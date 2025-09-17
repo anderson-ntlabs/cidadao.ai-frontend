@@ -15,21 +15,19 @@ export default function PTPage() {
     <>
       <LoadingScreen />
       {/* Hero Section */}
-      <section className="hero relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
-        {/* Geometric Pattern Background */}
+      <section 
+        className="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-fixed bg-cover bg-center"
+        style={{
+          backgroundImage: 'url(/operarios.png)',
+        }}
+      >
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 via-white/85 to-blue-50/90 dark:from-gray-900/90 dark:via-gray-800/85 dark:to-gray-900/90"></div>
+        
+        {/* Subtle animated gradient overlay */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-topography-pattern opacity-20 dark:opacity-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 via-transparent to-blue-100/40 dark:from-green-900/20 dark:via-transparent dark:to-blue-900/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10 animate-gradient-shift"></div>
         </div>
-        
-        {/* Animated lines */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-conic from-green-500/10 via-transparent to-blue-500/10 animate-spin-slow"></div>
-          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-conic from-yellow-500/10 via-transparent to-green-500/10 animate-spin-slow animation-delay-4000"></div>
-        </div>
-        
-        {/* Diagonal stripes */}
-        <div className="absolute inset-0 bg-stripes-diagonal opacity-[0.02] dark:opacity-[0.01]"></div>
         
         <div className="hero-container max-w-5xl mx-auto px-6 py-24 text-center relative z-10 stagger-children">
           <div className="hero-badge inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900 rounded-full text-green-800 dark:text-green-200 font-medium mb-6 hover-glow">
@@ -211,14 +209,9 @@ export default function PTPage() {
       </section>
 
       {/* Links Sections */}
-      <section 
-        className="py-20 bg-gray-50 dark:bg-gray-900/95 relative bg-cover bg-center bg-fixed bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/operarios.png)',
-        }}
-      >
-        {/* Overlay para melhorar legibilidade */}
-        <div className="absolute inset-0 bg-gray-50/95 dark:bg-gray-900/95" />
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+        {/* Pattern background instead of image */}
+        <div className="absolute inset-0 bg-topography-pattern opacity-5"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-4">

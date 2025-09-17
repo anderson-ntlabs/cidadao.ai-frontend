@@ -285,7 +285,7 @@
   }
   
   /* Text gradient animation */
-  @keyframes gradient-shift {
+  @keyframes gradient-text-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
@@ -293,6 +293,25 @@
   
   .animate-gradient {
     background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
+    animation: gradient-text-shift 3s ease infinite;
+  }
+  
+  /* Overlay gradient animation */
+  @keyframes gradient-shift {
+    0% {
+      transform: translateX(-100%) translateY(-100%);
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      transform: translateX(100%) translateY(100%);
+      opacity: 0.3;
+    }
+  }
+  
+  .animate-gradient-shift {
+    animation: gradient-shift 20s ease-in-out infinite;
   }
 }
