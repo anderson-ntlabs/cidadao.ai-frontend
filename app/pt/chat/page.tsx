@@ -10,6 +10,9 @@ import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-s
 import { MarkdownMessage } from '@/components/markdown-message'
 import { toast } from '@/hooks/use-toast'
 import { formatAgentName } from '@/lib/api/chat.service'
+import { testDirectAPI, testAPIHealth } from '@/lib/api/chat-direct'
+import { checkAPIEndpoints } from '@/lib/api/check-api'
+import { testBackendConnection } from '@/lib/api/test-backend'
 
 export default function ChatPage() {
   const router = useRouter()
@@ -333,6 +336,48 @@ export default function ChatPage() {
                 {connectionStatus === 'disconnected' && '🔴'} 
                 {connectionStatusText}
               </span>
+              
+              {/* Debug buttons - always show for now */}
+              <div className="mt-2 flex gap-2 justify-center flex-wrap">
+                <button
+                  onClick={async () => {
+                    console.log('Testing backend connection...');
+                    await testBackendConnection();
+                  }}
+                  className="text-xs px-2 py-1 bg-green-200 rounded"
+                >
+                  Test Backend
+                </button>
+                <button
+                  onClick={async () => {
+                    console.log('Checking all endpoints...');
+                    await checkAPIEndpoints();
+                  }}
+                  className="text-xs px-2 py-1 bg-blue-200 rounded"
+                >
+                  Check All APIs
+                </button>
+                <button
+                  onClick={async () => {
+                    console.log('Testing API health...');
+                    const health = await testAPIHealth();
+                    console.log('API health:', health);
+                  }}
+                  className="text-xs px-2 py-1 bg-gray-200 rounded"
+                >
+                  Test Health
+                </button>
+                <button
+                  onClick={async () => {
+                    console.log('Testing direct API...');
+                    const result = await testDirectAPI();
+                    console.log('Direct API result:', result);
+                  }}
+                  className="text-xs px-2 py-1 bg-gray-200 rounded"
+                >
+                  Test API
+                </button>
+              </div>
             </div>
           </div>
         </div>
