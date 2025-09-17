@@ -22,11 +22,7 @@ export default function PTPage() {
         </div>
         
         <div className="hero-container max-w-5xl mx-auto px-6 py-24 text-center relative z-10 stagger-children">
-          <div className="hero-badge inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900 rounded-full text-green-800 dark:text-green-200 font-medium mb-6 hover-glow">
-            🇧🇷 Transparência Pública com IA
-          </div>
-          
-          <h1 className="hero-title text-5xl sm:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent animate-gradient">
+          <h1 className="hero-title text-5xl sm:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
             Cidadão.AI
           </h1>
           
