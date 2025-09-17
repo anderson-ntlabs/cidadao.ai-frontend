@@ -1,9 +1,10 @@
 // Try to find the correct backend URL
 export async function findBackendURL() {
   const possibleURLs = [
-    // Standard HuggingFace Spaces URL format
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    // The actual working HuggingFace Spaces URL
+    'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend',
     // Alternative formats that might work
+    'https://neural-thinker-cidadao-ai-backend.hf.space',
     'https://neural-thinker-cidadaoai-backend.hf.space',
     'https://neural-thinker-cidadao-backend.hf.space',
     // Direct app URL (from HF Spaces)
