@@ -105,24 +105,33 @@ export class NaturalLanguageParser {
   static parse(userQuery: string): ParsedQuery {
     const query = userQuery.toLowerCase().trim();
     
+    console.log('[NLP] Original query:', userQuery);
+    
     // Detect data source
     const dataSource = this.detectDataSource(query);
+    console.log('[NLP] Detected data source:', dataSource);
     
     // Extract filters based on data source
     const filters = this.extractFilters(query, dataSource);
+    console.log('[NLP] Extracted filters:', filters);
     
     // Extract search terms (remove filter keywords)
-    const searchQuery = this.extractSearchQuery(query, dataSource);
+    const searchQuery = this.extractSearchQuery(userQuery, dataSource); // Use original query for name extraction
+    console.log('[NLP] Extracted search query:', searchQuery);
     
     // Calculate confidence based on how well we understood the query
     const confidence = this.calculateConfidence(query, dataSource, filters);
     
-    return {
+    const result = {
       query: searchQuery,
       dataSource,
       filters,
       confidence
     };
+    
+    console.log('[NLP] Final parsed result:', result);
+    
+    return result;
   }
 
   /**
@@ -362,30 +371,24 @@ export class NaturalLanguageParser {
         .replace(/remuneração/gi, '')
         .trim();
       
-      // Look for names (multiple words starting with capital letters)
-      // Match patterns like "Maria Silva", "João Carlos da Silva"
-      const namePatterns = [
-        // Full name with Portuguese characters
-        /\b([A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+(?:\s+(?:da|de|do|das|dos|e)\s+)?(?:[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+\s*)*)/g,
-        // After "funcionário/servidor"
-        /(?:servidor|funcionário|servidora|funcionária)\s+([a-záêéíóúãõç]+(?:\s+[a-záêéíóúãõç]+)*)/i,
-      ];
+      // Look for complete names with proper capitalization
+      // First try to find a complete name sequence
+      const fullNamePattern = /([A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+(?:\s+(?:da|de|do|das|dos|e)\s+)?[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+(?:\s+(?:da|de|do|das|dos|e)\s+)?(?:[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+)?(?:\s+[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+)*)/;
       
-      for (const pattern of namePatterns) {
-        const matches = Array.from(query.matchAll(pattern));
-        if (matches.length > 0) {
-          // Get the longest match (usually the most complete name)
-          let longestMatch = '';
-          for (const match of matches) {
-            const name = match[1].trim();
-            if (name.length > longestMatch.length && name.split(' ').length >= 2) {
-              longestMatch = name;
-            }
-          }
-          if (longestMatch) {
-            return longestMatch.toUpperCase(); // API expects uppercase
-          }
+      const nameMatch = query.match(fullNamePattern);
+      if (nameMatch && nameMatch[1]) {
+        const extractedName = nameMatch[1].trim();
+        // Ensure we have at least 2 words (first and last name)
+        if (extractedName.split(/\s+/).length >= 2) {
+          console.log('[NLP] Extracted full name:', extractedName);
+          return extractedName.toUpperCase();
         }
+      }
+      
+      // If no full name found, try after "funcionário/servidor"
+      const servantMatch = query.match(/(?:servidor|funcionário|servidora|funcionária)\s+([a-záêéíóúãõç]+(?:\s+[a-záêéíóúãõç]+)+)/i);
+      if (servantMatch && servantMatch[1]) {
+        return servantMatch[1].toUpperCase();
       }
       
       // If no full name found, try to extract any name-like words
