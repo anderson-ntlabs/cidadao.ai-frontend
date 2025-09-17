@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#10b981"/>
+  <g transform="translate(256,256)">
+    <circle r="180" fill="none" stroke="#fff" stroke-width="24"/>
+    <path d="M-120,0 A120,120 0 0,1 120,0" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="-60" cy="-40" r="16" fill="#fff"/>
+    <circle cx="60" cy="-40" r="16" fill="#fff"/>
+    <text y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#fff">AI</text>
+  </g>
+</svg>

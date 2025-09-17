@@ -1,0 +1,59 @@
+{
+  "site": {
+    "title": "Cidadão.AI — Documentation Hub",
+    "description": "Multi-agent artificial intelligence system to democratize access to public data and strengthen Brazilian government transparency."
+  },
+  "nav": {
+    "home": "Home",
+    "agents": "Agents",
+    "about": "About",
+    "manifesto": "Manifesto",
+    "system": "System",
+    "lang": "PT"
+  },
+  "hero": {
+    "title": "Cidadão.AI",
+    "subtitle": "Artificial Intelligence for Brazilian Public Transparency",
+    "description": "Multi-agent system that democratizes access to public data, promotes government transparency and strengthens social control through ethical and responsible AI.",
+    "stats": {
+      "agents": "17 Specialized Agents",
+      "apis": "+50 Public APIs",
+      "monitoring": "24/7 Monitoring",
+      "alerts": "Real-time Alerts"
+    }
+  },
+  "sections": {
+    "agents": {
+      "title": "Meet Our Agents",
+      "subtitle": "17 digital Brazilian heroes working for transparency"
+    },
+    "links": {
+      "title": "Project Resources",
+      "subtitle": "Access repositories, documentation and tools"
+    }
+  },
+  "agents": {
+    "viewMore": "View details",
+    "wikipedia": "Wikipedia"
+  },
+  "footer": {
+    "academic": {
+      "title": "Academic Context",
+      "description": "PhD Project in Data Science",
+      "university": "Polytechnic School - UFRJ",
+      "advisor": "Advisor",
+      "period": "2024-2028"
+    },
+    "author": {
+      "title": "Author",
+      "role": "PhD Student in Data Science"
+    },
+    "tech": {
+      "title": "Technology Stack"
+    },
+    "support": {
+      "title": "Institutional Support"
+    },
+    "copyright": "Open source project under MIT license"
+  }
+}

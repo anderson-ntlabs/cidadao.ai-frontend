@@ -1,0 +1,59 @@
+{
+  "site": {
+    "title": "Cidadão.AI — Hub de Documentação",
+    "description": "Sistema multi-agente de inteligência artificial para democratizar o acesso aos dados públicos e fortalecer a transparência governamental brasileira."
+  },
+  "nav": {
+    "home": "Início",
+    "agents": "Agentes",
+    "about": "Sobre",
+    "manifesto": "Manifesto",
+    "system": "Sistema",
+    "lang": "EN"
+  },
+  "hero": {
+    "title": "Cidadão.AI",
+    "subtitle": "Inteligência Artificial pela Transparência Pública Brasileira",
+    "description": "Sistema multi-agente que democratiza o acesso aos dados públicos, promove a transparência governamental e fortalece o controle social através de IA ética e responsável.",
+    "stats": {
+      "agents": "17 Agentes Especializados",
+      "apis": "+50 APIs Públicas",
+      "monitoring": "Monitoramento 24/7",
+      "alerts": "Alertas em Tempo Real"
+    }
+  },
+  "sections": {
+    "agents": {
+      "title": "Conheça Nossos Agentes",
+      "subtitle": "17 heróis brasileiros digitais trabalhando pela transparência"
+    },
+    "links": {
+      "title": "Recursos do Projeto",
+      "subtitle": "Acesse repositórios, documentação e ferramentas"
+    }
+  },
+  "agents": {
+    "viewMore": "Ver detalhes",
+    "wikipedia": "Wikipedia"
+  },
+  "footer": {
+    "academic": {
+      "title": "Contexto Acadêmico",
+      "description": "Projeto de Doutorado em Ciência de Dados",
+      "university": "Escola Politécnica - UFRJ",
+      "advisor": "Orientador",
+      "period": "2024-2028"
+    },
+    "author": {
+      "title": "Autor",
+      "role": "Doutorando em Ciência de Dados"
+    },
+    "tech": {
+      "title": "Stack Tecnológico"
+    },
+    "support": {
+      "title": "Apoio Institucional"
+    },
+    "copyright": "Projeto de código aberto sob licença MIT"
+  }
+}
