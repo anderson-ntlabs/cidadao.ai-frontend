@@ -1,5 +1,6 @@
 import { api, API_BASE_URL } from './client';
 import type { ChatRequest, ChatResponse } from '@/types/chat';
+import { parseUserQuery, formatParsedQuery } from './query-parser';
 
 /**
  * Chat adapter for the new full API with WebSocket support
@@ -42,7 +43,16 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
       context: request.context,
     };
 
-    const response = await api.post<ChatMessageResponse>('/api/v1/chat/message', payload);
+    // Parse the user query to determine data source and filters
+    const parsed = parseUserQuery(request.message);
+    
+    // Use the /api/investigate endpoint that's available in the HuggingFace deployment
+    const response = await api.post<any>('/api/investigate', {
+      query: parsed.searchTerm,
+      data_source: parsed.dataSource,
+      filters: parsed.filters,
+      max_results: 100
+    });
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');
@@ -50,22 +60,85 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
     const data = response.data;
 
-    // Convert API response to ChatResponse format
+    // Convert investigate response to ChatResponse format
+    const queryDescription = formatParsedQuery(parsed);
+    let responseMessage = `🔍 **${queryDescription}**\n\n`;
+    
+    if (data.results && data.results.length > 0) {
+      responseMessage += `Encontrei ${data.total_found} resultados:\n\n`;
+      
+      // Show first 3 results
+      data.results.slice(0, 3).forEach((result: any, idx: number) => {
+        if (data.data_source === 'servidores' && result.nome) {
+          responseMessage += `**${idx + 1}. ${result.nome}**\n`;
+          responseMessage += `- Órgão: ${result.orgao}\n`;
+          responseMessage += `- Cargo: ${result.cargo}\n`;
+          if (result.remuneracao?.total_liquido) {
+            responseMessage += `- Remuneração: R$ ${result.remuneracao.total_liquido.toLocaleString('pt-BR')}\n`;
+          }
+          responseMessage += '\n';
+        } else {
+          // Generic result display
+          responseMessage += `**${idx + 1}. Resultado**\n`;
+          responseMessage += JSON.stringify(result, null, 2) + '\n\n';
+        }
+      });
+      
+      if (data.total_found > 3) {
+        responseMessage += `... e ${data.total_found - 3} outros resultados.\n`;
+      }
+    } else {
+      responseMessage = `Não encontrei resultados para "${request.message}" na base de dados de ${data.data_source}.`;
+    }
+    
+    if (data.anomalies_detected > 0) {
+      responseMessage += `\n⚠️ **Anomalias detectadas:** ${data.anomalies_detected}`;
+    }
+
     return {
-      session_id: data.session_id,
-      agent_id: data.agent_id,
-      agent_name: data.agent_name,
-      message: data.content,
-      confidence: data.metadata?.confidence || 0.9,
-      suggested_actions: data.suggested_actions || [],
+      session_id: request.session_id || `session_${Date.now()}`,
+      agent_id: 'zumbi',
+      agent_name: 'Zumbi dos Palmares',
+      message: responseMessage,
+      confidence: data.confidence_score || 0.8,
+      suggested_actions: [
+        'Buscar por outro nome',
+        'Filtrar por órgão específico',
+        'Ver contratos relacionados',
+        'Analisar despesas do órgão'
+      ],
       metadata: {
-        ...data.metadata,
-        message_id: data.message_id,
-        timestamp: data.timestamp,
+        data_source: data.data_source,
+        total_found: data.total_found,
+        anomalies_detected: data.anomalies_detected,
+        processing_time_ms: data.processing_time_ms,
+        timestamp: new Date().toISOString(),
       },
     };
   } catch (error: any) {
     console.error('Chat error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      response: error.response,
+      status: error.response?.status,
+      data: error.response?.data,
+      url: `${API_BASE_URL}/api/investigate`,
+      headers: error.config?.headers,
+      method: error.config?.method,
+      payload: error.config?.data
+    });
+    
+    // Get more specific error message
+    let errorMessage = 'Erro desconhecido';
+    if (error.response?.status === 404) {
+      errorMessage = 'Endpoint de chat não encontrado. A API pode estar em atualização.';
+    } else if (error.response?.status === 500) {
+      errorMessage = 'Erro interno do servidor. Por favor, tente novamente.';
+    } else if (error.response?.data?.detail) {
+      errorMessage = error.response.data.detail;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
     
     // Fallback to error response
     return {
@@ -74,7 +147,9 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
       agent_name: 'Sistema',
       message: `Desculpe, ocorreu um erro ao processar sua mensagem. 
 
-${error.message || 'Erro desconhecido'}
+**Erro:** ${errorMessage}
+
+**URL tentada:** ${API_BASE_URL}/api/investigate
 
 Por favor, tente novamente ou reformule sua pergunta.`,
       confidence: 0,
@@ -82,10 +157,13 @@ Por favor, tente novamente ou reformule sua pergunta.`,
         'Tentar novamente',
         'Verificar conexão',
         'Reformular pergunta',
+        'Usar o modo de investigação',
       ],
       metadata: {
         error: true,
-        error_message: error.message,
+        error_message: errorMessage,
+        error_status: error.response?.status,
+        api_url: API_BASE_URL,
       },
     };
   }
