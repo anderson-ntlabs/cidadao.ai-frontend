@@ -38,7 +38,7 @@ export default function PTPage() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link 
-              href="/login" 
+              href="/pt/login" 
               className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300 hover-lift hover-glow"
             >
               Portal do Cidadão
@@ -187,7 +187,7 @@ export default function PTPage() {
           <div className="text-center mt-16">
             <h3 className="text-2xl font-bold mb-4">Pronto para exercer seu direito à transparência?</h3>
             <Link 
-              href="/login" 
+              href="/pt/login" 
               className="inline-block px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300 hover-lift hover-glow"
             >
               Acessar Portal do Cidadão
@@ -210,7 +210,7 @@ export default function PTPage() {
             {/* GitHub */}
             <Link 
               href="https://github.com/anderson-ufrj/cidadao.ai-backend" 
-              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+              className="p-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
             >
               <div className="text-4xl mb-4">🐙</div>
               <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">Código Aberto</h3>
@@ -220,7 +220,7 @@ export default function PTPage() {
             {/* Documentação */}
             <Link 
               href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro" 
-              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+              className="p-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
             >
               <div className="text-4xl mb-4">📚</div>
               <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">Documentação</h3>
@@ -230,7 +230,7 @@ export default function PTPage() {
             {/* API */}
             <Link 
               href="https://neural-thinker-cidadao-ai-backend.hf.space/docs" 
-              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+              className="p-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
             >
               <div className="text-4xl mb-4">⚡</div>
               <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">API REST</h3>

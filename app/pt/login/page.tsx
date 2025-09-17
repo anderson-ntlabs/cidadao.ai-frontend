@@ -73,9 +73,9 @@ export default function LoginPage() {
     <>
       <LoadingScreen />
       {/* Main Content */}
-      <section className="min-h-[80vh] py-20 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <section className="min-h-[80vh] py-20">
         <div className="max-w-md mx-auto px-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8">
             {/* Título */}
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">
@@ -147,7 +147,7 @@ export default function LoginPage() {
           </div>
           
           {/* Info Box */}
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="mt-6 p-4 bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg border border-blue-200/50 dark:border-blue-800/50">
             <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
               🔒 Ambiente de demonstração - Nenhuma informação real é coletada
             </p>

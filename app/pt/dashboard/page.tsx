@@ -122,7 +122,7 @@ export default function DashboardPage() {
     <>
       <LoadingScreen />
       {/* Sub-header do Dashboard */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -166,26 +166,26 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Métricas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-6 rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-green-600 mb-1">{metrics.totalInvestigacoes}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total de Investigações</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-6 rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-red-600 mb-1">{metrics.anomaliasDetectadas}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Anomalias Detectadas</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-6 rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-blue-600 mb-1">{metrics.economiaIdentificada}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Economia Identificada</div>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-6 rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-purple-600 mb-1">{metrics.tempoMedioAnalise}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Tempo Médio de Análise</div>
           </div>
         </div>
         
         {/* Lista de Investigações */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-bold">Investigações Recentes</h2>
           </div>

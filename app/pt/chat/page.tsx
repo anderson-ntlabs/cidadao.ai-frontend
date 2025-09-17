@@ -144,7 +144,7 @@ export default function ChatPage() {
     <>
       <LoadingScreen />
       {/* Sub-header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -187,7 +187,7 @@ export default function ChatPage() {
       {/* Chat Container */}
       <div className="flex h-[calc(100vh-120px)]">
         {/* Sidebar - Agentes */}
-        <div className="w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+        <div className="w-80 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-700/50 overflow-y-auto">
           <div className="p-4">
             <h2 className="text-lg font-bold mb-4">Agentes Disponíveis</h2>
             <div className="space-y-2">
@@ -221,7 +221,7 @@ export default function ChatPage() {
               ))}
             </div>
             
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="mt-6 p-4 bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 💡 Dica: Cada agente tem especialidades diferentes. Experimente conversar com vários!
               </p>
@@ -230,9 +230,9 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+        <div className="flex-1 flex flex-col bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
           {/* Agent Header */}
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <img 
                 src={`/agents/${getCurrentAgent().image}`} 
@@ -258,8 +258,8 @@ export default function ChatPage() {
                 <div
                   className={`max-w-[70%] rounded-lg px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                      ? 'bg-green-600/90 text-white backdrop-blur-sm'
+                      : 'bg-gray-100/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-200 backdrop-blur-sm'
                   }`}
                 >
                   {message.role === 'assistant' && (
@@ -286,7 +286,7 @@ export default function ChatPage() {
             ))}
             {isSending && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-3">
+                <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="animate-pulse">💭</div>
                     <span className="text-gray-600 dark:text-gray-400">
@@ -300,7 +300,7 @@ export default function ChatPage() {
           </div>
 
           {/* Input Area */}
-          <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="border-t border-gray-200/50 dark:border-gray-700/50 px-6 py-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
             <div className="flex gap-3">
               <textarea
                 ref={textareaRef}
@@ -308,7 +308,7 @@ export default function ChatPage() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Digite sua pergunta sobre transparência pública..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm dark:text-white"
                 rows={2}
                 disabled={isSending}
               />
@@ -334,7 +334,7 @@ export default function ChatPage() {
                     <button
                       key={index}
                       onClick={() => setInputMessage(suggestion)}
-                      className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      className="px-3 py-1 text-sm bg-gray-100/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-600/80 transition-colors"
                     >
                       {suggestion}
                     </button>
