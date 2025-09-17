@@ -6,7 +6,7 @@ interface FooterProps {
 
 export function Footer({ locale }: FooterProps) {
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white py-12 transition-colors">
+    <footer className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm text-gray-900 dark:text-white py-12 transition-colors border-t border-gray-200/50 dark:border-gray-800/50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Sobre o Projeto */}
