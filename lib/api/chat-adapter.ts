@@ -108,7 +108,7 @@ export function getMockAgents() {
       id: 'zumbi',
       name: 'Zumbi dos Palmares',
       role: 'Investigador',
-      status: 'available',
+      status: 'available' as const,
       specialty: 'Detecção de anomalias e irregularidades',
       type: 'investigator' as const,
       description: 'Especialista em detectar anomalias e irregularidades em contratos públicos',
