@@ -9,6 +9,7 @@ import type {
   SSEEvent,
   SSEEventType,
 } from '@/types/chat';
+import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter';
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -26,6 +27,14 @@ export const chatService = {
   // Send a chat message
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
+      console.log('Using Zumbi investigation adapter for chat');
+      
+      // Use the adapter to send chat as investigation
+      // This is temporary while the full chat API is not available
+      return await sendChatAsInvestigation(request);
+      
+      // Original chat endpoint code (kept for future use)
+      /*
       console.log('Sending message to:', `${API_BASE_URL}${CHAT_ENDPOINTS.MESSAGE}`);
       console.log('Request:', request);
       
@@ -58,6 +67,7 @@ export const chatService = {
       };
       
       return chatResponse;
+      */
     } catch (error) {
       console.error('Chat service error:', error);
       throw error;
@@ -66,14 +76,22 @@ export const chatService = {
 
   // Get quick action suggestions
   async getSuggestions(): Promise<QuickAction[]> {
-    const response = await api.get<QuickAction[]>(CHAT_ENDPOINTS.SUGGESTIONS);
-    return response.success ? response.data! : [];
+    // Use mock suggestions while the endpoint is not available
+    return getMockSuggestions();
+    
+    // Original code (kept for future use)
+    // const response = await api.get<QuickAction[]>(CHAT_ENDPOINTS.SUGGESTIONS);
+    // return response.success ? response.data! : [];
   },
 
   // Get available agents
   async getAgents(): Promise<AgentInfo[]> {
-    const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS);
-    return response.success ? response.data! : [];
+    // Use mock agents while the endpoint is not available
+    return getMockAgents();
+    
+    // Original code (kept for future use)
+    // const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS);
+    // return response.success ? response.data! : [];
   },
 
   // Get chat history
