@@ -96,6 +96,7 @@ Pergunte sobre irregularidades, valores suspeitos ou concentração de fornecedo
         'Verificar contratos emergenciais',
         'Examinar fornecedores recorrentes',
       ],
+      metadata: {}, // Add missing metadata property
     };
   }
 }
