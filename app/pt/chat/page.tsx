@@ -6,31 +6,39 @@ import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { agents } from '@/data/agents'
-import { useChat } from '@/hooks/use-chat'
+import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-store'
 import { MarkdownMessage } from '@/components/markdown-message'
 import { toast } from '@/hooks/use-toast'
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-  agent?: string
-}
+import { formatAgentName } from '@/lib/api/chat.service'
 
 export default function ChatPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
   const [inputMessage, setInputMessage] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [activeAgents, setActiveAgents] = useState<string[]>([])
-  const [isInvestigating, setIsInvestigating] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { sendMessage, getSuggestions } = useChat()
+  
+  // Use the new chat store hooks
+  const {
+    messages,
+    session,
+    isLoading,
+    error,
+    connectionStatus,
+    connectionStatusText,
+    agentTyping,
+    currentInvestigation,
+    canSendMessage,
+    sendMessage,
+    handleQuickAction,
+    setTyping,
+    clearError,
+    clearChat,
+  } = useChat()
+  
+  const { activeAgents, hasActiveAgents, activeAgentNames } = useAgentStatus()
+  const { suggestedActions } = useSuggestedActions()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -46,35 +54,27 @@ export default function ChatPage() {
     }
     
     setUser(JSON.parse(storedUser))
-    setIsLoading(false)
-    
-    // Mensagem inicial
-    setMessages([
-      {
-        id: '1',
-        role: 'assistant',
-        content: 'Olá! Sou o **Abaporu**, o orquestrador central do Cidadão.AI. 🌿\n\nEstou aqui para ajudá-lo a navegar pelos dados de transparência pública. Posso responder suas perguntas e, quando necessário, coordenar nossos agentes especializados para investigações aprofundadas.\n\nComo posso ajudar você hoje?',
-        timestamp: new Date(),
-        agent: 'abaporu'
-      }
-    ])
-    
-    // Buscar sugestões
-    loadSuggestions()
+    setIsAuthLoading(false)
   }, [router])
-  
-  const loadSuggestions = async () => {
-    try {
-      const suggs = await getSuggestions('abaporu')
-      setSuggestions(suggs.suggestions || [])
-    } catch (error) {
-      console.error('Erro ao carregar sugestões:', error)
-    }
-  }
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error('Erro', error)
+      clearError()
+    }
+  }, [error, clearError])
+
+  // Show investigation toast
+  useEffect(() => {
+    if (currentInvestigation && currentInvestigation.confidence_score > 0.8) {
+      toast.warning('Anomalia Detectada!', 'Nossos agentes encontraram possíveis irregularidades')
+    }
+  }, [currentInvestigation])
 
   const handleLogout = () => {
     localStorage.removeItem('user')
@@ -83,69 +83,13 @@ export default function ChatPage() {
   }
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || isSending) return
+    if (!inputMessage.trim() || !canSendMessage) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
+    const message = inputMessage
     setInputMessage('')
-    setIsSending(true)
-
-    try {
-      const data = await sendMessage({
-        message: inputMessage,
-        agent_id: 'abaporu',
-        session_id: user?.id || 'demo-session',
-        activeAgents: activeAgents
-      })
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response || data.message || 'Desculpe, não consegui processar sua solicitação.',
-        timestamp: new Date(),
-        agent: 'abaporu'
-      }
-
-      setMessages(prev => [...prev, assistantMessage])
-      
-      // Mostrar toast se foi uma investigação com anomalia
-      if (data.confidence && data.confidence > 0.8) {
-        toast.warning('Anomalia Detectada!', 'Nossos agentes encontraram possíveis irregularidades')
-      }
-      
-      // Atualizar agentes ativos se houver
-      if (data.activeAgents && data.activeAgents.length > 0) {
-        setActiveAgents(data.activeAgents)
-        setIsInvestigating(true)
-      } else {
-        setActiveAgents([])
-        setIsInvestigating(false)
-      }
-    } catch (error: any) {
-      console.error('Erro ao enviar mensagem:', error)
-      
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: error.message || 'Desculpe, houve um erro ao processar sua mensagem. Por favor, tente novamente.',
-        timestamp: new Date(),
-        agent: 'abaporu'
-      }
-      
-      setMessages(prev => [...prev, errorMessage])
-      
-      // Limpar agentes ativos em caso de erro
-      setActiveAgents([])
-      setIsInvestigating(false)
-    } finally {
-      setIsSending(false)
-    }
+    
+    // Use streaming for better UX
+    await sendMessage(message, { streaming: true })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -155,7 +99,7 @@ export default function ChatPage() {
     }
   }
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return <LoadingScreen />
   }
 
@@ -209,7 +153,7 @@ export default function ChatPage() {
       {/* Chat Container */}
       <div className="flex flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto w-full">
         {/* Active Agents Indicator */}
-        {activeAgents.length > 0 && (
+        {hasActiveAgents && (
           <div className="bg-green-50/80 dark:bg-green-900/30 backdrop-blur-sm border-b border-green-200/50 dark:border-green-700/50 px-6 py-3">
             <div className="flex items-center gap-3">
               <div className="animate-pulse">
@@ -219,12 +163,12 @@ export default function ChatPage() {
                 Investigação em andamento:
               </span>
               <div className="flex gap-2">
-                {activeAgents.map(agentId => {
-                  const agent = agents.find(a => a.id === agentId)
-                  return agent ? (
-                    <div key={agentId} className="flex items-center gap-1 bg-white/50 dark:bg-gray-800/50 px-2 py-1 rounded-full">
+                {activeAgents.filter(agent => agent.status === 'busy').map(agent => {
+                  const agentData = agents.find(a => a.id === agent.id)
+                  return agentData ? (
+                    <div key={agent.id} className="flex items-center gap-1 bg-white/50 dark:bg-gray-800/50 px-2 py-1 rounded-full">
                       <img 
-                        src={`/agents/${agent.image}`} 
+                        src={`/agents/${agentData.image}`} 
                         alt={agent.name}
                         className="w-5 h-5 rounded-full"
                       />
@@ -255,7 +199,7 @@ export default function ChatPage() {
                   </p>
                 </div>
               </div>
-              {isInvestigating && (
+              {currentInvestigation && (
                 <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   Coordenando investigação...
@@ -266,6 +210,20 @@ export default function ChatPage() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center py-8">
+                <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-6 py-4 max-w-2xl mx-auto">
+                  <h3 className="font-bold text-lg mb-2">Olá! Sou o Abaporu 🌿</h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Sou o orquestrador central do Cidadão.AI. Estou aqui para ajudá-lo a navegar pelos dados de transparência pública. 
+                    Posso responder suas perguntas e, quando necessário, coordenar nossos agentes especializados para investigações aprofundadas.
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    Como posso ajudar você hoje?
+                  </p>
+                </div>
+              </div>
+            )}
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -278,15 +236,15 @@ export default function ChatPage() {
                       : 'bg-gray-100/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-200 backdrop-blur-sm'
                   }`}
                 >
-                  {message.role === 'assistant' && (
+                  {message.role === 'assistant' && message.agent_name && (
                     <div className="flex items-center gap-2 mb-1">
                       <img 
-                        src={`/agents/${agents.find(a => a.id === message.agent)?.image || 'abaporu.png'}`} 
-                        alt="Agent"
+                        src={`/agents/${agents.find(a => a.name === message.agent_name)?.image || 'abaporu.png'}`} 
+                        alt={message.agent_name}
                         className="w-6 h-6 rounded-full"
                       />
                       <span className="text-sm font-medium">
-                        {agents.find(a => a.id === message.agent)?.name || 'Abaporu'}
+                        {message.agent_name}
                       </span>
                     </div>
                   )}
@@ -296,7 +254,7 @@ export default function ChatPage() {
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   )}
                   <p className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString('pt-BR', { 
+                    {new Date(message.timestamp).toLocaleTimeString('pt-BR', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
                     })}
@@ -304,13 +262,13 @@ export default function ChatPage() {
                 </div>
               </div>
             ))}
-            {isSending && (
+            {(isLoading || agentTyping) && (
               <div className="flex justify-start">
                 <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="animate-pulse">💭</div>
                     <span className="text-gray-600 dark:text-gray-400">
-                      Abaporu está analisando...
+                      {agentTyping ? 'Agente está digitando...' : 'Processando...'}
                     </span>
                   </div>
                 </div>
@@ -330,14 +288,14 @@ export default function ChatPage() {
                 placeholder="Digite sua pergunta sobre transparência pública..."
                 className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm dark:text-white"
                 rows={2}
-                disabled={isSending}
+                disabled={!canSendMessage}
               />
               <button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isSending}
+                disabled={!inputMessage.trim() || !canSendMessage}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isSending ? '⏳' : '📤'} Enviar
+                {isLoading ? '⏳' : '📤'} Enviar
               </button>
             </div>
             
@@ -346,22 +304,36 @@ export default function ChatPage() {
             </div>
             
             {/* Sugestões */}
-            {suggestions.length > 0 && messages.length === 1 && (
+            {suggestedActions.length > 0 && messages.length === 0 && (
               <div className="mt-4">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Sugestões de perguntas:</p>
                 <div className="flex flex-wrap gap-2">
-                  {suggestions.slice(0, 3).map((suggestion, index) => (
+                  {suggestedActions.slice(0, 4).map((action) => (
                     <button
-                      key={index}
-                      onClick={() => setInputMessage(suggestion)}
-                      className="px-3 py-1 text-sm bg-gray-100/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-600/80 transition-colors"
+                      key={action.id}
+                      onClick={() => handleQuickAction(action.action)}
+                      className="px-3 py-1 text-sm bg-gray-100/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-600/80 transition-colors flex items-center gap-1"
                     >
-                      {suggestion}
+                      <span>{action.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
+            
+            {/* Connection Status */}
+            <div className="mt-3 text-center">
+              <span className={`text-xs ${
+                connectionStatus === 'connected' ? 'text-green-600' : 
+                connectionStatus === 'connecting' ? 'text-yellow-600' : 
+                'text-gray-500'
+              }`}>
+                {connectionStatus === 'connected' && '🟢'} 
+                {connectionStatus === 'connecting' && '🟡'} 
+                {connectionStatus === 'disconnected' && '🔴'} 
+                {connectionStatusText}
+              </span>
+            </div>
           </div>
         </div>
       </div>
