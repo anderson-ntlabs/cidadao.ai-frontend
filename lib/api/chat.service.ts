@@ -41,26 +41,6 @@ export const chatService = {
       
       // Keep the old investigation adapter as fallback
       // return await sendChatAsInvestigation(request);
-      
-      if (!response.data) {
-        console.error('No data in response');
-        return null;
-      }
-      
-      // Ensure we have all required fields
-      const chatResponse: ChatResponse = {
-        session_id: response.data.session_id || request.session_id || 'unknown',
-        agent_id: response.data.agent_id || 'abaporu',
-        agent_name: response.data.agent_name || 'Abaporu',
-        message: response.data.message || 'Sem resposta',
-        confidence: response.data.confidence || 0.5,
-        suggested_actions: response.data.suggested_actions,
-        requires_input: response.data.requires_input,
-        metadata: response.data.metadata || {},
-      };
-      
-      return chatResponse;
-      */
     } catch (error) {
       console.error('Chat service error:', error);
       throw error;
