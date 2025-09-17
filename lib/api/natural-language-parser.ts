@@ -54,15 +54,23 @@ const ORGANIZATION_MAP: Record<string, string> = {
   'ministério da educação': '25000',
   'ministerio da educacao': '25000',
   'mec': '25000',
+  'mac': '25000', // Common typo for MEC
   'meio ambiente': '44000',
   'ministério do meio ambiente': '44000',
+  'ministerio do meio ambiente': '44000',
+  'mma': '44000',
   'ibama': '44000',
   'justiça': '36000',
   'justica': '36000',
   'ministério da justiça': '36000',
+  'ministerio da justica': '36000',
+  'mj': '36000',
   'presidência': '20000',
   'presidencia': '20000',
-  'planalto': '20000'
+  'planalto': '20000',
+  'presidência da república': '20000',
+  'presidencia da republica': '20000',
+  'pr': '20000'
 };
 
 // Value extraction patterns
@@ -340,7 +348,61 @@ export class NaturalLanguageParser {
   private static extractSearchQuery(query: string, dataSource: DataSourceType): string {
     let searchQuery = query;
     
-    // Remove common filter phrases
+    // Extract names for servant searches FIRST
+    if (dataSource === 'servidores') {
+      // Remove question words and common phrases
+      searchQuery = searchQuery
+        .replace(/quanto\s+(ganha|recebe)/gi, '')
+        .replace(/qual\s+(é|e)\s+o\s+salário/gi, '')
+        .replace(/\?/g, '')
+        .replace(/quanto/gi, '')
+        .replace(/ganha/gi, '')
+        .replace(/recebe/gi, '')
+        .replace(/salário/gi, '')
+        .replace(/remuneração/gi, '')
+        .trim();
+      
+      // Look for names (multiple words starting with capital letters)
+      // Match patterns like "Maria Silva", "João Carlos da Silva"
+      const namePatterns = [
+        // Full name with Portuguese characters
+        /\b([A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+(?:\s+(?:da|de|do|das|dos|e)\s+)?(?:[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+\s*)*)/g,
+        // After "funcionário/servidor"
+        /(?:servidor|funcionário|servidora|funcionária)\s+([a-záêéíóúãõç]+(?:\s+[a-záêéíóúãõç]+)*)/i,
+      ];
+      
+      for (const pattern of namePatterns) {
+        const matches = Array.from(query.matchAll(pattern));
+        if (matches.length > 0) {
+          // Get the longest match (usually the most complete name)
+          let longestMatch = '';
+          for (const match of matches) {
+            const name = match[1].trim();
+            if (name.length > longestMatch.length && name.split(' ').length >= 2) {
+              longestMatch = name;
+            }
+          }
+          if (longestMatch) {
+            return longestMatch.toUpperCase(); // API expects uppercase
+          }
+        }
+      }
+      
+      // If no full name found, try to extract any name-like words
+      const words = searchQuery.split(' ').filter(word => 
+        word.length > 2 && 
+        /^[A-ZÁÊÉÍÓÚÃÕÇ][a-záêéíóúãõç]+$/.test(word)
+      );
+      
+      if (words.length >= 2) {
+        return words.join(' ').toUpperCase();
+      }
+      
+      // Last resort: return cleaned query
+      return searchQuery.toUpperCase();
+    }
+    
+    // Remove common filter phrases for other data sources
     const filterPhrases = [
       /(?:acima|maior|mais|superior|abaixo|menor|menos|inferior)\s+(?:de\s+)?(?:que\s+)?(?:R\$\s*)?\d+(?:\.\d{3})*(?:,\d{2})?/gi,
       /(?:do|da)\s+(?:ministério|ministerio)\s+(?:da|do)\s+\w+/gi,
@@ -353,21 +415,6 @@ export class NaturalLanguageParser {
     
     for (const phrase of filterPhrases) {
       searchQuery = searchQuery.replace(phrase, '').trim();
-    }
-    
-    // Extract names for servant searches
-    if (dataSource === 'servidores') {
-      // Look for capitalized names
-      const nameMatch = query.match(/\b([A-ZÁÊÉÍÓÚÇ][a-záêéíóúç]+(?:\s+[A-ZÁÊÉÍÓÚÇ][a-záêéíóúç]+)*)\b/);
-      if (nameMatch) {
-        return nameMatch[1];
-      }
-      
-      // Look for "servidor X" or "funcionário Y"
-      const servantMatch = query.match(/(?:servidor|funcionário|servidora|funcionária)\s+([a-záêéíóúç]+(?:\s+[a-záêéíóúç]+)*)/i);
-      if (servantMatch) {
-        return servantMatch[1];
-      }
     }
     
     // For contracts/expenses, extract object description
