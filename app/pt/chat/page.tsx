@@ -7,6 +7,8 @@ import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { agents } from '@/data/agents'
 import { useChat } from '@/hooks/use-chat'
+import { MarkdownMessage } from '@/components/markdown-message'
+import { toast } from '@/hooks/use-toast'
 
 interface Message {
   id: string
@@ -50,7 +52,7 @@ export default function ChatPage() {
       {
         id: '1',
         role: 'assistant',
-        content: 'Olá! Sou o Abaporu, o agente coordenador do Cidadão.AI. Como posso ajudar você a investigar dados públicos hoje?',
+        content: 'Olá! Sou o **Abaporu**, o agente coordenador do Cidadão.AI. 🌿\n\nPosso ajudá-lo a investigar dados públicos e conectar você com nossos agentes especializados. Como posso ajudar hoje?',
         timestamp: new Date(),
         agent: 'abaporu'
       }
@@ -109,6 +111,11 @@ export default function ChatPage() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      
+      // Mostrar toast se foi uma investigação do Zumbi
+      if (selectedAgent === 'zumbi' && data.confidence && data.confidence > 0.8) {
+        toast.warning('Anomalia Detectada!', 'O Zumbi encontrou possíveis irregularidades')
+      }
     } catch (error: any) {
       console.error('Erro ao enviar mensagem:', error)
       
@@ -209,11 +216,18 @@ export default function ChatPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={`/agents/${agent.image}`} 
-                      alt={agent.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                    <div className="relative">
+                      <img 
+                        src={`/agents/${agent.image}`} 
+                        alt={agent.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      {agent.id === 'zumbi' && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" 
+                          title="Conectado ao Backend" 
+                        />
+                      )}
+                    </div>
                     <div>
                       <div className="font-medium">{agent.name}</div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -229,6 +243,11 @@ export default function ChatPage() {
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 💡 Dica: Cada agente tem especialidades diferentes. Experimente conversar com vários!
               </p>
+              {selectedAgent === 'zumbi' && (
+                <p className="text-sm text-green-700 dark:text-green-300 mt-2">
+                  ✅ Zumbi está conectado ao backend e pode fazer investigações reais!
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -278,7 +297,11 @@ export default function ChatPage() {
                       </span>
                     </div>
                   )}
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'assistant' ? (
+                    <MarkdownMessage content={message.content} />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  )}
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString('pt-BR', { 
                       hour: '2-digit', 
@@ -294,7 +317,7 @@ export default function ChatPage() {
                   <div className="flex items-center gap-2">
                     <div className="animate-pulse">💭</div>
                     <span className="text-gray-600 dark:text-gray-400">
-                      {getCurrentAgent().name} está pensando...
+                      {getCurrentAgent().name} está analisando...
                     </span>
                   </div>
                 </div>
