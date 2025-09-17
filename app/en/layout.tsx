@@ -32,13 +32,20 @@ export default function ENLayout({
       <head>
         <ThemeScript />
       </head>
-      <body 
-        className={`${inter.className} min-h-screen bg-fixed bg-cover bg-center bg-no-repeat`}
-        style={{
-          backgroundImage: 'url(/operarios.png)',
-        }}
-      >
-        <div className="min-h-screen flex flex-col bg-white/85 dark:bg-gray-900/85 backdrop-blur-sm">
+      <body className={`${inter.className} min-h-screen`}>
+        {/* Fixed background layer with image */}
+        <div 
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+          style={{
+            backgroundImage: 'url(/operarios.png)',
+          }}
+        />
+        
+        {/* Semi-transparent overlay */}
+        <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
+        
+        {/* Main content */}
+        <div className="relative z-20 min-h-screen flex flex-col">
           <Header locale="en" />
           <main className="pt-16 flex-1">
             {children}
