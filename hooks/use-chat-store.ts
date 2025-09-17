@@ -22,19 +22,8 @@ export function useChat() {
 
   // Send message with smart routing
   const sendMessage = async (content: string, options?: { streaming?: boolean; websocket?: boolean }) => {
-    // Detect if this is an investigation request
-    const isInvestigation = detectInvestigationIntent(content);
-    
-    if (options?.streaming || isInvestigation) {
-      // Use streaming for investigations or when explicitly requested
-      store.sendStreamingMessage(content);
-    } else if (options?.websocket && store.connectionStatus === 'connected') {
-      // Use WebSocket if connected and requested
-      await store.sendMessage(content, true);
-    } else {
-      // Default to REST API
-      await store.sendMessage(content, false);
-    }
+    // For now, always use REST API until SSE is properly configured
+    await store.sendMessage(content, false);
   };
 
   // Quick action handler

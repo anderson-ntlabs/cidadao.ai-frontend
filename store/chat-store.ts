@@ -119,16 +119,21 @@ export const useChatStore = create<ChatStore>()(
           
           const sessionId = get().session!.session_id;
           
-          // Add user message immediately
-          const userMessage: ChatMessage = {
-            id: `msg_${Date.now()}`,
-            session_id: sessionId,
-            role: 'user',
-            content,
-            timestamp: new Date().toISOString(),
-          };
+          // Check if user message already exists (avoid duplicates from streaming)
+          const lastMessage = state.messages[state.messages.length - 1];
+          if (!lastMessage || lastMessage.role !== 'user' || lastMessage.content !== content) {
+            // Add user message immediately
+            const userMessage: ChatMessage = {
+              id: `msg_${Date.now()}`,
+              session_id: sessionId,
+              role: 'user',
+              content,
+              timestamp: new Date().toISOString(),
+            };
+            
+            get().addMessage(userMessage);
+          }
           
-          get().addMessage(userMessage);
           set({ isLoading: true, error: null });
           
           try {
@@ -190,7 +195,7 @@ export const useChatStore = create<ChatStore>()(
           } catch (error: any) {
             set({ error: error.message || 'Failed to send message' });
           } finally {
-            set({ isLoading: false });
+            set({ isLoading: false, agentTyping: false });
           }
         },
 
@@ -216,81 +221,9 @@ export const useChatStore = create<ChatStore>()(
           get().addMessage(userMessage);
           set({ isLoading: true, error: null, agentTyping: true });
           
-          // Create assistant message placeholder
-          const assistantMessageId = `msg_${Date.now()}_assistant`;
-          const assistantMessage: ChatMessage = {
-            id: assistantMessageId,
-            session_id: sessionId,
-            role: 'assistant',
-            content: '',
-            timestamp: new Date().toISOString(),
-          };
-          
-          get().addMessage(assistantMessage);
-          
-          // Stream response
-          const cleanup = chatService.streamMessage(
-            {
-              message: content,
-              session_id: sessionId,
-            },
-            (type, data) => {
-              switch (type) {
-                case 'start':
-                  console.log('Stream started');
-                  break;
-                  
-                case 'detecting':
-                  console.log('Detecting intent...');
-                  break;
-                  
-                case 'agent_selected':
-                  get().updateMessage(assistantMessageId, {
-                    agent_id: data.agent_id,
-                    agent_name: data.agent_name,
-                  });
-                  break;
-                  
-                case 'chunk':
-                  // Append chunk to message
-                  const currentMessage = get().messages.find(m => m.id === assistantMessageId);
-                  if (currentMessage) {
-                    get().updateMessage(assistantMessageId, {
-                      content: currentMessage.content + data.content,
-                    });
-                  }
-                  break;
-                  
-                case 'complete':
-                  set({ agentTyping: false, isLoading: false });
-                  
-                  // Update metadata and suggested actions
-                  get().updateMessage(assistantMessageId, {
-                    metadata: data.metadata,
-                  });
-                  
-                  if (data.suggested_actions) {
-                    set({ suggestedActions: data.suggested_actions.map((action: string, idx: number) => ({
-                      id: `action_${idx}`,
-                      label: action,
-                      icon: 'MessageSquare',
-                      action,
-                    })) });
-                  }
-                  break;
-                  
-                case 'error':
-                  set({ error: data.message || 'Stream error', agentTyping: false, isLoading: false });
-                  break;
-              }
-            },
-            (error) => {
-              set({ error: error.message, agentTyping: false, isLoading: false });
-            }
-          );
-          
-          // Store cleanup function for later use if needed
-          (window as any).__streamCleanup = cleanup;
+          // For now, fallback to regular API call instead of SSE
+          // TODO: Implement SSE with proper authentication
+          get().sendMessage(content, false);
         },
 
         // Load chat history
