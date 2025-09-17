@@ -105,8 +105,9 @@ export const useChatStore = create<ChatStore>()(
             get().loadSuggestions(),
           ]);
           
-          // Connect WebSocket
-          get().connectWebSocket();
+          // Don't connect WebSocket - backend doesn't support it yet
+          // get().connectWebSocket();
+          set({ connectionStatus: 'disconnected' });
         },
 
         // Send message via REST API
@@ -285,6 +286,12 @@ export const useChatStore = create<ChatStore>()(
 
         // WebSocket connection
         connectWebSocket: () => {
+          // WebSocket not supported by current backend deployment
+          console.log('WebSocket connection skipped - not supported by backend');
+          set({ connectionStatus: 'disconnected' });
+          return;
+          
+          /* Disabled until backend supports WebSocket
           const state = get();
           if (!state.session || state.ws?.isConnected()) return;
           
@@ -327,6 +334,7 @@ export const useChatStore = create<ChatStore>()(
           
           ws.connect();
           set({ ws });
+          */
         },
 
         // Disconnect WebSocket

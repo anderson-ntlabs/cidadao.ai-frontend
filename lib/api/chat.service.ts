@@ -10,6 +10,7 @@ import type {
   SSEEventType,
 } from '@/types/chat';
 import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter';
+import { sendChatMessage } from './chat-adapter-v2';
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -27,27 +28,19 @@ export const chatService = {
   // Send a chat message
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
-      console.log('Using Zumbi investigation adapter for chat');
-      
-      // Use the adapter to send chat as investigation
-      // This is temporary while the full chat API is not available
-      return await sendChatAsInvestigation(request);
-      
-      // Original chat endpoint code (kept for future use)
-      /*
+      console.log('Using new chat API v2 adapter');
       console.log('Sending message to:', `${API_BASE_URL}${CHAT_ENDPOINTS.MESSAGE}`);
       console.log('Request:', request);
       
-      const response = await api.post<ChatResponse>(CHAT_ENDPOINTS.MESSAGE, request);
+      // Use the new v2 adapter that calls the correct endpoint
+      const response = await sendChatMessage(request);
       
-      console.log('API Response:', response);
-      console.log('Response data:', response.data);
-      console.log('Response success:', response.success);
+      console.log('Chat response:', response);
       
-      if (!response.success) {
-        console.error('API Error:', response.error);
-        throw new Error(response.error?.message || 'Failed to send message');
-      }
+      return response;
+      
+      // Keep the old investigation adapter as fallback
+      // return await sendChatAsInvestigation(request);
       
       if (!response.data) {
         console.error('No data in response');
