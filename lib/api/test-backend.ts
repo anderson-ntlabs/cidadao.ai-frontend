@@ -1,8 +1,27 @@
 // Test backend connection with proper error handling
 export async function testBackendConnection() {
-  const baseUrl = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+  // Try multiple possible URLs
+  const urls = [
+    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    localStorage.getItem('backend_url'), // Check if we found a working URL
+  ].filter(Boolean);
   
   console.log('=== Testing Backend Connection ===');
+  
+  for (const baseUrl of urls) {
+    console.log(`\n🔍 Testing: ${baseUrl}`);
+    
+    if (await testSingleBackend(baseUrl as string)) {
+      console.log(`\n✅ Backend is working at: ${baseUrl}`);
+      return true;
+    }
+  }
+  
+  console.log('\n❌ No working backend found');
+  return false;
+}
+
+async function testSingleBackend(baseUrl: string) {
   
   // 1. Test root endpoint
   console.log('\n1. Testing root endpoint...');
@@ -90,4 +109,5 @@ export async function testBackendConnection() {
   }
   
   console.log('\n=== End of Backend Connection Test ===');
+  return false; // Return false if no successful connection
 }

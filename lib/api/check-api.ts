@@ -1,13 +1,30 @@
 // Script to check API availability
 export async function checkAPIEndpoints() {
   const baseUrls = [
+    // Standard HuggingFace Spaces format
     'https://neural-thinker-cidadao-ai-backend.hf.space',
-    'https://huggingface.co/spaces/neural-thinker/cidadao-ai-backend',
-    'https://neural-thinker.hf.space',
-  ];
+    // Alternative formats
+    'https://neural-thinker-cidadaoai-backend.hf.space',
+    'https://neuralthinker-cidadao-ai-backend.hf.space',
+    // Check saved URL from discovery
+    localStorage.getItem('backend_url'),
+  ].filter(Boolean);
   
   for (const baseUrl of baseUrls) {
+    if (!baseUrl) continue;
     console.log(`\nTesting ${baseUrl}...`);
+    
+    // Test health endpoint first (more reliable)
+    try {
+      const healthResponse = await fetch(`${baseUrl}/health`);
+      console.log(`${baseUrl}/health - Status: ${healthResponse.status}`);
+      if (healthResponse.ok) {
+        const healthData = await healthResponse.json();
+        console.log('Health check passed:', healthData);
+      }
+    } catch (error) {
+      console.error(`${baseUrl}/health - Error:`, error);
+    }
     
     // Test root
     try {

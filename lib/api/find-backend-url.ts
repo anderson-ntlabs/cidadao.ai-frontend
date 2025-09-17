@@ -1,18 +1,16 @@
 // Try to find the correct backend URL
 export async function findBackendURL() {
   const possibleURLs = [
-    // Try with the user-space format
+    // Standard HuggingFace Spaces URL format
     'https://neural-thinker-cidadao-ai-backend.hf.space',
-    // Try with dot separator
-    'https://neural-thinker.cidadao-ai-backend.hf.space',
-    // Try without 'ai' in the name
-    'https://neural-thinker-cidadao-backend.hf.space',
-    // Try the embed URL format
-    'https://hf.space/embed/neural-thinker/cidadao.ai-backend/+',
-    // Try direct proxy format
+    // Alternative formats that might work
     'https://neural-thinker-cidadaoai-backend.hf.space',
-    // Try with HF proxy
-    'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend/proxy',
+    'https://neural-thinker-cidadao-backend.hf.space',
+    // Direct app URL (from HF Spaces)
+    'https://neural-thinker-cidadao.ai-backend.hf.space',
+    // Try with different separators
+    'https://neuralthinker-cidadaoai-backend.hf.space',
+    'https://neuralthinker-cidadao-ai-backend.hf.space',
   ];
 
   console.log('=== Searching for Backend URL ===');
@@ -65,26 +63,32 @@ export async function findBackendURL() {
     }
   }
   
-  // Try to get the URL from the iframe if we're on HuggingFace
+  // Also try checking the direct app URL from HuggingFace
+  console.log('\nChecking HuggingFace direct app URL...');
   try {
-    const hfPageResponse = await fetch('https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend');
-    const hfPageText = await hfPageResponse.text();
+    // The app runs on port 7860 internally, but HF handles the routing
+    const hfAppUrl = 'https://neural-thinker-cidadao-ai-backend.hf.space';
     
-    // Look for the actual space URL in the HTML
-    const spaceUrlMatch = hfPageText.match(/https:\/\/[^"'\s]+\.hf\.space[^"'\s]*/);
-    if (spaceUrlMatch) {
-      const foundUrl = spaceUrlMatch[0];
-      console.log(`Found URL in HF page: ${foundUrl}`);
-      
-      // Test it
-      const testResponse = await fetch(`${foundUrl}/docs`);
-      if (testResponse.status === 200) {
-        console.log(`✅ Confirmed working backend at: ${foundUrl}`);
-        return foundUrl;
+    // Test with a simple health check first
+    const healthResponse = await fetch(`${hfAppUrl}/health`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    console.log(`${hfAppUrl}/health - Status: ${healthResponse.status}`);
+    
+    if (healthResponse.ok) {
+      // If health check works, test the docs endpoint
+      const docsResponse = await fetch(`${hfAppUrl}/docs`);
+      if (docsResponse.ok) {
+        console.log(`✅ Confirmed working backend at: ${hfAppUrl}`);
+        return hfAppUrl;
       }
     }
   } catch (error) {
-    console.error('Failed to fetch HF page:', error);
+    console.error('Failed to check HF app directly:', error);
   }
   
   console.log('\n❌ Could not find working backend URL');
