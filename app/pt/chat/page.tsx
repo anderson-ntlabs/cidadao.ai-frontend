@@ -119,7 +119,7 @@ export default function ChatPage() {
       }
       
       // Atualizar status do Zumbi se estava offline
-      if (selectedAgent === 'zumbi' && !zumbiOnline && data.confidence > 0) {
+      if (selectedAgent === 'zumbi' && !zumbiOnline && data.confidence && data.confidence > 0) {
         setZumbiOnline(true)
       }
     } catch (error: any) {
