@@ -50,6 +50,9 @@ export function useChat() {
             data_source: 'contracts',
             max_results: 10
           })
+        }).catch(err => {
+          // Erro de rede ou CORS
+          throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão.')
         })
 
         if (!response.ok) {
@@ -120,7 +123,7 @@ export function useChat() {
       setError(errorMessage)
       
       // Se for o Zumbi e houver erro, retornar resposta mockada
-      if (params.agent_id === 'zumbi' && err.message.includes('servidor')) {
+      if (params.agent_id === 'zumbi' && (err.message.includes('servidor') || err.message.includes('HTML') || err.message.includes('JSON'))) {
         return {
           response: `⚠️ **Modo de Demonstração**\n\nO servidor do Zumbi está temporariamente indisponível, mas aqui está um exemplo de como funcionaria:\n\n🔍 Analisando: "${params.message}"\n\n📊 Em uma investigação real, eu buscaria por:\n- Contratos com valores atípicos\n- Empresas com múltiplas vitórias suspeitas\n- Prazos impossíveis de cumprir\n- Sobrepreços em relação ao mercado\n\n💡 Tente novamente em alguns minutos ou experimente outros agentes!`,
           agent: 'zumbi',

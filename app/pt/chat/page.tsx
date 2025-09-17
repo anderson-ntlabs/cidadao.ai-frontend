@@ -27,6 +27,7 @@ export default function ChatPage() {
   const [selectedAgent, setSelectedAgent] = useState('abaporu')
   const [isSending, setIsSending] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [zumbiOnline, setZumbiOnline] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { sendMessage, getSuggestions } = useChat()
@@ -116,6 +117,11 @@ export default function ChatPage() {
       if (selectedAgent === 'zumbi' && data.confidence && data.confidence > 0.8) {
         toast.warning('Anomalia Detectada!', 'O Zumbi encontrou possíveis irregularidades')
       }
+      
+      // Atualizar status do Zumbi se estava offline
+      if (selectedAgent === 'zumbi' && !zumbiOnline && data.confidence > 0) {
+        setZumbiOnline(true)
+      }
     } catch (error: any) {
       console.error('Erro ao enviar mensagem:', error)
       
@@ -128,6 +134,11 @@ export default function ChatPage() {
       }
       
       setMessages(prev => [...prev, errorMessage])
+      
+      // Marcar Zumbi como offline se foi erro de conexão
+      if (selectedAgent === 'zumbi' && (error.message.includes('HTML') || error.message.includes('servidor'))) {
+        setZumbiOnline(false)
+      }
     } finally {
       setIsSending(false)
     }
@@ -223,8 +234,8 @@ export default function ChatPage() {
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       {agent.id === 'zumbi' && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" 
-                          title="Conectado ao Backend" 
+                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${zumbiOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} 
+                          title={zumbiOnline ? 'Conectado ao Backend' : 'Offline - Modo Demo'} 
                         />
                       )}
                     </div>
@@ -244,8 +255,10 @@ export default function ChatPage() {
                 💡 Dica: Cada agente tem especialidades diferentes. Experimente conversar com vários!
               </p>
               {selectedAgent === 'zumbi' && (
-                <p className="text-sm text-green-700 dark:text-green-300 mt-2">
-                  ✅ Zumbi está conectado ao backend e pode fazer investigações reais!
+                <p className={`text-sm mt-2 ${zumbiOnline ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                  {zumbiOnline 
+                    ? '✅ Zumbi está conectado ao backend e pode fazer investigações reais!'
+                    : '⚠️ Zumbi está offline - Usando modo de demonstração'}
                 </p>
               )}
             </div>
