@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { Tour } from '@/components/tour'
+import { toast } from '@/hooks/use-toast'
 
 interface Investigation {
   id: string
@@ -124,6 +127,9 @@ export default function DashboardPage() {
       {/* Sub-header do Dashboard */}
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
+          <Breadcrumbs items={[
+            { label: 'Dashboard' }
+          ]} />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Dashboard de Investigações</h1>
@@ -163,9 +169,9 @@ export default function DashboardPage() {
       </div>
       
       {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-4">
         {/* Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="tour-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-6 rounded-xl shadow-sm">
             <div className="text-3xl font-bold text-green-600 mb-1">{metrics.totalInvestigacoes}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total de Investigações</div>
@@ -185,7 +191,7 @@ export default function DashboardPage() {
         </div>
         
         {/* Lista de Investigações */}
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-sm">
+        <div className="tour-investigations bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-bold">Investigações Recentes</h2>
           </div>
@@ -230,6 +236,32 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      
+      {/* Tour Guide para novos usuários */}
+      <Tour
+        storageKey="dashboard-tour-completed"
+        onComplete={() => toast.info('Tour concluído!', 'Agora você conhece o Dashboard')}
+        steps={[
+          {
+            target: '.tour-metrics',
+            title: 'Métricas em Tempo Real',
+            content: 'Aqui você acompanha as principais métricas do sistema: investigações realizadas, anomalias detectadas e economia identificada.',
+            placement: 'bottom'
+          },
+          {
+            target: '.tour-investigations',
+            title: 'Investigações Recentes',
+            content: 'Veja as últimas análises realizadas pelos nossos agentes de IA, com detalhes sobre anomalias e status de cada investigação.',
+            placement: 'top'
+          },
+          {
+            target: 'a[href="/pt/chat"]',
+            title: 'Chat com IAs',
+            content: 'Clique aqui para conversar diretamente com nossos agentes especializados e fazer perguntas sobre transparência pública.',
+            placement: 'bottom'
+          }
+        ]}
+      />
     </>
   )
 }

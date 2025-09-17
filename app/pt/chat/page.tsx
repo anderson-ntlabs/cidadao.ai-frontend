@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
+import { Breadcrumbs } from '@/components/breadcrumbs'
 import { agents } from '@/data/agents'
 import { useChat } from '@/hooks/use-chat'
 
@@ -146,6 +147,9 @@ export default function ChatPage() {
       {/* Sub-header */}
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
+          <Breadcrumbs items={[
+            { label: 'Chat com IAs' }
+          ]} />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Chat com IAs</h1>

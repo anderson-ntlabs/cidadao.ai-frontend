@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LoadingScreen } from '@/components/loading-screen'
 import Link from 'next/link'
+import { toast } from '@/hooks/use-toast'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,6 +30,9 @@ export default function LoginPage() {
     
     localStorage.setItem('user', JSON.stringify(mockUser))
     localStorage.setItem('isAuthenticated', 'true')
+    
+    // Mostra notificação de sucesso
+    toast.success(`Bem-vindo(a), ${mockUser.name}!`, 'Login realizado com sucesso')
     
     // Redireciona para dashboard
     router.push('/pt/dashboard')

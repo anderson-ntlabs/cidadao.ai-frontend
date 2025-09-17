@@ -21,6 +21,7 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeScript } from '../theme-script'
+import { ToastProvider } from '@/components/toast-provider'
 
 export default function PTLayout({
   children,
@@ -52,6 +53,7 @@ export default function PTLayout({
           </main>
           <Footer locale="pt" />
           <CookieConsent locale="pt" />
+          <ToastProvider />
         </div>
       </body>
     </html>
