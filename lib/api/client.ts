@@ -24,7 +24,9 @@ const apiClient: AxiosInstance = axios.create({
   timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
+  withCredentials: false, // Important for CORS
 });
 
 // Request interceptor for authentication
@@ -72,10 +74,13 @@ apiClient.interceptors.response.use(
         ? (typeof data.detail === 'string' ? data.detail : data.detail[0]?.msg)
         : data?.message || 'An unexpected error occurred';
 
+      console.error(`API Error ${status}:`, errorMessage, data);
+
       return Promise.reject({
         message: errorMessage,
         status,
         code: data?.code,
+        response: error.response,
         originalError: error,
       });
     }
@@ -114,11 +119,13 @@ export async function apiRequest<T = any>(
       success: true,
     };
   } catch (error: any) {
+    console.error('API request error:', error.response?.data || error.message);
     return {
       error: {
         message: error.message || 'An error occurred',
         status: error.status,
         code: error.code,
+        detail: error.response?.data?.detail,
       },
       success: false,
     };

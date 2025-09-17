@@ -142,10 +142,14 @@ export const useChatStore = create<ChatStore>()(
               state.ws.sendChatMessage(content);
             } else {
               // Send via REST API
+              console.log('Calling chatService.sendMessage with sessionId:', sessionId);
+              
               const response = await chatService.sendMessage({
                 message: content,
                 session_id: sessionId,
               });
+              
+              console.log('Chat service response:', response);
               
               if (response) {
                 // Add assistant response

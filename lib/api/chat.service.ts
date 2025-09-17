@@ -25,8 +25,43 @@ const CHAT_ENDPOINTS = {
 export const chatService = {
   // Send a chat message
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
-    const response = await api.post<ChatResponse>(CHAT_ENDPOINTS.MESSAGE, request);
-    return response.success ? response.data! : null;
+    try {
+      console.log('Sending message to:', `${API_BASE_URL}${CHAT_ENDPOINTS.MESSAGE}`);
+      console.log('Request:', request);
+      
+      const response = await api.post<ChatResponse>(CHAT_ENDPOINTS.MESSAGE, request);
+      
+      console.log('API Response:', response);
+      console.log('Response data:', response.data);
+      console.log('Response success:', response.success);
+      
+      if (!response.success) {
+        console.error('API Error:', response.error);
+        throw new Error(response.error?.message || 'Failed to send message');
+      }
+      
+      if (!response.data) {
+        console.error('No data in response');
+        return null;
+      }
+      
+      // Ensure we have all required fields
+      const chatResponse: ChatResponse = {
+        session_id: response.data.session_id || request.session_id || 'unknown',
+        agent_id: response.data.agent_id || 'abaporu',
+        agent_name: response.data.agent_name || 'Abaporu',
+        message: response.data.message || 'Sem resposta',
+        confidence: response.data.confidence || 0.5,
+        suggested_actions: response.data.suggested_actions,
+        requires_input: response.data.requires_input,
+        metadata: response.data.metadata || {},
+      };
+      
+      return chatResponse;
+    } catch (error) {
+      console.error('Chat service error:', error);
+      throw error;
+    }
   },
 
   // Get quick action suggestions
