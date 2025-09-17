@@ -32,13 +32,20 @@ export default function PTLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <Header locale="pt" />
-        <main className="pt-16 flex-1">
-          {children}
-        </main>
-        <Footer locale="pt" />
-        <CookieConsent locale="pt" />
+      <body 
+        className={`${inter.className} min-h-screen bg-fixed bg-cover bg-center bg-no-repeat`}
+        style={{
+          backgroundImage: 'url(/operarios.png)',
+        }}
+      >
+        <div className="min-h-screen flex flex-col bg-white/85 dark:bg-gray-900/85 backdrop-blur-sm">
+          <Header locale="pt" />
+          <main className="pt-16 flex-1">
+            {children}
+          </main>
+          <Footer locale="pt" />
+          <CookieConsent locale="pt" />
+        </div>
       </body>
     </html>
   )

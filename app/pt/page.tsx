@@ -15,18 +15,13 @@ export default function PTPage() {
     <>
       <LoadingScreen />
       {/* Hero Section */}
-      <section 
-        className="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-fixed bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(/operarios.png)',
-        }}
-      >
-        {/* Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 via-white/85 to-blue-50/90 dark:from-gray-900/90 dark:via-gray-800/85 dark:to-gray-900/90"></div>
+      <section className="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Glass morphism effect */}
+        <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md"></div>
         
         {/* Subtle animated gradient overlay */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10 animate-gradient-shift"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"></div>
         </div>
         
         <div className="hero-container max-w-5xl mx-auto px-6 py-24 text-center relative z-10 stagger-children">
@@ -70,7 +65,7 @@ export default function PTPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white dark:bg-gray-800">
+      <section id="features" className="py-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
             Como Funciona a Plataforma
@@ -163,7 +158,7 @@ export default function PTPage() {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="py-20 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
             Por que Confiar no Cidadão.AI?
@@ -209,9 +204,9 @@ export default function PTPage() {
       </section>
 
       {/* Links Sections */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
-        {/* Pattern background instead of image */}
-        <div className="absolute inset-0 bg-topography-pattern opacity-5"></div>
+      <section className="py-20 relative">
+        {/* Glass effect */}
+        <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-4">
