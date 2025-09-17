@@ -13,6 +13,7 @@ import { formatAgentName } from '@/lib/api/chat.service'
 import { testDirectAPI, testAPIHealth } from '@/lib/api/chat-direct'
 import { checkAPIEndpoints } from '@/lib/api/check-api'
 import { testBackendConnection } from '@/lib/api/test-backend'
+import { findBackendURL } from '@/lib/api/find-backend-url'
 
 export default function ChatPage() {
   const router = useRouter()
@@ -339,6 +340,20 @@ export default function ChatPage() {
               
               {/* Debug buttons - always show for now */}
               <div className="mt-2 flex gap-2 justify-center flex-wrap">
+                <button
+                  onClick={async () => {
+                    console.log('Finding backend URL...');
+                    const url = await findBackendURL();
+                    if (url) {
+                      console.log('Found backend at:', url);
+                      // Update the URL in localStorage for testing
+                      localStorage.setItem('backend_url', url);
+                    }
+                  }}
+                  className="text-xs px-2 py-1 bg-yellow-200 rounded"
+                >
+                  Find Backend URL
+                </button>
                 <button
                   onClick={async () => {
                     console.log('Testing backend connection...');
