@@ -24,10 +24,10 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
-  const [selectedAgent, setSelectedAgent] = useState('abaporu')
   const [isSending, setIsSending] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [zumbiOnline, setZumbiOnline] = useState(true)
+  const [activeAgents, setActiveAgents] = useState<string[]>([])
+  const [isInvestigating, setIsInvestigating] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { sendMessage, getSuggestions } = useChat()
@@ -53,19 +53,19 @@ export default function ChatPage() {
       {
         id: '1',
         role: 'assistant',
-        content: 'Olá! Sou o **Abaporu**, o agente coordenador do Cidadão.AI. 🌿\n\nPosso ajudá-lo a investigar dados públicos e conectar você com nossos agentes especializados. Como posso ajudar hoje?',
+        content: 'Olá! Sou o **Abaporu**, o orquestrador central do Cidadão.AI. 🌿\n\nEstou aqui para ajudá-lo a navegar pelos dados de transparência pública. Posso responder suas perguntas e, quando necessário, coordenar nossos agentes especializados para investigações aprofundadas.\n\nComo posso ajudar você hoje?',
         timestamp: new Date(),
         agent: 'abaporu'
       }
     ])
     
     // Buscar sugestões
-    loadSuggestions('abaporu')
+    loadSuggestions()
   }, [router])
   
-  const loadSuggestions = async (agentId: string) => {
+  const loadSuggestions = async () => {
     try {
-      const suggs = await getSuggestions(agentId)
+      const suggs = await getSuggestions('abaporu')
       setSuggestions(suggs.suggestions || [])
     } catch (error) {
       console.error('Erro ao carregar sugestões:', error)
@@ -99,8 +99,9 @@ export default function ChatPage() {
     try {
       const data = await sendMessage({
         message: inputMessage,
-        agent_id: selectedAgent,
-        session_id: user?.id || 'demo-session'
+        agent_id: 'abaporu',
+        session_id: user?.id || 'demo-session',
+        activeAgents: activeAgents
       })
       
       const assistantMessage: Message = {
@@ -108,19 +109,23 @@ export default function ChatPage() {
         role: 'assistant',
         content: data.response || data.message || 'Desculpe, não consegui processar sua solicitação.',
         timestamp: new Date(),
-        agent: selectedAgent
+        agent: 'abaporu'
       }
 
       setMessages(prev => [...prev, assistantMessage])
       
-      // Mostrar toast se foi uma investigação do Zumbi
-      if (selectedAgent === 'zumbi' && data.confidence && data.confidence > 0.8) {
-        toast.warning('Anomalia Detectada!', 'O Zumbi encontrou possíveis irregularidades')
+      // Mostrar toast se foi uma investigação com anomalia
+      if (data.confidence && data.confidence > 0.8) {
+        toast.warning('Anomalia Detectada!', 'Nossos agentes encontraram possíveis irregularidades')
       }
       
-      // Atualizar status do Zumbi se estava offline
-      if (selectedAgent === 'zumbi' && !zumbiOnline && data.confidence && data.confidence > 0) {
-        setZumbiOnline(true)
+      // Atualizar agentes ativos se houver
+      if (data.activeAgents && data.activeAgents.length > 0) {
+        setActiveAgents(data.activeAgents)
+        setIsInvestigating(true)
+      } else {
+        setActiveAgents([])
+        setIsInvestigating(false)
       }
     } catch (error: any) {
       console.error('Erro ao enviar mensagem:', error)
@@ -130,15 +135,14 @@ export default function ChatPage() {
         role: 'assistant',
         content: error.message || 'Desculpe, houve um erro ao processar sua mensagem. Por favor, tente novamente.',
         timestamp: new Date(),
-        agent: selectedAgent
+        agent: 'abaporu'
       }
       
       setMessages(prev => [...prev, errorMessage])
       
-      // Marcar Zumbi como offline se foi erro de conexão
-      if (selectedAgent === 'zumbi' && (error.message.includes('HTML') || error.message.includes('servidor'))) {
-        setZumbiOnline(false)
-      }
+      // Limpar agentes ativos em caso de erro
+      setActiveAgents([])
+      setIsInvestigating(false)
     } finally {
       setIsSending(false)
     }
@@ -149,10 +153,6 @@ export default function ChatPage() {
       e.preventDefault()
       handleSendMessage()
     }
-  }
-
-  const getCurrentAgent = () => {
-    return agents.find(a => a.id === selectedAgent) || agents[0]
   }
 
   if (isLoading) {
@@ -207,80 +207,60 @@ export default function ChatPage() {
       </div>
       
       {/* Chat Container */}
-      <div className="flex h-[calc(100vh-120px)]">
-        {/* Sidebar - Agentes */}
-        <div className="w-80 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-700/50 overflow-y-auto">
-          <div className="p-4">
-            <h2 className="text-lg font-bold mb-4">Agentes Disponíveis</h2>
-            <div className="space-y-2">
-              {agents.slice(0, 8).map((agent) => (
-                <button
-                  key={agent.id}
-                  onClick={() => {
-                    setSelectedAgent(agent.id)
-                    loadSuggestions(agent.id)
-                  }}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
-                    selectedAgent === agent.id
-                      ? 'bg-green-100 dark:bg-green-900 border-2 border-green-500'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
+      <div className="flex flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto w-full">
+        {/* Active Agents Indicator */}
+        {activeAgents.length > 0 && (
+          <div className="bg-green-50/80 dark:bg-green-900/30 backdrop-blur-sm border-b border-green-200/50 dark:border-green-700/50 px-6 py-3">
+            <div className="flex items-center gap-3">
+              <div className="animate-pulse">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              </div>
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                Investigação em andamento:
+              </span>
+              <div className="flex gap-2">
+                {activeAgents.map(agentId => {
+                  const agent = agents.find(a => a.id === agentId)
+                  return agent ? (
+                    <div key={agentId} className="flex items-center gap-1 bg-white/50 dark:bg-gray-800/50 px-2 py-1 rounded-full">
                       <img 
                         src={`/agents/${agent.image}`} 
                         alt={agent.name}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-5 h-5 rounded-full"
                       />
-                      {agent.id === 'zumbi' && (
-                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${zumbiOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} 
-                          title={zumbiOnline ? 'Conectado ao Backend' : 'Offline - Modo Demo'} 
-                        />
-                      )}
+                      <span className="text-xs font-medium">{agent.name}</span>
                     </div>
-                    <div>
-                      <div className="font-medium">{agent.name}</div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">
-                        {agent.role.pt}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-blue-50/80 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                💡 Dica: Cada agente tem especialidades diferentes. Experimente conversar com vários!
-              </p>
-              {selectedAgent === 'zumbi' && (
-                <p className={`text-sm mt-2 ${zumbiOnline ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                  {zumbiOnline 
-                    ? '✅ Zumbi está conectado ao backend e pode fazer investigações reais!'
-                    : '⚠️ Zumbi está offline - Usando modo de demonstração'}
-                </p>
-              )}
+                  ) : null
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Chat Area */}
         <div className="flex-1 flex flex-col bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
           {/* Agent Header */}
           <div className="px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <img 
-                src={`/agents/${getCurrentAgent().image}`} 
-                alt={getCurrentAgent().name}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              <div>
-                <h3 className="font-bold text-lg">{getCurrentAgent().name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {getCurrentAgent().role.pt}
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/agents/abaporu.png" 
+                  alt="Abaporu"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <div>
+                  <h3 className="font-bold text-lg">Abaporu</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Orquestrador Central do Cidadão.AI
+                  </p>
+                </div>
               </div>
+              {isInvestigating && (
+                <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  Coordenando investigação...
+                </div>
+              )}
             </div>
           </div>
 
@@ -301,12 +281,12 @@ export default function ChatPage() {
                   {message.role === 'assistant' && (
                     <div className="flex items-center gap-2 mb-1">
                       <img 
-                        src={`/agents/${message.agent === 'abaporu' ? 'abaporu.png' : getCurrentAgent().image}`} 
+                        src={`/agents/${agents.find(a => a.id === message.agent)?.image || 'abaporu.png'}`} 
                         alt="Agent"
                         className="w-6 h-6 rounded-full"
                       />
                       <span className="text-sm font-medium">
-                        {message.agent === 'abaporu' ? 'Abaporu' : getCurrentAgent().name}
+                        {agents.find(a => a.id === message.agent)?.name || 'Abaporu'}
                       </span>
                     </div>
                   )}
@@ -330,7 +310,7 @@ export default function ChatPage() {
                   <div className="flex items-center gap-2">
                     <div className="animate-pulse">💭</div>
                     <span className="text-gray-600 dark:text-gray-400">
-                      {getCurrentAgent().name} está analisando...
+                      Abaporu está analisando...
                     </span>
                   </div>
                 </div>

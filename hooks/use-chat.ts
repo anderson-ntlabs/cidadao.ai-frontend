@@ -6,6 +6,7 @@ interface ChatMessage {
   agent_id?: string
   session_id?: string
   context?: any
+  activeAgents?: string[]
 }
 
 interface ChatResponse {
@@ -15,6 +16,7 @@ interface ChatResponse {
   confidence?: number
   sources?: any[]
   error?: string
+  activeAgents?: string[]
 }
 
 interface InvestigationResponse {
@@ -36,8 +38,18 @@ export function useChat() {
     setError(null)
 
     try {
-      // Por enquanto, só o Zumbi tem endpoint no backend
-      if (params.agent_id === 'zumbi' || params.message.toLowerCase().includes('contrato') || params.message.toLowerCase().includes('investig')) {
+      const message = params.message.toLowerCase()
+      const needsInvestigation = 
+        message.includes('investig') || 
+        message.includes('contrato') || 
+        message.includes('anomalia') ||
+        message.includes('suspeito') ||
+        message.includes('irregularidad') ||
+        message.includes('analise') ||
+        message.includes('verifiq')
+      
+      // Se precisa investigação, orquestrar com múltiplos agentes
+      if (needsInvestigation) {
         // Usar o endpoint de investigação do Zumbi
         const response = await fetch('https://neural-thinker-cidadao-ai-backend.hf.space/api/agents/zumbi/investigate', {
           method: 'POST',
@@ -71,51 +83,115 @@ export function useChat() {
 
         const data: InvestigationResponse = await response.json()
         
-        // Formatar resposta do Zumbi
-        let responseText = `🔍 **Análise de ${data.agent}**\n\n`
+        // Formatar resposta como orquestração do Abaporu
+        let responseText = `🎯 **Iniciando investigação coordenada**\n\n`
+        responseText += `Identifiquei que sua solicitação requer uma análise especializada. `
+        responseText += `Vou acionar nossos agentes para investigar:\n\n`
+        
+        // Determinar quais agentes seriam acionados
+        const activeAgents = ['zumbi'] // Sempre inclui Zumbi para investigações
+        if (message.includes('padrão') || message.includes('tendência')) {
+          activeAgents.push('anita')
+        }
+        if (message.includes('relatório') || message.includes('resumo')) {
+          activeAgents.push('tiradentes')
+        }
+        
+        responseText += `**Agentes acionados:**\n`
+        activeAgents.forEach(agentId => {
+          const agent = agents.find(a => a.id === agentId)
+          if (agent) {
+            responseText += `• **${agent.name}** - ${agent.role.pt}\n`
+          }
+        })
+        
+        responseText += `\n**Resultados da investigação:**\n\n`
         
         if (data.anomalies_found > 0) {
-          responseText += `⚠️ Encontrei ${data.anomalies_found} anomalia(s) com confiança de ${(data.confidence_score * 100).toFixed(0)}%.\n\n`
+          responseText += `⚠️ **Zumbi dos Palmares** detectou ${data.anomalies_found} anomalia(s) com ${(data.confidence_score * 100).toFixed(0)}% de confiança.\n\n`
           
           if (data.results && data.results.length > 0) {
-            responseText += '**Principais descobertas:**\n'
+            responseText += '📊 **Principais descobertas:**\n'
             data.results.slice(0, 3).forEach((result, idx) => {
               responseText += `${idx + 1}. ${JSON.stringify(result).substring(0, 100)}...\n`
             })
           }
+          
+          responseText += `\n💡 **Próximos passos sugeridos:**\n`
+          responseText += `• Solicitar análise detalhada dos contratos suspeitos\n`
+          responseText += `• Verificar histórico das empresas envolvidas\n`
+          responseText += `• Gerar relatório completo para autoridades\n`
         } else {
-          responseText += `✅ Nenhuma anomalia significativa encontrada na análise.\n`
+          responseText += `✅ **Zumbi dos Palmares** concluiu a análise sem encontrar anomalias significativas.\n`
+          responseText += `\nTodos os contratos analisados estão dentro dos parâmetros normais.`
         }
         
-        responseText += `\n⏱️ Tempo de análise: ${data.processing_time_ms}ms`
+        responseText += `\n\n⏱️ Tempo total de investigação: ${data.processing_time_ms}ms`
         
         return {
           response: responseText,
-          agent: 'zumbi',
-          confidence: data.confidence_score
+          agent: 'abaporu',
+          confidence: data.confidence_score,
+          activeAgents: activeAgents
         }
       } else {
-        // Para outros agentes, simular resposta baseada no agente selecionado
-        const agent = agents.find(a => a.id === params.agent_id)
-        const agentName = agent?.name || 'Agente'
+        // Resposta conversacional do Abaporu
+        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700))
         
-        // Simular delay de processamento
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000))
+        let responseText = ''
         
-        // Gerar respostas contextuais baseadas no agente
-        const responses = {
-          abaporu: `Olá! Sou ${agentName}, o coordenador mestre do Cidadão.AI. Posso ajudá-lo a entender melhor os dados de transparência pública. Sobre sua pergunta: "${params.message}", sugiro começarmos analisando os contratos públicos com o agente Zumbi dos Palmares, que é especialista em detectar anomalias.`,
-          anita: `Saudações! ${agentName} aqui. Sou especialista em análise de padrões complexos. Sobre "${params.message}", posso identificar tendências e correlações nos dados públicos. Recomendo também consultar o Zumbi para uma análise de anomalias específica.`,
-          tiradentes: `Olá, sou ${agentName}. Minha especialidade é gerar relatórios claros e compreensíveis. Para "${params.message}", posso criar um documento detalhado após a análise dos dados. Sugiro primeiro uma investigação com o Zumbi dos Palmares.`,
-          default: `Olá! Sou ${agentName}. Sobre sua pergunta "${params.message}", cada agente tem uma especialidade única. O Zumbi dos Palmares é excelente para detectar anomalias em contratos. Gostaria de direcioná-lo para uma análise específica?`
+        // Respostas contextuais baseadas no tipo de pergunta
+        if (message.includes('como funciona') || message.includes('o que é')) {
+          responseText = `O Cidadão.AI é uma plataforma de transparência pública que utiliza inteligência artificial para analisar dados governamentais. \n\n`
+          responseText += `**Nossa missão** é democratizar o acesso à informação e fortalecer o controle social.\n\n`
+          responseText += `**Como funcionamos:**\n`
+          responseText += `• Coletamos dados públicos do Portal da Transparência\n`
+          responseText += `• Nossos agentes especializados analisam padrões e anomalias\n`
+          responseText += `• Geramos relatórios e alertas sobre possíveis irregularidades\n`
+          responseText += `• Disponibilizamos tudo de forma gratuita e acessível\n\n`
+          responseText += `Posso realizar uma investigação específica para você. Basta me dizer o que gostaria de analisar!`
+        } else if (message.includes('agente') || message.includes('quem')) {
+          responseText = `Somos uma equipe de 17 agentes de IA, cada um com especialidades únicas:\n\n`
+          responseText += `**Principais agentes:**\n`
+          responseText += `• **Zumbi dos Palmares** - Especialista em detectar anomalias e irregularidades\n`
+          responseText += `• **Anita Garibaldi** - Analisa padrões e tendências complexas\n`
+          responseText += `• **Tiradentes** - Gera relatórios detalhados e compreensíveis\n`
+          responseText += `• **Machado de Assis** - Especialista em análise de narrativas\n`
+          responseText += `• **Ayrton Senna** - Otimiza performance e velocidade das análises\n\n`
+          responseText += `E eu, **Abaporu**, coordeno todos eles para trazer as melhores respostas para você!\n\n`
+          responseText += `Que tipo de investigação você gostaria que eu coordenasse?`
+        } else if (message.includes('ajuda') || message.includes('pode')) {
+          responseText = `Claro! Posso ajudar você de várias formas:\n\n`
+          responseText += `**1. Investigações de Transparência:**\n`
+          responseText += `• Análise de contratos públicos\n`
+          responseText += `• Detecção de anomalias em licitações\n`
+          responseText += `• Verificação de gastos governamentais\n\n`
+          responseText += `**2. Análises de Dados:**\n`
+          responseText += `• Identificação de padrões suspeitos\n`
+          responseText += `• Comparação de valores e preços\n`
+          responseText += `• Tendências temporais de gastos\n\n`
+          responseText += `**3. Geração de Relatórios:**\n`
+          responseText += `• Resumos executivos de investigações\n`
+          responseText += `• Documentação de irregularidades\n`
+          responseText += `• Recomendações de ações\n\n`
+          responseText += `Me diga o que você gostaria de investigar e coordenarei os agentes necessários!`
+        } else {
+          // Resposta genérica que incentiva investigação
+          responseText = `Entendi sua mensagem sobre "${params.message}". \n\n`
+          responseText += `Como orquestrador do Cidadão.AI, posso coordenar investigações detalhadas sobre:\n\n`
+          responseText += `• Contratos e licitações públicas\n`
+          responseText += `• Gastos governamentais suspeitos\n`
+          responseText += `• Padrões anormais em dados públicos\n`
+          responseText += `• Empresas com múltiplas vitórias em licitações\n\n`
+          responseText += `Se você tiver uma suspeita específica ou quiser analisar algum órgão/período em particular, `
+          responseText += `é só me dizer que coordenarei nossos agentes especializados para uma investigação completa!`
         }
-        
-        const responseText = responses[params.agent_id as keyof typeof responses] || responses.default
         
         return {
           response: responseText,
-          agent: params.agent_id || 'abaporu',
-          confidence: 0.85
+          agent: 'abaporu',
+          confidence: 0.95,
+          activeAgents: []
         }
       }
     } catch (err: any) {
@@ -140,31 +216,17 @@ export function useChat() {
   const getSuggestions = useCallback(async (agent_id?: string) => {
     try {
       // Por enquanto, retornar sugestões estáticas baseadas no agente
-      const suggestions: Record<string, string[]> = {
-        zumbi: [
-          'Analise contratos emergenciais de 2024',
-          'Investigue licitações suspeitas',
-          'Procure por anomalias em contratos de saúde'
-        ],
-        abaporu: [
-          'Como funciona o sistema de transparência?',
-          'Quais agentes estão disponíveis?',
-          'Me ajude a investigar gastos públicos'
-        ],
-        anita: [
-          'Analise padrões de gastos no último trimestre',
-          'Compare despesas entre departamentos',
-          'Identifique tendências anormais'
-        ],
-        tiradentes: [
-          'Gere um relatório sobre contratos suspeitos',
-          'Crie um resumo das últimas investigações',
-          'Explique as anomalias encontradas'
-        ]
-      }
+      const suggestions = [
+        'Como funciona o Cidadão.AI?',
+        'Investigue contratos emergenciais de saúde em 2024',
+        'Analise licitações do meu município',
+        'Procure anomalias em contratos de obras públicas',
+        'Quais são os principais tipos de irregularidades?',
+        'Me ajude a entender o Portal da Transparência'
+      ]
       
       return { 
-        suggestions: suggestions[agent_id || 'abaporu'] || suggestions.abaporu 
+        suggestions: suggestions.slice(0, 3) // Retornar apenas 3 sugestões
       }
     } catch (err) {
       console.error('Erro ao buscar sugestões:', err)
