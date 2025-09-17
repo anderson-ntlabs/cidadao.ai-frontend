@@ -108,7 +108,7 @@ export default function ChatPage() {
   }
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <LoadingScreen />
       {/* Sub-header */}
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
@@ -154,11 +154,11 @@ export default function ChatPage() {
         </div>
       </div>
       
-      {/* Chat Container */}
-      <div className="flex flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto w-full">
+      {/* Chat Container - Using flex-1 to fill available space */}
+      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pb-4">
         {/* Active Agents Indicator */}
         {hasActiveAgents && (
-          <div className="bg-green-50/80 dark:bg-green-900/30 backdrop-blur-sm border-b border-green-200/50 dark:border-green-700/50 px-6 py-3">
+          <div className="bg-green-50/80 dark:bg-green-900/30 backdrop-blur-sm border border-green-200/50 dark:border-green-700/50 rounded-t-lg px-6 py-3 mx-4 mt-4">
             <div className="flex items-center gap-3">
               <div className="animate-pulse">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -185,8 +185,8 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+        {/* Chat Area - Fills remaining space with proper min-height */}
+        <div className={`flex-1 flex flex-col bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg overflow-hidden mx-4 ${hasActiveAgents ? '' : 'mt-4'} ${hasActiveAgents ? 'rounded-b-lg' : 'rounded-lg'}`} style={{ minHeight: '400px' }}>
           {/* Agent Header */}
           <div className="px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
             <div className="flex items-center justify-between">
@@ -212,8 +212,8 @@ export default function ChatPage() {
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {/* Messages - Scrollable area */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
             {messages.length === 0 && (
               <div className="text-center py-8">
                 <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-6 py-4 max-w-2xl mx-auto">
@@ -397,6 +397,6 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
