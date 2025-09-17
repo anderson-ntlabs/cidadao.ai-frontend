@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { LoadingScreen } from '@/components/loading-screen'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -32,7 +31,7 @@ export default function LoginPage() {
     localStorage.setItem('isAuthenticated', 'true')
     
     // Redireciona para dashboard
-    router.push('/dashboard')
+    router.push('/pt/dashboard')
   }
   
   const providers = [
@@ -73,37 +72,22 @@ export default function LoginPage() {
   return (
     <>
       <LoadingScreen />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        {/* Background patterns */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-topography-pattern opacity-10 dark:opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 via-transparent to-blue-100/40 dark:from-green-900/20 dark:via-transparent dark:to-blue-900/20"></div>
-        </div>
-        
-        {/* Login Container */}
-        <div className="relative z-10 w-full max-w-md mx-auto px-6">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
-            {/* Logo e Título */}
+      {/* Main Content */}
+      <section className="min-h-[80vh] py-20 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="max-w-md mx-auto px-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            {/* Título */}
             <div className="text-center mb-8">
-              <Link href="/" className="inline-flex items-center justify-center mb-4">
-                <Image
-                  src="/forum-icon.png"
-                  alt="Cidadão.AI"
-                  width={60}
-                  height={60}
-                  className="rounded-lg"
-                />
-              </Link>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold mb-2">
                 Portal do Cidadão
               </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">
-                Acesse com sua conta preferida
+              <p className="text-gray-600 dark:text-gray-400">
+                Acesse com sua conta preferida para começar
               </p>
             </div>
             
             {/* Providers */}
-            <div className="space-y-3">
+            <div className="space-y-3 mb-8">
               {providers.map((provider) => (
                 <button
                   key={provider.id}
@@ -149,29 +133,17 @@ export default function LoginPage() {
               Entrar com Email (Em breve)
             </button>
             
-            {/* Footer */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Ao entrar, você concorda com nossos{' '}
-                <Link href="/pt/privacy" className="text-green-600 hover:underline">
-                  termos de uso
-                </Link>
-                {' '}e{' '}
-                <Link href="/pt/privacy" className="text-green-600 hover:underline">
-                  política de privacidade
-                </Link>
-              </p>
-            </div>
-            
-            {/* Voltar */}
-            <div className="mt-6 text-center">
-              <Link 
-                href="/" 
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 transition-colors"
-              >
-                ← Voltar ao início
+            {/* Termos */}
+            <p className="mt-8 text-xs text-center text-gray-600 dark:text-gray-400">
+              Ao entrar, você concorda com nossos{' '}
+              <Link href="/pt/privacy" className="text-green-600 hover:underline">
+                termos de uso
               </Link>
-            </div>
+              {' '}e{' '}
+              <Link href="/pt/privacy" className="text-green-600 hover:underline">
+                política de privacidade
+              </Link>
+            </p>
           </div>
           
           {/* Info Box */}
@@ -181,7 +153,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-      </div>
+      </section>
     </>
   )
 }

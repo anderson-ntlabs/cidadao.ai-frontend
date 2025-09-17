@@ -15,7 +15,7 @@ export default function ENPage() {
     <>
       <LoadingScreen />
       {/* Hero Section */}
-      <section className="hero relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
+      <section className="hero relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
         {/* Geometric Pattern Background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-topography-pattern opacity-20 dark:opacity-10"></div>
@@ -36,65 +36,175 @@ export default function ENPage() {
             🇧🇷 Public Transparency with AI
           </div>
           
-          <h1 className="hero-title text-5xl sm:text-7xl font-bold mb-4 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent animate-gradient">
+          <h1 className="hero-title text-5xl sm:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent animate-gradient">
             Cidadão.AI
           </h1>
           
-          <p className="hero-subtitle-large text-2xl sm:text-3xl font-medium text-gray-800 dark:text-gray-200 mb-6">
-            Official Documentation Hub
+          <p className="hero-subtitle-large text-2xl sm:text-3xl font-medium text-gray-800 dark:text-gray-200 mb-8 max-w-3xl mx-auto">
+            Artificial Intelligence for Transparency and Social Control
           </p>
           
-          <p className="hero-mission text-xl text-gray-700 dark:text-gray-300 mb-6 max-w-3xl mx-auto">
-            This is the meeting point between technology, citizenship and public responsibility.
+          <p className="hero-description text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
+            Monitor public spending, detect anomalies and track investigations in real time. 
+            Our network of Brazilian AIs works 24/7 analyzing data from the Transparency Portal.
           </p>
           
-          <p className="hero-description text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto">
-            Cidadão.AI brings together multiple Brazilian artificial intelligences working in network 
-            to democratize access to public data, strengthen transparency and empower 
-            every citizen with clear, accessible and auditable information.
+          {/* CTA Buttons - Always go to PT version */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link 
+              href="/pt/login" 
+              className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300 hover-lift hover-glow"
+            >
+              Citizen Portal
+            </Link>
+            <Link 
+              href="#features" 
+              className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 transition-all duration-300"
+            >
+              Learn About the Platform
+            </Link>
+          </div>
+          
+          <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+            Already have access? Use the <span className="font-medium">Login</span> button at the top
           </p>
         </div>
       </section>
 
-      {/* Agents Carousel Section */}
-      <section className="py-20 bg-white dark:bg-gray-800">
+      {/* Features Section */}
+      <section id="features" className="py-20 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
-            Meet Our Brazilian AIs
+            How the Platform Works
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
-            Each agent is a specialized artificial intelligence, working 24/7 for public transparency
+            Three powerful tools for social control and public transparency
           </p>
           
-          {/* All 17 Agents Grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-9 gap-3 sm:gap-4 md:gap-6 justify-items-center">
-              {agents.map((agent, index) => (
-                <Link 
-                  href="/en/agents" 
-                  key={agent.id} 
-                  className="group cursor-pointer animate-fade-in-up" 
-                  style={{ animationDelay: `${index * 0.03}s` }}
-                >
-                  <div className="text-center transform transition-all duration-300 hover:scale-105">
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-3 rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-4 group-hover:ring-green-500 dark:group-hover:ring-green-400 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                    <Image
-                      src={`/agents/${agent.image}`}
-                      alt={agent.name}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                  <h3 className="font-medium text-sm sm:text-base group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">{agent.name}</h3>
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300">{agent.role.en}</p>
-                </div>
-              </Link>
-            ))}
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Dashboard Feature */}
+            <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-3xl">📊</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Investigation Dashboard</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                View real-time analyses performed by AIs. Track detected anomalies, 
+                suspicious patterns, and insights on public spending.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2">✓</span>
+                  Interactive charts and advanced filters
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2">✓</span>
+                  Automatic anomaly alerts
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2">✓</span>
+                  Detailed report export
+                </li>
+              </ul>
+            </div>
+
+            {/* Chat Feature */}
+            <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-3xl">💬</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Chat with Specialized AIs</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Talk directly with our Brazilian AIs. Ask questions about public spending, 
+                request specific analyses, or clarify doubts about transparency.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">✓</span>
+                  17 specialized agents available
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">✓</span>
+                  Natural language responses
+                </li>
+                <li className="flex items-start">
+                  <span className="text-blue-600 mr-2">✓</span>
+                  Complete conversation history
+                </li>
+              </ul>
+            </div>
+
+            {/* Real-time Monitoring */}
+            <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+              <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-6">
+                <span className="text-3xl">🔍</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Real-time Monitoring</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Our AIs work 24/7 analyzing data from the Transparency Portal, automatically 
+                detecting patterns and anomalies.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-start">
+                  <span className="text-yellow-600 mr-2">✓</span>
+                  Continuous public data analysis
+                </li>
+                <li className="flex items-start">
+                  <span className="text-yellow-600 mr-2">✓</span>
+                  Advanced Machine Learning
+                </li>
+                <li className="flex items-start">
+                  <span className="text-yellow-600 mr-2">✓</span>
+                  Instant notifications
+                </li>
+              </ul>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Trust Section */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
+            Why Trust Cidadão.AI?
+          </h2>
           
-          <div className="text-center mt-8">
-            <Link href="/en/agents" className="inline-block px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-300 hover-lift hover-glow">
-              Understand our AI agents
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+              <div className="text-4xl font-bold text-green-600 mb-2">100%</div>
+              <div className="text-lg font-medium mb-1">Free</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Complete access at no cost</div>
+            </div>
+            
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
+              <div className="text-lg font-medium mb-1">Monitoring</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">AIs working continuously</div>
+            </div>
+            
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="text-4xl font-bold text-yellow-600 mb-2">17</div>
+              <div className="text-lg font-medium mb-1">AI Agents</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Specialized in transparency</div>
+            </div>
+            
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <div className="text-4xl font-bold text-purple-600 mb-2">∞</div>
+              <div className="text-lg font-medium mb-1">Public Data</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Integrated Transparency Portal</div>
+            </div>
+          </div>
+
+          {/* Final CTA - Always go to PT */}
+          <div className="text-center mt-16">
+            <h3 className="text-2xl font-bold mb-4">Ready to exercise your right to transparency?</h3>
+            <Link 
+              href="/pt/login" 
+              className="inline-block px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300 hover-lift hover-glow"
+            >
+              Access Citizen Portal
             </Link>
           </div>
         </div>
@@ -111,139 +221,47 @@ export default function ENPage() {
         <div className="absolute inset-0 bg-gray-50/95 dark:bg-gray-900/95" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-6">
-          {/* Repositories */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-8">Repositories</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Link href="https://github.com/anderson-ufrj/cidadao.ai-backend" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <div className="flex items-start gap-3">
-                  <Folder className="w-8 h-8 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">cidadao.ai-backend</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Backend system with FastAPI and AI agents</p>
-                  </div>
-                </div>
-              </Link>
-              <Link href="https://github.com/anderson-ufrj/cidadao.ai-frontend" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <div className="flex items-start gap-3">
-                  <Folder className="w-8 h-8 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">cidadao.ai-frontend</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Modern web interface (in development)</p>
-                  </div>
-                </div>
-              </Link>
-              <Link href="https://github.com/anderson-ufrj/cidadao.ai-technical-docs" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <div className="flex items-start gap-3">
-                  <Folder className="w-8 h-8 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">cidadao.ai-technical-docs</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Detailed technical documentation</p>
-                  </div>
-                </div>
-              </Link>
-              {/* <Link href="https://github.com/anderson-ufrj/cidadao.ai-models" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <div className="flex items-start gap-3">
-                  <Folder className="w-8 h-8 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">cidadao.ai-models</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Machine Learning and AI models</p>
-                  </div>
-                </div>
-              </Link> */}
-              <Link href="https://github.com/anderson-ufrj/cidadao.ai-hub" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <div className="flex items-start gap-3">
-                  <Folder className="w-8 h-8 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">cidadao.ai-hub</h3>
-                    <p className="text-gray-600 dark:text-gray-400">This documentation hub (source code)</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Applications */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-8">Applications</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Link href="https://cidadao-ai-frontend.vercel.app/" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow border-l-4 border-green-500">
-                <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">🌐 Web App</h3>
-                <p className="text-gray-600 dark:text-gray-400">Modern frontend for agent interaction</p>
-              </Link>
-              <Link href="https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow border-l-4 border-blue-500">
-                <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">⚡ FastAPI Backend</h3>
-                <p className="text-gray-600 dark:text-gray-400">RESTful API for system integration</p>
-              </Link>
-            </div>
-          </div>
-
-          {/* Documentation & Research */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold mb-8">Documentation & Research</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Link href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro" 
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">📚 Technical Documentation</h3>
-                <p className="text-gray-600 dark:text-gray-400">Complete technical documentation</p>
-              </Link>
-              <Link href="/docs/notas-de-pesquisa.pdf" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group">
-                <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">📄 Research Notes</h3>
-                <p className="text-gray-600 dark:text-gray-400">Detailed technical document (PDF)</p>
-              </Link>
-            </div>
-          </div>
-
-          {/* Other Links */}
-          <div>
-            <h2 className="text-2xl font-bold mb-8">🔗 Other Links</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Additional Resources
+          </h2>
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
+            For developers, researchers and those interested in technical details
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* GitHub */}
+            <Link 
+              href="https://github.com/anderson-ufrj/cidadao.ai-backend" 
+              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+            >
+              <div className="text-4xl mb-4">🐙</div>
+              <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">Open Source</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">GitHub Repositories</p>
+            </Link>
             
-            {/* System & Status */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-red-600">🔴 System & Status</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Link href="https://neural-thinker-cidadao-ai-backend.hf.space/health" 
-                      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow">
-                  <h4 className="font-medium mb-1">System Health</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Check operational status</p>
-                </Link>
-                <Link href="https://neural-thinker-cidadao-ai-backend.hf.space/metrics" 
-                      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow">
-                  <h4 className="font-medium mb-1">Metrics</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Prometheus metrics endpoint</p>
-                </Link>
-              </div>
-            </div>
-
-            {/* API & Documentation */}
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-blue-600">📚 API & Documentation</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Link href="https://neural-thinker-cidadao-ai-backend.hf.space/docs" 
-                      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow">
-                  <h4 className="font-medium mb-1">Swagger UI</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Interactive API documentation</p>
-                </Link>
-                <Link href="https://neural-thinker-cidadao-ai-backend.hf.space/redoc" 
-                      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow">
-                  <h4 className="font-medium mb-1">ReDoc</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Alternative API documentation</p>
-                </Link>
-              </div>
-            </div>
+            {/* Documentation */}
+            <Link 
+              href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro" 
+              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+            >
+              <div className="text-4xl mb-4">📚</div>
+              <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">Documentation</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Complete technical guides</p>
+            </Link>
+            
+            {/* API */}
+            <Link 
+              href="https://neural-thinker-cidadao-ai-backend.hf.space/docs" 
+              className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
+            >
+              <div className="text-4xl mb-4">⚡</div>
+              <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">REST API</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Interactive documentation</p>
+            </Link>
           </div>
         </div>
       </section>
+
 
       <InstallPWA />
     </>

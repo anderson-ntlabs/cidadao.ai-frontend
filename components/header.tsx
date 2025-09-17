@@ -106,9 +106,9 @@ export function Header({ locale }: HeaderProps) {
               </div>
             </div>
             
-            {/* Login Button Desktop */}
+            {/* Login Button Desktop - Always goes to PT */}
             <Link
-              href="/login"
+              href="/pt/login"
               className="ml-4 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-shadow"
             >
               <span>
@@ -178,10 +178,10 @@ export function Header({ locale }: HeaderProps) {
                 </div>
               </div>
               
-              {/* Login Button Mobile */}
+              {/* Login Button Mobile - Always goes to PT */}
               <div className="px-3 mt-3">
                 <Link
-                  href="/login"
+                  href="/pt/login"
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
                 >

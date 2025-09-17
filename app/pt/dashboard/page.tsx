@@ -72,7 +72,7 @@ export default function DashboardPage() {
     const isAuth = localStorage.getItem('isAuthenticated')
     
     if (!storedUser || isAuth !== 'true') {
-      router.push('/login')
+      router.push('/pt/login')
       return
     }
     
@@ -119,22 +119,19 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header do Dashboard */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <>
+      <LoadingScreen />
+      {/* Sub-header do Dashboard */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Cidadão.AI
-              </Link>
-              <span className="text-gray-500 dark:text-gray-400">|</span>
-              <span className="text-gray-700 dark:text-gray-300 font-medium">Dashboard</span>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Dashboard de Investigações</h1>
             </div>
             
             <div className="flex items-center gap-4">
               <Link 
-                href="/chat" 
+                href="/pt/chat" 
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 💬 Chat com IAs
@@ -163,7 +160,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
       
       {/* Conteúdo Principal */}
       <main className="max-w-7xl mx-auto px-6 py-8">
@@ -233,6 +230,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
-    </div>
+    </>
   )
 }
