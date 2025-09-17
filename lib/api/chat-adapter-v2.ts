@@ -1,4 +1,4 @@
-import { api } from './client';
+import { api, API_BASE_URL } from './client';
 import type { ChatRequest, ChatResponse } from '@/types/chat';
 
 /**
@@ -173,7 +173,7 @@ export async function streamChatMessage(
   onError?: (error: Error) => void
 ) {
   try {
-    const response = await fetch(`${api.defaults.baseURL}/api/v1/chat/stream`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/chat/stream`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
