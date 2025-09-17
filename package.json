@@ -1,8 +1,8 @@
 {
-  "name": "cidadao-ai-hub",
-  "version": "0.1.0",
+  "name": "cidadao-ai-frontend",
+  "version": "1.0.0",
   "private": true,
-  "description": "Hub principal do projeto Cidadão.AI - Plataforma de transparência governamental",
+  "description": "Plataforma Cidadão.AI - Sistema de transparência governamental com inteligência artificial",
   "author": "Anderson Henrique <anderson.ufrj@gmail.com>",
   "license": "MIT",
   "scripts": {

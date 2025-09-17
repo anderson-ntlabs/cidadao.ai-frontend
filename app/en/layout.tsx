@@ -5,7 +5,7 @@ import '../../styles/globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Cidadão.AI — Documentation Hub',
+  title: 'Cidadão.AI',
   description: 'Multi-agent artificial intelligence system to democratize access to public data and strengthen Brazilian government transparency.',
   manifest: '/manifest.json',
   themeColor: '#10b981',

@@ -14,17 +14,17 @@
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Agentes de IA",
-      "short_name": "Agentes",
-      "description": "Ver todos os agentes",
-      "url": "/agents",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver investigações",
+      "url": "/pt/dashboard",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Investigações",
-      "short_name": "Investigar",
-      "description": "Iniciar nova investigação",
-      "url": "/investigate",
+      "name": "Chat com IA",
+      "short_name": "Chat",
+      "description": "Conversar com Abaporu",
+      "url": "/pt/chat",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],
