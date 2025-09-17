@@ -110,6 +110,14 @@ export function getMockAgents() {
       role: 'Investigador',
       status: 'available',
       specialty: 'Detecção de anomalias e irregularidades',
+      type: 'investigator' as const,
+      description: 'Especialista em detectar anomalias e irregularidades em contratos públicos',
+      capabilities: [
+        'Análise de contratos',
+        'Detecção de anomalias',
+        'Identificação de padrões suspeitos',
+        'Investigação de fornecedores',
+      ],
     },
   ];
 }
