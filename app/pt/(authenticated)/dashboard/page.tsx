@@ -1,257 +1,468 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { 
+  FileSearch, AlertTriangle, TrendingUp, Users, 
+  Activity, DollarSign, Calendar, Filter,
+  Download, RefreshCw
+} from 'lucide-react'
 import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
-import { Tour } from '@/components/tour'
-import { toast } from '@/hooks/use-toast'
-import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@/components/ui'
+import { Button, Card, CardHeader, CardTitle, CardContent, Tabs, TabsList, TabsTrigger, TabsContent, Badge } from '@/components/ui'
+import { StatCard, ChartCard } from '@/components/ui'
+import { LineChart, BarChart, PieChart, AreaChart } from '@/components/charts'
+import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
-interface Investigation {
-  id: string
-  title: string
-  status: 'em_andamento' | 'concluida' | 'pendente'
-  anomalyScore: number
-  agent: string
-  date: string
-  description: string
+// Mock data generators
+const generateTimeSeriesData = (days: number) => {
+  const data = []
+  const today = new Date()
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = subDays(today, i)
+    data.push({
+      date: format(date, 'yyyy-MM-dd'),
+      investigacoes: Math.floor(Math.random() * 20) + 10,
+      anomalias: Math.floor(Math.random() * 10) + 2,
+      relatorios: Math.floor(Math.random() * 15) + 5,
+      alertas: Math.floor(Math.random() * 8) + 1
+    })
+  }
+  
+  return data
 }
+
+const generateCategoryData = () => [
+  { name: 'Licitações', value: 234, anomalias: 12 },
+  { name: 'Contratos', value: 189, anomalias: 8 },
+  { name: 'Folha de Pagamento', value: 156, anomalias: 15 },
+  { name: 'Despesas', value: 98, anomalias: 5 },
+  { name: 'Convênios', value: 76, anomalias: 3 }
+]
+
+const generateAnomalyTypeData = () => [
+  { name: 'Sobrepreço', value: 45, color: '#ef4444' },
+  { name: 'Duplicação', value: 28, color: '#f59e0b' },
+  { name: 'Fracionamento', value: 22, color: '#3b82f6' },
+  { name: 'Direcionamento', value: 18, color: '#8b5cf6' },
+  { name: 'Outros', value: 12, color: '#6b7280' }
+]
+
+const generateAgentPerformanceData = () => [
+  { agent: 'Zumbi dos Palmares', investigacoes: 89, precisao: 94 },
+  { agent: 'Anita Garibaldi', investigacoes: 76, precisao: 91 },
+  { agent: 'Machado de Assis', investigacoes: 65, precisao: 88 },
+  { agent: 'Tiradentes', investigacoes: 54, precisao: 92 },
+  { agent: 'Dandara', investigacoes: 43, precisao: 95 }
+]
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
+  const [timeRange, setTimeRange] = useState('7days')
+  const [isLoading, setIsLoading] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState(new Date())
   
-  // Dados mockados
-  const investigations: Investigation[] = [
-    {
-      id: '1',
-      title: 'Análise de Contratos Emergenciais - Saúde 2024',
-      status: 'em_andamento',
-      anomalyScore: 0.87,
-      agent: 'Zumbi dos Palmares',
-      date: '2024-01-15',
-      description: 'Detectadas irregularidades em 23 contratos emergenciais'
-    },
-    {
-      id: '2',
-      title: 'Padrões de Gastos - Final de Ano',
-      status: 'concluida',
-      anomalyScore: 0.92,
-      agent: 'Anita Garibaldi',
-      date: '2024-01-14',
-      description: 'Aumento atípico de 340% em despesas de publicidade'
-    },
-    {
-      id: '3',
-      title: 'Licitações de Obras Públicas - Q4 2023',
-      status: 'concluida',
-      anomalyScore: 0.76,
-      agent: 'Tiradentes',
-      date: '2024-01-13',
-      description: '15 empresas com padrões suspeitos identificadas'
-    },
-    {
-      id: '4',
-      title: 'Folha de Pagamento - Gratificações',
-      status: 'pendente',
-      anomalyScore: 0.65,
-      agent: 'Machado de Assis',
-      date: '2024-01-12',
-      description: 'Aguardando análise detalhada de gratificações atípicas'
-    }
-  ]
-  
-  const metrics = {
-    totalInvestigacoes: 127,
-    anomaliasDetectadas: 89,
-    economiaIdentificada: 'R$ 45,7 milhões',
-    tempoMedioAnalise: '2.3 horas'
-  }
-  
+  // Generate mock data
+  const timeSeriesData = generateTimeSeriesData(timeRange === '7days' ? 7 : timeRange === '30days' ? 30 : 90)
+  const categoryData = generateCategoryData()
+  const anomalyTypeData = generateAnomalyTypeData()
+  const agentPerformanceData = generateAgentPerformanceData()
+
+  // Calculate statistics
+  const totalInvestigations = timeSeriesData.reduce((sum, day) => sum + day.investigacoes, 0)
+  const totalAnomalies = timeSeriesData.reduce((sum, day) => sum + day.anomalias, 0)
+  const totalReports = timeSeriesData.reduce((sum, day) => sum + day.relatorios, 0)
+  const averagePrecision = 91.8
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
   }, [])
-  
-  const handleLogout = () => {
-    localStorage.removeItem('user')
-    localStorage.removeItem('isAuthenticated')
-    router.push('/')
+
+  const handleRefresh = async () => {
+    setIsLoading(true)
+    // Simulate data refresh
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    setLastUpdate(new Date())
+    setIsLoading(false)
   }
-  
-  
-  const getStatusText = (status: Investigation['status']) => {
-    switch (status) {
-      case 'em_andamento':
-        return 'Em Andamento'
-      case 'concluida':
-        return 'Concluída'
-      case 'pendente':
-        return 'Pendente'
-    }
+
+  const handleExport = () => {
+    // In a real app, this would generate a PDF or CSV
+    console.log('Exporting dashboard data...')
   }
-  
-  const getAnomalyColor = (score: number) => {
-    if (score >= 0.8) return 'text-red-600 dark:text-red-400'
-    if (score >= 0.6) return 'text-yellow-600 dark:text-yellow-400'
-    return 'text-green-600 dark:text-green-400'
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(value)
   }
-  
-  
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat('pt-BR').format(value)
+  }
+
   return (
     <>
       <LoadingScreen />
-      {/* Sub-header do Dashboard */}
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <Breadcrumbs items={[
-            { label: 'Dashboard' }
-          ]} />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Dashboard de Investigações</h1>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Link href="/pt/chat">
-                <Button>
-                  💬 Chat com IAs
-                </Button>
-              </Link>
+      
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        {/* Header */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <Breadcrumbs items={[{ label: 'Dashboard Analítico' }]} />
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-2">
+                  Dashboard de Transparência
+                </h1>
+              </div>
               
               <div className="flex items-center gap-3">
-                {user && (
-                  <>
-                    <img 
-                      src={user.avatar} 
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {user.name}
-                    </span>
-                  </>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                 >
-                  Sair
-                </button>
+                  <option value="7days">Últimos 7 dias</option>
+                  <option value="30days">Últimos 30 dias</option>
+                  <option value="90days">Últimos 90 dias</option>
+                </select>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
+                
+                <Button onClick={handleExport}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
               </div>
             </div>
+            
+            {/* Last Update */}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Última atualização: {format(lastUpdate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+            </p>
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              title="Investigações Totais"
+              value={formatNumber(totalInvestigations)}
+              change={12}
+              icon={<FileSearch className="w-5 h-5 text-blue-600" />}
+              description="no período selecionado"
+            />
+            
+            <StatCard
+              title="Anomalias Detectadas"
+              value={formatNumber(totalAnomalies)}
+              change={-8}
+              changeType="negative"
+              icon={<AlertTriangle className="w-5 h-5 text-red-600" />}
+              description="redução é positiva"
+            />
+            
+            <StatCard
+              title="Economia Identificada"
+              value={formatCurrency(4570000)}
+              change={25}
+              icon={<DollarSign className="w-5 h-5 text-green-600" />}
+              description="em recursos públicos"
+            />
+            
+            <StatCard
+              title="Precisão do Sistema"
+              value={`${averagePrecision}%`}
+              change={2.3}
+              icon={<TrendingUp className="w-5 h-5 text-purple-600" />}
+              description="média dos agentes"
+            />
+          </div>
+
+          {/* Main Charts */}
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+              <TabsTrigger value="anomalies">Anomalias</TabsTrigger>
+              <TabsTrigger value="agents">Agentes</TabsTrigger>
+              <TabsTrigger value="financial">Financeiro</TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard
+                  title="Atividade ao Longo do Tempo"
+                  description="Investigações, anomalias e relatórios"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <AreaChart
+                    data={timeSeriesData}
+                    areas={[
+                      { dataKey: 'investigacoes', name: 'Investigações', color: '#3b82f6' },
+                      { dataKey: 'anomalias', name: 'Anomalias', color: '#ef4444' },
+                      { dataKey: 'relatorios', name: 'Relatórios', color: '#10b981' }
+                    ]}
+                    xAxisKey="date"
+                    xAxisType="date"
+                    height={300}
+                  />
+                </ChartCard>
+
+                <ChartCard
+                  title="Investigações por Categoria"
+                  description="Distribuição por tipo de processo"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <BarChart
+                    data={categoryData}
+                    bars={[
+                      { dataKey: 'value', name: 'Investigações', color: '#3b82f6' },
+                      { dataKey: 'anomalias', name: 'Anomalias', color: '#ef4444' }
+                    ]}
+                    xAxisKey="name"
+                    height={300}
+                  />
+                </ChartCard>
+              </div>
+
+              <ChartCard
+                title="Tendência de Alertas"
+                description="Evolução dos alertas críticos ao longo do período"
+                onRefresh={handleRefresh}
+                isLoading={isLoading}
+              >
+                <LineChart
+                  data={timeSeriesData}
+                  lines={[
+                    { dataKey: 'alertas', name: 'Alertas Críticos', color: '#f59e0b' }
+                  ]}
+                  xAxisKey="date"
+                  xAxisType="date"
+                  height={250}
+                />
+              </ChartCard>
+            </TabsContent>
+
+            {/* Anomalies Tab */}
+            <TabsContent value="anomalies" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard
+                  title="Tipos de Anomalias"
+                  description="Distribuição por categoria"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <PieChart
+                    data={anomalyTypeData}
+                    height={300}
+                    innerRadius={60}
+                  />
+                </ChartCard>
+
+                <ChartCard
+                  title="Anomalias por Órgão"
+                  description="Top 5 órgãos com mais anomalias"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <BarChart
+                    data={[
+                      { orgao: 'Sec. Saúde', anomalias: 23 },
+                      { orgao: 'Sec. Educação', anomalias: 18 },
+                      { orgao: 'Sec. Obras', anomalias: 15 },
+                      { orgao: 'Sec. Transportes', anomalias: 12 },
+                      { orgao: 'Sec. Cultura', anomalias: 8 }
+                    ]}
+                    bars={[
+                      { dataKey: 'anomalias', name: 'Anomalias', color: '#ef4444' }
+                    ]}
+                    xAxisKey="orgao"
+                    orientation="horizontal"
+                    height={300}
+                  />
+                </ChartCard>
+              </div>
+            </TabsContent>
+
+            {/* Agents Tab */}
+            <TabsContent value="agents" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ChartCard
+                  title="Performance dos Agentes"
+                  description="Investigações concluídas por agente"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <BarChart
+                    data={agentPerformanceData}
+                    bars={[
+                      { dataKey: 'investigacoes', name: 'Investigações', color: '#10b981' },
+                      { dataKey: 'precisao', name: 'Precisão (%)', color: '#8b5cf6' }
+                    ]}
+                    xAxisKey="agent"
+                    height={300}
+                  />
+                </ChartCard>
+
+                <ChartCard
+                  title="Taxa de Precisão por Agente"
+                  description="Percentual de acerto nas análises"
+                  onRefresh={handleRefresh}
+                  isLoading={isLoading}
+                >
+                  <LineChart
+                    data={agentPerformanceData}
+                    lines={[
+                      { dataKey: 'precisao', name: 'Precisão (%)', color: '#8b5cf6' }
+                    ]}
+                    xAxisKey="agent"
+                    height={300}
+                  />
+                </ChartCard>
+              </div>
+
+              {/* Agent Status Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Agentes Ativos</p>
+                        <p className="text-2xl font-bold">17</p>
+                      </div>
+                      <Badge variant="success">Operacional</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Em Investigação</p>
+                        <p className="text-2xl font-bold">5</p>
+                      </div>
+                      <div className="animate-pulse w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Tempo Médio</p>
+                        <p className="text-2xl font-bold">2.3h</p>
+                      </div>
+                      <Activity className="w-5 h-5 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Financial Tab */}
+            <TabsContent value="financial" className="space-y-6">
+              <ChartCard
+                title="Economia Acumulada"
+                description="Recursos públicos economizados através das investigações"
+                onRefresh={handleRefresh}
+                isLoading={isLoading}
+              >
+                <AreaChart
+                  data={timeSeriesData.map((day, index) => ({
+                    ...day,
+                    economia: Math.floor(Math.random() * 500000) + 100000,
+                    economiaAcumulada: (index + 1) * 150000
+                  }))}
+                  areas={[
+                    { dataKey: 'economia', name: 'Economia Diária', color: '#10b981', stackId: 'stack' },
+                    { dataKey: 'economiaAcumulada', name: 'Acumulado', color: '#059669' }
+                  ]}
+                  xAxisKey="date"
+                  xAxisType="date"
+                  yAxisFormatter={formatCurrency}
+                  height={350}
+                />
+              </ChartCard>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top 5 Contratos Suspeitos</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { contrato: 'CTR-2024-001', valor: 2340000, risco: 'alto' },
+                      { contrato: 'CTR-2024-045', valor: 1890000, risco: 'alto' },
+                      { contrato: 'CTR-2024-089', valor: 980000, risco: 'médio' },
+                      { contrato: 'CTR-2024-123', valor: 670000, risco: 'médio' },
+                      { contrato: 'CTR-2024-156', valor: 450000, risco: 'baixo' }
+                    ].map((item) => (
+                      <div key={item.contrato} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{item.contrato}</p>
+                          <p className="text-sm text-gray-600">{formatCurrency(item.valor)}</p>
+                        </div>
+                        <Badge variant={
+                          item.risco === 'alto' ? 'destructive' : 
+                          item.risco === 'médio' ? 'warning' : 
+                          'secondary'
+                        }>
+                          Risco {item.risco}
+                        </Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Resumo Financeiro</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Valor Total Investigado</span>
+                      <span className="font-semibold">{formatCurrency(45700000)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Anomalias Financeiras</span>
+                      <span className="font-semibold">{formatCurrency(8900000)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Taxa de Recuperação</span>
+                      <span className="font-semibold">19.5%</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <span className="font-medium">Economia Total</span>
+                      <span className="font-bold text-green-600">{formatCurrency(4570000)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-      
-      {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-6 py-4">
-        {/* Métricas */}
-        <div className="tour-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-green-600 mb-1">{metrics.totalInvestigacoes}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Total de Investigações</div>
-            </CardContent>
-          </Card>
-          <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-red-600 mb-1">{metrics.anomaliasDetectadas}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Anomalias Detectadas</div>
-            </CardContent>
-          </Card>
-          <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-blue-600 mb-1">{metrics.economiaIdentificada}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Economia Identificada</div>
-            </CardContent>
-          </Card>
-          <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-            <CardContent className="p-6">
-              <div className="text-3xl font-bold text-purple-600 mb-1">{metrics.tempoMedioAnalise}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Tempo Médio de Análise</div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Lista de Investigações */}
-        <Card className="tour-investigations backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
-          <CardHeader>
-            <CardTitle>Investigações Recentes</CardTitle>
-          </CardHeader>
-          
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {investigations.map((investigation) => (
-              <div key={investigation.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">{investigation.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">{investigation.description}</p>
-                  </div>
-                  <Badge 
-                    variant={investigation.status === 'concluida' ? 'success' : 
-                            investigation.status === 'em_andamento' ? 'warning' : 
-                            'secondary'}
-                  >
-                    {getStatusText(investigation.status)}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-4">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Agente: <span className="font-medium text-gray-700 dark:text-gray-300">{investigation.agent}</span>
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Score de Anomalia: 
-                      <span className={`font-bold ml-1 ${getAnomalyColor(investigation.anomalyScore)}`}>
-                        {(investigation.anomalyScore * 100).toFixed(0)}%
-                      </span>
-                    </span>
-                  </div>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {new Date(investigation.date).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-            <Button variant="ghost" className="w-full text-blue-600 dark:text-blue-400 hover:underline">
-              Ver todas as investigações →
-            </Button>
-          </div>
-        </Card>
-      </main>
-      
-      {/* Tour Guide para novos usuários */}
-      <Tour
-        storageKey="dashboard-tour-completed"
-        onComplete={() => toast.info('Tour concluído!', 'Agora você conhece o Dashboard')}
-        steps={[
-          {
-            target: '.tour-metrics',
-            title: 'Métricas em Tempo Real',
-            content: 'Aqui você acompanha as principais métricas do sistema: investigações realizadas, anomalias detectadas e economia identificada.',
-            placement: 'bottom'
-          },
-          {
-            target: '.tour-investigations',
-            title: 'Investigações Recentes',
-            content: 'Veja as últimas análises realizadas pelos nossos agentes de IA, com detalhes sobre anomalias e status de cada investigação.',
-            placement: 'top'
-          },
-          {
-            target: 'a[href="/pt/chat"]',
-            title: 'Chat com IAs',
-            content: 'Clique aqui para conversar diretamente com nossos agentes especializados e fazer perguntas sobre transparência pública.',
-            placement: 'bottom'
-          }
-        ]}
-      />
     </>
   )
 }
