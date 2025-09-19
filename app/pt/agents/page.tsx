@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/ui'
 
 export default function AgentsPage() {
   return (
@@ -22,7 +23,7 @@ export default function AgentsPage() {
         <div className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {agents.map((agent) => (
-              <div key={agent.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <Card key={agent.id} variant="elevated" className="overflow-hidden">
                 <div className="relative h-48 bg-gradient-to-br from-green-400 to-blue-500">
                   <Image
                     src={`/agents/${agent.image}`}
@@ -42,7 +43,7 @@ export default function AgentsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-2">{agent.name}</h3>
                   <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-3">
                     {agent.role.pt}
@@ -60,16 +61,19 @@ export default function AgentsPage() {
                       <ExternalLink className="ml-1 h-3 w-3" />
                     </Link>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
 
 
         {/* Technical Details */}
-        <div className="mt-16 bg-gray-100 dark:bg-gray-800 rounded-xl p-8">
-          <h2 className="text-2xl font-bold mb-6">Como Funcionam</h2>
+        <Card className="mt-16">
+          <CardHeader>
+            <CardTitle className="text-2xl">Como Funcionam</CardTitle>
+          </CardHeader>
+          <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-3">Colaboração em Rede</h3>
@@ -99,7 +103,8 @@ export default function AgentsPage() {
               </ul>
             </div>
           </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Call to Action */}
         <div className="mt-16 text-center">
@@ -112,16 +117,18 @@ export default function AgentsPage() {
             <Link
               href="https://neural-thinker-cidadao-ai-backend.hf.space/docs"
               target="_blank"
-              className="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
             >
-              Acessar API
+              <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-lg">
+                Acessar API
+              </Button>
             </Link>
             <Link
               href="https://github.com/anderson-ufrj/cidadao.ai-backend"
               target="_blank"
-              className="px-6 py-3 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
             >
-              Ver Código Fonte
+              <Button variant="secondary">
+                Ver Código Fonte
+              </Button>
             </Link>
           </div>
         </div>
