@@ -34,8 +34,15 @@ export default function LoginPage() {
     // Mostra notificação de sucesso
     toast.success(`Bem-vindo(a), ${mockUser.name}!`, 'Login realizado com sucesso')
     
-    // Redireciona para dashboard
-    router.push('/pt/dashboard')
+    // Verifica se há URL de redirecionamento salva
+    const redirectUrl = localStorage.getItem('redirectAfterLogin')
+    if (redirectUrl) {
+      localStorage.removeItem('redirectAfterLogin')
+      router.push(redirectUrl)
+    } else {
+      // Redireciona para home
+      router.push('/pt/home')
+    }
   }
   
   const providers = [
