@@ -1,7 +1,7 @@
 # 🚀 ROADMAP - PRÓXIMOS PASSOS
 **Cidadão.AI Frontend**
 
-📅 **Data de Criação**: 19 de Janeiro de 2025 - 16:26 (BRT)  
+📅 **Data de Criação**: 19 de Setembro de 2025 - 16:26 (BRT)  
 👤 **Responsável**: Time de Desenvolvimento Cidadão.AI  
 🎯 **Objetivo**: Transformar o Cidadão.AI na plataforma de transparência pública mais acessível e eficiente do Brasil
 
@@ -18,10 +18,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ## 🎯 Sprints de Desenvolvimento
 
-### 🏃 Sprint 1: Sistema de Design (20-31 Jan 2025)
+### 🏃 Sprint 1: Sistema de Design (22 Set - 3 Out 2025)
 **Objetivo**: Estabelecer fundação visual consistente
 
-#### Semana 1 (20-24 Jan)
+#### Semana 1 (22-26 Set)
 - [ ] **Component Library Base**
   - Criar `/components/ui/` directory structure
   - Button component com variantes (primary, secondary, ghost, danger)
@@ -35,7 +35,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - Padronizar spacing scale (4px base)
   - Estabelecer tipografia hierárquica
 
-#### Semana 2 (27-31 Jan)
+#### Semana 2 (29 Set - 3 Out)
 - [ ] **Componentes Avançados**
   - Modal/Dialog system
   - Dropdown menus
@@ -52,10 +52,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ---
 
-### 🏃 Sprint 2: Sistema de Notificações (3-14 Fev 2025)
+### 🏃 Sprint 2: Sistema de Notificações (6-17 Out 2025)
 **Objetivo**: Comunicação efetiva com usuários
 
-#### Semana 1 (3-7 Fev)
+#### Semana 1 (6-10 Out)
 - [ ] **Backend Integration**
   - WebSocket connection para real-time
   - API endpoints para notificações
@@ -66,7 +66,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - NotificationDropdown com lista
   - NotificationItem component
 
-#### Semana 2 (10-14 Fev)
+#### Semana 2 (13-17 Out)
 - [ ] **Notification Center Page**
   - `/pt/notifications` route
   - Filtros por tipo/data/status
@@ -82,10 +82,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ---
 
-### 🏃 Sprint 3: Perfil & Configurações (17-28 Fev 2025)
+### 🏃 Sprint 3: Perfil & Configurações (20-31 Out 2025)
 **Objetivo**: Personalização e controle do usuário
 
-#### Semana 1 (17-21 Fev)
+#### Semana 1 (20-24 Out)
 - [ ] **Profile Page** (`/pt/profile`)
   - Informações pessoais editáveis
   - Avatar upload
@@ -99,7 +99,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - Sessões ativas
   - Delete account option
 
-#### Semana 2 (24-28 Fev)
+#### Semana 2 (27-31 Out)
 - [ ] **App Settings** (`/pt/settings`)
   - Theme preferences (dark/light/auto)
   - Language selection
@@ -115,10 +115,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ---
 
-### 🏃 Sprint 4: Dashboard 2.0 (3-14 Mar 2025)
+### 🏃 Sprint 4: Dashboard 2.0 (3-14 Nov 2025)
 **Objetivo**: Analytics avançado e visualizações
 
-#### Semana 1 (3-7 Mar)
+#### Semana 1 (3-7 Nov)
 - [ ] **Widget System**
   - Draggable widgets
   - Customizable layouts
@@ -130,7 +130,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - Comparações temporais
   - Heatmaps
 
-#### Semana 2 (10-14 Mar)
+#### Semana 2 (10-14 Nov)
 - [ ] **Advanced Filters**
   - Date range picker
   - Multi-select filters
@@ -147,10 +147,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ---
 
-### 🏃 Sprint 5: Acessibilidade & Mobile (17-28 Mar 2025)
+### 🏃 Sprint 5: Acessibilidade & Mobile (17-28 Nov 2025)
 **Objetivo**: Inclusão e responsividade total
 
-#### Semana 1 (17-21 Mar)
+#### Semana 1 (17-21 Nov)
 - [ ] **Accessibility Audit**
   - WCAG 2.1 AA compliance
   - Screen reader testing
@@ -163,7 +163,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - Color blind friendly palette
   - Text size controls
 
-#### Semana 2 (24-28 Mar)
+#### Semana 2 (24-28 Nov)
 - [ ] **Mobile Optimization**
   - Touch-friendly interfaces
   - Gesture support
@@ -181,10 +181,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 
 ---
 
-### 🏃 Sprint 6: Help Center & Onboarding (31 Mar - 11 Abr 2025)
+### 🏃 Sprint 6: Help Center & Onboarding (1-12 Dez 2025)
 **Objetivo**: Suporte e educação do usuário
 
-#### Semana 1 (31 Mar - 4 Abr)
+#### Semana 1 (1-5 Dez)
 - [ ] **Help Center** (`/pt/help`)
   - FAQ searchable
   - Video tutorials
@@ -196,7 +196,7 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
   - Tooltips system
   - Interactive guides
 
-#### Semana 2 (7-11 Abr)
+#### Semana 2 (8-12 Dez)
 - [ ] **Onboarding Flow**
   - Welcome wizard
   - Feature tours
@@ -307,10 +307,10 @@ O Cidadão.AI está em fase de consolidação da interface após implementação
 ## 🎉 Marcos Importantes
 
 ### 🏆 Milestones
-- **28 Fev**: Component Library v1.0
-- **31 Mar**: Dashboard 2.0 Launch
-- **30 Abr**: Mobile App 100% Ready
-- **15 Mai**: Full Platform Launch
+- **31 Out**: Component Library v1.0
+- **28 Nov**: Dashboard 2.0 Launch
+- **12 Dez**: Mobile App 100% Ready
+- **19 Dez**: Full Platform Launch
 
 ### 🎊 Celebrações
 - Sprint completado = Team lunch
@@ -327,7 +327,7 @@ Este roadmap é um documento vivo e deve ser atualizado conforme o projeto evolu
 
 ---
 
-**Última Atualização**: 19/01/2025 16:26  
-**Próxima Revisão**: 26/01/2025
+**Última Atualização**: 19/09/2025 16:26  
+**Próxima Revisão**: 26/09/2025
 
 🇧🇷 **Feito com amor para o Brasil** 🇧🇷
