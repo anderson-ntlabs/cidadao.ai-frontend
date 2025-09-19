@@ -103,3 +103,6 @@ logs/
 *.log
 debug/
 *.debug
+
+*storybook.log
+storybook-static
