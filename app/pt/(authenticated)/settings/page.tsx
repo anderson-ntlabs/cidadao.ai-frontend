@@ -3,33 +3,33 @@
 import { useState, useEffect } from 'react'
 import { 
   Settings, Bell, Moon, Sun, Globe, Shield, 
-  Database, Paintbrush, Smartphone, Volume2
+  Database, Paintbrush, Smartphone, Volume2, Download, Upload,
+  Zap, Eye, EyeOff, Sliders, RefreshCw, Save, AlertTriangle
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui'
 import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { useNotificationStore } from '@/store/notification-store'
+import { useSettingsStore } from '@/hooks/use-settings-store'
+import { toast } from '@/hooks/use-toast'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+  const [importJson, setImportJson] = useState('')
+  const [showImport, setShowImport] = useState(false)
   
   const { preferences, updatePreferences } = useNotificationStore()
+  const { settings, updateSettings, resetSettings, exportSettings, importSettings } = useSettingsStore()
   
   useEffect(() => {
     const userData = localStorage.getItem('user')
     if (userData) {
       setUser(JSON.parse(userData))
     }
-    
-    // Get current theme
-    const currentTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system'
-    setTheme(currentTheme)
   }, [])
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+    updateSettings({ theme: newTheme })
     
     // Apply theme immediately
     const root = window.document.documentElement
@@ -40,6 +40,35 @@ export default function SettingsPage() {
       root.classList.add(systemTheme)
     } else {
       root.classList.add(newTheme)
+    }
+  }
+
+  const handleExportSettings = () => {
+    const settingsJson = exportSettings()
+    const blob = new Blob([settingsJson], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'cidadao-ai-settings.json'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Configurações exportadas!', 'Arquivo baixado com sucesso.')
+  }
+
+  const handleImportSettings = () => {
+    if (importSettings(importJson)) {
+      setImportJson('')
+      setShowImport(false)
+      toast.success('Configurações importadas!', 'Suas preferências foram atualizadas.')
+    } else {
+      toast.error('Erro na importação', 'Arquivo de configurações inválido.')
+    }
+  }
+
+  const handleResetSettings = () => {
+    if (confirm('Tem certeza que deseja restaurar todas as configurações padrão?')) {
+      resetSettings()
+      toast.success('Configurações restauradas!', 'Todas as preferências foram redefinidas.')
     }
   }
 
@@ -66,7 +95,7 @@ export default function SettingsPage() {
 
         <div className="max-w-4xl mx-auto px-6 py-8">
           <Tabs defaultValue="appearance" className="space-y-6">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
+            <TabsList className="grid grid-cols-2 md:grid-cols-6 w-full">
               <TabsTrigger value="appearance" className="flex items-center gap-2">
                 <Paintbrush className="w-4 h-4" />
                 Aparência
@@ -78,6 +107,14 @@ export default function SettingsPage() {
               <TabsTrigger value="privacy" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 Privacidade
+              </TabsTrigger>
+              <TabsTrigger value="performance" className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Performance
+              </TabsTrigger>
+              <TabsTrigger value="advanced" className="flex items-center gap-2">
+                <Sliders className="w-4 h-4" />
+                Avançado
               </TabsTrigger>
               <TabsTrigger value="system" className="flex items-center gap-2">
                 <Database className="w-4 h-4" />
@@ -99,7 +136,7 @@ export default function SettingsPage() {
                     <button
                       onClick={() => handleThemeChange('light')}
                       className={`p-4 border rounded-lg transition-all ${
-                        theme === 'light' 
+                        settings.theme === 'light' 
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                           : 'border-gray-200 dark:border-gray-700'
                       }`}
@@ -112,7 +149,7 @@ export default function SettingsPage() {
                     <button
                       onClick={() => handleThemeChange('dark')}
                       className={`p-4 border rounded-lg transition-all ${
-                        theme === 'dark' 
+                        settings.theme === 'dark' 
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                           : 'border-gray-200 dark:border-gray-700'
                       }`}
@@ -125,7 +162,7 @@ export default function SettingsPage() {
                     <button
                       onClick={() => handleThemeChange('system')}
                       className={`p-4 border rounded-lg transition-all ${
-                        theme === 'system' 
+                        settings.theme === 'system' 
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                           : 'border-gray-200 dark:border-gray-700'
                       }`}
@@ -134,6 +171,50 @@ export default function SettingsPage() {
                       <p className="font-medium">Sistema</p>
                       <p className="text-sm text-gray-500">Segue o sistema</p>
                     </button>
+                  </div>
+                  
+                  <div className="space-y-4 mt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Tamanho da Fonte</h4>
+                        <p className="text-sm text-gray-500">Ajuste o tamanho do texto da interface</p>
+                      </div>
+                      <select 
+                        value={settings.fontSize} 
+                        onChange={(e) => updateSettings({ fontSize: e.target.value as any })}
+                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                      >
+                        <option value="small">Pequeno</option>
+                        <option value="medium">Médio</option>
+                        <option value="large">Grande</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Movimento Reduzido</h4>
+                        <p className="text-sm text-gray-500">Diminui animações para melhor acessibilidade</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.reducedMotion}
+                        onChange={(e) => updateSettings({ reducedMotion: e.target.checked })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Modo Compacto</h4>
+                        <p className="text-sm text-gray-500">Interface mais densa com menos espaçamento</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.compactMode}
+                        onChange={(e) => updateSettings({ compactMode: e.target.checked })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
