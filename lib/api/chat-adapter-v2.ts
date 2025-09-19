@@ -15,11 +15,13 @@ export interface ChatMessageRequest {
 
 export interface ChatMessageResponse {
   session_id: string;
-  message_id: string;
+  message_id?: string;
   agent_id: string;
   agent_name: string;
-  content: string;
-  timestamp: string;
+  content?: string;
+  message?: string;
+  confidence?: number;
+  timestamp?: string;
   metadata?: {
     intent?: string;
     confidence?: number;
@@ -27,8 +29,13 @@ export interface ChatMessageResponse {
     data_source?: string;
     total_found?: number;
     anomalies_detected?: number;
+    intent_type?: string;
+    processing_time?: number;
+    is_demo_mode?: boolean;
+    timestamp?: string;
   };
   suggested_actions?: string[];
+  requires_input?: any;
 }
 
 /**
