@@ -207,6 +207,7 @@ export function formatAgentName(agentId: string): string {
     'ayrton': 'Ayrton Senna',
     'machado': 'Machado de Assis',
     'dandara': 'Dandara',
+    'drummond': 'Carlos Drummond de Andrade',
   };
   
   return agentNames[agentId] || agentId;

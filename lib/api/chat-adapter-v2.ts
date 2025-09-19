@@ -46,13 +46,8 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
     // Parse the user query to determine data source and filters
     const parsed = parseUserQuery(request.message);
     
-    // Use the /api/investigate endpoint that's available in the HuggingFace deployment
-    const response = await api.post<any>('/api/investigate', {
-      query: parsed.searchTerm,
-      data_source: parsed.dataSource,
-      filters: parsed.filters,
-      max_results: 100
-    });
+    // Use the actual chat endpoint
+    const response = await api.post<ChatMessageResponse>('/api/v1/chat/message', payload);
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');
@@ -60,59 +55,17 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
     const data = response.data;
 
-    // Convert investigate response to ChatResponse format
-    const queryDescription = formatParsedQuery(parsed);
-    let responseMessage = `🔍 **${queryDescription}**\n\n`;
-    
-    if (data.results && data.results.length > 0) {
-      responseMessage += `Encontrei ${data.total_found} resultados:\n\n`;
-      
-      // Show first 3 results
-      data.results.slice(0, 3).forEach((result: any, idx: number) => {
-        if (data.data_source === 'servidores' && result.nome) {
-          responseMessage += `**${idx + 1}. ${result.nome}**\n`;
-          responseMessage += `- Órgão: ${result.orgao}\n`;
-          responseMessage += `- Cargo: ${result.cargo}\n`;
-          if (result.remuneracao?.total_liquido) {
-            responseMessage += `- Remuneração: R$ ${result.remuneracao.total_liquido.toLocaleString('pt-BR')}\n`;
-          }
-          responseMessage += '\n';
-        } else {
-          // Generic result display
-          responseMessage += `**${idx + 1}. Resultado**\n`;
-          responseMessage += JSON.stringify(result, null, 2) + '\n\n';
-        }
-      });
-      
-      if (data.total_found > 3) {
-        responseMessage += `... e ${data.total_found - 3} outros resultados.\n`;
-      }
-    } else {
-      responseMessage = `Não encontrei resultados para "${request.message}" na base de dados de ${data.data_source}.`;
-    }
-    
-    if (data.anomalies_detected > 0) {
-      responseMessage += `\n⚠️ **Anomalias detectadas:** ${data.anomalies_detected}`;
-    }
-
+    // Return the chat response directly
     return {
-      session_id: request.session_id || `session_${Date.now()}`,
-      agent_id: 'zumbi',
-      agent_name: 'Zumbi dos Palmares',
-      message: responseMessage,
-      confidence: data.confidence_score || 0.8,
-      suggested_actions: [
-        'Buscar por outro nome',
-        'Filtrar por órgão específico',
-        'Ver contratos relacionados',
-        'Analisar despesas do órgão'
-      ],
+      session_id: data.session_id,
+      agent_id: data.agent_id,
+      agent_name: data.agent_name,
+      message: data.content,
+      confidence: data.metadata?.confidence || 0.9,
+      suggested_actions: data.suggested_actions || [],
       metadata: {
-        data_source: data.data_source,
-        total_found: data.total_found,
-        anomalies_detected: data.anomalies_detected,
-        processing_time_ms: data.processing_time_ms,
-        timestamp: new Date().toISOString(),
+        ...data.metadata,
+        timestamp: data.timestamp || new Date().toISOString(),
       },
     };
   } catch (error: any) {
@@ -122,7 +75,7 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
       response: error.response,
       status: error.response?.status,
       data: error.response?.data,
-      url: `${API_BASE_URL}/api/investigate`,
+      url: `${API_BASE_URL}/api/v1/chat/message`,
       headers: error.config?.headers,
       method: error.config?.method,
       payload: error.config?.data
@@ -149,7 +102,7 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
 **Erro:** ${errorMessage}
 
-**URL tentada:** ${API_BASE_URL}/api/investigate
+**URL tentada:** ${API_BASE_URL}/api/v1/chat/message
 
 Por favor, tente novamente ou reformule sua pergunta.`,
       confidence: 0,
@@ -334,6 +287,15 @@ export async function getAvailableAgents() {
  */
 function getMockAgents() {
   return [
+    {
+      id: 'drummond',
+      name: 'Carlos Drummond de Andrade',
+      role: 'Assistente Conversacional',
+      status: 'available' as const,
+      specialty: 'Conversação natural e orientação',
+      type: 'conversational' as const,
+      description: 'Poeta e comunicador, sua voz amiga no Cidadão.AI',
+    },
     {
       id: 'abaporu',
       name: 'Abaporu',

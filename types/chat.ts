@@ -1,5 +1,28 @@
 // Chat-related type definitions matching the backend API
 
+// Intent types matching the backend
+export enum IntentType {
+  // Task-specific intents
+  INVESTIGATE = "investigate",
+  ANALYZE = "analyze",
+  REPORT = "report",
+  STATUS = "status",
+  
+  // Conversational intents
+  GREETING = "greeting",
+  CONVERSATION = "conversation",
+  HELP_REQUEST = "help_request",
+  ABOUT_SYSTEM = "about_system",
+  SMALLTALK = "smalltalk",
+  THANKS = "thanks",
+  GOODBYE = "goodbye",
+  
+  // General
+  QUESTION = "question",
+  HELP = "help",
+  UNKNOWN = "unknown"
+}
+
 export interface ChatRequest {
   message: string;
   session_id?: string;
@@ -60,9 +83,11 @@ export interface CursorPaginationResponse {
 export interface AgentInfo {
   id: string;
   name: string;
-  type: string;
+  role: string;
+  type: 'master' | 'investigator' | 'analyst' | 'reporter' | 'conversational' | string;
   description: string;
-  capabilities: string[];
+  specialty: string;
+  capabilities?: string[];
   status: 'available' | 'busy' | 'offline';
 }
 
