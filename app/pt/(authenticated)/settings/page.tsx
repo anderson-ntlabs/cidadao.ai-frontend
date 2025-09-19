@@ -238,8 +238,10 @@ export default function SettingsPage() {
                       </div>
                       <input 
                         type="checkbox" 
-                        checked={preferences.investigations}
-                        onChange={(e) => updatePreferences({ investigations: e.target.checked })}
+                        checked={settings.notifications.investigations}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, investigations: e.target.checked }
+                        })}
                         className="w-4 h-4 text-green-600 rounded"
                       />
                     </div>
@@ -251,8 +253,10 @@ export default function SettingsPage() {
                       </div>
                       <input 
                         type="checkbox" 
-                        checked={preferences.anomalies}
-                        onChange={(e) => updatePreferences({ anomalies: e.target.checked })}
+                        checked={settings.notifications.anomalies}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, anomalies: e.target.checked }
+                        })}
                         className="w-4 h-4 text-green-600 rounded"
                       />
                     </div>
@@ -264,8 +268,10 @@ export default function SettingsPage() {
                       </div>
                       <input 
                         type="checkbox" 
-                        checked={preferences.reports}
-                        onChange={(e) => updatePreferences({ reports: e.target.checked })}
+                        checked={settings.notifications.reports}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, reports: e.target.checked }
+                        })}
                         className="w-4 h-4 text-green-600 rounded"
                       />
                     </div>
@@ -277,24 +283,79 @@ export default function SettingsPage() {
                       </div>
                       <input 
                         type="checkbox" 
-                        checked={preferences.system}
-                        onChange={(e) => updatePreferences({ system: e.target.checked })}
+                        checked={settings.notifications.system}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, system: e.target.checked }
+                        })}
                         className="w-4 h-4 text-green-600 rounded"
                       />
                     </div>
                   </div>
                   
-                  <div className="pt-4 border-t">
-                    <h4 className="font-medium mb-3">Som das Notificações</h4>
-                    <div className="flex items-center gap-3">
-                      <Volume2 className="w-5 h-5 text-gray-400" />
+                  <div className="pt-4 border-t space-y-4">
+                    <h4 className="font-medium">Configurações Avançadas</h4>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Som das Notificações</h4>
+                        <p className="text-sm text-gray-500">Reproduzir som ao receber notificações</p>
+                      </div>
                       <input 
                         type="checkbox" 
-                        checked={preferences.sound}
-                        onChange={(e) => updatePreferences({ sound: e.target.checked })}
+                        checked={settings.notifications.sound}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, sound: e.target.checked }
+                        })}
                         className="w-4 h-4 text-green-600 rounded"
                       />
-                      <label className="text-sm">Reproduzir som ao receber notificações</label>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Notificações Desktop</h4>
+                        <p className="text-sm text-gray-500">Mostrar notificações do navegador</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.notifications.desktop}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, desktop: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Email</h4>
+                        <p className="text-sm text-gray-500">Receber notificações por email</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.notifications.email}
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, email: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Frequência</h4>
+                        <p className="text-sm text-gray-500">Com que frequência receber notificações</p>
+                      </div>
+                      <select 
+                        value={settings.notifications.frequency} 
+                        onChange={(e) => updateSettings({ 
+                          notifications: { ...settings.notifications, frequency: e.target.value as any }
+                        })}
+                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                      >
+                        <option value="immediate">Imediato</option>
+                        <option value="hourly">A cada hora</option>
+                        <option value="daily">Diário</option>
+                      </select>
                     </div>
                   </div>
                 </CardContent>
@@ -310,27 +371,340 @@ export default function SettingsPage() {
                     Privacidade e Segurança
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Perfil Público</h4>
-                      <p className="text-sm text-gray-500">Permitir que outros usuários vejam seu perfil</p>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Perfil Público</h4>
+                        <p className="text-sm text-gray-500">Permitir que outros usuários vejam seu perfil</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.privacy.publicProfile}
+                        onChange={(e) => updateSettings({ 
+                          privacy: { ...settings.privacy, publicProfile: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded" 
+                      />
                     </div>
-                    <input type="checkbox" className="w-4 h-4 text-green-600 rounded" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Histórico de Atividades</h4>
-                      <p className="text-sm text-gray-500">Salvar histórico de conversas e investigações</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Histórico de Atividades</h4>
+                        <p className="text-sm text-gray-500">Salvar histórico de conversas e investigações</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.privacy.activityHistory}
+                        onChange={(e) => updateSettings({ 
+                          privacy: { ...settings.privacy, activityHistory: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded" 
+                      />
                     </div>
-                    <input type="checkbox" defaultChecked className="w-4 h-4 text-green-600 rounded" />
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Opt-out de Analytics</h4>
+                        <p className="text-sm text-gray-500">Desativar coleta de dados de uso</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.privacy.analyticsOptOut}
+                        onChange={(e) => updateSettings({ 
+                          privacy: { ...settings.privacy, analyticsOptOut: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded" 
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Compartilhar Dados de Uso</h4>
+                        <p className="text-sm text-gray-500">Ajudar a melhorar o sistema compartilhando dados anônimos</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.privacy.shareUsageData}
+                        onChange={(e) => updateSettings({ 
+                          privacy: { ...settings.privacy, shareUsageData: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded" 
+                      />
+                    </div>
                   </div>
                   
                   <div className="pt-4 border-t">
-                    <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
-                      Limpar Todos os Dados
-                    </Button>
+                    <h4 className="font-medium mb-4">Gestão de Dados</h4>
+                    <div className="space-y-3">
+                      <Button variant="outline" className="w-full text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                        <Download className="w-4 h-4 mr-2" />
+                        Baixar Meus Dados
+                      </Button>
+                      <Button variant="outline" className="w-full text-yellow-600 border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
+                        <EyeOff className="w-4 h-4 mr-2" />
+                        Tornar Perfil Privado
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        Excluir Conta
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Performance Settings */}
+            <TabsContent value="performance" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Configurações de Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Animações da Interface</h4>
+                        <p className="text-sm text-gray-500">Habilita transições e animações visuais</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.performance.enableAnimations}
+                        onChange={(e) => updateSettings({ 
+                          performance: { ...settings.performance, enableAnimations: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Efeitos Sonoros</h4>
+                        <p className="text-sm text-gray-500">Sons de feedback para ações da interface</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.performance.enableSounds}
+                        onChange={(e) => updateSettings({ 
+                          performance: { ...settings.performance, enableSounds: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Salvamento Automático</h4>
+                        <p className="text-sm text-gray-500">Salva automaticamente configurações e rascunhos</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.performance.autoSave}
+                        onChange={(e) => updateSettings({ 
+                          performance: { ...settings.performance, autoSave: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Tamanho do Cache</h4>
+                        <p className="text-sm text-gray-500">Quantidade de dados armazenados localmente</p>
+                      </div>
+                      <select 
+                        value={settings.performance.cacheSize} 
+                        onChange={(e) => updateSettings({ 
+                          performance: { ...settings.performance, cacheSize: e.target.value as any }
+                        })}
+                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                      >
+                        <option value="small">Pequeno (50MB)</option>
+                        <option value="medium">Médio (200MB)</option>
+                        <option value="large">Grande (500MB)</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <h4 className="font-medium mb-4">Estatísticas de Performance</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="font-medium text-gray-600 dark:text-gray-400">Cache Usado</div>
+                        <div className="text-lg font-bold">127 MB</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="font-medium text-gray-600 dark:text-gray-400">Tempo de Carregamento</div>
+                        <div className="text-lg font-bold">0.8s</div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                        <div className="font-medium text-gray-600 dark:text-gray-400">Dados Salvos</div>
+                        <div className="text-lg font-bold">2.4 MB</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 space-y-2">
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Limpar Cache
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Save className="w-4 h-4 mr-2" />
+                        Otimizar Performance
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Advanced Settings */}
+            <TabsContent value="advanced" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sliders className="w-5 h-5" />
+                    Configurações Avançadas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
+                          Configurações Experimentais
+                        </h4>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                          Estas opções podem afetar a estabilidade do sistema. Use com cuidado.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Recursos Beta</h4>
+                        <p className="text-sm text-gray-500">Acesso antecipado a novos recursos</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.advanced.betaFeatures}
+                        onChange={(e) => updateSettings({ 
+                          advanced: { ...settings.advanced, betaFeatures: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Modo Desenvolvedor</h4>
+                        <p className="text-sm text-gray-500">Mostra informações técnicas avançadas</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.advanced.developerMode}
+                        onChange={(e) => updateSettings({ 
+                          advanced: { ...settings.advanced, developerMode: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Debug Mode</h4>
+                        <p className="text-sm text-gray-500">Logs detalhados no console do navegador</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.advanced.debugMode}
+                        onChange={(e) => updateSettings({ 
+                          advanced: { ...settings.advanced, debugMode: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Interface Experimental</h4>
+                        <p className="text-sm text-gray-500">Testa novos designs e layouts</p>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={settings.advanced.experimentalUI}
+                        onChange={(e) => updateSettings({ 
+                          advanced: { ...settings.advanced, experimentalUI: e.target.checked }
+                        })}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <h4 className="font-medium mb-4">Gerenciamento de Dados</h4>
+                    <div className="space-y-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button 
+                          variant="outline" 
+                          onClick={handleExportSettings}
+                          className="flex-1"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Exportar Configurações
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowImport(!showImport)}
+                          className="flex-1"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Importar Configurações
+                        </Button>
+                      </div>
+                      
+                      {showImport && (
+                        <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <textarea
+                            value={importJson}
+                            onChange={(e) => setImportJson(e.target.value)}
+                            placeholder="Cole aqui o JSON das configurações..."
+                            className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg resize-none bg-white dark:bg-gray-700"
+                          />
+                          <div className="flex gap-2">
+                            <Button onClick={handleImportSettings} size="sm">
+                              Importar
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                setShowImport(false)
+                                setImportJson('')
+                              }}
+                            >
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <Button 
+                        variant="outline" 
+                        onClick={handleResetSettings}
+                        className="w-full text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Restaurar Configurações Padrão
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
