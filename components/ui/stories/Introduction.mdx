@@ -1,0 +1,76 @@
+import { Meta } from '@storybook/addon-docs'
+
+<Meta title="Introduction" />
+
+# Cidadão.AI Component Library
+
+Bem-vindo à documentação da Component Library do Cidadão.AI! 🚀
+
+## 🎯 Sobre
+
+Esta é uma coleção de componentes React reutilizáveis construída com:
+- **Next.js 15** - Framework React com App Router
+- **TypeScript** - Type safety em todo o projeto
+- **Tailwind CSS** - Estilização utility-first
+- **class-variance-authority** - Gerenciamento de variantes de componentes
+
+## 🎨 Design System
+
+Nossa biblioteca segue os princípios de design do Cidadão.AI:
+
+### Cores
+- **Primary**: Verde brasileiro (#10b981)
+- **Secondary**: Tons de cinza
+- **Accent**: Azul (#3b82f6)
+- **Success**: Verde
+- **Warning**: Amarelo
+- **Destructive**: Vermelho
+
+### Componentes Disponíveis
+
+1. **Button** - Botões com múltiplas variantes e tamanhos
+2. **Input** - Campos de entrada com estados e validação
+3. **Card** - Containers para conteúdo estruturado
+4. **Badge** - Indicadores de status e categorias
+5. **Modal** - Diálogos modais responsivos
+6. **Dropdown** - Menus dropdown customizáveis
+7. **Tabs** - Navegação em abas
+8. **Skeleton** - Loaders para conteúdo
+9. **Toast** - Notificações não intrusivas
+
+## 🚀 Como Usar
+
+```tsx
+import { Button, Card, Badge } from '@/components/ui'
+
+function MyComponent() {
+  return (
+    <Card>
+      <Button variant="primary">
+        Click me
+      </Button>
+      <Badge variant="success">Active</Badge>
+    </Card>
+  )
+}
+```
+
+## 📚 Documentação
+
+Cada componente possui:
+- **Props documentadas** com TypeScript
+- **Variantes visuais** para diferentes contextos
+- **Exemplos interativos** no Storybook
+- **Acessibilidade** integrada
+
+## 🤝 Contribuindo
+
+Para adicionar novos componentes:
+1. Crie o componente em `/components/ui/`
+2. Adicione types e props interface
+3. Crie stories em `/components/ui/stories/`
+4. Documente todas as variantes
+
+---
+
+Desenvolvido com ❤️ para o Cidadão.AI
