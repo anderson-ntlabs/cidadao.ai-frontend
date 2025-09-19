@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import { ThemeToggle } from './theme-toggle'
+import { Button, NotificationDropdown } from '@/components/ui'
 
 interface HeaderProps {
   locale: 'pt' | 'en'
@@ -100,6 +101,11 @@ export function Header({ locale }: HeaderProps) {
                 EN
               </Link>
               
+              {/* Notifications */}
+              <div className="ml-2">
+                <NotificationDropdown locale={locale} />
+              </div>
+              
               {/* Theme Toggle */}
               <div className="ml-2">
                 <ThemeToggle />
@@ -118,12 +124,14 @@ export function Header({ locale }: HeaderProps) {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="md:hidden"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          </Button>
         </div>
 
         {/* Mobile Navigation */}
