@@ -9,11 +9,7 @@ import { agents } from '@/data/agents'
 import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-store'
 import { MarkdownMessage } from '@/components/markdown-message'
 import { toast } from '@/hooks/use-toast'
-import { formatAgentName } from '@/lib/api/chat.service'
-import { testDirectAPI, testAPIHealth } from '@/lib/api/chat-direct'
-import { checkAPIEndpoints } from '@/lib/api/check-api'
-import { testBackendConnection } from '@/lib/api/test-backend'
-import { findBackendURL } from '@/lib/api/find-backend-url'
+import { Send, User, Bot, Sparkles, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function ChatPage() {
   const router = useRouter()
@@ -92,8 +88,12 @@ export default function ChatPage() {
     const message = inputMessage
     setInputMessage('')
     
-    // Use streaming for better UX
-    await sendMessage(message, { streaming: true })
+    // Adjust textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
+    
+    await sendMessage(message, { streaming: false })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -103,30 +103,43 @@ export default function ChatPage() {
     }
   }
 
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`
+    }
+  }
+
   if (isAuthLoading) {
     return <LoadingScreen />
   }
 
+  // Get Drummond agent data
+  const drummondAgent = agents.find(a => a.id === 'drummond')
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <LoadingScreen />
-      {/* Sub-header */}
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
+      {/* Professional Header */}
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <Breadcrumbs items={[
-            { label: 'Chat com IAs' }
+            { label: 'Assistente Virtual' }
           ]} />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Chat com IAs</h1>
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                Assistente Virtual Cidadão.AI
+              </h1>
             </div>
             
             <div className="flex items-center gap-4">
               <Link 
                 href="/pt/dashboard" 
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium flex items-center gap-2 shadow-lg"
               >
-                📊 Dashboard
+                <Sparkles className="w-4 h-4" />
+                Dashboard
               </Link>
               
               <div className="flex items-center gap-3">
@@ -135,48 +148,51 @@ export default function ChatPage() {
                     <img 
                       src={user.avatar} 
                       alt={user.name}
-                      className="w-8 h-8 rounded-full"
+                      className="w-10 h-10 rounded-full ring-2 ring-white shadow-md"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {user.name}
-                    </span>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {user.name}
+                      </p>
+                      <button
+                        onClick={handleLogout}
+                        className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                      >
+                        Sair
+                      </button>
+                    </div>
                   </>
                 )}
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
-                >
-                  Sair
-                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
       
-      {/* Chat Container - Using flex-1 to fill available space */}
-      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pb-4">
-        {/* Active Agents Indicator */}
+      {/* Chat Container */}
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 pb-4">
+        {/* Investigation Status Banner */}
         {hasActiveAgents && (
-          <div className="bg-green-50/80 dark:bg-green-900/30 backdrop-blur-sm border border-green-200/50 dark:border-green-700/50 rounded-t-lg px-6 py-3 mx-4 mt-4">
+          <div className="mt-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 backdrop-blur-sm border border-emerald-200/50 dark:border-emerald-700/50 rounded-xl px-6 py-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="animate-pulse">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="relative">
+                <div className="animate-ping absolute inset-0 w-3 h-3 bg-emerald-400 rounded-full opacity-75"></div>
+                <div className="relative w-3 h-3 bg-emerald-500 rounded-full"></div>
               </div>
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                Investigação em andamento:
+              <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                Investigação em andamento
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 ml-auto">
                 {activeAgents.filter(agent => agent.status === 'busy').map(agent => {
                   const agentData = agents.find(a => a.id === agent.id)
                   return agentData ? (
-                    <div key={agent.id} className="flex items-center gap-1 bg-white/50 dark:bg-gray-800/50 px-2 py-1 rounded-full">
+                    <div key={agent.id} className="flex items-center gap-2 bg-white/70 dark:bg-gray-800/70 px-3 py-1.5 rounded-full shadow-sm">
                       <img 
                         src={`/agents/${agentData.image}`} 
                         alt={agent.name}
                         className="w-5 h-5 rounded-full"
                       />
-                      <span className="text-xs font-medium">{agent.name}</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{agent.name}</span>
                     </div>
                   ) : null
                 })}
@@ -185,213 +201,197 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Chat Area - Fills remaining space with proper min-height */}
-        <div className={`flex-1 flex flex-col bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-lg overflow-hidden mx-4 ${hasActiveAgents ? '' : 'mt-4'} ${hasActiveAgents ? 'rounded-b-lg' : 'rounded-lg'}`} style={{ minHeight: '400px' }}>
-          {/* Agent Header */}
-          <div className="px-6 py-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+        {/* Main Chat Area */}
+        <div className={`flex-1 flex flex-col bg-white dark:bg-gray-900 shadow-xl rounded-2xl overflow-hidden ${hasActiveAgents ? 'mt-4' : 'mt-8'}`} style={{ minHeight: '500px' }}>
+          {/* Agent Header - Featuring Drummond */}
+          <div className="px-6 py-5 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img 
-                  src="/agents/abaporu.png" 
-                  alt="Abaporu"
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <img 
+                    src={`/agents/${drummondAgent?.image || 'drummond.png'}`} 
+                    alt="Carlos Drummond de Andrade"
+                    className="w-14 h-14 rounded-full object-cover ring-4 ring-white/20"
+                  />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+                </div>
                 <div>
-                  <h3 className="font-bold text-lg">Abaporu</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Orquestrador Central do Cidadão.AI
+                  <h3 className="font-bold text-xl">Carlos Drummond de Andrade</h3>
+                  <p className="text-sm text-green-50">
+                    Assistente Conversacional • Poeta Digital do Cidadão.AI
                   </p>
                 </div>
               </div>
-              {currentInvestigation && (
-                <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  Coordenando investigação...
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-sm bg-white/20 px-3 py-1.5 rounded-full">
+                <CheckCircle className="w-4 h-4" />
+                <span>Online</span>
+              </div>
             </div>
           </div>
 
-          {/* Messages - Scrollable area */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 min-h-0">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-6 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
             {messages.length === 0 && (
-              <div className="text-center py-8">
-                <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-6 py-4 max-w-2xl mx-auto">
-                  <h3 className="font-bold text-lg mb-2">Olá! Sou o Abaporu 🌿</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Sou o orquestrador central do Cidadão.AI. Estou aqui para ajudá-lo a navegar pelos dados de transparência pública. 
-                    Posso responder suas perguntas e, quando necessário, coordenar nossos agentes especializados para investigações aprofundadas.
+              <div className="flex justify-center items-center h-full">
+                <div className="text-center max-w-2xl mx-auto">
+                  <div className="mb-6">
+                    <img 
+                      src={`/agents/${drummondAgent?.image || 'drummond.png'}`} 
+                      alt="Carlos Drummond de Andrade"
+                      className="w-24 h-24 rounded-full mx-auto shadow-lg"
+                    />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3">
+                    Olá! Sou Carlos Drummond de Andrade 🎭
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-4">
+                    Poeta mineiro e seu assistente digital no Cidadão.AI. Como disse uma vez, 
+                    <em className="italic">"No meio do caminho tinha uma pedra"</em>, mas aqui 
+                    transformamos pedras em pontes para a transparência pública.
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400 mt-2">
-                    Como posso ajudar você hoje?
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
+                    Posso conversar, esclarecer dúvidas e, quando necessário, acionar nossos 
+                    agentes especializados para investigações profundas. Como posso ajudá-lo hoje?
                   </p>
-                </div>
-              </div>
-            )}
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[70%] rounded-lg px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-green-600/90 text-white backdrop-blur-sm'
-                      : 'bg-gray-100/90 dark:bg-gray-700/90 text-gray-800 dark:text-gray-200 backdrop-blur-sm'
-                  }`}
-                >
-                  {message.role === 'assistant' && message.agent_name && (
-                    <div className="flex items-center gap-2 mb-1">
-                      <img 
-                        src={`/agents/${agents.find(a => a.name === message.agent_name)?.image || 'abaporu.png'}`} 
-                        alt={message.agent_name || 'Agent'}
-                        className="w-6 h-6 rounded-full"
-                      />
-                      <span className="text-sm font-medium">
-                        {message.agent_name}
-                      </span>
-                    </div>
-                  )}
-                  {message.role === 'assistant' ? (
-                    <MarkdownMessage content={message.content || ''} />
-                  ) : (
-                    <p className="whitespace-pre-wrap">{message.content || ''}</p>
-                  )}
-                  <p className="text-xs opacity-70 mt-1">
-                    {new Date(message.timestamp).toLocaleTimeString('pt-BR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {(isLoading || agentTyping) && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100/90 dark:bg-gray-700/90 backdrop-blur-sm rounded-lg px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-pulse">💭</div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {agentTyping ? 'Agente está digitando...' : 'Processando...'}
-                    </span>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {suggestedActions.slice(0, 3).map((action) => (
+                      <button
+                        key={action.id}
+                        onClick={() => handleQuickAction(action.action)}
+                        className="group px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full hover:border-green-500 hover:shadow-md transition-all duration-200 flex items-center gap-2"
+                      >
+                        <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
+                          {action.label}
+                        </span>
+                        <AlertCircle className="w-4 h-4 text-gray-400 group-hover:text-green-600" />
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
             )}
+            
+            {/* Messages */}
+            <div className="space-y-6">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                    {/* Avatar */}
+                    <div className="flex-shrink-0">
+                      {message.role === 'user' ? (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-md">
+                          <User className="w-6 h-6 text-white" />
+                        </div>
+                      ) : (
+                        <img 
+                          src={`/agents/${message.agent_name === 'Carlos Drummond de Andrade' ? drummondAgent?.image : agents.find(a => a.name === message.agent_name)?.image || 'drummond.png'}`} 
+                          alt={message.agent_name || 'Assistant'}
+                          className="w-10 h-10 rounded-full shadow-md"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Message Content */}
+                    <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : ''}`}>
+                      {message.role === 'assistant' && message.agent_name && (
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 px-1">
+                          {message.agent_name}
+                        </span>
+                      )}
+                      <div
+                        className={`rounded-2xl px-5 py-3 shadow-sm ${
+                          message.role === 'user'
+                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+                            : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
+                        }`}
+                      >
+                        {message.role === 'assistant' ? (
+                          <MarkdownMessage content={message.content || ''} />
+                        ) : (
+                          <p className="leading-relaxed">{message.content || ''}</p>
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-400 mt-1 px-1">
+                        {new Date(message.timestamp).toLocaleTimeString('pt-BR', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Typing Indicator */}
+              {(isLoading || agentTyping) && (
+                <div className="flex justify-start">
+                  <div className="flex gap-3 max-w-[80%]">
+                    <img 
+                      src={`/agents/${drummondAgent?.image || 'drummond.png'}`}
+                      alt="Carlos Drummond"
+                      className="w-10 h-10 rounded-full shadow-md"
+                    />
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {agentTyping ? 'Drummond está escrevendo...' : 'Processando...'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area */}
-          <div className="border-t border-gray-200/50 dark:border-gray-700/50 px-6 py-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-            <div className="flex gap-3">
-              <textarea
-                ref={textareaRef}
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Digite sua pergunta sobre transparência pública..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm dark:text-white"
-                rows={2}
-                disabled={!canSendMessage}
-              />
+          <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <textarea
+                  ref={textareaRef}
+                  value={inputMessage}
+                  onChange={(e) => {
+                    setInputMessage(e.target.value)
+                    adjustTextareaHeight()
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Escreva sua mensagem..."
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 transition-all duration-200"
+                  rows={1}
+                  style={{ minHeight: '48px', maxHeight: '120px' }}
+                  disabled={!canSendMessage}
+                />
+              </div>
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || !canSendMessage}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                {isLoading ? '⏳' : '📤'} Enviar
+                <Send className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-              Pressione Enter para enviar, Shift+Enter para nova linha
-            </div>
-            
-            {/* Sugestões */}
-            {suggestedActions.length > 0 && messages.length === 0 && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Sugestões de perguntas:</p>
-                <div className="flex flex-wrap gap-2">
-                  {suggestedActions.slice(0, 4).map((action) => (
-                    <button
-                      key={action.id}
-                      onClick={() => handleQuickAction(action.action)}
-                      className="px-3 py-1 text-sm bg-gray-100/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-600/80 transition-colors flex items-center gap-1"
-                    >
-                      <span>{action.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Connection Status */}
-            <div className="mt-3 text-center">
-              <span className={`text-xs ${
-                connectionStatus === 'connected' ? 'text-green-600' : 
-                connectionStatus === 'connecting' ? 'text-yellow-600' : 
-                'text-gray-500'
-              }`}>
-                {connectionStatus === 'connected' && '🟢'} 
-                {connectionStatus === 'connecting' && '🟡'} 
-                {connectionStatus === 'disconnected' && '🔴'} 
-                {connectionStatusText}
-              </span>
-              
-              {/* Debug buttons - always show for now */}
-              <div className="mt-2 flex gap-2 justify-center flex-wrap">
-                <button
-                  onClick={async () => {
-                    console.log('Finding backend URL...');
-                    const url = await findBackendURL();
-                    if (url) {
-                      console.log('Found backend at:', url);
-                      // Update the URL in localStorage for testing
-                      localStorage.setItem('backend_url', url);
-                    }
-                  }}
-                  className="text-xs px-2 py-1 bg-yellow-200 rounded"
-                >
-                  Find Backend URL
-                </button>
-                <button
-                  onClick={async () => {
-                    console.log('Testing backend connection...');
-                    await testBackendConnection();
-                  }}
-                  className="text-xs px-2 py-1 bg-green-200 rounded"
-                >
-                  Test Backend
-                </button>
-                <button
-                  onClick={async () => {
-                    console.log('Checking all endpoints...');
-                    await checkAPIEndpoints();
-                  }}
-                  className="text-xs px-2 py-1 bg-blue-200 rounded"
-                >
-                  Check All APIs
-                </button>
-                <button
-                  onClick={async () => {
-                    console.log('Testing API health...');
-                    const health = await testAPIHealth();
-                    console.log('API health:', health);
-                  }}
-                  className="text-xs px-2 py-1 bg-gray-200 rounded"
-                >
-                  Test Health
-                </button>
-                <button
-                  onClick={async () => {
-                    console.log('Testing direct API...');
-                    const result = await testDirectAPI();
-                    console.log('Direct API result:', result);
-                  }}
-                  className="text-xs px-2 py-1 bg-gray-200 rounded"
-                >
-                  Test API
-                </button>
+            <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>Enter para enviar • Shift+Enter para nova linha</span>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  connectionStatus === 'connected' ? 'bg-green-500' : 
+                  connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 
+                  'bg-red-500'
+                }`}></div>
+                <span>{connectionStatusText}</span>
               </div>
             </div>
           </div>
