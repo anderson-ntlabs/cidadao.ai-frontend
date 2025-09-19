@@ -8,6 +8,8 @@ interface MarkdownMessageProps {
 export function MarkdownMessage({ content, className = '' }: MarkdownMessageProps) {
   // Processar markdown simples
   const processMarkdown = (text: string) => {
+    if (!text) return ''
+    
     return text
       // Bold
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

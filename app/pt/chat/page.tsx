@@ -244,7 +244,7 @@ export default function ChatPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <img 
                         src={`/agents/${agents.find(a => a.name === message.agent_name)?.image || 'abaporu.png'}`} 
-                        alt={message.agent_name}
+                        alt={message.agent_name || 'Agent'}
                         className="w-6 h-6 rounded-full"
                       />
                       <span className="text-sm font-medium">
