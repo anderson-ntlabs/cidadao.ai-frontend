@@ -253,9 +253,9 @@ export default function ChatPage() {
                     </div>
                   )}
                   {message.role === 'assistant' ? (
-                    <MarkdownMessage content={message.content} />
+                    <MarkdownMessage content={message.content || ''} />
                   ) : (
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <p className="whitespace-pre-wrap">{message.content || ''}</p>
                   )}
                   <p className="text-xs opacity-70 mt-1">
                     {new Date(message.timestamp).toLocaleTimeString('pt-BR', { 

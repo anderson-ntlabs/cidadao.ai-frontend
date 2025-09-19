@@ -54,14 +54,17 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
     }
 
     const data = response.data;
+    
+    // Debug log
+    console.log('Chat API response data:', data);
 
     // Return the chat response directly
     return {
       session_id: data.session_id,
       agent_id: data.agent_id,
       agent_name: data.agent_name,
-      message: data.content,
-      confidence: data.metadata?.confidence || 0.9,
+      message: data.message || data.content || '',
+      confidence: data.confidence || data.metadata?.confidence || 0.9,
       suggested_actions: data.suggested_actions || [],
       metadata: {
         ...data.metadata,
