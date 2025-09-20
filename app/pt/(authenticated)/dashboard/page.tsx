@@ -8,11 +8,12 @@ import {
 } from 'lucide-react'
 import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
-import { Button, Card, CardHeader, CardTitle, CardContent, Tabs, TabsList, TabsTrigger, TabsContent, Badge } from '@/components/ui'
+import { Button, Card, CardHeader, CardTitle, CardContent, Tabs, TabsList, TabsTrigger, TabsContent, Badge, Dropdown } from '@/components/ui'
 import { StatCard, ChartCard } from '@/components/ui'
 import { LineChart, BarChart, PieChart, AreaChart } from '@/components/charts'
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { useExport } from '@/hooks/use-export'
 
 // Mock data generators
 const generateTimeSeriesData = (days: number) => {
@@ -62,6 +63,9 @@ export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState('7days')
   const [isLoading, setIsLoading] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [selectedTab, setSelectedTab] = useState('overview')
+  
+  const { isExporting, exportToCSV, exportDashboardToPDF, exportFinancialReport } = useExport()
   
   // Generate mock data
   const timeSeriesData = generateTimeSeriesData(timeRange === '7days' ? 7 : timeRange === '30days' ? 30 : 90)
@@ -90,9 +94,61 @@ export default function DashboardPage() {
     setIsLoading(false)
   }
 
-  const handleExport = () => {
-    // In a real app, this would generate a PDF or CSV
-    console.log('Exporting dashboard data...')
+  const handleExportCSV = () => {
+    const dataMap: Record<string, any[]> = {
+      overview: [...timeSeriesData],
+      anomalies: [...anomalyTypeData],
+      agents: [...agentPerformanceData],
+      financial: timeSeriesData.map((day, index) => ({
+        ...day,
+        economia: Math.floor(Math.random() * 500000) + 100000,
+        economiaAcumulada: (index + 1) * 150000
+      }))
+    }
+
+    const currentData = dataMap[selectedTab] || timeSeriesData
+    exportToCSV(currentData, `dashboard-${selectedTab}-${format(new Date(), 'yyyy-MM-dd')}.csv`)
+  }
+
+  const handleExportPDF = async () => {
+    // Get all chart elements
+    const chartElements = document.querySelectorAll('.recharts-wrapper')
+    const charts = Array.from(chartElements).map(el => el.parentElement as HTMLElement).filter(Boolean)
+
+    const metrics = {
+      'Investigações Totais': formatNumber(totalInvestigations),
+      'Anomalias Detectadas': formatNumber(totalAnomalies),
+      'Economia Identificada': formatCurrency(4570000),
+      'Precisão do Sistema': `${averagePrecision}%`,
+      'Período': timeRange === '7days' ? 'Últimos 7 dias' : timeRange === '30days' ? 'Últimos 30 dias' : 'Últimos 90 dias'
+    }
+
+    await exportDashboardToPDF(charts, metrics, {
+      filename: `dashboard-cidadao-ai-${format(new Date(), 'yyyy-MM-dd')}.pdf`,
+      title: 'Dashboard de Transparência - Cidadão.AI',
+      subtitle: `Relatório gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`
+    })
+  }
+
+  const handleExportFinancial = async () => {
+    const financialData = {
+      totalInvestigated: 45700000,
+      totalSavings: 4570000,
+      recoveryRate: 19.5,
+      suspiciousContracts: [
+        { id: 'CTR-2024-001', value: 2340000, risk: 'alto', date: new Date() },
+        { id: 'CTR-2024-045', value: 1890000, risk: 'alto', date: new Date() },
+        { id: 'CTR-2024-089', value: 980000, risk: 'médio', date: new Date() }
+      ],
+      monthlyData: timeSeriesData
+    }
+
+    const chartElements = document.querySelectorAll('.recharts-wrapper')
+    const charts = Array.from(chartElements).map(el => el.parentElement as HTMLElement).filter(Boolean)
+
+    await exportFinancialReport(financialData, charts, {
+      filename: `relatorio-financeiro-${format(new Date(), 'yyyy-MM-dd')}.pdf`
+    })
   }
 
   const formatCurrency = (value: number) => {
@@ -144,10 +200,38 @@ export default function DashboardPage() {
                   <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </Button>
                 
-                <Button onClick={handleExport}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Exportar
-                </Button>
+                <Dropdown
+                  trigger={
+                    <Button disabled={isExporting}>
+                      <Download className="w-4 h-4 mr-2" />
+                      {isExporting ? 'Exportando...' : 'Exportar'}
+                    </Button>
+                  }
+                >
+                  <button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exportar como CSV
+                  </button>
+                  <button
+                    onClick={handleExportPDF}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exportar Dashboard (PDF)
+                  </button>
+                  {selectedTab === 'financial' && (
+                    <button
+                      onClick={handleExportFinancial}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Download className="w-4 h-4" />
+                      Relatório Financeiro (PDF)
+                    </button>
+                  )}
+                </Dropdown>
               </div>
             </div>
             
@@ -196,7 +280,12 @@ export default function DashboardPage() {
           </div>
 
           {/* Main Charts */}
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs 
+            defaultValue="overview" 
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="space-y-6"
+          >
             <TabsList className="grid grid-cols-4 w-full max-w-2xl">
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="anomalies">Anomalias</TabsTrigger>
