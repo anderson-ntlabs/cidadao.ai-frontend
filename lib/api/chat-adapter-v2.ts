@@ -112,15 +112,12 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
 **Erro:** ${errorMessage}
 
-**URL tentada:** ${API_BASE_URL}/api/v1/chat/message
-
 Por favor, tente novamente ou reformule sua pergunta.`,
       confidence: 0,
       suggested_actions: [
         'Tentar novamente',
         'Verificar conexão',
         'Reformular pergunta',
-        'Usar o modo de investigação',
       ],
       metadata: {
         error: true,
