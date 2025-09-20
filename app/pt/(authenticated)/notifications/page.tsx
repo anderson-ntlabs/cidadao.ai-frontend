@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   Bell, Filter, Settings, CheckCheck, Trash2, 
@@ -15,6 +16,7 @@ import { useNotificationStore } from '@/store/notification-store'
 import type { NotificationType, NotificationPriority } from '@/types/notification'
 
 export default function NotificationsPage() {
+  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [selectedType, setSelectedType] = useState<NotificationType | 'all'>('all')
   const [selectedPriority, setSelectedPriority] = useState<NotificationPriority | 'all'>('all')
