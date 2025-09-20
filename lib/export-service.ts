@@ -11,7 +11,7 @@ interface ExportOptions {
   subtitle?: string
   author?: string
   orientation?: 'portrait' | 'landscape'
-  format?: 'a4' | 'letter'
+  pageFormat?: 'a4' | 'letter'
 }
 
 interface TableData {
@@ -57,13 +57,13 @@ export class ExportService {
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
       author = 'Cidadão.AI',
       orientation = 'landscape',
-      format = 'a4'
+      pageFormat = 'a4'
     } = options
 
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
-      format
+      format: pageFormat
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
@@ -196,13 +196,13 @@ export class ExportService {
       title = 'Relatório de Transparência',
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
       orientation = 'portrait',
-      format = 'a4'
+      pageFormat = 'a4'
     } = options
 
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
-      format
+      format: pageFormat
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
