@@ -106,3 +106,9 @@ debug/
 
 *storybook.log
 storybook-static
+
+# Private technical reports
+RELATORIOS-TECNICOS/
+*-REPORT-*.md
+*-RELATORIO-*.md
+RELATORIO-*.md
