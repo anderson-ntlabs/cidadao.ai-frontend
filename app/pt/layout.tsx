@@ -8,13 +8,20 @@ export const metadata: Metadata = {
   title: 'Cidadão.AI',
   description: 'Sistema multi-agente de inteligência artificial para democratizar o acesso aos dados públicos e fortalecer a transparência governamental brasileira.',
   manifest: '/manifest.json',
-  themeColor: '#10b981',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Cidadão.AI',
   },
+}
+
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    themeColor: '#10b981',
+  }
 }
 
 import { Header } from '@/components/header'

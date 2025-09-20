@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+// import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft, Check, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import { Button, Progress } from '@/components/ui'
@@ -115,15 +115,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="min-h-[400px] flex flex-col items-center justify-center text-center"
-            >
+          <div className="min-h-[400px] flex flex-col items-center justify-center text-center animate-fade-in-up">
               {step.image && (
                 <div className="relative w-32 h-32 mb-6">
                   <Image
@@ -169,8 +161,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
                   />
                 ))}
               </div>
-            </motion.div>
-          </AnimatePresence>
+            </div>
 
           <div className="flex justify-between mt-8">
             <Button

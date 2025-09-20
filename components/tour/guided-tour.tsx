@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+// import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -178,17 +178,12 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
         onClick={handleClose}
       />
       
-      <AnimatePresence>
-        {targetElement && (
-          <motion.div
-            ref={tooltipRef}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
-            className="fixed z-[10000] bg-card border shadow-xl rounded-lg p-6 max-w-sm"
-            style={{ top: position.top, left: position.left }}
-          >
+      {targetElement && (
+        <div
+          ref={tooltipRef}
+          className="fixed z-[10000] bg-card border shadow-xl rounded-lg p-6 max-w-sm animate-scale-in"
+          style={{ top: position.top, left: position.left }}
+        >
             <button
               onClick={handleClose}
               className="absolute top-2 right-2 p-1 rounded-md hover:bg-muted"
@@ -233,9 +228,8 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
                 </Button>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </>,
     document.body
   )
