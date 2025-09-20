@@ -16,7 +16,7 @@ import { ptBR } from 'date-fns/locale'
 import { useExport } from '@/hooks/use-export'
 import { useOnboarding } from '@/hooks/use-onboarding'
 import { OnboardingFlow } from '@/components/onboarding'
-import { GuidedTour } from '@/components/tour'
+import { GuidedTour } from '@/components/tour/guided-tour'
 
 // Mock data generators
 const generateTimeSeriesData = (days: number) => {

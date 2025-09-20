@@ -87,7 +87,7 @@ export function AvatarUpload({
     } finally {
       setIsUploading(false)
     }
-  }, [maxSize, allowedTypes, onAvatarChange])
+  }, [maxSize, allowedTypes, onAvatarChange, validateFile])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

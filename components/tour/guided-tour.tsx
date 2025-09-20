@@ -90,7 +90,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
         targetElement.classList.remove('tour-highlight')
       }
     }
-  }, [currentStep, step, isOpen])
+  }, [currentStep, step, isOpen, targetElement])
 
   useEffect(() => {
     if (!targetElement || !tooltipRef.current) return
