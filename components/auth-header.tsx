@@ -36,10 +36,10 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('isAuthenticated')
-    toast({
-      title: locale === 'pt' ? 'Até logo!' : 'See you later!',
-      description: locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully',
-    })
+    toast.success(
+      locale === 'pt' ? 'Até logo!' : 'See you later!',
+      locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully'
+    )
     router.push(`/${locale}`)
   }
 

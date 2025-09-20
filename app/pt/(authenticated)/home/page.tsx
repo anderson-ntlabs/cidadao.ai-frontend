@@ -44,10 +44,10 @@ export default function HomePage() {
     if (user && !isLoading) {
       const hasSeenWelcome = localStorage.getItem('hasSeenWelcome')
       if (!hasSeenWelcome) {
-        toast({
-          title: `Bem-vindo ao Cidadão.AI, ${user.name}!`,
-          description: 'Explore as ferramentas de transparência pública.',
-        })
+        toast.success(
+          `Bem-vindo ao Cidadão.AI, ${user.name}!`,
+          'Explore as ferramentas de transparência pública.'
+        )
         localStorage.setItem('hasSeenWelcome', 'true')
       }
     }
