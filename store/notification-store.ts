@@ -86,11 +86,17 @@ export const useNotificationStore = create<NotificationStore>()(
       },
       
       addNotifications: (notifications) => {
-        set((state) => ({
-          notifications: [...notifications, ...state.notifications].sort(
-            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )
-        }))
+        set((state) => {
+          // Filter out any notifications that already exist
+          const existingIds = new Set(state.notifications.map(n => n.id))
+          const newNotifications = notifications.filter(n => !existingIds.has(n.id))
+          
+          return {
+            notifications: [...newNotifications, ...state.notifications].sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+          }
+        })
       },
       
       markAsRead: (id) => {
@@ -241,17 +247,18 @@ function generateDemoNotifications(): Notification[] {
     return []
   }
   
-  // Use fixed timestamps for consistency
-  const baseTime = new Date('2025-09-19T12:00:00Z')
+  // Use current time for realistic timestamps
+  const now = new Date()
+  const uniqueSuffix = Date.now().toString(36) + Math.random().toString(36).substr(2)
   
   return [
     {
-      id: 'demo-1',
+      id: `demo-1-${uniqueSuffix}`,
       type: 'investigation',
       priority: 'high',
       title: 'Nova Investigação Iniciada',
       message: 'Zumbi dos Palmares detectou possível anomalia em contrato público',
-      timestamp: new Date(baseTime.getTime() - 5 * 60 * 1000), // 5 min ago
+      timestamp: new Date(now.getTime() - 5 * 60 * 1000), // 5 min ago
       read: false,
       investigationId: 'inv-123',
       agentId: 'zumbi',
@@ -259,33 +266,33 @@ function generateDemoNotifications(): Notification[] {
       actionLabel: 'Ver Detalhes'
     },
     {
-      id: 'demo-2',
+      id: `demo-2-${uniqueSuffix}`,
       type: 'anomaly',
       priority: 'urgent',
       title: 'Anomalia Crítica Detectada',
       message: 'Score de anomalia 0.95 em licitação de R$ 2.5M',
-      timestamp: new Date(baseTime.getTime() - 15 * 60 * 1000), // 15 min ago
+      timestamp: new Date(now.getTime() - 15 * 60 * 1000), // 15 min ago
       read: false,
       anomalyScore: 0.95,
       data: { contractId: 'LC-2024-001' }
     },
     {
-      id: 'demo-3',
+      id: `demo-3-${uniqueSuffix}`,
       type: 'success',
       priority: 'low',
       title: 'Análise Concluída',
       message: 'Anita Garibaldi finalizou análise de padrões mensais',
-      timestamp: new Date(baseTime.getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
+      timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2 hours ago
       read: true,
       agentId: 'anita'
     },
     {
-      id: 'demo-4',
+      id: `demo-4-${uniqueSuffix}`,
       type: 'system',
       priority: 'medium',
       title: 'Atualização do Sistema',
       message: 'Nova versão dos agentes de IA disponível',
-      timestamp: new Date(baseTime.getTime() - 24 * 60 * 60 * 1000), // 1 day ago
+      timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 day ago
       read: true
     }
   ]
