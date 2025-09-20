@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Button Clicks</title>
+    <style>
+        body {
+            padding: 40px;
+            font-family: system-ui;
+        }
+        .test-button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .test-button:hover {
+            background: #e0e0e0;
+        }
+        .ghost {
+            background: transparent;
+            border: none;
+        }
+        .ghost:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Button Click Test</h1>
+    
+    <div>
+        <h2>Testing Button Interactions</h2>
+        
+        <button class="test-button ghost icon-button" onclick="alert('Theme toggle clicked!')">
+            🌙
+        </button>
+        
+        <button class="test-button ghost icon-button" onclick="alert('Notification clicked!')">
+            🔔
+        </button>
+        
+        <button class="test-button" onclick="alert('Regular button clicked!')">
+            Regular Button
+        </button>
+    </div>
+    
+    <div style="margin-top: 40px;">
+        <h3>Potential Issues to Check:</h3>
+        <ol>
+            <li>Check if buttons are rendered but invisible (CSS issue)</li>
+            <li>Check if onClick handlers are properly attached</li>
+            <li>Check browser console for JavaScript errors</li>
+            <li>Check if buttons have proper z-index</li>
+            <li>Check if parent elements have pointer-events: none</li>
+        </ol>
+    </div>
+</body>
+</html>
