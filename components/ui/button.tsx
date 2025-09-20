@@ -42,15 +42,22 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
-    const Comp = asChild ? React.Fragment : "button"
+    if (asChild) {
+      return (
+        <>
+          {children}
+        </>
+      )
+    }
     
     return (
-      <Comp
+      <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
         aria-busy={loading}
         aria-disabled={disabled || loading}
+        type="button"
         {...props}
       >
         {loading ? (
@@ -60,7 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : null}
         {children}
         {rightIcon && <span className="ml-2">{rightIcon}</span>}
-      </Comp>
+      </button>
     )
   }
 )
