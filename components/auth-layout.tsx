@@ -43,11 +43,11 @@ export function AuthLayout({ children, locale }: AuthLayoutProps) {
   }
   
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <AuthHeader locale={locale} user={user} />
-      <main className="pt-16">
+      <main className="pt-16 flex-1">
         {children}
       </main>
-    </>
+    </div>
   )
 }
