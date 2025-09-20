@@ -22,6 +22,7 @@ import { Footer } from '@/components/footer'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeScript } from '../theme-script'
 import { ToastProvider } from '@/components/toast-provider'
+import { SkipLinks } from '@/components/skip-link'
 
 export default function PTLayout({
   children,
@@ -47,8 +48,9 @@ export default function PTLayout({
         
         {/* Conteúdo principal */}
         <div className="relative z-20 min-h-screen flex flex-col">
+          <SkipLinks />
           <Header locale="pt" />
-          <main className="pt-16 flex-1">
+          <main id="main-content" role="main" className="pt-16 flex-1">
             {children}
           </main>
           <Footer locale="pt" />

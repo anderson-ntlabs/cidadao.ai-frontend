@@ -44,9 +44,26 @@ export function Header({ locale }: HeaderProps) {
         { name: 'System', href: '/en/system' },
       ]
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault()
+      const currentIndex = navigation.findIndex(item => item.href === pathname)
+      let newIndex = currentIndex
+
+      if (e.key === 'ArrowLeft') {
+        newIndex = currentIndex > 0 ? currentIndex - 1 : navigation.length - 1
+      } else if (e.key === 'ArrowRight') {
+        newIndex = currentIndex < navigation.length - 1 ? currentIndex + 1 : 0
+      }
+
+      const link = document.querySelector(`[href="${navigation[newIndex].href}"]`) as HTMLElement
+      link?.focus()
+    }
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-800/50">
-      <nav className="max-w-7xl mx-auto px-6">
+      <nav id="main-navigation" role="navigation" aria-label="Main navigation" className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center space-x-3">
