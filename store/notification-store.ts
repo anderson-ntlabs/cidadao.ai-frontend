@@ -222,8 +222,7 @@ async function showDesktopNotification(notification: Notification) {
         body: notification.message,
         icon: '/icon.svg',
         badge: '/icon.svg',
-        tag: notification.id,
-        renotify: notification.priority === 'urgent'
+        tag: notification.id
       })
       
       desktopNotif.onclick = () => {
