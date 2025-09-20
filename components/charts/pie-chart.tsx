@@ -6,8 +6,7 @@ import {
   Cell,
   Tooltip, 
   Legend,
-  ResponsiveContainer,
-  TooltipProps
+  ResponsiveContainer
 } from 'recharts'
 
 interface PieChartProps {
@@ -63,7 +62,7 @@ const renderCustomizedLabel = ({
   )
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps<any, any>) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0]
     return (
@@ -113,7 +112,7 @@ export function PieChart({
             fill="#8884d8"
             dataKey="value"
           >
-            {dataWithPercent.map((entry, index) => (
+            {dataWithPercent.map((entry: any, index: number) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />
             ))}
           </Pie>

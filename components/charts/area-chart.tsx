@@ -8,8 +8,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend,
-  ResponsiveContainer,
-  TooltipProps
+  ResponsiveContainer
 } from 'recharts'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -33,14 +32,14 @@ interface AreaChartProps {
   gradient?: boolean
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           {label}
         </p>
-        {payload.map((entry, index) => (
+        {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: <span className="font-semibold">{entry.value}</span>
           </p>
