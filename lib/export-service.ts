@@ -379,7 +379,7 @@ export class ExportService {
     let yPosition = margin
 
     // Header with investigation status
-    const statusColor = investigation.status === 'completed' 
+    const statusColor: [number, number, number] = investigation.status === 'completed' 
       ? [16, 185, 129]  // green
       : investigation.status === 'in_progress'
       ? [245, 158, 11]  // yellow
