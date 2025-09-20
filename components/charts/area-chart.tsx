@@ -9,10 +9,7 @@ import {
   Tooltip, 
   Legend,
   ResponsiveContainer,
-  TooltipProps,
-  defs,
-  linearGradient,
-  stop
+  TooltipProps
 } from 'recharts'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
