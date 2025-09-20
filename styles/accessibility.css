@@ -1,0 +1,195 @@
+/* Skip Links */
+.skip-links a {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-links a:focus {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  overflow: auto;
+  z-index: 9999;
+}
+
+/* Focus Indicators */
+*:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --color-text: #000;
+  --color-background: #fff;
+  --color-border: #000;
+  --color-link: #0000ff;
+  --color-link-hover: #000080;
+  --color-button: #000;
+  --color-button-bg: #fff;
+  --color-button-hover: #fff;
+  --color-button-hover-bg: #000;
+}
+
+.high-contrast.dark {
+  --color-text: #fff;
+  --color-background: #000;
+  --color-border: #fff;
+  --color-link: #ffff00;
+  --color-link-hover: #ffff80;
+  --color-button: #fff;
+  --color-button-bg: #000;
+  --color-button-hover: #000;
+  --color-button-hover-bg: #fff;
+}
+
+.high-contrast * {
+  color: var(--color-text) !important;
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+
+.high-contrast a {
+  color: var(--color-link) !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast a:hover {
+  color: var(--color-link-hover) !important;
+}
+
+.high-contrast button,
+.high-contrast [role="button"] {
+  color: var(--color-button) !important;
+  background-color: var(--color-button-bg) !important;
+  border: 2px solid var(--color-border) !important;
+}
+
+.high-contrast button:hover,
+.high-contrast [role="button"]:hover {
+  color: var(--color-button-hover) !important;
+  background-color: var(--color-button-hover-bg) !important;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Minimum Touch Target Size */
+button,
+a,
+input,
+select,
+textarea {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Color Contrast Improvements */
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.dark .text-gray-500 {
+  color: #9ca3af;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.dark .text-gray-600 {
+  color: #d1d5db;
+}
+
+/* Form Labels */
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+/* Error States */
+[aria-invalid="true"] {
+  border-color: #ef4444 !important;
+}
+
+[role="alert"] {
+  font-weight: 600;
+}
+
+/* Loading States */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+/* Keyboard Navigation Indicators */
+.keyboard-nav-indicator {
+  position: relative;
+}
+
+.keyboard-nav-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #10b981;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.keyboard-nav-indicator:focus::after {
+  transform: scaleX(1);
+}
