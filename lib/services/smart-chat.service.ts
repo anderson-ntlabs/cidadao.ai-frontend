@@ -245,6 +245,7 @@ export class SmartChatService {
     // Log to telemetry
     chatTelemetry.track({
       type: 'message_received',
+      timestamp: Date.now(),
       sessionId: response.session_id,
       duration,
       data: {

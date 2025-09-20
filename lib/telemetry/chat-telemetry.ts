@@ -218,6 +218,7 @@ export const chatTelemetry = new ChatTelemetry();
 export function trackChatMessage(sessionId: string, message: string, intent?: string): void {
   chatTelemetry.track({
     type: 'message_sent',
+    timestamp: Date.now(),
     sessionId,
     data: { message: message.substring(0, 50) + '...' },
     intent,
@@ -227,6 +228,7 @@ export function trackChatMessage(sessionId: string, message: string, intent?: st
 export function trackChatResponse(sessionId: string, duration: number, isDemoMode: boolean = false): void {
   chatTelemetry.track({
     type: 'message_received',
+    timestamp: Date.now(),
     sessionId,
     duration,
     isDemoMode,
@@ -236,6 +238,7 @@ export function trackChatResponse(sessionId: string, duration: number, isDemoMod
 export function trackChatError(sessionId: string, error: any): void {
   chatTelemetry.track({
     type: 'error',
+    timestamp: Date.now(),
     sessionId,
     error: error.message || 'Unknown error',
     data: { status: error.response?.status },
@@ -245,6 +248,7 @@ export function trackChatError(sessionId: string, error: any): void {
 export function trackChatRetry(sessionId: string, attempt: number): void {
   chatTelemetry.track({
     type: 'retry',
+    timestamp: Date.now(),
     sessionId,
     data: { attempt },
   });
@@ -253,6 +257,7 @@ export function trackChatRetry(sessionId: string, attempt: number): void {
 export function trackSessionStart(sessionId: string): void {
   chatTelemetry.track({
     type: 'session_start',
+    timestamp: Date.now(),
     sessionId,
   });
 }
@@ -260,6 +265,7 @@ export function trackSessionStart(sessionId: string): void {
 export function trackSessionEnd(sessionId: string): void {
   chatTelemetry.track({
     type: 'session_end',
+    timestamp: Date.now(),
     sessionId,
   });
 }

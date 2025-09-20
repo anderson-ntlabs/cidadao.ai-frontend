@@ -43,7 +43,9 @@ export async function sendOptimizedMessage(request: ChatRequest): Promise<ChatRe
     console.log('[Chat Optimized] Using Sabiazinho-3 (economical):', payload.message);
     
     // Track message
-    trackChatMessage(payload.session_id, request.message, 'optimized');
+    if (payload.session_id) {
+      trackChatMessage(payload.session_id, request.message, 'optimized');
+    }
     
     // Call the optimized endpoint
     const response = await api.post<OptimizedResponse>('/api/v1/chat/optimized', payload);
@@ -60,7 +62,9 @@ export async function sendOptimizedMessage(request: ChatRequest): Promise<ChatRe
     console.log('[Chat Optimized] Tokens:', data.tokens_used);
     
     // Track successful response
-    trackChatResponse(payload.session_id, duration, false);
+    if (payload.session_id) {
+      trackChatResponse(payload.session_id, duration, false);
+    }
     
     // Convert to standard ChatResponse format
     return {
