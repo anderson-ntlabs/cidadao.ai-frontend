@@ -72,6 +72,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                     ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
+                data-tour={item.href.includes('chat') ? 'chat-button' : item.href.includes('notifications') ? 'notifications' : undefined}
               >
                 <item.icon className="w-4 h-4" />
                 {item.name}

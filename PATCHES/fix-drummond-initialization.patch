@@ -1,0 +1,28 @@
+--- src/api/routes/chat.py.original
++++ src/api/routes/chat.py
+@@ -33,6 +33,7 @@
+ # Initialize Drummond agent
+ drummond_init_error = None
+ drummond_agent = None
++drummond_initialized = False
+ logger.info("Starting Drummond initialization...")
+ 
+ try:
+@@ -135,6 +136,17 @@ async def send_message(
+         logger.info(f"Target agent: {target_agent}, Drummond available: {drummond_agent is not None}")
+         
+         if target_agent == "drummond" and drummond_agent:
++            # Initialize Drummond on first use
++            global drummond_initialized
++            if not drummond_initialized:
++                try:
++                    logger.info("Initializing Drummond agent on first use...")
++                    await drummond_agent.initialize()
++                    drummond_initialized = True
++                    logger.info("Drummond agent initialized successfully")
++                except Exception as e:
++                    logger.error(f"Failed to initialize Drummond: {e}")
++                    raise
+             # Use Drummond for conversational intents
+             try:
+                 response = await drummond_agent.process(agent_message)

@@ -14,6 +14,9 @@ import { LineChart, BarChart, PieChart, AreaChart } from '@/components/charts'
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useExport } from '@/hooks/use-export'
+import { useOnboarding } from '@/hooks/use-onboarding'
+import { OnboardingFlow } from '@/components/onboarding'
+import { GuidedTour } from '@/components/tour'
 
 // Mock data generators
 const generateTimeSeriesData = (days: number) => {
@@ -66,6 +69,13 @@ export default function DashboardPage() {
   const [selectedTab, setSelectedTab] = useState('overview')
   
   const { isExporting, exportToCSV, exportDashboardToPDF, exportFinancialReport } = useExport()
+  const { 
+    shouldShowOnboarding, 
+    shouldShowTour, 
+    completeOnboarding, 
+    completeTour, 
+    startTour 
+  } = useOnboarding()
   
   // Generate mock data
   const timeSeriesData = generateTimeSeriesData(timeRange === '7days' ? 7 : timeRange === '30days' ? 30 : 90)
@@ -168,6 +178,20 @@ export default function DashboardPage() {
     <>
       <LoadingScreen />
       
+      {shouldShowOnboarding && (
+        <OnboardingFlow 
+          onComplete={completeOnboarding}
+          onSkip={completeOnboarding}
+        />
+      )}
+      
+      {shouldShowTour && (
+        <GuidedTour 
+          isOpen={shouldShowTour}
+          onClose={completeTour}
+        />
+      )}
+      
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {/* Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
@@ -202,7 +226,7 @@ export default function DashboardPage() {
                 
                 <Dropdown
                   trigger={
-                    <Button disabled={isExporting}>
+                    <Button disabled={isExporting} data-tour="export-button">
                       <Download className="w-4 h-4 mr-2" />
                       {isExporting ? 'Exportando...' : 'Exportar'}
                     </Button>
@@ -244,7 +268,7 @@ export default function DashboardPage() {
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" data-tour="dashboard-overview">
             <StatCard
               title="Investigações Totais"
               value={formatNumber(totalInvestigations)}
@@ -393,7 +417,7 @@ export default function DashboardPage() {
             </TabsContent>
 
             {/* Agents Tab */}
-            <TabsContent value="agents" className="space-y-6">
+            <TabsContent value="agents" className="space-y-6" data-tour="agents-section">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ChartCard
                   title="Performance dos Agentes"
