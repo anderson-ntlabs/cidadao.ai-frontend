@@ -10,6 +10,7 @@ export interface FeatureFlags {
   chatSSEEnabled: boolean;
   chatRetryEnabled: boolean;
   chatDemoMode: boolean;
+  smartChatEnabled: boolean;
   
   // Other features
   exportPDFEnabled: boolean;
@@ -25,6 +26,7 @@ const defaultFlags: FeatureFlags = {
   chatSSEEnabled: false,         // SSE disabled until Sprint 4
   chatRetryEnabled: true,        // Enable retry logic
   chatDemoMode: false,           // DESATIVADO TEMPORARIAMENTE para debug
+  smartChatEnabled: true,        // Enable smart chat with optimization and caching
   
   // Other features
   exportPDFEnabled: false,

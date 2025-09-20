@@ -13,6 +13,8 @@ import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './ch
 import { sendChatMessage } from './chat-adapter-v2';
 import { sendChatMessageV3 } from './chat-adapter-v3';
 import { sendSimpleMessage } from './chat-adapter-simple';
+import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
+import { isFeatureEnabled } from '@/lib/feature-flags';
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -31,6 +33,24 @@ export const chatService = {
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
       console.log('Chat service: Routing message');
+      
+      // Use smart chat service if feature is enabled
+      if (isFeatureEnabled('smartChatEnabled')) {
+        console.log('Using Smart Chat Service with caching and optimization');
+        
+        // Determine model preference based on context
+        const modelPreference = request.context?.model_preference || 'auto';
+        
+        const response = await cachedSmartChatService.sendMessage(request.message, {
+          preferredModel: modelPreference,
+          useDrummond: true,
+        });
+        
+        return response;
+      }
+      
+      // Original fallback logic
+      console.log('Using legacy chat adapters');
       
       // Tentar primeiro o endpoint simple que está 100% funcional com Maritaca
       console.log('Trying /api/v1/chat/simple endpoint first...');
