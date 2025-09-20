@@ -91,7 +91,7 @@ export function NotificationDropdown({ locale }: NotificationDropdownProps) {
       {/* Dropdown */}
       {isOpen && (
         <div className={cn(
-          "absolute right-0 mt-2 w-96 max-h-[600px] bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden",
+          "absolute right-0 mt-2 w-96 max-h-[600px] bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden z-50",
           "animate-in fade-in-0 zoom-in-95 duration-200"
         )}>
           {/* Header */}
