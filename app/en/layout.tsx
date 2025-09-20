@@ -2,7 +2,10 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '../../styles/globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   title: 'Cidadão.AI',
@@ -35,11 +38,11 @@ export default function ENLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className={`${inter.className} min-h-screen`}>
+      <body className="min-h-screen font-sans">
         {/* Fixed background layer with image */}
         <div 
           className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"

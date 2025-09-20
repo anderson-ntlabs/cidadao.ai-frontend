@@ -1,8 +1,12 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { cn } from '@/lib/utils'
 import '../../styles/globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   title: 'Cidadão.AI',
@@ -37,11 +41,11 @@ export default function PTLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt" suppressHydrationWarning>
+    <html lang="pt" className={inter.variable} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className={`${inter.className} min-h-screen`}>
+      <body className="min-h-screen font-sans">
         {/* Camada de fundo fixo com a imagem */}
         <div 
           className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"

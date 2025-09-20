@@ -1,7 +1,4 @@
 import { AuthLayout } from '@/components/auth-layout'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export default function AuthenticatedLayout({
   children,
@@ -9,10 +6,8 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className={inter.className}>
-      <AuthLayout locale="pt">
-        {children}
-      </AuthLayout>
-    </div>
+    <AuthLayout locale="pt">
+      {children}
+    </AuthLayout>
   )
 }
