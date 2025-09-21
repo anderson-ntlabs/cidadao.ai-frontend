@@ -1,0 +1,217 @@
+/*
+ * Design System v2 - Animation Tokens
+ * Cidadão.AI - Consistent motion design
+ * 
+ * Based on Material Motion principles adapted for Brazilian aesthetics
+ */
+
+:root {
+  /* ========================================
+     Timing Functions
+     ======================================== */
+  
+  /* Easing curves */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Specialized easings */
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  
+  /* ========================================
+     Duration Tokens
+     ======================================== */
+  
+  --duration-instant: 0ms;
+  --duration-faster: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 500ms;
+  
+  /* Component-specific durations */
+  --duration-button: var(--duration-normal);
+  --duration-card: var(--duration-normal);
+  --duration-menu: var(--duration-fast);
+  --duration-modal: var(--duration-slow);
+  --duration-page: var(--duration-slower);
+  
+  /* ========================================
+     Transition Tokens
+     ======================================== */
+  
+  /* Base transitions */
+  --transition-none: none;
+  --transition-all: all var(--duration-normal) var(--ease-in-out);
+  --transition-colors: color var(--duration-fast) var(--ease-in-out), 
+                      background-color var(--duration-fast) var(--ease-in-out),
+                      border-color var(--duration-fast) var(--ease-in-out);
+  --transition-opacity: opacity var(--duration-normal) var(--ease-in-out);
+  --transition-transform: transform var(--duration-normal) var(--ease-smooth);
+  --transition-shadow: box-shadow var(--duration-normal) var(--ease-in-out);
+  
+  /* Component transitions */
+  --transition-button: var(--transition-colors), var(--transition-transform), var(--transition-shadow);
+  --transition-card: var(--transition-shadow), var(--transition-transform);
+  --transition-link: var(--transition-colors);
+  --transition-input: var(--transition-colors), var(--transition-shadow);
+  
+  /* ========================================
+     Keyframe Animations
+     ======================================== */
+  
+  /* Fade animations */
+  --animate-fade-in: fade-in var(--duration-normal) var(--ease-out);
+  --animate-fade-out: fade-out var(--duration-fast) var(--ease-in);
+  
+  /* Slide animations */
+  --animate-slide-up: slide-up var(--duration-normal) var(--ease-out);
+  --animate-slide-down: slide-down var(--duration-normal) var(--ease-out);
+  --animate-slide-left: slide-left var(--duration-normal) var(--ease-out);
+  --animate-slide-right: slide-right var(--duration-normal) var(--ease-out);
+  
+  /* Scale animations */
+  --animate-scale-in: scale-in var(--duration-fast) var(--ease-bounce);
+  --animate-scale-out: scale-out var(--duration-fast) var(--ease-in);
+  
+  /* Special animations */
+  --animate-pulse: pulse 2s var(--ease-in-out) infinite;
+  --animate-bounce: bounce 1s var(--ease-bounce) infinite;
+  --animate-spin: spin 1s var(--ease-linear) infinite;
+}
+
+/* ========================================
+   Keyframe Definitions
+   ======================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-right {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

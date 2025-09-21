@@ -13,7 +13,7 @@
 @import './typography.css';
 
 /* Animation tokens - consistent transitions */
-/* @import './animations.css'; */
+@import './animations.css';
 
 /* Shadow tokens - elevation system */
 @import './shadows.css';
