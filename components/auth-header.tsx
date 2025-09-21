@@ -98,7 +98,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
               </Link>
               
               <Button 
-                variant="outline" 
+                variant="secondary" 
                 size="sm"
                 onClick={handleLogout}
                 className="gap-2"

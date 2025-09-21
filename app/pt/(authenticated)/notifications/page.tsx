@@ -81,7 +81,7 @@ export default function NotificationsPage() {
             
             <div className="flex items-center gap-3">
               {stats.unread > 0 && (
-                <Button variant="outline" onClick={markAllAsRead}>
+                <Button variant="secondary" onClick={markAllAsRead}>
                   <CheckCheck className="w-4 h-4 mr-2" />
                   Marcar todas como lidas
                 </Button>
@@ -95,7 +95,7 @@ export default function NotificationsPage() {
               )}
               
               <Link href="/pt/settings#notifications">
-                <Button variant="outline">
+                <Button variant="secondary">
                   <Settings className="w-4 h-4 mr-2" />
                   Configurações
                 </Button>

@@ -118,7 +118,7 @@ export default function ProfilePage() {
                 <div className="flex gap-3">
                   <Button 
                     onClick={() => setIsEditing(!isEditing)}
-                    variant={isEditing ? "outline" : "default"}
+                    variant={isEditing ? "secondary" : "default"}
                     className="flex items-center gap-2"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function ProfilePage() {
               </div>
               
               <div className="mt-6 text-center">
-                <Button variant="outline" className="flex items-center gap-2 mx-auto">
+                <Button variant="secondary" className="flex items-center gap-2 mx-auto">
                   <Clock className="w-4 h-4" />
                   Ver Histórico Completo
                 </Button>

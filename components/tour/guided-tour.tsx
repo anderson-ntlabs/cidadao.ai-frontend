@@ -197,7 +197,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
             {step.action && (
               <Button
                 size="sm"
-                variant="outline"
+                variant="secondary"
                 onClick={step.action.onClick}
                 className="mb-4 w-full"
               >
@@ -213,7 +213,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="secondary"
                   onClick={handlePrevious}
                   disabled={currentStep === 0}
                 >

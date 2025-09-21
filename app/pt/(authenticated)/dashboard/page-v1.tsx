@@ -216,7 +216,7 @@ export default function DashboardPage() {
                 </select>
                 
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   onClick={handleRefresh}
                   disabled={isLoading}

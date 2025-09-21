@@ -139,7 +139,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
               {step.action && (
                 <Button
                   onClick={step.action.onClick}
-                  variant="outline"
+                  variant="secondary"
                   className="mb-4"
                 >
                   {step.action.label}
@@ -165,7 +165,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
 
           <div className="flex justify-between mt-8">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={handlePrevious}
               disabled={currentStep === 0}
             >

@@ -437,15 +437,15 @@ export default function SettingsPage() {
                   <div className="pt-4 border-t">
                     <h4 className="font-medium mb-4">Gestão de Dados</h4>
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <Button variant="secondary" className="w-full text-blue-600 border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                         <Download className="w-4 h-4 mr-2" />
                         Baixar Meus Dados
                       </Button>
-                      <Button variant="outline" className="w-full text-yellow-600 border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
+                      <Button variant="secondary" className="w-full text-yellow-600 border-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
                         <EyeOff className="w-4 h-4 mr-2" />
                         Tornar Perfil Privado
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                      <Button variant="secondary" className="w-full text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
                         <AlertTriangle className="w-4 h-4 mr-2" />
                         Excluir Conta
                       </Button>
@@ -548,11 +548,11 @@ export default function SettingsPage() {
                     </div>
                     
                     <div className="mt-4 space-y-2">
-                      <Button variant="outline" className="w-full">
+                      <Button variant="secondary" className="w-full">
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Limpar Cache
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="secondary" className="w-full">
                         <Save className="w-4 h-4 mr-2" />
                         Otimizar Performance
                       </Button>
@@ -653,7 +653,7 @@ export default function SettingsPage() {
                     <div className="space-y-3">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Button 
-                          variant="outline" 
+                          variant="secondary" 
                           onClick={handleExportSettings}
                           className="flex-1"
                         >
@@ -661,7 +661,7 @@ export default function SettingsPage() {
                           Exportar Configurações
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="secondary" 
                           onClick={() => setShowImport(!showImport)}
                           className="flex-1"
                         >
@@ -683,7 +683,7 @@ export default function SettingsPage() {
                               Importar
                             </Button>
                             <Button 
-                              variant="outline" 
+                              variant="secondary" 
                               size="sm" 
                               onClick={() => {
                                 setShowImport(false)
@@ -697,7 +697,7 @@ export default function SettingsPage() {
                       )}
                       
                       <Button 
-                        variant="outline" 
+                        variant="secondary" 
                         onClick={handleResetSettings}
                         className="w-full text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
@@ -736,10 +736,10 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="pt-4 border-t space-y-3">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="secondary" className="w-full">
                       Verificar Atualizações
                     </Button>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="secondary" className="w-full">
                       Relatório de Sistema
                     </Button>
                   </div>

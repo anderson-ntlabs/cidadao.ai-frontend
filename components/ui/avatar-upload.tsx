@@ -194,7 +194,7 @@ export function AvatarUpload({
         <div className="absolute -bottom-12 left-0 right-0 flex justify-center gap-2">
           <Button
             size="sm"
-            variant="outline"
+            variant="secondary"
             onClick={cancelPreview}
             className="bg-white"
           >

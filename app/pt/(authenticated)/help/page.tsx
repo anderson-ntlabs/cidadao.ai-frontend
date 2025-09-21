@@ -77,7 +77,7 @@ export default function HelpCenterPage() {
             <h3 className="text-lg font-semibold mb-4">Este artigo foi útil?</h3>
             <div className="flex items-center gap-4">
               <Button
-                variant={articleFeedback[selectedArticle.id] === 'helpful' ? 'default' : 'outline'}
+                variant={articleFeedback[selectedArticle.id] === 'helpful' ? 'default' : 'secondary'}
                 size="sm"
                 onClick={() => handleArticleFeedback(selectedArticle.id, 'helpful')}
               >
@@ -85,7 +85,7 @@ export default function HelpCenterPage() {
                 Sim ({(selectedArticle.helpful || 0) + (articleFeedback[selectedArticle.id] === 'helpful' ? 1 : 0)})
               </Button>
               <Button
-                variant={articleFeedback[selectedArticle.id] === 'not-helpful' ? 'default' : 'outline'}
+                variant={articleFeedback[selectedArticle.id] === 'not-helpful' ? 'default' : 'secondary'}
                 size="sm"
                 onClick={() => handleArticleFeedback(selectedArticle.id, 'not-helpful')}
               >
@@ -272,7 +272,7 @@ export default function HelpCenterPage() {
               <Button onClick={() => router.push('/pt/chat')}>
                 Abrir Chat
               </Button>
-              <Button variant="outline">
+              <Button variant="secondary">
                 Falar com Suporte
               </Button>
             </div>
