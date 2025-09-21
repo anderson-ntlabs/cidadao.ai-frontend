@@ -1,4 +1,6 @@
-const withPWA = require('@ducanh2912/next-pwa')({
+const withPWAInit = require('@ducanh2912/next-pwa');
+
+const withPWA = withPWAInit.default({
   dest: 'public',
   register: true,
   skipWaiting: true,
