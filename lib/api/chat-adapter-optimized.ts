@@ -47,8 +47,8 @@ export async function sendOptimizedMessage(request: ChatRequest): Promise<ChatRe
       trackChatMessage(payload.session_id, request.message, 'optimized');
     }
     
-    // Call the optimized endpoint
-    const response = await api.post<OptimizedResponse>('/api/v1/chat/optimized', payload);
+    // Call the chat endpoint
+    const response = await api.post<OptimizedResponse>('/api/v1/chat/message', payload);
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');

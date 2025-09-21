@@ -65,8 +65,19 @@ export function AuthLayoutV2({
   ]
   
   return (
-    <div className={cn("min-h-screen bg-gray-50 dark:bg-gray-900", className)}>
-      {/* Header - Fixed at top */}
+    <div className={cn("min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden", className)}>
+      {/* Animated gradient overlay - matching landing page */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"></div>
+      </div>
+      
+      {/* Topography pattern - matching landing page */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundSize: '30px 30px'
+      }} />
+      
+      {/* Header - Fixed at top with backdrop blur */}
       <HeaderV2 
         locale={locale}
         user={user}
@@ -75,6 +86,7 @@ export function AuthLayoutV2({
       
       {/* Main content - Add padding for fixed header */}
       <main className={cn(
+        "relative z-10",
         "pt-16", // Space for fixed header
         showMobileNav && "pb-14 md:pb-0", // Space for mobile nav on mobile only
         contentClassName
@@ -124,7 +136,18 @@ export function AuthLayoutV2WithSidebar({
   ]
   
   return (
-    <div className={cn("min-h-screen bg-gray-50 dark:bg-gray-900", className)}>
+    <div className={cn("min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden", className)}>
+      {/* Animated gradient overlay */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"></div>
+      </div>
+      
+      {/* Topography pattern */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundSize: '30px 30px'
+      }} />
+      
       {/* Header */}
       <HeaderV2 
         locale={locale}
@@ -132,10 +155,10 @@ export function AuthLayoutV2WithSidebar({
         navigationItems={navigationItems}
       />
       
-      <div className="flex pt-16">
+      <div className="flex pt-16 relative z-10">
         {/* Sidebar - Hidden on mobile */}
         <aside className={cn(
-          "hidden md:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700",
+          "hidden md:block w-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-700/50",
           "transition-all duration-300",
           !isSidebarOpen && "md:w-16"
         )}>

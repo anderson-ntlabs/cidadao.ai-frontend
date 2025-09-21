@@ -3,22 +3,22 @@ import { cn } from "@/lib/utils"
 import { type VariantProps, cva } from "class-variance-authority"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg text-button font-medium transition-button focus-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-gradient-primary text-white hover:shadow-card-hover hover-lift hover-glow",
-        secondary: "border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-brand-green-600 dark:hover:border-brand-green-400 text-gray-700 dark:text-gray-300",
-        ghost: "text-gray-700 dark:text-gray-300 hover:text-brand-green-600 dark:hover:text-brand-green-400 hover:bg-gray-50 dark:hover:bg-gray-800",
-        destructive: "bg-brand-red-600 text-white hover:bg-red-700 hover:shadow-card-hover",
-        success: "bg-brand-green-600 text-white hover:bg-brand-green-700 hover:shadow-card-hover",
-        warning: "bg-brand-yellow-600 text-white hover:bg-brand-yellow-500 hover:shadow-card-hover"
+        primary: "bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 hover:shadow-xl focus:ring-green-500 hover-lift hover-glow",
+        secondary: "border-2 border-gray-300 dark:border-gray-600 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:border-green-600 dark:hover:border-green-400 hover:shadow-lg text-gray-700 dark:text-gray-300 transition-all",
+        ghost: "text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 backdrop-blur-sm",
+        destructive: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 hover:shadow-xl focus:ring-red-500",
+        success: "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:shadow-xl focus:ring-green-500",
+        warning: "bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 hover:shadow-xl focus:ring-yellow-500"
       },
       size: {
-        sm: "h-8 p-button-sm text-sm",
-        md: "h-10 p-button text-base",
-        lg: "h-12 p-button-lg text-lg",
-        xl: "h-14 px-10 py-4 text-xl",
+        sm: "h-8 px-3 text-sm",
+        md: "h-10 px-4 text-base",
+        lg: "h-12 px-6 text-lg",
+        xl: "h-14 px-8 py-4 text-xl",
         icon: "h-10 w-10 p-0"
       }
     },

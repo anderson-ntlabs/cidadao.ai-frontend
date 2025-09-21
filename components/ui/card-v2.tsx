@@ -3,14 +3,14 @@ import { cn } from "@/lib/utils"
 import { type VariantProps, cva } from "class-variance-authority"
 
 const cardVariants = cva(
-  "rounded-lg transition-card",
+  "rounded-2xl transition-all duration-300",
   {
     variants: {
       variant: {
-        elevated: "bg-white dark:bg-gray-800 shadow-card hover:shadow-card-hover",
-        outlined: "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-brand-green-600 dark:hover:border-brand-green-400",
-        ghost: "bg-transparent",
-        filled: "bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+        elevated: "bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-xl hover:shadow-2xl border border-gray-200/20 dark:border-gray-700/20",
+        outlined: "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:border-green-600/50 dark:hover:border-green-400/50",
+        ghost: "bg-transparent hover:bg-white/5 dark:hover:bg-gray-800/5",
+        filled: "bg-gray-50/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-100/50 dark:border-gray-800/50"
       },
       padding: {
         none: "",
@@ -197,7 +197,7 @@ const CardV2Stat = React.forwardRef<
       )}
     </div>
     {/* Decorative gradient */}
-    <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-brand-green-600 to-brand-blue-600" />
+    <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600" />
   </CardV2>
 ))
 CardV2Stat.displayName = "CardV2Stat"

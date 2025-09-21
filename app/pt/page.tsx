@@ -12,7 +12,20 @@ export default function PTPage() {
   const t = getTranslations('pt')
   
   return (
-    <>
+    <div className="relative">
+      {/* Global background image - very subtle */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url('/operarios.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.02
+        }}
+      />
+      
+      <div className="relative z-10">
       <LoadingScreen />
       {/* Hero Section */}
       <section className="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden">
@@ -242,6 +255,7 @@ export default function PTPage() {
 
 
       <InstallPWA />
-    </>
+      </div>
+    </div>
   )
 }

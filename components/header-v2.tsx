@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Menu, X, LogOut, User as UserIcon } from 'lucide-react'
+import { Menu, X, LogOut, User as UserIcon, Settings } from 'lucide-react'
 import { NavigationV2, NavigationV2Drawer, type NavigationItem } from './navigation-v2'
 import { ButtonV2 } from './ui/button-v2'
 import { NotificationDropdown } from './ui/notification-dropdown'
@@ -49,9 +49,9 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50",
-      "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md",
-      "border-b border-gray-200 dark:border-gray-800",
-      "shadow-sm",
+      "bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg",
+      "border-b border-gray-200/50 dark:border-gray-800/50",
+      "shadow-lg",
       className
     )}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6" role="navigation">
@@ -63,17 +63,10 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
               className="flex items-center gap-3 group"
               aria-label="Cidadão.AI Home"
             >
-              <div className="relative w-10 h-10 transition-transform group-hover:scale-110">
-                <Image
-                  src="/icon.svg"
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="w-full h-full"
-                  priority
-                />
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:scale-110">
+                <span className="text-white font-bold text-xl">C</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-brand-green-600 to-brand-blue-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
                 Cidadão.AI
               </span>
             </Link>
@@ -104,7 +97,7 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
                   size="sm"
                   className="flex items-center gap-2"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-brand-green-600 to-brand-blue-600 flex items-center justify-center text-white font-medium">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 via-yellow-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-md">
                     {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <span className="max-w-[150px] truncate">
@@ -114,7 +107,7 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
                 
                 {/* Dropdown Menu */}
                 <div className="absolute right-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2">
+                  <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-lg shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2">
                     <NavigationV2
                       items={userMenuItems}
                       variant="vertical"
@@ -195,6 +188,3 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
     </header>
   )
 }
-
-// Add missing import
-import { Settings } from 'lucide-react'

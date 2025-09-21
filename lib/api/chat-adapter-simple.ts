@@ -31,8 +31,8 @@ export async function sendSimpleMessage(request: ChatRequest): Promise<ChatRespo
     // Track message
     trackChatMessage(payload.session_id, request.message, 'chat');
     
-    // Call the simple endpoint
-    const response = await api.post<SimpleResponse>('/api/v1/chat/simple', payload);
+    // Call the chat endpoint
+    const response = await api.post<SimpleResponse>('/api/v1/chat/message', payload);
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');

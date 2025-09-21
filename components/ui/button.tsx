@@ -20,3 +20,6 @@ export const buttonVariants = useNewDesign ? buttonVariantsV2 : buttonVariantsV1
 // Re-export types from the active version
 export type { ButtonProps } from './button-v1'
 export type { ButtonV2Props } from './button-v2'
+
+// Export the correct type based on feature flag
+export type ButtonPropsActive = typeof Button extends React.FC<infer P> ? P : never
