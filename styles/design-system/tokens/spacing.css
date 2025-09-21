@@ -1,0 +1,83 @@
+/*
+ * Design System v2 - Spacing Tokens
+ * Cidadão.AI - Consistent spacing scale
+ * 
+ * Base unit: 4px - Provides flexibility while maintaining consistency
+ * Scale: Linear progression with larger jumps at higher values
+ */
+
+:root {
+  /* ========================================
+     Base Spacing Scale
+     ======================================== */
+  
+  /* Foundation spacing values */
+  --space-0: 0;
+  --space-1: 4px;   /* 0.25rem */
+  --space-2: 8px;   /* 0.5rem */
+  --space-3: 12px;  /* 0.75rem */
+  --space-4: 16px;  /* 1rem */
+  --space-5: 20px;  /* 1.25rem */
+  --space-6: 24px;  /* 1.5rem */
+  --space-8: 32px;  /* 2rem */
+  --space-10: 40px; /* 2.5rem */
+  --space-12: 48px; /* 3rem */
+  --space-16: 64px; /* 4rem */
+  --space-20: 80px; /* 5rem */
+  --space-24: 96px; /* 6rem */
+  
+  /* ========================================
+     Component-Specific Spacing
+     ======================================== */
+  
+  /* Button spacing */
+  --button-padding-x-sm: var(--space-3);
+  --button-padding-y-sm: var(--space-2);
+  --button-padding-x: var(--space-6);
+  --button-padding-y: var(--space-3);
+  --button-padding-x-lg: var(--space-8);
+  --button-padding-y-lg: var(--space-4);
+  
+  /* Card spacing */
+  --card-padding-sm: var(--space-4);
+  --card-padding: var(--space-6);
+  --card-padding-lg: var(--space-8);
+  --card-gap: var(--space-4);
+  
+  /* Form spacing */
+  --form-gap: var(--space-4);
+  --form-group-gap: var(--space-6);
+  --input-padding-x: var(--space-4);
+  --input-padding-y: var(--space-3);
+  
+  /* Layout spacing */
+  --section-spacing-sm: var(--space-12);
+  --section-spacing: var(--space-20);
+  --section-spacing-lg: var(--space-24);
+  --container-padding-x: var(--space-6);
+  
+  /* Navigation spacing */
+  --nav-item-gap: var(--space-8);
+  --nav-padding-x: var(--space-4);
+  --nav-padding-y: var(--space-3);
+  --breadcrumb-gap: var(--space-2);
+  
+  /* Modal/Dialog spacing */
+  --modal-padding: var(--space-6);
+  --modal-header-padding: var(--space-6);
+  --modal-footer-padding: var(--space-4);
+  --modal-gap: var(--space-4);
+  
+  /* List spacing */
+  --list-item-gap: var(--space-2);
+  --list-group-gap: var(--space-4);
+  
+  /* ========================================
+     Responsive Spacing Modifiers
+     ======================================== */
+  
+  /* Mobile adjustments */
+  --mobile-container-padding-x: var(--space-4);
+  --mobile-section-spacing: var(--space-12);
+  --mobile-card-padding: var(--space-4);
+}
