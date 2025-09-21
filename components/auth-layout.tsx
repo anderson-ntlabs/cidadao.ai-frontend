@@ -14,6 +14,3 @@ const useNewDesign = process.env.NEXT_PUBLIC_USE_NEW_DESIGN === 'true'
 // Export the appropriate component based on feature flag
 export const AuthLayout = useNewDesign ? AuthLayoutV2 : AuthLayoutV1
 export const AuthLayoutWithSidebar = useNewDesign ? AuthLayoutV2WithSidebar : AuthLayoutV1
-
-// Re-export types
-export type { AuthLayoutProps } from './auth-layout-v1'
