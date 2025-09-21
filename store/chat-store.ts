@@ -151,6 +151,9 @@ export const useChatStore = create<ChatStore>()(
               });
               
               console.log('Chat service response:', response);
+              console.log('Response message field:', response?.message);
+              console.log('Response type:', typeof response);
+              console.log('Response keys:', response ? Object.keys(response) : 'null');
               
               if (response) {
                 // Add assistant response
@@ -158,7 +161,7 @@ export const useChatStore = create<ChatStore>()(
                   id: `msg_${Date.now()}_assistant`,
                   session_id: response.session_id,
                   role: 'assistant',
-                  content: response.message,
+                  content: response.message || response.content || 'Desculpe, não consegui processar sua mensagem.',
                   agent_id: response.agent_id,
                   agent_name: response.agent_name,
                   timestamp: new Date().toISOString(),

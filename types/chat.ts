@@ -34,7 +34,7 @@ export interface ChatResponse {
   agent_id: string;
   agent_name: string;
   message: string;
-  confidence: float;
+  confidence: number;
   suggested_actions?: string[];
   requires_input?: Record<string, string>;
   metadata: Record<string, any>;
