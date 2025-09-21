@@ -1,46 +1,20 @@
-'use client'
+/*
+ * Breadcrumbs Component with Feature Flag
+ * 
+ * This file exports the appropriate breadcrumbs component based on the
+ * NEXT_PUBLIC_USE_NEW_DESIGN environment variable.
+ */
 
-import Link from 'next/link'
-import { ChevronRight, Home } from 'lucide-react'
+import { Breadcrumbs as BreadcrumbsV1, type BreadcrumbItem } from './breadcrumbs-v1'
+import { BreadcrumbsV2, BreadcrumbsV2Mobile, BreadcrumbsV2Schema, type BreadcrumbItemV2 } from './breadcrumbs-v2'
 
-export interface BreadcrumbItem {
-  label: string
-  href?: string
-}
+// Feature flag to enable gradual migration
+const useNewDesign = process.env.NEXT_PUBLIC_USE_NEW_DESIGN === 'true'
 
-interface BreadcrumbsProps {
-  items: BreadcrumbItem[]
-}
+// Export the appropriate component based on feature flag
+export const Breadcrumbs = useNewDesign ? BreadcrumbsV2 : BreadcrumbsV1
+export const BreadcrumbsMobile = useNewDesign ? BreadcrumbsV2Mobile : null
+export const BreadcrumbsSchema = useNewDesign ? BreadcrumbsV2Schema : null
 
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
-  return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 py-3">
-      {/* Home */}
-      <Link 
-        href="/pt" 
-        className="hover:text-green-600 dark:hover:text-green-400 transition-colors"
-        aria-label="Início"
-      >
-        <Home className="w-4 h-4" />
-      </Link>
-      
-      {items.map((item, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <ChevronRight className="w-3 h-3 text-gray-400" />
-          {item.href && index < items.length - 1 ? (
-            <Link 
-              href={item.href} 
-              className="hover:text-green-600 dark:hover:text-green-400 transition-colors"
-            >
-              {item.label}
-            </Link>
-          ) : (
-            <span className="text-gray-800 dark:text-gray-200 font-medium">
-              {item.label}
-            </span>
-          )}
-        </div>
-      ))}
-    </nav>
-  )
-}
+// Re-export types
+export type { BreadcrumbItem, BreadcrumbItemV2 }
