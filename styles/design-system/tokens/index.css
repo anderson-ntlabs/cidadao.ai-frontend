@@ -7,10 +7,10 @@
 @import './colors.css';
 
 /* Spacing tokens - consistent spacing scale */
-/* @import './spacing.css'; */
+@import './spacing.css';
 
 /* Typography tokens - font sizes and line heights */
-/* @import './typography.css'; */
+@import './typography.css';
 
 /* Animation tokens - consistent transitions */
 /* @import './animations.css'; */
