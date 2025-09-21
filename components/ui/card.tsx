@@ -42,6 +42,3 @@ export const cardVariants = useNewDesign ? cardVariantsV2 : cardVariantsV1
 // New components only available in v2
 export const CardBadge = useNewDesign ? CardV2Badge : null
 export const CardStat = useNewDesign ? CardV2Stat : null
-
-// Re-export types
-export type { CardProps } from './card-v1'
