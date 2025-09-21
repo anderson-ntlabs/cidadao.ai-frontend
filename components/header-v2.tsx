@@ -87,7 +87,7 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
             <NotificationDropdown locale={locale} />
             
             {/* Theme Toggle */}
-            <ThemeToggle locale={locale} />
+            <ThemeToggle />
 
             {/* User Menu - Desktop */}
             <div className="hidden lg:flex items-center gap-2">
