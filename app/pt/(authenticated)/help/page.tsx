@@ -247,8 +247,8 @@ export default function HelpCenterPage() {
                     Nenhum artigo encontrado.
                   </p>
                   <Button
-                    variant="link"
-                    className="mt-4"
+                    variant="ghost"
+                    className="mt-4 text-blue-600 hover:text-blue-700"
                     onClick={() => {
                       setSearchQuery('')
                       setSelectedCategory(null)
