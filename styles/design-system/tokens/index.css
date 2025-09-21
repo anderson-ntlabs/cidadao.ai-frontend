@@ -1,0 +1,19 @@
+/*
+ * Design System v2 - Token Index
+ * Import all design tokens in the correct order
+ */
+
+/* Color tokens - foundation of the design system */
+@import './colors.css';
+
+/* Spacing tokens - consistent spacing scale */
+/* @import './spacing.css'; */
+
+/* Typography tokens - font sizes and line heights */
+/* @import './typography.css'; */
+
+/* Animation tokens - consistent transitions */
+/* @import './animations.css'; */
+
+/* Shadow tokens - elevation system */
+/* @import './shadows.css'; */

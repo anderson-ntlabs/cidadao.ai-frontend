@@ -1,0 +1,130 @@
+/* 
+ * Design System v2 - Color Tokens
+ * Cidadão.AI - Brazilian Government Transparency Platform
+ * 
+ * Based on brand identity extracted from current implementation
+ */
+
+:root {
+  /* ========================================
+     Brand Colors - Core Identity
+     ======================================== */
+  
+  /* Green - Primary brand color */
+  --cidadao-green-500: #22c55e;
+  --cidadao-green-600: #16a34a;
+  --cidadao-green-700: #15803d;
+  
+  /* Blue - Secondary brand color */
+  --cidadao-blue-500: #3b82f6;
+  --cidadao-blue-600: #2563eb;
+  --cidadao-blue-700: #1d4ed8;
+  
+  /* Yellow - Accent/Alert color */
+  --cidadao-yellow-500: #eab308;
+  --cidadao-yellow-600: #ca8a04;
+  
+  /* Additional brand colors */
+  --cidadao-purple-600: #9333ea;
+  --cidadao-red-600: #dc2626;
+  
+  /* ========================================
+     Semantic Color Tokens
+     ======================================== */
+  
+  /* Primary - Main actions and brand presence */
+  --color-primary: var(--cidadao-green-600);
+  --color-primary-hover: var(--cidadao-green-700);
+  --color-primary-light: var(--cidadao-green-500);
+  
+  /* Secondary - Complementary actions */
+  --color-secondary: var(--cidadao-blue-600);
+  --color-secondary-hover: var(--cidadao-blue-700);
+  --color-secondary-light: var(--cidadao-blue-500);
+  
+  /* Accent - Highlights and alerts */
+  --color-accent: var(--cidadao-yellow-600);
+  --color-accent-light: var(--cidadao-yellow-500);
+  
+  /* System colors */
+  --color-success: var(--cidadao-green-600);
+  --color-warning: var(--cidadao-yellow-600);
+  --color-danger: var(--cidadao-red-600);
+  --color-info: var(--cidadao-blue-600);
+  
+  /* ========================================
+     Neutral Scale - Simplified grayscale
+     ======================================== */
+  
+  --color-neutral-50: #f9fafb;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-500: #6b7280;
+  --color-neutral-700: #374151;
+  --color-neutral-900: #111827;
+  
+  /* ========================================
+     Surface Colors - Backgrounds and cards
+     ======================================== */
+  
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: var(--color-neutral-50);
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Borders and dividers */
+  --color-border: var(--color-neutral-200);
+  --color-border-hover: var(--color-neutral-500);
+  
+  /* Text colors */
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-muted: var(--color-neutral-500);
+  --color-text-inverse: #ffffff;
+}
+
+/* ========================================
+   Dark Mode Overrides
+   ======================================== */
+
+.dark {
+  /* Adjust brand colors for dark mode */
+  --cidadao-green-500: #22c55e;
+  --cidadao-green-600: #16a34a;
+  --cidadao-green-700: #14532d;
+  
+  --cidadao-blue-500: #60a5fa;
+  --cidadao-blue-600: #3b82f6;
+  --cidadao-blue-700: #2563eb;
+  
+  /* Dark mode surfaces */
+  --color-surface-primary: #1f2937;
+  --color-surface-secondary: #111827;
+  --color-surface-elevated: #374151;
+  --color-surface-overlay: rgba(0, 0, 0, 0.8);
+  
+  /* Dark mode borders */
+  --color-border: #374151;
+  --color-border-hover: #6b7280;
+  
+  /* Dark mode text */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #e5e7eb;
+  --color-text-muted: #9ca3af;
+  --color-text-inverse: #111827;
+}
+
+/* ========================================
+   Gradients - Brand signature
+   ======================================== */
+
+:root {
+  /* Main brand gradient */
+  --gradient-brand: linear-gradient(to right, var(--cidadao-green-600), var(--cidadao-yellow-500), var(--cidadao-blue-600));
+  
+  /* Button gradients */
+  --gradient-primary: linear-gradient(to right, var(--cidadao-green-600), var(--cidadao-blue-600));
+  --gradient-secondary: linear-gradient(to right, var(--cidadao-blue-600), var(--cidadao-purple-600));
+  
+  /* Overlay gradients */
+  --gradient-overlay-light: linear-gradient(to top right, rgba(34, 197, 94, 0.1), transparent, rgba(59, 130, 246, 0.1));
+}
