@@ -31,9 +31,11 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   generateEtags: true,
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Fix para o erro do webpack no Vercel
-    config.optimization.minimize = true
+    if (!isServer && process.env.VERCEL) {
+      config.optimization.minimize = false
+    }
     return config
   },
 }
