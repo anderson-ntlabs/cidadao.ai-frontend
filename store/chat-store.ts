@@ -161,7 +161,7 @@ export const useChatStore = create<ChatStore>()(
                   id: `msg_${Date.now()}_assistant`,
                   session_id: response.session_id,
                   role: 'assistant',
-                  content: response.message || response.content || 'Desculpe, não consegui processar sua mensagem.',
+                  content: response.message || 'Desculpe, não consegui processar sua mensagem.',
                   agent_id: response.agent_id,
                   agent_name: response.agent_name,
                   timestamp: new Date().toISOString(),
