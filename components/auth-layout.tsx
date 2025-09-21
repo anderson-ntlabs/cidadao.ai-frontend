@@ -1,53 +1,19 @@
-'use client'
+/*
+ * AuthLayout Component with Feature Flag
+ * 
+ * This file exports the appropriate auth layout component based on the
+ * NEXT_PUBLIC_USE_NEW_DESIGN environment variable.
+ */
 
-import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { AuthHeader } from './auth-header'
-import { LoadingScreen } from './loading-screen'
+import { AuthLayout as AuthLayoutV1 } from './auth-layout-v1'
+import { AuthLayoutV2, AuthLayoutV2WithSidebar } from './auth-layout-v2'
 
-interface AuthLayoutProps {
-  children: React.ReactNode
-  locale: 'pt' | 'en'
-}
+// Feature flag to enable gradual migration
+const useNewDesign = process.env.NEXT_PUBLIC_USE_NEW_DESIGN === 'true'
 
-export function AuthLayout({ children, locale }: AuthLayoutProps) {
-  const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  const pathname = usePathname()
-  
-  useEffect(() => {
-    const checkAuth = () => {
-      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-      const userData = localStorage.getItem('user')
-      
-      if (!isAuthenticated) {
-        // Salva a URL que o usuário estava tentando acessar
-        localStorage.setItem('redirectAfterLogin', pathname)
-        router.push(`/${locale}/login`)
-        return
-      }
-      
-      if (userData) {
-        setUser(JSON.parse(userData))
-      }
-      
-      setIsLoading(false)
-    }
-    
-    checkAuth()
-  }, [router, locale, pathname])
-  
-  if (isLoading) {
-    return <LoadingScreen />
-  }
-  
-  return (
-    <div className="min-h-screen flex flex-col">
-      <AuthHeader locale={locale} user={user} />
-      <main className="pt-16 flex-1">
-        {children}
-      </main>
-    </div>
-  )
-}
+// Export the appropriate component based on feature flag
+export const AuthLayout = useNewDesign ? AuthLayoutV2 : AuthLayoutV1
+export const AuthLayoutWithSidebar = useNewDesign ? AuthLayoutV2WithSidebar : AuthLayoutV1
+
+// Re-export types
+export type { AuthLayoutProps } from './auth-layout-v1'
