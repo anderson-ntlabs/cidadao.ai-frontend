@@ -85,13 +85,13 @@ const generateAgentPerformanceData = () => [
 // Chart Card Component using CardV2
 function ChartCard({ title, description, children, onRefresh, isLoading }: any) {
   return (
-    <CardV2 variant="elevated">
+    <CardV2 variant="elevated" className="bg-white/90 dark:bg-gray-900/90">
       <CardV2Header>
         <div className="flex items-start justify-between">
           <div>
-            <CardV2Title>{title}</CardV2Title>
+            <CardV2Title className="text-lg font-semibold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">{title}</CardV2Title>
             {description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-space-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {description}
               </p>
             )}
@@ -102,6 +102,7 @@ function ChartCard({ title, description, children, onRefresh, isLoading }: any) 
               size="icon"
               onClick={onRefresh}
               disabled={isLoading}
+              className="hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </ButtonV2>
@@ -246,23 +247,36 @@ export default function DashboardPageV2() {
         />
       )}
       
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen relative">
+        {/* Background Image - Operários */}
+        <div 
+          className="fixed inset-0 z-0 opacity-5"
+          style={{
+            backgroundImage: `url('/operarios.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        
+        {/* Content wrapper */}
+        <div className="relative z-10">
         {/* Header */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
-          <div className="max-w-7xl mx-auto px-space-6 py-space-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-4">
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50 dark:border-gray-700/50">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <Breadcrumbs items={[{ label: 'Dashboard Analítico' }]} />
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-space-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent mt-2">
                   Dashboard de Transparência
                 </h1>
               </div>
               
-              <div className="flex items-center gap-space-3">
+              <div className="flex items-center gap-3">
                 <select
                   value={timeRange}
                   onChange={(e) => setTimeRange(e.target.value)}
-                  className="px-space-3 py-space-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                  className="px-3 py-2 border border-gray-300/50 dark:border-gray-600/50 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-sm"
                 >
                   <option value="7days">Últimos 7 dias</option>
                   <option value="30days">Últimos 30 dias</option>
@@ -270,7 +284,7 @@ export default function DashboardPageV2() {
                 </select>
                 
                 <ButtonV2
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
                   onClick={handleRefresh}
                   disabled={isLoading}
@@ -281,21 +295,21 @@ export default function DashboardPageV2() {
                 <Dropdown
                   trigger={
                     <ButtonV2 disabled={isExporting} data-tour="export-button">
-                      <Download className="w-4 h-4 mr-space-2" />
+                      <Download className="w-4 h-4 mr-2" />
                       {isExporting ? 'Exportando...' : 'Exportar'}
                     </ButtonV2>
                   }
                 >
                   <button
                     onClick={handleExportCSV}
-                    className="flex items-center gap-space-2 w-full px-space-3 py-space-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <Download className="w-4 h-4" />
                     Exportar como CSV
                   </button>
                   <button
                     onClick={handleExportPDF}
-                    className="flex items-center gap-space-2 w-full px-space-3 py-space-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <Download className="w-4 h-4" />
                     Exportar Dashboard (PDF)
@@ -303,7 +317,7 @@ export default function DashboardPageV2() {
                   {selectedTab === 'financial' && (
                     <button
                       onClick={handleExportFinancial}
-                      className="flex items-center gap-space-2 w-full px-space-3 py-space-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <Download className="w-4 h-4" />
                       Relatório Financeiro (PDF)
@@ -314,21 +328,21 @@ export default function DashboardPageV2() {
             </div>
             
             {/* Last Update */}
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-space-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Última atualização: {format(lastUpdate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
             </p>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-space-6 py-space-8">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Key Metrics - Using CardV2Stat */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-6 mb-space-8" data-tour="dashboard-overview">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" data-tour="dashboard-overview">
             <CardV2Stat
               title="Investigações Totais"
               value={formatNumber(totalInvestigations)}
               description="no período selecionado"
               trend={{ value: 12, isPositive: true }}
-              icon={<FileSearch className="w-5 h-5 text-brand-blue-600" />}
+              icon={<FileSearch className="w-5 h-5 text-blue-600" />}
             />
             
             <CardV2Stat
@@ -336,7 +350,7 @@ export default function DashboardPageV2() {
               value={formatNumber(totalAnomalies)}
               description="redução é positiva"
               trend={{ value: 8, isPositive: false }}
-              icon={<AlertTriangle className="w-5 h-5 text-brand-red-600" />}
+              icon={<AlertTriangle className="w-5 h-5 text-red-600" />}
             />
             
             <CardV2Stat
@@ -344,7 +358,7 @@ export default function DashboardPageV2() {
               value={formatCurrency(4570000)}
               description="em recursos públicos"
               trend={{ value: 25, isPositive: true }}
-              icon={<DollarSign className="w-5 h-5 text-brand-green-600" />}
+              icon={<DollarSign className="w-5 h-5 text-green-600" />}
             />
             
             <CardV2Stat
@@ -352,7 +366,7 @@ export default function DashboardPageV2() {
               value={`${averagePrecision}%`}
               description="média dos agentes"
               trend={{ value: 2.3, isPositive: true }}
-              icon={<TrendingUp className="w-5 h-5 text-brand-purple-600" />}
+              icon={<TrendingUp className="w-5 h-5 text-purple-600" />}
             />
           </div>
 
@@ -361,9 +375,9 @@ export default function DashboardPageV2() {
             defaultValue="overview" 
             value={selectedTab}
             onValueChange={setSelectedTab}
-            className="space-y-space-6"
+            className="space-y-6"
           >
-            <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+            <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg p-1">
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="anomalies">Anomalias</TabsTrigger>
               <TabsTrigger value="agents">Agentes</TabsTrigger>
@@ -371,8 +385,8 @@ export default function DashboardPageV2() {
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-space-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-6">
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ChartCard
                   title="Atividade ao Longo do Tempo"
                   description="Investigações, anomalias e relatórios"
@@ -429,8 +443,8 @@ export default function DashboardPageV2() {
             </TabsContent>
 
             {/* Anomalies Tab */}
-            <TabsContent value="anomalies" className="space-y-space-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-6">
+            <TabsContent value="anomalies" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ChartCard
                   title="Tipos de Anomalias"
                   description="Distribuição por categoria"
@@ -470,8 +484,8 @@ export default function DashboardPageV2() {
             </TabsContent>
 
             {/* Agents Tab */}
-            <TabsContent value="agents" className="space-y-space-6" data-tour="agents-section">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-6">
+            <TabsContent value="agents" className="space-y-6" data-tour="agents-section">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <ChartCard
                   title="Performance dos Agentes"
                   description="Investigações concluídas por agente"
@@ -507,9 +521,9 @@ export default function DashboardPageV2() {
               </div>
 
               {/* Agent Status Cards - Using CardV2 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-space-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <CardV2>
-                  <CardV2Content className="p-space-4">
+                  <CardV2Content className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">Agentes Ativos</p>
@@ -521,7 +535,7 @@ export default function DashboardPageV2() {
                 </CardV2>
                 
                 <CardV2>
-                  <CardV2Content className="p-space-4">
+                  <CardV2Content className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">Em Investigação</p>
@@ -533,13 +547,13 @@ export default function DashboardPageV2() {
                 </CardV2>
                 
                 <CardV2>
-                  <CardV2Content className="p-space-4">
+                  <CardV2Content className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">Tempo Médio</p>
                         <p className="text-2xl font-bold">2.3h</p>
                       </div>
-                      <Activity className="w-5 h-5 text-brand-blue-600" />
+                      <Activity className="w-5 h-5 text-blue-600" />
                     </div>
                   </CardV2Content>
                 </CardV2>
@@ -547,7 +561,7 @@ export default function DashboardPageV2() {
             </TabsContent>
 
             {/* Financial Tab */}
-            <TabsContent value="financial" className="space-y-space-6">
+            <TabsContent value="financial" className="space-y-6">
               <ChartCard
                 title="Economia Acumulada"
                 description="Recursos públicos economizados através das investigações"
@@ -571,12 +585,12 @@ export default function DashboardPageV2() {
                 />
               </ChartCard>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-space-6">
-                <CardV2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardV2 className="bg-white/90 dark:bg-gray-900/90">
                   <CardV2Header>
                     <CardV2Title>Top 5 Contratos Suspeitos</CardV2Title>
                   </CardV2Header>
-                  <CardV2Content className="space-y-space-3">
+                  <CardV2Content className="space-y-3">
                     {[
                       { contrato: 'CTR-2024-001', valor: 2340000, risco: 'alto' },
                       { contrato: 'CTR-2024-045', valor: 1890000, risco: 'alto' },
@@ -601,11 +615,11 @@ export default function DashboardPageV2() {
                   </CardV2Content>
                 </CardV2>
 
-                <CardV2>
+                <CardV2 className="bg-white/90 dark:bg-gray-900/90">
                   <CardV2Header>
                     <CardV2Title>Resumo Financeiro</CardV2Title>
                   </CardV2Header>
-                  <CardV2Content className="space-y-space-4">
+                  <CardV2Content className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Valor Total Investigado</span>
                       <span className="font-semibold">{formatCurrency(45700000)}</span>
@@ -618,9 +632,9 @@ export default function DashboardPageV2() {
                       <span className="text-gray-600">Taxa de Recuperação</span>
                       <span className="font-semibold">19.5%</span>
                     </div>
-                    <div className="flex justify-between items-center pt-space-3 border-t">
+                    <div className="flex justify-between items-center pt-3 border-t">
                       <span className="font-medium">Economia Total</span>
-                      <span className="font-bold text-brand-green-600">{formatCurrency(4570000)}</span>
+                      <span className="font-bold text-green-600">{formatCurrency(4570000)}</span>
                     </div>
                   </CardV2Content>
                 </CardV2>
@@ -628,6 +642,7 @@ export default function DashboardPageV2() {
             </TabsContent>
           </Tabs>
         </div>
+        </div> {/* Close content wrapper */}
       </div>
     </>
   )
