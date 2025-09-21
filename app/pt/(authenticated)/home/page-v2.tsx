@@ -305,7 +305,7 @@ export default function HomePageV2() {
                   <ButtonV2 
                     variant="primary"
                     size="sm"
-                    className="mt-space-3">
+                    className="mt-space-3"
                     rightIcon={<ChevronRight className="w-4 h-4" />}
                     onClick={() => router.push('/pt/chat')}
                   >
