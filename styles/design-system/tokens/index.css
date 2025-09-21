@@ -17,3 +17,6 @@
 
 /* Shadow tokens - elevation system */
 @import './shadows.css';
+
+/* Component styles - responsive grid system */
+@import '../components/grid.css';
