@@ -105,6 +105,57 @@ O componente Button foi o primeiro a ser migrado para o novo design system.
 <Button rightIcon={<ChevronRight />}>Próximo</Button>
 ```
 
+### Card v2
+
+O componente Card oferece múltiplas variantes para diferentes contextos.
+
+#### Variantes
+
+```tsx
+// Elevated - Padrão com sombra
+<Card variant="elevated">Conteúdo</Card>
+
+// Outlined - Com borda
+<Card variant="outlined">Conteúdo</Card>
+
+// Ghost - Sem fundo
+<Card variant="ghost">Conteúdo</Card>
+
+// Filled - Com fundo cinza
+<Card variant="filled">Conteúdo</Card>
+```
+
+#### Composição
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardBadge variant="success">Ativo</CardBadge>
+    <CardTitle>Título do Card</CardTitle>
+    <CardDescription>Descrição opcional</CardDescription>
+  </CardHeader>
+  <CardContent>
+    Conteúdo principal do card
+  </CardContent>
+  <CardFooter>
+    <span>Info</span>
+    <Button size="sm">Ação</Button>
+  </CardFooter>
+</Card>
+```
+
+#### Card de Estatísticas
+
+```tsx
+<CardStat
+  title="Investigações"
+  value="1,234"
+  description="Total este mês"
+  trend={{ value: 12, isPositive: true }}
+  icon={<FileText />}
+/>
+```
+
 ## 🚀 Como Usar
 
 ### 1. Ativar o Design System v2
@@ -201,8 +252,8 @@ tests/
 
 ### Componentes Migrados
 - [x] Button
-- [ ] Card (próximo)
-- [ ] Navigation
+- [x] Card
+- [ ] Navigation (próximo)
 - [ ] Breadcrumbs
 - [ ] Input
 - [ ] Modal
