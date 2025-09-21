@@ -154,6 +154,7 @@ export const useChatStore = create<ChatStore>()(
               console.log('Response message field:', response?.message);
               console.log('Response type:', typeof response);
               console.log('Response keys:', response ? Object.keys(response) : 'null');
+              console.log('Full response data:', JSON.stringify(response, null, 2));
               
               if (response) {
                 // Add assistant response

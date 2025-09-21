@@ -36,7 +36,7 @@ export async function sendOptimizedMessage(request: ChatRequest): Promise<ChatRe
     const payload: OptimizedRequest = {
       message: request.message,
       session_id: request.session_id || `opt_${Date.now()}`,
-      use_drummond: true, // Always use Drummond persona
+      // use_drummond: true, // Commented out - causes maintenance message
       context: request.context,
     };
 
