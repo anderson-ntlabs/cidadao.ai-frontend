@@ -4,7 +4,6 @@
 
 @import './accessibility.css';
 @import './design-system/tokens/index.css';
-@import './design-system/utilities.css';
 
 @layer base {
   :root {
