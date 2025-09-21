@@ -606,7 +606,7 @@ export default function DashboardPageV2() {
                         <CardV2Badge variant={
                           item.risco === 'alto' ? 'danger' : 
                           item.risco === 'médio' ? 'warning' : 
-                          'secondary'
+                          'info'
                         }>
                           Risco {item.risco}
                         </CardV2Badge>
