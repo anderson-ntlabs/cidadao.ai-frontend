@@ -52,26 +52,58 @@
      Shadow Utilities
      ======================================== */
   
-  /* Card shadows */
+  /* Card shadows using tokens */
   .shadow-card {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: var(--shadow-card);
   }
   
   .shadow-card-hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    box-shadow: var(--shadow-card-hover);
   }
   
   .shadow-card-elevated {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-card-elevated);
   }
   
-  /* Dark mode shadows */
-  .dark .shadow-card {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.48);
+  /* Additional shadow utilities */
+  .shadow-xs {
+    box-shadow: var(--shadow-xs);
   }
   
-  .dark .shadow-card-hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.32), 0 3px 6px rgba(0, 0, 0, 0.46);
+  .shadow-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .shadow-md {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .shadow-xl {
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .shadow-2xl {
+    box-shadow: var(--shadow-2xl);
+  }
+  
+  .shadow-button {
+    box-shadow: var(--shadow-button);
+  }
+  
+  .shadow-button-hover {
+    box-shadow: var(--shadow-button-hover);
+  }
+  
+  .shadow-inner {
+    box-shadow: var(--shadow-inner);
+  }
+  
+  .shadow-inner-lg {
+    box-shadow: var(--shadow-inner-lg);
   }
   
   /* ========================================
