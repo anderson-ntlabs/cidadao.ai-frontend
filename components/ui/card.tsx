@@ -1,108 +1,47 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { type VariantProps, cva } from "class-variance-authority"
+/*
+ * Card Component with Feature Flag
+ * 
+ * This file exports the appropriate card component based on the
+ * NEXT_PUBLIC_USE_NEW_DESIGN environment variable.
+ */
 
-const cardVariants = cva(
-  "rounded-lg border bg-card text-card-foreground",
-  {
-    variants: {
-      variant: {
-        default: "shadow-sm",
-        elevated: "shadow-md hover:shadow-lg transition-shadow",
-        outlined: "border-2",
-        ghost: "border-0 shadow-none"
-      },
-      padding: {
-        none: "",
-        sm: "p-3",
-        default: "p-6",
-        lg: "p-8",
-        xl: "p-10"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      padding: "default"
-    }
-  }
-)
+import { 
+  Card as CardV1, 
+  CardHeader as CardHeaderV1,
+  CardFooter as CardFooterV1,
+  CardTitle as CardTitleV1,
+  CardDescription as CardDescriptionV1,
+  CardContent as CardContentV1,
+  cardVariants as cardVariantsV1
+} from './card-v1'
 
-interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {
-  asChild?: boolean
-}
+import { 
+  CardV2, 
+  CardV2Header,
+  CardV2Footer,
+  CardV2Title,
+  CardV2Description,
+  CardV2Content,
+  CardV2Badge,
+  CardV2Stat,
+  cardVariants as cardVariantsV2
+} from './card-v2'
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, padding, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? React.Fragment : "div"
-    
-    return (
-      <Comp
-        ref={ref}
-        className={cn(cardVariants({ variant, padding }), className)}
-        {...props}
-      />
-    )
-  }
-)
+// Feature flag to enable gradual migration
+const useNewDesign = process.env.NEXT_PUBLIC_USE_NEW_DESIGN === 'true'
 
-Card.displayName = "Card"
+// Export the appropriate components based on feature flag
+export const Card = useNewDesign ? CardV2 : CardV1
+export const CardHeader = useNewDesign ? CardV2Header : CardHeaderV1
+export const CardFooter = useNewDesign ? CardV2Footer : CardFooterV1
+export const CardTitle = useNewDesign ? CardV2Title : CardTitleV1
+export const CardDescription = useNewDesign ? CardV2Description : CardDescriptionV1
+export const CardContent = useNewDesign ? CardV2Content : CardContentV1
+export const cardVariants = useNewDesign ? cardVariantsV2 : cardVariantsV1
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+// New components only available in v2
+export const CardBadge = useNewDesign ? CardV2Badge : null
+export const CardStat = useNewDesign ? CardV2Stat : null
 
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn("text-2xl font-semibold leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
-
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
-
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
-
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center border-t pt-6", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, cardVariants }
+// Re-export types
+export type { CardProps } from './card-v1'
