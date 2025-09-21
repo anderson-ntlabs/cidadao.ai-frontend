@@ -10,6 +10,7 @@ module.exports = {
   theme: {
   	extend: {
   		colors: {
+  			// Existing shadcn/ui colors
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
@@ -49,6 +50,29 @@ module.exports = {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			// New Design System v2 colors
+  			'brand': {
+  				'green': {
+  					500: 'var(--cidadao-green-500)',
+  					600: 'var(--cidadao-green-600)',
+  					700: 'var(--cidadao-green-700)',
+  				},
+  				'blue': {
+  					500: 'var(--cidadao-blue-500)',
+  					600: 'var(--cidadao-blue-600)',
+  					700: 'var(--cidadao-blue-700)',
+  				},
+  				'yellow': {
+  					500: 'var(--cidadao-yellow-500)',
+  					600: 'var(--cidadao-yellow-600)',
+  				},
+  				'purple': {
+  					600: 'var(--cidadao-purple-600)',
+  				},
+  				'red': {
+  					600: 'var(--cidadao-red-600)',
+  				}
   			}
   		},
   		fontFamily: {
