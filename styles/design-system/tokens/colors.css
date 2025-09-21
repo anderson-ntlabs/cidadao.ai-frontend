@@ -14,6 +14,7 @@
   --cidadao-green-500: #22c55e;
   --cidadao-green-600: #16a34a;
   --cidadao-green-700: #15803d;
+  --cidadao-green-800: #14532d; /* WCAG AA compliant with white */
   
   /* Blue - Secondary brand color */
   --cidadao-blue-500: #3b82f6;
@@ -23,6 +24,8 @@
   /* Yellow - Accent/Alert color */
   --cidadao-yellow-500: #eab308;
   --cidadao-yellow-600: #ca8a04;
+  --cidadao-yellow-700: #a16207; /* Better contrast for text */
+  --cidadao-yellow-800: #854d0e; /* WCAG AA compliant with white */
   
   /* Additional brand colors */
   --cidadao-purple-600: #9333ea;
