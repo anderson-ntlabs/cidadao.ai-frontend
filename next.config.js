@@ -29,6 +29,7 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   generateEtags: true,
+  swcMinify: false,
 }
 
 module.exports = withPWA(nextConfig)
