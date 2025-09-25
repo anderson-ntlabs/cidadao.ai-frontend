@@ -57,15 +57,16 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     // Convert backend response to frontend ChatResponse format
     return {
       session_id: data.session_id,
-      agent_id: data.agent_id || 'assistant',
-      agent_name: data.agent_name || mapAgentIdToName(data.agent_id || 'assistant'),
+      agent_id: data.agent_id || data.agent_used || 'assistant',
+      agent_name: data.agent_name || mapAgentIdToName(data.agent_id || data.agent_used || 'assistant'),
       message: messageText,
       confidence: data.confidence || 0.9,
-      suggested_actions: data.suggested_actions || [],
+      suggested_actions: data.suggested_actions || data.suggestions || [],
       metadata: {
         ...data.metadata,
         endpoint: 'backend',
         response_time: duration,
+        processing_time: data.processing_time,
       },
     };
     

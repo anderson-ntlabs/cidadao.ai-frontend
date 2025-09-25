@@ -42,12 +42,18 @@ export interface ChatResponse {
 
 // Backend API response structure
 export interface BackendChatMessageResponse {
-  response: string;
+  response?: string;  // Backend may use either response or message field
+  message?: string;   // Some endpoints use message instead of response
   session_id: string;
   message_id: string;
-  agent_used: string;
-  processing_time: number;
+  agent_used?: string;
+  agent_id?: string;  // Some endpoints return agent_id instead
+  agent_name?: string; // Optional agent name
+  processing_time?: number;
+  confidence?: number;
   suggestions?: string[];
+  suggested_actions?: string[]; // Alternative field name
+  metadata?: Record<string, any>;
 }
 
 export interface QuickAction {
