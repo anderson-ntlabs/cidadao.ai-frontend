@@ -34,9 +34,14 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     console.log('[Chat Backend] Response received in', duration, 'ms');
     console.log('[Chat Backend] Full response:', JSON.stringify(data, null, 2));
     
+    // Backend returns 'message' field, not 'response'
+    const messageText = data.message || data.response || '';
+    
     // Check if backend is returning maintenance message
-    const isMaintenanceMessage = data.response?.includes('sistema está em manutenção') || 
-                                data.response?.includes('em breve voltaremos');
+    const isMaintenanceMessage = messageText.includes('manutenção') || 
+                                messageText.includes('em breve') ||
+                                messageText.includes('temporariamente indisponível') ||
+                                data.agent_id === 'system';
     
     if (isMaintenanceMessage) {
       console.log('[Chat Backend] Backend is in maintenance mode');
@@ -44,7 +49,7 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
       throw new Error('Backend in maintenance mode');
     }
     
-    console.log('[Chat Backend] Agent used:', data.agent_used);
+    console.log('[Chat Backend] Agent used:', data.agent_id);
     
     // Track successful response
     trackChatResponse(payload.session_id, duration, false);
@@ -52,14 +57,13 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     // Convert backend response to frontend ChatResponse format
     return {
       session_id: data.session_id,
-      agent_id: data.agent_used || 'assistant',
-      agent_name: mapAgentIdToName(data.agent_used || 'assistant'),
-      message: data.response,
+      agent_id: data.agent_id || 'assistant',
+      agent_name: data.agent_name || mapAgentIdToName(data.agent_id || 'assistant'),
+      message: messageText,
       confidence: data.confidence || 0.9,
-      suggested_actions: data.suggestions || [],
+      suggested_actions: data.suggested_actions || [],
       metadata: {
-        message_id: data.message_id,
-        processing_time: data.processing_time,
+        ...data.metadata,
         endpoint: 'backend',
         response_time: duration,
       },
