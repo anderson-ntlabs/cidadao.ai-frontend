@@ -1,7 +1,5 @@
 import type { ChatRequest, ChatResponse } from '@/types/chat';
-import { sendSimpleMessage } from '@/lib/api/chat-adapter-simple';
-import { sendOptimizedMessage } from '@/lib/api/chat-adapter-optimized';
-import { sendStableMessage } from '@/lib/api/chat-adapter-stable';
+import { sendBackendMessage } from '@/lib/api/chat-adapter-backend';
 import { sendChatMessageV3 } from '@/lib/api/chat-adapter-v3';
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry';
 
@@ -29,28 +27,20 @@ export interface SmartChatOptions {
 export class SmartChatService {
   private endpoints: ChatEndpoint[] = [
     {
-      url: '/api/v1/chat/optimized',
-      name: 'Optimized (Sabiazinho-3)',
-      adapter: sendOptimizedMessage,
-      model: 'sabiazinho-3',
-      costLevel: 1,
+      url: '/api/v1/chat/message',
+      name: 'Backend Official',
+      adapter: sendBackendMessage,
+      model: 'multi-agent',
+      costLevel: 2,
       priority: 1,
     },
     {
-      url: '/api/v1/chat/stable',
-      name: 'Stable (Multi-fallback)',
-      adapter: sendStableMessage,
-      model: 'mixed',
-      costLevel: 2,
+      url: '/api/v1/chat/message',
+      name: 'Legacy Fallback',
+      adapter: sendChatMessageV3,
+      model: 'legacy',
+      costLevel: 1,
       priority: 2,
-    },
-    {
-      url: '/api/v1/chat/simple',
-      name: 'Simple (Sabiá-3)',
-      adapter: sendSimpleMessage,
-      model: 'sabia-3',
-      costLevel: 3,
-      priority: 3,
     },
   ];
 
