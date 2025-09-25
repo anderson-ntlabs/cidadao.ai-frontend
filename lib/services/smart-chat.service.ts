@@ -82,12 +82,15 @@ export class SmartChatService {
     // Select endpoints based on preference
     const selectedEndpoints = this.selectEndpoints(message, options);
     
+    console.log('[SmartChat] Selected endpoints order:', selectedEndpoints.map(e => e.name));
+    console.log('[SmartChat] Model preference:', options.preferredModel || 'default');
+    
     // Try each endpoint in order
     let lastError: Error | null = null;
     
     for (const endpoint of selectedEndpoints) {
       try {
-        console.log(`[SmartChat] Trying ${endpoint.name}...`);
+        console.log(`[SmartChat] Trying ${endpoint.name} (${endpoint.url})...`);
         
         const startTime = Date.now();
         const response = await this.tryEndpoint(endpoint, request, options.timeout);
@@ -155,8 +158,13 @@ export class SmartChatService {
     
     // Handle explicit preferences
     if (options.preferredModel === 'economic') {
-      // Sort by cost (cheapest first)
-      endpoints.sort((a, b) => a.costLevel - b.costLevel);
+      // Sort by cost (cheapest first) but prioritize Maritaca over legacy
+      endpoints.sort((a, b) => {
+        // Legacy fallback should always be last resort
+        if (a.model === 'legacy') return 1;
+        if (b.model === 'legacy') return -1;
+        return a.costLevel - b.costLevel;
+      });
     } else if (options.preferredModel === 'quality') {
       // Sort by cost (most expensive first = highest quality)
       endpoints.sort((a, b) => b.costLevel - a.costLevel);
@@ -165,16 +173,9 @@ export class SmartChatService {
       endpoints.sort((a, b) => 
         a.url.includes('stable') ? -1 : b.url.includes('stable') ? 1 : 0
       );
-    } else if (options.preferredModel === 'auto') {
-      // Auto mode - select based on complexity
-      if (complexity === 'simple') {
-        // Prefer economic for simple queries
-        endpoints.sort((a, b) => a.costLevel - b.costLevel);
-      } else if (complexity === 'complex') {
-        // Prefer quality for complex queries
-        endpoints.sort((a, b) => b.costLevel - a.costLevel);
-      }
-      // moderate complexity keeps default order
+    } else {
+      // Default: use priority field
+      endpoints.sort((a, b) => a.priority - b.priority);
     }
     
     return endpoints;
