@@ -33,7 +33,7 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -60,12 +60,32 @@ apiClient.interceptors.response.use(
       const { status, data } = error.response;
 
       // Handle authentication errors
-      if (status === 401) {
-        // Clear auth data and redirect to login if needed
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user');
-          // Could trigger a redirect here if needed
+      if (status === 401 && typeof window !== 'undefined') {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+        
+        // Try to refresh token if not already retrying
+        if (!originalRequest._retry) {
+          originalRequest._retry = true;
+          
+          try {
+            // Dynamic import to avoid circular dependency
+            const { authService } = await import('./auth.service');
+            await authService.refreshToken();
+            
+            // Retry original request with new token
+            const newToken = localStorage.getItem('access_token');
+            if (newToken) {
+              originalRequest.headers = originalRequest.headers || {};
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              return apiClient.request(originalRequest);
+            }
+          } catch (refreshError) {
+            // Refresh failed, clear auth data
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            // Redirect to login could be triggered here
+          }
         }
       }
 

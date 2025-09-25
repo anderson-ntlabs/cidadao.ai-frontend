@@ -1,21 +1,6 @@
 import { api } from './client';
-import type { ChatRequest, ChatResponse } from '@/types/chat';
+import type { ChatRequest, ChatResponse, BackendChatMessageResponse } from '@/types/chat';
 import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry';
-
-/**
- * Chat adapter for the official backend API
- * Follows the API specification from the backend documentation
- */
-
-// Backend response structure as per documentation
-interface BackendChatMessageResponse {
-  response: string;
-  session_id: string;
-  message_id: string;
-  agent_used: string;
-  processing_time: number;
-  suggestions?: string[];
-}
 
 /**
  * Send message to the official backend endpoint

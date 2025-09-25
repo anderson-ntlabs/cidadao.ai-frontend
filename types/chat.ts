@@ -40,6 +40,16 @@ export interface ChatResponse {
   metadata: Record<string, any>;
 }
 
+// Backend API response structure
+export interface BackendChatMessageResponse {
+  response: string;
+  session_id: string;
+  message_id: string;
+  agent_used: string;
+  processing_time: number;
+  suggestions?: string[];
+}
+
 export interface QuickAction {
   id: string;
   label: string;
