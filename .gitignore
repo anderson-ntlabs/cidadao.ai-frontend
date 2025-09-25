@@ -77,6 +77,12 @@ next-steps.md
 *next-steps*
 planning/
 *.planning
+*ROADMAP*
+*PLAN*.md
+*STATUS*.md
+docs/*ROADMAP*
+docs/*PLAN*
+docs/*STATUS*
 
 # Security sensitive files
 .secrets/
