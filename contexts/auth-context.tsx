@@ -1,80 +1,26 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { createContext, useContext, ReactNode } from 'react'
+import { useAuth } from '@/hooks/use-auth'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  provider: string
-  avatar: string
-  createdAt: string
-}
+type AuthContextType = ReturnType<typeof useAuth>
 
-interface AuthContextType {
-  user: User | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (user: User) => void
-  logout: () => void
-}
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  login: () => {},
-  logout: () => {}
-})
+const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  
-  useEffect(() => {
-    // Verifica se há usuário no localStorage
-    const storedUser = localStorage.getItem('user')
-    const isAuth = localStorage.getItem('isAuthenticated')
-    
-    if (storedUser && isAuth === 'true') {
-      setUser(JSON.parse(storedUser))
-    }
-    
-    setIsLoading(false)
-  }, [])
-  
-  const login = (userData: User) => {
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-    localStorage.setItem('isAuthenticated', 'true')
-  }
-  
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-    localStorage.removeItem('isAuthenticated')
-    router.push('/')
-  }
+  const auth = useAuth()
   
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated: !!user,
-      isLoading,
-      login,
-      logout
-    }}>
+    <AuthContext.Provider value={auth}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export const useAuth = () => {
+export function useAuthContext() {
   const context = useContext(AuthContext)
   if (!context) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider')
+    throw new Error('useAuthContext must be used within AuthProvider')
   }
   return context
 }
