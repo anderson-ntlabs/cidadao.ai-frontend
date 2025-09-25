@@ -13,6 +13,7 @@ import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './ch
 import { sendChatMessage } from './chat-adapter-v2';
 import { sendChatMessageV3 } from './chat-adapter-v3';
 import { sendSimpleMessage } from './chat-adapter-simple';
+import { sendBackendMessage } from './chat-adapter-backend';
 import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
 import { isFeatureEnabled } from '@/lib/feature-flags';
 
@@ -49,24 +50,23 @@ export const chatService = {
         return response;
       }
       
-      // Original fallback logic
-      console.log('Using legacy chat adapters');
+      // Use the official backend adapter
+      console.log('Using official backend adapter');
       
-      // Tentar primeiro o endpoint simple que está 100% funcional com Maritaca
-      console.log('Trying /api/v1/chat/simple endpoint first...');
       try {
-        const response = await sendSimpleMessage(request);
-        console.log('✅ Maritaca AI responded successfully');
+        const response = await sendBackendMessage(request);
+        console.log('✅ Backend responded successfully');
         return response;
-      } catch (simpleError) {
-        console.log('Simple endpoint failed, falling back to v3 adapter...');
+      } catch (backendError) {
+        console.error('Backend adapter failed:', backendError);
+        
+        // Fallback to v3 adapter for backwards compatibility
+        console.log('Falling back to v3 adapter...');
+        const response = await sendChatMessageV3(request);
+        console.log('Chat response from v3:', response);
+        
+        return response;
       }
-      
-      // Fallback para o adapter v3 se o simple falhar
-      const response = await sendChatMessageV3(request);
-      console.log('Chat response from v3:', response);
-      
-      return response;
       
     } catch (error) {
       console.error('Chat service error:', error);
