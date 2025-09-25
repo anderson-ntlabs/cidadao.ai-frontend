@@ -32,6 +32,18 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     const duration = Date.now() - startTime;
     
     console.log('[Chat Backend] Response received in', duration, 'ms');
+    console.log('[Chat Backend] Full response:', JSON.stringify(data, null, 2));
+    
+    // Check if backend is returning maintenance message
+    const isMaintenanceMessage = data.response?.includes('sistema está em manutenção') || 
+                                data.response?.includes('em breve voltaremos');
+    
+    if (isMaintenanceMessage) {
+      console.log('[Chat Backend] Backend is in maintenance mode');
+      // Let the upstream handler deal with fallback
+      throw new Error('Backend in maintenance mode');
+    }
+    
     console.log('[Chat Backend] Agent used:', data.agent_used);
     
     // Track successful response
@@ -40,11 +52,11 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     // Convert backend response to frontend ChatResponse format
     return {
       session_id: data.session_id,
-      agent_id: data.agent_used,
-      agent_name: mapAgentIdToName(data.agent_used),
+      agent_id: data.agent_used || 'assistant',
+      agent_name: mapAgentIdToName(data.agent_used || 'assistant'),
       message: data.response,
-      confidence: 0.9, // Default confidence since backend doesn't provide it
-      suggested_actions: data.suggestions,
+      confidence: data.confidence || 0.9,
+      suggested_actions: data.suggestions || [],
       metadata: {
         message_id: data.message_id,
         processing_time: data.processing_time,
