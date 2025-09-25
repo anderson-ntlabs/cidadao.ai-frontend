@@ -14,14 +14,25 @@ async function debugBackendResponse() {
     'Mostre transparência governamental'
   ];
 
-  for (const message of testMessages) {
-    console.log(`\n📤 Testing message: "${message}"`);
+  const endpoints = [
+    '/api/v1/chat/stable',
+    '/api/v1/chat/optimized', 
+    '/api/v1/chat/emergency',
+    '/api/v1/chat/simple'
+  ];
+
+  for (const endpoint of endpoints) {
+    console.log(`\n🔗 Testing endpoint: ${endpoint}`);
+    console.log('=' .repeat(50));
     
-    try {
-      const response = await axios.post(`${API_URL}/api/v1/chat/message`, {
-        message: message,
-        session_id: `debug_${Date.now()}`
-      }, {
+    for (const message of testMessages.slice(0, 2)) {
+      console.log(`\n📤 Sending: "${message}"`);
+      
+      try {
+        const response = await axios.post(`${API_URL}${endpoint}`, {
+          message: message,
+          session_id: `debug_${Date.now()}`
+        }, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -41,19 +52,21 @@ async function debugBackendResponse() {
       console.log('- Response text:', response.data.response || response.data.message || 'N/A');
       console.log('- Agent used:', response.data.agent_used || 'N/A');
       console.log('- Session ID:', response.data.session_id || 'N/A');
-      console.log('- Message ID:', response.data.message_id || 'N/A');
-      
-      // Check if it's a maintenance message
-      const text = response.data.response || response.data.message || '';
-      if (text.includes('manutenção') || text.includes('em breve')) {
-        console.log('⚠️  MAINTENANCE MESSAGE DETECTED');
-      }
-      
-    } catch (error) {
-      console.error('❌ Request failed:', error.message);
-      if (error.response) {
-        console.log('Response status:', error.response.status);
-        console.log('Response data:', error.response.data);
+          console.log('- Message ID:', response.data.message_id || 'N/A');
+          
+          // Check if it's a maintenance message
+          const text = response.data.response || response.data.message || '';
+          if (text.includes('manutenção') || text.includes('em breve')) {
+            console.log('⚠️  MAINTENANCE MESSAGE DETECTED');
+          }
+          
+        } catch (error) {
+          console.error('❌ Request failed:', error.message);
+          if (error.response) {
+            console.log('Response status:', error.response.status);
+            console.log('Response data:', error.response.data);
+          }
+        }
       }
     }
     

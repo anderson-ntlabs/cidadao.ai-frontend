@@ -1,6 +1,8 @@
 import type { ChatRequest, ChatResponse } from '@/types/chat';
 import { sendBackendMessage } from '@/lib/api/chat-adapter-backend';
 import { sendChatMessageV3 } from '@/lib/api/chat-adapter-v3';
+import { sendOptimizedMessage } from '@/lib/api/chat-adapter-optimized-maritaca';
+import { sendEmergencyMessage } from '@/lib/api/chat-adapter-emergency';
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry';
 
 export type ModelPreference = 'auto' | 'economic' | 'quality' | 'stable';
@@ -27,20 +29,36 @@ export interface SmartChatOptions {
 export class SmartChatService {
   private endpoints: ChatEndpoint[] = [
     {
-      url: '/api/v1/chat/message',
-      name: 'Backend Official',
+      url: '/api/v1/chat/stable',
+      name: 'Maritaca Stable',
       adapter: sendBackendMessage,
-      model: 'multi-agent',
-      costLevel: 2,
+      model: 'sabiazinho-3',
+      costLevel: 1,
       priority: 1,
+    },
+    {
+      url: '/api/v1/chat/optimized',
+      name: 'Maritaca Optimized',
+      adapter: sendOptimizedMessage,
+      model: 'sabiazinho-3',
+      costLevel: 1,
+      priority: 2,
+    },
+    {
+      url: '/api/v1/chat/emergency',
+      name: 'Maritaca Emergency',
+      adapter: sendEmergencyMessage,
+      model: 'sabiazinho-3',
+      costLevel: 1,
+      priority: 3,
     },
     {
       url: '/api/v1/chat/message',
       name: 'Legacy Fallback',
       adapter: sendChatMessageV3,
       model: 'legacy',
-      costLevel: 1,
-      priority: 2,
+      costLevel: 0,
+      priority: 4,
     },
   ];
 

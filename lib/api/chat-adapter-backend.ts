@@ -4,7 +4,7 @@ import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telem
 
 /**
  * Send message to the official backend endpoint
- * Uses the documented /api/v1/chat/message endpoint
+ * Uses the stable endpoint with Maritaca integration
  */
 export async function sendBackendMessage(request: ChatRequest): Promise<ChatResponse> {
   const startTime = Date.now();
@@ -16,13 +16,13 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
       context: request.context,
     };
 
-    console.log('[Chat Backend] Sending to /api/v1/chat/message:', payload.message);
+    console.log('[Chat Backend] Sending to /api/v1/chat/stable:', payload.message);
     
     // Track message
     trackChatMessage(payload.session_id, request.message, 'backend');
     
-    // Call the official backend endpoint
-    const response = await api.post<BackendChatMessageResponse>('/api/v1/chat/message', payload);
+    // Call the stable endpoint with Maritaca
+    const response = await api.post<BackendChatMessageResponse>('/api/v1/chat/stable', payload);
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');
