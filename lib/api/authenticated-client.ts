@@ -26,7 +26,10 @@ class AuthenticatedApiClient {
     this.client.interceptors.request.use(
       async (config) => {
         const headers = await authIntegrationService.getAuthHeaders();
-        config.headers = { ...config.headers, ...headers };
+        // Merge headers properly for Axios
+        Object.entries(headers).forEach(([key, value]) => {
+          config.headers.set(key, value);
+        });
         return config;
       },
       (error) => Promise.reject(error)
