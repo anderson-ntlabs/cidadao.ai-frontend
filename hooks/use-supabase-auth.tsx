@@ -36,15 +36,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Convert Supabase user to our User type
   const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
+    // Google OAuth provides: full_name, avatar_url, email, provider_id
+    // GitHub OAuth provides: user_name, avatar_url, email, preferred_username
+    const metadata = supabaseUser.user_metadata || {}
+    
+    // Get name from different possible fields
+    const name = metadata.full_name || 
+                 metadata.name || 
+                 metadata.user_name ||
+                 metadata.preferred_username ||
+                 supabaseUser.email!.split('@')[0]
+    
+    // Get avatar with fallback
+    const avatar = metadata.avatar_url || 
+                   metadata.picture ||
+                   `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff`
+    
     return {
       id: supabaseUser.id,
       email: supabaseUser.email!,
-      name: supabaseUser.user_metadata?.name || supabaseUser.email!.split('@')[0],
+      name: name,
       role: supabaseUser.app_metadata?.role || 'user',
-      avatar: supabaseUser.user_metadata?.avatar_url || 
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                supabaseUser.user_metadata?.name || supabaseUser.email!
-              )}&background=16a34a&color=fff`
+      avatar: avatar
     }
   }
 

@@ -154,7 +154,17 @@ export function Header({ locale }: HeaderProps) {
                   href={`/${locale}/perfil`}
                   className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                 >
-                  <User size={20} />
+                  {user?.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt={user.name}
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover"
+                    />
+                  ) : (
+                    <User size={20} />
+                  )}
                   <span className="hidden lg:inline">{user?.name || user?.email}</span>
                 </Link>
                 
@@ -257,7 +267,17 @@ export function Header({ locale }: HeaderProps) {
                       onClick={() => setIsMenuOpen(false)}
                       className="w-full flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <User size={20} />
+                      {user?.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name}
+                          width={32}
+                          height={32}
+                          className="rounded-full object-cover"
+                        />
+                      ) : (
+                        <User size={20} />
+                      )}
                       <span>{user?.name || user?.email}</span>
                     </Link>
                     

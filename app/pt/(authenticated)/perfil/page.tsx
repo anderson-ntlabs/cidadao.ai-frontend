@@ -18,7 +18,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [user])
 
   const loadData = async () => {
     setIsLoading(true)
@@ -27,6 +27,28 @@ export default function ProfilePage() {
         profileService.getProfile(),
         profileService.getPreferences()
       ])
+
+      // If profile doesn't exist or missing Google data, use auth user data
+      if (profileData && user) {
+        profileData.full_name = profileData.full_name || user.name
+        profileData.avatar_url = profileData.avatar_url || user.avatar
+        profileData.email = user.email
+      } else if (!profileData && user) {
+        // Create a profile object from auth user data
+        setProfile({
+          id: user.id,
+          email: user.email,
+          full_name: user.name,
+          avatar_url: user.avatar,
+          username: user.email.split('@')[0],
+          bio: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        setPreferences(preferencesData)
+        setIsLoading(false)
+        return
+      }
 
       setProfile(profileData)
       setPreferences(preferencesData)
