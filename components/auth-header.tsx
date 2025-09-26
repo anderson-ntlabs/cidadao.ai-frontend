@@ -142,7 +142,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
               
               <div className="border-t border-gray-200 dark:border-gray-800 pt-3 mt-3">
                 <Link
-                  href={`/${locale}/profile`}
+                  href={`/${locale}/perfil`}
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
                 >
@@ -151,7 +151,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                 </Link>
                 
                 <Link
-                  href={`/${locale}/settings`}
+                  href={`/${locale}/configuracoes`}
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
                 >

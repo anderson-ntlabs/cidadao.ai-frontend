@@ -47,7 +47,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
     },
     {
       name: locale === 'pt' ? 'Configurações' : 'Settings',
-      href: `/${locale}/settings`,
+      href: `/${locale}/configuracoes`,
       icon: Settings
     }
   ]
