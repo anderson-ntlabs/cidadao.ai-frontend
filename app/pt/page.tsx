@@ -52,9 +52,9 @@ export default function PTPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link 
               href="/pt/login" 
-              className="px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-xl font-bold hover:shadow-xl transition-all duration-300 hover-lift hover-glow animate-pulse"
+              className="px-8 py-4 bg-green-600 text-white rounded-lg text-lg font-medium hover:bg-green-700 transition-colors"
             >
-              🚀 Comece Agora Gratuitamente
+              Acessar o Sistema
             </Link>
             <Link 
               href="#features" 
@@ -62,15 +62,6 @@ export default function PTPage() {
             >
               Ver Demonstração
             </Link>
-          </div>
-          
-          <div className="mt-8 space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              ✅ Sem cartão de crédito • ✅ 100% gratuito • ✅ Acesso completo
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              Já tem uma conta? <Link href="/pt/login" className="text-green-600 hover:text-green-700 font-medium underline">Entre aqui</Link>
-            </p>
           </div>
         </div>
       </section>

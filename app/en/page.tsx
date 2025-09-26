@@ -42,9 +42,9 @@ export default function ENPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link 
               href="/pt/login" 
-              className="px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-xl font-bold hover:shadow-xl transition-all duration-300 hover-lift hover-glow animate-pulse"
+              className="px-8 py-4 bg-green-600 text-white rounded-lg text-lg font-medium hover:bg-green-700 transition-colors"
             >
-              🚀 Start Now for Free
+              Access the System
             </Link>
             <Link 
               href="#features" 
@@ -54,17 +54,9 @@ export default function ENPage() {
             </Link>
           </div>
           
-          <div className="mt-8 space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              ✅ No credit card • ✅ 100% free • ✅ Full access
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              Already have an account? <Link href="/pt/login" className="text-green-600 hover:text-green-700 font-medium underline">Sign in here</Link>
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 italic mt-4">
-              Note: Full system available in Portuguese only
-            </p>
-          </div>
+          <p className="mt-8 text-xs text-gray-400 dark:text-gray-500 italic">
+            Note: Full system available in Portuguese only
+          </p>
         </div>
       </section>
 

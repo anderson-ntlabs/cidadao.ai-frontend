@@ -18,6 +18,9 @@ export function Header({ locale }: HeaderProps) {
   const pathname = usePathname()
   const { user, isAuthenticated, logout } = useAuth()
   
+  // Check if we're on landing page
+  const isLandingPage = pathname === '/pt' || pathname === '/en'
+  
   // Function to get the current page path without locale
   const getLocalizedPath = (targetLocale: 'pt' | 'en') => {
     // Remove current locale from pathname
@@ -156,7 +159,7 @@ export function Header({ locale }: HeaderProps) {
                   </span>
                 </Button>
               </div>
-            ) : (
+            ) : !isLandingPage ? (
               <Link
                 href="/pt/login"
                 className="ml-4 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-shadow"
@@ -166,7 +169,7 @@ export function Header({ locale }: HeaderProps) {
                   {locale === 'pt' ? 'Entrar' : 'Login'}
                 </span>
               </Link>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -258,7 +261,7 @@ export function Header({ locale }: HeaderProps) {
                       {locale === 'pt' ? 'Sair' : 'Logout'}
                     </button>
                   </>
-                ) : (
+                ) : !isLandingPage ? (
                   <Link
                     href="/pt/login"
                     onClick={() => setIsMenuOpen(false)}
@@ -267,7 +270,7 @@ export function Header({ locale }: HeaderProps) {
                     <LogIn size={20} />
                     {locale === 'pt' ? 'Entrar' : 'Login'}
                   </Link>
-                )}</div>
+                ) : null}</div>
             </div>
           </div>
         )}
