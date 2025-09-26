@@ -8,6 +8,7 @@ import { LoadingScreen } from './loading-screen'
 import { cn } from '@/lib/utils'
 import { Home, MessageSquare, LayoutDashboard, Bell } from 'lucide-react'
 import type { NavigationItem } from './navigation-v2'
+import { useAuth } from '@/hooks/use-supabase-auth'
 
 interface AuthLayoutV2Props {
   children: React.ReactNode
@@ -26,8 +27,7 @@ export function AuthLayoutV2({
   containerClassName,
   contentClassName
 }: AuthLayoutV2Props) {
-  const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   
@@ -82,26 +82,12 @@ export function AuthLayoutV2({
   }
   
   useEffect(() => {
-    const checkAuth = () => {
-      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-      const userData = localStorage.getItem('user')
-      
-      if (!isAuthenticated) {
-        // Save the URL the user was trying to access
-        localStorage.setItem('redirectAfterLogin', pathname)
-        router.push(`/${locale}/login`)
-        return
-      }
-      
-      if (userData) {
-        setUser(JSON.parse(userData))
-      }
-      
-      setIsLoading(false)
+    if (!isLoading && !isAuthenticated) {
+      // Save the URL the user was trying to access
+      localStorage.setItem('redirectAfterLogin', pathname)
+      router.push(`/${locale}/login`)
     }
-    
-    checkAuth()
-  }, [router, locale, pathname])
+  }, [isLoading, isAuthenticated, router, locale, pathname])
   
   if (isLoading) {
     return <LoadingScreen />

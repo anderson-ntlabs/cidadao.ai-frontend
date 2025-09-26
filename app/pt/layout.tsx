@@ -34,6 +34,7 @@ import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeScript } from '../theme-script'
 import { ToastProvider } from '@/components/toast-provider'
 import { SkipLinks } from '@/components/skip-link'
+import { Providers } from '@/components/providers'
 
 export default function PTLayout({
   children,
@@ -46,28 +47,30 @@ export default function PTLayout({
         <ThemeScript />
       </head>
       <body className="min-h-screen font-sans">
-        {/* Camada de fundo fixo com a imagem */}
-        <div 
-          className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-          style={{
-            backgroundImage: 'url(/operarios.png)',
-          }}
-        />
-        
-        {/* Overlay semi-transparente */}
-        <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
-        
-        {/* Conteúdo principal */}
-        <div className="relative z-20 min-h-screen flex flex-col">
-          <SkipLinks />
-          <Header locale="pt" />
-          <main id="main-content" role="main" className="pt-16 flex-1">
-            {children}
-          </main>
-          <Footer locale="pt" />
-          <CookieConsent locale="pt" />
-          <ToastProvider />
-        </div>
+        <Providers>
+          {/* Camada de fundo fixo com a imagem */}
+          <div 
+            className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+            style={{
+              backgroundImage: 'url(/operarios.png)',
+            }}
+          />
+          
+          {/* Overlay semi-transparente */}
+          <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
+          
+          {/* Conteúdo principal */}
+          <div className="relative z-20 min-h-screen flex flex-col">
+            <SkipLinks />
+            <Header locale="pt" />
+            <main id="main-content" role="main" className="pt-16 flex-1">
+              {children}
+            </main>
+            <Footer locale="pt" />
+            <CookieConsent locale="pt" />
+            <ToastProvider />
+          </div>
+        </Providers>
       </body>
     </html>
   )
