@@ -145,7 +145,7 @@ export function Header({ locale }: HeaderProps) {
                 
                 {/* Logout Button */}
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={logout}
                   className="flex items-center gap-2"
