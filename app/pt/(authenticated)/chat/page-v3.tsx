@@ -10,13 +10,15 @@ import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-s
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { TypingMessage } from '@/components/chat/typing-message'
 import { toast } from '@/hooks/use-toast'
-import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield } from 'lucide-react'
+import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, History } from 'lucide-react'
 import { ButtonV2 } from '@/components/ui/button-v2'
 import { cn } from '@/lib/utils'
+import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 
 export default function ChatPageV3() {
   const { user } = useAuth()
   const [inputMessage, setInputMessage] = useState('')
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   
@@ -87,6 +89,14 @@ export default function ChatPageV3() {
   ]
 
   const drummondAgent = agents.find(a => a.id === 'drummond')
+  
+  // Handle session selection from history
+  const handleSelectSession = async (sessionId: string) => {
+    // For now, just close the sidebar
+    // In future, we would load the session messages
+    setIsHistoryOpen(false)
+    toast.info('Histórico', 'Carregando conversa anterior...')
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -108,6 +118,13 @@ export default function ChatPageV3() {
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-6">
         <LoadingScreen />
         
+        {/* Chat History Sidebar */}
+        <ChatHistorySidebar 
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          onSelectSession={handleSelectSession}
+          currentSessionId={session?.session_id}
+        />
 
         {/* Main Chat Container */}
         <GlassCard className="min-h-[80vh] flex flex-col">
@@ -128,14 +145,25 @@ export default function ChatPageV3() {
                 </div>
               </div>
               
-              {hasActiveAgents && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-100/50 dark:bg-green-900/30 rounded-full">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                    {activeAgents.length} agentes investigando
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {hasActiveAgents && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-100/50 dark:bg-green-900/30 rounded-full">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                      {activeAgents.length} agentes investigando
+                    </span>
+                  </div>
+                )}
+                
+                <ButtonV2
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsHistoryOpen(true)}
+                  leftIcon={<History className="w-4 h-4" />}
+                >
+                  Histórico
+                </ButtonV2>
+              </div>
             </div>
           </GlassCardHeader>
 
@@ -144,9 +172,11 @@ export default function ChatPageV3() {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="mb-8">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center shadow-xl">
-                    <Bot className="w-14 h-14 text-white" />
-                  </div>
+                  <img 
+                    src="/agents/abaporu.png" 
+                    alt="Abaporu - Mestre Orquestrador" 
+                    className="w-24 h-24 mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
+                  />
                 </div>
                 
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
@@ -175,7 +205,8 @@ export default function ChatPageV3() {
             ) : (
               <div className="space-y-4 py-6">
                 {messages.map((message, index) => {
-                  const isLatest = index === messages.length - 1 && message.role === 'assistant'
+                  // Only show typing animation for the very last assistant message and only if loading
+                  const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
                   
                   return (
                     <div
@@ -187,9 +218,11 @@ export default function ChatPageV3() {
                     >
                       {message.role === 'assistant' && (
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                            <Bot className="w-6 h-6 text-white" />
-                          </div>
+                          <img 
+                            src="/agents/abaporu.png" 
+                            alt="Abaporu" 
+                            className="w-10 h-10 rounded-lg shadow-md object-cover"
+                          />
                         </div>
                       )}
                       

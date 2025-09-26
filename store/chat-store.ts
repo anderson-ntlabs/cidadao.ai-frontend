@@ -11,6 +11,7 @@ import type {
 } from '@/types/chat';
 import { chatService, generateSessionId } from '@/lib/api/chat.service';
 import { ChatWebSocket, getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket';
+import { chatSessionService } from '@/lib/services/chat-session.service';
 
 interface ChatStore {
   // State
@@ -59,14 +60,13 @@ interface ChatStore {
   updateMessage: (messageId: string, updates: Partial<ChatMessage>) => void;
   
   // Session actions
-  createNewSession: () => void;
+  createNewSession: () => Promise<void>;
   updateSession: (updates: Partial<ChatSession>) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
   devtools(
-    persist(
-      (set, get) => ({
+    (set, get) => ({
         // Initial state
         messages: [],
         session: null,
@@ -84,20 +84,9 @@ export const useChatStore = create<ChatStore>()(
         initializeChat: async (sessionId?: string) => {
           const state = get();
           
-          // Create or retrieve session
-          if (!sessionId && !state.session) {
-            get().createNewSession();
-          } else if (sessionId && sessionId !== state.session?.session_id) {
-            // Load existing session
-            set({
-              session: {
-                session_id: sessionId,
-                created_at: new Date().toISOString(),
-                metadata: {},
-              },
-            });
-            await get().loadChatHistory(sessionId);
-          }
+          // Always create new session when initializing
+          // Don't load old messages
+          await get().createNewSession();
           
           // Load initial data
           await Promise.all([
@@ -162,6 +151,25 @@ export const useChatStore = create<ChatStore>()(
                 };
                 
                 get().addMessage(assistantMessage);
+                
+                // Save message to Supabase
+                try {
+                  await chatSessionService.addMessage(sessionId, {
+                    role: 'user',
+                    content: content,
+                    agent_id: '',
+                    agent_name: ''
+                  });
+                  
+                  await chatSessionService.addMessage(sessionId, {
+                    role: 'assistant',
+                    content: assistantMessage.content,
+                    agent_id: response.agent_id || '',
+                    agent_name: response.agent_name || ''
+                  });
+                } catch (error) {
+                  console.error('Failed to save message to Supabase:', error);
+                }
                 
                 // Update suggested actions
                 if (response.suggested_actions) {
@@ -392,7 +400,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         // Session actions
-        createNewSession: () => {
+        createNewSession: async () => {
           const sessionId = generateSessionId();
           set({
             session: {
@@ -403,6 +411,16 @@ export const useChatStore = create<ChatStore>()(
             messages: [],
             currentInvestigation: null,
           });
+          
+          // Create session in Supabase
+          try {
+            await chatSessionService.createSession({
+              agent_id: 'abaporu', // Default to Abaporu
+              metadata: { session_id: sessionId }
+            });
+          } catch (error) {
+            console.error('Failed to create session in Supabase:', error);
+          }
         },
 
         updateSession: (updates) => {
@@ -410,14 +428,6 @@ export const useChatStore = create<ChatStore>()(
             session: state.session ? { ...state.session, ...updates } : null,
           }));
         },
-      }),
-      {
-        name: 'chat-storage',
-        partialize: (state) => ({
-          session: state.session,
-          messages: state.messages.slice(-50), // Keep last 50 messages
-        }),
-      }
-    )
+      })
   )
 );

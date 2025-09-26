@@ -49,6 +49,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: string
+  agent_id?: string
+  agent_name?: string
   metadata?: Record<string, any>
 }
 
