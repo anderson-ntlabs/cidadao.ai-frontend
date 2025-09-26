@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/use-supabase-auth'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import type { UserProfile, UserPreferences } from '@/types/profile'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 
 export default function ProfilePageV3() {
   const { user } = useAuth()
@@ -111,6 +112,15 @@ export default function ProfilePageV3() {
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
       
       <div className="relative z-10 max-w-4xl mx-auto py-8 px-4">
+        {/* Breadcrumbs */}
+        <BreadcrumbsV2
+          items={[
+            { label: 'Home', href: '/pt/home' },
+            { label: 'Perfil', current: true }
+          ]}
+          className="mb-6"
+        />
+        
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

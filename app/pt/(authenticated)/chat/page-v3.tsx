@@ -14,6 +14,7 @@ import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, Hist
 import { ButtonV2 } from '@/components/ui/button-v2'
 import { cn } from '@/lib/utils'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 
 export default function ChatPageV3() {
   const { user } = useAuth()
@@ -43,8 +44,12 @@ export default function ChatPageV3() {
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    // Only scroll when a new assistant message is added
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage && lastMessage.role === 'assistant') {
+      scrollToBottom()
+    }
+  }, [messages.length])
 
   useEffect(() => {
     if (error) {
@@ -117,6 +122,15 @@ export default function ChatPageV3() {
       
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-6">
         <LoadingScreen />
+        
+        {/* Breadcrumbs */}
+        <BreadcrumbsV2
+          items={[
+            { label: 'Home', href: '/pt/home' },
+            { label: 'Chat', current: true }
+          ]}
+          className="mb-4"
+        />
         
         {/* Chat History Sidebar */}
         <ChatHistorySidebar 
@@ -242,7 +256,12 @@ export default function ChatPageV3() {
                             <TypingMessage 
                               content={message.content || ''} 
                               isLatest={isLatest}
-                              onComplete={scrollToBottom}
+                              onComplete={() => {
+                                // Only scroll if it's really the latest message
+                                if (isLatest) {
+                                  scrollToBottom()
+                                }
+                              }}
                             />
                           ) : (
                             <p className="whitespace-pre-wrap">{message.content}</p>
