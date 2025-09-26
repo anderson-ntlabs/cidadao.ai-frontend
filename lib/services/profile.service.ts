@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/client'
 import type { UserProfile, UserPreferences, UpdateProfileData, UpdatePreferencesData } from '@/types/profile'
+import { createLogger } from '@/lib/logger'
 
 export class ProfileService {
   private supabase = createClient()
+  private logger = createLogger('ProfileService')
 
   async getProfile(): Promise<UserProfile | null> {
     try {
@@ -16,7 +18,7 @@ export class ProfileService {
         .single()
 
       if (error) {
-        console.error('Error fetching profile:', error)
+        this.logger.error('Error fetching profile', error)
         return null
       }
 
@@ -25,7 +27,7 @@ export class ProfileService {
         email: user.email!
       }
     } catch (error) {
-      console.error('Profile fetch error:', error)
+      this.logger.error('Profile fetch error', error)
       return null
     }
   }
