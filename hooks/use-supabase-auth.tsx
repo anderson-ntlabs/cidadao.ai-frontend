@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear any remaining local storage
       localStorage.removeItem('redirectAfterLogin')
       
-      router.push('/pt/login')
+      router.push('/pt')
     } catch (error: any) {
       console.error('Logout error:', error)
       toast.error('Erro ao sair', error.message || 'Tente novamente')

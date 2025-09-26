@@ -33,7 +33,7 @@ export function Header({ locale }: HeaderProps) {
     return `/${targetLocale}${pathWithoutLocale}`
   }
   
-  const navigation = locale === 'pt' 
+  const publicNavigation = locale === 'pt' 
     ? [
         { name: 'Início', href: '/pt' },
         { name: 'Agentes', href: '/pt/agents' },
@@ -48,6 +48,17 @@ export function Header({ locale }: HeaderProps) {
         { name: 'Manifesto', href: '/en/manifesto' },
         { name: 'System', href: '/en/system' },
       ]
+
+  const authenticatedNavigation = locale === 'pt'
+    ? [
+        { name: 'Home', href: '/pt/home' },
+        { name: 'Chat', href: '/pt/chat' },
+        { name: 'Investigações', href: '/pt/investigacoes' },
+        { name: 'Dashboard', href: '/pt/dashboard' },
+      ]
+    : [] // No authenticated navigation in English
+
+  const navigation = isAuthenticated ? authenticatedNavigation : publicNavigation
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
