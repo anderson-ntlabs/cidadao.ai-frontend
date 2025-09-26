@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui'
 import { LoadingScreen } from '@/components/loading-screen'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 import { useNotificationStore } from '@/store/notification-store'
 import { useSettingsStore } from '@/hooks/use-settings-store'
 import { toast } from '@/hooks/use-toast'
@@ -84,8 +84,9 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <Breadcrumbs items={[
-              { label: 'Configurações' }
+            <BreadcrumbsV2 items={[
+              { label: 'Home', href: '/pt/home' },
+              { label: 'Configurações', current: true }
             ]} />
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-2">
               Configurações
