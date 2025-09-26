@@ -199,6 +199,7 @@ export default function ChatPageV4() {
     }
     
     // Send message
+    console.log('Sending message:', message, 'Session ID:', sessionId);
     await sendMessage(message, { streaming: false })
     
     // Save message to Supabase

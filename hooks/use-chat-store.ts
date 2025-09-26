@@ -8,6 +8,8 @@ export function useChat() {
   // Initialize chat on mount
   useEffect(() => {
     const sessionId = store.session?.session_id;
+    
+    // Always initialize chat, it will create a session if needed
     store.initializeChat(sessionId);
 
     // Cleanup on unmount
@@ -18,11 +20,13 @@ export function useChat() {
         delete (window as any).__streamCleanup;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Send message with smart routing
   const sendMessage = async (content: string, options?: { streaming?: boolean; websocket?: boolean }) => {
     // For now, always use REST API until SSE is properly configured
+    console.log('[useChat] Sending message:', content, 'Session:', store.session);
     await store.sendMessage(content, false);
   };
 
