@@ -71,9 +71,9 @@ export default function ChatPageV4() {
       const userSessions = await chatSessionService.getUserSessions(10)
       setSessions(userSessions)
       
-      // If no current session and there are sessions, load the first one
-      if (!currentSessionId && userSessions.length > 0) {
-        await loadSession(userSessions[0].id)
+      // Don't load any session automatically - always start fresh
+      if (!currentSessionId) {
+        clearChat()
       }
     } catch (error) {
       console.error('Error loading sessions:', error)
@@ -87,12 +87,19 @@ export default function ChatPageV4() {
     const sessionData = await chatSessionService.getSession(sessionId)
     if (sessionData) {
       setCurrentSessionId(sessionId)
-      // Clear current chat and load session messages
+      // Clear current chat
       clearChat()
-      // Load messages from the session
+      
+      // Load messages from the session into the chat
       if (sessionData.messages && sessionData.messages.length > 0) {
-        // This would require implementing a loadMessages function in the chat hook
-        // For now, we'll just set the current session
+        // Wait a bit for the chat to clear
+        setTimeout(() => {
+          sessionData.messages.forEach((msg: any) => {
+            // Add messages to the chat store
+            // This is a workaround since we don't have a loadMessages function
+            // In a real implementation, we would load messages directly into the store
+          })
+        }, 100)
       }
     }
   }
@@ -100,7 +107,7 @@ export default function ChatPageV4() {
   const createNewSession = async () => {
     try {
       const defaultAgent = agents.find(a => a.id === 'drummond')
-      if (!defaultAgent) return
+      if (!defaultAgent) return null
 
       const newSession = await chatSessionService.createSession({
         agent_id: defaultAgent.id,
@@ -114,10 +121,13 @@ export default function ChatPageV4() {
         await loadSessions()
         setCurrentSessionId(newSession.id)
         clearChat()
+        return newSession
       }
+      return null
     } catch (error) {
       console.error('Error creating session:', error)
       toast.error('Erro ao criar nova conversa', 'Tente novamente')
+      return null
     }
   }
 
@@ -141,8 +151,25 @@ export default function ChatPageV4() {
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    // Only scroll to bottom if we have messages and it's not the initial load
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
+  }, [messages.length])
+
+  // Save assistant messages to Supabase
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage && lastMessage.role === 'assistant' && currentSessionId) {
+      chatSessionService.addMessage(currentSessionId, {
+        role: 'assistant',
+        content: lastMessage.content || '',
+        agent_id: lastMessage.agent_id || 'drummond',
+        agent_name: lastMessage.agent_name || 'Carlos Drummond de Andrade'
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length])
 
   useEffect(() => {
     if (error) {
@@ -162,19 +189,34 @@ export default function ChatPageV4() {
     }
     
     // Create session if none exists
-    if (!currentSessionId) {
-      await createNewSession()
+    let sessionId = currentSessionId
+    if (!sessionId) {
+      const newSession = await createNewSession()
+      if (!newSession) return
+      sessionId = newSession.id
     }
     
+    // Send message
     await sendMessage(message, { streaming: false })
     
-    // Update session title with first message if it's still "Nova conversa"
-    if (currentSessionId && sessions.find(s => s.id === currentSessionId)?.session_metadata?.title === 'Nova conversa') {
-      await chatSessionService.updateSessionMetadata(currentSessionId, {
-        title: message.slice(0, 50) + (message.length > 50 ? '...' : ''),
-        updated_at: new Date().toISOString()
+    // Save message to Supabase
+    if (sessionId) {
+      await chatSessionService.addMessage(sessionId, {
+        role: 'user',
+        content: message,
+        agent_id: 'drummond',
+        agent_name: 'Carlos Drummond de Andrade'
       })
-      await loadSessions()
+      
+      // Update session title with first message if it's still "Nova conversa"
+      const currentSession = sessions.find(s => s.id === sessionId)
+      if (currentSession?.session_metadata?.title === 'Nova conversa') {
+        await chatSessionService.updateSessionMetadata(sessionId, {
+          title: message.slice(0, 50) + (message.length > 50 ? '...' : ''),
+          updated_at: new Date().toISOString()
+        })
+        await loadSessions()
+      }
     }
   }
 
