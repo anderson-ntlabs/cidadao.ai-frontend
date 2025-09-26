@@ -52,21 +52,26 @@ export default function PTPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link 
               href="/pt/login" 
-              className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300 hover-lift hover-glow"
+              className="px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-xl font-bold hover:shadow-xl transition-all duration-300 hover-lift hover-glow animate-pulse"
             >
-              Portal do Cidadão
+              🚀 Comece Agora Gratuitamente
             </Link>
             <Link 
               href="#features" 
               className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 transition-all duration-300"
             >
-              Conheça a Plataforma
+              Ver Demonstração
             </Link>
           </div>
           
-          <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-            Já possui acesso? Use o botão <span className="font-medium">Entrar</span> no topo da página
-          </p>
+          <div className="mt-8 space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              ✅ Sem cartão de crédito • ✅ 100% gratuito • ✅ Acesso completo
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              Já tem uma conta? <Link href="/pt/login" className="text-green-600 hover:text-green-700 font-medium underline">Entre aqui</Link>
+            </p>
+          </div>
         </div>
       </section>
 
