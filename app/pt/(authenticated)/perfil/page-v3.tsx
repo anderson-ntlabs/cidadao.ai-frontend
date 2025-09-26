@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import type { UserProfile, UserPreferences } from '@/types/profile'
 import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { toast } from '@/hooks/use-toast'
 
 export default function ProfilePageV3() {
   const { user } = useAuth()
@@ -61,6 +62,7 @@ export default function ProfilePageV3() {
       setPreferences(preferencesData)
     } catch (error) {
       console.error('Error loading profile data:', error)
+      toast.error('Erro ao carregar perfil', 'Verifique sua conexão e tente novamente')
     } finally {
       setIsLoading(false)
     }
@@ -94,8 +96,6 @@ export default function ProfilePageV3() {
 
   return (
     <div className="min-h-screen relative">
-      <LoadingScreen />
-      
       {/* Background Image */}
       <div 
         className="fixed inset-0 z-0"

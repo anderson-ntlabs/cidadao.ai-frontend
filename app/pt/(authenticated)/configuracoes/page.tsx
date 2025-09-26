@@ -77,10 +77,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
-      <LoadingScreen />
-      
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {/* Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -763,6 +760,6 @@ export default function SettingsPage() {
           </Card>
         </div>
       </div>
-    </>
+    </div>
   )
 }
