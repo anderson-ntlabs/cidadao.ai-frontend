@@ -379,12 +379,13 @@ export default function InvestigacoesPageV3() {
             const StatusIcon = statusConfig[investigation.status as keyof typeof statusConfig].icon
 
             return (
-              <GlassCard 
-                key={investigation.id} 
-                className="hover:shadow-xl transition-all duration-300 cursor-pointer group"
+              <div
+                key={investigation.id}
                 onClick={() => router.push(`/pt/investigacoes/${investigation.id}`)}
+                className="cursor-pointer"
               >
-                <GlassCardContent className="p-6">
+                <GlassCard className="hover:shadow-xl transition-all duration-300 group">
+                  <GlassCardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                     {/* Main Content */}
                     <div className="flex-1">
@@ -511,7 +512,8 @@ export default function InvestigacoesPageV3() {
                     </div>
                   </div>
                 </GlassCardContent>
-              </GlassCard>
+                </GlassCard>
+              </div>
             )
           })}
         </div>
