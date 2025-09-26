@@ -14,7 +14,14 @@ import { useAuth } from '@/hooks/use-supabase-auth'
 export default function PTPage() {
   const t = getTranslations('pt')
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
+
+  // Auto redirect authenticated users to home
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/pt/home')
+    }
+  }, [isAuthenticated, isLoading, router])
 
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
