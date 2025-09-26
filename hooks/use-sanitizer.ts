@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { sanitizer } from '@/lib/security/sanitizer'
 
 export function useSanitizer() {
