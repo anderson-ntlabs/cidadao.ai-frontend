@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogIn, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
 import { ThemeToggle } from './theme-toggle'
 import { Button, NotificationDropdown } from '@/components/ui'
+import { useAuth } from '@/hooks/use-supabase-auth'
 
 interface HeaderProps {
   locale: 'pt' | 'en'
@@ -15,6 +16,7 @@ interface HeaderProps {
 export function Header({ locale }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { user, isAuthenticated, logout } = useAuth()
   
   // Function to get the current page path without locale
   const getLocalizedPath = (targetLocale: 'pt' | 'en') => {
@@ -129,15 +131,42 @@ export function Header({ locale }: HeaderProps) {
               </div>
             </div>
             
-            {/* Login Button Desktop - Always goes to PT */}
-            <Link
-              href="/pt/login"
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-shadow"
-            >
-              <span>
-                {locale === 'pt' ? 'Entrar' : 'Login'}
-              </span>
-            </Link>
+            {/* Auth Button Desktop */}
+            {isAuthenticated ? (
+              <div className="ml-4 flex items-center gap-3">
+                {/* User Menu */}
+                <Link
+                  href={`/${locale}/perfil`}
+                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                >
+                  <User size={20} />
+                  <span className="hidden lg:inline">{user?.name || user?.email}</span>
+                </Link>
+                
+                {/* Logout Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  <span>
+                    {locale === 'pt' ? 'Sair' : 'Logout'}
+                  </span>
+                </Button>
+              </div>
+            ) : (
+              <Link
+                href="/pt/login"
+                className="ml-4 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-shadow"
+              >
+                <LogIn size={18} />
+                <span>
+                  {locale === 'pt' ? 'Entrar' : 'Login'}
+                </span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -203,16 +232,42 @@ export function Header({ locale }: HeaderProps) {
                 </div>
               </div>
               
-              {/* Login Button Mobile - Always goes to PT */}
-              <div className="px-3 mt-3">
-                <Link
-                  href="/pt/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
-                >
-                  {locale === 'pt' ? 'Entrar' : 'Login'}
-                </Link>
-              </div>
+              {/* Auth Section Mobile */}
+              <div className="px-3 mt-3 space-y-3">
+                {isAuthenticated ? (
+                  <>
+                    {/* User Profile Link */}
+                    <Link
+                      href={`/${locale}/perfil`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <User size={20} />
+                      <span>{user?.name || user?.email}</span>
+                    </Link>
+                    
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        logout()
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                    >
+                      <LogOut size={20} />
+                      {locale === 'pt' ? 'Sair' : 'Logout'}
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/pt/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
+                  >
+                    <LogIn size={20} />
+                    {locale === 'pt' ? 'Entrar' : 'Login'}
+                  </Link>
+                )}</div>
             </div>
           </div>
         )}

@@ -6,7 +6,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Briefcase, Shield } from 'lucide-react'
+import { Briefcase, Shield, Users, ChartBar, FileSearch, Brain } from 'lucide-react'
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -39,13 +39,36 @@ export default function LoginPage() {
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Briefcase className="h-6 w-6" />
+                <Brain className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Análise Inteligente</h3>
-                <p className="opacity-80">
-                  17 agentes de IA especializados para investigar contratos, 
-                  licitações e gastos públicos
+                <h3 className="font-semibold mb-1">17 Agentes de IA</h3>
+                <p className="opacity-80 text-sm">
+                  Especialistas virtuais inspirados em heróis brasileiros
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FileSearch className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Investigação Profunda</h3>
+                <p className="opacity-80 text-sm">
+                  Análise de contratos, licitações e gastos públicos
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <ChartBar className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Visualizações Claras</h3>
+                <p className="opacity-80 text-sm">
+                  Dashboards interativos com insights em tempo real
                 </p>
               </div>
             </div>
