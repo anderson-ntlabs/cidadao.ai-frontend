@@ -156,7 +156,7 @@ export default function ChatPageV3() {
                 )}
                 
                 <ButtonV2
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => setIsHistoryOpen(true)}
                   leftIcon={<History className="w-4 h-4" />}

@@ -80,7 +80,7 @@ export function ChatHistorySidebar({
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Histórico de Conversas</h2>
             <ButtonV2
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={onClose}
               leftIcon={<ChevronLeft className="w-4 h-4" />}
