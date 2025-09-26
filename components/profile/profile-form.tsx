@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Camera, Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { profileService } from '@/lib/services/profile.service'
@@ -88,10 +89,12 @@ export function ProfileForm({ profile, onUpdate }: ProfileFormProps) {
       {/* Avatar */}
       <div className="flex items-center space-x-6">
         <div className="relative">
-          <img
+          <Image
             src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || profile.email)}&background=16a34a&color=fff`}
             alt="Avatar"
-            className="w-24 h-24 rounded-full object-cover"
+            width={96}
+            height={96}
+            className="rounded-full object-cover"
           />
           <label
             htmlFor="avatar-upload"
