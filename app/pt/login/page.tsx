@@ -1,6 +1,5 @@
-import dynamic from 'next/dynamic'
+import LoginPageSupabase from './page-supabase'
 
-// Use Supabase authentication
-const LoginPage = dynamic(() => import('./page-supabase'), { ssr: false })
-
-export default LoginPage
+export default function LoginPage() {
+  return <LoginPageSupabase />
+}

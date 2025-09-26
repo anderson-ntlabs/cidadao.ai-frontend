@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
@@ -11,6 +11,11 @@ import { Briefcase, Shield } from 'lucide-react'
 export default function LoginPage() {
   const supabase = createClient()
   const [view, setView] = useState<'sign_in' | 'sign_up'>('sign_in')
+  const [redirectTo, setRedirectTo] = useState<string>('')
+
+  useEffect(() => {
+    setRedirectTo(`${window.location.origin}/auth/callback`)
+  }, [])
 
   return (
     <main className="min-h-screen flex flex-col lg:flex-row">
@@ -132,7 +137,7 @@ export default function LoginPage() {
                 },
               }}
               providers={['google', 'github']}
-              redirectTo={`${window.location.origin}/auth/callback`}
+              redirectTo={redirectTo}
               onlyThirdPartyProviders={false}
               magicLink={false}
             />
