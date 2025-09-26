@@ -31,6 +31,7 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeScript } from '../theme-script'
+import { Providers } from '@/components/providers'
 
 export default function ENLayout({
   children,
@@ -43,26 +44,28 @@ export default function ENLayout({
         <ThemeScript />
       </head>
       <body className="min-h-screen font-sans">
-        {/* Fixed background layer with image */}
-        <div 
-          className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-          style={{
-            backgroundImage: 'url(/operarios.png)',
-          }}
-        />
-        
-        {/* Semi-transparent overlay */}
-        <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
-        
-        {/* Main content */}
-        <div className="relative z-20 min-h-screen flex flex-col">
-          <Header locale="en" />
-          <main className="pt-16 flex-1">
-            {children}
-          </main>
-          <Footer locale="en" />
-          <CookieConsent locale="en" />
-        </div>
+        <Providers>
+          {/* Fixed background layer with image */}
+          <div 
+            className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+            style={{
+              backgroundImage: 'url(/operarios.png)',
+            }}
+          />
+          
+          {/* Semi-transparent overlay */}
+          <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
+          
+          {/* Main content */}
+          <div className="relative z-20 min-h-screen flex flex-col">
+            <Header locale="en" />
+            <main className="pt-16 flex-1">
+              {children}
+            </main>
+            <Footer locale="en" />
+            <CookieConsent locale="en" />
+          </div>
+        </Providers>
       </body>
     </html>
   )
