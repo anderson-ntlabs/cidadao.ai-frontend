@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [redirectTo, setRedirectTo] = useState<string>('')
 
   useEffect(() => {
-    setRedirectTo(`${window.location.origin}/auth/callback`)
+    setRedirectTo(`${window.location.origin}/auth/callback?next=/pt/home`)
   }, [])
 
   return (
