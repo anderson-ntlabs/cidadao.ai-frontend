@@ -42,7 +42,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
   const userMenuItems: NavigationItem[] = [
     {
       name: locale === 'pt' ? 'Meu Perfil' : 'My Profile',
-      href: `/${locale}/profile`,
+      href: `/${locale}/perfil`,
       icon: UserIcon
     },
     {
