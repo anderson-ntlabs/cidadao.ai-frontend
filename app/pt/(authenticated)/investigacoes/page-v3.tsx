@@ -11,7 +11,6 @@ import {
 } from 'lucide-react'
 import { ButtonV2 } from '@/components/ui/button-v2'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -221,12 +220,7 @@ export default function InvestigacoesPageV3() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <BreadcrumbsV2 items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Investigações' }
-          ]} />
-          
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Central de Investigações

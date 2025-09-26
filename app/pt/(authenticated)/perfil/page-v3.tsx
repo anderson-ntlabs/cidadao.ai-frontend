@@ -7,7 +7,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui'
 import { ProfileForm } from '@/components/profile/profile-form'
 import { PreferencesForm } from '@/components/profile/preferences-form'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { ButtonV2 } from '@/components/ui/button-v2'
 import { profileService } from '@/lib/services/profile.service'
@@ -114,12 +113,7 @@ export default function ProfilePageV3() {
       <div className="relative z-10 max-w-4xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <BreadcrumbsV2 items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Meu Perfil', href: '/pt/perfil' }
-          ]} />
-          
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 mt-4">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Meu Perfil
           </h1>
           <p className="text-gray-600 dark:text-gray-400">

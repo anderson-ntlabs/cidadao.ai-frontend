@@ -3,7 +3,6 @@
 import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect } from 'react'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { 
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle, 
@@ -192,12 +191,7 @@ export default function DashboardPageV3() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <BreadcrumbsV2 items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Dashboard', href: '/pt/dashboard' }
-          ]} />
-          
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Dashboard de Transparência

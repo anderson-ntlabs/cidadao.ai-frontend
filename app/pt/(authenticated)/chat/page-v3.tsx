@@ -4,7 +4,6 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { agents } from '@/data/agents'
 import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-store'
@@ -109,13 +108,6 @@ export default function ChatPageV3() {
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-6">
         <LoadingScreen />
         
-        {/* Header */}
-        <div className="mb-6">
-          <BreadcrumbsV2 items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Assistente IA', href: '/pt/chat' }
-          ]} />
-        </div>
 
         {/* Main Chat Container */}
         <GlassCard className="min-h-[80vh] flex flex-col">
