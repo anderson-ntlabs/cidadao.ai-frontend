@@ -58,7 +58,8 @@ export function Header({ locale }: HeaderProps) {
       ]
     : [] // No authenticated navigation in English
 
-  const navigation = isAuthenticated ? authenticatedNavigation : publicNavigation
+  // Always show public navigation on landing page
+  const navigation = isLandingPage ? publicNavigation : (isAuthenticated ? authenticatedNavigation : publicNavigation)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -146,7 +147,7 @@ export function Header({ locale }: HeaderProps) {
             </div>
             
             {/* Auth Button Desktop */}
-            {isAuthenticated ? (
+            {isAuthenticated && !isLandingPage ? (
               <div className="ml-4 flex items-center gap-3">
                 {/* User Menu */}
                 <Link
@@ -248,7 +249,7 @@ export function Header({ locale }: HeaderProps) {
               
               {/* Auth Section Mobile */}
               <div className="px-3 mt-3 space-y-3">
-                {isAuthenticated ? (
+                {isAuthenticated && !isLandingPage ? (
                   <>
                     {/* User Profile Link */}
                     <Link
