@@ -31,7 +31,6 @@ export default function ChatPageV4() {
   const [showSessionMenu, setShowSessionMenu] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
   
   const {
     messages,
@@ -361,7 +360,7 @@ export default function ChatPageV4() {
               </GlassCardHeader>
 
               {/* Messages Area with Fixed Height */}
-              <GlassCardContent className="flex-1 overflow-y-auto" ref={chatContainerRef}>
+              <GlassCardContent className="flex-1 overflow-y-auto">
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center py-12">
                     <div className="mb-8">
