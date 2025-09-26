@@ -72,6 +72,6 @@ export function withSanitizedProps<P extends Record<string, any>>(
       return newProps
     }, [props, sanitizeInput])
     
-    return <Component {...sanitizedProps} />
+    return React.createElement(Component, sanitizedProps)
   }
 }
