@@ -1,6 +1,7 @@
 import { api, API_BASE_URL } from './client';
 import type { ChatRequest, ChatResponse } from '@/types/chat';
 import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry';
+import { sanitizer } from '@/lib/security/sanitizer';
 
 /**
  * Chat adapter for the stable endpoint with multi-fallback
@@ -26,8 +27,11 @@ export async function sendStableMessage(request: ChatRequest): Promise<ChatRespo
   const startTime = Date.now();
   
   try {
+    // Sanitize user input
+    const sanitizedMessage = sanitizer.sanitizeInput(request.message);
+    
     const payload = {
-      message: request.message,
+      message: sanitizedMessage,
       session_id: request.session_id || `stable_${Date.now()}`,
       context: request.context,
     };
