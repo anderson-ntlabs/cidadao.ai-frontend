@@ -1,21 +1,55 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Briefcase, Shield, Users, ChartBar, FileSearch, Brain } from 'lucide-react'
+import { useAuth } from '@/hooks/use-supabase-auth'
 
 export default function LoginPage() {
   const supabase = createClient()
+  const router = useRouter()
+  const { isAuthenticated, isLoading } = useAuth()
   const [view, setView] = useState<'sign_in' | 'sign_up'>('sign_in')
   const [redirectTo, setRedirectTo] = useState<string>('')
 
   useEffect(() => {
+    // Redirect authenticated users to home
+    if (isAuthenticated && !isLoading) {
+      router.replace('/pt/home')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  useEffect(() => {
     setRedirectTo(`${window.location.origin}/auth/callback?next=/pt/home`)
   }, [])
+
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verificando autenticação...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If authenticated, will redirect (handled by useEffect above)
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecionando para o sistema...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen flex flex-col lg:flex-row">

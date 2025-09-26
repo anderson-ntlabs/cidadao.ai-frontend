@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { getTranslations } from '@/lib/i18n'
 import { InstallPWA } from '@/components/install-pwa'
 import { LoadingScreen } from '@/components/loading-screen'
@@ -7,9 +9,21 @@ import { agents } from '@/data/agents'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Folder } from 'lucide-react'
+import { useAuth } from '@/hooks/use-supabase-auth'
 
 export default function ENPage() {
   const t = getTranslations('en')
+  const router = useRouter()
+  const { isAuthenticated } = useAuth()
+
+  const handleAccessSystem = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (isAuthenticated) {
+      router.push('/pt/home')
+    } else {
+      router.push('/pt/login')
+    }
+  }
   
   return (
     <>
@@ -40,12 +54,12 @@ export default function ENPage() {
           
           {/* CTA Buttons - Always go to PT version */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link 
-              href="/pt/login" 
+            <button
+              onClick={handleAccessSystem}
               className="px-8 py-4 bg-green-600 text-white rounded-lg text-lg font-medium hover:bg-green-700 transition-colors"
             >
               Access the System
-            </Link>
+            </button>
             <Link 
               href="#features" 
               className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 transition-all duration-300"
