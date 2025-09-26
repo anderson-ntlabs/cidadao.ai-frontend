@@ -6,6 +6,7 @@ import { HeaderV2 } from '@/components/header-v2'
 import { MobileNavV2 } from '@/components/mobile-nav-v2'
 import { type NavigationItem } from '@/components/navigation-v2'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/hooks/use-supabase-auth'
 import { 
   Home, 
   MessageSquare, 
@@ -31,14 +32,7 @@ export function AuthLayoutV2({
   showMobileNav = true,
   contentClassName
 }: AuthLayoutV2Props) {
-  const [user, setUser] = useState<any>(null)
-  
-  useEffect(() => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
-  }, [])
+  const { user, logout } = useAuth()
   
   // Navigation items for header
   const navigationItems: NavigationItem[] = [
@@ -82,6 +76,7 @@ export function AuthLayoutV2({
         locale={locale}
         user={user}
         navigationItems={navigationItems}
+        onLogout={logout}
       />
       
       {/* Main content - Add padding for fixed header */}

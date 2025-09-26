@@ -17,20 +17,26 @@ interface HeaderV2Props {
   user: any
   navigationItems: NavigationItem[]
   className?: string
+  onLogout?: () => void
 }
 
-export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2Props) {
+export function HeaderV2({ locale, user, navigationItems, className, onLogout }: HeaderV2Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
   
-  const handleLogout = () => {
-    localStorage.removeItem('user')
-    localStorage.removeItem('isAuthenticated')
-    toast.success(
-      locale === 'pt' ? 'Até logo!' : 'See you later!',
-      locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully'
-    )
-    router.push(`/${locale}`)
+  const handleLogout = async () => {
+    if (onLogout) {
+      await onLogout()
+    } else {
+      // Fallback to localStorage removal if no onLogout provided
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      toast.success(
+        locale === 'pt' ? 'Até logo!' : 'See you later!',
+        locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully'
+      )
+      router.push(`/${locale}`)
+    }
   }
 
   const userMenuItems: NavigationItem[] = [
@@ -97,9 +103,19 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
                   size="sm"
                   className="flex items-center gap-2"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 via-yellow-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-md">
-                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </div>
+                  {user?.avatar ? (
+                    <Image
+                      src={user.avatar}
+                      alt={user.name}
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover shadow-md"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 via-yellow-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-md">
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  )}
                   <span className="max-w-[150px] truncate">
                     {user?.name || 'Usuário'}
                   </span>
@@ -152,9 +168,19 @@ export function HeaderV2({ locale, user, navigationItems, className }: HeaderV2P
         {/* User section in mobile */}
         <div className="mt-6 px-6 pb-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-brand-green-600 to-brand-blue-600 flex items-center justify-center text-white font-semibold text-lg">
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user.name}
+                width={48}
+                height={48}
+                className="rounded-full object-cover shadow-md"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-brand-green-600 to-brand-blue-600 flex items-center justify-center text-white font-semibold text-lg">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                 {user?.name || 'Usuário'}
