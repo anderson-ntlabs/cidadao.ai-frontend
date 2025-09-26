@@ -112,10 +112,10 @@ export default function ProfilePage() {
               <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <h3 className="font-medium mb-2">Autenticação</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Você está autenticado via {user?.app_metadata?.provider || 'email'}
+                  Você está autenticado via {user?.email ? 'email' : 'OAuth'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Último login: {new Date(user?.last_sign_in_at || '').toLocaleString('pt-BR')}
+                  Email: {user?.email}
                 </p>
               </div>
 
