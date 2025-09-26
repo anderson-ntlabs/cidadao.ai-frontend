@@ -164,8 +164,10 @@ export default function ChatPageV4() {
       chatSessionService.addMessage(currentSessionId, {
         role: 'assistant',
         content: lastMessage.content || '',
-        agent_id: lastMessage.agent_id || 'drummond',
-        agent_name: lastMessage.agent_name || 'Carlos Drummond de Andrade'
+        metadata: {
+          agent_id: lastMessage.agent_id || 'drummond',
+          agent_name: lastMessage.agent_name || 'Carlos Drummond de Andrade'
+        }
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,8 +206,10 @@ export default function ChatPageV4() {
       await chatSessionService.addMessage(sessionId, {
         role: 'user',
         content: message,
-        agent_id: 'drummond',
-        agent_name: 'Carlos Drummond de Andrade'
+        metadata: {
+          agent_id: 'drummond',
+          agent_name: 'Carlos Drummond de Andrade'
+        }
       })
       
       // Update session title with first message if it's still "Nova conversa"
