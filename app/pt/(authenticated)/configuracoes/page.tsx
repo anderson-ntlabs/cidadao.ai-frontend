@@ -750,7 +750,7 @@ export default function SettingsPage() {
           <Card className="mt-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                🚧 Página em Desenvolvimento
+                Página em Desenvolvimento
               </h3>
               <p className="text-blue-600 dark:text-blue-300">
                 Esta página será expandida no Sprint 3 com configurações avançadas, 
