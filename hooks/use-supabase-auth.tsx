@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('redirectAfterLogin')
           router.push(redirectUrl)
         } else {
-          router.push('/pt/dashboard')
+          router.push('/pt/home')
         }
       }
     } catch (error: any) {
