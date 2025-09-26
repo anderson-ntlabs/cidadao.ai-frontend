@@ -26,7 +26,6 @@ export function useChat() {
   // Send message with smart routing
   const sendMessage = async (content: string, options?: { streaming?: boolean; websocket?: boolean }) => {
     // For now, always use REST API until SSE is properly configured
-    console.log('[useChat] Sending message:', content, 'Session:', store.session);
     await store.sendMessage(content, false);
   };
 
