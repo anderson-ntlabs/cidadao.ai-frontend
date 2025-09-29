@@ -27,26 +27,18 @@ export function generateViewport() {
   }
 }
 
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ThemeScript } from '../theme-script'
 import { Providers } from '@/components/providers'
-import type { NavigationItem } from '@/components/navigation'
+import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
+import { ToastProvider } from '@/components/toast-provider'
+import { SkipLinks } from '@/components/skip-link'
 
 export default function ENLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const publicNavigationItems: NavigationItem[] = [
-    { name: 'Home', href: '/en' },
-    { name: 'Agents', href: '/en/agents' },
-    { name: 'About', href: '/en/about' },
-    { name: 'Manifesto', href: '/en/manifesto' },
-    { name: 'System', href: '/en/system' },
-  ]
-
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -67,16 +59,12 @@ export default function ENLayout({
           
           {/* Main content */}
           <div className="relative z-20 min-h-screen flex flex-col">
-            <Header 
-              locale="en" 
-              user={null}
-              navigationItems={publicNavigationItems}
-            />
-            <main className="pt-16 flex-1">
+            <SkipLinks />
+            <PTLayoutWrapper locale="en">
               {children}
-            </main>
-            <Footer locale="en" />
+            </PTLayoutWrapper>
             <CookieConsent locale="en" />
+            <ToastProvider />
           </div>
         </Providers>
       </body>
