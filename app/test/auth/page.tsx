@@ -3,8 +3,9 @@
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
+import { AuthProvider } from '@/contexts/auth-context'
 
-export default function TestAuthPage() {
+function TestAuthContent() {
   const { user, isAuthenticated, login, logout, loginWithProvider } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -106,5 +107,13 @@ export default function TestAuthPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function TestAuthPage() {
+  return (
+    <AuthProvider>
+      <TestAuthContent />
+    </AuthProvider>
   )
 }
