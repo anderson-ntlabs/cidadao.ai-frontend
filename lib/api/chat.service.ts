@@ -12,7 +12,6 @@ import type {
 import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter';
 import { sendChatMessage } from './chat-adapter-v2';
 import { sendChatMessageV3 } from './chat-adapter-v3';
-import { sendSimpleMessage } from './chat-adapter-simple';
 import { sendBackendMessage } from './chat-adapter-backend';
 import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
 import { isFeatureEnabled } from '@/lib/feature-flags';
