@@ -14,7 +14,12 @@ import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, Hist
 import { ButtonV2 } from '@/components/ui/button-v2'
 import { cn } from '@/lib/utils'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { SmartBreadcrumbs } from '@/components/smart-breadcrumbs'
+import { StrategicTooltip } from '@/components/ui/tooltip'
+import { useReportUXIssue } from '@/components/hints/adaptive-hints-provider'
+import { ContrastToggle, ContrastChecker } from '@/components/ui/contrast-toggle'
+import { useContrastCheck } from '@/hooks/use-contrast-check'
+import { InteractiveTour } from '@/components/tour/interactive-tour'
 
 export default function ChatPageV3() {
   const { user } = useAuth()
@@ -22,6 +27,10 @@ export default function ChatPageV3() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { reportMissingElement, reportContrastIssue } = useReportUXIssue()
+  
+  // Check contrast issues automatically
+  useContrastCheck()
   
   const {
     messages,
@@ -123,14 +132,14 @@ export default function ChatPageV3() {
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-6">
         <LoadingScreen />
         
-        {/* Breadcrumbs */}
-        <BreadcrumbsV2
-          items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Chat', current: true }
-          ]}
-          className="mb-4"
-        />
+        {/* Smart Breadcrumbs - Detecta página atual automaticamente */}
+        <SmartBreadcrumbs className="mb-4" />
+        
+        {/* Contrast Checker - Auto suggests high contrast mode */}
+        <ContrastChecker />
+        
+        {/* Interactive Tour */}
+        <InteractiveTour autoStart={true} mode="quick" />
         
         {/* Chat History Sidebar */}
         <ChatHistorySidebar 
@@ -169,14 +178,26 @@ export default function ChatPageV3() {
                   </div>
                 )}
                 
-                <ButtonV2
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsHistoryOpen(true)}
-                  leftIcon={<History className="w-4 h-4" />}
+                <div className="contrast-toggle">
+                  <ContrastToggle />
+                </div>
+                
+                <StrategicTooltip 
+                  tooltipKey="chat-history"
+                  content="Veja suas conversas anteriores e retome de onde parou"
+                  position="bottom"
+                  delay={1000}
                 >
-                  Histórico
-                </ButtonV2>
+                  <ButtonV2
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setIsHistoryOpen(true)}
+                    leftIcon={<History className="w-4 h-4" />}
+                    className="chat-history-button"
+                  >
+                    Histórico
+                  </ButtonV2>
+                </StrategicTooltip>
               </div>
             </div>
           </GlassCardHeader>
@@ -203,7 +224,7 @@ export default function ChatPageV3() {
                 </p>
 
                 {/* Suggested Questions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl suggested-questions">
                   {suggestedQuestions.map((question, index) => (
                     <button
                       key={index}
@@ -284,28 +305,42 @@ export default function ChatPageV3() {
 
           {/* Input Area */}
           <div className="p-6 border-t border-gray-200/20 dark:border-gray-700/20">
-            <div className="flex gap-3">
-              <textarea
-                ref={textareaRef}
-                value={inputMessage}
-                onChange={(e) => {
-                  setInputMessage(e.target.value)
-                  adjustTextareaHeight()
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="Digite sua pergunta sobre transparência pública..."
-                className="flex-1 resize-none rounded-xl px-4 py-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all"
-                rows={1}
-                disabled={!canSendMessage}
-              />
-              <ButtonV2
-                onClick={handleSendMessage}
-                disabled={!canSendMessage || !inputMessage.trim()}
-                className="px-6"
-                leftIcon={<Send className="w-5 h-5" />}
+            <div className="flex gap-3 chat-input">
+              <StrategicTooltip
+                tooltipKey="first-chat"
+                position="top"
+                delay={2000}
+                trigger={messages.length === 0 ? 'hover' : 'focus'}
               >
-                Enviar
-              </ButtonV2>
+                <textarea
+                  ref={textareaRef}
+                  value={inputMessage}
+                  onChange={(e) => {
+                    setInputMessage(e.target.value)
+                    adjustTextareaHeight()
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Digite sua pergunta sobre transparência pública..."
+                  className="flex-1 resize-none rounded-xl px-4 py-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all"
+                  rows={1}
+                  disabled={!canSendMessage}
+                />
+              </StrategicTooltip>
+              <StrategicTooltip
+                tooltipKey="send-message"
+                content="Pressione Enter para enviar rapidamente"
+                position="top"
+                delay={3000}
+              >
+                <ButtonV2
+                  onClick={handleSendMessage}
+                  disabled={!canSendMessage || !inputMessage.trim()}
+                  className="px-6 send-button"
+                  leftIcon={<Send className="w-5 h-5" />}
+                >
+                  Enviar
+                </ButtonV2>
+              </StrategicTooltip>
             </div>
             
             {isLoading && (
