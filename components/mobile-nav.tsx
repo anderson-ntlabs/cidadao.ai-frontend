@@ -10,6 +10,7 @@ import {
   LayoutDashboard, 
   Bell, 
   Menu,
+  FileSearch,
   type LucideIcon 
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -40,10 +41,9 @@ const mobileNavItems: MobileNavItem[] = [
     icon: LayoutDashboard
   },
   {
-    name: 'Alertas',
-    href: '/pt/notifications',
-    icon: Bell,
-    badge: 0 // Will be updated dynamically
+    name: 'Investigações',
+    href: '/pt/investigacoes',
+    icon: FileSearch
   }
 ]
 
@@ -200,11 +200,6 @@ export function MobileNavDrawer({
       name: 'Configurações',
       href: '/pt/settings',
       icon: Home // Replace with Settings icon when available
-    },
-    {
-      name: 'Investigações',
-      href: '/pt/investigacoes',
-      icon: Home // Replace with FileSearch icon when available
     }
   ]
   

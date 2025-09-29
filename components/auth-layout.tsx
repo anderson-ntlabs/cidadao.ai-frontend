@@ -6,7 +6,7 @@ import { HeaderV2 } from './header'
 import { BreadcrumbsV2, BreadcrumbsV2Mobile, type BreadcrumbItemV2 } from './breadcrumbs'
 import { LoadingScreen } from './loading-screen'
 import { cn } from '@/lib/utils'
-import { Home, MessageSquare, LayoutDashboard, Bell } from 'lucide-react'
+import { Home, MessageSquare, LayoutDashboard, FileSearch } from 'lucide-react'
 import type { NavigationItem } from './navigation'
 import { useAuth } from '@/hooks/use-supabase-auth'
 
@@ -37,13 +37,13 @@ export function AuthLayoutV2({
         { name: 'Início', href: '/pt/home', icon: Home },
         { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
         { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-        { name: 'Notificações', href: '/pt/notifications', icon: Bell, badge: 3 },
+        { name: 'Investigações', href: '/pt/investigacoes', icon: FileSearch },
       ]
     : [
         { name: 'Home', href: '/en/home', icon: Home },
         { name: 'AI Chat', href: '/en/chat', icon: MessageSquare },
         { name: 'Dashboard', href: '/en/dashboard', icon: LayoutDashboard },
-        { name: 'Notifications', href: '/en/notifications', icon: Bell, badge: 3 },
+        { name: 'Investigations', href: '/en/investigations', icon: FileSearch },
       ]
   
   // Generate breadcrumbs from pathname if not provided
@@ -97,19 +97,35 @@ export function AuthLayoutV2({
   const currentBreadcrumbs = generateBreadcrumbs()
   
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 relative">
+      {/* Background image for glassmorphism effect */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url('/operarios.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.03
+        }}
+      />
+      
+      {/* Gradient overlay */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
+      
       {/* Header with navigation */}
       <HeaderV2 
         locale={locale} 
         user={user} 
         navigationItems={navigationItems}
+        className="relative z-10"
       />
       
       {/* Main content area */}
-      <main className="pt-16 flex-1 flex flex-col">
+      <main className="pt-16 flex-1 flex flex-col relative z-10">
         {/* Breadcrumbs section */}
         {showBreadcrumbs && currentBreadcrumbs.length > 0 && (
-          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
             <div className={cn("max-w-7xl mx-auto px-4 sm:px-6", containerClassName)}>
               {/* Desktop breadcrumbs */}
               <div className="hidden md:block">
