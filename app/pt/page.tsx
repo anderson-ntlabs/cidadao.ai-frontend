@@ -16,13 +16,6 @@ export default function PTPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
 
-  // Auto redirect authenticated users to home
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/pt/home')
-    }
-  }, [isAuthenticated, isLoading, router])
-
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isAuthenticated) {

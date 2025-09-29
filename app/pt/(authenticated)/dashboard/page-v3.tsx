@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs'
+// BreadcrumbsV2 removed - handled by AuthLayout
 
 // Dynamic imports for charts
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
@@ -190,15 +190,6 @@ export default function DashboardPageV3() {
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumbs */}
-        <BreadcrumbsV2
-          items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Dashboard', current: true }
-          ]}
-          className="mb-6"
-        />
-        
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

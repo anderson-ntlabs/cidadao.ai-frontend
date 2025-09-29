@@ -14,7 +14,7 @@ import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/gl
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs'
+// BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
 const investigationTypes = {
@@ -219,15 +219,6 @@ export default function InvestigacoesPageV3() {
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumbs */}
-        <BreadcrumbsV2
-          items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Investigações', current: true }
-          ]}
-          className="mb-6"
-        />
-        
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
