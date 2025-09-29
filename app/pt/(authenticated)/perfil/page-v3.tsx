@@ -80,7 +80,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Header Card */}
-        <GlassCard className="mb-8" variant="lighter">
+        <GlassCard className="mb-8">
           <GlassCardContent className="p-8">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative group">

@@ -5,7 +5,7 @@ import { User, Mail, Calendar, Shield, Edit3, Activity, Clock, FileText, Brain }
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@/components/ui'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { LoadingScreen } from '@/components/loading-screen'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -76,7 +76,7 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <Breadcrumbs items={[
+            <BreadcrumbsV2 items={[
               { label: 'Meu Perfil' }
             ]} />
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-2">

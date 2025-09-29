@@ -163,7 +163,7 @@ export default function HomePageV3() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {quickStats.map((stat, index) => (
-            <GlassCard key={index} variant="lighter" blur="sm" className="p-6">
+            <GlassCard key={index} className="p-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="p-2 bg-gradient-to-br from-green-500/20 to-blue-600/20 rounded-lg">
                   {stat.icon}
@@ -195,7 +195,6 @@ export default function HomePageV3() {
             <Link key={index} href={card.href}>
               <GlassCard 
                 className="h-full hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
-                variant="default"
               >
                 <GlassCardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -233,7 +232,7 @@ export default function HomePageV3() {
         </div>
 
         {/* Recent Activity */}
-        <GlassCard variant="default" className="mb-8">
+        <GlassCard className="mb-8">
           <GlassCardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -303,7 +302,7 @@ export default function HomePageV3() {
         </GlassCard>
 
         {/* Quick Actions */}
-        <GlassCard variant="darker" className="bg-gradient-to-r from-green-600/10 to-blue-600/10">
+        <GlassCard className="bg-gradient-to-r from-green-600/10 to-blue-600/10">
           <GlassCardContent className="p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
               Ações Rápidas

@@ -11,7 +11,7 @@ import {
 import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui'
 import { NotificationItem } from '@/components/ui/notification-item'
 import { LoadingScreen } from '@/components/loading-screen'
-import { Breadcrumbs } from '@/components/breadcrumbs'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { useNotificationStore } from '@/store/notification-store'
 import type { NotificationType, NotificationPriority } from '@/types/notification'
 
@@ -69,7 +69,7 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <Breadcrumbs items={[
+          <BreadcrumbsV2 items={[
             { label: 'Dashboard', href: '/pt/dashboard' },
             { label: 'Notificações' }
           ]} />
