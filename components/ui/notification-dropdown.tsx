@@ -68,10 +68,14 @@ export function NotificationDropdown({ locale }: NotificationDropdownProps) {
   
   const handleNotificationClick = (notification: any) => {
     markAsRead(notification.id)
+    setIsOpen(false)
+    // If notification has an action URL, navigate to it
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl
+    } else {
+      // Otherwise, navigate to the notifications page
+      window.location.href = `/${locale}/notifications`
     }
-    setIsOpen(false)
   }
   
   return (

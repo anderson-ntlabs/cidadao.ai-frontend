@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Settings, Bell, Moon, Sun, Globe, Shield, Database, Paintbrush } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { ButtonV2 } from '@/components/ui/button'
 
 export default function SettingsPage() {
@@ -31,11 +30,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <BreadcrumbsV2 items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Configurações', current: true }
-          ]} />
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-2">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
             Configurações
           </h1>
         </div>

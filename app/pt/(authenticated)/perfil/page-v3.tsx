@@ -5,7 +5,6 @@ import { User, Mail, Calendar, Shield, Edit2, Camera } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { LoadingScreen } from '@/components/loading-screen'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import Image from 'next/image'
@@ -60,15 +59,6 @@ export default function ProfilePage() {
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
       
       <div className="relative z-10 max-w-4xl mx-auto py-8 px-4">
-        {/* Breadcrumbs */}
-        <BreadcrumbsV2
-          items={[
-            { label: 'Home', href: '/pt/home' },
-            { label: 'Perfil', current: true }
-          ]}
-          className="mb-6"
-        />
-        
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

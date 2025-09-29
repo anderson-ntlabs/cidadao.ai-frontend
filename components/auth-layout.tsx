@@ -56,7 +56,11 @@ export function AuthLayoutV2({
     // Skip locale segment
     const startIndex = segments[0] === locale ? 1 : 0
     
-    for (let i = startIndex; i < segments.length; i++) {
+    // Skip home segment since it's already shown as home icon
+    const skipHome = segments[startIndex] === 'home'
+    const actualStartIndex = skipHome ? startIndex + 1 : startIndex
+    
+    for (let i = actualStartIndex; i < segments.length; i++) {
       const segment = segments[i]
       const path = '/' + segments.slice(0, i + 1).join('/')
       
