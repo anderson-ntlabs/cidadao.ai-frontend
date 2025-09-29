@@ -14,7 +14,6 @@ import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, Hist
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
-import { SmartBreadcrumbs } from '@/components/smart-breadcrumbs'
 import { StrategicTooltip } from '@/components/ui/tooltip'
 import { useReportUXIssue } from '@/components/hints/adaptive-hints-provider'
 import { ContrastToggle, ContrastChecker } from '@/components/ui/contrast-toggle'
@@ -131,9 +130,6 @@ export default function ChatPageV3() {
       
       <div className="relative z-10 max-w-5xl mx-auto px-4 py-6">
         <LoadingScreen />
-        
-        {/* Smart Breadcrumbs - Detecta página atual automaticamente */}
-        <SmartBreadcrumbs className="mb-4" />
         
         {/* Contrast Checker - Auto suggests high contrast mode */}
         <ContrastChecker />

@@ -121,10 +121,13 @@ export function AuthLayoutV2({
       />
       
       {/* Main content area */}
-      <main className="pt-16 flex-1 flex flex-col relative z-10">
-        {/* Breadcrumbs section */}
+      <main className="flex-1 flex flex-col relative z-10">
+        {/* Fixed spacer for header */}
+        <div className="h-16" aria-hidden="true" />
+        
+        {/* Breadcrumbs section - directly attached to header */}
         {showBreadcrumbs && currentBreadcrumbs.length > 0 && (
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-16 z-20">
             <div className={cn("max-w-7xl mx-auto px-4 sm:px-6", containerClassName)}>
               {/* Desktop breadcrumbs */}
               <div className="hidden md:block">
