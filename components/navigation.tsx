@@ -3,8 +3,9 @@
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { type LucideIcon } from 'lucide-react'
+import { type LucideIcon, X } from 'lucide-react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { useEffect } from 'react'
 
 const navigationVariants = cva(
   "flex items-center transition-colors duration-200",
@@ -91,6 +92,11 @@ export function NavigationV2({
   const isActive = (href: string) => {
     if (href === '/') return pathname === href
     return pathname.startsWith(href)
+  }
+
+  // Handle undefined or empty items array
+  if (!items || items.length === 0) {
+    return null
   }
 
   return (
