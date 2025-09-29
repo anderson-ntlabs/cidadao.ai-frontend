@@ -154,7 +154,7 @@ export function NotificationDropdown({ locale }: NotificationDropdownProps) {
           {notifications.length > 0 && (
             <div className="border-t border-gray-200 dark:border-gray-800 p-3">
               <Link 
-                href={`/${locale}/notifications`}
+                href={`/${locale}/notificacoes`}
                 className="block text-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 {locale === 'pt' ? 'Ver todas as notificações' : 'View all notifications'}

@@ -260,9 +260,7 @@ function generateDemoNotifications(): Notification[] {
       timestamp: new Date(now.getTime() - 5 * 60 * 1000), // 5 min ago
       read: false,
       investigationId: 'inv-123',
-      agentId: 'zumbi',
-      actionUrl: '/pt/dashboard',
-      actionLabel: 'Ver Detalhes'
+      agentId: 'zumbi'
     },
     {
       id: `demo-2-${uniqueSuffix}`,
