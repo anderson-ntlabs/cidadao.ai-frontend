@@ -74,7 +74,7 @@ export function NotificationDropdown({ locale }: NotificationDropdownProps) {
       window.location.href = notification.actionUrl
     } else {
       // Otherwise, navigate to the notifications page
-      window.location.href = `/${locale}/notifications`
+      window.location.href = `/${locale}/notificacoes`
     }
   }
   
