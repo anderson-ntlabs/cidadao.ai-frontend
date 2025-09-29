@@ -305,5 +305,10 @@ export function NavigationV2Tabs({
   )
 }
 
-import { useEffect } from 'react'
-import { X } from 'lucide-react'
+// Export with both names for compatibility
+export { 
+  NavigationV2 as Navigation,
+  NavigationV2Drawer as NavigationDrawer,
+  NavigationV2Group as NavigationGroup,
+  NavigationV2Tabs as NavigationTabs
+}

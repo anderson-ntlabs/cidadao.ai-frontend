@@ -5,8 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Menu, X, LogOut, User as UserIcon, Settings } from 'lucide-react'
-import { NavigationV2, NavigationV2Drawer, type NavigationItem } from './navigation'
-import { ButtonV2 } from './ui/button'
+import { Navigation, NavigationDrawer, type NavigationItem } from './navigation'
+import { Button } from './ui/button'
 import { NotificationDropdown } from './ui/notification-dropdown'
 import { ThemeToggle } from './theme-toggle'
 import { toast } from '@/hooks/use-toast'
@@ -79,7 +79,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
 
             {/* Desktop Navigation */}
             <div className="hidden lg:block">
-              <NavigationV2 
+              <Navigation 
                 items={navigationItems}
                 variant="horizontal"
                 size="sm"
@@ -98,7 +98,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             {/* User Menu - Desktop */}
             <div className="hidden lg:flex items-center gap-2">
               <div className="relative group">
-                <ButtonV2
+                <Button
                   variant="ghost"
                   size="sm"
                   className="flex items-center gap-2"
@@ -119,18 +119,18 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
                   <span className="max-w-[150px] truncate">
                     {user?.name || 'Usuário'}
                   </span>
-                </ButtonV2>
+                </Button>
                 
                 {/* Dropdown Menu */}
                 <div className="absolute right-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-lg shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2">
-                    <NavigationV2
+                    <Navigation
                       items={userMenuItems}
                       variant="vertical"
                       size="sm"
                     />
                     <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2 px-2">
-                      <ButtonV2
+                      <Button
                         variant="ghost"
                         size="sm"
                         className="w-full justify-start"
@@ -138,7 +138,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
                         onClick={handleLogout}
                       >
                         {locale === 'pt' ? 'Sair' : 'Logout'}
-                      </ButtonV2>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             </div>
 
             {/* Mobile Menu Button */}
-            <ButtonV2
+            <Button
               variant="ghost"
               size="icon"
               className="lg:hidden"
@@ -154,13 +154,13 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </ButtonV2>
+            </Button>
           </div>
         </div>
       </nav>
 
       {/* Mobile Navigation Drawer */}
-      <NavigationV2Drawer
+      <NavigationDrawer
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         items={navigationItems}
@@ -192,12 +192,12 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
           </div>
           
           <div className="space-y-1">
-            <NavigationV2
+            <Navigation
               items={userMenuItems}
               variant="mobile"
               onItemClick={() => setIsMenuOpen(false)}
             />
-            <ButtonV2
+            <Button
               variant="ghost"
               className="w-full justify-start"
               leftIcon={<LogOut className="h-5 w-5" />}
@@ -207,10 +207,13 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
               }}
             >
               {locale === 'pt' ? 'Sair' : 'Logout'}
-            </ButtonV2>
+            </Button>
           </div>
         </div>
-      </NavigationV2Drawer>
+      </NavigationDrawer>
     </header>
   )
 }
+
+// Export with both names for compatibility
+export { HeaderV2 as Header }

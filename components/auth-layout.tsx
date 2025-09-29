@@ -211,3 +211,6 @@ export function AuthLayoutV2WithSidebar({
     </AuthLayoutV2>
   )
 }
+
+// Export with both names for compatibility
+export { AuthLayoutV2 as AuthLayout }
