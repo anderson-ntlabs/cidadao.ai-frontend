@@ -56,7 +56,7 @@ export default function PTLayout({
           />
           
           {/* Overlay semi-transparente */}
-          <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-10" />
+          <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5]" />
           
           {/* Conteúdo principal */}
           <div className="relative z-20 min-h-screen flex flex-col">

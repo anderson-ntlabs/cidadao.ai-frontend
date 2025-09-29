@@ -118,7 +118,6 @@ export function AuthLayoutV2({
         locale={locale} 
         user={user} 
         navigationItems={navigationItems}
-        className="relative z-10"
       />
       
       {/* Main content area */}
