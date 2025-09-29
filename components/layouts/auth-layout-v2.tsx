@@ -7,6 +7,7 @@ import { MobileNavV2 } from '@/components/mobile-nav-v2'
 import { type NavigationItem } from '@/components/navigation-v2'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-supabase-auth'
+import { SmartBreadcrumbs } from '@/components/smart-breadcrumbs'
 import { 
   Home, 
   MessageSquare, 
@@ -23,6 +24,8 @@ interface AuthLayoutV2Props {
   className?: string
   showMobileNav?: boolean
   contentClassName?: string
+  showBreadcrumbs?: boolean
+  breadcrumbsClassName?: string
 }
 
 export function AuthLayoutV2({ 
@@ -30,7 +33,9 @@ export function AuthLayoutV2({
   locale = 'pt',
   className,
   showMobileNav = true,
-  contentClassName
+  contentClassName,
+  showBreadcrumbs = false,
+  breadcrumbsClassName
 }: AuthLayoutV2Props) {
   const { user, logout } = useAuth()
   
@@ -86,6 +91,13 @@ export function AuthLayoutV2({
         showMobileNav && "pb-14 md:pb-0", // Space for mobile nav on mobile only
         contentClassName
       )}>
+        {/* Global breadcrumbs */}
+        {showBreadcrumbs && (
+          <div className={cn("px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto", breadcrumbsClassName)}>
+            <SmartBreadcrumbs />
+          </div>
+        )}
+        
         {children}
       </main>
       

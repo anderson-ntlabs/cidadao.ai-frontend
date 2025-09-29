@@ -66,7 +66,8 @@ export function AuthLayoutV2({
       breadcrumbItems.push({
         label: navItem?.name || formatSegmentLabel(segment),
         href: i === segments.length - 1 ? undefined : path,
-        icon: navItem?.icon
+        icon: navItem?.icon,
+        current: i === segments.length - 1
       })
     }
     
