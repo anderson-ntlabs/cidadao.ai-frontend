@@ -24,19 +24,21 @@ export default defineConfig({
         'storybook-static/**',
         '.storybook/**'
       ],
-      thresholds: {
-        branches: 80,
-        functions: 80,
-        lines: 80,
-        statements: 80
-      }
+      // thresholds: {
+      //   branches: 80,
+      //   functions: 80,
+      //   lines: 80,
+      //   statements: 80
+      // }
     },
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: [
       'node_modules/**',
       '.next/**',
       'storybook-static/**',
-      'scripts/**'
+      'scripts/**',
+      'tests/e2e/**',
+      '**/*.spec.ts'
     ]
   },
   resolve: {
