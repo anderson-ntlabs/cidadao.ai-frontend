@@ -35,12 +35,21 @@ import { ThemeScript } from '../theme-script'
 import { ToastProvider } from '@/components/toast-provider'
 import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
+import type { NavigationItem } from '@/components/navigation'
 
 export default function PTLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const publicNavigationItems: NavigationItem[] = [
+    { name: 'Início', href: '/pt' },
+    { name: 'Agentes', href: '/pt/agents' },
+    { name: 'Sobre', href: '/pt/about' },
+    { name: 'Manifesto', href: '/pt/manifesto' },
+    { name: 'Sistema', href: '/pt/system' },
+  ]
+
   return (
     <html lang="pt" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -62,7 +71,11 @@ export default function PTLayout({
           {/* Conteúdo principal */}
           <div className="relative z-20 min-h-screen flex flex-col">
             <SkipLinks />
-            <Header locale="pt" />
+            <Header 
+              locale="pt" 
+              user={null}
+              navigationItems={publicNavigationItems}
+            />
             <main id="main-content" role="main" className="pt-16 flex-1">
               {children}
             </main>
