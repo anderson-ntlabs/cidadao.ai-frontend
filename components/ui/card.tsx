@@ -204,12 +204,20 @@ CardV2Stat.displayName = "CardV2Stat"
 
 export { 
   CardV2, 
+  CardV2 as Card,
   CardV2Header, 
+  CardV2Header as CardHeader,
   CardV2Footer, 
+  CardV2Footer as CardFooter,
   CardV2Title, 
+  CardV2Title as CardTitle,
   CardV2Description, 
+  CardV2Description as CardDescription,
   CardV2Content,
+  CardV2Content as CardContent,
   CardV2Badge,
+  CardV2Badge as CardBadge,
   CardV2Stat,
+  CardV2Stat as CardStat,
   cardVariants 
 }
