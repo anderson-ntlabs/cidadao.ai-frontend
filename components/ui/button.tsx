@@ -29,7 +29,7 @@ const buttonVariants = cva(
   }
 )
 
-export interface ButtonV2Props
+export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
@@ -38,7 +38,7 @@ export interface ButtonV2Props
   rightIcon?: React.ReactNode
 }
 
-const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonV2Props>(
+const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, leftIcon, rightIcon, children, disabled, type = "button", ...props }, ref) => {
     // Handle asChild prop for composition
     if (asChild && React.isValidElement(children)) {
@@ -98,4 +98,4 @@ const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonV2Props>(
 
 ButtonV2.displayName = "ButtonV2"
 
-export { ButtonV2, buttonVariants }
+export { ButtonV2, ButtonV2 as Button, buttonVariants }
