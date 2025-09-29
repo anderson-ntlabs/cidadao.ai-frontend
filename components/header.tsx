@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Menu, X, LogOut, User as UserIcon, Settings } from 'lucide-react'
 import { Navigation, NavigationDrawer, type NavigationItem } from './navigation'
 import { Button } from './ui/button'
@@ -24,6 +24,10 @@ interface HeaderV2Props {
 export function HeaderV2({ locale, user, navigationItems, className, onLogout }: HeaderV2Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  
+  // Check if we're on landing page
+  const isLandingPage = pathname === '/pt' || pathname === '/en' || pathname === '/'
   
   const handleLogout = async () => {
     if (onLogout) {
@@ -66,7 +70,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
           {/* Logo */}
           <div className="flex items-center gap-8">
             <Link 
-              href={`/${locale}/home`} 
+              href={isLandingPage ? `/${locale}` : `/${locale}/home`} 
               className="flex items-center gap-3 group"
               aria-label="Cidadão.AI Home"
             >
@@ -97,14 +101,15 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             {/* Language Switcher */}
             <LanguageSwitcherV2 />
             
-            {/* Notifications */}
-            <NotificationDropdown locale={locale} />
+            {/* Notifications - Only show if not on landing page */}
+            {!isLandingPage && <NotificationDropdown locale={locale} />}
             
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* User Menu - Desktop */}
-            <div className="hidden lg:flex items-center gap-2">
+            {/* User Menu - Desktop - Only show if user exists and not on landing page */}
+            {!isLandingPage && user && (
+              <div className="hidden lg:flex items-center gap-2">
               <div className="relative group">
                 <Button
                   variant="ghost"
@@ -152,6 +157,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
                 </div>
               </div>
             </div>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
@@ -186,8 +192,9 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
           </div>
         </div>
         
-        {/* User section in mobile */}
-        <div className="mt-6 px-6 pb-6">
+        {/* User section in mobile - Only show if not on landing page */}
+        {!isLandingPage && user && (
+          <div className="mt-6 px-6 pb-6">
           <div className="flex items-center gap-3 mb-4">
             {user?.avatar ? (
               <Image
@@ -231,6 +238,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             </Button>
           </div>
         </div>
+        )}
       </NavigationDrawer>
     </header>
   )
