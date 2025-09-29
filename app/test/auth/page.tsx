@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 import { AuthProvider } from '@/contexts/auth-context'
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = 'force-dynamic'
+
 function TestAuthContent() {
   const { user, isAuthenticated, login, logout, loginWithProvider } = useAuth()
   const [email, setEmail] = useState('')

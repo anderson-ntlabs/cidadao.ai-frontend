@@ -2,6 +2,9 @@
 
 import { BreadcrumbsV2Demo } from '@/components/breadcrumbs-demo'
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = 'force-dynamic'
+
 export default function TestBreadcrumbsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
