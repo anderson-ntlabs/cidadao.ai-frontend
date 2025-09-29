@@ -112,7 +112,10 @@ export function BreadcrumbsV2({
                   "hover:text-brand-green-600 dark:hover:text-brand-green-400",
                   "hover:bg-gray-100 dark:hover:bg-gray-800",
                   "transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2"
+                  "focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2",
+                  "relative after:content-[''] after:absolute after:inset-0",
+                  "after:rounded-md after:transition-transform after:duration-200",
+                  "hover:after:scale-105 active:after:scale-95"
                 )}
                 aria-label={homeLabel}
                 onClick={() => onItemClick?.({ label: homeLabel, href: homeHref })}
@@ -146,23 +149,41 @@ export function BreadcrumbsV2({
                     "hover:bg-gray-100 dark:hover:bg-gray-800",
                     "transition-all duration-200",
                     "focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2",
+                    "relative after:content-[''] after:absolute after:inset-0",
+                    "after:rounded-md after:transition-transform after:duration-200",
+                    "hover:after:scale-105 active:after:scale-95",
+                    "group",
                     item.label === '...' && "cursor-default hover:bg-transparent"
                   )}
                   onClick={() => onItemClick?.(item)}
                 >
-                  {Icon && <Icon className="w-4 h-4" />}
+                  {Icon && <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />}
                   <span>{item.label}</span>
                 </Link>
               ) : (
                 <span 
                   className={cn(
-                    "flex items-center gap-1 px-2 py-1",
-                    isCurrent && "text-gray-900 dark:text-gray-100 font-medium"
+                    "flex items-center gap-1 px-2 py-1 rounded-md relative",
+                    isCurrent && [
+                      "text-gray-900 dark:text-gray-100 font-semibold",
+                      "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-800/50",
+                      "border border-gray-200 dark:border-gray-700",
+                      "shadow-sm"
+                    ]
                   )}
                   aria-current={isCurrent ? "page" : undefined}
                 >
-                  {Icon && <Icon className="w-4 h-4" />}
+                  {Icon && <Icon className={cn(
+                    "w-4 h-4",
+                    isCurrent && "text-brand-green-600 dark:text-brand-green-400"
+                  )} />}
                   <span>{item.label}</span>
+                  {isCurrent && (
+                    <span 
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-green-500 rounded-full"
+                      aria-hidden="true"
+                    />
+                  )}
                 </span>
               )}
               
