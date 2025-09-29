@@ -73,7 +73,7 @@ test.describe('ButtonV2 Component', () => {
         window.buttonClicks = [];
         document.addEventListener('click', (e) => {
           if (e.target instanceof HTMLButtonElement) {
-            window.buttonClicks.push(e.target.textContent);
+            window.buttonClicks!.push(e.target.textContent || '');
           }
         });
       });
@@ -185,8 +185,8 @@ test.describe('ButtonV2 Component', () => {
       await expect(longTextBtn).toBeVisible();
       
       // Check that text doesn't overflow
-      const buttonWidth = await longTextBtn.evaluate(el => el.offsetWidth);
-      const textWidth = await longTextBtn.locator('span').evaluate(el => el.scrollWidth);
+      const buttonWidth = await longTextBtn.evaluate(el => (el as HTMLElement).offsetWidth);
+      const textWidth = await longTextBtn.locator('span').evaluate(el => (el as HTMLElement).scrollWidth);
       
       expect(textWidth).toBeLessThanOrEqual(buttonWidth);
     });

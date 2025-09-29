@@ -128,7 +128,7 @@ test.describe('CardV2 Component', () => {
           const card = (e.target as Element).closest('[class*="cursor-pointer"]');
           if (card) {
             const title = card.querySelector('h3')?.textContent;
-            window.cardClicks.push(title);
+            window.cardClicks!.push(title || '');
           }
         });
       });
