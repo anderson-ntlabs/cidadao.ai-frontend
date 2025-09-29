@@ -1,6 +1,6 @@
 'use client'
 
-import { ButtonV2Demo } from '@/components/ui/button-v2-demo'
+import { ButtonV2Demo } from '@/components/ui/button-demo'
 
 export default function TestButtonsPage() {
   return (

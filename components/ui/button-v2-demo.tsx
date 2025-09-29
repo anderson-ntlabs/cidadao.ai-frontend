@@ -1,6 +1,6 @@
 'use client'
 
-import { ButtonV2 } from './button-v2'
+import { ButtonV2 } from './button'
 import { 
   Search, 
   ChevronRight, 

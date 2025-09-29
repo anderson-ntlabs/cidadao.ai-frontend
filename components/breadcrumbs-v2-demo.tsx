@@ -1,7 +1,7 @@
 'use client'
 
-import { BreadcrumbsV2, BreadcrumbsV2Mobile, type BreadcrumbItemV2 } from './breadcrumbs-v2'
-import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content } from './ui/card-v2'
+import { BreadcrumbsV2, BreadcrumbsV2Mobile, type BreadcrumbItemV2 } from './breadcrumbs'
+import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content } from './ui/card'
 import { Home, FileText, Shield, Settings, User, BarChart } from 'lucide-react'
 
 const basicItems: BreadcrumbItemV2[] = [

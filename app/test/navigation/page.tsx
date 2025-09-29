@@ -1,6 +1,6 @@
 'use client'
 
-import { NavigationV2Demo } from '@/components/navigation-v2-demo'
+import { NavigationV2Demo } from '@/components/navigation-demo'
 
 export default function TestNavigationPage() {
   return (

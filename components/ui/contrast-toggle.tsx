@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { ButtonV2 } from './button-v2';
+import { ButtonV2 } from './button';
 import { StrategicTooltip } from './tooltip';
 import { toast } from '@/hooks/use-toast';
 

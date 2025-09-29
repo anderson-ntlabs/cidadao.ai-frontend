@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { Settings, Bell, Moon, Sun, Globe, Shield, Database, Paintbrush } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
+import { ButtonV2 } from '@/components/ui/button'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)

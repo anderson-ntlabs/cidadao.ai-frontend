@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { NavigationV2, NavigationV2Drawer, NavigationV2Tabs, NavigationV2Group } from './navigation-v2'
-import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content } from './ui/card-v2'
-import { ButtonV2 } from './ui/button-v2'
+import { NavigationV2, NavigationV2Drawer, NavigationV2Tabs, NavigationV2Group } from './navigation'
+import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content } from './ui/card'
+import { ButtonV2 } from './ui/button'
 import { 
   Home, 
   MessageSquare, 

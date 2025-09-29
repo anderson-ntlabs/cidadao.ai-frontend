@@ -9,8 +9,8 @@ import {
   CardV2Footer,
   CardV2Badge,
   CardV2Stat
-} from './card-v2'
-import { ButtonV2 } from './button-v2'
+} from './card'
+import { ButtonV2 } from './button'
 import { TrendingUp, Users, FileText, AlertCircle } from 'lucide-react'
 
 export function CardV2Demo() {

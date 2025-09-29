@@ -2,9 +2,9 @@
 
 import '@/styles/design-system/tokens/index.css'
 import { ReactNode, useEffect, useState } from 'react'
-import { HeaderV2 } from '@/components/header-v2'
-import { MobileNavV2 } from '@/components/mobile-nav-v2'
-import { type NavigationItem } from '@/components/navigation-v2'
+import { HeaderV2 } from '@/components/header'
+import { MobileNavV2 } from '@/components/mobile-nav'
+import { type NavigationItem } from '@/components/navigation'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { SmartBreadcrumbs } from '@/components/smart-breadcrumbs'

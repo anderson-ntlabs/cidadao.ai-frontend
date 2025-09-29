@@ -19,8 +19,8 @@ import {
   CardV2Footer,
   CardV2Badge,
   CardV2Stat
-} from '@/components/ui/card-v2'
-import { ButtonV2 } from '@/components/ui/button-v2'
+} from '@/components/ui/card'
+import { ButtonV2 } from '@/components/ui/button'
 import { LoadingScreen } from '@/components/loading-screen'
 import { useNotificationStore } from '@/store/notification-store'
 import { toast } from '@/hooks/use-toast'

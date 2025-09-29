@@ -1,9 +1,9 @@
 'use client'
 
-import { AuthLayoutV2, AuthLayoutV2WithSidebar } from '@/components/auth-layout-v2'
-import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content, CardV2Stat } from '@/components/ui/card-v2'
-import { ButtonV2 } from '@/components/ui/button-v2'
-import { NavigationV2, NavigationV2Group } from '@/components/navigation-v2'
+import { AuthLayoutV2, AuthLayoutV2WithSidebar } from '@/components/auth-layout'
+import { CardV2, CardV2Header, CardV2Title, CardV2Description, CardV2Content, CardV2Stat } from '@/components/ui/card'
+import { ButtonV2 } from '@/components/ui/button'
+import { NavigationV2, NavigationV2Group } from '@/components/navigation'
 import { FileText, Users, TrendingUp, AlertCircle, Settings, HelpCircle, LogOut } from 'lucide-react'
 
 // Force new design

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { LoadingScreen } from '@/components/loading-screen'
 import { Breadcrumbs } from '@/components/breadcrumbs'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { 
   CardV2, 
   CardV2Header, 
@@ -17,7 +17,7 @@ import {
   CardV2Content, 
   CardV2Badge,
   CardV2Stat
-} from '@/components/ui/card-v2'
+} from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent, Dropdown } from '@/components/ui'
 import { LineChart, BarChart, PieChart, AreaChart } from '@/components/charts'
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns'

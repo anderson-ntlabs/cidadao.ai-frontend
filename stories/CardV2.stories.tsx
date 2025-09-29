@@ -8,8 +8,8 @@ import {
   CardV2Footer,
   CardV2Badge,
   CardV2Stat
-} from '@/components/ui/card-v2'
-import { ButtonV2 } from '@/components/ui/button-v2'
+} from '@/components/ui/card'
+import { ButtonV2 } from '@/components/ui/button'
 import { FileText, Users, TrendingUp, AlertCircle } from 'lucide-react'
 
 const meta: Meta<typeof CardV2> = {

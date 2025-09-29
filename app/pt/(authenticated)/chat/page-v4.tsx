@@ -4,7 +4,7 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { agents } from '@/data/agents'
 import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-store'
@@ -16,7 +16,7 @@ import {
   Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, 
   Shield, Plus, MessageSquare, X, Clock, Trash2, MoreVertical 
 } from 'lucide-react'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'

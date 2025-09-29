@@ -1,6 +1,6 @@
 'use client'
 
-import { CardV2Demo } from '@/components/ui/card-v2-demo'
+import { CardV2Demo } from '@/components/ui/card-demo'
 
 export default function TestCardsPage() {
   return (

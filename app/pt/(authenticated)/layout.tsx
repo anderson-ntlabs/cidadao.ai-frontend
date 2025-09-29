@@ -1,5 +1,5 @@
 import { AuthLayout } from '@/components/auth-layout'
-import { AuthLayoutV2 } from '@/components/auth-layout-v2'
+import { AuthLayoutV2 } from '@/components/auth-layout'
 import { AdaptiveHintsProvider } from '@/components/hints/adaptive-hints-provider'
 
 // Use the new design system if feature flag is enabled

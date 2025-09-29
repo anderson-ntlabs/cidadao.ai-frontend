@@ -4,14 +4,14 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { LoadingScreen } from '@/components/loading-screen'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { agents } from '@/data/agents'
 import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-store'
 import { MarkdownMessage } from '@/components/markdown-message'
 import { toast } from '@/hooks/use-toast'
 import { Send, User, Bot, Sparkles, AlertCircle, CheckCircle } from 'lucide-react'
-import { ButtonV2 } from '@/components/ui/button-v2'
-import { CardV2, CardV2Content, CardV2Badge } from '@/components/ui/card-v2'
+import { ButtonV2 } from '@/components/ui/button'
+import { CardV2, CardV2Content, CardV2Badge } from '@/components/ui/card'
 
 export default function ChatPageV2() {
   const [user, setUser] = useState<any>(null)

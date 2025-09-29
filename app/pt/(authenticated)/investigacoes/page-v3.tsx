@@ -9,12 +9,12 @@ import {
   BarChart3, Shield, Zap, Target, Activity, Users,
   CheckCircle, XCircle, AlertCircle, RefreshCw
 } from 'lucide-react'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 
 // Tipos de investigação
 const investigationTypes = {

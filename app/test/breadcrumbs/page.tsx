@@ -1,6 +1,6 @@
 'use client'
 
-import { BreadcrumbsV2Demo } from '@/components/breadcrumbs-v2-demo'
+import { BreadcrumbsV2Demo } from '@/components/breadcrumbs-demo'
 
 export default function TestBreadcrumbsPage() {
   return (

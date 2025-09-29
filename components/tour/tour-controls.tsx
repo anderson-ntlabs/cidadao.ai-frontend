@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X, Maximize2, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { ButtonV2 } from '@/components/ui/button-v2';
+import { ButtonV2 } from '@/components/ui/button';
 
 interface TourControlsProps {
   currentStep: number;

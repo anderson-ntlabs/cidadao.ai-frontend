@@ -11,13 +11,13 @@ import {
   CheckCircle, Search, BarChart, Lock
 } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent, GlassCardFooter } from '@/components/ui/glass-card'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { LoadingScreen } from '@/components/loading-screen'
 import { useNotificationStore } from '@/store/notification-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 
 interface QuickStat {
   label: string

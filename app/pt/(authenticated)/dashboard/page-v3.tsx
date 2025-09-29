@@ -9,10 +9,10 @@ import {
   Activity, FileSearch, Users, DollarSign, Calendar,
   Filter, Download, RefreshCw, BarChart
 } from 'lucide-react'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 
 // Dynamic imports for charts
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })

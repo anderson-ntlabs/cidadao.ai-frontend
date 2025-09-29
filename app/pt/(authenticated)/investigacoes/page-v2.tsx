@@ -10,9 +10,9 @@ import {
   BarChart3, Shield, Zap, Target, Activity, Users,
   CheckCircle, XCircle, AlertCircle, RefreshCw
 } from 'lucide-react'
-import { ButtonV2 } from '@/components/ui/button-v2'
-import { CardV2, CardV2Content, CardV2Header, CardV2Title, CardV2Badge } from '@/components/ui/card-v2'
-import { BreadcrumbsV2 } from '@/components/breadcrumbs-v2'
+import { ButtonV2 } from '@/components/ui/button'
+import { CardV2, CardV2Content, CardV2Header, CardV2Title, CardV2Badge } from '@/components/ui/card'
+import { BreadcrumbsV2 } from '@/components/breadcrumbs'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 

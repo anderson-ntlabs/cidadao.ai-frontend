@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { BreadcrumbsV2, type BreadcrumbItemV2 } from './breadcrumbs-v2';
+import { BreadcrumbsV2, type BreadcrumbItemV2 } from './breadcrumbs';
 import { 
   Home, 
   MessageSquare, 

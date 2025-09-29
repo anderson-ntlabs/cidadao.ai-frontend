@@ -1,158 +1,107 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, X, LogIn, LogOut, User } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { Menu, X, LogOut, User as UserIcon, Settings } from 'lucide-react'
+import { NavigationV2, NavigationV2Drawer, type NavigationItem } from './navigation'
+import { ButtonV2 } from './ui/button'
+import { NotificationDropdown } from './ui/notification-dropdown'
 import { ThemeToggle } from './theme-toggle'
-import { Button, NotificationDropdown } from '@/components/ui'
-import { useAuth } from '@/hooks/use-supabase-auth'
+import { toast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 
-interface HeaderProps {
+interface HeaderV2Props {
   locale: 'pt' | 'en'
+  user: any
+  navigationItems: NavigationItem[]
+  className?: string
+  onLogout?: () => void
 }
 
-export function Header({ locale }: HeaderProps) {
+export function HeaderV2({ locale, user, navigationItems, className, onLogout }: HeaderV2Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const pathname = usePathname()
-  const { user, isAuthenticated, logout } = useAuth()
+  const router = useRouter()
   
-  // Check if we're on landing page
-  const isLandingPage = pathname === '/pt' || pathname === '/en'
-  
-  // Function to get the current page path without locale
-  const getLocalizedPath = (targetLocale: 'pt' | 'en') => {
-    // Remove current locale from pathname
-    const pathWithoutLocale = pathname.replace(/^\/(pt|en)/, '')
-    // If it's the home page or empty, return just the locale
-    if (!pathWithoutLocale || pathWithoutLocale === '/') {
-      return `/${targetLocale}`
-    }
-    // Otherwise, return the locale + current path
-    return `/${targetLocale}${pathWithoutLocale}`
-  }
-  
-  const publicNavigation = locale === 'pt' 
-    ? [
-        { name: 'Início', href: '/pt' },
-        { name: 'Agentes', href: '/pt/agents' },
-        { name: 'Sobre', href: '/pt/about' },
-        { name: 'Manifesto', href: '/pt/manifesto' },
-        { name: 'Sistema', href: '/pt/system' },
-      ]
-    : [
-        { name: 'Home', href: '/en' },
-        { name: 'Agents', href: '/en/agents' },
-        { name: 'About', href: '/en/about' },
-        { name: 'Manifesto', href: '/en/manifesto' },
-        { name: 'System', href: '/en/system' },
-      ]
-
-  const authenticatedNavigation = locale === 'pt'
-    ? [
-        { name: 'Home', href: '/pt/home' },
-        { name: 'Chat', href: '/pt/chat' },
-        { name: 'Investigações', href: '/pt/investigacoes' },
-        { name: 'Dashboard', href: '/pt/dashboard' },
-      ]
-    : [] // No authenticated navigation in English
-
-  // Always show public navigation on landing page
-  const navigation = isLandingPage ? publicNavigation : (isAuthenticated ? authenticatedNavigation : publicNavigation)
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      e.preventDefault()
-      const currentIndex = navigation.findIndex(item => item.href === pathname)
-      let newIndex = currentIndex
-
-      if (e.key === 'ArrowLeft') {
-        newIndex = currentIndex > 0 ? currentIndex - 1 : navigation.length - 1
-      } else if (e.key === 'ArrowRight') {
-        newIndex = currentIndex < navigation.length - 1 ? currentIndex + 1 : 0
-      }
-
-      const link = document.querySelector(`[href="${navigation[newIndex].href}"]`) as HTMLElement
-      link?.focus()
+  const handleLogout = async () => {
+    if (onLogout) {
+      await onLogout()
+    } else {
+      // Fallback to localStorage removal if no onLogout provided
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      toast.success(
+        locale === 'pt' ? 'Até logo!' : 'See you later!',
+        locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully'
+      )
+      router.push(`/${locale}`)
     }
   }
+
+  const userMenuItems: NavigationItem[] = [
+    {
+      name: locale === 'pt' ? 'Meu Perfil' : 'My Profile',
+      href: `/${locale}/perfil`,
+      icon: UserIcon
+    },
+    {
+      name: locale === 'pt' ? 'Configurações' : 'Settings',
+      href: `/${locale}/configuracoes`,
+      icon: Settings
+    }
+  ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-800/50">
-      <nav id="main-navigation" role="navigation" aria-label="Main navigation" className="max-w-7xl mx-auto px-6">
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50",
+      "bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg",
+      "border-b border-gray-200/50 dark:border-gray-800/50",
+      "shadow-lg",
+      className
+    )}>
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6" role="navigation">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center space-x-3">
-            <Image
-              src="/forum-icon.png"
-              alt="Greek Forum"
-              width={40}
-              height={40}
-              className="rounded-lg"
-            />
-            <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-              Cidadão.AI
-            </span>
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link 
+              href={`/${locale}/home`} 
+              className="flex items-center gap-3 group"
+              aria-label="Cidadão.AI Home"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:scale-110">
+                <span className="text-white font-bold text-xl">C</span>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+                Cidadão.AI
+              </span>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-green-600 ${
-                  pathname === item.href 
-                    ? 'text-green-600' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {/* Language Switcher Desktop */}
-            <div className="flex gap-2 ml-6 pl-6 border-l border-gray-300 dark:border-gray-700">
-              <Link
-                href={getLocalizedPath('pt')}
-                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                  locale === 'pt' 
-                    ? 'bg-green-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                }`}
-              >
-                PT
-              </Link>
-              <Link
-                href={getLocalizedPath('en')}
-                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                  locale === 'en' 
-                    ? 'bg-green-600 text-white' 
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
-                }`}
-              >
-                EN
-              </Link>
-              
-              {/* Notifications */}
-              <div className="ml-2">
-                <NotificationDropdown locale={locale} />
-              </div>
-              
-              {/* Theme Toggle */}
-              <div className="ml-2">
-                <ThemeToggle />
-              </div>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:block">
+              <NavigationV2 
+                items={navigationItems}
+                variant="horizontal"
+                size="sm"
+              />
             </div>
+          </div>
+
+          {/* Right side actions */}
+          <div className="flex items-center gap-2">
+            {/* Notifications */}
+            <NotificationDropdown locale={locale} />
             
-            {/* Auth Button Desktop */}
-            {isAuthenticated && !isLandingPage ? (
-              <div className="ml-4 flex items-center gap-3">
-                {/* User Menu */}
-                <Link
-                  href={`/${locale}/perfil`}
-                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* User Menu - Desktop */}
+            <div className="hidden lg:flex items-center gap-2">
+              <div className="relative group">
+                <ButtonV2
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
                 >
                   {user?.avatar ? (
                     <Image
@@ -160,153 +109,108 @@ export function Header({ locale }: HeaderProps) {
                       alt={user.name}
                       width={32}
                       height={32}
-                      className="rounded-full object-cover"
+                      className="rounded-full object-cover shadow-md"
                     />
                   ) : (
-                    <User size={20} />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 via-yellow-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-md">
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
                   )}
-                  <span className="hidden lg:inline">{user?.name || user?.email}</span>
-                </Link>
-                
-                {/* Logout Button */}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={logout}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut size={16} />
-                  <span>
-                    {locale === 'pt' ? 'Sair' : 'Logout'}
+                  <span className="max-w-[150px] truncate">
+                    {user?.name || 'Usuário'}
                   </span>
-                </Button>
-              </div>
-            ) : !isLandingPage ? (
-              <Link
-                href="/pt/login"
-                className="ml-4 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-shadow"
-              >
-                <LogIn size={18} />
-                <span>
-                  {locale === 'pt' ? 'Entrar' : 'Login'}
-                </span>
-              </Link>
-            ) : null}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm">
-            <div className="flex flex-col space-y-3">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`px-3 py-2 rounded-lg text-base font-medium transition-colors ${
-                    pathname === item.href 
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20' 
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              
-              {/* Language and Theme Switcher Mobile */}
-              <div className="px-3 pt-3 mt-3 border-t border-gray-200 dark:border-gray-800">
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-2">
-                    <Link
-                      href={getLocalizedPath('pt')}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`px-3 py-1 rounded text-sm font-medium ${
-                        locale === 'pt' 
-                          ? 'bg-green-600 text-white' 
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                      }`}
-                    >
-                      Português
-                    </Link>
-                    <Link
-                      href={getLocalizedPath('en')}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`px-3 py-1 rounded text-sm font-medium ${
-                        locale === 'en' 
-                          ? 'bg-green-600 text-white' 
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                      }`}
-                    >
-                      English
-                    </Link>
+                </ButtonV2>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg rounded-lg shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2">
+                    <NavigationV2
+                      items={userMenuItems}
+                      variant="vertical"
+                      size="sm"
+                    />
+                    <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2 px-2">
+                      <ButtonV2
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start"
+                        leftIcon={<LogOut className="h-4 w-4" />}
+                        onClick={handleLogout}
+                      >
+                        {locale === 'pt' ? 'Sair' : 'Logout'}
+                      </ButtonV2>
+                    </div>
                   </div>
-                  
-                  {/* Theme Toggle Mobile */}
-                  <ThemeToggle />
                 </div>
               </div>
-              
-              {/* Auth Section Mobile */}
-              <div className="px-3 mt-3 space-y-3">
-                {isAuthenticated && !isLandingPage ? (
-                  <>
-                    {/* User Profile Link */}
-                    <Link
-                      href={`/${locale}/perfil`}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="w-full flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      {user?.avatar ? (
-                        <Image
-                          src={user.avatar}
-                          alt={user.name}
-                          width={32}
-                          height={32}
-                          className="rounded-full object-cover"
-                        />
-                      ) : (
-                        <User size={20} />
-                      )}
-                      <span>{user?.name || user?.email}</span>
-                    </Link>
-                    
-                    {/* Logout Button */}
-                    <button
-                      onClick={() => {
-                        setIsMenuOpen(false)
-                        logout()
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-                    >
-                      <LogOut size={20} />
-                      {locale === 'pt' ? 'Sair' : 'Logout'}
-                    </button>
-                  </>
-                ) : !isLandingPage ? (
-                  <Link
-                    href="/pt/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
-                  >
-                    <LogIn size={20} />
-                    {locale === 'pt' ? 'Entrar' : 'Login'}
-                  </Link>
-                ) : null}</div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <ButtonV2
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </ButtonV2>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation Drawer */}
+      <NavigationV2Drawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        items={navigationItems}
+      >
+        {/* User section in mobile */}
+        <div className="mt-6 px-6 pb-6">
+          <div className="flex items-center gap-3 mb-4">
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user.name}
+                width={48}
+                height={48}
+                className="rounded-full object-cover shadow-md"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-brand-green-600 to-brand-blue-600 flex items-center justify-center text-white font-semibold text-lg">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                {user?.name || 'Usuário'}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                {user?.email || 'email@example.com'}
+              </p>
             </div>
           </div>
-        )}
-      </nav>
+          
+          <div className="space-y-1">
+            <NavigationV2
+              items={userMenuItems}
+              variant="mobile"
+              onItemClick={() => setIsMenuOpen(false)}
+            />
+            <ButtonV2
+              variant="ghost"
+              className="w-full justify-start"
+              leftIcon={<LogOut className="h-5 w-5" />}
+              onClick={() => {
+                setIsMenuOpen(false)
+                handleLogout()
+              }}
+            >
+              {locale === 'pt' ? 'Sair' : 'Logout'}
+            </ButtonV2>
+          </div>
+        </div>
+      </NavigationV2Drawer>
     </header>
   )
 }

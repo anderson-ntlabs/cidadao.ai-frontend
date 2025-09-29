@@ -5,7 +5,7 @@ import { MessageSquare, Trash2, ChevronLeft, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import type { ChatSession } from '@/types/supabase'
-import { ButtonV2 } from '@/components/ui/button-v2'
+import { ButtonV2 } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
