@@ -9,6 +9,7 @@ import { Navigation, NavigationDrawer, type NavigationItem } from './navigation'
 import { Button } from './ui/button'
 import { NotificationDropdown } from './ui/notification-dropdown'
 import { ThemeToggle } from './theme-toggle'
+import { LanguageSwitcherV2 } from './language-switcher-v2'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -89,6 +90,9 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <LanguageSwitcherV2 />
+            
             {/* Notifications */}
             <NotificationDropdown locale={locale} />
             
@@ -165,6 +169,19 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
         onClose={() => setIsMenuOpen(false)}
         items={navigationItems}
       >
+        {/* Language and Theme section in mobile */}
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="space-y-4">
+            <LanguageSwitcherV2 variant="mobile" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {locale === 'pt' ? 'Tema' : 'Theme'}
+              </span>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+        
         {/* User section in mobile */}
         <div className="mt-6 px-6 pb-6">
           <div className="flex items-center gap-3 mb-4">

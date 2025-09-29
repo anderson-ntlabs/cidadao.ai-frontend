@@ -1,7 +1,11 @@
+// Re-export the V2 version as the main component
+export { LanguageSwitcherV2 as LanguageSwitcher } from './language-switcher-v2'
+
+// Keep original for backward compatibility if needed
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-export function LanguageSwitcher() {
+export function LanguageSwitcherOriginal() {
   const pathname = usePathname()
   const currentLang = pathname.startsWith('/en') ? 'en' : 'pt'
   
