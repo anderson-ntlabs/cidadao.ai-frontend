@@ -20,7 +20,8 @@
     <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript" alt="TypeScript">
     <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind">
     <img src="https://img.shields.io/badge/PWA-Ready-5A0FC8?style=flat-square&logo=pwa" alt="PWA">
-    <img src="https://img.shields.io/badge/coverage-20%25-red?style=flat-square" alt="Coverage">
+    <img src="https://img.shields.io/badge/coverage-23%25-red?style=flat-square" alt="Coverage">
+    <img src="https://img.shields.io/github/actions/workflow/status/anderson-ufrj/cidadao.ai-frontend/test.yml?style=flat-square&label=tests" alt="Tests">
   </p>
   
   <p>
