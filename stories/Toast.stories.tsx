@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useState } from 'react'
 import { Toast, Toaster } from '@/components/ui/toast'
 import { Button } from '@/components/ui/button'
@@ -248,7 +248,6 @@ export const MultipleToasts: Story = {
  * Investigation workflow toasts
  */
 export const InvestigationWorkflow: Story = {
-  name: 'Investigation Workflow',
   render: () => {
     const { addNotification } = useNotificationStore()
     

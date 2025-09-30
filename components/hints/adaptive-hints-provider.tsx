@@ -76,7 +76,7 @@ export function AdaptiveHintsProvider({ children }: AdaptiveHintsProviderProps) 
         }
       }, hint.showAfter);
     });
-  }, [pathname, messages.length, errors, hintSystem]);
+  }, [pathname, messages.length, errors, hintSystem, currentHints]);
 
   const dismissHint = (key: string) => {
     setCurrentHints(prev => prev.filter(h => h.key !== key));

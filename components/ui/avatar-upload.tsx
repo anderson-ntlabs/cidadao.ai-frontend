@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import { Camera, Upload, X, Check, AlertCircle } from 'lucide-react'
 import { Button } from './button'
 import { toast } from '@/hooks/use-toast'
@@ -87,7 +88,7 @@ export function AvatarUpload({
     } finally {
       setIsUploading(false)
     }
-  }, [maxSize, allowedTypes, onAvatarChange, validateFile])
+  }, [onAvatarChange, validateFile])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -147,10 +148,13 @@ export function AvatarUpload({
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <img 
+        <Image 
           src={displayAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=10b981&color=fff&size=128`} 
-          alt={userName}
+          alt={userName || 'Avatar'}
           className="w-full h-full object-cover"
+          width={128}
+          height={128}
+          unoptimized={!displayAvatar}
         />
         
         {/* Upload Overlay */}

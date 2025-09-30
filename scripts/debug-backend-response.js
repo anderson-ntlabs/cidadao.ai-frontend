@@ -72,6 +72,5 @@ async function debugBackendResponse() {
     
     console.log('\n' + '='.repeat(60));
   }
-}
 
-debugBackendResponse().catch(console.error);
+  debugBackendResponse().catch(console.error);

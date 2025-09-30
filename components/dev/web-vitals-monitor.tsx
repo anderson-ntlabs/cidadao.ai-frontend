@@ -11,11 +11,6 @@ export function WebVitalsMonitor() {
   const [isMinimized, setIsMinimized] = useState(true)
   const { score, metrics, recommendations } = useWebVitalsMonitor()
 
-  // Only show in development
-  if (process.env.NODE_ENV !== 'development') {
-    return null
-  }
-
   // Auto-hide after 10 seconds
   useEffect(() => {
     if (isOpen && !isMinimized) {
@@ -25,6 +20,11 @@ export function WebVitalsMonitor() {
       return () => clearTimeout(timer)
     }
   }, [isOpen, isMinimized])
+
+  // Only show in development
+  if (process.env.NODE_ENV !== 'development') {
+    return null
+  }
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-500'

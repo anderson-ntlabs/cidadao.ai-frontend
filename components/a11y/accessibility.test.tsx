@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -206,8 +207,8 @@ describe('Accessibility Tests', () => {
           </header>
           <nav role="navigation">
             <ul>
-              <li><a href="/">Home</a></li>
-              <li><a href="/about">About</a></li>
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/about">About</Link></li>
             </ul>
           </nav>
           <main role="main">

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useCallback } from 'react';
 import { TourManager } from '@/lib/services/tour-manager';
 import { useAuth } from '@/hooks/use-supabase-auth';

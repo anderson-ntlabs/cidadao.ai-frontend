@@ -1,8 +1,9 @@
 'use client'
 
 import '@/styles/design-system/tokens/index.css'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LoadingScreen } from '@/components/loading-screen'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { agents } from '@/data/agents'
@@ -48,9 +49,9 @@ export default function ChatPageV3() {
   const { activeAgents, hasActiveAgents } = useAgentStatus()
   const { suggestedActions } = useSuggestedActions()
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  }, [])
 
   useEffect(() => {
     // Only scroll when a new assistant message is added
@@ -58,7 +59,7 @@ export default function ChatPageV3() {
     if (lastMessage && lastMessage.role === 'assistant') {
       scrollToBottom()
     }
-  }, [messages.length])
+  }, [messages, scrollToBottom])
 
   useEffect(() => {
     if (error) {
@@ -253,10 +254,12 @@ export default function ChatPageV3() {
                     >
                       {message.role === 'assistant' && (
                         <div className="flex-shrink-0">
-                          <img 
+                          <Image 
                             src="/agents/abaporu.png" 
                             alt="Abaporu" 
                             className="w-10 h-10 rounded-lg shadow-md object-cover"
+                            width={40}
+                            height={40}
                           />
                         </div>
                       )}

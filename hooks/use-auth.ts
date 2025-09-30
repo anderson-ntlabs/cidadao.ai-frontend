@@ -29,11 +29,6 @@ export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
-  // Check authentication status on mount
-  useEffect(() => {
-    checkAuth()
-  }, [])
-
   const checkAuth = useCallback(async () => {
     try {
       // Check if we have a token
@@ -69,6 +64,11 @@ export function useAuth(): UseAuthReturn {
       setIsLoading(false)
     }
   }, [])
+
+  // Check authentication status on mount
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true)
