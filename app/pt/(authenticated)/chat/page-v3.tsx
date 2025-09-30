@@ -18,7 +18,7 @@ import { StrategicTooltip } from '@/components/ui/tooltip'
 import { useReportUXIssue } from '@/components/hints/adaptive-hints-provider'
 import { ContrastToggle, ContrastChecker } from '@/components/ui/contrast-toggle'
 import { useContrastCheck } from '@/hooks/use-contrast-check'
-import { InteractiveTour } from '@/components/tour/interactive-tour'
+import { InteractiveTour } from '@/components/tour/lazy'
 
 export default function ChatPageV3() {
   const { user } = useAuth()
