@@ -60,6 +60,59 @@ const nextConfig = {
     if (!isServer && process.env.VERCEL) {
       config.optimization.minimize = false
     }
+    
+    // Optimize chunking
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        runtimeChunk: 'single',
+        splitChunks: {
+          chunks: 'all',
+          maxInitialRequests: 25,
+          minSize: 20000,
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            framework: {
+              name: 'framework',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-sync-external-store)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            lib: {
+              test: /[\\/]node_modules[\\/]/,
+              name(module) {
+                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+                return `npm.${packageName.replace('@', '')}`;
+              },
+              priority: 30,
+              minChunks: 1,
+              reuseExistingChunk: true,
+            },
+            commons: {
+              name: 'commons',
+              chunks: 'all',
+              minChunks: 2,
+              priority: 20,
+            },
+            charts: {
+              name: 'charts',
+              test: /[\\/]node_modules[\\/](recharts|react-apexcharts|apexcharts|d3)[\\/]/,
+              priority: 25,
+              reuseExistingChunk: true,
+            },
+            animations: {
+              name: 'animations',
+              test: /[\\/]node_modules[\\/](framer-motion|react-spring)[\\/]/,
+              priority: 25,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
+    }
+    
     return config
   },
 }
