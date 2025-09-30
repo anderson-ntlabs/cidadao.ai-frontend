@@ -20,7 +20,9 @@
     "test:playwright": "playwright test",
     "test:playwright:ui": "playwright test --ui",
     "test:design-system": "playwright test tests/e2e/design-system/",
-    "test:install": "playwright install"
+    "test:install": "playwright install",
+    "generate:component": "node scripts/generate-component.js",
+    "analyze": "node scripts/analyze-bundle.js"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
