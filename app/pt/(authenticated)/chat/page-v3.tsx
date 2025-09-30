@@ -19,6 +19,7 @@ import { useReportUXIssue } from '@/components/hints/adaptive-hints-provider'
 import { ContrastToggle, ContrastChecker } from '@/components/ui/contrast-toggle'
 import { useContrastCheck } from '@/hooks/use-contrast-check'
 import { InteractiveTour } from '@/components/tour/lazy'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 export default function ChatPageV3() {
   const { user } = useAuth()
@@ -203,10 +204,13 @@ export default function ChatPageV3() {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="mb-8">
-                  <img 
+                  <OptimizedImage 
                     src="/agents/abaporu.png" 
                     alt="Abaporu - Mestre Orquestrador" 
-                    className="w-24 h-24 mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
+                    width={96}
+                    height={96}
+                    className="mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
+                    priority
                   />
                 </div>
                 
