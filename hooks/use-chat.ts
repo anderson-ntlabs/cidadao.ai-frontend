@@ -1,34 +1,95 @@
 import { useState, useCallback } from 'react'
 import { agents } from '@/data/agents'
 
+/**
+ * Message structure for chat requests
+ * 
+ * @interface ChatMessage
+ */
 interface ChatMessage {
+  /** The message content to send */
   message: string
+  /** Optional agent ID to direct the message to */
   agent_id?: string
+  /** Session ID for conversation continuity */
   session_id?: string
+  /** Additional context for the conversation */
   context?: any
+  /** List of active agents in the conversation */
   activeAgents?: string[]
 }
 
+/**
+ * Response structure from chat API
+ * 
+ * @interface ChatResponse
+ */
 interface ChatResponse {
+  /** Response text (legacy field) */
   response?: string
+  /** Response message content */
   message?: string
+  /** Agent that handled the request */
   agent?: string
+  /** Confidence score (0-1) */
   confidence?: number
+  /** Source references used */
   sources?: any[]
+  /** Error message if request failed */
   error?: string
+  /** Currently active agents */
   activeAgents?: string[]
 }
 
+/**
+ * Response structure for investigation queries
+ * 
+ * @interface InvestigationResponse
+ */
 interface InvestigationResponse {
+  /** Investigation status */
   status: string
+  /** Agent performing the investigation */
   agent: string
+  /** Original query */
   query: string
+  /** Investigation results */
   results: any[]
+  /** Number of anomalies detected */
   anomalies_found: number
+  /** Confidence score (0-1) */
   confidence_score: number
+  /** Processing time in milliseconds */
   processing_time_ms: number
 }
 
+/**
+ * useChat - Hook for managing chat interactions with AI agents
+ * 
+ * @hook
+ * @example
+ * ```tsx
+ * const { sendMessage, startInvestigation, isLoading, error } = useChat();
+ * 
+ * // Send a regular message
+ * const response = await sendMessage({
+ *   message: "What can you tell me about public contracts?",
+ *   agent_id: "zumbi"
+ * });
+ * 
+ * // Start an investigation
+ * const investigation = await startInvestigation("suspicious contracts in 2024");
+ * ```
+ * 
+ * @returns {Object} Chat methods and state
+ * @returns {Function} returns.sendMessage - Send a message to an agent
+ * @returns {Function} returns.startInvestigation - Start a new investigation
+ * @returns {Function} returns.getAgentByRole - Get agent by role
+ * @returns {boolean} returns.isLoading - Loading state
+ * @returns {string|null} returns.error - Error message if any
+ * 
+ * @since 1.0.0
+ */
 export function useChat() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

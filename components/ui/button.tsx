@@ -2,6 +2,10 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { type VariantProps, cva } from "class-variance-authority"
 
+/**
+ * Variant configuration for Button component styling
+ * Uses class-variance-authority for type-safe variant management
+ */
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
@@ -29,15 +33,65 @@ const buttonVariants = cva(
   }
 )
 
+/**
+ * Props for Button and ButtonV2 components
+ * 
+ * @interface ButtonProps
+ * @extends {React.ButtonHTMLAttributes<HTMLButtonElement>}
+ */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /**
+   * Render as child component for composition
+   * @default false
+   */
   asChild?: boolean
+  
+  /**
+   * Show loading spinner and disable interactions
+   * @default false
+   */
   loading?: boolean
+  
+  /**
+   * Icon to display on the left side of the button
+   */
   leftIcon?: React.ReactNode
+  
+  /**
+   * Icon to display on the right side of the button
+   */
   rightIcon?: React.ReactNode
 }
 
+/**
+ * ButtonV2 - Modern button component with multiple variants and states
+ * 
+ * @component
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <ButtonV2 variant="primary">Click me</ButtonV2>
+ * 
+ * // With icons
+ * <ButtonV2 
+ *   leftIcon={<SaveIcon />} 
+ *   variant="success"
+ * >
+ *   Save Changes
+ * </ButtonV2>
+ * 
+ * // Loading state
+ * <ButtonV2 loading>Processing...</ButtonV2>
+ * ```
+ * 
+ * @param {ButtonProps} props - Component props
+ * @returns {JSX.Element} Rendered button element
+ * 
+ * @since 2.0.0
+ * @see {@link Button} - Original button component
+ */
 const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, leftIcon, rightIcon, children, disabled, type = "button", ...props }, ref) => {
     // Handle asChild prop for composition

@@ -2,6 +2,10 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { type VariantProps, cva } from "class-variance-authority"
 
+/**
+ * Variant configuration for Card component styling
+ * Provides multiple visual styles and padding options
+ */
 const cardVariants = cva(
   "rounded-2xl transition-all duration-300",
   {
@@ -32,9 +36,19 @@ const cardVariants = cva(
   }
 )
 
+/**
+ * Props for CardV2 component
+ * 
+ * @interface CardV2Props
+ * @extends {React.HTMLAttributes<HTMLDivElement>}
+ */
 interface CardV2Props
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
+  /**
+   * Render as child component for composition
+   * @default false
+   */
   asChild?: boolean
 }
 
