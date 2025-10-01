@@ -67,7 +67,7 @@ export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <Badge size="sm">Small</Badge>
-      <Badge size="md">Medium</Badge>
+      <Badge>Default</Badge>
       <Badge size="lg">Large</Badge>
     </div>
   ),
