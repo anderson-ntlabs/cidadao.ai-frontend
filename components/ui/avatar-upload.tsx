@@ -26,22 +26,23 @@ export function AvatarUpload({
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const validateFile = (file: File): string | null => {
-    // Check file type
-    if (!allowedTypes.includes(file.type)) {
-      return `Tipo de arquivo não suportado. Use: ${allowedTypes.join(', ')}`
-    }
-
-    // Check file size
-    const sizeInMB = file.size / (1024 * 1024)
-    if (sizeInMB > maxSize) {
-      return `Arquivo muito grande. Máximo: ${maxSize}MB`
-    }
-
-    return null
-  }
-
   const processFile = useCallback(async (file: File) => {
+    // validateFile moved inside useCallback
+    const validateFile = (file: File): string | null => {
+      // Check file type
+      if (!allowedTypes.includes(file.type)) {
+        return `Tipo de arquivo não suportado. Use: ${allowedTypes.join(', ')}`
+      }
+
+      // Check file size
+      const sizeInMB = file.size / (1024 * 1024)
+      if (sizeInMB > maxSize) {
+        return `Arquivo muito grande. Máximo: ${maxSize}MB`
+      }
+
+      return null
+    }
+
     const error = validateFile(file)
     if (error) {
       toast.error('Erro no arquivo', error)
@@ -88,7 +89,7 @@ export function AvatarUpload({
     } finally {
       setIsUploading(false)
     }
-  }, [onAvatarChange, validateFile])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [onAvatarChange, maxSize, allowedTypes])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

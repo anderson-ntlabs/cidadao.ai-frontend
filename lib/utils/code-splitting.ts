@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
 
 interface DynamicOptions {
-  loading?: ComponentType<any>;
+  loading?: () => React.ReactNode;
   ssr?: boolean;
 }
 
