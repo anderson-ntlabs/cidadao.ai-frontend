@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 import { Toast, Toaster } from '@/components/ui/toast'
 import { Button } from '@/components/ui/button'

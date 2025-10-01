@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, CheckCircle, Info, XCircle, Clock, User } from 'lucide-react'
 
