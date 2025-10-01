@@ -50,12 +50,12 @@ export const Default: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Badge>Default</Badge>
-      <Badge variant="primary">Primary</Badge>
       <Badge variant="secondary">Secondary</Badge>
       <Badge variant="success">Success</Badge>
       <Badge variant="warning">Warning</Badge>
-      <Badge variant="danger">Danger</Badge>
+      <Badge variant="destructive">Destructive</Badge>
       <Badge variant="outline">Outline</Badge>
+      <Badge variant="info">Info</Badge>
     </div>
   ),
 }
@@ -83,7 +83,7 @@ export const WithIcons: Story = {
         <CheckCircle className="w-3 h-3 mr-1" />
         Approved
       </Badge>
-      <Badge variant="danger">
+      <Badge variant="destructive">
         <XCircle className="w-3 h-3 mr-1" />
         Rejected
       </Badge>
@@ -91,7 +91,7 @@ export const WithIcons: Story = {
         <AlertCircle className="w-3 h-3 mr-1" />
         Pending
       </Badge>
-      <Badge variant="primary">
+      <Badge variant="default">
         <Info className="w-3 h-3 mr-1" />
         Info
       </Badge>
@@ -118,7 +118,7 @@ export const StatusBadges: Story = {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Connection:</span>
-        <Badge variant="danger">Offline</Badge>
+        <Badge variant="destructive">Offline</Badge>
       </div>
     </div>
   ),
@@ -133,7 +133,7 @@ export const CountBadges: Story = {
       <div className="relative">
         <User className="w-8 h-8" />
         <Badge 
-          variant="danger" 
+          variant="destructive" 
           size="sm" 
           className="absolute -top-1 -right-1"
         >
@@ -143,7 +143,7 @@ export const CountBadges: Story = {
       <div className="relative">
         <User className="w-8 h-8" />
         <Badge 
-          variant="primary" 
+          variant="default" 
           size="sm" 
           className="absolute -top-1 -right-1"
         >
@@ -162,11 +162,11 @@ export const AgentBadges: Story = {
   render: () => (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Badge variant="primary">Orchestrator</Badge>
+        <Badge variant="default">Orchestrator</Badge>
         <Badge variant="secondary">Investigator</Badge>
         <Badge variant="success">Analyst</Badge>
         <Badge variant="warning">Reporter</Badge>
-        <Badge variant="danger">Monitor</Badge>
+        <Badge variant="destructive">Monitor</Badge>
       </div>
       <div className="text-sm text-gray-600 dark:text-gray-400">
         Agent role badges used throughout the Cidadão.AI platform
