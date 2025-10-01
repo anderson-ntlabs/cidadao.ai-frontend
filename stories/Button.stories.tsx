@@ -68,10 +68,10 @@ export const Variants: Story = {
     <div className="flex flex-wrap gap-2">
       <Button variant="primary">Primary</Button>
       <Button variant="secondary">Secondary</Button>
-      <Button variant="outline">Outline</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="danger">Danger</Button>
-      <Button>Default</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="success">Success</Button>
+      <Button variant="warning">Warning</Button>
     </div>
   ),
 }
@@ -107,7 +107,7 @@ export const WithIcons: Story = {
           Download
           <Download className="w-4 h-4 ml-2" />
         </Button>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Plus className="w-4 h-4 mr-2" />
           Add New
         </Button>
@@ -158,9 +158,9 @@ export const DisabledStates: Story = {
     <div className="flex flex-wrap gap-2">
       <Button variant="primary" disabled>Primary</Button>
       <Button variant="secondary" disabled>Secondary</Button>
-      <Button variant="outline" disabled>Outline</Button>
+      <Button variant="secondary" disabled>Outline</Button>
       <Button variant="ghost" disabled>Ghost</Button>
-      <Button variant="danger" disabled>Danger</Button>
+      <Button variant="destructive" disabled>Danger</Button>
     </div>
   ),
 }
@@ -175,9 +175,9 @@ export const ButtonV2Showcase: Story = {
       <div className="flex flex-wrap gap-2">
         <ButtonV2 variant="primary">Primary V2</ButtonV2>
         <ButtonV2 variant="secondary">Secondary V2</ButtonV2>
-        <ButtonV2 variant="outline">Outline V2</ButtonV2>
+        <ButtonV2 variant="secondary">Outline V2</ButtonV2>
         <ButtonV2 variant="ghost">Ghost V2</ButtonV2>
-        <ButtonV2 variant="danger">Danger V2</ButtonV2>
+        <ButtonV2 variant="destructive">Danger V2</ButtonV2>
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-400">
         ButtonV2 includes enhanced animations and modern styling
@@ -193,14 +193,14 @@ export const ButtonGroups: Story = {
   render: () => (
     <div className="space-y-4">
       <div className="inline-flex rounded-lg shadow-sm">
-        <Button variant="outline" className="rounded-r-none">
+        <Button variant="secondary" className="rounded-r-none">
           <ChevronLeft className="w-4 h-4" />
           Previous
         </Button>
-        <Button variant="outline" className="rounded-none border-l-0">
+        <Button variant="secondary" className="rounded-none border-l-0">
           Current
         </Button>
-        <Button variant="outline" className="rounded-l-none border-l-0">
+        <Button variant="secondary" className="rounded-l-none border-l-0">
           Next
           <ChevronRight className="w-4 h-4" />
         </Button>
@@ -210,13 +210,13 @@ export const ButtonGroups: Story = {
         <Button variant="primary" size="sm" className="rounded-r-none">
           Day
         </Button>
-        <Button variant="outline" size="sm" className="rounded-none border-l-0">
+        <Button variant="secondary" size="sm" className="rounded-none border-l-0">
           Week
         </Button>
-        <Button variant="outline" size="sm" className="rounded-none border-l-0">
+        <Button variant="secondary" size="sm" className="rounded-none border-l-0">
           Month
         </Button>
-        <Button variant="outline" size="sm" className="rounded-l-none border-l-0">
+        <Button variant="secondary" size="sm" className="rounded-l-none border-l-0">
           Year
         </Button>
       </div>
@@ -242,7 +242,7 @@ export const CidadaoActions: Story = {
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
-          <Button variant="outline">
+          <Button variant="secondary">
             Share Results
           </Button>
         </div>
@@ -257,10 +257,10 @@ export const CidadaoActions: Story = {
           <ButtonV2 variant="secondary" size="sm">
             Run Analysis
           </ButtonV2>
-          <ButtonV2 variant="outline" size="sm">
+          <ButtonV2 variant="secondary" size="sm">
             View Details
           </ButtonV2>
-          <ButtonV2 variant="danger" size="sm">
+          <ButtonV2 variant="destructive" size="sm">
             Stop Agent
           </ButtonV2>
         </div>
@@ -324,7 +324,7 @@ export const FullWidth: Story = {
       <Button variant="secondary" className="w-full">
         Full Width Secondary
       </Button>
-      <Button variant="outline" className="w-full">
+      <Button variant="secondary" className="w-full">
         Full Width Outline
       </Button>
     </div>
