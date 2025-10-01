@@ -1,3 +1,4 @@
+import React from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import dynamic from 'next/dynamic'
 import { Card } from '@/components/ui/card'
