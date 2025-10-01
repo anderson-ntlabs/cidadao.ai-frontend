@@ -55,7 +55,6 @@ export const routeModules = {
   },
   investigations: {
     export: () => import('@/lib/export-service'),
-    timeline: () => import('@/components/ui/timeline'),
   },
   profile: {
     avatar: () => import('@/components/ui/avatar-upload'),
