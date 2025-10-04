@@ -11,8 +11,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { AreaChart } from '@/components/charts/area-chart'
-import { PieChart } from '@/components/charts/pie-chart'
+// Use lazy-loaded charts to reduce initial bundle size
+import { AreaChart, PieChart } from '@/components/charts/lazy'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 export default function DashboardPageV3() {
