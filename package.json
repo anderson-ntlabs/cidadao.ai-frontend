@@ -25,7 +25,8 @@
     "analyze": "node scripts/analyze-bundle.js"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
+    "@serwist/next": "^9.2.1",
+    "@serwist/sw": "^9.2.1",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
@@ -46,7 +47,7 @@
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.543.0",
     "minimatch": "^10.0.3",
-    "next": "^15.1.0",
+    "next": "15.1.0",
     "papaparse": "^5.5.3",
     "pino": "^9.11.0",
     "pino-pretty": "^13.1.1",
@@ -54,6 +55,7 @@
     "react-apexcharts": "^1.7.0",
     "react-dom": "^18.3.1",
     "recharts": "^3.2.1",
+    "serwist": "^9.2.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^4.2.4",
