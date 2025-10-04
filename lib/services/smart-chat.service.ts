@@ -4,6 +4,7 @@ import { sendBackendMessage } from '@/lib/api/chat-adapter-backend';
 import { sendFallbackMessage } from '@/lib/api/chat-adapter-fallback';
 import { sendChatAsInvestigation } from '@/lib/api/chat-adapter';
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry';
+import { getChatCacheIDB } from '@/lib/services/chat-cache-idb.service';
 
 export type ModelPreference = 'auto' | 'economic' | 'quality' | 'stable';
 
@@ -75,6 +76,22 @@ export class SmartChatService {
     message: string,
     options: SmartChatOptions = {}
   ): Promise<ChatResponse> {
+    // Check cache first (only for non-streaming requests)
+    if (!options.streaming) {
+      try {
+        const cache = await getChatCacheIDB();
+        const cachedResponse = await cache.get(message);
+
+        if (cachedResponse) {
+          console.log('[SmartChat] Returning cached response');
+          return cachedResponse;
+        }
+      } catch (error) {
+        console.warn('[SmartChat] Cache check failed:', error);
+        // Continue without cache
+      }
+    }
+
     const sessionId = `smart_${Date.now()}`;
     const request: ChatRequest = {
       message,
@@ -103,6 +120,15 @@ export class SmartChatService {
           0
         );
 
+        // Cache SSE response (streaming responses are not cached during streaming)
+        // but we cache the final result
+        try {
+          const cache = await getChatCacheIDB();
+          await cache.set(message, response);
+        } catch (error) {
+          console.warn('[SmartChat] Failed to cache SSE response:', error);
+        }
+
         return response;
       } catch (error) {
         console.warn('[SmartChat] SSE streaming failed, falling back to standard endpoints:', error);
@@ -130,6 +156,15 @@ export class SmartChatService {
 
         // Success! Log metrics
         this.logSuccess(endpoint, response, Date.now() - startTime);
+
+        // Cache the successful response
+        try {
+          const cache = await getChatCacheIDB();
+          await cache.set(message, response);
+        } catch (error) {
+          console.warn('[SmartChat] Failed to cache response:', error);
+          // Don't fail the request due to cache errors
+        }
 
         return response;
       } catch (error) {
