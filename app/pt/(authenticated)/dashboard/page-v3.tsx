@@ -11,96 +11,36 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import dynamic from 'next/dynamic'
+import { AreaChart } from '@/components/charts/area-chart'
+import { PieChart } from '@/components/charts/pie-chart'
 // BreadcrumbsV2 removed - handled by AuthLayout
-
-// Dynamic imports for charts
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 export default function DashboardPageV3() {
   const [selectedPeriod, setSelectedPeriod] = useState('7d')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Mock data for charts
-  const lineChartOptions = {
-    chart: {
-      type: 'area' as const,
-      toolbar: { show: false },
-      background: 'transparent'
-    },
-    colors: ['#10b981', '#3b82f6'],
-    stroke: {
-      curve: 'smooth' as const,
-      width: 2
-    },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        opacityFrom: 0.4,
-        opacityTo: 0.1,
-      }
-    },
-    dataLabels: { enabled: false },
-    xaxis: {
-      categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-      labels: { style: { colors: '#9ca3af' } }
-    },
-    yaxis: {
-      labels: { style: { colors: '#9ca3af' } }
-    },
-    grid: {
-      borderColor: '#374151',
-      strokeDashArray: 3,
-      xaxis: { lines: { show: false } }
-    },
-    legend: {
-      labels: { colors: ['#9ca3af'] }
-    },
-    theme: { mode: 'dark' as const }
-  }
-
-  const lineChartSeries = [
-    {
-      name: 'Contratos Analisados',
-      data: [120, 135, 125, 140, 155, 145, 160]
-    },
-    {
-      name: 'Anomalias Detectadas',
-      data: [3, 5, 4, 7, 5, 8, 6]
-    }
+  // Mock data for charts - Recharts format
+  const areaChartData = [
+    { name: 'Seg', contratos: 120, anomalias: 3 },
+    { name: 'Ter', contratos: 135, anomalias: 5 },
+    { name: 'Qua', contratos: 125, anomalias: 4 },
+    { name: 'Qui', contratos: 140, anomalias: 7 },
+    { name: 'Sex', contratos: 155, anomalias: 5 },
+    { name: 'Sáb', contratos: 145, anomalias: 8 },
+    { name: 'Dom', contratos: 160, anomalias: 6 },
   ]
 
-  const donutChartOptions = {
-    chart: {
-      type: 'donut' as const,
-      background: 'transparent'
-    },
-    labels: ['Normais', 'Suspeitas', 'Confirmadas', 'Em Análise'],
-    colors: ['#10b981', '#eab308', '#ef4444', '#3b82f6'],
-    dataLabels: { enabled: false },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '70%',
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: 'Total',
-              color: '#9ca3af'
-            }
-          }
-        }
-      }
-    },
-    legend: {
-      position: 'bottom' as const,
-      labels: { colors: ['#9ca3af'] }
-    },
-    theme: { mode: 'dark' as const }
-  }
+  const areaChartAreas = [
+    { dataKey: 'contratos', name: 'Contratos Analisados', color: '#10b981' },
+    { dataKey: 'anomalias', name: 'Anomalias Detectadas', color: '#3b82f6' },
+  ]
 
-  const donutChartSeries = [245, 52, 23, 28]
+  const pieChartData = [
+    { name: 'Normais', value: 245, color: '#10b981' },
+    { name: 'Suspeitas', value: 52, color: '#eab308' },
+    { name: 'Confirmadas', value: 23, color: '#ef4444' },
+    { name: 'Em Análise', value: 28, color: '#3b82f6' },
+  ]
 
   const stats = [
     {
@@ -285,14 +225,13 @@ export default function DashboardPageV3() {
               </h3>
             </GlassCardHeader>
             <GlassCardContent>
-              <div className="h-64">
-                <Chart
-                  options={lineChartOptions}
-                  series={lineChartSeries}
-                  type="area"
-                  height="100%"
-                />
-              </div>
+              <AreaChart
+                data={areaChartData}
+                areas={areaChartAreas}
+                xAxisKey="name"
+                height={256}
+                className="w-full"
+              />
             </GlassCardContent>
           </GlassCard>
 
@@ -305,14 +244,15 @@ export default function DashboardPageV3() {
               </h3>
             </GlassCardHeader>
             <GlassCardContent>
-              <div className="h-64">
-                <Chart
-                  options={donutChartOptions}
-                  series={donutChartSeries}
-                  type="donut"
-                  height="100%"
-                />
-              </div>
+              <PieChart
+                data={pieChartData}
+                height={256}
+                innerRadius={60}
+                outerRadius={90}
+                showLabel={true}
+                showLegend={true}
+                className="w-full"
+              />
             </GlassCardContent>
           </GlassCard>
         </div>
