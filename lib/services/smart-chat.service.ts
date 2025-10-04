@@ -1,4 +1,5 @@
 import type { ChatRequest, ChatResponse } from '@/types/chat';
+import { sendSSEMessage, type SSEMessageOptions } from '@/lib/api/chat-adapter-sse';
 import { sendBackendMessage } from '@/lib/api/chat-adapter-backend';
 import { sendFallbackMessage } from '@/lib/api/chat-adapter-fallback';
 import { sendChatAsInvestigation } from '@/lib/api/chat-adapter';
@@ -20,6 +21,9 @@ export interface SmartChatOptions {
   useDrummond?: boolean;
   maxRetries?: number;
   timeout?: number;
+  streaming?: boolean; // Enable SSE streaming
+  onChunk?: (text: string) => void; // Callback for streaming chunks
+  onProgress?: (accumulated: string) => void; // Callback for accumulated text
 }
 
 /**
@@ -28,12 +32,23 @@ export interface SmartChatOptions {
 export class SmartChatService {
   private endpoints: ChatEndpoint[] = [
     {
-      url: '/api/v1/chat/stable',
-      name: 'Backend Primary',
-      adapter: sendBackendMessage,
+      url: '/api/v1/chat/stream',
+      name: 'SSE Streaming (Primary)',
+      adapter: async (request) => {
+        // SSE adapter will be called with streaming options
+        throw new Error('SSE adapter requires streaming options - use sendMessage with streaming: true');
+      },
       model: 'sabiazinho-3',
       costLevel: 1,
       priority: 1,
+    },
+    {
+      url: '/api/v1/chat/stable',
+      name: 'Backend Stable',
+      adapter: sendBackendMessage,
+      model: 'sabiazinho-3',
+      costLevel: 1,
+      priority: 2,
     },
     {
       url: '/api/v1/chat/fallback',
@@ -41,7 +56,7 @@ export class SmartChatService {
       adapter: sendFallbackMessage,
       model: 'sabiazinho-3',
       costLevel: 1,
-      priority: 2,
+      priority: 3,
     },
     {
       url: '/api/investigate',
@@ -49,7 +64,7 @@ export class SmartChatService {
       adapter: sendChatAsInvestigation,
       model: 'local',
       costLevel: 0,
-      priority: 3,
+      priority: 4,
     },
   ];
 
@@ -70,30 +85,57 @@ export class SmartChatService {
       },
     };
 
-    // Select endpoints based on preference
-    const selectedEndpoints = this.selectEndpoints(message, options);
-    
+    // If streaming is enabled, use SSE directly
+    if (options.streaming) {
+      console.log('[SmartChat] Using SSE streaming mode');
+
+      try {
+        const sseOptions: SSEMessageOptions = {
+          onChunk: options.onChunk,
+          onProgress: options.onProgress,
+        };
+
+        const response = await sendSSEMessage(request, sseOptions);
+
+        this.logSuccess(
+          { name: 'SSE Streaming', url: '/api/v1/chat/stream' } as any,
+          response,
+          0
+        );
+
+        return response;
+      } catch (error) {
+        console.warn('[SmartChat] SSE streaming failed, falling back to standard endpoints:', error);
+        // Continue to fallback logic below
+      }
+    }
+
+    // Select endpoints based on preference (excluding SSE for non-streaming)
+    const selectedEndpoints = this.selectEndpoints(message, options).filter(
+      (e) => e.url !== '/api/v1/chat/stream'
+    );
+
     console.log('[SmartChat] Selected endpoints order:', selectedEndpoints.map(e => e.name));
     console.log('[SmartChat] Model preference:', options.preferredModel || 'default');
-    
+
     // Try each endpoint in order
     let lastError: Error | null = null;
-    
+
     for (const endpoint of selectedEndpoints) {
       try {
         console.log(`[SmartChat] Trying ${endpoint.name} (${endpoint.url})...`);
-        
+
         const startTime = Date.now();
         const response = await this.tryEndpoint(endpoint, request, options.timeout);
-        
+
         // Success! Log metrics
         this.logSuccess(endpoint, response, Date.now() - startTime);
-        
+
         return response;
       } catch (error) {
         console.warn(`[SmartChat] ${endpoint.name} failed:`, error);
         lastError = error as Error;
-        
+
         // Continue to next endpoint
         continue;
       }
