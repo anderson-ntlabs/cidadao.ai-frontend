@@ -170,6 +170,17 @@ cidadao.ai-frontend/
 │   └── breadcrumbs.tsx   # Navegação breadcrumb
 ├── data/                  # Dados estáticos
 │   └── agents.ts         # Configuração dos 17 agentes
+├── docs/                  # 📚 Documentação Técnica Completa
+│   ├── reports/          # Análises técnicas
+│   │   └── ANALISE_TECNICA_ARQUITETURA_FRONTEND.md
+│   ├── planning/         # Planejamento de Sprints
+│   │   ├── SPRINT_PLANNING_OVERVIEW.md
+│   │   └── sprints/
+│   │       ├── SPRINT_01_QUICK_WINS.md
+│   │       ├── SPRINT_02_INFRASTRUCTURE.md
+│   │       ├── SPRINT_03_EDGE_OPTIMIZATION.md
+│   │       └── SPRINT_04_ML_ADVANCED.md
+│   └── EMAIL_HANDOFF_DEV_TEAM.md
 ├── hooks/                 # React hooks customizados
 │   ├── use-chat.ts       # Hook para chat com backend
 │   └── use-toast.ts      # Hook para notificações
