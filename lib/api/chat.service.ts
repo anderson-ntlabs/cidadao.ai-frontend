@@ -10,9 +10,8 @@ import type {
   SSEEventType,
 } from '@/types/chat';
 import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter';
-import { sendChatMessage } from './chat-adapter-v2';
-import { sendChatMessageV3 } from './chat-adapter-v3';
 import { sendBackendMessage } from './chat-adapter-backend';
+import { sendFallbackMessage } from './chat-adapter-fallback';
 import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
 import { isFeatureEnabled } from '@/lib/feature-flags';
 
@@ -58,12 +57,12 @@ export const chatService = {
         return response;
       } catch (backendError) {
         console.error('Backend adapter failed:', backendError);
-        
-        // Fallback to v3 adapter for backwards compatibility
-        console.log('Falling back to v3 adapter...');
-        const response = await sendChatMessageV3(request);
-        console.log('Chat response from v3:', response);
-        
+
+        // Fallback to consolidated fallback adapter
+        console.log('Falling back to multi-endpoint fallback adapter...');
+        const response = await sendFallbackMessage(request);
+        console.log('Chat response from fallback:', response);
+
         return response;
       }
       
