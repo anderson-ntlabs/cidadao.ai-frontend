@@ -45,15 +45,16 @@ export function buildCSP(
 /**
  * Production CSP Configuration
  *
- * Strict policy for maximum security
+ * Balanced policy for security and Next.js compatibility
  */
 export const productionCSP: CSPDirectives = {
   'default-src': ["'self'"],
 
-  // Scripts: Allow self, Vercel Analytics, and Google Analytics
+  // Scripts: Allow self, eval (Next.js), inline (Next.js), and analytics
   'script-src': [
     "'self'",
     "'unsafe-eval'", // Required for Next.js
+    "'unsafe-inline'", // Required for Next.js inline scripts
     'https://vercel.live',
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
