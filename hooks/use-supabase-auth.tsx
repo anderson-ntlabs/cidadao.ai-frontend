@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('redirectAfterLogin')
           router.push(redirectUrl)
         } else {
-          router.push('/pt/home')
+          router.push('/pt/dashboard')
         }
       }
     } catch (error: any) {
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             name: name,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/home`
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/dashboard`
         }
       })
 
@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/pt/home`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/pt/dashboard`,
         }
       })
 
@@ -185,18 +185,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     setIsLoading(true)
-    
+
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
+      // Clear state
       setUser(null)
       setIsAuthenticated(false)
-      
-      // Clear any remaining local storage
+
+      // Clear any auth-related local storage
       localStorage.removeItem('redirectAfterLogin')
-      
+
+      // Clear Supabase session from storage
+      localStorage.removeItem('supabase.auth.token')
+      sessionStorage.clear()
+
+      // Show success message
+      toast.success('Logout realizado com sucesso', 'Até logo!')
+
+      // Redirect to landing page
       router.push('/pt')
+      router.refresh()
     } catch (error: any) {
       console.error('Logout error:', error)
       toast.error('Erro ao sair', error.message || 'Tente novamente')
