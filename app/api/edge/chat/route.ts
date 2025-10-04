@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateChatRequest, validateRequestBody, checkRateLimit } from '@/lib/edge/request-validator';
 import { detectRegion, getBackendUrlForRegion } from '@/lib/edge/geo-detector';
+import { getCachedChat, cacheChat } from '@/lib/cache/multi-layer-cache.service';
 
 // Enable edge runtime
 export const runtime = 'edge';
@@ -75,7 +76,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 5: Route to appropriate backend
+    const message = bodyValidation.sanitized?.message || '';
+
+    // Step 5: Check cache for existing response
+    const cachedResponse = await getCachedChat(message);
+
+    if (cachedResponse) {
+      const totalLatency = Date.now() - startTime;
+
+      console.log(`[Edge Chat] Cache hit! Latency: ${totalLatency}ms`);
+
+      return NextResponse.json(
+        {
+          response: cachedResponse,
+          metadata: {
+            edge: {
+              processed: true,
+              cached: true,
+              region: geoLocation.region,
+              country: geoLocation.country,
+              latency: totalLatency,
+              rateLimit: {
+                remaining: rateLimit.remaining
+              }
+            }
+          }
+        },
+        {
+          headers: {
+            'X-Edge-Region': geoLocation.region,
+            'X-Edge-Latency': String(totalLatency),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+            'X-Cache-Status': 'HIT',
+            'Cache-Control': 'private, max-age=300'
+          }
+        }
+      );
+    }
+
+    // Step 6: Route to appropriate backend
     const backendUrl = getBackendUrlForRegion(geoLocation.region);
 
     // For now, we'll proxy to the main backend
@@ -100,12 +139,17 @@ export async function POST(request: NextRequest) {
       })
     });
 
-    // Step 6: Return response with edge metadata
+    // Step 7: Return response with edge metadata
     const responseData = await backendResponse.json();
 
     const totalLatency = Date.now() - startTime;
 
     console.log(`[Edge Chat] Total latency: ${totalLatency}ms`);
+
+    // Cache the response for future requests
+    if (responseData.response) {
+      await cacheChat(message, responseData.response);
+    }
 
     return NextResponse.json(
       {
@@ -114,6 +158,7 @@ export async function POST(request: NextRequest) {
           ...responseData.metadata,
           edge: {
             processed: true,
+            cached: false,
             region: geoLocation.region,
             country: geoLocation.country,
             latency: totalLatency,
@@ -128,7 +173,8 @@ export async function POST(request: NextRequest) {
           'X-Edge-Region': geoLocation.region,
           'X-Edge-Latency': String(totalLatency),
           'X-RateLimit-Remaining': String(rateLimit.remaining),
-          'Cache-Control': 'no-store' // Don't cache chat responses
+          'X-Cache-Status': 'MISS',
+          'Cache-Control': 'private, max-age=300'
         }
       }
     );
