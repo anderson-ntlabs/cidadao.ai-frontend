@@ -34,6 +34,7 @@ import { ToastProvider } from '@/components/toast-provider'
 import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
 import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
+import { SentryInit } from '@/components/sentry-init'
 
 export default function PTLayout({
   children,
@@ -47,17 +48,18 @@ export default function PTLayout({
       </head>
       <body className="min-h-screen font-sans">
         <Providers>
+          <SentryInit />
           {/* Camada de fundo fixo com a imagem */}
-          <div 
+          <div
             className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
             style={{
               backgroundImage: 'url(/operarios.png)',
             }}
           />
-          
+
           {/* Overlay semi-transparente */}
           <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5]" />
-          
+
           {/* Conteúdo principal */}
           <div className="relative z-20 min-h-screen flex flex-col">
             <SkipLinks />
