@@ -1,8 +1,21 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { detectRegion } from '@/lib/edge/geo-detector'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  // Edge optimization: Add geo headers
+  const geoLocation = detectRegion(request);
+
+  // Update session (Supabase auth)
+  const response = await updateSession(request);
+
+  // Add custom geo headers to response
+  response.headers.set('X-User-Region', geoLocation.region);
+  if (geoLocation.country) {
+    response.headers.set('X-User-Country', geoLocation.country);
+  }
+
+  return response;
 }
 
 export const config = {
