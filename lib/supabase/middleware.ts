@@ -36,8 +36,8 @@ export async function updateSession(request: NextRequest) {
   // Handle root redirect for authenticated users
   const pathname = request.nextUrl.pathname
   if (user && (pathname === '/' || pathname === '/pt')) {
-    // Direct redirect to home for authenticated users
-    return NextResponse.redirect(new URL('/pt/home', request.url))
+    // Direct redirect to dashboard for authenticated users
+    return NextResponse.redirect(new URL('/pt/dashboard', request.url))
   }
 
   return supabaseResponse
