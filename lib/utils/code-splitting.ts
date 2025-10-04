@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
 
 interface DynamicOptions {
-  loading?: () => React.ReactNode;
+  loading?: () => JSX.Element | null;
   ssr?: boolean;
 }
 
@@ -14,7 +14,7 @@ export function createDynamicComponent<P = {}>(
   options?: DynamicOptions
 ) {
   return dynamic(importFn, {
-    loading: options?.loading || (() => null),
+    loading: options?.loading,
     ssr: options?.ssr ?? true,
   });
 }
