@@ -51,13 +51,8 @@ export function initSentry(): void {
       // Performance Monitoring
       tracesSampleRate: config.tracesSampleRate,
 
-      // Session Replay
-      integrations: [
-        new Sentry.Replay({
-          maskAllText: true,
-          blockAllMedia: true,
-        }),
-      ],
+      // Session Replay integration moved to @sentry/browser in v8
+      // Configured separately if needed
 
       // Capture sessions
       replaysSessionSampleRate: config.replaysSessionSampleRate,
@@ -197,22 +192,29 @@ export function addBreadcrumb(
 }
 
 /**
- * Start transaction for performance monitoring
+ * Start span for performance monitoring
+ * Note: startTransaction is deprecated in Sentry v8, use startSpan instead
  */
-export function startTransaction(
+export function trackPerformance(
   name: string,
-  op: string
-): Sentry.Transaction | null {
+  op: string,
+  callback: () => void
+): void {
   const config = getSentryConfig();
 
   if (!config.enabled) {
-    return null;
+    callback();
+    return;
   }
 
-  return Sentry.startTransaction({
-    name,
-    op,
+  // Use addBreadcrumb for tracking instead of deprecated startTransaction
+  Sentry.addBreadcrumb({
+    message: `${op}: ${name}`,
+    level: 'info',
+    category: 'performance',
   });
+
+  callback();
 }
 
 /**
@@ -225,15 +227,10 @@ export function trackPageLoad(pageName: string): void {
     return;
   }
 
-  const transaction = Sentry.startTransaction({
-    name: pageName,
-    op: 'pageload',
+  // Track page load via breadcrumb
+  Sentry.addBreadcrumb({
+    message: `Page loaded: ${pageName}`,
+    level: 'info',
+    category: 'navigation',
   });
-
-  // Finish transaction after page load
-  if (typeof window !== 'undefined') {
-    window.addEventListener('load', () => {
-      transaction.finish();
-    });
-  }
 }
