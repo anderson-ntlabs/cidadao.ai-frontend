@@ -11,11 +11,13 @@ import {
 } from './chat-adapter-sse';
 import type { ChatRequest } from '@/types/chat';
 
-// Mock ChatSSE class
-vi.mock('./chat-sse', () => ({
+// Mock ChatSSE class - use absolute path with @ alias to ensure proper hoisting
+vi.mock('@/lib/sse/chat-sse', () => ({
   ChatSSE: vi.fn().mockImplementation((config, handlers) => ({
     sendMessage: vi.fn().mockImplementation(async (message, context) => {
-      // Simulate successful streaming
+      // Simulate successful streaming with immediate completion
+      await new Promise(resolve => setTimeout(resolve, 10));
+
       handlers.onMessage?.('Hello');
       handlers.onMessage?.(' World');
 
@@ -36,7 +38,9 @@ vi.mock('./chat-sse', () => ({
     isActive: vi.fn(() => false),
     dispose: vi.fn()
   })),
-  streamChatMessage: vi.fn().mockImplementation((request, onChunk, onComplete, onError) => {
+  streamChatMessage: vi.fn().mockImplementation(async (request, onChunk, onComplete, onError) => {
+    await new Promise(resolve => setTimeout(resolve, 10));
+
     onChunk?.('Test chunk');
     onComplete?.({
       session_id: request.session_id,
