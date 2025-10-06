@@ -1,5 +1,17 @@
 # Breadcrumb Active Page Indicator Improvements
 
+---
+
+**Documento**: Melhorias no Indicador de Página Ativa do Breadcrumb
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-29 09:54:26 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Documentation / UI Components
+**Última Atualização**: 2025-10-04
+
+---
+
 This document describes the improvements made to the breadcrumb component to better indicate the active/current page.
 
 ## Changes Made

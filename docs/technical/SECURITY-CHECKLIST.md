@@ -1,5 +1,17 @@
 # Security Checklist - Cidadão.AI Frontend
 
+---
+
+**Documento**: Checklist de Segurança
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-30 15:52:37 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Documentation / Security
+**Última Atualização**: 2025-10-04
+
+---
+
 ## 🛡️ OWASP Top 10 Security Verification
 
 ### 1. Broken Access Control ✅

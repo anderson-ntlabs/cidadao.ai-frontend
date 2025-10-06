@@ -19,8 +19,13 @@
     "test:coverage": "vitest run --coverage",
     "test:playwright": "playwright test",
     "test:playwright:ui": "playwright test --ui",
+    "test:e2e": "playwright test __tests__/e2e",
+    "test:e2e:ui": "playwright test __tests__/e2e --ui",
     "test:design-system": "playwright test tests/e2e/design-system/",
     "test:install": "playwright install",
+    "lighthouse": "lhci autorun",
+    "lighthouse:collect": "lhci collect",
+    "lighthouse:assert": "lhci assert",
     "generate:component": "node scripts/generate-component.js",
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server npm run build",
@@ -65,6 +70,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.55.1",
     "@storybook/addon-a11y": "^8.6.14",

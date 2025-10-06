@@ -1,5 +1,17 @@
 # UI/UX Improvements - Cidadão.AI
 
+---
+
+**Documento**: Melhorias de UI/UX
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-26 10:19:48 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Design Guide / UI/UX
+**Última Atualização**: 2025-10-04
+
+---
+
 ## 🎯 Objetivo
 Padronizar a interface do sistema com glass morphism, transparências consistentes e redesenhar o chat para parecer uma IA conversacional moderna.
 

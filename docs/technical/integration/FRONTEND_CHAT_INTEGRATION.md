@@ -1,7 +1,16 @@
 # Frontend Chat Integration - Carlos Drummond de Andrade
 
-**Date**: 2025-09-19  
-**Author**: Engineering Team
+---
+
+**Documento**: Integração de Chat Frontend
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-19 10:54:49 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Integration / Chat
+**Última Atualização**: 2025-10-04
+
+---
 
 ## Summary
 

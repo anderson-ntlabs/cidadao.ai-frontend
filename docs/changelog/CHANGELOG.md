@@ -1,5 +1,17 @@
 # Changelog
 
+---
+
+**Documento**: Registro de Mudanças
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-17 08:42:08 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Documentation / Changelog
+**Última Atualização**: 2025-10-04
+
+---
+
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),

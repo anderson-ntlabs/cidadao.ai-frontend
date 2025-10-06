@@ -1,5 +1,17 @@
 # Security Hardening Guide
 
+---
+
+**Documento**: Guia de Segurança e Hardening
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-10-04 13:22:40 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Infrastructure Guide / Security
+**Última Atualização**: 2025-10-04
+
+---
+
 Complete guide for security hardening of Cidadão.AI Frontend.
 
 ## Overview

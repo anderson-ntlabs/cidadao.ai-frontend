@@ -1,5 +1,17 @@
 # Maritaca Integration Guide
 
+---
+
+**Documento**: Guia de Integração Maritaca
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-25 13:21:26 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Integration / API
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Overview
 
 The Cidadão.AI frontend is now integrated with Maritaca-powered endpoints using the **sabiazinho-3** model for cost-effective and efficient responses.

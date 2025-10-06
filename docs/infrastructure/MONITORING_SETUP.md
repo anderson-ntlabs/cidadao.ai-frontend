@@ -1,5 +1,17 @@
 # Monitoring & Observability Setup Guide
 
+---
+
+**Documento**: Guia de Configuração de Monitoramento e Observabilidade
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-10-04 13:17:10 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Infrastructure Guide / Monitoring
+**Última Atualização**: 2025-10-04
+
+---
+
 Complete guide for setting up comprehensive monitoring and observability for Cidadão.AI Frontend.
 
 ## Overview

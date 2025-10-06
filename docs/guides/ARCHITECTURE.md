@@ -1,5 +1,17 @@
 # Architecture Guide
 
+---
+
+**Documento**: Guia de Arquitetura
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-30 12:49:49 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Guide
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Overview
 
 Cidadão.AI Frontend is built with Next.js 15 App Router, TypeScript, and Tailwind CSS. This guide explains the architectural decisions and patterns used throughout the application.

@@ -1,5 +1,17 @@
 # Production Deployment Guide
 
+---
+
+**Documento**: Guia de Deploy em Produção
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-10-04 13:03:16 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Infrastructure Guide / Deployment
+**Última Atualização**: 2025-10-04
+
+---
+
 Complete guide for deploying Cidadão.AI Frontend to Vercel production environment.
 
 ## Prerequisites

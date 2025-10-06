@@ -1,8 +1,17 @@
 # 🌙 Guia de Preservação do Dark Mode - Cidadão.AI
 
-**Autor:** Anderson Henrique da Silva  
-**Data:** 29 de setembro de 2025  
-**Status:** PRESERVAR COMO ESTÁ ✅
+---
+
+**Documento**: Guia de Preservação do Dark Mode
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-29 14:30:06 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Design Guide / Theme Preservation
+**Status**: PRESERVAR COMO ESTÁ ✅
+**Última Atualização**: 2025-10-04
+
+---
 
 ## Visual Atual do Dark Mode (MANTER)
 

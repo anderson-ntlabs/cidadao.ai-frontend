@@ -1,5 +1,17 @@
 # Dead Code Analysis - Sprint 1 Cleanup
 
+---
+
+**Documento**: Análise de Código Morto - Limpeza Sprint 1
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-29 14:30:06 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Documentation / Code Cleanup
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Summary
 - **Total files to delete**: 56 files
 - **Total lines of code to remove**: ~11,148 lines

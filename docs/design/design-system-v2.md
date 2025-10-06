@@ -1,5 +1,17 @@
 # Design System v2 - Cidadão.AI
 
+---
+
+**Documento**: Design System v2
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-21 15:21:02 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Design Guide / Design System
+**Última Atualização**: 2025-10-04
+
+---
+
 ## 📚 Introdução
 
 O Design System v2 do Cidadão.AI foi criado para padronizar a interface da plataforma, garantindo consistência visual e melhor experiência do usuário. Este documento serve como guia de referência para desenvolvedores.

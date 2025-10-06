@@ -1,5 +1,17 @@
 # Branch Protection Guide
 
+---
+
+**Documento**: Guia de Proteção de Branch
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-29 16:29:16 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Documentation / Git Workflow
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Configuração de Proteção de Branch para Sprint 2
 
 ### Objetivo

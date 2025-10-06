@@ -1,5 +1,17 @@
 # Contributing Guide
 
+---
+
+**Documento**: Guia de Contribuição
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-30 12:51:45 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Contribution Guide
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Welcome Contributors!
 
 Thank you for your interest in contributing to Cidadão.AI Frontend. This guide will help you get started with contributing to our project.

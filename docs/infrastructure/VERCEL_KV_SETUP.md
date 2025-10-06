@@ -1,5 +1,17 @@
 # Vercel KV Setup Guide
 
+---
+
+**Documento**: Guia de Configuração do Vercel KV
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-10-04 12:57:34 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Infrastructure Guide / Database
+**Última Atualização**: 2025-10-04
+
+---
+
 This document provides step-by-step instructions for setting up Vercel KV (Redis) for distributed caching.
 
 ## Overview

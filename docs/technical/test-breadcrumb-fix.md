@@ -1,5 +1,17 @@
 # Breadcrumb Fix Summary
 
+---
+
+**Documento**: Resumo da Correção de Breadcrumb
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-29 15:45:41 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Documentation / Bug Fix
+**Última Atualização**: 2025-10-04
+
+---
+
 ## Changes Made:
 
 ### 1. Fixed Duplicate Home Icon in Breadcrumbs

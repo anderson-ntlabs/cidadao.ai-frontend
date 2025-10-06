@@ -1,5 +1,17 @@
 # Testing Guide
 
+---
+
+**Documento**: Guia de Testes
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-30 12:50:56 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Technical Guide / Testing
+**Última Atualização**: 2025-10-04 (Sprint 5 - Testing & QA)
+
+---
+
 ## Overview
 
 This guide covers testing strategies, patterns, and best practices for the Cidadão.AI frontend application.

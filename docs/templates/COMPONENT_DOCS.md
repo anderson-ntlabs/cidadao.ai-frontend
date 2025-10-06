@@ -1,5 +1,17 @@
 # Component Documentation Template
 
+---
+
+**Documento**: Template de Documentação de Componentes
+**Projeto**: Cidadão.AI - Frontend
+**Autor**: Anderson Henrique da Silva
+**Data**: 2025-09-30 11:41:40 -03 (Horário de Brasília)
+**Localização**: Minas Gerais, Brasil
+**Categoria**: Template / Documentation
+**Última Atualização**: 2025-10-04
+
+---
+
 ## JSDoc Template for React Components
 
 ```tsx
