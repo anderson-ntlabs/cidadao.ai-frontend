@@ -160,7 +160,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should allow request within rate limit', () => {
-    const ip = '192.168.1.1';
+    const ip = '10.0.0.1'; // Unique IP for this test
 
     const result = checkRateLimit(ip);
 
@@ -169,7 +169,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should track multiple requests from same IP', () => {
-    const ip = '192.168.1.1';
+    const ip = '10.0.0.2'; // Unique IP for this test
 
     const result1 = checkRateLimit(ip);
     const result2 = checkRateLimit(ip);
@@ -186,7 +186,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should block requests exceeding rate limit', () => {
-    const ip = '192.168.1.1';
+    const ip = '10.0.0.3'; // Unique IP for this test
 
     // Make 60 requests (limit)
     for (let i = 0; i < 60; i++) {
@@ -201,7 +201,7 @@ describe('checkRateLimit', () => {
   });
 
   it('should reset after time window', async () => {
-    const ip = '192.168.1.1';
+    const ip = '10.0.0.4'; // Unique IP for this test
 
     // This test would need to mock time
     // Skipping actual implementation for now
@@ -209,8 +209,8 @@ describe('checkRateLimit', () => {
   });
 
   it('should handle different IPs independently', () => {
-    const ip1 = '192.168.1.1';
-    const ip2 = '192.168.1.2';
+    const ip1 = '10.0.0.5'; // Unique IP for this test
+    const ip2 = '10.0.0.6'; // Unique IP for this test
 
     checkRateLimit(ip1);
     checkRateLimit(ip1);
