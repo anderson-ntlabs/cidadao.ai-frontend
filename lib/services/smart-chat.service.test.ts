@@ -1,17 +1,15 @@
 import { describe, expect, it, beforeEach, vi, afterEach, type MockedFunction } from 'vitest'
 import { SmartChatService, type ModelPreference, type SmartChatOptions } from './smart-chat.service'
 import * as backendAdapter from '@/lib/api/chat-adapter-backend'
-import * as v3Adapter from '@/lib/api/chat-adapter-v3'
-import * as optimizedAdapter from '@/lib/api/chat-adapter-optimized-maritaca'
-import * as emergencyAdapter from '@/lib/api/chat-adapter-emergency'
+import * as sseAdapter from '@/lib/api/chat-adapter-sse'
+import * as fallbackAdapter from '@/lib/api/chat-adapter-fallback'
 import * as telemetry from '@/lib/telemetry/chat-telemetry'
 import type { ChatRequest, ChatResponse } from '@/types/chat'
 
 // Mock all adapters
 vi.mock('@/lib/api/chat-adapter-backend')
-vi.mock('@/lib/api/chat-adapter-v3')
-vi.mock('@/lib/api/chat-adapter-optimized-maritaca')
-vi.mock('@/lib/api/chat-adapter-emergency')
+vi.mock('@/lib/api/chat-adapter-sse')
+vi.mock('@/lib/api/chat-adapter-fallback')
 vi.mock('@/lib/telemetry/chat-telemetry', () => ({
   chatTelemetry: {
     track: vi.fn()
