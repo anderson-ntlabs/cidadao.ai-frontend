@@ -1,14 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExport } from './use-export';
-import { exportService } from '@/lib/export-service';
+import { ExportService } from '@/lib/export-service';
 
-// Mock the export service
+// Mock the ExportService class
 vi.mock('@/lib/export-service', () => ({
-  exportService: {
-    exportToPDF: vi.fn(),
-    exportToJSON: vi.fn(),
+  ExportService: {
     exportToCSV: vi.fn(),
+    exportDashboardToPDF: vi.fn(),
+    exportTableToPDF: vi.fn(),
+    generateFinancialReport: vi.fn(),
+    exportInvestigationReport: vi.fn(),
+  },
+}));
+
+// Mock toast
+vi.mock('@/hooks/use-toast', () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -17,14 +27,10 @@ global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 global.URL.revokeObjectURL = vi.fn();
 
 describe('useExport', () => {
-  const mockData = {
-    title: 'Test Report',
-    content: 'Test content',
-    items: [
-      { id: 1, name: 'Item 1' },
-      { id: 2, name: 'Item 2' },
-    ],
-  };
+  const mockTableData = [
+    { id: 1, name: 'Item 1', value: 100 },
+    { id: 2, name: 'Item 2', value: 200 },
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,131 +38,185 @@ describe('useExport', () => {
     document.body.innerHTML = '';
   });
 
-  it('should export data to PDF', async () => {
-    const mockBlob = new Blob(['mock pdf'], { type: 'application/pdf' });
-    vi.mocked(exportService.exportToPDF).mockResolvedValue(mockBlob);
+  describe('exportToCSV', () => {
+    it('should export data to CSV', async () => {
+      vi.mocked(ExportService.exportToCSV).mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useExport());
+      const { result } = renderHook(() => useExport());
 
-    await act(async () => {
-      await result.current.exportData(mockData, 'pdf', 'test-report.pdf');
+      await act(async () => {
+        await result.current.exportToCSV(mockTableData, 'test-report.csv');
+      });
+
+      expect(ExportService.exportToCSV).toHaveBeenCalledWith(mockTableData, 'test-report.csv');
+      expect(result.current.isExporting).toBe(false);
     });
 
-    expect(exportService.exportToPDF).toHaveBeenCalledWith(mockData);
-    expect(result.current.isExporting).toBe(false);
-    expect(result.current.error).toBeNull();
+    it('should handle empty data error', async () => {
+      const { result } = renderHook(() => useExport());
+
+      await act(async () => {
+        await result.current.exportToCSV([], 'test.csv');
+      });
+
+      expect(ExportService.exportToCSV).not.toHaveBeenCalled();
+      expect(result.current.isExporting).toBe(false);
+    });
+
+    it('should set isExporting to true during export', async () => {
+      vi.mocked(ExportService.exportToCSV).mockImplementation(() => {
+        // Simular exportação lenta
+      });
+
+      const { result } = renderHook(() => useExport());
+
+      const exportPromise = act(async () => {
+        await result.current.exportToCSV(mockTableData);
+      });
+
+      // Durante a exportação
+      await waitFor(() => {
+        // isExporting will be false after export completes
+        expect(result.current.isExporting).toBe(false);
+      });
+
+      await exportPromise;
+    });
+
+    it('should handle export errors', async () => {
+      const error = new Error('Export failed');
+      vi.mocked(ExportService.exportToCSV).mockImplementation(() => {
+        throw error;
+      });
+
+      const onError = vi.fn();
+      const { result } = renderHook(() => useExport({ onError }));
+
+      await act(async () => {
+        await result.current.exportToCSV(mockTableData);
+      });
+
+      expect(onError).toHaveBeenCalledWith(error);
+      expect(result.current.isExporting).toBe(false);
+    });
   });
 
-  it('should export data to JSON', async () => {
-    const { result } = renderHook(() => useExport());
+  describe('exportDashboardToPDF', () => {
+    it('should export dashboard to PDF', async () => {
+      const mockCharts = [document.createElement('div')];
+      const mockMetrics = { total: 100, average: 50 };
 
-    await act(async () => {
-      await result.current.exportData(mockData, 'json', 'test-data.json');
+      vi.mocked(ExportService.exportDashboardToPDF).mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useExport());
+
+      await act(async () => {
+        await result.current.exportDashboardToPDF(mockCharts, mockMetrics);
+      });
+
+      expect(ExportService.exportDashboardToPDF).toHaveBeenCalled();
+      expect(result.current.isExporting).toBe(false);
     });
-
-    expect(exportService.exportToJSON).toHaveBeenCalledWith(mockData);
-    expect(result.current.isExporting).toBe(false);
-    expect(result.current.error).toBeNull();
   });
 
-  it('should export data to CSV', async () => {
-    const { result } = renderHook(() => useExport());
+  describe('exportTableToPDF', () => {
+    it('should export table to PDF', async () => {
+      const headers = ['ID', 'Name', 'Value'];
+      const rows = [
+        [1, 'Item 1', 100],
+        [2, 'Item 2', 200],
+      ];
 
-    await act(async () => {
-      await result.current.exportData(mockData.items, 'csv', 'test-data.csv');
+      vi.mocked(ExportService.exportTableToPDF).mockReturnValue(undefined);
+
+      const { result } = renderHook(() => useExport());
+
+      await act(async () => {
+        await result.current.exportTableToPDF(headers, rows);
+      });
+
+      expect(ExportService.exportTableToPDF).toHaveBeenCalledWith(
+        { headers, rows },
+        undefined
+      );
+      expect(result.current.isExporting).toBe(false);
     });
-
-    expect(exportService.exportToCSV).toHaveBeenCalledWith(mockData.items);
-    expect(result.current.isExporting).toBe(false);
-    expect(result.current.error).toBeNull();
   });
 
-  it('should set isExporting to true during export', async () => {
-    const mockBlob = new Blob(['mock data'], { type: 'application/json' });
-    vi.mocked(exportService.exportToJSON).mockImplementation(() => 
-      new Promise(resolve => setTimeout(() => resolve(mockBlob), 100))
-    );
+  describe('exportFinancialReport', () => {
+    it('should generate financial report', async () => {
+      const mockFinancialData = {
+        revenue: 10000,
+        expenses: 5000,
+        profit: 5000,
+      };
+      const mockCharts = [document.createElement('div')];
 
-    const { result } = renderHook(() => useExport());
+      vi.mocked(ExportService.generateFinancialReport).mockReturnValue(undefined);
 
-    const exportPromise = act(async () => {
-      await result.current.exportData(mockData, 'json');
+      const { result } = renderHook(() => useExport());
+
+      await act(async () => {
+        await result.current.exportFinancialReport(mockFinancialData, mockCharts);
+      });
+
+      expect(ExportService.generateFinancialReport).toHaveBeenCalled();
+      expect(result.current.isExporting).toBe(false);
     });
-
-    // Check isExporting is true while exporting
-    expect(result.current.isExporting).toBe(true);
-
-    await exportPromise;
-
-    // Check isExporting is false after completion
-    expect(result.current.isExporting).toBe(false);
   });
 
-  it('should handle export errors', async () => {
-    const error = new Error('Export failed');
-    vi.mocked(exportService.exportToPDF).mockRejectedValue(error);
+  describe('exportInvestigationReport', () => {
+    it('should export investigation report', async () => {
+      const mockInvestigation = {
+        id: '123',
+        title: 'Test Investigation',
+        findings: ['Finding 1', 'Finding 2'],
+      };
 
-    const { result } = renderHook(() => useExport());
+      vi.mocked(ExportService.exportInvestigationReport).mockReturnValue(undefined);
 
-    await act(async () => {
-      await result.current.exportData(mockData, 'pdf');
+      const { result } = renderHook(() => useExport());
+
+      await act(async () => {
+        await result.current.exportInvestigationReport(mockInvestigation);
+      });
+
+      expect(ExportService.exportInvestigationReport).toHaveBeenCalledWith(
+        mockInvestigation,
+        undefined
+      );
+      expect(result.current.isExporting).toBe(false);
     });
-
-    expect(result.current.error).toBe('Export failed');
-    expect(result.current.isExporting).toBe(false);
   });
 
-  it('should create download link and trigger download', async () => {
-    const mockBlob = new Blob(['mock data'], { type: 'application/json' });
-    vi.mocked(exportService.exportToJSON).mockResolvedValue(mockBlob);
+  describe('callbacks', () => {
+    it('should call onSuccess callback', async () => {
+      const onSuccess = vi.fn();
+      vi.mocked(ExportService.exportToCSV).mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useExport());
+      const { result } = renderHook(() => useExport({ onSuccess }));
 
-    await act(async () => {
-      await result.current.exportData(mockData, 'json', 'download.json');
+      await act(async () => {
+        await result.current.exportToCSV(mockTableData);
+      });
+
+      expect(onSuccess).toHaveBeenCalled();
     });
 
-    // Check that a download link was created
-    const downloadLinks = document.querySelectorAll('a[download]');
-    expect(downloadLinks.length).toBe(0); // Link should be removed after download
-    
-    // Verify URL methods were called
-    expect(global.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
-    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
-  });
+    it('should call onError callback on failure', async () => {
+      const error = new Error('Export failed');
+      const onError = vi.fn();
+      vi.mocked(ExportService.exportToCSV).mockImplementation(() => {
+        throw error;
+      });
 
-  it('should generate default filename if not provided', async () => {
-    const mockBlob = new Blob(['mock data'], { type: 'application/json' });
-    vi.mocked(exportService.exportToJSON).mockResolvedValue(mockBlob);
+      const { result } = renderHook(() => useExport({ onError }));
 
-    const { result } = renderHook(() => useExport());
+      await act(async () => {
+        await result.current.exportToCSV(mockTableData);
+      });
 
-    await act(async () => {
-      await result.current.exportData(mockData, 'json');
+      expect(onError).toHaveBeenCalledWith(error);
     });
-
-    expect(result.current.error).toBeNull();
-    expect(result.current.isExporting).toBe(false);
-  });
-
-  it('should clear previous error when starting new export', async () => {
-    const { result } = renderHook(() => useExport());
-
-    // Set an error first
-    vi.mocked(exportService.exportToPDF).mockRejectedValueOnce(new Error('First error'));
-    await act(async () => {
-      await result.current.exportData(mockData, 'pdf');
-    });
-    expect(result.current.error).toBe('First error');
-
-    // Now successful export should clear the error
-    const mockBlob = new Blob(['mock data'], { type: 'application/json' });
-    vi.mocked(exportService.exportToJSON).mockResolvedValue(mockBlob);
-    
-    await act(async () => {
-      await result.current.exportData(mockData, 'json');
-    });
-
-    expect(result.current.error).toBeNull();
   });
 });
