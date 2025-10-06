@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { SkipLink } from '@/components/skip-link';
@@ -45,12 +45,12 @@ describe('Accessibility Tests', () => {
     it('should not have accessibility violations', async () => {
       const { container } = render(
         <Card>
-          <Card.Header>
-            <Card.Title>Card Title</Card.Title>
-          </Card.Header>
-          <Card.Content>
+          <CardHeader>
+            <CardTitle>Card Title</CardTitle>
+          </CardHeader>
+          <CardContent>
             <p>Card content goes here</p>
-          </Card.Content>
+          </CardContent>
         </Card>
       );
       const results = await axe(container);
@@ -152,11 +152,11 @@ describe('Accessibility Tests', () => {
     it('should have sufficient contrast for text on cards', async () => {
       const { container } = render(
         <Card>
-          <Card.Content>
+          <CardContent>
             <p className="text-gray-700 dark:text-gray-300">
               This text should have sufficient contrast
             </p>
-          </Card.Content>
+          </CardContent>
         </Card>
       );
       const results = await axe(container);
