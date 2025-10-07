@@ -4,12 +4,13 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect } from 'react'
 import { LoadingScreen } from '@/components/loading-screen'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import { 
-  TrendingUp, TrendingDown, AlertTriangle, CheckCircle, 
+import {
+  TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
   Activity, FileSearch, Users, DollarSign, Calendar,
-  Filter, Download, RefreshCw, BarChart
+  Filter, Download, RefreshCw, BarChart, Info
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tooltip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 // Use lazy-loaded charts to reduce initial bundle size
 import { AreaChart, PieChart } from '@/components/charts/lazy'
@@ -50,7 +51,8 @@ export default function DashboardPageV3() {
       trend: 'up',
       icon: DollarSign,
       color: 'text-green-600',
-      bgColor: 'bg-green-500/20'
+      bgColor: 'bg-green-500/20',
+      tooltip: 'Soma total dos valores de contratos e licitações analisados pelos agentes de IA no período selecionado. Inclui contratos federais, estaduais e municipais.'
     },
     {
       title: 'Contratos',
@@ -59,7 +61,8 @@ export default function DashboardPageV3() {
       trend: 'up',
       icon: FileSearch,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-500/20'
+      bgColor: 'bg-blue-500/20',
+      tooltip: 'Número de contratos públicos analisados automaticamente. Cada contrato passa por verificação de anomalias, análise de preços e checagem de conformidade legal.'
     },
     {
       title: 'Anomalias',
@@ -68,7 +71,8 @@ export default function DashboardPageV3() {
       trend: 'down',
       icon: AlertTriangle,
       color: 'text-yellow-600',
-      bgColor: 'bg-yellow-500/20'
+      bgColor: 'bg-yellow-500/20',
+      tooltip: 'Irregularidades detectadas pelos algoritmos de IA, incluindo superfaturamento, fracionamento ilegal, direcionamento e favorecimento. Cada anomalia tem score de confiança e requer validação.'
     },
     {
       title: 'Agentes Ativos',
@@ -77,7 +81,8 @@ export default function DashboardPageV3() {
       trend: 'up',
       icon: Users,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-500/20'
+      bgColor: 'bg-purple-500/20',
+      tooltip: 'Agentes de IA atualmente processando investigações. O sistema conta com 17 agentes especializados (Abaporu, Zumbi, Anita, Tiradentes, etc.), cada um com funções específicas.'
     }
   ]
 
@@ -206,9 +211,23 @@ export default function DashboardPageV3() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                   {stat.value}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {stat.title}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {stat.title}
+                  </p>
+                  <Tooltip
+                    content={stat.tooltip}
+                    position="bottom"
+                    delay={200}
+                  >
+                    <button
+                      className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      aria-label={`Informação sobre ${stat.title}`}
+                    >
+                      <Info className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                    </button>
+                  </Tooltip>
+                </div>
               </GlassCardContent>
             </GlassCard>
           ))}
