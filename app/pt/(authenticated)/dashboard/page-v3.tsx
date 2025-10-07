@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip } from '@/components/ui/tooltip'
+import { SkeletonStatsGrid, SkeletonChart } from '@/components/ui/skeleton-cards'
 import { cn } from '@/lib/utils'
 // Use lazy-loaded charts to reduce initial bundle size
 import { AreaChart, PieChart } from '@/components/charts/lazy'
@@ -197,8 +198,11 @@ export default function DashboardPageV3() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
+        {isLoading ? (
+          <SkeletonStatsGrid />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {stats.map((stat, index) => (
             <GlassCard key={index}>
               <GlassCardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -235,8 +239,9 @@ export default function DashboardPageV3() {
                 </div>
               </GlassCardContent>
             </GlassCard>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Charts Row */}
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -249,13 +254,17 @@ export default function DashboardPageV3() {
               </h3>
             </GlassCardHeader>
             <GlassCardContent>
-              <AreaChart
-                data={areaChartData}
-                areas={areaChartAreas}
-                xAxisKey="name"
-                height={256}
-                className="w-full"
-              />
+              {isLoading ? (
+                <SkeletonChart height={256} />
+              ) : (
+                <AreaChart
+                  data={areaChartData}
+                  areas={areaChartAreas}
+                  xAxisKey="name"
+                  height={256}
+                  className="w-full"
+                />
+              )}
             </GlassCardContent>
           </GlassCard>
 
@@ -268,15 +277,19 @@ export default function DashboardPageV3() {
               </h3>
             </GlassCardHeader>
             <GlassCardContent>
-              <PieChart
-                data={pieChartData}
-                height={256}
-                innerRadius={60}
-                outerRadius={90}
-                showLabel={true}
-                showLegend={true}
-                className="w-full"
-              />
+              {isLoading ? (
+                <SkeletonChart height={256} />
+              ) : (
+                <PieChart
+                  data={pieChartData}
+                  height={256}
+                  innerRadius={60}
+                  outerRadius={90}
+                  showLabel={true}
+                  showLegend={true}
+                  className="w-full"
+                />
+              )}
             </GlassCardContent>
           </GlassCard>
         </div>

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import type { ChatSession } from '@/types/supabase'
 import { ButtonV2 } from '@/components/ui/button'
+import { SkeletonChatHistory } from '@/components/ui/skeleton-cards'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -93,10 +94,8 @@ export function ChatHistorySidebar({
         {/* Sessions List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-4 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
-              ))}
+            <div className="p-4">
+              <SkeletonChatHistory count={5} />
             </div>
           ) : sessions.length === 0 ? (
             <div className="p-8 text-center text-gray-500 dark:text-gray-400">
