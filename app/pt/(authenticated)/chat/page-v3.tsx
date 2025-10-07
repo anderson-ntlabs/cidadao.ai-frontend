@@ -351,6 +351,7 @@ export default function ChatPageV3() {
                 <Button
                   onClick={handleSendMessage}
                   disabled={!canSendMessage || !inputMessage.trim()}
+                  loading={isLoading}
                   className="px-6 send-button"
                   leftIcon={<Send className="w-5 h-5" />}
                 >

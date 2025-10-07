@@ -148,14 +148,19 @@ export default function DashboardPageV3() {
             </div>
             
             <div className="flex gap-3">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 leftIcon={<RefreshCw className="w-4 h-4" />}
-                onClick={() => setIsLoading(true)}
+                loading={isLoading}
+                onClick={() => {
+                  setIsLoading(true)
+                  // Simulate API call
+                  setTimeout(() => setIsLoading(false), 2000)
+                }}
               >
                 Atualizar
               </Button>
-              <Button 
+              <Button
                 variant="secondary"
                 leftIcon={<Download className="w-4 h-4" />}
               >
