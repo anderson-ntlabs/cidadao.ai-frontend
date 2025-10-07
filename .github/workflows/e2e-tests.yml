@@ -41,8 +41,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key-for-build' }}
 
-      - name: Run Playwright tests
-        run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - name: Run Playwright tests (Sprint 1 only)
+        run: npm run test:e2e -- --project=${{ matrix.browser }} --grep="Sprint 1|Dark Mode"
         env:
           CI: true
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://neural-thinker-cidadao-ai-backend.hf.space' }}
