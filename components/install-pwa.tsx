@@ -11,7 +11,20 @@ export function InstallPWA() {
     const handler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e)
-      setShowInstallPrompt(true)
+
+      // Check if previously dismissed
+      const dismissedTime = localStorage.getItem('pwa-install-dismissed')
+      if (dismissedTime) {
+        const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24)
+        if (daysSinceDismissed < 7) {
+          return // Don't show if dismissed less than 7 days ago
+        }
+      }
+
+      // Add 30 second delay before showing prompt
+      setTimeout(() => {
+        setShowInstallPrompt(true)
+      }, 30000) // 30 seconds
     }
 
     window.addEventListener('beforeinstallprompt', handler)
@@ -41,17 +54,6 @@ export function InstallPWA() {
     // Store dismissal in localStorage to not show again for 7 days
     localStorage.setItem('pwa-install-dismissed', Date.now().toString())
   }
-
-  // Check if previously dismissed
-  useEffect(() => {
-    const dismissedTime = localStorage.getItem('pwa-install-dismissed')
-    if (dismissedTime) {
-      const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24)
-      if (daysSinceDismissed < 7) {
-        setShowInstallPrompt(false)
-      }
-    }
-  }, [])
 
   if (!showInstallPrompt) return null
 
