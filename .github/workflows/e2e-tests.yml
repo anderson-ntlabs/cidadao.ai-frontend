@@ -1,11 +1,13 @@
 name: E2E Tests (Playwright)
 
+# Temporarily disabled - E2E tests require production OAuth configuration
+# Enable when Supabase secrets are configured in GitHub repository settings
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
 
 jobs:
   test:
