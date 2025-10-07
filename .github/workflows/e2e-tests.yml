@@ -45,6 +45,9 @@ jobs:
         run: npm run test:e2e -- --project=${{ matrix.browser }}
         env:
           CI: true
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://neural-thinker-cidadao-ai-backend.hf.space' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key-for-build' }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
