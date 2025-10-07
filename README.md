@@ -20,14 +20,20 @@
     <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript" alt="TypeScript">
     <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind">
     <img src="https://img.shields.io/badge/PWA-Ready-5A0FC8?style=flat-square&logo=pwa" alt="PWA">
+  </p>
+
+  <p>
+    <img src="https://github.com/anderson-ufrj/cidadao.ai-frontend/workflows/CI%20-%20Build%20%26%20Test/badge.svg" alt="CI Build">
+    <img src="https://github.com/anderson-ufrj/cidadao.ai-frontend/workflows/E2E%20Tests%20(Playwright)/badge.svg" alt="E2E Tests">
     <img src="https://img.shields.io/badge/coverage-91%25-success?style=flat-square" alt="Coverage">
-    <img src="https://img.shields.io/badge/tests-161_passing-success?style=flat-square" alt="Tests">
+    <img src="https://img.shields.io/badge/E2E-36_tests-success?style=flat-square&logo=playwright" alt="E2E Tests">
+    <img src="https://img.shields.io/badge/Lighthouse-97.8-success?style=flat-square&logo=lighthouse" alt="Lighthouse">
     <img src="https://img.shields.io/badge/security-A+-success?style=flat-square" alt="Security">
     <img src="https://img.shields.io/badge/production-ready-brightgreen?style=flat-square" alt="Production Ready">
   </p>
   
   <p>
-    <img src="https://img.shields.io/badge/ODS_16-Peace_Justice_Strong_Institutions-00689D?style=flat-square&logo=united-nations" alt="ODS 16">
+    <img src="https://img.shields.io/badge/ODS_16-Peace_Justice_Strong_Institutions-00689D?style=flat-square&logo=united-natioopção Cns" alt="ODS 16">
     <img src="https://img.shields.io/badge/UN_SDG-16-00689D?style=flat-square" alt="UN SDG 16">
     <img src="https://img.shields.io/badge/Open_Government-Partnership-4A90E2?style=flat-square" alt="Open Government">
     <img src="https://img.shields.io/badge/WCAG-AAA_Ready-0F7B0F?style=flat-square&logo=accessibility" alt="WCAG AAA">
@@ -42,7 +48,7 @@
 |-----------|--------|----------|
 | **Infraestrutura** | ✅ 100% | Multi-region, Edge Functions, Security A+ |
 | **Chat & Adapters** | ✅ 90% | SSE, IndexedDB, Vercel KV, Smart Routing |
-| **Testes** | ✅ 91% | 161 tests, Component coverage 91%, E2E pronto |
+| **Testes** | ✅ 95% | 161 unit tests, 36 E2E tests (Playwright), CI/CD automation |
 | **Performance** | ✅ 85% | Bundle <400KB, Dynamic imports, Lighthouse CI |
 | **Segurança** | ✅ 100% | OWASP Top 10, CSP, Rate Limiting, CSRF |
 | **Monitoramento** | ✅ 100% | Sentry, Custom Metrics, Dashboards |
