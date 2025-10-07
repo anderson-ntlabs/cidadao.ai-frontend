@@ -15,6 +15,7 @@ import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, Hist
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
+import { AgentBadge } from '@/components/chat/agent-badge'
 import { StrategicTooltip } from '@/components/ui/tooltip'
 import { useReportUXIssue } from '@/components/hints/adaptive-hints-provider'
 import { ContrastToggle, ContrastChecker } from '@/components/ui/contrast-toggle'
@@ -243,7 +244,12 @@ export default function ChatPageV3() {
                 {messages.map((message, index) => {
                   // Only show typing animation for the very last assistant message and only if loading
                   const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
-                  
+
+                  // Find agent info for this message
+                  const messageAgent = message.agent_id
+                    ? agents.find(a => a.id === message.agent_id)
+                    : null
+
                   return (
                     <div
                       key={message.id}
@@ -254,20 +260,33 @@ export default function ChatPageV3() {
                     >
                       {message.role === 'assistant' && (
                         <div className="flex-shrink-0">
-                          <Image 
-                            src="/agents/abaporu.png" 
-                            alt="Abaporu" 
+                          <Image
+                            src={messageAgent?.image ? `/agents/${messageAgent.image}` : "/agents/abaporu.png"}
+                            alt={messageAgent?.name || "Abaporu"}
                             className="w-10 h-10 rounded-lg shadow-md object-cover"
                             width={40}
                             height={40}
                           />
                         </div>
                       )}
-                      
+
                       <div className={cn(
                         "max-w-[70%]",
                         message.role === 'user' ? 'order-first' : ''
                       )}>
+                        {/* Agent Badge - Show above assistant messages */}
+                        {message.role === 'assistant' && (message.agent_name || message.agent_id) && (
+                          <div className="mb-2">
+                            <AgentBadge
+                              agentId={message.agent_id}
+                              agentName={message.agent_name || messageAgent?.name}
+                              agentRole={messageAgent?.role.pt}
+                              agentImage={messageAgent?.image}
+                              size="sm"
+                            />
+                          </div>
+                        )}
+
                         <div
                           className={cn(
                             "rounded-2xl px-5 py-3",
@@ -277,8 +296,8 @@ export default function ChatPageV3() {
                           )}
                         >
                           {message.role === 'assistant' ? (
-                            <TypingMessage 
-                              content={message.content || ''} 
+                            <TypingMessage
+                              content={message.content || ''}
                               isLatest={isLatest}
                               onComplete={() => {
                                 // Only scroll if it's really the latest message
@@ -291,12 +310,6 @@ export default function ChatPageV3() {
                             <p className="whitespace-pre-wrap">{message.content}</p>
                           )}
                         </div>
-                        
-                        {message.agent_name && message.agent_name !== 'Carlos Drummond de Andrade' && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-2">
-                            via {message.agent_name}
-                          </p>
-                        )}
                       </div>
                     </div>
                   )
