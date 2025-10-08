@@ -80,6 +80,8 @@ export const productionCSP: CSPDirectives = {
   'connect-src': [
     "'self'",
     'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
+    'https://pbsiyuattnwgohvkkkks.supabase.co',
     'https://vercel.live',
     'https://*.vercel-insights.com',
     'https://www.google-analytics.com',
@@ -127,6 +129,8 @@ export const developmentCSP: CSPDirectives = {
   'connect-src': [
     "'self'",
     'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
+    'https://pbsiyuattnwgohvkkkks.supabase.co',
     'http://localhost:*',
     'ws://localhost:*',
     'wss://localhost:*',
