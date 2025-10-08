@@ -87,14 +87,14 @@ export function useAuth(): UseAuthReturn {
       setIsAuthenticated(true)
       
       toast.success(`Bem-vindo(a), ${response.user.name}!`, 'Login realizado com sucesso')
-      
+
       // Handle redirect
       const redirectUrl = localStorage.getItem('redirectAfterLogin')
       if (redirectUrl) {
         localStorage.removeItem('redirectAfterLogin')
         router.push(redirectUrl)
       } else {
-        router.push('/pt/dashboard')
+        router.push('/pt/home')
       }
     } catch (error) {
       console.error('Login failed:', error)
@@ -128,14 +128,14 @@ export function useAuth(): UseAuthReturn {
       setIsAuthenticated(true)
       
       toast.success(`Bem-vindo(a), ${mockUser.name}!`, 'Login realizado com sucesso')
-      
+
       // Handle redirect
       const redirectUrl = localStorage.getItem('redirectAfterLogin')
       if (redirectUrl) {
         localStorage.removeItem('redirectAfterLogin')
         router.push(redirectUrl)
       } else {
-        router.push('/pt/dashboard')
+        router.push('/pt/home')
       }
     } catch (error) {
       console.error('Provider login failed:', error)

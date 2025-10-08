@@ -30,7 +30,7 @@ const navigationVariants = cva(
 )
 
 const navItemVariants = cva(
-  "flex items-center gap-2 font-medium transition-all duration-200 relative",
+  "flex items-center gap-2 font-medium transition-all duration-200 relative cursor-pointer",
   {
     variants: {
       variant: {
