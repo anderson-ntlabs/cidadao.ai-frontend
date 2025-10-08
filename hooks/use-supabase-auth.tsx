@@ -114,14 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true)
         
         toast.success(`Bem-vindo(a), ${convertedUser.name}!`, 'Login realizado com sucesso')
-        
+
         // Handle redirect
         const redirectUrl = localStorage.getItem('redirectAfterLogin')
         if (redirectUrl) {
           localStorage.removeItem('redirectAfterLogin')
           router.push(redirectUrl)
         } else {
-          router.push('/pt/dashboard')
+          router.push('/pt/home')
         }
       }
     } catch (error: any) {
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             name: name,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/dashboard`
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/home`
         }
       })
 
@@ -169,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/pt/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/pt/home`,
         }
       })
 
