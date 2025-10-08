@@ -87,7 +87,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:block pointer-events-auto">
+            <div className="hidden lg:block">
               <Navigation
                 items={navigationItems}
                 variant="horizontal"
