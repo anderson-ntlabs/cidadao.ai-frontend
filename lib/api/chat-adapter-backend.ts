@@ -17,11 +17,11 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     };
 
     console.log('[Chat Backend] Sending to /api/v1/chat/stable:', payload.message);
-    
+
     // Track message
     trackChatMessage(payload.session_id, request.message, 'backend');
-    
-    // Call the stable endpoint with Maritaca
+
+    // Call the stable endpoint with Maritaca (Railway backend - CORRECT PATH)
     const response = await api.post<BackendChatMessageResponse>('/api/v1/chat/stable', payload);
 
     if (!response.success || !response.data) {

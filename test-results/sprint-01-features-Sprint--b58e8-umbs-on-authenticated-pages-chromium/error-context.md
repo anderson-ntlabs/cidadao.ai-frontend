@@ -1,0 +1,198 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic:
+      - link "Pular para o conteúdo principal" [ref=e5] [cursor=pointer]:
+        - /url: "#main-content"
+      - link "Pular para a navegação" [ref=e6] [cursor=pointer]:
+        - /url: "#main-navigation"
+      - link "Pular para métricas" [ref=e7] [cursor=pointer]:
+        - /url: "#dashboard-metrics"
+      - link "Pular para o rodapé" [ref=e8] [cursor=pointer]:
+        - /url: "#footer"
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - navigation [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]:
+              - link "Cidadão.AI Home" [ref=e17] [cursor=pointer]:
+                - /url: /pt/home
+                - img "Greek Forum" [ref=e18]
+                - generic [ref=e19]: Cidadão.AI
+              - navigation "Main navigation" [ref=e21]:
+                - link "Início" [ref=e22] [cursor=pointer]:
+                  - /url: /pt/home
+                  - img [ref=e23]
+                  - generic [ref=e26]: Início
+                - link "Chat com IAs" [ref=e27] [cursor=pointer]:
+                  - /url: /pt/chat
+                  - img [ref=e28]
+                  - generic [ref=e30]: Chat com IAs
+                - link "Dashboard" [ref=e31] [cursor=pointer]:
+                  - /url: /pt/dashboard
+                  - img [ref=e32]
+                  - generic [ref=e37]: Dashboard
+                - link "Investigações" [ref=e39] [cursor=pointer]:
+                  - /url: /pt/investigacoes
+                  - img [ref=e40]
+                  - generic [ref=e45]: Investigações
+            - generic [ref=e46]:
+              - generic [ref=e47]:
+                - link "PT" [ref=e48] [cursor=pointer]:
+                  - /url: /pt/dashboard
+                - link "EN" [ref=e49] [cursor=pointer]:
+                  - /url: /en/dashboard
+              - button "Notificações" [ref=e51] [cursor=pointer]:
+                - generic [ref=e52]:
+                  - img [ref=e53]
+                  - generic [ref=e56]: "2"
+              - button "Switch to dark mode" [ref=e57] [cursor=pointer]:
+                - img [ref=e59]
+        - main [ref=e61]:
+          - navigation "Breadcrumb" [ref=e66]:
+            - list [ref=e67]:
+              - listitem [ref=e68]:
+                - link "Início" [ref=e69] [cursor=pointer]:
+                  - /url: /pt/home
+                  - img [ref=e70]
+                  - generic [ref=e73]: Início
+              - listitem [ref=e74]:
+                - img [ref=e75]
+              - listitem [ref=e77]:
+                - generic [ref=e78]:
+                  - img [ref=e79]
+                  - generic [ref=e84]: Dashboard
+          - generic [ref=e91]:
+            - generic [ref=e93]:
+              - generic [ref=e94]:
+                - heading "Dashboard de Transparência" [level=1] [ref=e95]
+                - paragraph [ref=e96]: Visão geral das investigações e análises em tempo real
+              - generic [ref=e97]:
+                - button "Atualizar" [ref=e98] [cursor=pointer]:
+                  - img [ref=e100]
+                  - generic [ref=e105]: Atualizar
+                - button "Exportar" [ref=e106] [cursor=pointer]:
+                  - img [ref=e108]
+                  - generic [ref=e111]: Exportar
+                - button "Filtros" [ref=e112] [cursor=pointer]:
+                  - img [ref=e114]
+                  - generic [ref=e116]: Filtros
+            - generic [ref=e117]:
+              - button "Hoje" [ref=e118] [cursor=pointer]
+              - button "7 dias" [ref=e119] [cursor=pointer]
+              - button "30 dias" [ref=e120] [cursor=pointer]
+              - button "3 meses" [ref=e121] [cursor=pointer]
+            - generic [ref=e122]:
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - img [ref=e127]
+                  - generic [ref=e129]:
+                    - img [ref=e130]
+                    - text: +15.3%
+                - paragraph [ref=e133]: R$ 12.5M
+                - generic [ref=e134]:
+                  - paragraph [ref=e135]: Total Analisado
+                  - button "Informação sobre Total Analisado" [ref=e137] [cursor=pointer]:
+                    - img [ref=e138]
+              - generic [ref=e141]:
+                - generic [ref=e142]:
+                  - img [ref=e144]
+                  - generic [ref=e149]:
+                    - img [ref=e150]
+                    - text: +8.2%
+                - paragraph [ref=e153]: "348"
+                - generic [ref=e154]:
+                  - paragraph [ref=e155]: Contratos
+                  - button "Informação sobre Contratos" [ref=e157] [cursor=pointer]:
+                    - img [ref=e158]
+              - generic [ref=e161]:
+                - generic [ref=e162]:
+                  - img [ref=e164]
+                  - generic [ref=e166]:
+                    - img [ref=e167]
+                    - text: "-12.5%"
+                - paragraph [ref=e170]: "23"
+                - generic [ref=e171]:
+                  - paragraph [ref=e172]: Anomalias
+                  - button "Informação sobre Anomalias" [ref=e174] [cursor=pointer]:
+                    - img [ref=e175]
+              - generic [ref=e178]:
+                - generic [ref=e179]:
+                  - img [ref=e181]
+                  - generic [ref=e186]:
+                    - img [ref=e187]
+                    - text: "+2"
+                - paragraph [ref=e190]: 8/17
+                - generic [ref=e191]:
+                  - paragraph [ref=e192]: Agentes Ativos
+                  - button "Informação sobre Agentes Ativos" [ref=e194] [cursor=pointer]:
+                    - img [ref=e195]
+            - generic [ref=e197]:
+              - heading "Atividade de Análise" [level=3] [ref=e200]:
+                - img [ref=e201]
+                - text: Atividade de Análise
+              - heading "Status das Investigações" [level=3] [ref=e211]:
+                - img [ref=e212]
+                - text: Status das Investigações
+            - generic [ref=e219]:
+              - generic [ref=e221]:
+                - heading "Investigações Recentes" [level=3] [ref=e222]
+                - button "Ver todas" [ref=e223] [cursor=pointer]:
+                  - generic [ref=e224]: Ver todas
+              - table [ref=e227]:
+                - rowgroup [ref=e228]:
+                  - row "Investigação Status Valor Agentes Data" [ref=e229]:
+                    - cell "Investigação" [ref=e230]
+                    - cell "Status" [ref=e231]
+                    - cell "Valor" [ref=e232]
+                    - cell "Agentes" [ref=e233]
+                    - cell "Data" [ref=e234]
+                - rowgroup [ref=e235]:
+                  - row "Licitação Suspeita - Ministério da Saúde Em Análise R$ 2.3M Z A Hoje, 14:32" [ref=e236]:
+                    - cell "Licitação Suspeita - Ministério da Saúde" [ref=e237]:
+                      - paragraph [ref=e239]: Licitação Suspeita - Ministério da Saúde
+                    - cell "Em Análise" [ref=e240]
+                    - cell "R$ 2.3M" [ref=e241]
+                    - cell "Z A" [ref=e242]:
+                      - generic [ref=e243]:
+                        - generic "Zumbi dos Palmares" [ref=e244]:
+                          - generic [ref=e245]: Z
+                        - generic "Anita Garibaldi" [ref=e246]:
+                          - generic [ref=e247]: A
+                    - cell "Hoje, 14:32" [ref=e248]
+                  - row "Contrato de Merenda Escolar - SP Anomalia Detectada R$ 850K T Hoje, 10:15" [ref=e249]:
+                    - cell "Contrato de Merenda Escolar - SP" [ref=e250]:
+                      - paragraph [ref=e252]: Contrato de Merenda Escolar - SP
+                    - cell "Anomalia Detectada" [ref=e253]
+                    - cell "R$ 850K" [ref=e254]
+                    - cell "T" [ref=e255]:
+                      - generic "Tiradentes" [ref=e257]:
+                        - generic [ref=e258]: T
+                    - cell "Hoje, 10:15" [ref=e259]
+                  - row "Obras de Infraestrutura - RJ Concluída R$ 5.2M M N Ontem" [ref=e260]:
+                    - cell "Obras de Infraestrutura - RJ" [ref=e261]:
+                      - paragraph [ref=e263]: Obras de Infraestrutura - RJ
+                    - cell "Concluída" [ref=e264]
+                    - cell "R$ 5.2M" [ref=e265]
+                    - cell "M N" [ref=e266]:
+                      - generic [ref=e267]:
+                        - generic "Machado de Assis" [ref=e268]:
+                          - generic [ref=e269]: M
+                        - generic "Niemeyer" [ref=e270]:
+                          - generic [ref=e271]: "N"
+                    - cell "Ontem" [ref=e272]
+    - generic [ref=e275]:
+      - generic [ref=e276]:
+        - text: Usamos cookies essenciais para garantir o funcionamento adequado do site. Ao continuar navegando, você concorda com nossa
+        - link "Política de Cookies" [ref=e277] [cursor=pointer]:
+          - /url: /pt/cookies
+        - text: .
+      - generic [ref=e278]:
+        - button "Apenas essenciais" [ref=e279] [cursor=pointer]
+        - button "Aceitar" [ref=e280] [cursor=pointer]
+        - button "Close" [ref=e281] [cursor=pointer]:
+          - img [ref=e282]
+  - alert [ref=e285]
+```
