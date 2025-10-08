@@ -33,16 +33,23 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     
     console.log('[Chat Backend] Response received in', duration, 'ms');
     console.log('[Chat Backend] Full response:', JSON.stringify(data, null, 2));
-    
+
     // Backend returns 'message' field, not 'response'
     const messageText = data.message || data.response || '';
-    
+    console.log('[Chat Backend] Message text:', messageText ? `"${messageText.substring(0, 100)}..."` : '(empty)');
+
+    // Check if message is empty
+    if (!messageText || messageText.trim().length === 0) {
+      console.error('[Chat Backend] Received empty message from backend');
+      throw new Error('Empty response from backend');
+    }
+
     // Check if backend is returning maintenance message
-    const isMaintenanceMessage = messageText.includes('manutenção') || 
+    const isMaintenanceMessage = messageText.includes('manutenção') ||
                                 messageText.includes('em breve') ||
                                 messageText.includes('temporariamente indisponível') ||
                                 data.agent_id === 'system';
-    
+
     if (isMaintenanceMessage) {
       console.log('[Chat Backend] Backend is in maintenance mode');
       // Let the upstream handler deal with fallback
