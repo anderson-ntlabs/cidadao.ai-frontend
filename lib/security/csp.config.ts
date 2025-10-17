@@ -79,7 +79,7 @@ export const productionCSP: CSPDirectives = {
   // Connect: API endpoints and analytics
   'connect-src': [
     "'self'",
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     'https://cidadao-api-production.up.railway.app',
     'https://pbsiyuattnwgohvkkkks.supabase.co',
     'https://vercel.live',
@@ -99,6 +99,9 @@ export const productionCSP: CSPDirectives = {
 
   // Forms: Allow self only
   'form-action': ["'self'"],
+
+  // Frame sources: Allow Spotify embeds
+  'frame-src': ["'self'", 'https://open.spotify.com'],
 
   // Frame ancestors: Prevent clickjacking
   'frame-ancestors': ["'none'"],
@@ -128,7 +131,7 @@ export const developmentCSP: CSPDirectives = {
   'font-src': ["'self'", 'data:'],
   'connect-src': [
     "'self'",
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     'https://cidadao-api-production.up.railway.app',
     'https://pbsiyuattnwgohvkkkks.supabase.co',
     'http://localhost:*',
@@ -140,6 +143,7 @@ export const developmentCSP: CSPDirectives = {
   'object-src': ["'none'"],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
+  'frame-src': ["'self'", 'https://open.spotify.com'],
   'frame-ancestors': ["'none'"],
 };
 

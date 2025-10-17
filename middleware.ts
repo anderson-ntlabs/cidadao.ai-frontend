@@ -36,9 +36,9 @@ export async function middleware(request: NextRequest) {
 
   // Security Headers
 
-  // Content Security Policy (without nonce for Next.js compatibility)
-  const csp = buildCSP(getCSPConfig());
-  response.headers.set('Content-Security-Policy', csp);
+  // Simple CSP that allows Spotify embeds
+  const simpleCsp = "default-src 'self' https:; frame-src 'self' https://open.spotify.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;";
+  response.headers.set('Content-Security-Policy', simpleCsp);
 
   // Prevent XSS attacks
   response.headers.set('X-Content-Type-Options', 'nosniff');

@@ -216,13 +216,9 @@ export default function ENPage() {
       {/* Spotify Playlist Section */}
       <section className="py-20 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
             Soundtrack for Transparency
           </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-            Music to inspire active citizenship. A special selection of Brazilian sounds
-            that accompany our fight for transparency and social justice.
-          </p>
 
           <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
             <div className="relative w-full" style={{ minHeight: '352px' }}>
