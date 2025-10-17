@@ -213,11 +213,41 @@ export default function ENPage() {
         </div>
       </section>
 
+      {/* Spotify Playlist Section */}
+      <section className="py-20 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">
+            Soundtrack for Transparency
+          </h2>
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+            Music to inspire active citizenship. A special selection of Brazilian sounds
+            that accompany our fight for transparency and social justice.
+          </p>
+
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+            <div className="relative w-full" style={{ minHeight: '352px' }}>
+              <iframe
+                style={{ borderRadius: '12px' }}
+                src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
+                width="100%"
+                height="352"
+                frameBorder="0"
+                allowFullScreen
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="shadow-lg"
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {/* Links Sections */}
       <section className="py-20 bg-gray-50 dark:bg-gray-900 relative">
         {/* Pattern background instead of image */}
         <div className="absolute inset-0 bg-topography-pattern opacity-5"></div>
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-4">
             Additional Resources
@@ -249,7 +279,7 @@ export default function ENPage() {
             
             {/* API */}
             <Link 
-              href="https://neural-thinker-cidadao-ai-backend.hf.space/docs" 
+              href="https://cidadao-api-production.up.railway.app/docs" 
               className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 hover-lift group text-center"
             >
               <div className="text-4xl mb-4">⚡</div>
