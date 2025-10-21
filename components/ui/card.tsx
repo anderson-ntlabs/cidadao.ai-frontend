@@ -52,10 +52,10 @@ interface CardV2Props
   asChild?: boolean
 }
 
-const CardV2 = React.forwardRef<HTMLDivElement, CardV2Props>(
+const CardV2 = React.memo(React.forwardRef<HTMLDivElement, CardV2Props>(
   ({ className, variant, padding, interactive, asChild = false, ...props }, ref) => {
     const Comp = asChild ? React.Fragment : "div"
-    
+
     return (
       <Comp
         ref={ref}
@@ -64,11 +64,11 @@ const CardV2 = React.forwardRef<HTMLDivElement, CardV2Props>(
       />
     )
   }
-)
+))
 
 CardV2.displayName = "CardV2"
 
-const CardV2Header = React.forwardRef<
+const CardV2Header = React.memo(React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -77,10 +77,10 @@ const CardV2Header = React.forwardRef<
     className={cn("flex flex-col gap-2 mb-4", className)}
     {...props}
   />
-))
+)))
 CardV2Header.displayName = "CardV2Header"
 
-const CardV2Title = React.forwardRef<
+const CardV2Title = React.memo(React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
@@ -92,10 +92,10 @@ const CardV2Title = React.forwardRef<
     )}
     {...props}
   />
-))
+)))
 CardV2Title.displayName = "CardV2Title"
 
-const CardV2Description = React.forwardRef<
+const CardV2Description = React.memo(React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
@@ -107,22 +107,22 @@ const CardV2Description = React.forwardRef<
     )}
     {...props}
   />
-))
+)))
 CardV2Description.displayName = "CardV2Description"
 
-const CardV2Content = React.forwardRef<
+const CardV2Content = React.memo(React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div 
-    ref={ref} 
-    className={cn("text-body text-gray-700 dark:text-gray-300", className)} 
-    {...props} 
+  <div
+    ref={ref}
+    className={cn("text-body text-gray-700 dark:text-gray-300", className)}
+    {...props}
   />
-))
+)))
 CardV2Content.displayName = "CardV2Content"
 
-const CardV2Footer = React.forwardRef<
+const CardV2Footer = React.memo(React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
@@ -134,7 +134,7 @@ const CardV2Footer = React.forwardRef<
     )}
     {...props}
   />
-))
+)))
 CardV2Footer.displayName = "CardV2Footer"
 
 // Compound components for specific use cases
