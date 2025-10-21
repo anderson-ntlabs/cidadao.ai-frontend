@@ -17,12 +17,6 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true, // Temporary: skip Storybook type errors
-  },
-  eslint: {
-    ignoreDuringBuilds: true, // Temporary: skip lint during build
-  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',
