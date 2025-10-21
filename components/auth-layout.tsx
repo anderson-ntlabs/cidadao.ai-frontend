@@ -31,20 +31,13 @@ export function AuthLayoutV2({
   const router = useRouter()
   const pathname = usePathname()
   
-  // Navigation items based on locale
-  const navigationItems: NavigationItem[] = locale === 'pt' 
-    ? [
-        { name: 'Início', href: '/pt/home', icon: Home },
-        { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
-        { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-        { name: 'Investigações', href: '/pt/investigacoes', icon: FileSearch },
-      ]
-    : [
-        { name: 'Home', href: '/en/home', icon: Home },
-        { name: 'AI Chat', href: '/en/chat', icon: MessageSquare },
-        { name: 'Dashboard', href: '/en/dashboard', icon: LayoutDashboard },
-        { name: 'Investigations', href: '/en/investigations', icon: FileSearch },
-      ]
+  // Navigation items - authenticated system is PT-BR only
+  const navigationItems: NavigationItem[] = [
+    { name: 'Início', href: '/pt/home', icon: Home },
+    { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
+    { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
+    { name: 'Investigações', href: '/pt/investigacoes', icon: FileSearch },
+  ]
   
   // Generate breadcrumbs from pathname if not provided
   const generateBreadcrumbs = (): BreadcrumbItemV2[] => {
