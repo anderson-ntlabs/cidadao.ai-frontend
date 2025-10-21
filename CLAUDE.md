@@ -239,9 +239,36 @@ const { isEnabled, toggle, enable, disable } = useVLibras()
 **Testing:**
 Access http://localhost:3000/pt and look for the VLibras widget in the bottom-right corner. Click to activate LIBRAS translation.
 
+### Accessibility Panel (Unified Controls)
+
+The platform includes a comprehensive accessibility panel that consolidates all a11y features in one place.
+
+**Access:**
+- FAB button in bottom-right corner (green gear icon)
+- Keyboard shortcut: `Alt + A`
+- Mobile responsive design
+
+**Features:**
+1. **Font Size Control**: 4 sizes (small, normal, large, xlarge)
+2. **High Contrast Toggle**: Enhanced visibility mode
+3. **VLibras Toggle**: Enable/disable LIBRAS translation (PT only)
+4. **Keyboard Shortcuts Guide**: Built-in reference
+
+**Keyboard Shortcuts:**
+- `Alt + A`: Open/close accessibility panel
+- `Alt + H`: Toggle high contrast
+- `Alt + +`: Increase font size
+- `Alt + -`: Decrease font size
+
+**Components:**
+```tsx
+import { AccessibilityPanel } from '@/components/a11y'
+
+<AccessibilityPanel locale="pt" />
+```
+
 ### Other Accessibility Features
-- **Skip Links**: Keyboard navigation shortcuts (app/pt/layout.tsx)
-- **High Contrast Mode**: Toggle in header (components/a11y/high-contrast-toggle.tsx)
+- **Skip Links**: Keyboard navigation shortcuts
 - **Screen Reader Support**: ARIA labels throughout
-- **Keyboard Navigation**: Full keyboard accessibility
 - **Form Accessibility**: Accessible form field components
+- **Persistent Preferences**: All settings saved in localStorage
