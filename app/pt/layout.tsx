@@ -35,7 +35,8 @@ import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
 import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
 import { SentryInit } from '@/components/sentry-init'
-import { VLibrasWidget } from '@/components/a11y'
+import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
+import { WebVitalsProvider } from '@/components/web-vitals-provider'
 
 export default function PTLayout({
   children,
@@ -46,10 +47,26 @@ export default function PTLayout({
     <html lang="pt" className={inter.variable} suppressHydrationWarning>
       <head>
         <ThemeScript />
+
+        {/* Resource Hints - Performance Optimization */}
+        {/* Preconnect to critical origins */}
+        <link rel="preconnect" href="https://cidadao-api-production.up.railway.app" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pbsiyuattnwgohvkkkks.supabase.co" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* DNS Prefetch for external resources */}
+        <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
+        <link rel="dns-prefetch" href="https://vlibras.gov.br" />
+
+        {/* Preload critical assets */}
+        <link rel="preload" href="/operarios.png" as="image" type="image/png" />
+        <link rel="preload" href="/agents/abaporu.png" as="image" type="image/png" />
       </head>
       <body className="min-h-screen font-sans">
-        <Providers>
-          <SentryInit />
+        <WebVitalsProvider>
+          <Providers>
+            <SentryInit />
           {/* Camada de fundo fixo com a imagem */}
           <div
             className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
@@ -70,10 +87,11 @@ export default function PTLayout({
             <CookieConsent locale="pt" />
             <ToastProvider />
 
-            {/* VLibras - Brazilian Sign Language (Official Widget) */}
-            <VLibrasWidget locale="pt" forceOnload />
+            {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
+            <VLibrasLazy locale="pt" forceOnload />
           </div>
         </Providers>
+        </WebVitalsProvider>
       </body>
     </html>
   )
