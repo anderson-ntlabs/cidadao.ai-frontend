@@ -33,7 +33,8 @@
   </p>
   
   <p>
-    <img src="https://img.shields.io/badge/ODS_16-Peace_Justice_Strong_Institutions-00689D?style=flat-square&logo=united-natioopção Cns" alt="ODS 16">
+    <img src="https://img.shields.io/badge/ODS_16-Peace_Justice_Strong_Institutions-00689D?style=flat-square&logo=united-natioopção C
+ns" alt="ODS 16">
     <img src="https://img.shields.io/badge/UN_SDG-16-00689D?style=flat-square" alt="UN SDG 16">
     <img src="https://img.shields.io/badge/Open_Government-Partnership-4A90E2?style=flat-square" alt="Open Government">
     <img src="https://img.shields.io/badge/WCAG-AAA_Ready-0F7B0F?style=flat-square&logo=accessibility" alt="WCAG AAA">
@@ -70,7 +71,7 @@ O **Cidadão.AI Frontend** é a interface web da plataforma de transparência p�
 - 🎨 **Design Cultural**: Interface inspirada na obra "Operários" de Tarsila do Amaral
 - 📱 **PWA**: Aplicação progressiva com funcionamento offline
 - 🌐 **Bilíngue**: Interface em português e inglês
-- ♿ **Acessibilidade WCAG AAA**: Modo de alto contraste e navegação por teclado
+- ♿ **Acessibilidade WCAG AAA**: Modo de alto contraste, navegação por teclado e VLibras (LIBRAS)
 
 ## 🌍 Compromisso com Desenvolvimento Sustentável
 
@@ -108,6 +109,7 @@ Implementamos os pilares do governo aberto:
 ### ♿ Acessibilidade e Inclusão
 
 - **WCAG AAA**: Contraste superior a 7:1 no modo alto contraste
+- **VLibras (LIBRAS)**: Tradução automática para Língua Brasileira de Sinais
 - **Touch Targets**: Mínimo 44x44px para acessibilidade mobile
 - **Navegação**: 100% navegável por teclado
 - **Screen Readers**: Compatível com leitores de tela
@@ -162,11 +164,16 @@ http://localhost:3000
 ### Scripts Disponíveis
 
 ```bash
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build de produção
-npm run start        # Servidor de produção
-npm run lint         # Verificação de código
-npm run type-check   # Verificação de tipos TypeScript
+npm run dev                # Servidor de desenvolvimento
+npm run build              # Build de produção
+npm run start              # Servidor de produção
+npm run lint               # Verificação de código
+npm run type-check         # Verificação de tipos TypeScript
+
+# Scripts de Teste
+node scripts/test-vlibras.js       # Test VLibras (LIBRAS) integration
+node scripts/test-backend.js       # Test backend connectivity
+node scripts/test-chat-adapters.js # Test chat adapters
 ```
 
 ### Fluxo de Navegação
@@ -189,6 +196,10 @@ cidadao.ai-frontend/
 │   ├── en/                # Páginas em inglês
 │   └── layout.tsx         # Layout raiz
 ├── components/            # Componentes reutilizáveis
+│   ├── a11y/             # Componentes de acessibilidade
+│   │   ├── vlibras-widget.tsx  # VLibras (LIBRAS)
+│   │   ├── announcer.tsx       # Screen reader support
+│   │   └── high-contrast-toggle.tsx
 │   ├── header.tsx        # Cabeçalho com navegação
 │   ├── footer.tsx        # Rodapé
 │   ├── toast.tsx         # Sistema de notificações
@@ -312,7 +323,7 @@ Configure a URL do backend em `hooks/use-chat.ts`:
 
 ```typescript
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 
-  'https://neural-thinker-cidadao-ai-backend.hf.space'
+  'https://cidadao-api-production.up.railway.app'
 ```
 
 ## 📊 Métricas de Impacto e Sustentabilidade
@@ -356,10 +367,11 @@ Adoramos contribuições! Por favor, leia nosso [Guia de Contribuição](CONTRIB
 
 ### 🎯 Áreas Prioritárias para Contribuição
 
-- **Acessibilidade**: Melhorias WCAG AAA
+- **Acessibilidade**: Melhorias WCAG AAA, testes com usuários surdos (VLibras)
 - **Internacionalização**: Novos idiomas (espanhol, inglês)
 - **Visualizações**: Gráficos de dados públicos
 - **IA**: Novos agentes especializados
+- **LIBRAS**: Melhorias na integração VLibras e feedback da comunidade surda
 
 ## 📝 Licença
 
