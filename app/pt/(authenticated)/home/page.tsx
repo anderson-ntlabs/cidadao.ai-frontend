@@ -54,6 +54,7 @@ export default function HomePage() {
     return <LoadingScreen />
   }
   
+  // Phase 1: Only Home and Chat are active
   const navigationCards = [
     {
       title: 'Chat com IAs',
@@ -62,7 +63,8 @@ export default function HomePage() {
       href: '/pt/chat',
       gradient: 'from-blue-500 to-purple-600',
       stats: '17 agentes disponíveis',
-      badge: null
+      badge: null,
+      active: true
     },
     {
       title: 'Dashboard',
@@ -70,17 +72,19 @@ export default function HomePage() {
       icon: LayoutDashboard,
       href: '/pt/dashboard',
       gradient: 'from-green-500 to-emerald-600',
-      stats: '5 investigações ativas',
-      badge: 'Novo'
+      stats: 'Em desenvolvimento',
+      badge: 'Em Breve',
+      active: false
     },
     {
       title: 'Notificações',
       description: 'Central de alertas e atualizações do sistema',
       icon: Bell,
-      href: '/pt/notifications',
+      href: '/pt/notificacoes',
       gradient: 'from-orange-500 to-red-600',
-      stats: `${notificationStats.total} notificações`,
-      badge: unreadCount > 0 ? unreadCount : null
+      stats: 'Em desenvolvimento',
+      badge: 'Em Breve',
+      active: false
     },
     {
       title: 'Investigações',
@@ -88,8 +92,9 @@ export default function HomePage() {
       icon: FileSearch,
       href: '/pt/investigacoes',
       gradient: 'from-purple-500 to-pink-600',
-      stats: 'Análise profunda',
-      badge: null
+      stats: 'Em desenvolvimento',
+      badge: 'Em Breve',
+      active: false
     }
   ]
   
@@ -181,44 +186,72 @@ export default function HomePage() {
 
         {/* Navigation Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {navigationCards.map((card, index) => (
-            <Link key={index} href={card.href}>
-              <GlassCard 
-                className="h-full hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
-              >
-                <GlassCardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={cn(
-                      "p-3 rounded-xl bg-gradient-to-br shadow-lg",
-                      card.gradient
-                    )}>
-                      <card.icon className="w-8 h-8 text-white" />
+          {navigationCards.map((card, index) => {
+            const CardWrapper = card.active ? Link : 'div'
+            const cardProps = card.active ? { href: card.href } : {}
+
+            return (
+              <CardWrapper key={index} {...cardProps}>
+                <GlassCard
+                  className={cn(
+                    "h-full transition-all duration-300",
+                    card.active
+                      ? "hover:shadow-2xl hover:scale-[1.02] cursor-pointer group"
+                      : "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  <GlassCardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={cn(
+                        "p-3 rounded-xl bg-gradient-to-br shadow-lg",
+                        card.gradient,
+                        !card.active && "grayscale"
+                      )}>
+                        <card.icon className="w-8 h-8 text-white" />
+                      </div>
+                      {card.badge && (
+                        <span className={cn(
+                          "px-3 py-1 text-xs font-bold rounded-full",
+                          card.active
+                            ? "bg-red-500 text-white"
+                            : "bg-yellow-500 text-white"
+                        )}>
+                          {card.badge}
+                        </span>
+                      )}
                     </div>
-                    {card.badge && (
-                      <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-                        {card.badge}
+
+                    <h3 className={cn(
+                      "text-xl font-bold mb-2 transition-colors",
+                      card.active
+                        ? "text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400"
+                        : "text-gray-500 dark:text-gray-500"
+                    )}>
+                      {card.title}
+                    </h3>
+
+                    <p className={cn(
+                      "mb-4",
+                      card.active
+                        ? "text-gray-600 dark:text-gray-400"
+                        : "text-gray-500 dark:text-gray-600"
+                    )}>
+                      {card.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500 dark:text-gray-500">
+                        {card.stats}
                       </span>
-                    )}
-                  </div>
-                  
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                    {card.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {card.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-500">
-                      {card.stats}
-                    </span>
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </GlassCardContent>
-              </GlassCard>
-            </Link>
-          ))}
+                      {card.active && (
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 group-hover:translate-x-1 transition-all" />
+                      )}
+                    </div>
+                  </GlassCardContent>
+                </GlassCard>
+              </CardWrapper>
+            )
+          })}
         </div>
 
         {/* Recent Activity */}
@@ -298,28 +331,21 @@ export default function HomePage() {
               Ações Rápidas
             </h3>
             <div className="flex flex-wrap gap-3">
-              <Button 
+              <Button
                 variant="secondary"
-                leftIcon={<Search className="w-4 h-4" />}
+                leftIcon={<MessageSquare className="w-4 h-4" />}
                 onClick={() => router.push('/pt/chat')}
               >
-                Nova Investigação
+                Iniciar Chat com IAs
               </Button>
-              <Button 
-                variant="secondary"
-                leftIcon={<BarChart className="w-4 h-4" />}
-                onClick={() => router.push('/pt/dashboard')}
-              >
-                Ver Relatórios
-              </Button>
-              <Button 
+              <Button
                 variant="secondary"
                 leftIcon={<Settings className="w-4 h-4" />}
                 onClick={() => router.push('/pt/configuracoes')}
               >
                 Configurações
               </Button>
-              <Button 
+              <Button
                 variant="secondary"
                 leftIcon={<Lock className="w-4 h-4" />}
                 onClick={() => router.push('/pt/perfil')}

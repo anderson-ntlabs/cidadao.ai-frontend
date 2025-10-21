@@ -24,6 +24,7 @@ interface MobileNavItem {
 }
 
 // Mobile navigation items - optimized for thumb reach
+// Phase 1: Only Home and Chat are active
 const mobileNavItems: MobileNavItem[] = [
   {
     name: 'Início',
@@ -34,16 +35,6 @@ const mobileNavItems: MobileNavItem[] = [
     name: 'Chat',
     href: '/pt/chat',
     icon: MessageSquare
-  },
-  {
-    name: 'Dashboard',
-    href: '/pt/dashboard',
-    icon: LayoutDashboard
-  },
-  {
-    name: 'Investigações',
-    href: '/pt/investigacoes',
-    icon: FileSearch
   }
 ]
 

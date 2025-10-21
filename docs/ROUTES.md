@@ -20,6 +20,21 @@
 
 O Cidadão.AI Frontend usa Next.js 15 App Router com estrutura de rotas baseada em arquivo. O sistema é **principalmente em português** com suporte limitado para inglês em páginas públicas.
 
+### 🚀 Phase 1: Simplified Post-Login Experience
+
+**Strategic Decision (Jan 2025)**: To provide a focused user experience in Phase 1, we've simplified the post-login flow:
+
+- ✅ **Active Features**: Home, Chat, Profile, Settings, Help
+- 🚧 **Coming Soon**: Dashboard, Notifications, Investigations
+- 🎯 **Post-login destination**: `/pt/home` (main hub)
+- 💡 **User Experience**: Disabled features show "EM BREVE" badges with grayscale styling
+
+**Navigation Changes**:
+- Desktop header: Only Home and Chat are clickable
+- Mobile bottom nav: Only Home and Chat are shown
+- Home page cards: Disabled features have muted styling + "Em Breve" badge
+- All navigation components updated for consistency
+
 ### Convenções Importantes
 
 ✅ **Sempre use rotas em português** para áreas autenticadas:
@@ -52,16 +67,20 @@ O Cidadão.AI Frontend usa Next.js 15 App Router com estrutura de rotas baseada 
 
 Todas as rotas autenticadas estão sob `/pt/(authenticated)/`:
 
+**⚠️ PHASE 1 - Simplified Post-Login Experience**
+
+Post-login defaults to `/pt/home` which serves as the main hub. Only Home and Chat are fully active in Phase 1.
+
 | Rota | Arquivo | Descrição | Status |
 |------|---------|-----------|--------|
-| `/pt/home` | `app/pt/(authenticated)/home/page.tsx` | Página inicial pós-login | ✅ Ativo |
-| `/pt/chat` | `app/pt/(authenticated)/chat/page.tsx` | Chat com agentes IA | ✅ Ativo |
-| `/pt/dashboard` | `app/pt/(authenticated)/dashboard/page.tsx` | Dashboard de investigações | ✅ Ativo |
-| `/pt/investigacoes` | `app/pt/(authenticated)/investigacoes/page.tsx` | Investigações detalhadas | ✅ Ativo |
-| `/pt/perfil` | `app/pt/(authenticated)/perfil/page.tsx` | Perfil do usuário | ✅ Ativo |
-| `/pt/notificacoes` | `app/pt/(authenticated)/notificacoes/page.tsx` | Centro de notificações | ✅ Ativo |
-| `/pt/configuracoes` | `app/pt/(authenticated)/configuracoes/page.tsx` | Configurações | ✅ Ativo |
-| `/pt/help` | `app/pt/(authenticated)/help/page.tsx` | Central de ajuda | ✅ Ativo |
+| `/pt/home` | `app/pt/(authenticated)/home/page.tsx` | Main hub post-login | ✅ Active |
+| `/pt/chat` | `app/pt/(authenticated)/chat/page.tsx` | Chat with AI agents | ✅ Active |
+| `/pt/dashboard` | `app/pt/(authenticated)/dashboard/page.tsx` | Investigations dashboard | 🚧 Coming Soon |
+| `/pt/investigacoes` | `app/pt/(authenticated)/investigacoes/page.tsx` | Detailed investigations | 🚧 Coming Soon |
+| `/pt/notificacoes` | `app/pt/(authenticated)/notificacoes/page.tsx` | Notification center | 🚧 Coming Soon |
+| `/pt/perfil` | `app/pt/(authenticated)/perfil/page.tsx` | User profile | ✅ Active |
+| `/pt/configuracoes` | `app/pt/(authenticated)/configuracoes/page.tsx` | Settings | ✅ Active |
+| `/pt/help` | `app/pt/(authenticated)/help/page.tsx` | Help center | ✅ Active |
 
 ---
 
