@@ -779,7 +779,7 @@ Localização: Minas Gerais, Brasil
 - Backend: github.com/anderson-ufrj/cidadao.ai-backend
 
 **Ambiente de Produção:**
-- Backend: https://neural-thinker-cidadao-ai-backend.hf.space
+- Backend: https://cidadao-api-production.up.railway.app
 - Frontend: (Vercel deployment pendente)
 
 ---

@@ -1,7 +1,7 @@
 // Quick script to test the backend URL
 const https = require('https');
 
-const testUrl = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const testUrl = 'https://cidadao-api-production.up.railway.app';
 
 console.log(`Testing backend at: ${testUrl}`);
 

@@ -112,7 +112,7 @@ export function useChat() {
       // Se precisa investigação, orquestrar com múltiplos agentes
       if (needsInvestigation) {
         // Usar o endpoint de investigação do Zumbi
-        const response = await fetch('https://neural-thinker-cidadao-ai-backend.hf.space/api/agents/zumbi/investigate', {
+        const response = await fetch('https://cidadao-api-production.up.railway.app/api/agents/zumbi/investigate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -2,7 +2,7 @@
  * Teste específico para verificar integração com Maritaca AI
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function testMaritacaIntegration() {
   console.log('🔍 Teste de Integração Maritaca AI\n');

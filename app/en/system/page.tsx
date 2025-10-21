@@ -115,9 +115,9 @@ export default function SystemPage() {
           </p>
           <div className="bg-gray-900 text-white p-6 rounded-lg mt-4 font-mono text-sm">
             <p className="text-green-400"># Get system health</p>
-            <p>GET https://neural-thinker-cidadao-ai-backend.hf.space/health</p>
+            <p>GET https://cidadao-api-production.up.railway.app/health</p>
             <p className="mt-3 text-green-400"># Access API documentation</p>
-            <p>GET https://neural-thinker-cidadao-ai-backend.hf.space/docs</p>
+            <p>GET https://cidadao-api-production.up.railway.app/docs</p>
           </div>
         </section>
 

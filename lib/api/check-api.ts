@@ -2,7 +2,7 @@
 export async function checkAPIEndpoints() {
   const baseUrls = [
     // Standard HuggingFace Spaces format
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     // Alternative formats
     'https://neural-thinker-cidadaoai-backend.hf.space',
     'https://neuralthinker-cidadao-ai-backend.hf.space',

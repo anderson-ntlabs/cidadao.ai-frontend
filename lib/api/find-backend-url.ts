@@ -4,7 +4,7 @@ export async function findBackendURL() {
     // The actual working HuggingFace Spaces URL
     'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend',
     // Alternative formats that might work
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     'https://neural-thinker-cidadaoai-backend.hf.space',
     'https://neural-thinker-cidadao-backend.hf.space',
     // Direct app URL (from HF Spaces)
@@ -68,7 +68,7 @@ export async function findBackendURL() {
   console.log('\nChecking HuggingFace direct app URL...');
   try {
     // The app runs on port 7860 internally, but HF handles the routing
-    const hfAppUrl = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+    const hfAppUrl = 'https://cidadao-api-production.up.railway.app';
     
     // Test with a simple health check first
     const healthResponse = await fetch(`${hfAppUrl}/health`, {

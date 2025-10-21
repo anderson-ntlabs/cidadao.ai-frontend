@@ -50,7 +50,7 @@ vercel link
 ```bash
 # Production
 vercel env add NEXT_PUBLIC_API_URL production
-# Valor: https://neural-thinker-cidadao-ai-backend.hf.space
+# Valor: https://cidadao-api-production.up.railway.app
 
 vercel env add NEXT_PUBLIC_SENTRY_DSN production
 # Valor: Obter em sentry.io após criar projeto

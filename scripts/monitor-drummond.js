@@ -2,7 +2,7 @@
  * Monitor para verificar quando o Drummond estiver ativo
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function checkDrummond() {
   try {

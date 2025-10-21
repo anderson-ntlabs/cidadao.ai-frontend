@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const possibleUrls = [
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     'https://neuralthinker-cidadaoaibackend.hf.space',
     'https://neural-thinker.cidadao-ai-backend.hf.space',
     'https://neural-thinker-cidadaoai-backend.hf.space',

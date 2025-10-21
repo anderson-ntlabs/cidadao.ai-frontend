@@ -68,7 +68,7 @@ Property 'timestamp' is missing in type...
 
 ### 3.2 Endpoints Configurados
 
-1. **Base URL**: `https://neural-thinker-cidadao-ai-backend.hf.space`
+1. **Base URL**: `https://cidadao-api-production.up.railway.app`
 
 2. **Endpoints Ativos**:
    - `/api/v1/chat/optimized` - Sabiazinho-3 (modelo econômico)

@@ -3,11 +3,11 @@
  */
 
 // Simular ambiente do frontend
-process.env.NEXT_PUBLIC_API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+process.env.NEXT_PUBLIC_API_URL = 'https://cidadao-api-production.up.railway.app';
 
 // Importar diretamente o código transpilado seria complexo, então vamos testar via HTTP
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function testCompleteIntegration() {
   console.log('🚀 Teste de Integração Completa\n');

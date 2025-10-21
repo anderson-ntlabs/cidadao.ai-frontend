@@ -2,7 +2,7 @@
  * Verifica se o backend foi reiniciado
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function checkRestart() {
   let lastUptime = Infinity;

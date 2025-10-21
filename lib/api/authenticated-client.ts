@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { authIntegrationService } from './auth-integration.service';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neural-thinker-cidadao-ai-backend.hf.space';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app';
 
 interface ApiResponse<T = any> {
   success: boolean;

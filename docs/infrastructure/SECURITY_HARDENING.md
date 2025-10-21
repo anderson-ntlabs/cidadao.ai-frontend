@@ -38,7 +38,7 @@ Content-Security-Policy:
   script-src 'self' 'unsafe-eval' https://vercel.live https://*.google-analytics.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://*.vercel.app;
-  connect-src 'self' https://neural-thinker-cidadao-ai-backend.hf.space;
+  connect-src 'self' https://cidadao-api-production.up.railway.app;
   font-src 'self' data:;
   object-src 'none';
   base-uri 'self';

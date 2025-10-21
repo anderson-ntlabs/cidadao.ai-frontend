@@ -454,8 +454,8 @@ ws://localhost:8000/api/v1/ws
 
 ### Production (HuggingFace Spaces)
 ```
-https://neural-thinker-cidadao-ai-backend.hf.space/api/v1
-wss://neural-thinker-cidadao-ai-backend.hf.space/api/v1/ws
+https://cidadao-api-production.up.railway.app/api/v1
+wss://cidadao-api-production.up.railway.app/api/v1/ws
 ```
 
 ---

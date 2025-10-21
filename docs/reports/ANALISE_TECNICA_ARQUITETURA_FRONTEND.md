@@ -803,7 +803,7 @@ async headers() {
           style-src 'self' 'unsafe-inline';
           img-src 'self' blob: data: https:;
           font-src 'self' data:;
-          connect-src 'self' https://neural-thinker-cidadao-ai-backend.hf.space https://*.supabase.co;
+          connect-src 'self' https://cidadao-api-production.up.railway.app https://*.supabase.co;
         `
       },
     ],
@@ -919,7 +919,7 @@ scripts/
 // lib/api/client.ts
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  'https://neural-thinker-cidadao-ai-backend.hf.space';
+  'https://cidadao-api-production.up.railway.app';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -1762,7 +1762,7 @@ node scripts/analyze-bundle.js # Custom bundle analyzer
 
 ```bash
 # Backend API
-NEXT_PUBLIC_API_URL=https://neural-thinker-cidadao-ai-backend.hf.space
+NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
 
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co

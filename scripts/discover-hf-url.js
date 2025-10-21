@@ -1,24 +1,15 @@
 // Try to discover the correct HuggingFace Spaces app URL
 const https = require('https');
 
-// Based on HuggingFace Spaces patterns, try these URLs
+// Based on Railway deployment, try these URLs
 const possibleUrls = [
-  // Standard pattern: {username}-{space-name}.hf.space
-  'https://neural-thinker-cidadao-ai-backend.hf.space',
-  'https://neural-thinker-cidadaoai-backend.hf.space',
-  'https://neuralthinker-cidadao-ai-backend.hf.space',
-  
-  // With dots
-  'https://neural-thinker.cidadao-ai-backend.hf.space',
-  'https://neural-thinker.cidadao.ai-backend.hf.space',
-  
-  // Proxy patterns
-  'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend/proxy',
-  'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend/resolve/main',
-  
-  // Direct patterns
-  'https://hf.space/neural-thinker/cidadao.ai-backend',
-  'https://hf.space/embed/neural-thinker/cidadao.ai-backend/+',
+  // Production Railway URL
+  'https://cidadao-api-production.up.railway.app',
+
+  // Legacy HuggingFace URLs (kept for reference)
+  // 'https://neural-thinker-cidadao-ai-backend.hf.space',
+  // 'https://neural-thinker-cidadaoai-backend.hf.space',
+  // 'https://neuralthinker-cidadao-ai-backend.hf.space',
 ];
 
 console.log('🔍 Discovering HuggingFace Spaces App URL...\n');

@@ -2,7 +2,7 @@
  * Teste completo do novo endpoint /api/v1/chat/simple com Maritaca AI
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function testSimpleEndpoint() {
   console.log('🚀 TESTE DO ENDPOINT /api/v1/chat/simple COM MARITACA AI\n');

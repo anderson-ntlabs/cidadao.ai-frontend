@@ -15,8 +15,8 @@ npm install -D @types/eventsource
 ### Variáveis de Ambiente (.env.local)
 
 ```env
-NEXT_PUBLIC_API_URL=https://neural-thinker-cidadao-ai-backend.hf.space
-NEXT_PUBLIC_WS_URL=wss://neural-thinker-cidadao-ai-backend.hf.space
+NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
+NEXT_PUBLIC_WS_URL=wss://cidadao-api-production.up.railway.app
 ```
 
 ## 2. CLIENTE API BASE
@@ -627,8 +627,8 @@ export const chatAnalytics = {
 // vercel.json
 {
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://neural-thinker-cidadao-ai-backend.hf.space",
-    "NEXT_PUBLIC_WS_URL": "wss://neural-thinker-cidadao-ai-backend.hf.space"
+    "NEXT_PUBLIC_API_URL": "https://cidadao-api-production.up.railway.app",
+    "NEXT_PUBLIC_WS_URL": "wss://cidadao-api-production.up.railway.app"
   },
   "headers": [
     {
@@ -636,7 +636,7 @@ export const chatAnalytics = {
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://neural-thinker-cidadao-ai-backend.hf.space wss://neural-thinker-cidadao-ai-backend.hf.space"
+          "value": "default-src 'self'; connect-src 'self' https://cidadao-api-production.up.railway.app wss://cidadao-api-production.up.railway.app"
         }
       ]
     }
@@ -660,7 +660,7 @@ vercel --prod
 
 Este manual fornece uma base completa para integrar o frontend Next.js com o backend Cidadão.AI. O fluxo conversacional proposto oferece uma experiência intuitiva para análise de transparência governamental, com suporte a investigações em tempo real, detecção de anomalias e geração de relatórios.
 
-Para questões técnicas ou suporte adicional, consulte a documentação da API em: https://neural-thinker-cidadao-ai-backend.hf.space/docs
+Para questões técnicas ou suporte adicional, consulte a documentação da API em: https://cidadao-api-production.up.railway.app/docs
 
 ---
 **Documento preparado por:** Anderson Henrique d Silva  

@@ -55,7 +55,7 @@ describe('useChat', () => {
         });
 
         expect(mockFetch).toHaveBeenCalledWith(
-          'https://neural-thinker-cidadao-ai-backend.hf.space/api/agents/zumbi/investigate',
+          'https://cidadao-api-production.up.railway.app/api/agents/zumbi/investigate',
           expect.objectContaining({
             method: 'POST',
             headers: expect.objectContaining({

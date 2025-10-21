@@ -251,7 +251,7 @@ Crie um arquivo `.env.local`:
 
 ```env
 # API Backend (opcional - tem fallback)
-NEXT_PUBLIC_API_URL=https://neural-thinker-cidadao-ai-backend.hf.space
+NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
 
 # Analytics (opcional)
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX

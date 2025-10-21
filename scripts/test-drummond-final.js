@@ -2,7 +2,7 @@
  * Teste final do Drummond com Maritaca AI
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function testDrummondFinal() {
   console.log('🎭 Teste Final - Carlos Drummond de Andrade + Maritaca AI\n');

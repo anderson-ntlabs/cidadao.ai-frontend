@@ -30,7 +30,7 @@ O chatbot conversacional no frontend está funcionando corretamente e se comunic
 
 ### Teste de API Direta
 ```bash
-POST https://neural-thinker-cidadao-ai-backend.hf.space/api/v1/chat/message
+POST https://cidadao-api-production.up.railway.app/api/v1/chat/message
 {
   "message": "olá",
   "session_id": "test-session"

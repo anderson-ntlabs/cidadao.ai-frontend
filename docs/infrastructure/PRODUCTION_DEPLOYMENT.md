@@ -64,7 +64,7 @@ Configure these environment variables in Vercel Dashboard → Settings → Envir
 
 ```env
 # Backend API (Production)
-NEXT_PUBLIC_API_URL=https://neural-thinker-cidadao-ai-backend.hf.space
+NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
 
 # Vercel KV (will be auto-added when KV is created)
 KV_REST_API_URL=

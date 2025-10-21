@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app';
 
 async function testBackendIntegration() {
   console.log('🔧 Testing Backend Integration');

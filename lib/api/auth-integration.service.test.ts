@@ -79,7 +79,7 @@ describe('AuthIntegrationService', () => {
 
       expect(result).toBe(true);
       expect(axios.post).toHaveBeenCalledWith(
-        'https://neural-thinker-cidadao-ai-backend.hf.space/api/auth/register',
+        'https://cidadao-api-production.up.railway.app/api/auth/register',
         {
           supabase_id: 'user-123',
           email: 'test@example.com',
@@ -208,7 +208,7 @@ describe('AuthIntegrationService', () => {
       expect(result).toEqual(mockResponse);
       expect(axios).toHaveBeenCalledWith({
         method: 'GET',
-        url: 'https://neural-thinker-cidadao-ai-backend.hf.space/api/test',
+        url: 'https://cidadao-api-production.up.railway.app/api/test',
         headers: {
           'Authorization': 'Bearer token',
           'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ describe('AuthIntegrationService', () => {
       expect(result).toEqual(mockResponse);
       expect(axios).toHaveBeenCalledWith({
         method: 'POST',
-        url: 'https://neural-thinker-cidadao-ai-backend.hf.space/api/test',
+        url: 'https://cidadao-api-production.up.railway.app/api/test',
         headers: expect.any(Object),
         data: postData,
       });
@@ -279,7 +279,7 @@ describe('AuthIntegrationService', () => {
       expect(result).toBe(true);
       expect(axios).toHaveBeenCalledWith({
         method: 'POST',
-        url: 'https://neural-thinker-cidadao-ai-backend.hf.space/api/user/profile/sync',
+        url: 'https://cidadao-api-production.up.railway.app/api/user/profile/sync',
         headers: expect.any(Object),
         data: {
           supabase_id: 'user-123',

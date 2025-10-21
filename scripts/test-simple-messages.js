@@ -2,7 +2,7 @@
  * Teste com mensagens simples para verificar o SimpleDrummondAgent
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function testSimpleMessages() {
   console.log('🧪 Testando mensagens simples com o SimpleDrummondAgent\n');

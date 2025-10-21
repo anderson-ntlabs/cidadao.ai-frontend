@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://neural-thinker-cidadao-ai-backend.hf.space'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
 export class AuthIntegrationService {
   private supabase = createClient()

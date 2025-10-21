@@ -2,7 +2,7 @@
  * Verificação completa do status do backend
  */
 
-const API_URL = 'https://neural-thinker-cidadao-ai-backend.hf.space';
+const API_URL = 'https://cidadao-api-production.up.railway.app';
 
 async function checkBackendStatus() {
   console.log('🔍 Verificação Completa do Backend Cidadão.AI\n');

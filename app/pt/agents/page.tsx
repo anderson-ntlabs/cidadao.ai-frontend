@@ -115,7 +115,7 @@ export default function AgentsPage() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
-              href="https://neural-thinker-cidadao-ai-backend.hf.space/docs"
+              href="https://cidadao-api-production.up.railway.app/docs"
               target="_blank"
             >
               <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-lg">

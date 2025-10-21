@@ -257,7 +257,7 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://neural-thinker-cidadao-ai-backend.hf.space https://*.vercel-storage.com",
+      "connect-src 'self' https://cidadao-api-production.up.railway.app https://*.vercel-storage.com",
     ].join('; ')
   );
 

@@ -3,7 +3,7 @@ export async function testBackendConnection() {
   // Try multiple possible URLs
   const urls = [
     'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend',
-    'https://neural-thinker-cidadao-ai-backend.hf.space',
+    'https://cidadao-api-production.up.railway.app',
     localStorage.getItem('backend_url'), // Check if we found a working URL
   ].filter(Boolean);
   
