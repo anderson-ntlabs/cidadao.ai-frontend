@@ -5,6 +5,7 @@ import { sendFallbackMessage } from '@/lib/api/chat-adapter-fallback';
 import { sendChatAsInvestigation } from '@/lib/api/chat-adapter';
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry';
 import { getChatCacheIDB } from '@/lib/services/chat-cache-idb.service';
+import { logger } from '@/lib/utils/logger';
 
 export type ModelPreference = 'auto' | 'economic' | 'quality' | 'stable';
 
@@ -83,11 +84,11 @@ export class SmartChatService {
         const cachedResponse = await cache.get(message);
 
         if (cachedResponse) {
-          console.log('[SmartChat] Returning cached response');
+          logger.debug('SmartChat: Returning cached response');
           return cachedResponse;
         }
       } catch (error) {
-        console.warn('[SmartChat] Cache check failed:', error);
+        logger.warn('SmartChat: Cache check failed', { error });
         // Continue without cache
       }
     }
@@ -104,7 +105,7 @@ export class SmartChatService {
 
     // If streaming is enabled, use SSE directly
     if (options.streaming) {
-      console.log('[SmartChat] Using SSE streaming mode');
+      logger.debug('SmartChat: Using SSE streaming mode');
 
       try {
         const sseOptions: SSEMessageOptions = {
@@ -126,12 +127,12 @@ export class SmartChatService {
           const cache = await getChatCacheIDB();
           await cache.set(message, response);
         } catch (error) {
-          console.warn('[SmartChat] Failed to cache SSE response:', error);
+          logger.warn('SmartChat: Failed to cache SSE response', { error });
         }
 
         return response;
       } catch (error) {
-        console.warn('[SmartChat] SSE streaming failed, falling back to standard endpoints:', error);
+        logger.warn('SmartChat: SSE streaming failed, falling back to standard endpoints', { error });
         // Continue to fallback logic below
       }
     }
@@ -141,15 +142,19 @@ export class SmartChatService {
       (e) => e.url !== '/api/v1/chat/stream'
     );
 
-    console.log('[SmartChat] Selected endpoints order:', selectedEndpoints.map(e => e.name));
-    console.log('[SmartChat] Model preference:', options.preferredModel || 'default');
+    logger.debug('SmartChat: Selected endpoints order', {
+      endpoints: selectedEndpoints.map(e => e.name)
+    });
+    logger.debug('SmartChat: Model preference', {
+      preference: options.preferredModel || 'default'
+    });
 
     // Try each endpoint in order
     let lastError: Error | null = null;
 
     for (const endpoint of selectedEndpoints) {
       try {
-        console.log(`[SmartChat] Trying ${endpoint.name} (${endpoint.url})...`);
+        logger.debug(`SmartChat: Trying ${endpoint.name}`, { url: endpoint.url });
 
         const startTime = Date.now();
         const response = await this.tryEndpoint(endpoint, request, options.timeout);
@@ -162,13 +167,13 @@ export class SmartChatService {
           const cache = await getChatCacheIDB();
           await cache.set(message, response);
         } catch (error) {
-          console.warn('[SmartChat] Failed to cache response:', error);
+          logger.warn('SmartChat: Failed to cache response', { error });
           // Don't fail the request due to cache errors
         }
 
         return response;
       } catch (error) {
-        console.warn(`[SmartChat] ${endpoint.name} failed:`, error);
+        logger.warn(`SmartChat: ${endpoint.name} failed`, { error });
         lastError = error as Error;
 
         // Continue to next endpoint
@@ -177,7 +182,9 @@ export class SmartChatService {
     }
 
     // All endpoints failed - use local fallback
-    console.error('[SmartChat] All endpoints failed, using local fallback');
+    logger.error('SmartChat: All endpoints failed, using local fallback', {
+      lastError: lastError?.message
+    });
     
     return this.createFallbackResponse(request, lastError);
   }
@@ -317,8 +324,12 @@ export class SmartChatService {
     response: ChatResponse,
     duration: number
   ): void {
-    console.log(`[SmartChat] Success with ${endpoint.name} in ${duration}ms`);
-    
+    logger.performance(`SmartChat: Success with ${endpoint.name}`, duration, {
+      endpoint: endpoint.name,
+      model: endpoint.model,
+      confidence: response.confidence
+    });
+
     // Log to telemetry
     chatTelemetry.track({
       type: 'message_received',
