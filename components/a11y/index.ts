@@ -17,9 +17,15 @@ export { Announcer, useAnnouncer } from './announcer'
 
 // Visual Accessibility
 export { HighContrastToggle } from './high-contrast-toggle'
+export { FontSizeControl, useFontSize } from './font-size-control'
+export type { FontSize } from './font-size-control'
 
 // Sign Language Support (Brazilian LIBRAS)
 export { VLibrasWidget, useVLibras } from './vlibras-widget'
+export { VLibrasToggle } from './vlibras-toggle'
+
+// Unified Accessibility Panel
+export { AccessibilityPanel } from './accessibility-panel'
 
 // Form Accessibility
 export { FormField } from './form-field'
