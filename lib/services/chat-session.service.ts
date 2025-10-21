@@ -5,6 +5,7 @@ export class ChatSessionService {
   private supabase = createClient()
 
   async createSession(data: {
+    session_id: string  // Frontend-generated session ID
     investigation_id?: string
     agent_id: string
     metadata?: Record<string, any>
@@ -15,6 +16,7 @@ export class ChatSessionService {
     const { data: session, error } = await this.supabase
       .from('chat_sessions')
       .insert({
+        session_id: data.session_id,
         user_id: user.id,
         investigation_id: data.investigation_id,
         agent_id: data.agent_id,
@@ -32,14 +34,14 @@ export class ChatSessionService {
     return session
   }
 
-  async getSession(id: string): Promise<ChatSession | null> {
+  async getSession(sessionId: string): Promise<ChatSession | null> {
     const { data: { user } } = await this.supabase.auth.getUser()
     if (!user) return null
 
-    const { data, error } = await this.supabase
+    const { data, error} = await this.supabase
       .from('chat_sessions')
       .select('*')
-      .eq('id', id)
+      .eq('session_id', sessionId)  // Use custom session_id instead of UUID
       .eq('user_id', user.id)
       .single()
 
@@ -110,7 +112,7 @@ export class ChatSessionService {
         messages: updatedMessages,
         updated_at: new Date().toISOString()
       })
-      .eq('id', sessionId)
+      .eq('session_id', sessionId)  // Use session_id instead of id
 
     if (error) {
       console.error('Error adding message:', error)
@@ -133,7 +135,7 @@ export class ChatSessionService {
         session_metadata: metadata,
         updated_at: new Date().toISOString()
       })
-      .eq('id', sessionId)
+      .eq('session_id', sessionId)  // Use session_id instead of id
       .eq('user_id', user.id)
 
     if (error) {
@@ -144,14 +146,14 @@ export class ChatSessionService {
     return true
   }
 
-  async deleteSession(id: string): Promise<boolean> {
+  async deleteSession(sessionId: string): Promise<boolean> {
     const { data: { user } } = await this.supabase.auth.getUser()
     if (!user) return false
 
     const { error } = await this.supabase
       .from('chat_sessions')
       .delete()
-      .eq('id', id)
+      .eq('session_id', sessionId)  // Use session_id instead of id
       .eq('user_id', user.id)
 
     if (error) {

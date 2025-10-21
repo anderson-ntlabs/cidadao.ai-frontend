@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create chat_sessions table
 CREATE TABLE IF NOT EXISTS public.chat_sessions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  session_id TEXT UNIQUE NOT NULL, -- Custom session ID from frontend
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   investigation_id UUID REFERENCES public.investigations(id) ON DELETE CASCADE,
   agent_id TEXT NOT NULL,
@@ -46,6 +47,7 @@ CREATE TRIGGER set_chat_sessions_updated_at
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_investigation_id ON public.chat_sessions(investigation_id);
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_session_id ON public.chat_sessions(session_id);
 
 -- Verify table creation (run this after the above)
 SELECT

@@ -35,6 +35,7 @@ export interface Investigation {
 
 export interface ChatSession {
   id: string
+  session_id: string  // Frontend-generated session ID
   user_id: string
   investigation_id?: string
   agent_id: string

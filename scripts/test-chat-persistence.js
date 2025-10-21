@@ -57,14 +57,15 @@ async function testChatPersistence() {
 
     // Test 3: Try to create a session (will fail without auth, but that's expected)
     console.log('Test 3: Testing session creation (expect auth error)...');
+    const testSessionId = `test-session-${Date.now()}`;
     const testSession = {
+      session_id: testSessionId,  // Frontend-generated session ID
       agent_id: 'abaporu',
       messages: [
         { role: 'user', content: 'Test message', timestamp: new Date().toISOString() }
       ],
       session_metadata: {
         test: true,
-        session_id: `test-${Date.now()}`,
         created_at: new Date().toISOString()
       }
     };
