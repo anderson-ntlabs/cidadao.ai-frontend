@@ -41,9 +41,14 @@ The application uses Next.js 15 App Router with internationalization:
 app/
 ├── pt/                    # Portuguese routes (default)
 │   ├── (authenticated)/   # Protected routes requiring login
-│   │   ├── dashboard/     # Investigation dashboard
 │   │   ├── chat/          # AI chat interface
-│   │   └── investigacoes/ # Detailed investigations
+│   │   ├── dashboard/     # Investigation dashboard
+│   │   ├── home/          # User home page
+│   │   ├── investigacoes/ # Detailed investigations
+│   │   ├── perfil/        # User profile
+│   │   ├── notificacoes/  # Notifications center
+│   │   ├── configuracoes/ # Settings
+│   │   └── help/          # Help page
 │   ├── login/             # Authentication page
 │   └── [public pages]     # About, agents, privacy, etc.
 ├── en/                    # English routes (mirror structure)
@@ -117,7 +122,7 @@ Configured in `next.config.js` with next-pwa:
 5. **Performance**: Lazy loading, code splitting, image optimization
 6. **Real-time**: WebSocket support for live chat updates (infrastructure ready)
 7. **Error Boundaries**: Comprehensive error handling at adapter level
-8. **Feature Flags**: Runtime toggles via environment variables
+8. **Glass Morphism Design**: V3 design system with glassmorphism effects (consolidated as default)
 
 ## Environment Configuration
 
@@ -142,9 +147,11 @@ NEXT_PUBLIC_ENABLE_VLIBRAS=true  # Enable VLibras (Brazilian Sign Language) on P
 3. **No Test Framework**: Project uses manual integration scripts instead of Jest/Vitest
 4. **Cultural Theme**: UI inspired by Tarsila do Amaral's "Operários" painting
 5. **Telemetry**: Custom event tracking system with batching (`lib/telemetry/`)
-6. **AI Models**: Supports Sabiazinho-3 (optimized) and Sabiá-3 (standard)
-7. **Export Features**: PDF, JSON, CSV export for investigations
-8. **Accessibility**: VLibras (LIBRAS) integration for Brazilian Sign Language support
+6. **Design System**: V3 glass morphism design consolidated as default (Jan 2025 refactor)
+7. **Single Route Convention**: Only Portuguese routes under `/pt/(authenticated)/*`
+8. **AI Models**: Supports Sabiazinho-3 (optimized) and Sabiá-3 (standard)
+9. **Export Features**: PDF, JSON, CSV export for investigations
+10. **Accessibility**: VLibras (LIBRAS) integration for Brazilian Sign Language support
 
 ## Component Development
 
@@ -186,9 +193,8 @@ Key component patterns:
 3. Enable PWA (remove `DISABLE_PWA`)
 4. Set up Google Analytics tracking ID
 5. Enable VLibras (`NEXT_PUBLIC_ENABLE_VLIBRAS=true`)
-6. Review feature flags
-7. Test all chat adapters with production backend
-8. Run accessibility audit (`npx lighthouse --only-categories=accessibility`)
+6. Test all chat adapters with production backend
+7. Run accessibility audit (`npx lighthouse --only-categories=accessibility`)
 
 ## Accessibility (A11y) Features
 
