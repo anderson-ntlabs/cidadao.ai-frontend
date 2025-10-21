@@ -1,17 +1,8 @@
 // Try to find the correct backend URL
 export async function findBackendURL() {
+  // Railway is the primary backend (HuggingFace Spaces is deprecated/offline)
   const possibleURLs = [
-    // The actual working HuggingFace Spaces URL
-    'https://huggingface.co/spaces/neural-thinker/cidadao.ai-backend',
-    // Alternative formats that might work
     'https://cidadao-api-production.up.railway.app',
-    'https://neural-thinker-cidadaoai-backend.hf.space',
-    'https://neural-thinker-cidadao-backend.hf.space',
-    // Direct app URL (from HF Spaces)
-    'https://neural-thinker-cidadao.ai-backend.hf.space',
-    // Try with different separators
-    'https://neuralthinker-cidadaoai-backend.hf.space',
-    'https://neuralthinker-cidadao-ai-backend.hf.space',
   ];
 
   console.log('=== Searching for Backend URL ===');
@@ -64,32 +55,26 @@ export async function findBackendURL() {
     }
   }
   
-  // Also try checking the direct app URL from HuggingFace
-  console.log('\nChecking HuggingFace direct app URL...');
+  // Fallback to Railway if no URL worked (shouldn't happen)
+  console.log('\n⚠️  No backend URL found from list, using Railway as fallback');
+  const railwayUrl = 'https://cidadao-api-production.up.railway.app';
+
   try {
-    // The app runs on port 7860 internally, but HF handles the routing
-    const hfAppUrl = 'https://cidadao-api-production.up.railway.app';
-    
-    // Test with a simple health check first
-    const healthResponse = await fetch(`${hfAppUrl}/health`, {
+    const healthResponse = await fetch(`${railwayUrl}/health`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
     });
-    
-    console.log(`${hfAppUrl}/health - Status: ${healthResponse.status}`);
-    
+
+    console.log(`${railwayUrl}/health - Status: ${healthResponse.status}`);
+
     if (healthResponse.ok) {
-      // If health check works, test the docs endpoint
-      const docsResponse = await fetch(`${hfAppUrl}/docs`);
-      if (docsResponse.ok) {
-        console.log(`✅ Confirmed working backend at: ${hfAppUrl}`);
-        return hfAppUrl;
-      }
+      console.log(`✅ Railway backend is available: ${railwayUrl}`);
+      return railwayUrl;
     }
   } catch (error) {
-    console.error('Failed to check HF app directly:', error);
+    console.error('Failed to connect to Railway:', error);
   }
   
   console.log('\n❌ Could not find working backend URL');
