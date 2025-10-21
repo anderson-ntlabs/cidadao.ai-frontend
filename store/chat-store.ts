@@ -412,14 +412,14 @@ export const useChatStore = create<ChatStore>()(
             currentInvestigation: null,
           });
           
-          // Create session in Supabase
+          // Create session in Supabase (optional - fails silently if table doesn't exist)
           try {
             await chatSessionService.createSession({
               agent_id: 'abaporu', // Default to Abaporu
               metadata: { session_id: sessionId }
             });
           } catch (error) {
-            console.error('Failed to create session in Supabase:', error);
+            // Silently ignore - chat works without Supabase persistence
           }
         },
 
