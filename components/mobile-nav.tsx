@@ -193,7 +193,7 @@ export function MobileNavDrawer({
   const drawerItems: MobileNavItem[] = [
     {
       name: 'Perfil',
-      href: '/pt/profile',
+      href: '/pt/perfil',
       icon: Home // Replace with User icon when available
     },
     {

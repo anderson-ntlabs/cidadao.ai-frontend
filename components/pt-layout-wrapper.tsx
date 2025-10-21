@@ -18,7 +18,7 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
                               pathname.includes('/chat') || 
                               pathname.includes('/investigacoes') ||
                               pathname.includes('/home') ||
-                              pathname.includes('/profile') ||
+                              pathname.includes('/perfil') ||
                               pathname.includes('/settings')
 
   const publicNavigationItems: NavigationItem[] = locale === 'pt'

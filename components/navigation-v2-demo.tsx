@@ -26,7 +26,7 @@ const mainNavItems = [
 ]
 
 const settingsNavItems = [
-  { name: 'Perfil', href: '/pt/profile', icon: User },
+  { name: 'Perfil', href: '/pt/perfil', icon: User },
   { name: 'Configurações', href: '/pt/settings', icon: Settings },
   { name: 'Ajuda', href: '/pt/help', icon: HelpCircle },
 ]

@@ -84,7 +84,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
             
             {/* User Menu */}
             <div className="hidden md:flex items-center gap-3">
-              <Link href={`/${locale}/profile`}>
+              <Link href={`/${locale}/perfil`}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <User className="w-4 h-4" />
                   {user?.name || 'Perfil'}
