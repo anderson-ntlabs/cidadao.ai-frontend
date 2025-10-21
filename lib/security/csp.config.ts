@@ -50,7 +50,7 @@ export function buildCSP(
 export const productionCSP: CSPDirectives = {
   'default-src': ["'self'"],
 
-  // Scripts: Allow self, eval (Next.js), inline (Next.js), and analytics
+  // Scripts: Allow self, eval (Next.js), inline (Next.js), analytics, and VLibras
   'script-src': [
     "'self'",
     "'unsafe-eval'", // Required for Next.js
@@ -58,12 +58,14 @@ export const productionCSP: CSPDirectives = {
     'https://vercel.live',
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
+    'https://vlibras.gov.br', // VLibras CDN
+    'https://*.vlibras.gov.br', // VLibras subdomains
   ],
 
   // Styles: Allow self and inline styles (Next.js requirement)
   'style-src': ["'self'", "'unsafe-inline'"],
 
-  // Images: Allow self, data URIs, Vercel, and external CDNs
+  // Images: Allow self, data URIs, Vercel, VLibras, and external CDNs
   'img-src': [
     "'self'",
     'data:',
@@ -71,12 +73,14 @@ export const productionCSP: CSPDirectives = {
     'https://*.vercel.app',
     'https://*.vercel-insights.com',
     'https://www.google-analytics.com',
+    'https://vlibras.gov.br', // VLibras avatars and images
+    'https://*.vlibras.gov.br', // VLibras CDN
   ],
 
   // Fonts: Allow self and data URIs
   'font-src': ["'self'", 'data:'],
 
-  // Connect: API endpoints and analytics
+  // Connect: API endpoints, analytics, and VLibras
   'connect-src': [
     "'self'",
     'https://cidadao-api-production.up.railway.app',
@@ -86,6 +90,8 @@ export const productionCSP: CSPDirectives = {
     'https://*.vercel-insights.com',
     'https://www.google-analytics.com',
     'https://*.sentry.io',
+    'https://vlibras.gov.br', // VLibras API
+    'https://*.vlibras.gov.br', // VLibras subdomains
   ],
 
   // Media: Only self-hosted
@@ -100,8 +106,13 @@ export const productionCSP: CSPDirectives = {
   // Forms: Allow self only
   'form-action': ["'self'"],
 
-  // Frame sources: Allow Spotify embeds
-  'frame-src': ["'self'", 'https://open.spotify.com'],
+  // Frame sources: Allow Spotify embeds and VLibras
+  'frame-src': [
+    "'self'",
+    'https://open.spotify.com',
+    'https://vlibras.gov.br', // VLibras widget iframe
+    'https://*.vlibras.gov.br', // VLibras subdomains
+  ],
 
   // Frame ancestors: Prevent clickjacking
   'frame-ancestors': ["'none'"],
