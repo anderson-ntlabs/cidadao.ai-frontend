@@ -24,7 +24,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
     { name: 'Início', href: '/pt/home', icon: Home },
     { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
     { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-    { name: 'Notificações', href: '/pt/notifications', icon: Bell },
+    { name: 'Notificações', href: '/pt/notificacoes', icon: Bell },
   ]
       
   const handleLogout = () => {
@@ -66,7 +66,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                     ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
-                data-tour={item.href.includes('chat') ? 'chat-button' : item.href.includes('notifications') ? 'notifications' : undefined}
+                data-tour={item.href.includes('chat') ? 'chat-button' : item.href.includes('notificacoes') ? 'notifications' : undefined}
               >
                 <item.icon className="w-4 h-4" />
                 {item.name}

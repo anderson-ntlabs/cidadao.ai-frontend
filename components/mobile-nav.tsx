@@ -83,8 +83,8 @@ export function MobileNavV2() {
   }
   
   // Update notification badge
-  const items = mobileNavItems.map(item => 
-    item.href === '/pt/notifications' 
+  const items = mobileNavItems.map(item =>
+    item.href === '/pt/notificacoes'
       ? { ...item, badge: unreadCount > 0 ? unreadCount : undefined }
       : item
   )
@@ -198,7 +198,7 @@ export function MobileNavDrawer({
     },
     {
       name: 'Configurações',
-      href: '/pt/settings',
+      href: '/pt/configuracoes',
       icon: Home // Replace with Settings icon when available
     }
   ]

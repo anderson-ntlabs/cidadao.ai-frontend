@@ -22,12 +22,12 @@ const mainNavItems = [
   { name: 'Início', href: '/pt/home', icon: Home },
   { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
   { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-  { name: 'Notificações', href: '/pt/notifications', icon: Bell, badge: 3 },
+  { name: 'Notificações', href: '/pt/notificacoes', icon: Bell, badge: 3 },
 ]
 
 const settingsNavItems = [
   { name: 'Perfil', href: '/pt/perfil', icon: User },
-  { name: 'Configurações', href: '/pt/settings', icon: Settings },
+  { name: 'Configurações', href: '/pt/configuracoes', icon: Settings },
   { name: 'Ajuda', href: '/pt/help', icon: HelpCircle },
 ]
 
@@ -196,7 +196,7 @@ export function NavigationV2Demo() {
               items={[
                 { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
                 { name: 'Mensagens', href: '/pt/messages', icon: MessageSquare, badge: 5 },
-                { name: 'Notificações', href: '/pt/notifications', icon: Bell, badge: '99+' },
+                { name: 'Notificações', href: '/pt/notificacoes', icon: Bell, badge: '99+' },
                 { name: 'Alertas', href: '/pt/alerts', icon: Shield, badge: '!' },
               ]} 
               variant="vertical"
