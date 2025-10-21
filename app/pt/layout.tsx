@@ -35,7 +35,7 @@ import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
 import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
 import { SentryInit } from '@/components/sentry-init'
-import { VLibrasWidget } from '@/components/a11y'
+import { VLibrasWidget, AccessibilityPanel } from '@/components/a11y'
 
 export default function PTLayout({
   children,
@@ -70,8 +70,9 @@ export default function PTLayout({
             <CookieConsent locale="pt" />
             <ToastProvider />
 
-            {/* VLibras Widget - Brazilian Sign Language Support */}
+            {/* Accessibility Features */}
             <VLibrasWidget locale="pt" forceOnload />
+            <AccessibilityPanel locale="pt" />
           </div>
         </Providers>
       </body>
