@@ -19,15 +19,15 @@ interface AuthLayoutV2Props {
   contentClassName?: string
 }
 
-export function AuthLayoutV2({ 
-  children, 
-  locale, 
+export function AuthLayoutV2({
+  children,
+  locale,
   breadcrumbs,
   showBreadcrumbs = true,
   containerClassName,
   contentClassName
 }: AuthLayoutV2Props) {
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   
@@ -118,10 +118,11 @@ export function AuthLayoutV2({
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
       
       {/* Header with navigation */}
-      <HeaderV2 
-        locale={locale} 
-        user={user} 
+      <HeaderV2
+        locale={locale}
+        user={user}
         navigationItems={navigationItems}
+        onLogout={logout}
       />
       
       {/* Main content area */}
