@@ -110,9 +110,9 @@ export function ChatHistorySidebar({
                   className={cn(
                     "group p-3 rounded-lg cursor-pointer transition-colors",
                     "hover:bg-gray-100 dark:hover:bg-gray-800",
-                    currentSessionId === session.id && "bg-gray-100 dark:bg-gray-800"
+                    currentSessionId === session.session_id && "bg-gray-100 dark:bg-gray-800"
                   )}
-                  onClick={() => onSelectSession(session.id)}
+                  onClick={() => onSelectSession(session.session_id)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export function ChatHistorySidebar({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleDeleteSession(session.id)
+                        handleDeleteSession(session.session_id)
                       }}
                       className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-opacity"
                     >
