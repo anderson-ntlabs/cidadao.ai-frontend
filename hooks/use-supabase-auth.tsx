@@ -204,9 +204,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Show success message
       toast.success('Logout realizado com sucesso', 'Até logo!')
 
-      // Redirect to landing page
-      router.push('/pt')
-      router.refresh()
+      // Force redirect to landing page with full page reload
+      // Using window.location instead of router to ensure clean state
+      window.location.href = '/pt'
     } catch (error: any) {
       console.error('Logout error:', error)
       toast.error('Erro ao sair', error.message || 'Tente novamente')
