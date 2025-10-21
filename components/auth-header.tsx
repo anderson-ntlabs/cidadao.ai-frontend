@@ -19,19 +19,13 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   
-  const navigation = locale === 'pt' 
-    ? [
-        { name: 'Início', href: '/pt/home', icon: Home },
-        { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
-        { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-        { name: 'Notificações', href: '/pt/notifications', icon: Bell },
-      ]
-    : [
-        { name: 'Home', href: '/en/home', icon: Home },
-        { name: 'AI Chat', href: '/en/chat', icon: MessageSquare },
-        { name: 'Dashboard', href: '/en/dashboard', icon: LayoutDashboard },
-        { name: 'Notifications', href: '/en/notifications', icon: Bell },
-      ]
+  // System is PT-only (English landing page doesn't use authenticated routes)
+  const navigation = [
+    { name: 'Início', href: '/pt/home', icon: Home },
+    { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
+    { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
+    { name: 'Notificações', href: '/pt/notifications', icon: Bell },
+  ]
       
   const handleLogout = () => {
     localStorage.removeItem('user')
