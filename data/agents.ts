@@ -12,7 +12,7 @@ export const agents: Agent[] = [
       pt: 'Inspirado na obra de Tarsila do Amaral, Abaporu é o coordenador central que supervisiona e orquestra todas as operações do sistema.',
       en: 'Inspired by Tarsila do Amaral\'s artwork, Abaporu is the central coordinator who oversees and orchestrates all system operations.'
     },
-    image: 'abaporu.png',
+    image: '/agents/abaporu.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Abaporu'
   },
   {
@@ -26,7 +26,7 @@ export const agents: Agent[] = [
       pt: 'Guerreira e estrategista, detecta padrões suspeitos e anomalias nos dados públicos com precisão militar.',
       en: 'Warrior and strategist, detects suspicious patterns and anomalies in public data with military precision.'
     },
-    image: 'anita.png',
+    image: '/agents/anita.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Anita_Garibaldi'
   },
   {
@@ -40,7 +40,7 @@ export const agents: Agent[] = [
       pt: 'Veloz e preciso, otimiza consultas e melhora a performance do sistema em tempo real.',
       en: 'Fast and precise, optimizes queries and improves system performance in real-time.'
     },
-    image: 'senna.png',
+    image: '/agents/senna.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Ayrton_Senna'
   },
   {
@@ -54,7 +54,7 @@ export const agents: Agent[] = [
       pt: 'Líder quilombola que luta pela transparência, protege o acesso democrático aos dados públicos e combate a opacidade governamental.',
       en: 'Quilombola leader who fights for transparency, protects democratic access to public data and combats governmental opacity.'
     },
-    image: 'zumbi.png',
+    image: '/agents/zumbi.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Zumbi_dos_Palmares'
   },
   {
@@ -68,7 +68,7 @@ export const agents: Agent[] = [
       pt: 'Mártir da independência, identifica e reporta irregularidades em contratos e licitações públicas.',
       en: 'Independence martyr, identifies and reports irregularities in public contracts and bids.'
     },
-    image: 'tiradentes.png',
+    image: '/agents/tiradentes.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Tiradentes'
   },
   {
@@ -82,7 +82,7 @@ export const agents: Agent[] = [
       pt: 'Orixá da cura, limpa e corrige inconsistências nos dados, garantindo sua integridade.',
       en: 'Orisha of healing, cleanses and corrects data inconsistencies, ensuring data integrity.'
     },
-    image: 'obaluaie.png',
+    image: '/agents/obaluaie.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Obaluai%C3%AA'
   },
   {
@@ -96,7 +96,7 @@ export const agents: Agent[] = [
       pt: 'Mestre das curvas, projeta estruturas de dados elegantes e interfaces intuitivas.',
       en: 'Master of curves, designs elegant data structures and intuitive interfaces.'
     },
-    image: 'niemeyer.png',
+    image: '/agents/niemeyer.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Oscar_Niemeyer'
   },
   {
@@ -110,7 +110,7 @@ export const agents: Agent[] = [
       pt: 'Orixá anciã, preserva registros históricos e mantém a memória institucional.',
       en: 'Elder Orisha, preserves historical records and maintains institutional memory.'
     },
-    image: 'nana.png',
+    image: '/agents/nana.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Nan%C3%A3_Buruqu%C3%AA'
   },
   {
@@ -124,7 +124,7 @@ export const agents: Agent[] = [
       pt: 'Rei do cangaço, audita gastos públicos em regiões remotas e esquecidas.',
       en: 'King of cangaço, audits public spending in remote and forgotten regions.'
     },
-    image: 'lampiao.png',
+    image: '/agents/lampiao.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Lampi%C3%A3o_(cangaceiro)'
   },
   {
@@ -138,7 +138,7 @@ export const agents: Agent[] = [
       pt: 'Deusa tupi-guarani, protege recursos naturais e monitora concessões ambientais.',
       en: 'Tupi-Guarani goddess, protects natural resources and monitors environmental concessions.'
     },
-    image: 'ceuci.png',
+    image: '/agents/ceuci.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Mitologia_tupi-guarani'
   },
   {
@@ -152,7 +152,7 @@ export const agents: Agent[] = [
       pt: 'Guerreira de Palmares, desenvolve estratégias para proteger dados sensíveis.',
       en: 'Palmares warrior, develops strategies to protect sensitive data.'
     },
-    image: 'dandara.png',
+    image: '/agents/dandara.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Dandara'
   },
   {
@@ -166,7 +166,7 @@ export const agents: Agent[] = [
       pt: 'Mestre da literatura, transforma dados complexos em narrativas compreensíveis.',
       en: 'Master of literature, transforms complex data into understandable narratives.'
     },
-    image: 'machado.png',
+    image: '/agents/machado.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Machado_de_Assis'
   },
   {
@@ -180,7 +180,7 @@ export const agents: Agent[] = [
       pt: 'Patriarca da independência, estabelece padrões éticos e de integridade.',
       en: 'Independence patriarch, establishes ethical and integrity standards.'
     },
-    image: 'bonifacio.png',
+    image: '/agents/bonifacio.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Jos%C3%A9_Bonif%C3%A1cio_de_Andrada_e_Silva'
   },
   {
@@ -194,7 +194,7 @@ export const agents: Agent[] = [
       pt: 'Proclamador da República, executa ações corretivas com autoridade.',
       en: 'Republic proclaimer, executes corrective actions with authority.'
     },
-    image: 'deodoro.png',
+    image: '/agents/deodoro.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Deodoro_da_Fonseca'
   },
   {
@@ -208,7 +208,7 @@ export const agents: Agent[] = [
       pt: 'Poeta maior, encontra beleza e significado em meio aos números.',
       en: 'Greatest poet, finds beauty and meaning amidst the numbers.'
     },
-    image: 'drummond.png',
+    image: '/agents/drummond.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Carlos_Drummond_de_Andrade'
   },
   {
@@ -222,7 +222,7 @@ export const agents: Agent[] = [
       pt: 'Primeira mulher soldado do Brasil, combate a desinformação com coragem.',
       en: 'Brazil\'s first female soldier, combats misinformation with courage.'
     },
-    image: 'quiteria.png',
+    image: '/agents/quiteria.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Maria_Quit%C3%A9ria'
   },
   {
@@ -236,7 +236,7 @@ export const agents: Agent[] = [
       pt: 'Orixá caçador, rastreia e identifica fraudes com precisão certeira.',
       en: 'Hunter Orisha, tracks and identifies fraud with unerring precision.'
     },
-    image: 'oxossi.png',
+    image: '/agents/oxossi.png',
     wikipedia: 'https://pt.wikipedia.org/wiki/Ox%C3%B3ssi'
   }
 ]
