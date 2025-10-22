@@ -22,8 +22,17 @@ export const lazyExportToCSV = async (data: any[], filename: string = 'export.cs
 }
 
 export const lazyExportToJSON = async (data: any, filename: string = 'export.json') => {
-  const { ExportService } = await import('./export-service')
-  return ExportService.exportToJSON(data, filename)
+  // Simple JSON export without heavy dependencies
+  const json = JSON.stringify(data, null, 2)
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+
+  URL.revokeObjectURL(url)
 }
 
 export const lazyExportTableToPDF = async (
@@ -36,19 +45,36 @@ export const lazyExportTableToPDF = async (
 
 export const lazyExportDashboardToPDF = async (
   charts: Array<{ chartElement: HTMLElement, title: string, description?: string }>,
-  tableData?: { headers: string[], rows: any[][] },
+  metrics: Record<string, any> = {},
   options: any = {}
 ) => {
   const { ExportService } = await import('./export-service')
-  return ExportService.exportDashboardToPDF(charts, tableData, options)
+  return ExportService.exportDashboardToPDF(charts, metrics, options)
 }
 
 export const lazyExportChartToPNG = async (
   chartElement: HTMLElement,
   filename: string = 'chart.png'
 ) => {
-  const { ExportService } = await import('./export-service')
-  return ExportService.exportChartToPNG(chartElement, filename)
+  // Use html2canvas for chart export
+  const html2canvas = (await import('html2canvas')).default
+
+  const canvas = await html2canvas(chartElement, {
+    backgroundColor: '#ffffff',
+    scale: 2, // Higher resolution
+  })
+
+  // Convert canvas to blob and download
+  canvas.toBlob((blob) => {
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.click()
+      URL.revokeObjectURL(url)
+    }
+  }, 'image/png')
 }
 
 /**
@@ -72,10 +98,10 @@ export function useExport() {
 
   const exportDashboardToPDF = async (
     charts: Array<{ chartElement: HTMLElement, title: string, description?: string }>,
-    tableData?: { headers: string[], rows: any[][] },
+    metrics: Record<string, any> = {},
     options: any = {}
   ) => {
-    return lazyExportDashboardToPDF(charts, tableData, options)
+    return lazyExportDashboardToPDF(charts, metrics, options)
   }
 
   const exportChartToPNG = async (
