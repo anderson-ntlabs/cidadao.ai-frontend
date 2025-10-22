@@ -177,7 +177,8 @@ export const useChatStore = create<ChatStore>()(
               if (response) {
                 // Extract message content from response
                 // Backend may return 'message', 'response', or 'content' field
-                const messageContent = response.message || response.response || response.content || '';
+                const responseAny = response as any;
+                const messageContent = response.message || responseAny.response || responseAny.content || '';
 
                 console.log('📝 Message content extracted:', messageContent);
 
