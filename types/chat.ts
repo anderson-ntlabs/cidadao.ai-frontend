@@ -31,12 +31,14 @@ export interface ChatRequest {
 
 export interface ChatResponse {
   session_id: string;
+  message_id?: string;
   agent_id: string;
   agent_name: string;
   message: string;
   confidence: number;
   suggested_actions?: string[];
-  requires_input?: Record<string, string>;
+  follow_up_questions?: string[];
+  requires_input?: Record<string, string> | null;
   metadata: Record<string, any>;
 }
 
@@ -53,6 +55,8 @@ export interface BackendChatMessageResponse {
   confidence?: number;
   suggestions?: string[];
   suggested_actions?: string[]; // Alternative field name
+  follow_up_questions?: string[]; // Follow-up questions from backend
+  requires_input?: Record<string, string> | null; // Required input fields
   metadata?: Record<string, any>;
 }
 
@@ -99,12 +103,14 @@ export interface CursorPaginationResponse {
 export interface AgentInfo {
   id: string;
   name: string;
+  avatar: string;
   role: string;
-  type: 'master' | 'investigator' | 'analyst' | 'reporter' | 'conversational' | string;
   description: string;
-  specialty: string;
+  status: 'active' | 'inactive' | 'maintenance';
+  // Optional fields for extended agent info
+  type?: 'master' | 'investigator' | 'analyst' | 'reporter' | 'conversational' | string;
+  specialty?: string;
   capabilities?: string[];
-  status: 'available' | 'busy' | 'offline';
 }
 
 // WebSocket message types

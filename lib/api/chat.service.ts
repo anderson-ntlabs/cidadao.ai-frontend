@@ -84,12 +84,23 @@ export const chatService = {
 
   // Get available agents
   async getAgents(): Promise<AgentInfo[]> {
-    // Use mock agents while the endpoint is not available
-    return getMockAgents();
-    
-    // Original code (kept for future use)
-    // const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS);
-    // return response.success ? response.data! : [];
+    try {
+      // Use real backend endpoint
+      const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS);
+
+      if (response.success && response.data) {
+        console.log('✅ Loaded agents from backend:', response.data.length);
+        return response.data;
+      }
+
+      // Fallback to mocks only if backend fails
+      console.warn('⚠️ Backend agents endpoint failed, using mocks');
+      return getMockAgents();
+    } catch (error) {
+      console.error('Failed to load agents from backend:', error);
+      // Fallback to mocks on error
+      return getMockAgents();
+    }
   },
 
   // Get chat history
