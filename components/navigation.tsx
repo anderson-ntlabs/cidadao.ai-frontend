@@ -100,10 +100,9 @@ export function NavigationV2({
       e.preventDefault()
       onItemClick?.(item)
 
-      // Use router.push with refresh to ensure navigation works
-      // This fixes an issue where Next.js router wasn't navigating
-      router.push(item.href)
-      router.refresh()
+      // Force hard navigation to ensure it always works
+      // Using window.location for reliability across all scenarios
+      window.location.href = item.href
     }
   }
 
