@@ -290,8 +290,9 @@ export function getMockAgents() {
     {
       id: 'zumbi',
       name: 'Zumbi dos Palmares',
+      avatar: '🔍',
       role: 'Investigador Universal',
-      status: 'available' as const,
+      status: 'active' as const,
       specialty: 'Análise de dados governamentais',
       type: 'investigator' as const,
       description: 'Especialista em detectar anomalias em dados do governo',

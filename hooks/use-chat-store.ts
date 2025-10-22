@@ -101,16 +101,16 @@ export function useChat() {
 export function useAgentStatus() {
   const activeAgents = useChatStore((state) => state.activeAgents);
   const agentTyping = useChatStore((state) => state.agentTyping);
-  
+
   const getActiveAgentNames = () => {
     return activeAgents
-      .filter(agent => agent.status === 'busy')
+      .filter(agent => agent.status === 'active')
       .map(agent => agent.name)
       .join(', ');
   };
-  
-  const hasActiveAgents = activeAgents.some(agent => agent.status === 'busy');
-  
+
+  const hasActiveAgents = activeAgents.some(agent => agent.status === 'active');
+
   return {
     activeAgents,
     agentTyping,
