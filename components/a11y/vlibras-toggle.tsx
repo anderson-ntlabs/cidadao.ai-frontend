@@ -138,7 +138,7 @@ export function VLibrasToggle({
   // Button variant
   return (
     <Button
-      variant={isEnabled ? 'default' : 'outline'}
+      variant={isEnabled ? 'success' : 'secondary'}
       size="sm"
       onClick={handleToggle}
       aria-label={isEnabled ? t.disable : t.enable}

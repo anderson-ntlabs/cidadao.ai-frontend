@@ -174,7 +174,7 @@ export const AgentCard: Story = {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" variant="outline">
+        <Button className="w-full" variant="secondary">
           Start Investigation
         </Button>
       </CardFooter>

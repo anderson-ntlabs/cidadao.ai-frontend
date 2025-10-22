@@ -94,7 +94,7 @@ export class ChatSSE {
       const duration = Date.now() - startTime;
       const err = error as Error;
 
-      trackChatError(this.config.sessionId, err.message, duration);
+      trackChatError(this.config.sessionId, err);
       this.handlers.onError?.(err);
       this.updateConnectionStatus('error');
 
@@ -226,10 +226,8 @@ export class ChatSSE {
       // Track success
       trackChatResponse(
         this.currentResponse.session_id!,
-        this.currentResponse.message!,
-        this.currentResponse.agent_id!,
         duration,
-        'sse'
+        false
       );
 
       this.handlers.onComplete?.(this.currentResponse as ChatResponse);

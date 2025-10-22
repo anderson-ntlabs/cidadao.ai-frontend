@@ -203,7 +203,7 @@ export default function ConfiguracoesPage() {
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     className="border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                     asChild
@@ -213,7 +213,7 @@ export default function ConfiguracoesPage() {
                     </Link>
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     className="border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                     asChild

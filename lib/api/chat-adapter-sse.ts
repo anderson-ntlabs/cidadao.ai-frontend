@@ -69,10 +69,8 @@ export async function sendSSEMessage(
           // Track successful response
           trackChatResponse(
             response.session_id,
-            response.message,
-            response.agent_id,
             duration,
-            'sse'
+            false
           );
 
           // Update metadata with streaming info
@@ -94,7 +92,7 @@ export async function sendSSEMessage(
           const duration = Date.now() - startTime;
 
           // Track error
-          trackChatError(sessionId, error.message, duration);
+          trackChatError(sessionId, error);
 
           reject(error);
         },

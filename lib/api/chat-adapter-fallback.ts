@@ -48,10 +48,8 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
       // Success! Track and return
       trackChatResponse(
         sessionId,
-        data.message,
-        data.agent_id || 'unknown',
         duration,
-        endpoint.name
+        false
       );
 
       console.log(`[Chat Fallback] Success with ${endpoint.name} (${duration}ms)`);
@@ -84,7 +82,7 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
 
   // All endpoints failed - track error and return local fallback
   const duration = Date.now() - startTime;
-  trackChatError(sessionId, lastError?.message || 'All endpoints failed', duration);
+  trackChatError(sessionId, lastError || new Error('All endpoints failed'));
 
   console.error('[Chat Fallback] All endpoints exhausted, returning local response');
 
