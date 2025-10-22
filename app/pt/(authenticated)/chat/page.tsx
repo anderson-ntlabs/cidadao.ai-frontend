@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { agents } from '@/data/agents'
-import { useChat } from '@/hooks/use-chat-store'
+import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { TypingMessage } from '@/components/chat/typing-message'
 import { AgentThinkingIndicator } from '@/components/chat/agent-thinking-indicator'
@@ -19,20 +19,31 @@ export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState('')
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [currentAgentId, setCurrentAgentId] = useState<string>('abaporu')
+  const [isInitialized, setIsInitialized] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const {
-    messages,
-    session,
-    isLoading,
-    error,
-    canSendMessage,
-    sendMessage,
-    clearError,
-    loadSession,
-    createNewSession,
-  } = useChat()
+  // Direct store access - no wrapper hook
+  const messages = useChatStore((state) => state.messages)
+  const session = useChatStore((state) => state.session)
+  const isLoading = useChatStore((state) => state.isLoading)
+  const error = useChatStore((state) => state.error)
+  const sendMessage = useChatStore((state) => state.sendMessage)
+  const clearError = useChatStore((state) => state.clearError)
+  const loadSession = useChatStore((state) => state.loadSession)
+  const createNewSession = useChatStore((state) => state.createNewSession)
+  const initializeChat = useChatStore((state) => state.initializeChat)
+
+  const canSendMessage = !isLoading && error === null
+
+  // Initialize chat ONCE
+  useEffect(() => {
+    if (!isInitialized) {
+      console.log('🚀 Initializing chat...')
+      initializeChat()
+      setIsInitialized(true)
+    }
+  }, [isInitialized, initializeChat])
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -66,7 +77,7 @@ export default function ChatPage() {
       textareaRef.current.style.height = 'auto'
     }
 
-    await sendMessage(message, { streaming: false })
+    await sendMessage(message, false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -97,6 +108,18 @@ export default function ChatPage() {
   // Get last assistant message agent for confidence
   const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant')
   const confidence = lastAssistantMessage?.metadata?.confidence || 0
+
+  // Show loading while initializing
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Inicializando chat...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
