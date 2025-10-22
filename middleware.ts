@@ -36,8 +36,8 @@ export async function middleware(request: NextRequest) {
 
   // Security Headers
 
-  // Simple CSP that allows Spotify embeds
-  const simpleCsp = "default-src 'self' https:; frame-src 'self' https://open.spotify.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https:;";
+  // CSP that allows VLibras, Spotify embeds, and other third-party services
+  const simpleCsp = "default-src 'self' https:; frame-src 'self' https://open.spotify.com https://vlibras.gov.br; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https:; media-src 'self' https: blob:;";
   response.headers.set('Content-Security-Policy', simpleCsp);
 
   // Prevent XSS attacks
@@ -76,9 +76,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - manifest.json (PWA manifest)
+     * - sw.js (service worker)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
