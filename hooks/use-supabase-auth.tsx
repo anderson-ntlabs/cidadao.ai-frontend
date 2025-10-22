@@ -63,37 +63,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication status on mount
   useEffect(() => {
+    console.log('🚀 AUTH HOOK: useEffect triggered')
+
     const checkSession = async () => {
       try {
         console.log('🔐 Checking Supabase session...')
-        const { data: { session } } = await supabase.auth.getSession()
+        console.log('📍 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 
-        console.log('🔐 Session result:', session ? 'Authenticated' : 'Not authenticated')
+        const startTime = Date.now()
+        const { data: { session }, error } = await supabase.auth.getSession()
+        const elapsed = Date.now() - startTime
+
+        console.log(`⏱️ Session check took ${elapsed}ms`)
+
+        if (error) {
+          console.error('❌ Session check error:', error)
+          setUser(null)
+          setIsAuthenticated(false)
+          return
+        }
+
+        console.log('🔐 Session result:', session ? 'Authenticated ✅' : 'Not authenticated ❌')
+        console.log('📊 Session details:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          email: session?.user?.email
+        })
 
         if (session?.user) {
           const user = convertSupabaseUser(session.user)
-          console.log('👤 User:', user.email)
+          console.log('👤 User converted:', {
+            id: user.id,
+            email: user.email,
+            name: user.name
+          })
           setUser(user)
           setIsAuthenticated(true)
+          console.log('✅ User state updated - authenticated')
         } else {
+          console.log('ℹ️ No session found - setting unauthenticated state')
           setUser(null)
           setIsAuthenticated(false)
         }
       } catch (error) {
-        console.error('❌ Session check error:', error)
+        console.error('❌ Unexpected error in checkSession:', error)
+        setUser(null)
+        setIsAuthenticated(false)
       } finally {
-        console.log('✅ Auth loading complete')
+        console.log('✅ Auth loading complete - setting isLoading=false')
         setIsLoading(false)
       }
     }
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.warn('⚠️ Auth check timeout - forcing loading=false')
+      console.warn('⚠️ Auth check timeout (5s) - forcing loading=false')
       setIsLoading(false)
     }, 5000) // 5 seconds timeout
 
-    checkSession().finally(() => clearTimeout(timeout))
+    console.log('🎬 Starting checkSession...')
+    checkSession().finally(() => {
+      console.log('🏁 checkSession completed, clearing timeout')
+      clearTimeout(timeout)
+    })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
