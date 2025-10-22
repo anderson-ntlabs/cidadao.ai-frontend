@@ -2,11 +2,43 @@
 
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
-**Última Atualização**: 2025-10-22 08:31:43 -0300
+**Última Atualização**: 2025-10-22 14:43:27 -0300
 
 ---
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 🚨 Recent Critical Fixes
+
+### OAuth Authentication (2025-10-22) ✅ RESOLVED
+
+**Issue**: 15-day production blocker - OAuth (Google/GitHub) authentication not persisting sessions.
+
+**Root Cause**: OAuth callback route handler (`app/auth/callback/route.ts`) was using `createClient()` helper designed for Server Components, which silently fails to set cookies in Route Handler context.
+
+**Solution**: Use `createServerClient()` directly with explicit cookie handling:
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+// In Route Handlers, ALWAYS use createServerClient with explicit cookies
+const cookieStore = await cookies()
+const supabase = createServerClient(url, key, {
+  cookies: {
+    getAll() { return cookieStore.getAll() },
+    setAll(cookiesToSet) {
+      cookiesToSet.forEach(({ name, value, options }) => {
+        cookieStore.set(name, value, options)
+      })
+    }
+  }
+})
+```
+
+**Documentation**: See `/docs/oauth-authentication-fix.md` for complete technical report.
+
+**Lesson**: Route Handlers ≠ Server Components. Check Supabase docs for your specific context.
 
 ## Documentation Standard
 
