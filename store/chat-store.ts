@@ -61,6 +61,7 @@ interface ChatStore {
   
   // Session actions
   createNewSession: () => Promise<void>;
+  loadSession: (sessionId: string) => Promise<void>;
   updateSession: (updates: Partial<ChatSession>) => void;
 }
 
@@ -83,17 +84,51 @@ export const useChatStore = create<ChatStore>()(
         // Initialize chat
         initializeChat: async (sessionId?: string) => {
           const state = get();
-          
-          // Always create new session when initializing
-          // Don't load old messages
+
+          // If sessionId provided, try to load existing session
+          if (sessionId) {
+            try {
+              const session = await chatSessionService.getSession(sessionId);
+              if (session) {
+                // Convert Supabase messages to Chat messages (add session_id)
+                const messages = (session.messages || []).map(msg => ({
+                  ...msg,
+                  session_id: session.session_id,
+                }));
+
+                set({
+                  session: {
+                    session_id: session.session_id,
+                    created_at: session.created_at,
+                    metadata: session.session_metadata || {},
+                  },
+                  messages,
+                });
+
+                // Load initial data
+                await Promise.all([
+                  get().loadAgents(),
+                  get().loadSuggestions(),
+                ]);
+
+                set({ connectionStatus: 'disconnected' });
+                return;
+              }
+            } catch (error) {
+              console.error('Failed to load session:', error);
+              // Continue to create new session
+            }
+          }
+
+          // Create new session if no sessionId or session not found
           await get().createNewSession();
-          
+
           // Load initial data
           await Promise.all([
             get().loadAgents(),
             get().loadSuggestions(),
           ]);
-          
+
           // Don't connect WebSocket - backend doesn't support it yet
           // get().connectWebSocket();
           set({ connectionStatus: 'disconnected' });
@@ -411,7 +446,7 @@ export const useChatStore = create<ChatStore>()(
             messages: [],
             currentInvestigation: null,
           });
-          
+
           // Create session in Supabase (optional - fails silently if table doesn't exist)
           try {
             await chatSessionService.createSession({
@@ -422,6 +457,40 @@ export const useChatStore = create<ChatStore>()(
           } catch (error) {
             // Silently ignore - chat works without Supabase persistence
             console.error('Failed to create session in Supabase:', error);
+          }
+        },
+
+        loadSession: async (sessionId: string) => {
+          set({ isLoading: true });
+
+          try {
+            const session = await chatSessionService.getSession(sessionId);
+
+            if (session) {
+              // Convert Supabase messages to Chat messages (add session_id)
+              const messages = (session.messages || []).map(msg => ({
+                ...msg,
+                session_id: session.session_id,
+              }));
+
+              set({
+                session: {
+                  session_id: session.session_id,
+                  created_at: session.created_at,
+                  metadata: session.session_metadata || {},
+                },
+                messages,
+                currentInvestigation: null,
+                error: null,
+              });
+            } else {
+              throw new Error('Session not found');
+            }
+          } catch (error) {
+            console.error('Failed to load session:', error);
+            set({ error: 'Failed to load chat session' });
+          } finally {
+            set({ isLoading: false });
           }
         },
 

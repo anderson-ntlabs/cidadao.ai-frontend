@@ -11,7 +11,7 @@ import { useChat, useAgentStatus, useSuggestedActions } from '@/hooks/use-chat-s
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { TypingMessage } from '@/components/chat/typing-message'
 import { toast } from '@/hooks/use-toast'
-import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, History } from 'lucide-react'
+import { Send, Bot, Sparkles, AlertCircle, Brain, Search, FileText, Shield, History, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
@@ -45,6 +45,8 @@ export default function ChatPage() {
     handleQuickAction,
     clearError,
     clearChat,
+    loadSession,
+    createNewSession,
   } = useChat()
 
   const { activeAgents, hasActiveAgents } = useAgentStatus()
@@ -108,10 +110,16 @@ export default function ChatPage() {
 
   // Handle session selection from history
   const handleSelectSession = async (sessionId: string) => {
-    // For now, just close the sidebar
-    // In future, we would load the session messages
     setIsHistoryOpen(false)
-    toast.info('Histórico', 'Carregando conversa anterior...')
+
+    try {
+      toast.info('Histórico', 'Carregando conversa anterior...')
+      await loadSession(sessionId)
+      toast.success('Sucesso', 'Conversa carregada!')
+    } catch (error) {
+      console.error('Failed to load session:', error)
+      toast.error('Erro', 'Falha ao carregar conversa')
+    }
   }
 
   return (
@@ -180,6 +188,17 @@ export default function ChatPage() {
                 <div className="contrast-toggle">
                   <ContrastToggle />
                 </div>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => createNewSession()}
+                  leftIcon={<Plus className="w-4 h-4" />}
+                  className="new-chat-button"
+                  title="Inicie uma nova conversa"
+                >
+                  Nova
+                </Button>
 
                 <StrategicTooltip
                   tooltipKey="chat-history"

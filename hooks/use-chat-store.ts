@@ -82,11 +82,15 @@ export function useChat() {
     setTyping: store.setTyping,
     clearError: store.clearError,
     loadMoreMessages: store.loadMoreMessages,
-    
+
+    // Session actions
+    loadSession: store.loadSession,
+    createNewSession: store.createNewSession,
+
     // WebSocket actions
     connectWebSocket: store.connectWebSocket,
     disconnectWebSocket: store.disconnectWebSocket,
-    
+
     // Investigation actions
     subscribeToInvestigation: store.subscribeToInvestigation,
     unsubscribeFromInvestigation: store.unsubscribeFromInvestigation,
