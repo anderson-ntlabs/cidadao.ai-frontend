@@ -92,7 +92,7 @@ export interface ButtonProps
  * @since 2.0.0
  * @see {@link Button} - Original button component
  */
-const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonV2 = React.memo(React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, leftIcon, rightIcon, children, disabled, type = "button", ...props }, ref) => {
     // Handle asChild prop for composition
     if (asChild && React.isValidElement(children)) {
@@ -148,7 +148,7 @@ const ButtonV2 = React.forwardRef<HTMLButtonElement, ButtonProps>(
       </button>
     )
   }
-)
+))
 
 ButtonV2.displayName = "ButtonV2"
 

@@ -1,6 +1,7 @@
 import { api } from './client';
 import type { ChatRequest, ChatResponse, BackendChatMessageResponse } from '@/types/chat';
 import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Send message to the official backend endpoint
@@ -16,7 +17,7 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
       context: request.context,
     };
 
-    console.log('[Chat Backend] Sending to /api/v1/chat/stable:', payload.message);
+    logger.debug('Chat Backend: Sending to /api/v1/chat/stable', { message: payload.message });
 
     // Track message
     trackChatMessage(payload.session_id, request.message, 'backend');
@@ -30,17 +31,19 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
 
     const data = response.data;
     const duration = Date.now() - startTime;
-    
-    console.log('[Chat Backend] Response received in', duration, 'ms');
-    console.log('[Chat Backend] Full response:', JSON.stringify(data, null, 2));
+
+    logger.performance('Chat Backend: Response received', duration);
+    logger.debug('Chat Backend: Full response', { data });
 
     // Backend returns 'message' field, not 'response'
     const messageText = data.message || data.response || '';
-    console.log('[Chat Backend] Message text:', messageText ? `"${messageText.substring(0, 100)}..."` : '(empty)');
+    logger.debug('Chat Backend: Message text', {
+      preview: messageText ? messageText.substring(0, 100) : '(empty)'
+    });
 
     // Check if message is empty
     if (!messageText || messageText.trim().length === 0) {
-      console.error('[Chat Backend] Received empty message from backend');
+      logger.error('Chat Backend: Received empty message from backend');
       throw new Error('Empty response from backend');
     }
 
@@ -51,12 +54,12 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
                                 data.agent_id === 'system';
 
     if (isMaintenanceMessage) {
-      console.log('[Chat Backend] Backend is in maintenance mode');
+      logger.info('Chat Backend: Backend is in maintenance mode');
       // Let the upstream handler deal with fallback
       throw new Error('Backend in maintenance mode');
     }
-    
-    console.log('[Chat Backend] Agent used:', data.agent_id);
+
+    logger.debug('Chat Backend: Agent used', { agent_id: data.agent_id });
     
     // Track successful response
     trackChatResponse(payload.session_id, duration, false);
@@ -78,11 +81,14 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
     };
     
   } catch (error: any) {
-    console.error('[Chat Backend] Error:', error);
-    
+    logger.error(
+      error instanceof Error ? error : new Error(String(error)),
+      { context: 'Chat Backend', session_id: request.session_id }
+    );
+
     const duration = Date.now() - startTime;
     trackChatError(request.session_id || 'unknown', error);
-    
+
     // Re-throw for proper error handling upstream
     throw error;
   }

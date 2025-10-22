@@ -1,6 +1,7 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
+import DOMPurify from 'dompurify'
 import { cn } from '@/lib/utils'
 
 interface MarkdownRendererProps {
@@ -56,10 +57,31 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     return html
   }
 
+  // Sanitize HTML to prevent XSS attacks
+  const sanitizedHtml = useMemo(() => {
+    const html = renderMarkdown(content)
+
+    // DOMPurify configuration for safe markdown rendering
+    const sanitizeConfig = {
+      ALLOWED_TAGS: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'p', 'br',
+        'strong', 'em', 'b', 'i',
+        'ul', 'ol', 'li',
+        'a', 'code', 'pre',
+        'span'
+      ],
+      ALLOWED_ATTR: ['href', 'class', 'target', 'rel'],
+      ALLOW_DATA_ATTR: false,
+    }
+
+    return DOMPurify.sanitize(html, sanitizeConfig)
+  }, [content])
+
   return (
-    <div 
+    <div
       className={cn("prose prose-gray dark:prose-invert max-w-none", className)}
-      dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+      dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
     />
   )
 }
