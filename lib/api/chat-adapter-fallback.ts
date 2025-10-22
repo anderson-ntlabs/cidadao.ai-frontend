@@ -5,7 +5,7 @@ import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telem
 /**
  * Fallback adapter for chat communication
  * Tries multiple backend endpoints with graceful degradation
- * Priority: optimized → stable → emergency
+ * Priority: stream → message → local fallback
  */
 
 export async function sendFallbackMessage(request: ChatRequest): Promise<ChatResponse> {
@@ -22,10 +22,10 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
   trackChatMessage(sessionId, request.message, 'fallback');
 
   // Try endpoints in order of preference
+  // Only using endpoints that actually exist in the backend
   const endpoints = [
-    { url: '/api/v1/chat/optimized', name: 'optimized', priority: 1 },
-    { url: '/api/v1/chat/stable', name: 'stable', priority: 2 },
-    { url: '/api/v1/chat/emergency', name: 'emergency', priority: 3 },
+    { url: '/api/v1/chat/stream', name: 'stream', priority: 1 },
+    { url: '/api/v1/chat/message', name: 'message', priority: 2 },
   ];
 
   let lastError: Error | null = null;
@@ -76,7 +76,7 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
       lastError = error as Error;
 
       // Continue to next endpoint
-      if (endpoint.priority < 3) {
+      if (endpoint.priority < 2) {
         continue;
       }
     }

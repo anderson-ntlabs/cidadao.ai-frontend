@@ -45,8 +45,8 @@ export class SmartChatService {
       priority: 1,
     },
     {
-      url: '/api/v1/chat/stable',
-      name: 'Backend Stable',
+      url: '/api/v1/chat/message',
+      name: 'Backend Message',
       adapter: sendBackendMessage,
       model: 'sabiazinho-3',
       costLevel: 1,

@@ -62,7 +62,7 @@ describe('sendBackendMessage', () => {
     const result = await sendBackendMessage(request)
 
     // Verify API call
-    expect(api.post).toHaveBeenCalledWith('/api/v1/chat/stable', {
+    expect(api.post).toHaveBeenCalledWith('/api/v1/chat/message', {
       message: request.message,
       session_id: request.session_id,
       context: request.context
@@ -115,7 +115,7 @@ describe('sendBackendMessage', () => {
 
     await sendBackendMessage(request)
 
-    expect(api.post).toHaveBeenCalledWith('/api/v1/chat/stable', {
+    expect(api.post).toHaveBeenCalledWith('/api/v1/chat/message', {
       message: 'Hello',
       session_id: expect.stringMatching(/^session_\d+$/),
       context: undefined

@@ -17,13 +17,13 @@ export async function sendBackendMessage(request: ChatRequest): Promise<ChatResp
       context: request.context,
     };
 
-    logger.debug('Chat Backend: Sending to /api/v1/chat/stable', { message: payload.message });
+    logger.debug('Chat Backend: Sending to /api/v1/chat/message', { message: payload.message });
 
     // Track message
     trackChatMessage(payload.session_id, request.message, 'backend');
 
-    // Call the stable endpoint with Maritaca (Railway backend - CORRECT PATH)
-    const response = await api.post<BackendChatMessageResponse>('/api/v1/chat/stable', payload);
+    // Call the message endpoint (Railway backend - CORRECT PATH)
+    const response = await api.post<BackendChatMessageResponse>('/api/v1/chat/message', payload);
 
     if (!response.success || !response.data) {
       throw new Error(response.error?.message || 'Failed to send message');
