@@ -133,7 +133,7 @@ export function NavigationV2({
             )}
             {/* Active indicator for horizontal variant */}
             {variant === "horizontal" && active && (
-              <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-brand-green-600 dark:bg-brand-green-400" />
+              <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-brand-green-600 dark:bg-brand-green-400 pointer-events-none" />
             )}
           </>
         )

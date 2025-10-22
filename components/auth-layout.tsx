@@ -97,7 +97,7 @@ export function AuthLayoutV2({
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 relative">
       {/* Background image for glassmorphism effect */}
       <div
-        className="fixed inset-0 z-0 pointer-events-none"
+        className="fixed inset-0 -z-10 pointer-events-none"
         style={{
           backgroundImage: `url('/operarios.png')`,
           backgroundSize: 'cover',
@@ -108,8 +108,8 @@ export function AuthLayoutV2({
       />
 
       {/* Gradient overlay */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20 pointer-events-none" />
-      
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20 pointer-events-none" />
+
       {/* Header with navigation */}
       <HeaderV2
         locale={locale}

@@ -144,7 +144,7 @@ export function MobileNavV2() {
                 
                 {/* Active indicator */}
                 {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-brand-green-600 dark:bg-brand-green-400 rounded-full" />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-brand-green-600 dark:bg-brand-green-400 rounded-full pointer-events-none" />
                 )}
               </Link>
             )
