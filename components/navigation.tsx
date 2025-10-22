@@ -96,39 +96,21 @@ export function NavigationV2({
   }
 
   const handleNavigation = (item: NavigationItem, e: React.MouseEvent) => {
-    console.log('🎯 CLICK DETECTED!')
-    console.log('  Item:', item.name)
-    console.log('  Target href:', item.href)
-    console.log('  Current path:', pathname)
-    console.log('  Is external:', item.external)
-
     if (!item.external) {
-      console.log('  ✅ Internal link - preventing default and routing')
       e.preventDefault()
       onItemClick?.(item)
 
-      // Try window.location.href as fallback
-      console.log('  ⚡ Using window.location.href:', item.href)
-      window.location.href = item.href
-      console.log('  ✅ Navigation triggered')
-    } else {
-      console.log('  🔗 External link - using native behavior')
+      // Use router.push with refresh to ensure navigation works
+      // This fixes an issue where Next.js router wasn't navigating
+      router.push(item.href)
+      router.refresh()
     }
   }
 
   // Handle undefined or empty items array
   if (!items || items.length === 0) {
-    console.warn('⚠️ NavigationV2: No items provided!')
     return null
   }
-
-  console.log('📋 NavigationV2 rendering:', {
-    itemCount: items.length,
-    variant,
-    size,
-    currentPath: pathname,
-    items: items.map(i => ({ name: i.name, href: i.href }))
-  })
 
   return (
     <nav
@@ -137,7 +119,6 @@ export function NavigationV2({
       aria-label="Main navigation"
     >
       {items.map((item) => {
-        console.log('🔗 Rendering link:', item.name, '→', item.href)
         const Icon = item.icon
         const active = isActive(item.href)
         
