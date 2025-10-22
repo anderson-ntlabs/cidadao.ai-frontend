@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { User, Mail, Calendar, Shield, Edit2, Camera } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { LoadingScreen } from '@/components/loading-screen'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
@@ -32,8 +31,9 @@ export default function ProfilePage() {
     }
   }, [user])
 
-  if (isLoading || !user) {
-    return <LoadingScreen />
+  // Auth loading is handled by AuthLayout
+  if (!user) {
+    return null
   }
 
   const handleSave = () => {

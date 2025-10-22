@@ -2,7 +2,6 @@
 
 import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect } from 'react'
-import { LoadingScreen } from '@/components/loading-screen'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import {
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
@@ -119,8 +118,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen relative">
-      <LoadingScreen />
-      
       {/* Background */}
       <div 
         className="fixed inset-0 z-0"

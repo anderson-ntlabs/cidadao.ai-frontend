@@ -13,7 +13,6 @@ import {
 import { GlassCard, GlassCardHeader, GlassCardContent, GlassCardFooter } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { LoadingScreen } from '@/components/loading-screen'
 import { useNotificationStore } from '@/store/notification-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { toast } from '@/hooks/use-toast'
@@ -50,11 +49,9 @@ export default function HomePage() {
     }
     setIsLoading(false)
   }, [user, isLoading])
-  
-  if (isLoading) {
-    return <LoadingScreen />
-  }
-  
+
+  // Auth loading is handled by AuthLayout
+
   // Phase 1: Only Home and Chat are active
   const navigationCards = [
     {
@@ -128,8 +125,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative">
-      <LoadingScreen />
-      
       {/* Background Image - Operários */}
       <div 
         className="fixed inset-0 z-0"
