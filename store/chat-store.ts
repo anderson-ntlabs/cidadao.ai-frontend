@@ -171,20 +171,32 @@ export const useChatStore = create<ChatStore>()(
                 message: content,
                 session_id: sessionId,
               });
-              
+
+              console.log('🔍 Backend response received:', response);
+
               if (response) {
+                // Extract message content from response
+                // Backend may return 'message', 'response', or 'content' field
+                const messageContent = response.message || response.response || response.content || '';
+
+                console.log('📝 Message content extracted:', messageContent);
+
+                if (!messageContent || messageContent.trim().length === 0) {
+                  console.error('⚠️ Empty message from backend! Full response:', JSON.stringify(response));
+                }
+
                 // Add assistant response
                 const assistantMessage: ChatMessage = {
                   id: `msg_${Date.now()}_assistant`,
                   session_id: response.session_id,
                   role: 'assistant',
-                  content: response.message || 'Desculpe, não consegui processar sua mensagem.',
+                  content: messageContent || 'Desculpe, não consegui processar sua mensagem.',
                   agent_id: response.agent_id,
                   agent_name: response.agent_name,
                   timestamp: new Date().toISOString(),
                   metadata: response.metadata,
                 };
-                
+
                 get().addMessage(assistantMessage);
                 
                 // Save message to Supabase
