@@ -45,6 +45,18 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
       const data = response.data;
       const duration = Date.now() - startTime;
 
+      console.log(`🔍 [Fallback] Raw backend data:`, data);
+
+      // Extract message - backend may use different field names
+      const dataAny = data as any;
+      const messageContent = data.message || data.response || dataAny.content || dataAny.text || '';
+
+      console.log(`📝 [Fallback] Extracted message: "${messageContent}"`);
+
+      if (!messageContent) {
+        console.error(`⚠️ [Fallback] Empty message from ${endpoint.name}! Data:`, JSON.stringify(data));
+      }
+
       // Success! Track and return
       trackChatResponse(
         sessionId,
@@ -58,7 +70,7 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
         session_id: data.session_id,
         agent_id: data.agent_id || 'system',
         agent_name: data.agent_name || 'Sistema',
-        message: data.message || '',
+        message: messageContent,
         confidence: data.confidence || 0.8,
         suggested_actions: data.suggested_actions || [],
         metadata: {
