@@ -5,11 +5,11 @@ import { agents } from '@/data/agents'
 import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { TypingMessage } from '@/components/chat/typing-message'
-import { AgentThinkingIndicator } from '@/components/chat/agent-thinking-indicator'
 import { toast } from '@/hooks/use-toast'
-import { Send, History, Plus } from 'lucide-react'
+import { Send, History, Plus, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { getAgentColorTheme, buildGradientClasses, getAgentRingClass } from '@/lib/utils/agent-colors'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { VLibrasWidget } from '@/components/a11y'
@@ -123,13 +123,6 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-      {/* Agent Thinking Indicator */}
-      <AgentThinkingIndicator
-        currentAgentId={currentAgentId}
-        isThinking={isLoading}
-        confidence={confidence}
-      />
-
       {/* VLibras Widget for Authenticated Area */}
       <VLibrasWidget locale="pt" forceOnload />
 
@@ -247,15 +240,28 @@ export default function ChatPage() {
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
-                    {/* Assistant Avatar */}
+                    {/* Assistant Avatar with agent-specific ring color */}
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0">
+                      <div className="flex-shrink-0 relative">
+                        {/* Thinking indicator - only show for latest message when loading */}
+                        {isLatest && isLoading && (
+                          <div className="absolute -top-1 -right-1 z-10">
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-ping opacity-75" />
+                              <Brain className="relative w-4 h-4 text-emerald-500 animate-pulse" />
+                            </div>
+                          </div>
+                        )}
                         <OptimizedImage
                           src={messageAgent?.image || '/agents/abaporu.png'}
                           alt={messageAgent?.name || 'Abaporu'}
                           width={36}
                           height={36}
-                          className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+                          className={cn(
+                            "w-9 h-9 rounded-full object-cover",
+                            getAgentRingClass(message.agent_id),
+                            isLatest && isLoading && "animate-pulse"
+                          )}
                         />
                       </div>
                     )}
@@ -265,22 +271,30 @@ export default function ChatPage() {
                       "max-w-[75%]",
                       message.role === 'user' ? 'order-first' : ''
                     )}>
-                      {/* Agent name for assistant messages */}
+                      {/* Agent name for assistant messages with color indicator */}
                       {message.role === 'assistant' && messageAgent && (
-                        <div className="mb-1 px-1">
+                        <div className="mb-1 px-1 flex items-center gap-2">
                           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                             {messageAgent.name}
+                          </span>
+                          {/* Agent role badge */}
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                            • {messageAgent.role.pt}
                           </span>
                         </div>
                       )}
 
-                      {/* Message content */}
+                      {/* Message content with agent-specific colors for assistant */}
                       <div
                         className={cn(
-                          "rounded-2xl px-4 py-3",
+                          "rounded-2xl px-4 py-3 transition-all duration-300",
                           message.role === 'user'
                             ? "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg"
-                            : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+                            : cn(
+                                // Agent-specific gradient for assistant messages
+                                "shadow-md border border-opacity-20",
+                                buildGradientClasses(getAgentColorTheme(message.agent_id))
+                              )
                         )}
                       >
                         {message.role === 'assistant' ? (
