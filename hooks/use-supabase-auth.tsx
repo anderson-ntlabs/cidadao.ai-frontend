@@ -65,23 +65,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log('🔐 Checking Supabase session...')
         const { data: { session } } = await supabase.auth.getSession()
-        
+
+        console.log('🔐 Session result:', session ? 'Authenticated' : 'Not authenticated')
+
         if (session?.user) {
-          setUser(convertSupabaseUser(session.user))
+          const user = convertSupabaseUser(session.user)
+          console.log('👤 User:', user.email)
+          setUser(user)
           setIsAuthenticated(true)
         } else {
           setUser(null)
           setIsAuthenticated(false)
         }
       } catch (error) {
-        console.error('Session check error:', error)
+        console.error('❌ Session check error:', error)
       } finally {
+        console.log('✅ Auth loading complete')
         setIsLoading(false)
       }
     }
 
-    checkSession()
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.warn('⚠️ Auth check timeout - forcing loading=false')
+      setIsLoading(false)
+    }, 5000) // 5 seconds timeout
+
+    checkSession().finally(() => clearTimeout(timeout))
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
