@@ -96,17 +96,37 @@ export function NavigationV2({
   }
 
   const handleNavigation = (item: NavigationItem, e: React.MouseEvent) => {
+    console.log('🎯 CLICK DETECTED!')
+    console.log('  Item:', item.name)
+    console.log('  Target href:', item.href)
+    console.log('  Current path:', pathname)
+    console.log('  Is external:', item.external)
+
     if (!item.external) {
+      console.log('  ✅ Internal link - preventing default and routing')
       e.preventDefault()
       onItemClick?.(item)
+      console.log('  ⚡ Calling router.push with:', item.href)
       router.push(item.href)
+      console.log('  ✅ router.push called successfully')
+    } else {
+      console.log('  🔗 External link - using native behavior')
     }
   }
 
   // Handle undefined or empty items array
   if (!items || items.length === 0) {
+    console.warn('⚠️ NavigationV2: No items provided!')
     return null
   }
+
+  console.log('📋 NavigationV2 rendering:', {
+    itemCount: items.length,
+    variant,
+    size,
+    currentPath: pathname,
+    items: items.map(i => ({ name: i.name, href: i.href }))
+  })
 
   return (
     <nav
@@ -115,6 +135,7 @@ export function NavigationV2({
       aria-label="Main navigation"
     >
       {items.map((item) => {
+        console.log('🔗 Rendering link:', item.name, '→', item.href)
         const Icon = item.icon
         const active = isActive(item.href)
         
