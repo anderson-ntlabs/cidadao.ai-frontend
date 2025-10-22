@@ -1,6 +1,26 @@
 # CLAUDE.md
 
+**Autor**: Anderson Henrique da Silva
+**Localização**: Minas Gerais, Brasil
+**Última Atualização**: 2025-10-22 08:31:43 -0300
+
+---
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Documentation Standard
+
+All new documentation files in `/docs` should include this header:
+
+```markdown
+# [Document Title]
+
+**Autor**: Anderson Henrique da Silva
+**Localização**: Minas Gerais, Brasil
+**Data de Criação**: [YYYY-MM-DD HH:MM:SS -0300]
+```
+
+Use Brazilian timezone (America/Sao_Paulo) for timestamps.
 
 ## Project Overview
 
