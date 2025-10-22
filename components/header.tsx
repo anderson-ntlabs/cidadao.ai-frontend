@@ -98,9 +98,9 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Language Switcher */}
-            <LanguageSwitcherV2 />
-            
+            {/* Language Switcher - Disabled: System is PT-only */}
+            {/* <LanguageSwitcherV2 /> */}
+
             {/* Notifications - Only show if not on landing page */}
             {!isLandingPage && <NotificationDropdown locale={locale} />}
             
