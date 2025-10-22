@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { type LucideIcon, X } from 'lucide-react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { useEffect } from 'react'
@@ -78,8 +78,8 @@ interface NavigationV2Props extends VariantProps<typeof navigationVariants> {
   onItemClick?: (item: NavigationItem) => void
 }
 
-export function NavigationV2({ 
-  items, 
+export function NavigationV2({
+  items,
   variant = "horizontal",
   size = "md",
   className,
@@ -88,10 +88,19 @@ export function NavigationV2({
   onItemClick
 }: NavigationV2Props) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === href
     return pathname.startsWith(href)
+  }
+
+  const handleNavigation = (item: NavigationItem, e: React.MouseEvent) => {
+    if (!item.external) {
+      e.preventDefault()
+      onItemClick?.(item)
+      router.push(item.href)
+    }
   }
 
   // Handle undefined or empty items array
@@ -100,7 +109,7 @@ export function NavigationV2({
   }
 
   return (
-    <nav 
+    <nav
       className={cn(navigationVariants({ variant, size }), className)}
       role="navigation"
       aria-label="Main navigation"
@@ -159,7 +168,7 @@ export function NavigationV2({
             key={item.href}
             href={item.href}
             className={cn(navItemVariants({ variant, active }))}
-            onClick={() => onItemClick?.(item)}
+            onClick={(e) => handleNavigation(item, e)}
             aria-current={active ? "page" : undefined}
           >
             {content}
