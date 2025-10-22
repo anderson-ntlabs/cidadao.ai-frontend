@@ -106,9 +106,11 @@ export function NavigationV2({
       console.log('  ✅ Internal link - preventing default and routing')
       e.preventDefault()
       onItemClick?.(item)
-      console.log('  ⚡ Calling router.push with:', item.href)
-      router.push(item.href)
-      console.log('  ✅ router.push called successfully')
+
+      // Try window.location.href as fallback
+      console.log('  ⚡ Using window.location.href:', item.href)
+      window.location.href = item.href
+      console.log('  ✅ Navigation triggered')
     } else {
       console.log('  🔗 External link - using native behavior')
     }
