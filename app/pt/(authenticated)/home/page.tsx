@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent, GlassCardFooter } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { LoadingScreen } from '@/components/loading-screen'
 import { useNotificationStore } from '@/store/notification-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
@@ -187,11 +188,8 @@ export default function HomePage() {
         {/* Navigation Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {navigationCards.map((card, index) => {
-            const CardWrapper = card.active ? Link : 'div'
-            const cardProps = card.active ? { href: card.href } : {}
-
-            return (
-              <CardWrapper key={index} {...cardProps}>
+            return card.active ? (
+              <Link key={index} href={card.href}>
                 <GlassCard
                   className={cn(
                     "h-full transition-all duration-300",
@@ -249,7 +247,53 @@ export default function HomePage() {
                     </div>
                   </GlassCardContent>
                 </GlassCard>
-              </CardWrapper>
+              </Link>
+            ) : (
+              <div key={index}>
+                <GlassCard
+                  className={cn(
+                    "h-full transition-all duration-300",
+                    "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  <GlassCardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={cn(
+                        "p-3 rounded-xl bg-gradient-to-br shadow-lg",
+                        card.gradient,
+                        "grayscale"
+                      )}>
+                        <card.icon className="w-6 h-6 text-white" />
+                      </div>
+                      {!card.active && (
+                        <Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200">
+                          Em Breve
+                        </Badge>
+                      )}
+                    </div>
+
+                    <h3 className={cn(
+                      "text-xl font-bold mb-2 transition-colors",
+                      "text-gray-500 dark:text-gray-500"
+                    )}>
+                      {card.title}
+                    </h3>
+
+                    <p className={cn(
+                      "mb-4",
+                      "text-gray-500 dark:text-gray-600"
+                    )}>
+                      {card.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500 dark:text-gray-500">
+                        {card.stats}
+                      </span>
+                    </div>
+                  </GlassCardContent>
+                </GlassCard>
+              </div>
             )
           })}
         </div>

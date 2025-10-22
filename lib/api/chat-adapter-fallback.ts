@@ -58,7 +58,7 @@ export async function sendFallbackMessage(request: ChatRequest): Promise<ChatRes
         session_id: data.session_id,
         agent_id: data.agent_id || 'system',
         agent_name: data.agent_name || 'Sistema',
-        message: data.message,
+        message: data.message || '',
         confidence: data.confidence || 0.8,
         suggested_actions: data.suggested_actions || [],
         metadata: {
