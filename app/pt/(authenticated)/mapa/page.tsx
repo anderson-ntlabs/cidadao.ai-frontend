@@ -504,16 +504,36 @@ export default function MapaTransparencia() {
                           </a>
                         </div>
                         <span className={`ml-2 px-2 py-1 rounded text-xs whitespace-nowrap ${getAPIStatusBadgeClass(api.status)}`}>
-                          {getAPIStatusEmoji(api.status)} {api.status === 'operational' ? 'Operacional' : api.status === 'partial' ? 'Parcial' : 'Fora do Ar'}
+                          {getAPIStatusEmoji(api.status)} {
+                            api.status === 'operational' ? 'Operacional' :
+                            api.status === 'partial' ? 'Parcial' :
+                            api.status === 'timeout' ? 'Timeout' :
+                            api.status === 'error' ? 'Erro' :
+                            'Fora do Ar'
+                          }
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-2">
                         <div className="flex items-center gap-1">
                           <span className="text-purple-600 dark:text-purple-400 font-semibold">{api.endpoints}</span>
                           <span>endpoint{api.endpoints !== 1 ? 's' : ''}</span>
                         </div>
+                        {api.response_time_ms && (
+                          <div className="flex items-center gap-1">
+                            <span>⏱️</span>
+                            <span className="text-green-600 dark:text-green-400 font-semibold">{api.response_time_ms}ms</span>
+                          </div>
+                        )}
                       </div>
+
+                      {api.error && (
+                        <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs">
+                          <p className="text-red-700 dark:text-red-400">
+                            <span className="font-semibold">❌ Erro:</span> {api.error}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

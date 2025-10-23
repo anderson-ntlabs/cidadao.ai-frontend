@@ -15,7 +15,9 @@ export interface BackendAPIDetail {
   name: string;
   url: string;
   endpoints: number;
-  status: 'operational' | 'partial' | 'down';
+  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error';
+  response_time_ms?: number | null;
+  error?: string | null;
 }
 
 export interface BackendStateData {
@@ -53,7 +55,9 @@ export interface APIDetail {
   name: string;
   url: string;
   endpoints: number;
-  status: 'operational' | 'partial' | 'down';
+  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error';
+  response_time_ms?: number | null;
+  error?: string | null;
 }
 
 export interface StateData {
@@ -100,7 +104,9 @@ function normalizeBackendData(backendData: BackendTransparencyMapData): Transpar
       name: api.name,
       url: api.url,
       endpoints: api.endpoints,
-      status: api.status
+      status: api.status,
+      response_time_ms: api.response_time_ms,
+      error: api.error
     }));
 
     const totalEndpoints = apis.reduce((sum, api) => sum + api.endpoints, 0);
@@ -254,6 +260,8 @@ export function getAPIStatusBadgeClass(status: APIDetail['status']): string {
   const classes: Record<APIDetail['status'], string> = {
     operational: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    timeout: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     down: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   };
   return classes[status] || classes.down;
@@ -279,6 +287,8 @@ export function getAPIStatusEmoji(status: APIDetail['status']): string {
   const emojis: Record<APIDetail['status'], string> = {
     operational: '🟢',
     partial: '🟡',
+    timeout: '🟠',
+    error: '🔴',
     down: '🔴'
   };
   return emojis[status] || '⚫';
