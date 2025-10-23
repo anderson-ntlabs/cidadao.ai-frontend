@@ -278,8 +278,8 @@ export default function MapaTransparencia() {
         </div>
       </div>
 
-      {/* Status Banner - Shows when using cached data or has errors */}
-      {(isUsingCachedData || apiError) && (
+      {/* Status Banner - Shows only when cache is old or has errors */}
+      {(apiError || (isUsingCachedData && (apiMapData?.cache_info?.age_minutes || 0) > 5)) && (
         <div className={`border-b ${apiError ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-start gap-3">
