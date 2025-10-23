@@ -51,6 +51,7 @@ export default function MapaTransparencia() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [viewBox, setViewBox] = useState('0 0 1000 1000');
   const [showModal, setShowModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Carregar dados do estado selecionado
   const estadoInfo = estadoSelecionado && apiMapData?.states[estadoSelecionado]
@@ -186,6 +187,22 @@ export default function MapaTransparencia() {
     }
   }, [estadoSelecionado]);
 
+  // Handler para refresh manual dos dados
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    setApiError(null);
+
+    try {
+      const data = await fetchTransparencyMap();
+      setApiMapData(data);
+    } catch (error) {
+      console.error('Error refreshing map data:', error);
+      setApiError(error instanceof Error ? error.message : 'Erro ao atualizar dados');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const createPath = (coordinates: number[][][][]) => {
     let path = '';
 
@@ -239,9 +256,6 @@ export default function MapaTransparencia() {
     }
   };
 
-  // Check if we're using cached data or if backend is unavailable
-  const isUsingCachedData = apiMapData?.cache_info?.cached || false;
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -260,51 +274,35 @@ export default function MapaTransparencia() {
               </h1>
             </div>
 
-            <div className="hidden md:flex gap-4 text-sm">
-              <span className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                Estados: {apiMapData?.summary?.states_with_apis || 0}
-              </span>
-              <span className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                APIs: {apiMapData?.summary?.total_apis || 0}
-              </span>
-              <span className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
-                Endpoints: {apiMapData?.summary?.total_endpoints || 0}
-              </span>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex gap-4 text-sm">
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  Estados: {apiMapData?.summary?.states_with_apis || 0}
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                  APIs: {apiMapData?.summary?.total_apis || 0}
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                  Endpoints: {apiMapData?.summary?.total_endpoints || 0}
+                </span>
+              </div>
+
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm transition-colors"
+                title="Atualizar dados"
+              >
+                <span className={isRefreshing ? 'animate-spin' : ''}>🔄</span>
+                <span className="hidden sm:inline">{isRefreshing ? 'Atualizando...' : 'Atualizar'}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Status Banner - Shows only when cache is old or has errors */}
-      {(apiError || (isUsingCachedData && (apiMapData?.cache_info?.age_minutes || 0) > 5)) && (
-        <div className={`border-b ${apiError ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-start gap-3">
-              <div className={`text-lg mt-0.5 ${apiError ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                {apiError ? '⚠️' : 'ℹ️'}
-              </div>
-              <div className="flex-1">
-                <h3 className={`text-sm font-semibold mb-1 ${apiError ? 'text-red-900 dark:text-red-200' : 'text-blue-900 dark:text-blue-200'}`}>
-                  {apiError ? 'Erro ao Carregar Dados' : 'Dados em Cache'}
-                </h3>
-                <p className={`text-sm ${apiError ? 'text-red-800 dark:text-red-300' : 'text-blue-800 dark:text-blue-300'}`}>
-                  {apiError
-                    ? `Não foi possível conectar ao backend: ${apiError}. Exibindo dados em cache.`
-                    : `Exibindo dados em cache. Última atualização: ${apiMapData?.cache_info?.age_minutes || 0} minutos atrás.`}
-                </p>
-                {isLoadingAPI && (
-                  <p className={`text-xs mt-1 ${apiError ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
-                    🔄 Tentando buscar dados atualizados...
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
