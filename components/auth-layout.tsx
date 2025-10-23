@@ -6,7 +6,7 @@ import { HeaderV2 } from './header'
 import { BreadcrumbsV2, BreadcrumbsV2Mobile, type BreadcrumbItemV2 } from './breadcrumbs'
 import { LoadingScreen } from './loading-screen'
 import { cn } from '@/lib/utils'
-import { Home, MessageSquare, LayoutDashboard, FileSearch } from 'lucide-react'
+import { Home, MessageSquare, LayoutDashboard, FileSearch, Map } from 'lucide-react'
 import type { NavigationItem } from './navigation'
 import { useAuth } from '@/hooks/use-supabase-auth'
 
@@ -37,6 +37,7 @@ export function AuthLayoutV2({
     { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
     { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
     { name: 'Investigações', href: '/pt/investigacoes', icon: FileSearch },
+    { name: 'Mapa de Transparência', href: '/pt/mapa', icon: Map },
   ]
   
   // Generate breadcrumbs from pathname if not provided
