@@ -4,83 +4,127 @@
  * Autor: Anderson Henrique da Silva
  * Localização: Minas Gerais, Brasil
  * Data de Criação: 2025-10-23 13:15:00 -0300
+ * Última Atualização: 2025-10-23 14:40:00 -0300
  *
  * Service for fetching transparency API coverage map data
+ * Updated to match Railway backend v2 structure
  */
 
+// Backend API structure (Railway v2)
+export interface BackendAPIDetail {
+  name: string;
+  url: string;
+  endpoints: number;
+  status: 'operational' | 'partial' | 'down';
+}
+
+export interface BackendStateData {
+  name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  apis: BackendAPIDetail[];
+}
+
+export interface BackendSummaryStats {
+  total_states: number;
+  states_with_apis: number;
+  states_working: number;
+  overall_coverage_percentage: number;
+  total_apis: number;
+  total_endpoints: number;
+}
+
+export interface BackendCacheInfo {
+  cached: boolean;
+  last_update: string;
+  age_minutes: number;
+  note?: string;
+}
+
+export interface BackendTransparencyMapData {
+  last_update: string;
+  summary: BackendSummaryStats;
+  states: Record<string, BackendStateData>;
+  cache_info: BackendCacheInfo;
+}
+
+// Frontend-friendly interface (normalized)
 export interface APIDetail {
   id: string;
   name: string;
-  type: 'tce' | 'ckan' | 'state_portal' | 'federal';
-  status: 'healthy' | 'degraded' | 'unhealthy' | 'blocked' | 'unknown';
-  response_time_ms: number | null;
-  last_check: string;
-  error: string | null;
-  error_details: Record<string, any>;
-  coverage: string[];
-  action: string;
-  url?: string; // Optional URL to the API portal
+  url: string;
+  endpoints: number;
+  status: 'operational' | 'partial' | 'down';
 }
 
 export interface StateData {
   name: string;
+  status: 'healthy' | 'degraded' | 'unhealthy' | 'no_api';
   apis: APIDetail[];
-  overall_status: 'healthy' | 'degraded' | 'unhealthy' | 'no_api';
-  coverage_percentage: number;
+  apiCount: number;
+  endpointCount: number;
   color: string;
-  region?: string; // Optional region name
-  population?: number; // Optional population count
-  notes?: string; // Optional additional notes
 }
 
 export interface SummaryStats {
   total_states: number;
   states_with_apis: number;
   states_working: number;
-  states_degraded: number;
-  states_no_api: number;
   overall_coverage_percentage: number;
-  api_breakdown: {
-    healthy: number;
-    degraded: number;
-    unhealthy: number;
-    total: number;
-  };
-}
-
-export interface Issue {
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  title: string;
-  description: string;
-  affected_states: string[];
-  action: string;
-  legal_basis?: string;
-}
-
-export interface CallToAction {
-  title: string;
-  description: string;
-  guide_url: string;
+  total_apis: number;
+  total_endpoints: number;
+  states_no_api: number;
 }
 
 export interface TransparencyMapData {
   last_update: string;
-  cache_info: {
-    cached: boolean;
-    last_update: string;
-    age_minutes: number;
-    age_hours?: number;
-  };
+  cache_info: BackendCacheInfo;
   states: Record<string, StateData>;
   summary: SummaryStats;
-  issues: Issue[];
-  call_to_action: CallToAction;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app';
 const COVERAGE_MAP_ENDPOINT = '/api/v1/transparency/coverage/map';
 const CACHE_KEY = 'transparencyMapCache';
 const CACHE_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+/**
+ * Normalize backend data to frontend format
+ */
+function normalizeBackendData(backendData: BackendTransparencyMapData): TransparencyMapData {
+  const normalizedStates: Record<string, StateData> = {};
+
+  // Convert backend states to frontend format
+  Object.entries(backendData.states).forEach(([stateCode, stateData]) => {
+    const apis: APIDetail[] = stateData.apis.map((api, index) => ({
+      id: `${stateCode}-${index}`,
+      name: api.name,
+      url: api.url,
+      endpoints: api.endpoints,
+      status: api.status
+    }));
+
+    const totalEndpoints = apis.reduce((sum, api) => sum + api.endpoints, 0);
+
+    normalizedStates[stateCode] = {
+      name: stateData.name,
+      status: stateData.status,
+      apis,
+      apiCount: apis.length,
+      endpointCount: totalEndpoints,
+      color: getStateColor(stateData.status)
+    };
+  });
+
+  return {
+    last_update: backendData.last_update,
+    cache_info: backendData.cache_info,
+    states: normalizedStates,
+    summary: {
+      ...backendData.summary,
+      states_no_api: 27 - backendData.summary.states_with_apis
+    }
+  };
+}
 
 /**
  * Fetch transparency coverage map from backend
@@ -102,17 +146,18 @@ export async function fetchTransparencyMap(): Promise<TransparencyMapData> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const data: TransparencyMapData = await response.json();
+    const backendData: BackendTransparencyMapData = await response.json();
+    const normalizedData = normalizeBackendData(backendData);
 
     // Cache data in localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem(CACHE_KEY, JSON.stringify({
-        data,
+        data: normalizedData,
         timestamp: Date.now()
       }));
     }
 
-    return data;
+    return normalizedData;
   } catch (error) {
     console.error('Error fetching transparency map:', error);
 
@@ -190,52 +235,64 @@ export function clearCachedMapData(): void {
 }
 
 /**
- * Get color for state based on status (fallback if backend doesn't provide)
+ * Get color for state based on status
  */
-export function getStateColor(status: StateData['overall_status']): string {
-  const colors: Record<StateData['overall_status'], string> = {
+export function getStateColor(status: StateData['status']): string {
+  const colors: Record<StateData['status'], string> = {
     healthy: '#22c55e',    // green-500
-    degraded: '#f59e0b',   // yellow-500
+    degraded: '#f59e0b',   // amber-500
     unhealthy: '#ef4444',  // red-500
-    no_api: '#6b7280'      // gray-500
+    no_api: '#9ca3af'      // gray-400
   };
   return colors[status] || colors.no_api;
 }
 
 /**
- * Get status badge color class
+ * Get status badge color class for API status
  */
-export function getStatusBadgeClass(status: APIDetail['status']): string {
+export function getAPIStatusBadgeClass(status: APIDetail['status']): string {
   const classes: Record<APIDetail['status'], string> = {
-    healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    degraded: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    unhealthy: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    blocked: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    unknown: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+    operational: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    down: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
   };
-  return classes[status] || classes.unknown;
+  return classes[status] || classes.down;
 }
 
 /**
- * Format response time for display
+ * Get status badge color class for state overall status
  */
-export function formatResponseTime(ms: number | null): string {
-  if (ms === null) return 'N/A';
-  if (ms < 1000) return `${ms.toFixed(0)}ms`;
-  if (ms < 10000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${(ms / 1000).toFixed(0)}s`;
+export function getStateStatusBadgeClass(status: StateData['status']): string {
+  const classes: Record<StateData['status'], string> = {
+    healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    degraded: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    unhealthy: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    no_api: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+  };
+  return classes[status] || classes.no_api;
 }
 
 /**
- * Get status emoji
+ * Get status emoji for API status
  */
-export function getStatusEmoji(status: APIDetail['status']): string {
+export function getAPIStatusEmoji(status: APIDetail['status']): string {
   const emojis: Record<APIDetail['status'], string> = {
+    operational: '🟢',
+    partial: '🟡',
+    down: '🔴'
+  };
+  return emojis[status] || '⚫';
+}
+
+/**
+ * Get status emoji for state overall status
+ */
+export function getStateStatusEmoji(status: StateData['status']): string {
+  const emojis: Record<StateData['status'], string> = {
     healthy: '🟢',
     degraded: '🟡',
     unhealthy: '🔴',
-    blocked: '🟠',
-    unknown: '⚫'
+    no_api: '⚫'
   };
   return emojis[status] || '⚫';
 }

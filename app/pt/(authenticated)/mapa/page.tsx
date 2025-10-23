@@ -17,10 +17,12 @@ import {
   fetchTransparencyMap,
   getCachedMapData,
   getStateColor,
-  getStatusBadgeClass,
-  formatResponseTime,
+  getAPIStatusBadgeClass,
+  getStateStatusBadgeClass,
+  getAPIStatusEmoji,
+  getStateStatusEmoji,
   type TransparencyMapData,
-  type StateData as APIStateData,
+  type StateData,
   type APIDetail
 } from '@/lib/services/transparency-map.service';
 import { estadoNomes } from '@/data/transparency-apis';
@@ -62,26 +64,27 @@ export default function MapaTransparencia() {
       return {
         name: estadoNomes[sigla] || sigla,
         totalAPIs: 0,
-        healthyAPIs: 0,
-        errorAPIs: 0,
+        operationalAPIs: 0,
+        partialAPIs: 0,
+        downAPIs: 0,
+        totalEndpoints: 0,
         hasData: false as const
       };
     }
 
-    const healthyAPIs = stateData.apis.filter(api => api.status === 'healthy').length;
-    const errorAPIs = stateData.apis.filter(api =>
-      api.status === 'degraded' || api.status === 'unhealthy' || api.status === 'blocked'
-    ).length;
+    const operationalAPIs = stateData.apis.filter(api => api.status === 'operational').length;
+    const partialAPIs = stateData.apis.filter(api => api.status === 'partial').length;
+    const downAPIs = stateData.apis.filter(api => api.status === 'down').length;
 
     return {
       name: stateData.name,
-      totalAPIs: stateData.apis.length,
-      healthyAPIs,
-      errorAPIs,
+      totalAPIs: stateData.apiCount,
+      operationalAPIs,
+      partialAPIs,
+      downAPIs,
+      totalEndpoints: stateData.endpointCount,
       hasData: true as const,
-      status: stateData.overall_status,
-      coveragePercentage: stateData.coverage_percentage,
-      region: stateData.region
+      status: stateData.status
     };
   };
 
@@ -222,23 +225,22 @@ export default function MapaTransparencia() {
     return '#e5e7eb'; // gray-200 (no API)
   };
 
-  const getStatusBadge = (status: APIStateData['overall_status'] | APIDetail['status']) => {
+  const getStatusBadge = (status: StateData['status']) => {
     switch (status) {
       case 'healthy':
         return <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">🟢 Online</span>;
       case 'degraded':
         return <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">🟡 Degradado</span>;
-      case 'blocked':
-        return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">🔴 Bloqueado</span>;
       case 'unhealthy':
         return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">🔴 Erro</span>;
-      case 'unknown':
-        return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">❓ Desconhecido</span>;
       case 'no_api':
       default:
         return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">⚫ Sem API</span>;
     }
   };
+
+  // Check if we're using cached data or if backend is unavailable
+  const isUsingCachedData = apiMapData?.cache_info?.cached || false;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -261,16 +263,48 @@ export default function MapaTransparencia() {
             <div className="hidden md:flex gap-4 text-sm">
               <span className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                Online: {apiMapData?.summary?.api_breakdown?.healthy || 0}
+                Estados: {apiMapData?.summary?.states_with_apis || 0}
               </span>
               <span className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                Total: {apiMapData?.summary?.api_breakdown?.total || 0} APIs
+                <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                APIs: {apiMapData?.summary?.total_apis || 0}
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                Endpoints: {apiMapData?.summary?.total_endpoints || 0}
               </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Status Banner - Shows when using cached data or has errors */}
+      {(isUsingCachedData || apiError) && (
+        <div className={`border-b ${apiError ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-start gap-3">
+              <div className={`text-lg mt-0.5 ${apiError ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                {apiError ? '⚠️' : 'ℹ️'}
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-sm font-semibold mb-1 ${apiError ? 'text-red-900 dark:text-red-200' : 'text-blue-900 dark:text-blue-200'}`}>
+                  {apiError ? 'Erro ao Carregar Dados' : 'Dados em Cache'}
+                </h3>
+                <p className={`text-sm ${apiError ? 'text-red-800 dark:text-red-300' : 'text-blue-800 dark:text-blue-300'}`}>
+                  {apiError
+                    ? `Não foi possível conectar ao backend: ${apiError}. Exibindo dados em cache.`
+                    : `Exibindo dados em cache. Última atualização: ${apiMapData?.cache_info?.age_minutes || 0} minutos atrás.`}
+                </p>
+                {isLoadingAPI && (
+                  <p className={`text-xs mt-1 ${apiError ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                    🔄 Tentando buscar dados atualizados...
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -291,19 +325,9 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {apiMapData?.summary?.states_working || 0}
+              {apiMapData?.summary?.total_apis || 0}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Estados Funcionando</div>
-          </motion.div>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
-          >
-            <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
-              {apiMapData?.summary?.states_degraded || 0}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Com Problemas</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">APIs Mapeadas</div>
           </motion.div>
 
           <motion.div
@@ -311,6 +335,16 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+              {apiMapData?.summary?.total_endpoints || 0}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Endpoints Disponíveis</div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
+          >
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
               {apiMapData?.summary?.overall_coverage_percentage?.toFixed(0) || 0}%
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Cobertura Nacional</div>
@@ -425,100 +459,61 @@ export default function MapaTransparencia() {
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
               >
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="font-bold text-gray-900 dark:text-white text-lg">
-                    {estadoInfo.name}
-                  </h3>
-                  {getStatusBadge(estadoInfo.overall_status)}
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                      {estadoInfo.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{estadoSelecionado}</p>
+                  </div>
+                  {getStatusBadge(estadoInfo.status)}
                 </div>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Região:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.region}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">APIs Disponíveis:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.apis.length}</span>
+                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.apiCount}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Cobertura:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.coverage_percentage}%</span>
+                    <span className="text-gray-600 dark:text-gray-400">Endpoints:</span>
+                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.endpointCount}</span>
                   </div>
-                  {estadoInfo.population && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">População:</span>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {estadoInfo.population.toLocaleString('pt-BR')}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Status Geral:</span>
+                    <span className="text-gray-900 dark:text-white font-medium capitalize">{estadoInfo.status}</span>
+                  </div>
                 </div>
-
-                {estadoInfo.notes && (
-                  <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                    <p className="text-sm text-amber-700 dark:text-amber-400">
-                      ℹ️ {estadoInfo.notes}
-                    </p>
-                  </div>
-                )}
 
                 {/* Lista de APIs */}
                 <div className="mt-6 space-y-3">
-                  <h4 className="font-semibold text-gray-900 dark:text-white">APIs Disponíveis:</h4>
-                  {estadoInfo.apis.map((api, index) => (
+                  <h4 className="font-semibold text-gray-900 dark:text-white">APIs e Portais:</h4>
+                  {estadoInfo.apis.map((api) => (
                     <div
                       key={api.id}
                       className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h5 className="font-medium text-gray-900 dark:text-white">{api.name}</h5>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{api.type}</span>
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-1">{api.name}</h5>
+                          <a
+                            href={api.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline break-all"
+                          >
+                            🔗 {api.url}
+                          </a>
                         </div>
-                        {getStatusBadge(api.status)}
+                        <span className={`ml-2 px-2 py-1 rounded text-xs whitespace-nowrap ${getAPIStatusBadgeClass(api.status)}`}>
+                          {getAPIStatusEmoji(api.status)} {api.status === 'operational' ? 'Operacional' : api.status === 'partial' ? 'Parcial' : 'Fora do Ar'}
+                        </span>
                       </div>
 
-                      {api.url && (
-                        <a
-                          href={api.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 dark:text-blue-400 hover:underline block mb-2"
-                        >
-                          🔗 {api.url}
-                        </a>
-                      )}
-
-                      {api.coverage.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {api.coverage.map((item, idx) => (
-                            <span
-                              key={idx}
-                              className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded"
-                            >
-                              {item}
-                            </span>
-                          ))}
+                      <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <span className="text-purple-600 dark:text-purple-400 font-semibold">{api.endpoints}</span>
+                          <span>endpoint{api.endpoints !== 1 ? 's' : ''}</span>
                         </div>
-                      )}
-
-                      {api.error && (
-                        <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">
-                          <p className="text-xs text-red-700 dark:text-red-400">❌ {api.error}</p>
-                        </div>
-                      )}
-
-                      {api.action && (
-                        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                          <p className="text-xs text-blue-700 dark:text-blue-400">ℹ️ {api.action}</p>
-                        </div>
-                      )}
-
-                      {api.response_time_ms && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          ⏱️ Tempo de resposta: {api.response_time_ms}ms
-                        </p>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -563,7 +558,7 @@ export default function MapaTransparencia() {
                       </h4>
                       {stats.hasData && (
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {stats.region}
+                          {hoveredState}
                         </span>
                       )}
                     </div>
@@ -586,20 +581,39 @@ export default function MapaTransparencia() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
                           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                          Funcionando:
+                          Operacionais:
                         </span>
                         <span className="font-bold text-green-600 dark:text-green-400">
-                          {stats.healthyAPIs}
+                          {stats.operationalAPIs}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                          <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                          Parciais:
+                        </span>
+                        <span className="font-bold text-amber-600 dark:text-amber-400">
+                          {stats.partialAPIs}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
                           <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                          Com Erros:
+                          Fora do Ar:
                         </span>
                         <span className="font-bold text-red-600 dark:text-red-400">
-                          {stats.errorAPIs}
+                          {stats.downAPIs}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                          📊 Endpoints:
+                        </span>
+                        <span className="font-bold text-purple-600 dark:text-purple-400">
+                          {stats.totalEndpoints}
                         </span>
                       </div>
 
