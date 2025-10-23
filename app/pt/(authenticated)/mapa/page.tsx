@@ -37,6 +37,7 @@ interface StateData {
 export default function MapaTransparencia() {
   const [estadoSelecionado, setEstadoSelecionado] = useState<string>('');
   const [hoveredState, setHoveredState] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
   const [statesData, setStatesData] = useState<StateData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewBox, setViewBox] = useState('0 0 1000 1000');
@@ -46,6 +47,46 @@ export default function MapaTransparencia() {
 
   // Carregar dados do estado selecionado
   const estadoInfo = estadoSelecionado ? transparencyAPIs[estadoSelecionado] : null;
+
+  // Calcular estatísticas do estado para o tooltip
+  const getStateStats = (sigla: string) => {
+    const stateData = transparencyAPIs[sigla];
+    if (!stateData) {
+      return {
+        name: estadoNomes[sigla] || sigla,
+        totalAPIs: 0,
+        healthyAPIs: 0,
+        errorAPIs: 0,
+        hasData: false as const
+      };
+    }
+
+    const healthyAPIs = stateData.apis.filter(api => api.status === 'healthy').length;
+    const errorAPIs = stateData.apis.filter(api =>
+      api.status === 'degraded' || api.status === 'blocked' || api.status === 'server_error'
+    ).length;
+
+    return {
+      name: stateData.name,
+      totalAPIs: stateData.apis.length,
+      healthyAPIs,
+      errorAPIs,
+      hasData: true as const,
+      region: stateData.region,
+      status: stateData.overall_status
+    };
+  };
+
+  // Handler para mouse move no mapa
+  const handleMouseMove = (e: React.MouseEvent<SVGPathElement>, sigla: string) => {
+    setHoveredState(sigla);
+    setTooltipPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredState(null);
+    setTooltipPosition(null);
+  };
 
   // Projeção Mercator simplificada
   const projectCoordinate = useCallback((lon: number, lat: number): [number, number] => {
@@ -291,17 +332,11 @@ export default function MapaTransparencia() {
                             fill={getStateColor(sigla)}
                             stroke="#fff"
                             strokeWidth="2"
-                            className={`transition-all duration-200 ${hasAPI ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-                            onMouseEnter={() => setHoveredState(sigla)}
-                            onMouseLeave={() => setHoveredState(null)}
+                            className={`transition-all duration-200 ${hasAPI ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed'}`}
+                            onMouseMove={(e) => handleMouseMove(e, sigla)}
+                            onMouseLeave={handleMouseLeave}
                             onClick={() => hasAPI && setEstadoSelecionado(sigla)}
                           />
-                          {hoveredState === sigla && (
-                            <title>
-                              {nome}
-                              {hasAPI ? ` - ${hasAPI.apis.length} API(s) - Clique para ver detalhes` : ' - Sem APIs públicas'}
-                            </title>
-                          )}
                         </g>
                       );
                     })}
@@ -481,6 +516,95 @@ export default function MapaTransparencia() {
           </div>
         </div>
       </div>
+
+      {/* Tooltip Flutuante */}
+      {hoveredState && tooltipPosition && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: tooltipPosition.x + 15,
+            top: tooltipPosition.y - 10,
+          }}
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
+            {(() => {
+              const stats = getStateStats(hoveredState);
+              return (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">
+                        {stats.name}
+                      </h4>
+                      {stats.hasData && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {stats.region}
+                        </span>
+                      )}
+                    </div>
+                    {stats.hasData && getStatusBadge(stats.status)}
+                  </div>
+
+                  {/* Estatísticas */}
+                  {stats.hasData ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                          Total de APIs:
+                        </span>
+                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                          {stats.totalAPIs}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          Funcionando:
+                        </span>
+                        <span className="font-bold text-green-600 dark:text-green-400">
+                          {stats.healthyAPIs}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          Com Erros:
+                        </span>
+                        <span className="font-bold text-red-600 dark:text-red-400">
+                          {stats.errorAPIs}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          💡 Clique para ver detalhes
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-2">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        ⚠️ Sem APIs públicas mapeadas
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        Aguardando integração
+                      </p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
