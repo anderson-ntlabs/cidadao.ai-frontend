@@ -14,14 +14,18 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  transparencyAPIs,
-  estadoNomes,
-  calculateMapSummary,
-  type StateAPICoverage,
-  type APIStatus
-} from '@/data/transparency-apis';
+  fetchTransparencyMap,
+  getCachedMapData,
+  getStateColor,
+  getStatusBadgeClass,
+  formatResponseTime,
+  type TransparencyMapData,
+  type StateData as APIStateData,
+  type APIDetail
+} from '@/lib/services/transparency-map.service';
+import { estadoNomes } from '@/data/transparency-apis';
 
-interface StateData {
+interface GeoJSONStateData {
   type: string;
   geometry: {
     type: string;
@@ -38,19 +42,22 @@ export default function MapaTransparencia() {
   const [estadoSelecionado, setEstadoSelecionado] = useState<string>('');
   const [hoveredState, setHoveredState] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
-  const [statesData, setStatesData] = useState<StateData[]>([]);
+  const [geoStatesData, setGeoStatesData] = useState<GeoJSONStateData[]>([]);
+  const [apiMapData, setApiMapData] = useState<TransparencyMapData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAPI, setIsLoadingAPI] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [viewBox, setViewBox] = useState('0 0 1000 1000');
   const [showModal, setShowModal] = useState(false);
 
-  const summary = calculateMapSummary();
-
   // Carregar dados do estado selecionado
-  const estadoInfo = estadoSelecionado ? transparencyAPIs[estadoSelecionado] : null;
+  const estadoInfo = estadoSelecionado && apiMapData?.states[estadoSelecionado]
+    ? apiMapData.states[estadoSelecionado]
+    : null;
 
   // Calcular estatísticas do estado para o tooltip
   const getStateStats = (sigla: string) => {
-    const stateData = transparencyAPIs[sigla];
+    const stateData = apiMapData?.states[sigla];
     if (!stateData) {
       return {
         name: estadoNomes[sigla] || sigla,
@@ -63,7 +70,7 @@ export default function MapaTransparencia() {
 
     const healthyAPIs = stateData.apis.filter(api => api.status === 'healthy').length;
     const errorAPIs = stateData.apis.filter(api =>
-      api.status === 'degraded' || api.status === 'blocked' || api.status === 'server_error'
+      api.status === 'degraded' || api.status === 'unhealthy' || api.status === 'blocked'
     ).length;
 
     return {
@@ -72,8 +79,9 @@ export default function MapaTransparencia() {
       healthyAPIs,
       errorAPIs,
       hasData: true as const,
-      region: stateData.region,
-      status: stateData.overall_status
+      status: stateData.overall_status,
+      coveragePercentage: stateData.coverage_percentage,
+      region: stateData.region
     };
   };
 
@@ -100,7 +108,7 @@ export default function MapaTransparencia() {
     return [x, y];
   }, []);
 
-  const calculateBounds = useCallback((features: StateData[]) => {
+  const calculateBounds = useCallback((features: GeoJSONStateData[]) => {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
     features.forEach(feature => {
@@ -122,12 +130,12 @@ export default function MapaTransparencia() {
     return { minX, minY, maxX, maxY };
   }, [projectCoordinate]);
 
+  // Carregar GeoJSON do mapa do Brasil
   useEffect(() => {
-    // Carregar dados do mapa do Brasil
     fetch('/brazil-states.json')
       .then(res => res.json())
       .then(data => {
-        setStatesData(data.features);
+        setGeoStatesData(data.features);
         setIsLoading(false);
 
         // Calcular viewBox baseado nos dados
@@ -142,6 +150,32 @@ export default function MapaTransparencia() {
         setIsLoading(false);
       });
   }, [calculateBounds]);
+
+  // Carregar dados da API de transparência
+  useEffect(() => {
+    setIsLoadingAPI(true);
+    setApiError(null);
+
+    // Try to get cached data first for instant display
+    const cachedData = getCachedMapData();
+    if (cachedData) {
+      setApiMapData(cachedData);
+    }
+
+    // Then fetch fresh data
+    fetchTransparencyMap()
+      .then(data => {
+        setApiMapData(data);
+        setIsLoadingAPI(false);
+        setApiError(null);
+      })
+      .catch(error => {
+        console.error('Error loading API data:', error);
+        setApiError(error.message);
+        setIsLoadingAPI(false);
+        // Keep cached data if fetch fails
+      });
+  }, []);
 
   useEffect(() => {
     if (estadoSelecionado) {
@@ -170,41 +204,25 @@ export default function MapaTransparencia() {
     return path;
   };
 
-  const getStateColor = (sigla: string): string => {
-    const stateData = transparencyAPIs[sigla];
-
-    if (hoveredState === sigla) {
-      if (!stateData) return '#9ca3af'; // gray-400
-      switch (stateData.overall_status) {
-        case 'healthy': return '#10b981'; // green-500 (hover)
-        case 'degraded': return '#f59e0b'; // amber-500 (hover)
-        case 'blocked': return '#ef4444'; // red-500 (hover)
-        default: return '#9ca3af';
+  const getStateColorLocal = (sigla: string): string => {
+    // Use API data color if available
+    const apiState = apiMapData?.states[sigla];
+    if (apiState?.color) {
+      // Apply opacity variations for hover/selected states
+      if (hoveredState === sigla) {
+        return apiState.color; // Slightly brighter on hover
       }
-    }
-
-    if (estadoSelecionado === sigla) {
-      if (!stateData) return '#6b7280'; // gray-500
-      switch (stateData.overall_status) {
-        case 'healthy': return '#059669'; // green-600 (selected)
-        case 'degraded': return '#d97706'; // amber-600 (selected)
-        case 'blocked': return '#dc2626'; // red-600 (selected)
-        default: return '#6b7280';
+      if (estadoSelecionado === sigla) {
+        return apiState.color; // Keep same color when selected
       }
+      return apiState.color;
     }
 
-    if (!stateData) return '#e5e7eb'; // gray-200 (no API)
-
-    switch (stateData.overall_status) {
-      case 'healthy': return '#34d399'; // green-400
-      case 'degraded': return '#fbbf24'; // amber-400
-      case 'blocked': return '#f87171'; // red-400
-      case 'server_error': return '#fb923c'; // orange-400
-      default: return '#e5e7eb';
-    }
+    // Fallback to gray if no data
+    return '#e5e7eb'; // gray-200 (no API)
   };
 
-  const getStatusBadge = (status: APIStatus) => {
+  const getStatusBadge = (status: APIStateData['overall_status'] | APIDetail['status']) => {
     switch (status) {
       case 'healthy':
         return <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">🟢 Online</span>;
@@ -212,8 +230,11 @@ export default function MapaTransparencia() {
         return <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">🟡 Degradado</span>;
       case 'blocked':
         return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">🔴 Bloqueado</span>;
-      case 'server_error':
-        return <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded text-xs">⚠️ Erro</span>;
+      case 'unhealthy':
+        return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">🔴 Erro</span>;
+      case 'unknown':
+        return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">❓ Desconhecido</span>;
+      case 'no_api':
       default:
         return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">⚫ Sem API</span>;
     }
@@ -240,11 +261,11 @@ export default function MapaTransparencia() {
             <div className="hidden md:flex gap-4 text-sm">
               <span className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                Online: {summary.healthy_apis}
+                Online: {apiMapData?.summary?.api_breakdown?.healthy || 0}
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                Total: {summary.total_apis} APIs
+                Total: {apiMapData?.summary?.api_breakdown?.total || 0} APIs
               </span>
             </div>
           </div>
@@ -260,7 +281,7 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-              {summary.states_with_apis}/27
+              {apiMapData?.summary?.states_with_apis || 0}/27
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Estados com APIs</div>
           </motion.div>
@@ -270,9 +291,9 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {summary.states_working}
+              {apiMapData?.summary?.states_working || 0}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">APIs Funcionando</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Estados Funcionando</div>
           </motion.div>
 
           <motion.div
@@ -280,7 +301,7 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
-              {summary.states_degraded}
+              {apiMapData?.summary?.states_degraded || 0}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Com Problemas</div>
           </motion.div>
@@ -290,7 +311,7 @@ export default function MapaTransparencia() {
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-              {summary.overall_coverage_percentage.toFixed(0)}%
+              {apiMapData?.summary?.overall_coverage_percentage?.toFixed(0) || 0}%
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Cobertura Nacional</div>
           </motion.div>
@@ -320,16 +341,15 @@ export default function MapaTransparencia() {
                     className="w-full h-[500px]"
                     style={{ backgroundColor: '#f9fafb' }}
                   >
-                    {statesData.map((state, index) => {
+                    {geoStatesData.map((state, index) => {
                       const sigla = state.properties?.sigla || '';
-                      const nome = estadoNomes[sigla] || state.properties?.nome || '';
-                      const hasAPI = transparencyAPIs[sigla];
+                      const hasAPI = apiMapData?.states[sigla];
 
                       return (
                         <g key={index}>
                           <path
                             d={createPath(state.geometry.coordinates)}
-                            fill={getStateColor(sigla)}
+                            fill={getStateColorLocal(sigla)}
                             stroke="#fff"
                             strokeWidth="2"
                             className={`transition-all duration-200 ${hasAPI ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed'}`}
@@ -391,7 +411,7 @@ export default function MapaTransparencia() {
                 <option value="">Selecione um estado</option>
                 {Object.entries(estadoNomes).map(([sigla, nome]) => (
                   <option key={sigla} value={sigla}>
-                    {nome} {transparencyAPIs[sigla] && `(${transparencyAPIs[sigla].apis.length} APIs)`}
+                    {nome} {apiMapData?.states[sigla] && `(${apiMapData.states[sigla].apis.length} APIs)`}
                   </option>
                 ))}
               </select>
@@ -494,9 +514,9 @@ export default function MapaTransparencia() {
                         </div>
                       )}
 
-                      {api.responseTimeMs && (
+                      {api.response_time_ms && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          ⏱️ Tempo de resposta: {api.responseTimeMs}ms
+                          ⏱️ Tempo de resposta: {api.response_time_ms}ms
                         </p>
                       )}
                     </div>
