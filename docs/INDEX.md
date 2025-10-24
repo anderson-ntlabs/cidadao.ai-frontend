@@ -1,7 +1,7 @@
 # Documentation Index - Cidadão.AI Frontend
 
-**Last Updated**: 2025-01-25 18:30:00 -0300
-**Total Files**: 95 documents
+**Last Updated**: 2025-01-25 19:00:00 -0300
+**Total Files**: 96 documents
 **Maintainer**: Frontend Team
 
 ---
@@ -34,7 +34,7 @@
 | [System Architecture](./guides/ARCHITECTURE.md) | Complete system design, tech stack, patterns | 2025-01-25 |
 | [Routing Conventions](./ROUTES.md) | App Router structure, PT/EN routes | 2025-01-21 |
 | [State Management](./technical/state-management-architecture.md) | Zustand stores, actions, persistence | 2025-01-25 |
-| [Data Fetching](#) 🚧 | RSC, SSR, CSR strategies | Coming soon |
+| [Data Fetching Strategies](./technical/data-fetching-strategies.md) | Complete guide: RSC, CSR, caching, streaming, loading states | ✅ 2025-01-25 |
 
 ### Features
 
