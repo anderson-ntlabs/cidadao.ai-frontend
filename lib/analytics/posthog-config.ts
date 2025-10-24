@@ -42,8 +42,8 @@ export function initPostHog() {
       },
 
       // Performance & Features
-      autocapture: false,                    // Manual tracking only
-      capture_pageview: false,               // Manual page tracking
+      autocapture: true,                     // Enable autocapture for web analytics
+      capture_pageview: true,                // Capture pageview events automatically
       capture_pageleave: true,               // Track when users leave
 
       // Debugging
