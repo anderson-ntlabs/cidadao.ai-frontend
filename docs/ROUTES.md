@@ -77,6 +77,7 @@ Post-login defaults to `/pt/home` which serves as the main hub. Only Home and Ch
 | `/pt/chat` | `app/pt/(authenticated)/chat/page.tsx` | Chat with AI agents | ✅ Active |
 | `/pt/dashboard` | `app/pt/(authenticated)/dashboard/page.tsx` | Investigations dashboard | 🚧 Coming Soon |
 | `/pt/investigacoes` | `app/pt/(authenticated)/investigacoes/page.tsx` | Detailed investigations | 🚧 Coming Soon |
+| `/pt/mapa` | `app/pt/(authenticated)/mapa/page.tsx` | Transparency Map | ✅ Active |
 | `/pt/notificacoes` | `app/pt/(authenticated)/notificacoes/page.tsx` | Notification center | 🚧 Coming Soon |
 | `/pt/perfil` | `app/pt/(authenticated)/perfil/page.tsx` | User profile | ✅ Active |
 | `/pt/configuracoes` | `app/pt/(authenticated)/configuracoes/page.tsx` | Settings | ✅ Active |
@@ -106,6 +107,37 @@ Post-login defaults to `/pt/home` which serves as the main hub. Only Home and Ch
 ```
 
 **Razão**: O sistema é focado no mercado brasileiro. Páginas autenticadas são apenas em português.
+
+---
+
+## 📍 Detalhamento de Rotas Importantes
+
+### /pt/mapa - Transparency Map
+
+**Status**: ✅ Active (Added in Jan 2025)
+**Access**: Authenticated users only
+
+Interactive geographic visualization of Brazilian government transparency data.
+
+**Features**:
+- Interactive map with clickable regions
+- Real-time data from Railway backend API
+- Fallback UI when backend unavailable
+- Cache-first strategy for performance
+- Responsive design (desktop + mobile)
+
+**Backend Integration**:
+- Endpoint: `${API_URL}/api/v1/transparency/map`
+- Cache TTL: 1 hour
+- Fallback: Local mock data
+
+**Related Documentation**:
+- [Transparency Map Integration](./transparency-map-integration-complete.md)
+- [Fallback Handling](./transparency-map-fallback.md)
+- [Backend API Integration](./frontend-backend-integration-analysis.md)
+
+**Navigation**:
+Accessible from Home page cards or direct URL.
 
 ---
 
@@ -267,6 +299,7 @@ const isAuthenticatedRoute =
   pathname.includes('/chat') ||
   pathname.includes('/investigacoes') ||
   pathname.includes('/home') ||
+  pathname.includes('/mapa') ||
   pathname.includes('/perfil') ||
   pathname.includes('/notificacoes') ||
   pathname.includes('/configuracoes')

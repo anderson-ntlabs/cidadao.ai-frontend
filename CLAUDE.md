@@ -157,13 +157,17 @@ Key agents:
 
 ### Progressive Web App Features
 
-Configured in `next.config.js` with next-pwa:
+**Migration Note (Jan 2025)**: Migrated from `@ducanh2912/next-pwa` to `@serwist/next` for Next.js 15 compatibility.
+
+Configured in `next.config.mjs` with Serwist:
+- Service Worker: `app/sw.ts` (manual implementation)
 - Offline support with NetworkFirst caching strategy
-- Service worker with skipWaiting
-- 200-entry cache limit
-- Automatic reload on reconnection
+- skipWaiting and clientsClaim enabled
+- navigationPreload for faster page loads
 - Disabled in development for better DX
 - Manifest file for installability
+
+**Documentation**: See `docs/10-reference/migration-guides/pwa-migration.md` (coming soon)
 
 ### Key Technical Patterns
 
@@ -296,6 +300,8 @@ const { isEnabled, toggle, enable, disable } = useVLibras()
 
 **Testing:**
 Access http://localhost:3000/pt and look for the VLibras widget in the bottom-right corner. Click to activate LIBRAS translation.
+
+**Detailed Documentation**: See `docs/accessibility-vlibras.md` for complete integration guide.
 
 ### Accessibility Panel (Unified Controls)
 

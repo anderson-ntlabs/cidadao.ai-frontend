@@ -34,6 +34,62 @@ Cidadão.AI Frontend is built with Next.js 15 App Router, TypeScript, and Tailwi
 - **Storybook**: Component documentation
 - **ESLint**: Code linting
 - **Prettier**: Code formatting
+- **Lighthouse CI**: Performance budgets and monitoring
+
+### Progressive Web App (PWA)
+
+**PWA Framework**: Serwist (migrated from next-pwa in Jan 2025)
+
+- **Package**: `@serwist/next@^9.2.1` + `serwist@^9.2.1`
+- **Service Worker**: `app/sw.ts` (manual implementation)
+- **Configuration**: `next.config.mjs`
+
+**Migration Rationale**:
+The original `@ducanh2912/next-pwa` package caused webpack build failures with Next.js 15.5.4 due to internal plugin incompatibilities. Serwist is the official successor, actively maintained by the same author, providing full Next.js 15+ compatibility with improved TypeScript support.
+
+**Key Features**:
+- Offline support with NetworkFirst caching strategy
+- Service worker with skipWaiting and clientsClaim
+- NavigationPreload for faster page loads
+- Automatic precaching of static assets
+- Disabled in development for faster iteration
+
+**Service Worker Implementation** (`app/sw.ts`):
+```typescript
+import { defaultCache } from '@serwist/next/worker';
+import { Serwist } from 'serwist';
+
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
+  runtimeCaching: defaultCache,
+});
+
+serwist.addEventListeners();
+```
+
+**Build Configuration** (`next.config.mjs`):
+```javascript
+import withSerwistInit from '@serwist/next';
+
+const withSerwist = withSerwistInit({
+  swSrc: 'app/sw.ts',
+  swDest: 'public/sw.js',
+  disable: process.env.NODE_ENV === 'development',
+  reloadOnOnline: true,
+  cacheOnNavigation: true,
+});
+
+export default withSerwist(nextConfig);
+```
+
+**Breaking Changes from next-pwa**:
+1. **ESM-only**: No CommonJS support (requires `next.config.mjs`)
+2. **Manual Service Worker**: Must create `app/sw.ts` (was auto-generated)
+3. **Different Caching API**: Uses Serwist's `defaultCache` instead of next-pwa presets
+4. **TypeScript First**: Better type definitions and IntelliSense
 
 ## Directory Structure
 
@@ -66,23 +122,53 @@ cidadao-ai-frontend/
 
 ### 1. Multi-Adapter Chat System
 
-The chat system implements multiple adapter patterns for robustness:
+The chat system implements multiple adapter patterns for robustness and failover:
 
 ```
-User Input → Smart Chat Service → Adapter Selection → API Call → Response
+User Input → SmartChatService → Adapter Selection → Backend/SSE/Fallback → Response
+                    ↓                                           ↓
+             Health Checks                                 Cache Layer
                     ↓
-             Fallback Chain
-                    ↓
-             Cache Layer
+          Automatic Failover
 ```
 
-**Adapters:**
-- `v1`: Original implementation
-- `v2`: Enhanced error handling
-- `v3`: Retry logic optimization
-- `simple`: Minimal fallback (100% success)
-- `stable`: Production-ready
-- `optimized`: Performance-focused
+**Chat Adapters** (located in `lib/api/`):
+
+- **`chat-adapter-backend.ts`**: Primary adapter for Railway production backend
+  - Endpoint: `${API_URL}/api/v1/chat/message`
+  - Features: Full chat API integration, error handling, retry logic
+  - Usage: Production default for all chat requests
+
+- **`chat-adapter-sse.ts`**: Server-Sent Events streaming adapter
+  - Endpoint: `${API_URL}/api/v1/chat/stream`
+  - Features: Real-time message streaming, reconnection logic, exponential backoff
+  - Usage: Streaming responses for better UX (when enabled)
+  - Implementation: `lib/sse/` (client, reconnect, types)
+
+- **`chat-adapter-fallback.ts`**: Graceful degradation adapter
+  - Features: Fallback responses when backend unavailable
+  - Usage: Automatic failover during backend downtime
+
+**Adapter Selection Logic** (`lib/services/smart-chat.service.ts`):
+```typescript
+// SmartChatService automatically selects best adapter based on:
+// 1. Backend health status
+// 2. Response time SLA (<2s preferred)
+// 3. Error rate thresholds (<5%)
+// 4. Feature flags (SSE enabled/disabled)
+```
+
+**Caching Strategy** (`lib/services/`):
+- `chat-cache.service.ts`: In-memory cache with 5min TTL
+- `chat-cache-idb.service.ts`: IndexedDB persistence for offline support
+- `cached-smart-chat.service.ts`: Wrapper providing cache-first strategy
+
+**Session Management** (`lib/services/chat-session.service.ts`):
+- Supabase integration for chat persistence
+- Session history and pagination
+- Multi-device sync capabilities
+
+**Note**: Previous adapter versions (v1, v2, v3, simple, stable, optimized) were consolidated into the current three-adapter architecture for maintainability.
 
 ### 2. Agent System Architecture
 
