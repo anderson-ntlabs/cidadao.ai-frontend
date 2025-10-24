@@ -31,9 +31,7 @@ export function initPostHog() {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
 
       // Privacy & LGPD Compliance
-      anonymize_ip: true,                    // Anonymize IP addresses
-      respect_dnt: true,                     // Respect Do Not Track
-      disable_persistence: false,            // Allow localStorage for session
+      persistence: 'localStorage',           // Use localStorage for session
 
       // Session Recording Configuration
       disable_session_recording: !hasUserConsent(), // Disabled without consent
