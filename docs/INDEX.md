@@ -1,7 +1,7 @@
 # Documentation Index - Cidadão.AI Frontend
 
-**Last Updated**: 2025-01-25 19:00:00 -0300
-**Total Files**: 96 documents
+**Last Updated**: 2025-01-25 19:30:00 -0300
+**Total Files**: 97 documents
 **Maintainer**: Frontend Team
 
 ---
@@ -113,6 +113,7 @@
 
 | Document | Description | Status |
 |----------|-------------|--------|
+| [Deployment Guide](./technical/deployment-guide.md) | Complete guide: Vercel, CI/CD, environment variables, monitoring, rollback procedures | ✅ Complete |
 | [Production Checklist](./deployment/PRODUCTION_DEPLOY_CHECKLIST.md) | Pre-deployment checklist | ✅ Complete |
 | [Vercel KV Setup](./infrastructure/VERCEL_KV_SETUP_COMPLETE.md) | Vercel KV configuration | ✅ Complete |
 | [Sentry Setup](./infrastructure/SENTRY_SETUP_COMPLETE.md) | Error tracking setup | ✅ Complete |
