@@ -32,12 +32,12 @@ export function AuthLayoutV2({
   const pathname = usePathname()
   
   // Navigation items - authenticated system is PT-BR only
+  // Sistema unificado em /pt/app/* para separar área autenticada da landing pública
   const navigationItems: NavigationItem[] = [
-    { name: 'Início', href: '/pt/home', icon: Home },
-    { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare },
-    { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard },
-    { name: 'Investigações', href: '/pt/investigacoes', icon: FileSearch },
-    { name: 'Mapa de Transparência', href: '/pt/mapa', icon: Map },
+    { name: 'Início', href: '/pt/app', icon: Home },
+    { name: 'Chat com IAs', href: '/pt/app/chat', icon: MessageSquare },
+    { name: 'Investigações', href: '/pt/app/investigacoes', icon: FileSearch },
+    { name: 'Mapa de Transparência', href: '/pt/app/mapa', icon: Map },
   ]
   
   // Generate breadcrumbs from pathname if not provided
@@ -82,11 +82,12 @@ export function AuthLayoutV2({
   
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Save the URL the user was trying to access
+      // Save the URL the user was trying to access for redirect after login
       localStorage.setItem('redirectAfterLogin', pathname)
-      router.push(`/${locale}/login`)
+      // Sistema autenticado está sempre em /pt (sem /en)
+      router.push('/pt/login')
     }
-  }, [isLoading, isAuthenticated, router, locale, pathname])
+  }, [isLoading, isAuthenticated, router, pathname])
   
   if (isLoading) {
     return <LoadingScreen />
