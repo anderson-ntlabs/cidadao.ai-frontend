@@ -83,17 +83,20 @@
 | Document | Description | Last Updated |
 |----------|-------------|--------------|
 | [Development Guide](./guides/COMPONENT-DEVELOPMENT.md) | Patterns, best practices | 2025-10-04 |
+| [Component API Reference](./technical/component-api-reference.md) | Complete component documentation | ✅ 2025-01-25 |
 | [Design System v2](./design/design-system-v2.md) | Colors, typography, spacing | Latest |
 | [Dark Mode](./design/DARK-MODE-PRESERVATION.md) | Dark mode implementation | Latest |
 | [Component Template](./templates/COMPONENT_DOCS.md) | Documentation template | Latest |
 
-**Component Categories** (🚧 Needs documentation):
-- `ui/` - Reusable UI primitives
-- `chat/` - Chat-specific components
-- `a11y/` - Accessibility components
-- `charts/` - Chart components (Recharts)
-- `tour/` - Interactive tour components
-- `onboarding/` - User onboarding flows
+**Component Categories** (✅ Fully documented):
+- `a11y/` - Accessibility components (AccessibilityPanel, VLibras, FontSize, etc.)
+- `charts/` - Chart components (LineChart, BarChart, PieChart, AreaChart)
+- `dev/` - Development tools (TelemetryPanel, WebVitalsMonitor)
+- `hints/` - Adaptive hints system (AdaptiveHintsProvider)
+- `markdown/` - Secure markdown rendering (MarkdownRenderer)
+- `tour/` - Interactive tours (InteractiveTour, TourControls)
+- `onboarding/` - User onboarding (OnboardingFlow)
+- `ui/` - Reusable UI primitives (shadcn/ui based)
 
 ### Testing
 
