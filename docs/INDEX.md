@@ -117,7 +117,7 @@
 | [Vercel KV Setup](./infrastructure/VERCEL_KV_SETUP_COMPLETE.md) | Vercel KV configuration | ✅ Complete |
 | [Sentry Setup](./infrastructure/SENTRY_SETUP_COMPLETE.md) | Error tracking setup | ✅ Complete |
 | [Monitoring](./infrastructure/MONITORING_SETUP.md) | Grafana + Prometheus | ✅ Complete |
-| [Security Hardening](./infrastructure/SECURITY_HARDENING.md) | CSP, rate limiting, headers | ✅ Complete |
+| [Security Hardening Guide](./infrastructure/security-hardening-guide.md) | Complete guide: CSP, headers, rate limiting, auth, OWASP Top 10 | ✅ Complete |
 | [Security Checklist](./technical/SECURITY-CHECKLIST.md) | Security audit checklist | ✅ Complete |
 
 ### Performance
