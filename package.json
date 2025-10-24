@@ -27,6 +27,7 @@
     "lighthouse:collect": "lhci collect",
     "lighthouse:assert": "lhci assert",
     "generate:component": "node scripts/generate-component.js",
+    "generate:types": "node scripts/generate-api-types.js",
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server npm run build",
     "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser npm run build"

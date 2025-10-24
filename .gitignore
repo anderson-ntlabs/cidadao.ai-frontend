@@ -40,6 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Generated files
+types/generated/
+.cache/
+
 # Backup files - Universal patterns
 *.backup
 *.backup.*

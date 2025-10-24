@@ -1,3 +1,18 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Sobre o Cidadão.AI | Transparência Pública com Inteligência Artificial',
+  description: 'Projeto acadêmico inovador que combina IA, transparência pública e responsabilidade social para democratizar o acesso aos dados governamentais brasileiros.',
+  keywords: ['transparência pública', 'inteligência artificial', 'dados governamentais', 'Brasil', 'TCC', 'IFSULDEMINAS'],
+  authors: [{ name: 'Anderson Henrique da Silva' }],
+  openGraph: {
+    title: 'Sobre o Cidadão.AI',
+    description: 'Sistema multi-agente de IA para transparência governamental',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+}
+
 export default function AboutPage() {
   return (
     <div 
