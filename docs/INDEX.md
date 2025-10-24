@@ -43,8 +43,8 @@
 | Document | Description | Status |
 |----------|-------------|--------|
 | [Chat Integration](./technical/integration/FRONTEND_CHAT_INTEGRATION.md) | Frontend chat implementation | ✅ Complete |
-| [Chat Architecture](#) 🚧 | Deep dive into adapters, SSE, caching | Coming soon |
-| [SSE Streaming](#) 🚧 | Server-Sent Events streaming | Coming soon |
+| [Chat Architecture Deep Dive](./technical/chat-architecture-deep-dive.md) | Complete chat system architecture | ✅ Complete |
+| [SSE Streaming](./sse-streaming.md) | Server-Sent Events streaming | ✅ Complete |
 | [WebSocket](#) 🚧 | WebSocket (future implementation) | Coming soon |
 
 #### Authentication
