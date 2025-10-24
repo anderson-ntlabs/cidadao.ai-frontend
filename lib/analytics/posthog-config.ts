@@ -28,7 +28,7 @@ export function initPostHog() {
 
   try {
     posthog.init(apiKey, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
 
       // Privacy & LGPD Compliance
       persistence: 'localStorage',           // Use localStorage for session
