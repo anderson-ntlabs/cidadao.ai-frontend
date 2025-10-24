@@ -301,7 +301,7 @@ export default function HomePage() {
                 <Activity className="w-5 h-5" />
                 Atividade Recente
               </h2>
-              <Link href="/pt/dashboard">
+              <Link href="/pt/app">
                 <Button variant="ghost" size="sm">
                   Ver tudo
                   <ChevronRight className="w-4 h-4 ml-1" />

@@ -264,7 +264,7 @@ export default function MapaTransparencia() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-4">
               <Link
-                href="/pt/home"
+                href="/pt/app"
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 ← Voltar

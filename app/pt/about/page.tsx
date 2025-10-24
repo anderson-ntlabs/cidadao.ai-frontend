@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ProjectTimeline } from '@/components/timeline'
 
 export const metadata: Metadata = {
   title: 'Sobre o Cidadão.AI | Transparência Pública com Inteligência Artificial',
@@ -94,10 +95,15 @@ export default function AboutPage() {
           
           <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg mt-6">
             <p className="font-medium text-green-800 dark:text-green-200">
-              "A transparência é o melhor remédio contra a corrupção. A tecnologia é a ferramenta 
+              "A transparência é o melhor remédio contra a corrupção. A tecnologia é a ferramenta
               que torna esse remédio acessível a todos."
             </p>
           </div>
+        </div>
+
+        {/* Timeline do Projeto */}
+        <div className="mt-16">
+          <ProjectTimeline />
         </div>
       </div>
     </div>

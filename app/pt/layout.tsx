@@ -37,6 +37,8 @@ import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
 import { SentryInit } from '@/components/sentry-init'
 import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
+import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { ResearchConsentBanner } from '@/components/research-consent-banner'
 
 export default function PTLayout({
   children,
@@ -52,6 +54,7 @@ export default function PTLayout({
         {/* Preconnect to critical origins */}
         <link rel="preconnect" href="https://cidadao-api-production.up.railway.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pbsiyuattnwgohvkkkks.supabase.co" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://app.posthog.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
@@ -66,31 +69,34 @@ export default function PTLayout({
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>
           <Providers>
-            <SentryInit />
-          {/* Camada de fundo fixo com a imagem */}
-          <div
-            className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-            style={{
-              backgroundImage: 'url(/operarios.png)',
-            }}
-          />
+            <AnalyticsProvider>
+              <SentryInit />
+              {/* Camada de fundo fixo com a imagem */}
+              <div
+                className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+                style={{
+                  backgroundImage: 'url(/operarios.png)',
+                }}
+              />
 
-          {/* Overlay semi-transparente */}
-          <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
+              {/* Overlay semi-transparente */}
+              <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
 
-          {/* Conteúdo principal */}
-          <div className="relative z-20 min-h-screen flex flex-col">
-            <SkipLinks />
-            <PTLayoutWrapper locale="pt">
-              {children}
-            </PTLayoutWrapper>
-            <CookieConsent locale="pt" />
-            <ToastProvider />
+              {/* Conteúdo principal */}
+              <div className="relative z-20 min-h-screen flex flex-col">
+                <SkipLinks />
+                <PTLayoutWrapper locale="pt">
+                  {children}
+                </PTLayoutWrapper>
+                <CookieConsent locale="pt" />
+                <ResearchConsentBanner locale="pt" />
+                <ToastProvider />
 
-            {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
-            <VLibrasLazy locale="pt" forceOnload />
-          </div>
-        </Providers>
+                {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
+                <VLibrasLazy locale="pt" forceOnload />
+              </div>
+            </AnalyticsProvider>
+          </Providers>
         </WebVitalsProvider>
       </body>
     </html>

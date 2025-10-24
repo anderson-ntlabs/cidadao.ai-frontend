@@ -18,14 +18,15 @@ export default function LoginPage() {
   const [redirectTo, setRedirectTo] = useState<string>('')
 
   useEffect(() => {
-    // Redirect authenticated users to home
+    // Redirect authenticated users to app (sistema autenticado)
     if (isAuthenticated && !isLoading) {
-      router.replace('/pt/home')
+      router.replace('/pt/app')
     }
   }, [isAuthenticated, isLoading, router])
 
   useEffect(() => {
-    setRedirectTo(`${window.location.origin}/auth/callback?next=/pt/home`)
+    // Callback redireciona para /pt/app após login bem-sucedido
+    setRedirectTo(`${window.location.origin}/auth/callback?next=/pt/app`)
   }, [])
 
   // Show loading while checking auth status
@@ -193,7 +194,7 @@ export default function LoginPage() {
                   },
                 },
               }}
-              providers={['google', 'github']}
+              providers={['google', 'github', 'spotify', 'facebook']}
               redirectTo={redirectTo}
               onlyThirdPartyProviders={false}
               magicLink={false}

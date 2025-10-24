@@ -306,7 +306,7 @@ export default function ChatPage() {
                             }}
                           />
                         ) : (
-                          <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                          <p className="whitespace-pre-wrap text-sm text-white">{message.content}</p>
                         )}
                       </div>
                     </div>
