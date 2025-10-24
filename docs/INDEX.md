@@ -124,9 +124,9 @@
 
 | Document | Description | Status |
 |----------|-------------|--------|
+| [Bundle Optimization Guide](./technical/bundle-optimization.md) | Complete guide: webpack, code splitting, dynamic imports, image optimization | ✅ Complete |
 | [Optimization Report](./optimization/OPTIMIZATION-REPORT.md) | Performance optimizations | ✅ Complete |
-| [Bundle Analysis](#) 🚧 | Webpack chunking strategy | Coming soon |
-| [Lighthouse CI](#) 🚧 | Performance budgets | Coming soon |
+| [Lighthouse CI](#) 🚧 | Performance budgets CI/CD setup | Coming soon |
 | [Web Vitals](#) 🚧 | Core Web Vitals tracking | Coming soon |
 
 ### API Integration
