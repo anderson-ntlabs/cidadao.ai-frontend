@@ -194,7 +194,7 @@ export default function LoginPage() {
                   },
                 },
               }}
-              providers={['google', 'github']}
+              providers={['google', 'github', 'spotify', 'facebook']}
               redirectTo={redirectTo}
               onlyThirdPartyProviders={false}
               magicLink={false}
