@@ -33,7 +33,7 @@
 |----------|-------------|--------------|
 | [System Architecture](./guides/ARCHITECTURE.md) | Complete system design, tech stack, patterns | 2025-01-25 |
 | [Routing Conventions](./ROUTES.md) | App Router structure, PT/EN routes | 2025-01-21 |
-| [State Management](#) 🚧 | Zustand stores, actions, persistence | Coming soon |
+| [State Management](./technical/state-management-architecture.md) | Zustand stores, actions, persistence | 2025-01-25 |
 | [Data Fetching](#) 🚧 | RSC, SSR, CSR strategies | Coming soon |
 
 ### Features
