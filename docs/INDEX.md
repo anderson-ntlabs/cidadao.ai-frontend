@@ -1,7 +1,7 @@
 # Documentation Index - Cidadão.AI Frontend
 
-**Last Updated**: 2025-01-25 13:00:00 -0300
-**Total Files**: 94 documents
+**Last Updated**: 2025-01-25 18:30:00 -0300
+**Total Files**: 95 documents
 **Maintainer**: Frontend Team
 
 ---
@@ -133,6 +133,7 @@
 
 | Document | Description | Status |
 |----------|-------------|--------|
+| [API Integration Guide](./technical/api-integration-guide.md) | Complete guide: HTTP clients, services, type safety, error handling, auth, caching, streaming | ✅ Complete |
 | [API Data Structures](./technical/REFERENCE/API_DATA_STRUCTURES.md) | Backend API types | ✅ Complete |
 | [Backend Integration Status](./FRONTEND-BACKEND-INTEGRATION-STATUS.md) | Integration status | ✅ Complete |
 | [Backend Integration Analysis](./frontend-backend-integration-analysis.md) | Integration analysis | ✅ Complete |
