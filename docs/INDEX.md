@@ -125,9 +125,9 @@
 | Document | Description | Status |
 |----------|-------------|--------|
 | [Bundle Optimization Guide](./technical/bundle-optimization.md) | Complete guide: webpack, code splitting, dynamic imports, image optimization | ✅ Complete |
+| [Lighthouse CI Guide](./infrastructure/lighthouse-ci-guide.md) | Complete setup: budgets, CI/CD, report analysis, troubleshooting | ✅ Complete |
 | [Optimization Report](./optimization/OPTIMIZATION-REPORT.md) | Performance optimizations | ✅ Complete |
-| [Lighthouse CI](#) 🚧 | Performance budgets CI/CD setup | Coming soon |
-| [Web Vitals](#) 🚧 | Core Web Vitals tracking | Coming soon |
+| [Web Vitals](#) 🚧 | Core Web Vitals tracking implementation | Coming soon |
 
 ### API Integration
 
