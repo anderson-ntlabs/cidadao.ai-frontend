@@ -36,7 +36,7 @@ export default function NotFound() {
               Voltar ao Início
             </Link>
             <Link 
-              href="/pt/dashboard"
+              href="/pt/app"
               className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 transition-all duration-300"
             >
               Ir para Dashboard
@@ -55,7 +55,7 @@ export default function NotFound() {
           {/* Agent suggestion */}
           <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
             💡 Dica: Nossos agentes de IA estão sempre prontos para ajudar no{' '}
-            <Link href="/pt/chat" className="text-green-600 hover:underline">
+            <Link href="/pt/app/chat" className="text-green-600 hover:underline">
               chat
             </Link>
           </div>

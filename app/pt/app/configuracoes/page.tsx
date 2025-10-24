@@ -33,7 +33,7 @@ export default function ConfiguracoesPage() {
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/pt/home"
+            href="/pt/app"
             className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
