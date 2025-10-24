@@ -93,12 +93,12 @@ export function updateConsentStatus() {
 /**
  * Identify user (anonymously with hash)
  */
-export function identifyUser(userId: string | null) {
+export async function identifyUser(userId: string | null) {
   if (!isInitialized || !hasUserConsent()) return
 
   if (userId) {
     // Use SHA-256 hash of user ID for anonymization
-    const userHash = hashUserId(userId)
+    const userHash = await hashUserId(userId)
     posthog.identify(userHash, {
       anonymized: true,
     })
