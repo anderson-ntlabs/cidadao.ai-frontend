@@ -1,3 +1,17 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Política de Privacidade | Cidadão.AI',
+  description: 'Política de privacidade do Cidadão.AI. Saiba como protegemos seus dados e respeitamos sua privacidade ao usar nosso sistema de transparência pública.',
+  robots: 'index, follow',
+  openGraph: {
+    title: 'Política de Privacidade - Cidadão.AI',
+    description: 'Como o Cidadão.AI protege seus dados e privacidade',
+    type: 'website',
+    locale: 'pt_BR',
+  },
+}
+
 export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
