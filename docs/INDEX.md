@@ -102,10 +102,9 @@
 
 | Document | Description | Status |
 |----------|-------------|--------|
-| [Testing Strategy](./guides/TESTING.md) | Vitest, Playwright, testing pyramid | ✅ Complete |
+| [Testing Strategy Guide](./guides/TESTING-STRATEGY.md) | Complete testing strategy: Vitest, Playwright, integration, accessibility | ✅ Complete |
+| [Testing Guide (Original)](./guides/TESTING.md) | Basic testing patterns and examples | ✅ Complete |
 | [Manual Test Scripts](#) 🚧 | scripts/ documentation | Coming soon |
-| [E2E Testing](#) 🚧 | Playwright patterns | Coming soon |
-| [Accessibility Testing](#) 🚧 | jest-axe, Lighthouse CI | Coming soon |
 
 **Test Sessions** (Historical):
 - [Test Session 2025-10-06](./testing/TEST_SESSION_2025-10-06.md)
