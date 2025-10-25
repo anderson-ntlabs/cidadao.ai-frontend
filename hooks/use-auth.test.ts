@@ -166,7 +166,7 @@ describe('useAuth', () => {
         'Bem-vindo(a), Test User!',
         'Login realizado com sucesso'
       );
-      expect(mockRouter.push).toHaveBeenCalledWith('/pt/dashboard');
+      expect(mockRouter.push).toHaveBeenCalledWith('/pt/home');
     });
 
     it('should redirect to saved URL after login', async () => {
@@ -237,7 +237,7 @@ describe('useAuth', () => {
         'Bem-vindo(a), João Silva!',
         'Login realizado com sucesso'
       );
-      expect(mockRouter.push).toHaveBeenCalledWith('/pt/dashboard');
+      expect(mockRouter.push).toHaveBeenCalledWith('/pt/home');
     });
 
     it('should handle provider login errors', async () => {
