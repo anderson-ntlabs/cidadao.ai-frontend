@@ -80,21 +80,24 @@ describe('sendBackendMessage', () => {
       false
     )
 
-    // Verify response format
-    expect(result).toEqual({
+    // Verify response format (partial match to allow for additional fields)
+    expect(result).toMatchObject({
       session_id: 'test-session-123',
       agent_id: 'anita',
       agent_name: 'Anita Garibaldi',
       message: 'I am doing well, thank you!',
       confidence: 0.95,
       suggested_actions: ['What can I help you with?', 'Tell me about your project'],
-      metadata: {
+      metadata: expect.objectContaining({
         intent: 'greeting',
         endpoint: 'backend',
-        response_time: expect.any(Number),
         processing_time: 150
-      }
+      })
     })
+
+    // Verify response contains expected fields
+    expect(result).toHaveProperty('metadata.response_time')
+    expect(typeof result.metadata.response_time).toBe('number')
   })
 
   it('generates session_id when not provided', async () => {

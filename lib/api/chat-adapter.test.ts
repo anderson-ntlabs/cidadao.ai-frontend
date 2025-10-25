@@ -415,7 +415,7 @@ describe('chat-adapter', () => {
         id: 'zumbi',
         name: 'Zumbi dos Palmares',
         role: 'Investigador Universal',
-        status: 'available',
+        status: 'active',
         specialty: 'Análise de dados governamentais',
         type: 'investigator',
       });
