@@ -259,40 +259,234 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
 ## 🧪 Testes
 
+### Por que Testes São Importantes
+
+Testes garantem:
+- ✅ Código funciona conforme esperado
+- ✅ Mudanças não quebram funcionalidades existentes
+- ✅ Documentação viva do comportamento do código
+- ✅ Confiança para refatorar
+
+**Meta de Coverage**: Mínimo 80%, Target 95%
+
+**Status Atual**: 943 testes passando | 91% coverage ✅
+
 ### Executando Testes
 
 ```bash
-# Testes unitários
-npm run test
+# Todos os testes
+npm test
 
-# Testes com coverage
+# Com coverage report
 npm run test:coverage
 
-# Testes em modo watch
+# Modo watch (rerun on changes)
 npm run test:watch
+
+# Teste específico
+npm test path/to/file.test.ts
+
+# E2E tests (Playwright)
+npm run test:e2e
+
+# UI do Vitest
+npm run test:ui
 ```
 
-### Escrevendo Testes
+### Tipos de Testes
+
+#### 1. Unit Tests (Vitest + Testing Library)
+
+Teste unidades isoladas de código:
 
 ```tsx
-// Exemplo de teste para componente
-import { render, screen } from '@testing-library/react'
-import { Button } from '@/components/button'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { Button } from '@/components/ui/button'
 
 describe('Button', () => {
-  it('renders with label', () => {
-    render(<Button label="Click me" onClick={() => {}} />)
-    expect(screen.getByText('Click me')).toBeInTheDocument()
+  it('should render with correct label', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button')).toHaveTextContent('Click me')
   })
-  
-  it('calls onClick when clicked', () => {
-    const handleClick = jest.fn()
-    render(<Button label="Click me" onClick={handleClick} />)
-    screen.getByText('Click me').click()
+
+  it('should call onClick handler when clicked', () => {
+    const handleClick = vi.fn()
+    render(<Button onClick={handleClick}>Click</Button>)
+
+    fireEvent.click(screen.getByRole('button'))
+
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 })
 ```
+
+#### 2. Hook Tests
+
+Teste React hooks personalizados:
+
+```tsx
+import { describe, it, expect } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { useCounter } from '@/hooks/use-counter'
+
+describe('useCounter', () => {
+  it('should increment counter', () => {
+    const { result } = renderHook(() => useCounter())
+
+    expect(result.current.count).toBe(0)
+
+    act(() => {
+      result.current.increment()
+    })
+
+    expect(result.current.count).toBe(1)
+  })
+})
+```
+
+#### 3. Integration Tests
+
+Teste múltiplos componentes trabalhando juntos:
+
+```tsx
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { LoginForm } from '@/components/auth/login-form'
+
+describe('LoginForm Integration', () => {
+  it('should submit form with valid data', async () => {
+    const handleSubmit = vi.fn()
+    const user = userEvent.setup()
+
+    render(<LoginForm onSubmit={handleSubmit} />)
+
+    await user.type(screen.getByLabelText('Email'), 'user@example.com')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.click(screen.getByRole('button', { name: 'Login' }))
+
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith({
+        email: 'user@example.com',
+        password: 'password123'
+      })
+    })
+  })
+})
+```
+
+### Boas Práticas de Testes
+
+#### ✅ DO - Faça
+
+1. **Teste comportamento do usuário, não implementação**
+   ```tsx
+   // ✅ BOM - Testa o que o usuário vê
+   expect(screen.getByRole('button')).toBeDisabled()
+
+   // ❌ RUIM - Testa detalhe de implementação
+   expect(component.state.isDisabled).toBe(true)
+   ```
+
+2. **Use queries acessíveis**
+   ```tsx
+   // ✅ BOM - Por role (mais acessível)
+   screen.getByRole('button', { name: 'Submit' })
+
+   // ⚠️ OK - Por texto
+   screen.getByText('Submit')
+
+   // ❌ EVITE - Por test ID
+   screen.getByTestId('submit-btn')
+   ```
+
+3. **Limpe mocks entre testes**
+   ```tsx
+   import { beforeEach, vi } from 'vitest'
+
+   beforeEach(() => {
+     vi.clearAllMocks()
+   })
+   ```
+
+4. **Use act() para operações async**
+   ```tsx
+   await act(async () => {
+     await result.current.fetchData()
+   })
+   ```
+
+5. **Nomes descritivos**
+   ```tsx
+   // ✅ BOM
+   it('should show error message when email is invalid', () => {})
+
+   // ❌ RUIM
+   it('test email', () => {})
+   ```
+
+#### ❌ DON'T - Não Faça
+
+1. **Não teste bibliotecas externas**
+2. **Não use timeouts arbitrários** - Use `waitFor`
+3. **Não ignore warnings de `act()`**
+4. **Não faça testes dependentes de ordem**
+5. **Não commite testes quebrados**
+
+### Coverage Requirements
+
+Antes de abrir um PR, verifique:
+
+```bash
+npm run test:coverage
+```
+
+**Requisitos**:
+- ✅ Todos os testes passando
+- ✅ Coverage não deve diminuir
+- ✅ Novos códigos devem ter testes
+- ✅ Funções críticas: 100% coverage
+
+### Troubleshooting
+
+#### "act() warning"
+```tsx
+// Wrap async operations in act()
+await act(async () => {
+  await asyncFunction()
+})
+```
+
+#### "Unhandled promise rejection"
+```tsx
+// Attach catch handler
+const promise = asyncFunc()
+promise.catch(() => {})
+await expect(promise).rejects.toThrow()
+```
+
+#### "Cannot read properties of null"
+```tsx
+// Use optional chaining
+expect(result.current?.isLoading).toBe(false)
+```
+
+### Recursos de Testes
+
+- 📖 [Testing Architecture](./docs/testing-architecture.md) - Arquitetura completa
+- 📖 [Testing Guide](./docs/testing-guide.md) - Guia prático para contribuidores
+- 📖 [Vitest Docs](https://vitest.dev/)
+- 📖 [Testing Library](https://testing-library.com/)
+
+### Checklist Antes do PR
+
+- [ ] `npm test` - Todos os testes passando
+- [ ] `npm run lint` - Sem warnings ESLint
+- [ ] `npm run type-check` - Sem erros TypeScript
+- [ ] `npm run test:coverage` - Coverage não diminuiu
+- [ ] Testes novos para código novo
+- [ ] Testes documentam comportamento esperado
 
 ## 📚 Recursos Úteis
 
