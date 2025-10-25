@@ -1,10 +1,10 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useChat } from './use-chat';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+global.fetch = mockFetch as any;
 
 // Mock agents data
 vi.mock('@/data/agents', () => ({
@@ -13,6 +13,7 @@ vi.mock('@/data/agents', () => ({
     { id: 'anita', name: 'Anita Garibaldi', role: { pt: 'Analista de Padrões' } },
     { id: 'tiradentes', name: 'Tiradentes', role: { pt: 'Gerador de Relatórios' } },
     { id: 'abaporu', name: 'Abaporu', role: { pt: 'Orquestrador' } },
+    { id: 'drummond', name: 'Carlos Drummond de Andrade', role: { pt: 'Comunicador' } },
   ]
 }));
 
@@ -27,296 +28,224 @@ describe('useChat', () => {
   });
 
   describe('sendMessage', () => {
-    describe('Investigation Flow', () => {
-      it('should handle successful investigation request', async () => {
-        const mockResponse = {
-          status: 'completed',
-          agent: 'zumbi',
-          query: 'investigar contratos',
-          results: [{ contract_id: '123', anomaly: true }],
-          anomalies_found: 2,
-          confidence_score: 0.95,
-          processing_time_ms: 1500,
-        };
+    it('should send message to unified chat endpoint', async () => {
+      const mockResponse = {
+        message: 'Olá! Como posso ajudar?',
+        agent_id: 'drummond',
+        confidence: 0.9,
+        metadata: {
+          sources: []
+        }
+      };
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          headers: new Map([['content-type', 'application/json']]),
-          json: async () => mockResponse,
-        });
-
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'investigar contratos suspeitos',
-          });
-        });
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          'https://cidadao-api-production.up.railway.app/api/agents/zumbi/investigate',
-          expect.objectContaining({
-            method: 'POST',
-            headers: expect.objectContaining({
-              'Content-Type': 'application/json',
-            }),
-            body: JSON.stringify({
-              query: 'investigar contratos suspeitos',
-              data_source: 'contracts',
-              max_results: 10,
-            }),
-          })
-        );
-
-        expect(response).toMatchObject({
-          agent: 'abaporu',
-          confidence: 0.95,
-          activeAgents: ['zumbi'],
-        });
-        expect(response.response).toContain('2 anomalia(s)');
-        expect(response.response).toContain('95% de confiança');
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => mockResponse,
       });
 
-      it('should activate multiple agents based on keywords', async () => {
-        const mockResponse = {
-          status: 'completed',
-          agent: 'zumbi',
-          query: 'investigar padrões e gerar relatório',
-          results: [],
-          anomalies_found: 0,
-          confidence_score: 0.85,
-          processing_time_ms: 1000,
-        };
+      const { result } = renderHook(() => useChat());
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          headers: new Map([['content-type', 'application/json']]),
-          json: async () => mockResponse,
+      let response;
+      await act(async () => {
+        response = await result.current.sendMessage({
+          message: 'Olá',
         });
-
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'investigar padrões e gerar relatório',
-          });
-        });
-
-        expect(response.activeAgents).toEqual(['zumbi', 'tiradentes']);
-        // Check if agents are mentioned in response
-        expect(response.response).toContain('Tiradentes');
       });
 
-      it('should handle investigation with no anomalies', async () => {
-        const mockResponse = {
-          status: 'completed',
-          agent: 'zumbi',
-          query: 'verificar contratos',
-          results: [],
-          anomalies_found: 0,
-          confidence_score: 0.99,
-          processing_time_ms: 500,
-        };
+      // Verify correct endpoint was called
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://cidadao-api-production.up.railway.app/api/v1/chat/message',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+          body: expect.stringContaining('"message":"Olá"'),
+        })
+      );
 
-        mockFetch.mockResolvedValue({
-          ok: true,
-          headers: new Map([['content-type', 'application/json']]),
-          json: async () => mockResponse,
-        });
-
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'verificar contratos',
-          });
-        });
-
-        expect(response.response).toContain('sem encontrar anomalias significativas');
-        expect(response.response).toContain('dentro dos parâmetros normais');
+      // Verify response structure
+      expect(response).toMatchObject({
+        response: 'Olá! Como posso ajudar?',
+        message: 'Olá! Como posso ajudar?',
+        agent: 'drummond',
+        confidence: 0.9,
       });
     });
 
-    describe('Conversational Flow', () => {
-      it('should handle "how it works" questions', async () => {
-        const { result } = renderHook(() => useChat());
+    it('should include session_id in request', async () => {
+      const mockResponse = {
+        message: 'Response',
+        agent_id: 'drummond',
+      };
 
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'como funciona o cidadão ai?',
-          });
-        });
-
-        expect(response.response).toContain('plataforma de transparência pública');
-        expect(response.response).toContain('Nossa missão');
-        expect(response.agent).toBe('abaporu');
-        expect(response.confidence).toBe(0.95);
-        expect(response.activeAgents).toEqual([]);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => mockResponse,
       });
 
-      it('should handle agent questions', async () => {
-        const { result } = renderHook(() => useChat());
+      const { result } = renderHook(() => useChat());
 
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'quem são os agentes?',
-          });
+      await act(async () => {
+        await result.current.sendMessage({
+          message: 'Test',
+          session_id: 'test-session-123',
         });
-
-        expect(response.response).toContain('17 agentes de IA');
-        expect(response.response).toContain('Zumbi dos Palmares');
-        expect(response.response).toContain('Anita Garibaldi');
       });
 
-      it('should handle help requests', async () => {
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'como você pode me ajudar?',
-          });
-        });
-
-        expect(response.response).toContain('Investigações de Transparência');
-        expect(response.response).toContain('Análises de Dados');
-        expect(response.response).toContain('Geração de Relatórios');
-      });
-
-      it('should handle generic messages', async () => {
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'olá, tudo bem?',
-          });
-        });
-
-        expect(response.response).toContain('Entendi sua mensagem');
-        expect(response.response).toContain('posso coordenar investigações');
-      });
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody).toHaveProperty('session_id', 'test-session-123');
     });
 
-    describe('Error Handling', () => {
-      it.skip('should handle network errors', async () => {
-        // Skipped due to async state update issue in test
-        // The functionality works correctly in production
+    it('should include context in request', async () => {
+      const mockResponse = {
+        message: 'Response',
+        agent_id: 'drummond',
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => mockResponse,
       });
 
-      it('should handle HTML response error', async () => {
-        mockFetch.mockResolvedValue({
-          ok: false,
-          status: 500,
-          headers: new Map([['content-type', 'text/html']]),
+      const { result } = renderHook(() => useChat());
+
+      const context = { investigation_id: '123' };
+      await act(async () => {
+        await result.current.sendMessage({
+          message: 'Test',
+          context,
         });
-
-        const { result } = renderHook(() => useChat());
-
-        await expect(
-          act(async () => {
-            await result.current.sendMessage({
-              message: 'investigar contratos',
-            });
-          })
-        ).rejects.toThrow('Servidor retornou HTML em vez de JSON');
       });
 
-      it('should handle JSON parse errors', async () => {
-        mockFetch.mockResolvedValue({
-          ok: false,
-          status: 400,
-          headers: new Map([['content-type', 'application/json']]),
-          json: async () => { throw new Error('Invalid JSON'); },
-        });
-
-        const { result } = renderHook(() => useChat());
-
-        await expect(
-          act(async () => {
-            await result.current.sendMessage({
-              message: 'investigar contratos',
-            });
-          })
-        ).rejects.toThrow('Erro HTTP: 400');
-      });
-
-      it('should handle invalid content type', async () => {
-        mockFetch.mockResolvedValue({
-          ok: true,
-          headers: new Map([['content-type', 'text/plain']]),
-        });
-
-        const { result } = renderHook(() => useChat());
-
-        await expect(
-          act(async () => {
-            await result.current.sendMessage({
-              message: 'investigar contratos',
-            });
-          })
-        ).rejects.toThrow('Resposta inválida do servidor');
-      });
-
-      it('should return demo response for Zumbi when server is down', async () => {
-        mockFetch.mockRejectedValue(new Error('Servidor retornou HTML em vez de JSON'));
-
-        const { result } = renderHook(() => useChat());
-
-        let response;
-        await act(async () => {
-          response = await result.current.sendMessage({
-            message: 'investigar',
-            agent_id: 'zumbi',
-          });
-        });
-
-        expect(response.response).toContain('Modo de Demonstração');
-        expect(response.response).toContain('servidor do Zumbi está temporariamente indisponível');
-        expect(response.agent).toBe('zumbi');
-        expect(response.confidence).toBe(0.0);
-      });
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(callBody).toHaveProperty('context');
+      expect(callBody.context).toMatchObject(context);
     });
 
-    describe('Loading State', () => {
-      it('should manage loading state correctly', async () => {
-        mockFetch.mockImplementation(() => 
-          new Promise(resolve => setTimeout(() => resolve({
-            ok: true,
-            headers: new Map([['content-type', 'application/json']]),
-            json: async () => ({
-              status: 'completed',
-              agent: 'zumbi',
-              query: 'test',
-              results: [],
-              anomalies_found: 0,
-              confidence_score: 0.9,
-              processing_time_ms: 100,
-            }),
-          }), 100))
-        );
-
-        const { result } = renderHook(() => useChat());
-        
-        expect(result.current.isLoading).toBe(false);
-
-        // The loading state is managed synchronously in the hook
-        expect(result.current.isLoading).toBe(false);
-        
-        const promise = act(async () => {
-          await result.current.sendMessage({ message: 'investigar' });
-        });
-
-        // Can't check loading state during async operation with current implementation
-        await promise;
-        
-        expect(result.current.isLoading).toBe(false);
+    it('should handle backend error responses', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ detail: 'Internal server error' }),
       });
+
+      const { result } = renderHook(() => useChat());
+
+      await expect(
+        act(async () => {
+          await result.current.sendMessage({
+            message: 'Test',
+          });
+        })
+      ).rejects.toThrow('Internal server error');
+    });
+
+    it('should handle HTML response error', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers({ 'content-type': 'text/html' }),
+      });
+
+      const { result } = renderHook(() => useChat());
+
+      await expect(
+        act(async () => {
+          await result.current.sendMessage({
+            message: 'Test',
+          });
+        })
+      ).rejects.toThrow('Servidor retornou HTML em vez de JSON');
+    });
+
+    it('should handle network errors', async () => {
+      mockFetch.mockRejectedValue(new Error('Network error'));
+
+      const { result } = renderHook(() => useChat());
+
+      await expect(
+        act(async () => {
+          await result.current.sendMessage({
+            message: 'Test',
+          });
+        })
+      ).rejects.toThrow('Não foi possível conectar ao servidor');
+    });
+
+    it('should handle invalid content type', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'text/plain' }),
+        json: async () => ({ message: 'test' }),
+      });
+
+      const { result } = renderHook(() => useChat());
+
+      await expect(
+        act(async () => {
+          await result.current.sendMessage({
+            message: 'Test',
+          });
+        })
+      ).rejects.toThrow('Resposta inválida do servidor');
+    });
+
+    it('should set loading state to false after request completes', async () => {
+      const mockResponse = {
+        message: 'Response',
+        agent_id: 'drummond',
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => mockResponse,
+      });
+
+      const { result } = renderHook(() => useChat());
+
+      expect(result.current.isLoading).toBe(false);
+
+      await act(async () => {
+        await result.current.sendMessage({
+          message: 'Test',
+        });
+      });
+
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('should set error state on failure', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ detail: 'Bad request' }),
+      });
+
+      const { result } = renderHook(() => useChat());
+
+      // Initial error state should be null
+      expect(result.current?.error).toBe(null);
+
+      let caughtError = false;
+      await act(async () => {
+        try {
+          await result.current.sendMessage({
+            message: 'Test',
+          });
+        } catch (err) {
+          caughtError = true;
+        }
+      });
+
+      expect(caughtError).toBe(true);
+      expect(result.current?.error).toBe('Bad request');
     });
   });
 
@@ -324,94 +253,28 @@ describe('useChat', () => {
     it('should return static suggestions', async () => {
       const { result } = renderHook(() => useChat());
 
-      await waitFor(() => {
-        expect(result.current.getSuggestions).toBeDefined();
-      });
-
-      let suggestions;
+      let suggestions: any;
       await act(async () => {
-        suggestions = await result.current.getSuggestions();
+        suggestions = await result.current?.getSuggestions();
       });
 
-      expect(suggestions.suggestions).toHaveLength(3);
-      expect(suggestions.suggestions).toContain('Como funciona o Cidadão.AI?');
-    });
-
-    it('should handle errors gracefully', async () => {
-      const { result } = renderHook(() => useChat());
-
-      await waitFor(() => {
-        expect(result.current.getSuggestions).toBeDefined();
-      });
-
-      // getSuggestions doesn't throw errors, it returns empty array on error
-      let suggestions;
-      await act(async () => {
-        suggestions = await result.current.getSuggestions();
-      });
-
-      expect(suggestions.suggestions).toBeDefined();
+      expect(suggestions).toBeDefined();
+      expect(suggestions).toHaveProperty('suggestions');
       expect(Array.isArray(suggestions.suggestions)).toBe(true);
+      expect(suggestions.suggestions.length).toBe(3);
     });
 
-    it('should accept optional agent_id parameter', async () => {
+    it('should return suggestions even without agent_id', async () => {
       const { result } = renderHook(() => useChat());
 
-      await waitFor(() => {
-        expect(result.current.getSuggestions).toBeDefined();
-      });
-
-      let suggestions;
+      let suggestions: any;
       await act(async () => {
-        suggestions = await result.current.getSuggestions('zumbi');
+        suggestions = await result.current?.getSuggestions();
       });
 
-      expect(suggestions.suggestions).toHaveLength(3);
-    });
-  });
-
-  describe('Investigation Keywords Detection', () => {
-    const investigationKeywords = [
-      'investigar algo suspeito',
-      'contrato emergencial',
-      'detectar anomalia',
-      'algo suspeito aqui',
-      'irregularidade encontrada',
-      'preciso de uma analise',
-      'verifique isso',
-    ];
-
-    investigationKeywords.forEach(keyword => {
-      it(`should detect investigation need for "${keyword}"`, async () => {
-        mockFetch.mockResolvedValue({
-          ok: true,
-          headers: new Map([['content-type', 'application/json']]),
-          json: async () => ({
-            status: 'completed',
-            agent: 'zumbi',
-            query: keyword,
-            results: [],
-            anomalies_found: 0,
-            confidence_score: 0.9,
-            processing_time_ms: 100,
-          }),
-        });
-
-        const { result } = renderHook(() => useChat());
-
-        await waitFor(() => {
-          expect(result.current.sendMessage).toBeDefined();
-        });
-
-        await act(async () => {
-          await result.current.sendMessage({ message: keyword });
-        });
-
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/agents/zumbi/investigate'),
-          expect.any(Object)
-        );
-      });
+      expect(suggestions).toBeDefined();
+      expect(suggestions.suggestions).toBeDefined();
+      expect(suggestions.suggestions.length).toBeGreaterThan(0);
     });
   });
 });
