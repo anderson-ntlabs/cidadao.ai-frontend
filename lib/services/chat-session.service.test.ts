@@ -147,7 +147,7 @@ describe('ChatSessionService', () => {
       expect(result).toEqual(mockSession);
       expect(mockSupabase.from).toHaveBeenCalledWith('chat_sessions');
       expect(mockFrom.select).toHaveBeenCalledWith('*');
-      expect(mockFrom.eq).toHaveBeenCalledWith('id', 'session-123');
+      expect(mockFrom.eq).toHaveBeenCalledWith('session_id', 'session-123');
       expect(mockFrom.eq).toHaveBeenCalledWith('user_id', 'user-123');
       expect(mockFrom.single).toHaveBeenCalled();
     });
@@ -324,7 +324,7 @@ describe('ChatSessionService', () => {
       // Check getSession was called
       expect(mockSupabase.from).toHaveBeenNthCalledWith(1, 'chat_sessions');
       expect(getSessionChain.select).toHaveBeenCalledWith('*');
-      expect(getSessionChain.eq).toHaveBeenNthCalledWith(1, 'id', 'session-123');
+      expect(getSessionChain.eq).toHaveBeenNthCalledWith(1, 'session_id', 'session-123');
       expect(getSessionChain.eq).toHaveBeenNthCalledWith(2, 'user_id', 'user-123');
       
       // Check update was called
@@ -341,7 +341,7 @@ describe('ChatSessionService', () => {
         ],
         updated_at: '2024-01-01T00:00:00.000Z'
       });
-      expect(updateChain.eq).toHaveBeenCalledWith('id', 'session-123');
+      expect(updateChain.eq).toHaveBeenCalledWith('session_id', 'session-123');
     });
 
     it('should return false when session not found', async () => {
@@ -417,7 +417,7 @@ describe('ChatSessionService', () => {
         session_metadata: metadata,
         updated_at: '2024-01-01T00:00:00.000Z'
       });
-      expect(mockFrom.eq).toHaveBeenCalledWith('id', 'session-123');
+      expect(mockFrom.eq).toHaveBeenCalledWith('session_id', 'session-123');
       expect(mockFrom.eq).toHaveBeenCalledWith('user_id', 'user-123');
     });
 
@@ -474,7 +474,7 @@ describe('ChatSessionService', () => {
       expect(result).toBe(true);
       expect(mockSupabase.from).toHaveBeenCalledWith('chat_sessions');
       expect(mockFrom.delete).toHaveBeenCalled();
-      expect(mockFrom.eq).toHaveBeenCalledWith('id', 'session-123');
+      expect(mockFrom.eq).toHaveBeenCalledWith('session_id', 'session-123');
       expect(mockFrom.eq).toHaveBeenCalledWith('user_id', 'user-123');
     });
 
