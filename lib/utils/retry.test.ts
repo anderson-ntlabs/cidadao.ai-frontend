@@ -47,15 +47,20 @@ describe('retry utils', () => {
 
     it('should throw error after max attempts', async () => {
       const error = new Error('Always fails');
-      const fn = vi.fn().mockRejectedValue(error);
-      
+      const fn = vi.fn().mockImplementation(() => Promise.reject(error));
+
+      // Create promise and attach error handler immediately to prevent unhandled rejection
       const promise = withRetry(fn, { maxAttempts: 3 });
-      
+      promise.catch(() => {}); // Prevent unhandled rejection during timer advancement
+
       // Advance through all retry attempts
       await vi.advanceTimersByTimeAsync(0); // First attempt
       await vi.advanceTimersByTimeAsync(1000); // Second attempt
       await vi.advanceTimersByTimeAsync(2000); // Third attempt
-      
+
+      // Ensure all timers are flushed before assertion
+      await vi.runAllTimersAsync();
+
       await expect(promise).rejects.toThrow('Always fails');
       expect(fn).toHaveBeenCalledTimes(3);
     });
@@ -230,15 +235,20 @@ describe('retry utils', () => {
     });
 
     it('should handle async errors correctly', async () => {
-      const fn = vi.fn().mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        throw new Error('Async error');
-      });
-      
+      const fn = vi.fn().mockImplementation(() =>
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Async error')), 100);
+        })
+      );
+
+      // Create promise and attach error handler immediately to prevent unhandled rejection
       const promise = withRetry(fn, { maxAttempts: 1 });
-      
+      promise.catch(() => {}); // Prevent unhandled rejection during timer advancement
+
+      // Advance timers and wait for promise resolution
       await vi.advanceTimersByTimeAsync(100);
-      
+      await vi.runAllTimersAsync();
+
       await expect(promise).rejects.toThrow('Async error');
     });
 
