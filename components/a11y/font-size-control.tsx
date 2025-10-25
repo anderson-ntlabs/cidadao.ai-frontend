@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Minus, Plus, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -73,7 +73,7 @@ export function FontSizeControl({
   const [fontSize, setFontSize] = useState<FontSize>('normal')
   const [isMounted, setIsMounted] = useState(false)
 
-  const t = locale === 'pt' ? {
+  const t = useMemo(() => locale === 'pt' ? {
     decrease: 'Diminuir tamanho da fonte',
     increase: 'Aumentar tamanho da fonte',
     reset: 'Restaurar tamanho padrão',
@@ -91,17 +91,9 @@ export function FontSizeControl({
     normal: 'Normal',
     large: 'Large',
     xlarge: 'Extra Large',
-  }
+  }, [locale])
 
-  useEffect(() => {
-    setIsMounted(true)
-    const saved = localStorage.getItem('fontSize') as FontSize
-    if (saved && FONT_SIZE_MAP[saved]) {
-      applyFontSize(saved, false)
-    }
-  }, [])
-
-  const applyFontSize = (size: FontSize, persist: boolean = true) => {
+  const applyFontSize = useCallback((size: FontSize, persist: boolean = true) => {
     const root = document.documentElement
     root.style.fontSize = FONT_SIZE_MAP[size]
     setFontSize(size)
@@ -128,7 +120,15 @@ export function FontSizeControl({
     announcement.textContent = `${t.current}: ${t[size]}`
     document.body.appendChild(announcement)
     setTimeout(() => document.body.removeChild(announcement), 1000)
-  }
+  }, [onChange, t])
+
+  useEffect(() => {
+    setIsMounted(true)
+    const saved = localStorage.getItem('fontSize') as FontSize
+    if (saved && FONT_SIZE_MAP[saved]) {
+      applyFontSize(saved, false)
+    }
+  }, [applyFontSize])
 
   const decrease = () => {
     const sizes: FontSize[] = ['small', 'normal', 'large', 'xlarge']

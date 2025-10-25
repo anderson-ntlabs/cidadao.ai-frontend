@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Settings, X, Eye, Type, Languages, Keyboard, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FontSizeControl } from './font-size-control'
@@ -40,7 +40,7 @@ export function AccessibilityPanel({ locale, className = '' }: AccessibilityPane
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
-  const t = locale === 'pt' ? {
+  const t = useMemo(() => locale === 'pt' ? {
     title: 'Painel de Acessibilidade',
     open: 'Abrir painel de acessibilidade',
     close: 'Fechar painel de acessibilidade',
@@ -84,7 +84,7 @@ export function AccessibilityPanel({ locale, className = '' }: AccessibilityPane
     increaseFontSize: 'Increase font size',
     altMinus: 'Alt + -',
     decreaseFontSize: 'Decrease font size',
-  }
+  }, [locale])
 
   useEffect(() => {
     setIsMounted(true)
