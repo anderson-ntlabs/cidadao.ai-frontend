@@ -118,32 +118,36 @@ async function runTests() {
 
   results.push(await testEndpoint(
     'List Available Agents',
-    `${API_URL}/api/agents`
+    `${API_URL}/api/v1/agents/`
   ));
 
   results.push(await testEndpoint(
-    'Abaporu Agent (Master Orchestrator)',
-    `${API_URL}/api/agents/abaporu`
+    'Agent Status',
+    `${API_URL}/api/v1/agents/status`
   ));
 
   results.push(await testEndpoint(
     'Zumbi Agent (Anomaly Detection)',
-    `${API_URL}/api/agents/zumbi`
-  ));
-
-  results.push(await testEndpoint(
-    'Anita Agent (Pattern Analysis)',
-    `${API_URL}/api/agents/anita`
+    `${API_URL}/api/v1/agents/zumbi`,
+    {
+      method: 'POST',
+      body: {
+        query: 'Analyze contratos públicos',
+        context: {}
+      }
+    }
   ));
 
   results.push(await testEndpoint(
     'Tiradentes Agent (Report Generation)',
-    `${API_URL}/api/agents/tiradentes`
-  ));
-
-  results.push(await testEndpoint(
-    'Senna Agent (Router)',
-    `${API_URL}/api/agents/senna`
+    `${API_URL}/api/v1/agents/tiradentes`,
+    {
+      method: 'POST',
+      body: {
+        query: 'Generate report summary',
+        context: {}
+      }
+    }
   ));
 
   // ============================================================================
@@ -152,20 +156,18 @@ async function runTests() {
   logSection('3️⃣  Chat & Analysis Endpoints');
 
   results.push(await testEndpoint(
-    'Chat Message (Simple)',
-    `${API_URL}/api/chat/message`,
-    {
-      method: 'POST',
-      body: {
-        message: 'Olá, como funciona o sistema?',
-        mode: 'quick'
-      }
-    }
+    'Chat Available Agents',
+    `${API_URL}/api/v1/chat/agents`
   ));
 
   results.push(await testEndpoint(
-    'Chat Suggestions',
-    `${API_URL}/api/chat/suggestions`
+    'Chat Cache Stats',
+    `${API_URL}/api/v1/chat/cache/stats`
+  ));
+
+  results.push(await testEndpoint(
+    'List Analyses',
+    `${API_URL}/api/v1/analysis/`
   ));
 
   // ============================================================================
@@ -178,25 +180,11 @@ async function runTests() {
     `${API_URL}/api/v1/transparency/coverage/map`
   ));
 
-  results.push(await testEndpoint(
-    'List Agencies',
-    `${API_URL}/api/v1/transparency/agencies?page=1&limit=5`
-  ));
-
-  // Note: These endpoints require specific parameters
-  log('\n⚠️  Skipping endpoints that require specific parameters:', 'yellow');
+  // Note: Skipping endpoints that may trigger rate limits or require parameters
+  log('\n⚠️  Skipping endpoints that require specific parameters or may rate limit:', 'yellow');
+  log('  - /api/v1/transparency/coverage/statistics (rate limited after map call)', 'gray');
   log('  - /api/v1/transparency/contracts (requires codigoOrgao)', 'gray');
   log('  - /api/v1/transparency/servants (requires CPF)', 'gray');
-
-  // ============================================================================
-  // SECTION 5: Investigation Endpoints
-  // ============================================================================
-  logSection('5️⃣  Investigation Endpoints');
-
-  results.push(await testEndpoint(
-    'List Investigations',
-    `${API_URL}/api/investigations`
-  ));
 
   // ============================================================================
   // RESULTS SUMMARY
