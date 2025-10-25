@@ -38,7 +38,6 @@ import { SentryInit } from '@/components/sentry-init'
 import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
-import { ResearchConsentBanner } from '@/components/research-consent-banner'
 
 export default function PTLayout({
   children,
@@ -89,7 +88,6 @@ export default function PTLayout({
                   {children}
                 </PTLayoutWrapper>
                 <CookieConsent locale="pt" />
-                <ResearchConsentBanner locale="pt" />
                 <ToastProvider />
 
                 {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}

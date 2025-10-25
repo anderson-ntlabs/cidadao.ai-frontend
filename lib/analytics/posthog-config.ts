@@ -2,7 +2,12 @@
  * PostHog Analytics Configuration
  *
  * Privacy-first analytics for usability research
- * LGPD compliant with anonymization and consent management
+ * LGPD compliant with anonymization and unified consent management
+ *
+ * Unified Consent Model:
+ * - Single cookie consent banner covers both cookies and analytics
+ * - Accepting cookies = consent for PostHog analytics
+ * - Rejecting cookies = only essential cookies, no analytics
  */
 
 import posthog from 'posthog-js'
@@ -11,6 +16,10 @@ let isInitialized = false
 
 /**
  * Initialize PostHog with privacy-first configuration
+ *
+ * PostHog always initializes, but respects user consent:
+ * - With consent: full analytics + session recording
+ * - Without consent: opt-out mode (no data collection)
  */
 export function initPostHog() {
   // Only initialize in browser
@@ -22,7 +31,9 @@ export function initPostHog() {
   // Require API key
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
   if (!apiKey) {
-    console.warn('[PostHog] API key not configured. Analytics disabled.')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[PostHog] API key not configured. Analytics disabled.')
+    }
     return
   }
 
@@ -32,6 +43,7 @@ export function initPostHog() {
 
       // Privacy & LGPD Compliance
       persistence: 'localStorage',           // Use localStorage for session
+      opt_out_capturing_by_default: false,   // Start in opt-in mode
 
       // Session Recording Configuration
       disable_session_recording: !hasUserConsent(), // Disabled without consent
@@ -50,7 +62,11 @@ export function initPostHog() {
       loaded: (ph) => {
         if (process.env.NODE_ENV === 'development') {
           console.log('[PostHog] Initialized successfully')
+          console.log('[PostHog] User consent:', hasUserConsent())
         }
+
+        // Apply current consent status immediately
+        updateConsentStatus()
       },
     })
 
@@ -62,31 +78,54 @@ export function initPostHog() {
 
 /**
  * Check if user has consented to analytics
+ *
+ * Unified consent model: only cookie-consent is required
+ * Accepting cookies implies consent for analytics and research
  */
 export function hasUserConsent(): boolean {
   if (typeof window === 'undefined') return false
 
   const cookieConsent = localStorage.getItem('cookie-consent')
-  const researchConsent = localStorage.getItem('research-consent')
 
-  // User must accept cookies AND research consent
-  return cookieConsent === 'accepted' && researchConsent === 'accepted'
+  // Simplified: only cookie consent is required
+  // Analytics consent is bundled in the cookie consent banner
+  return cookieConsent === 'accepted'
 }
 
 /**
  * Update PostHog consent status
+ *
+ * Called when user accepts/rejects cookie consent
+ * or when consent status changes
  */
 export function updateConsentStatus() {
-  if (!isInitialized) return
+  if (!isInitialized) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[PostHog] Not initialized yet, skipping consent update')
+    }
+    return
+  }
 
   const hasConsent = hasUserConsent()
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[PostHog] Updating consent status:', hasConsent ? 'ACCEPTED' : 'REJECTED')
+  }
 
   if (hasConsent) {
     posthog.opt_in_capturing()
     posthog.startSessionRecording()
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[PostHog] ✅ Analytics ENABLED - collecting data')
+    }
   } else {
     posthog.opt_out_capturing()
     posthog.stopSessionRecording()
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[PostHog] ❌ Analytics DISABLED - not collecting data')
+    }
   }
 }
 
