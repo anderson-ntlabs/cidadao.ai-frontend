@@ -36,9 +36,28 @@ export async function middleware(request: NextRequest) {
 
   // Security Headers
 
-  // CSP that allows VLibras, Spotify embeds, and other third-party services
-  const simpleCsp = "default-src 'self' https:; frame-src 'self' https://open.spotify.com https://vlibras.gov.br; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' data: https:; connect-src 'self' https:; media-src 'self' https: blob:;";
-  response.headers.set('Content-Security-Policy', simpleCsp);
+  /**
+   * Content Security Policy
+   *
+   * Uses environment-aware CSP configuration from csp.config.ts
+   *
+   * Note on 'unsafe-eval':
+   * - Required by Next.js for webpack hot module replacement (HMR) in dev
+   * - Required by Next.js dynamic imports and code splitting in production
+   * - Cannot be removed without breaking core Next.js functionality
+   *
+   * Note on 'unsafe-inline':
+   * - Required by Next.js for inline styles and scripts
+   * - Future improvement: Use nonce-based CSP when Next.js fully supports it
+   *
+   * VLibras exception:
+   * - Brazilian government accessibility tool (LIBRAS translation)
+   * - Requires script-src, frame-src, img-src, and connect-src permissions
+   * - Official service: vlibras.gov.br
+   */
+  const cspConfig = getCSPConfig();
+  const cspHeader = buildCSP(cspConfig);
+  response.headers.set('Content-Security-Policy', cspHeader);
 
   // Prevent XSS attacks
   response.headers.set('X-Content-Type-Options', 'nosniff');
