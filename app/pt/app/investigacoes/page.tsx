@@ -3,9 +3,9 @@
 import '@/styles/design-system/tokens/index.css'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  Search, Filter, TrendingUp, AlertTriangle, FileSearch, 
-  Calendar, ChevronRight, Download, Eye, Clock, 
+import {
+  Search, Filter, TrendingUp, AlertTriangle, FileSearch,
+  Calendar, ChevronRight, Download, Eye, Clock,
   BarChart3, Shield, Zap, Target, Activity, Users,
   CheckCircle, XCircle, AlertCircle, RefreshCw
 } from 'lucide-react'
@@ -14,6 +14,7 @@ import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/gl
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { sanitizeSearchQuery } from '@/lib/security/input-validation'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
@@ -162,15 +163,30 @@ export default function InvestigacoesPage() {
   const [investigations] = useState(mockInvestigations)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Handler for search input with sanitization
+  const handleSearchChange = (value: string) => {
+    const sanitized = sanitizeSearchQuery(value)
+    setSearchTerm(sanitized)
+  }
+
+  // Validate filter values to prevent manipulation
+  const isValidType = (type: string): boolean => {
+    return type === 'all' || ['anomaly', 'pattern', 'fraud', 'overpricing'].includes(type)
+  }
+
+  const isValidStatus = (status: string): boolean => {
+    return status === 'all' || ['active', 'completed', 'pending', 'critical'].includes(status)
+  }
+
   // Filtrar investigações
   const filteredInvestigations = investigations.filter(inv => {
     const matchesSearch = inv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          inv.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          inv.id.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesType = selectedType === 'all' || inv.type === selectedType
     const matchesStatus = selectedStatus === 'all' || inv.status === selectedStatus
-    
+
     return matchesSearch && matchesType && matchesStatus
   })
 
@@ -323,7 +339,8 @@ export default function InvestigacoesPage() {
                     type="text"
                     placeholder="Buscar investigações..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    maxLength={200}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200/50 dark:border-gray-700/50 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>

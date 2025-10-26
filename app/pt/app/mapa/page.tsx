@@ -54,6 +54,22 @@ export default function MapaTransparencia() {
   const [showModal, setShowModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Validate state code (UF) format
+  const isValidStateCode = (code: string): boolean => {
+    const validStates = Object.keys(estadoNomes);
+    return validStates.includes(code.toUpperCase());
+  }
+
+  // Handler for state selection with validation
+  const handleStateSelection = (code: string) => {
+    const upperCode = code.toUpperCase();
+    if (isValidStateCode(upperCode)) {
+      setEstadoSelecionado(upperCode);
+    } else {
+      logger.warn('Invalid state code attempted', { code });
+    }
+  };
+
   // Carregar dados do estado selecionado
   const estadoInfo = estadoSelecionado && apiMapData?.states[estadoSelecionado]
     ? apiMapData.states[estadoSelecionado]
@@ -398,7 +414,7 @@ export default function MapaTransparencia() {
                             className={`transition-all duration-200 ${hasAPI ? 'cursor-pointer hover:opacity-90' : 'cursor-not-allowed'}`}
                             onMouseMove={(e) => handleMouseMove(e, sigla)}
                             onMouseLeave={handleMouseLeave}
-                            onClick={() => hasAPI && setEstadoSelecionado(sigla)}
+                            onClick={() => hasAPI && handleStateSelection(sigla)}
                           />
                         </g>
                       );
@@ -449,7 +465,7 @@ export default function MapaTransparencia() {
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 value={estadoSelecionado}
-                onChange={(e) => setEstadoSelecionado(e.target.value)}
+                onChange={(e) => handleStateSelection(e.target.value)}
               >
                 <option value="">Selecione um estado</option>
                 {Object.entries(estadoNomes).map(([sigla, nome]) => (
