@@ -1,4 +1,5 @@
 import { createClient } from './client'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * Supabase Auth Helpers
@@ -24,7 +25,7 @@ export async function signInWithGoogle() {
   })
 
   if (error) {
-    console.error('Google login error:', error)
+    logger.error(error, { provider: 'google', action: 'signInWithOAuth' })
     throw error
   }
 
@@ -45,7 +46,7 @@ export async function signInWithGithub() {
   })
 
   if (error) {
-    console.error('GitHub login error:', error)
+    logger.error(error, { provider: 'github', action: 'signInWithOAuth' })
     throw error
   }
 
@@ -72,7 +73,7 @@ export async function signInWithSpotify() {
   })
 
   if (error) {
-    console.error('Spotify login error:', error)
+    logger.error(error, { provider: 'spotify', action: 'signInWithOAuth' })
     throw error
   }
 
@@ -99,7 +100,7 @@ export async function signInWithFacebook() {
   })
 
   if (error) {
-    console.error('Facebook login error:', error)
+    logger.error(error, { provider: 'facebook', action: 'signInWithOAuth' })
     throw error
   }
 
@@ -115,7 +116,7 @@ export async function signOut() {
   const { error } = await supabase.auth.signOut()
 
   if (error) {
-    console.error('Logout error:', error)
+    logger.error(error, { action: 'signOut' })
     throw error
   }
 
@@ -143,7 +144,7 @@ export async function getCurrentUser() {
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error) {
-    console.error('Get user error:', error)
+    logger.error(error, { action: 'getCurrentUser' })
     return null
   }
 

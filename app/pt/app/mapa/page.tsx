@@ -26,6 +26,7 @@ import {
   type APIDetail
 } from '@/lib/services/transparency-map.service';
 import { estadoNomes } from '@/data/transparency-apis';
+import { logger } from '@/lib/utils/logger';
 
 interface GeoJSONStateData {
   type: string;
@@ -150,7 +151,10 @@ export default function MapaTransparencia() {
         setViewBox(`${bounds.minX - padding} ${bounds.minY - padding} ${width} ${height}`);
       })
       .catch(err => {
-        console.error('Erro ao carregar mapa:', err);
+        logger.error(err instanceof Error ? err : new Error('Erro ao carregar mapa'), {
+          component: 'MapPage',
+          action: 'loadGeoJSON'
+        });
         setIsLoading(false);
       });
   }, [calculateBounds]);
@@ -174,7 +178,11 @@ export default function MapaTransparencia() {
         setApiError(null);
       })
       .catch(error => {
-        console.error('Error loading API data:', error);
+        logger.error(error instanceof Error ? error : new Error('Error loading API data'), {
+          component: 'MapPage',
+          action: 'fetchTransparencyMap',
+          hasCachedData: !!cachedData
+        });
         setApiError(error.message);
         setIsLoadingAPI(false);
         // Keep cached data if fetch fails
@@ -196,7 +204,10 @@ export default function MapaTransparencia() {
       const data = await fetchTransparencyMap();
       setApiMapData(data);
     } catch (error) {
-      console.error('Error refreshing map data:', error);
+      logger.error(error instanceof Error ? error : new Error('Error refreshing map data'), {
+        component: 'MapPage',
+        action: 'handleRefresh'
+      });
       setApiError(error instanceof Error ? error.message : 'Erro ao atualizar dados');
     } finally {
       setIsRefreshing(false);

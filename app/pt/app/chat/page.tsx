@@ -13,6 +13,7 @@ import { getAgentColorTheme, buildGradientClasses, getAgentRingClass } from '@/l
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { VLibrasWidget } from '@/components/a11y'
+import { logger } from '@/lib/utils/logger'
 
 export default function ChatPage() {
   const { user } = useAuth()
@@ -39,7 +40,7 @@ export default function ChatPage() {
   // Initialize chat ONCE
   useEffect(() => {
     if (!isInitialized) {
-      console.log('🚀 Initializing chat...')
+      logger.debug('Initializing chat')
       initializeChat()
       setIsInitialized(true)
     }
@@ -100,7 +101,10 @@ export default function ChatPage() {
       await loadSession(sessionId)
       toast.success('Sucesso', 'Conversa carregada!')
     } catch (error) {
-      console.error('Failed to load session:', error)
+      logger.error(error instanceof Error ? error : new Error('Failed to load session'), {
+        sessionId,
+        userId: user?.id
+      })
       toast.error('Erro', 'Falha ao carregar conversa')
     }
   }
