@@ -9,6 +9,7 @@ import { ButtonV2 } from '@/components/ui/button'
 import { SkeletonChatHistory } from '@/components/ui/skeleton-cards'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { logger } from '@/lib/utils/logger'
 
 interface ChatHistorySidebarProps {
   isOpen: boolean
@@ -36,7 +37,10 @@ export function ChatHistorySidebar({
       const userSessions = await chatSessionService.getUserSessions(20)
       setSessions(userSessions)
     } catch (error) {
-      console.error('Failed to load chat sessions:', error)
+      logger.error(error instanceof Error ? error : new Error('Failed to load chat sessions'), {
+        component: 'ChatHistorySidebar',
+        action: 'loadSessions'
+      })
     } finally {
       setLoading(false)
     }
