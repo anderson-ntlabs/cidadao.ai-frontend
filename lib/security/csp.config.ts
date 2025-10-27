@@ -46,6 +46,26 @@ export function buildCSP(
  * Production CSP Configuration
  *
  * Balanced policy for security and Next.js compatibility
+ *
+ * ⚠️ Security Note on 'unsafe-eval' and 'unsafe-inline':
+ *
+ * These directives are required by Next.js core functionality and cannot be
+ * removed without breaking the application:
+ *
+ * - 'unsafe-eval': Required for Next.js webpack runtime, dynamic imports,
+ *   and code splitting. This is a known limitation of Next.js.
+ *
+ * - 'unsafe-inline': Required for Next.js inline scripts and styles injected
+ *   during server-side rendering (SSR) and client-side hydration.
+ *
+ * Future improvement: Next.js 14+ may support nonce-based CSP which would
+ * allow removing 'unsafe-inline'. Monitor: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
+ *
+ * The CSP still provides significant protection by:
+ * - Restricting resource origins to specific trusted domains
+ * - Blocking plugins via object-src 'none'
+ * - Preventing clickjacking via frame-ancestors
+ * - Enforcing HTTPS via upgrade-insecure-requests
  */
 export const productionCSP: CSPDirectives = {
   'default-src': ["'self'"],
@@ -53,8 +73,8 @@ export const productionCSP: CSPDirectives = {
   // Scripts: Allow self, eval (Next.js), inline (Next.js), analytics, and VLibras
   'script-src': [
     "'self'",
-    "'unsafe-eval'", // Required for Next.js
-    "'unsafe-inline'", // Required for Next.js inline scripts
+    "'unsafe-eval'", // ⚠️ Required for Next.js - see note above
+    "'unsafe-inline'", // ⚠️ Required for Next.js - see note above
     'https://vercel.live',
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',

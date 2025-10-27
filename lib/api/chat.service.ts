@@ -14,6 +14,8 @@ import { sendBackendMessage } from './chat-adapter-backend';
 import { sendFallbackMessage } from './chat-adapter-fallback';
 import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
 import { isFeatureEnabled } from '@/lib/feature-flags';
+import { sanitizeSearchQuery, isValidInvestigationId, InputValidator } from '@/lib/security/input-validation';
+import { logger } from '@/lib/utils/logger';
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -31,43 +33,75 @@ export const chatService = {
   // Send a chat message
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
-      console.log('Chat service: Routing message');
-      
+      // Validate and sanitize input
+      const validator = new InputValidator();
+
+      validator
+        .required('message', request.message, 'Message')
+        .length('message', request.message, 1, 4000);
+
+      // Validate session_id if provided
+      if (request.session_id && !isValidInvestigationId(request.session_id)) {
+        validator.addError('session_id', 'Invalid session ID format');
+      }
+
+      if (!validator.isValid()) {
+        const errors = validator.getErrors();
+        logger.warn('Chat input validation failed', { errors, request });
+        throw new Error(`Invalid input: ${Object.values(errors).join(', ')}`);
+      }
+
+      // Sanitize message to prevent injection
+      const sanitizedMessage = sanitizeSearchQuery(request.message);
+
+      logger.debug('Chat service: Routing message', {
+        messageLength: sanitizedMessage.length,
+        hasSessionId: !!request.session_id
+      });
+
       // Use smart chat service if feature is enabled
       if (isFeatureEnabled('smartChatEnabled')) {
-        console.log('Using Smart Chat Service with caching and optimization');
+        logger.debug('Using Smart Chat Service with caching and optimization');
         
         // Determine model preference based on context
         const modelPreference = request.context?.model_preference || 'auto';
         
-        const response = await cachedSmartChatService.sendMessage(request.message, {
+        const response = await cachedSmartChatService.sendMessage(sanitizedMessage, {
           preferredModel: modelPreference,
           useDrummond: true,
         });
-        
+
         return response;
       }
-      
+
       // Use the official backend adapter
-      console.log('Using official backend adapter');
-      
+      logger.debug('Using official backend adapter');
+
+      // Create sanitized request
+      const sanitizedRequest: ChatRequest = {
+        ...request,
+        message: sanitizedMessage
+      };
+
       try {
-        const response = await sendBackendMessage(request);
-        console.log('✅ Backend responded successfully');
+        const response = await sendBackendMessage(sanitizedRequest);
+        logger.debug('Backend responded successfully');
         return response;
       } catch (backendError) {
-        console.error('Backend adapter failed:', backendError);
+        logger.warn('Backend adapter failed, falling back', { error: backendError });
 
         // Fallback to consolidated fallback adapter
-        console.log('Falling back to multi-endpoint fallback adapter...');
-        const response = await sendFallbackMessage(request);
-        console.log('Chat response from fallback:', response);
+        const response = await sendFallbackMessage(sanitizedRequest);
+        logger.debug('Chat response from fallback');
 
         return response;
       }
       
     } catch (error) {
-      console.error('Chat service error:', error);
+      logger.error(error instanceof Error ? error : new Error('Chat service error'), {
+        service: 'chatService',
+        action: 'sendMessage'
+      });
       throw error;
     }
   },
