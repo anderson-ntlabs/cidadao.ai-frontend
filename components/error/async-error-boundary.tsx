@@ -158,7 +158,7 @@ export class AsyncErrorBoundary extends Component<
               <Button
                 onClick={this.resetErrorBoundary}
                 className="w-full"
-                variant="default"
+                variant="primary"
               >
                 <RefreshCcw className="w-4 h-4 mr-2" />
                 Tentar Novamente
