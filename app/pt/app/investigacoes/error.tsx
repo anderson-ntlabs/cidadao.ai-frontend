@@ -89,7 +89,7 @@ export default function InvestigationsError({ error, reset }: ErrorProps) {
                   window.location.href = '/pt/app/investigacoes'
                 }
               }}
-              variant="outline"
+              variant="secondary"
               className="w-full"
               size="lg"
             >

@@ -77,7 +77,7 @@ export default function ChatError({ error, reset }: ErrorProps) {
                   window.location.href = '/pt/app/chat'
                 }
               }}
-              variant="outline"
+              variant="secondary"
               className="w-full"
               size="lg"
             >

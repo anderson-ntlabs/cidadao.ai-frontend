@@ -83,7 +83,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
 
             {/* Go to Chat */}
             <Link href="/pt/app/chat" className="block">
-              <Button variant="outline" className="w-full" size="lg">
+              <Button variant="secondary" className="w-full" size="lg">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Ir para o Chat
               </Button>

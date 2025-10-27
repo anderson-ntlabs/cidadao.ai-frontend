@@ -110,7 +110,7 @@ export function RateLimitNotice({
             <Button
               onClick={onRetry}
               size="sm"
-              variant="outline"
+              variant="secondary"
               className="border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/20"
             >
               <RefreshCw className="w-4 h-4 mr-2" />

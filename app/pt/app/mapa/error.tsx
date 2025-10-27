@@ -91,7 +91,7 @@ export default function MapError({ error, reset }: ErrorProps) {
                   window.location.href = url.toString()
                 }
               }}
-              variant="outline"
+              variant="secondary"
               className="w-full"
               size="lg"
             >
