@@ -57,10 +57,16 @@ export function sanitizeFilename(filename: string): string {
  * Validate and sanitize investigation ID
  */
 export function isValidInvestigationId(id: string): boolean {
+  if (!id || typeof id !== 'string') return false;
+
   // UUID v4 format
   const uuidRegex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
+
+  // Custom session formats: maritaca_, session_, smart_, etc.
+  const customSessionRegex = /^(maritaca|session|smart|chat)_[0-9]+(_[a-z0-9]+)?$/i;
+
+  return uuidRegex.test(id) || customSessionRegex.test(id);
 }
 
 /**
