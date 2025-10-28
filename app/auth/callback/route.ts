@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') ?? '/pt/home'
+  const next = requestUrl.searchParams.get('next') ?? '/pt/app'
 
   if (code) {
     try {
