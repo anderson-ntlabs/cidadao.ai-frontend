@@ -48,15 +48,21 @@ export async function sendMaritacaMessage(request: MaritacaDirectRequest): Promi
   const model = request.model || MARITACA_MODELS.SABIAZINHO3;
 
   try {
+    // Backend expects 'messages' array, not 'message' string
     const payload = {
-      message: request.message,
+      messages: [
+        {
+          role: 'user',
+          content: request.message
+        }
+      ],
       session_id: request.session_id || `maritaca_${Date.now()}`,
       model: model,
       context: request.context,
     };
 
     logger.debug('Chat Maritaca: Sending to /api/v1/chat/direct/maritaca', {
-      message: payload.message,
+      message: request.message,
       model: model
     });
 
