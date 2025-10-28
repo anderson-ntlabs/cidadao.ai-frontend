@@ -22,10 +22,10 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
   // System is PT-only (English landing page doesn't use authenticated routes)
   // Phase 1: Only Home and Chat are active
   const navigation = [
-    { name: 'Início', href: '/pt/home', icon: Home, active: true },
-    { name: 'Chat com IAs', href: '/pt/chat', icon: MessageSquare, active: true },
-    { name: 'Dashboard', href: '/pt/dashboard', icon: LayoutDashboard, active: false, comingSoon: true },
-    { name: 'Notificações', href: '/pt/notificacoes', icon: Bell, active: false, comingSoon: true },
+    { name: 'Início', href: '/pt/app', icon: Home, active: true },
+    { name: 'Chat com IAs', href: '/pt/app/chat', icon: MessageSquare, active: true },
+    { name: 'Investigações', href: '/pt/app/investigacoes', icon: LayoutDashboard, active: true },
+    { name: 'Notificações', href: '/pt/app/notificacoes', icon: Bell, active: true },
   ]
       
   const handleLogout = () => {
@@ -43,7 +43,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
       <nav className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={`/${locale}/home`} className="flex items-center space-x-3">
+          <Link href={`/${locale}/app`} className="flex items-center space-x-3">
             <Image
               src="/forum-icon.png"
               alt="Cidadão.AI"

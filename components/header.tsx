@@ -69,8 +69,8 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link 
-              href={isLandingPage ? `/${locale}` : `/${locale}/home`} 
+            <Link
+              href={isLandingPage ? `/${locale}` : `/${locale}/app`}
               className="flex items-center gap-3 group"
               aria-label="Cidadão.AI Home"
             >

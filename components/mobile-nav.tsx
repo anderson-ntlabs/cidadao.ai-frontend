@@ -28,12 +28,12 @@ interface MobileNavItem {
 const mobileNavItems: MobileNavItem[] = [
   {
     name: 'Início',
-    href: '/pt/home',
+    href: '/pt/app',
     icon: Home
   },
   {
     name: 'Chat',
-    href: '/pt/chat',
+    href: '/pt/app/chat',
     icon: MessageSquare
   }
 ]
@@ -69,7 +69,7 @@ export function MobileNavV2() {
   }, [lastScrollY])
   
   const isActive = (href: string) => {
-    if (href === '/pt/home') return pathname === href
+    if (href === '/pt/app') return pathname === href || pathname === '/pt/app'
     return pathname.startsWith(href)
   }
   
