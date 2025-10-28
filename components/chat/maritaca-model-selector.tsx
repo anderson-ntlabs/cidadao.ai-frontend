@@ -33,11 +33,11 @@ export function MaritacaModelSelector({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           className={cn(
             'gap-2 text-xs font-medium',
-            'border-gray-200 dark:border-gray-700',
+            'border border-gray-200 dark:border-gray-700',
             'hover:border-green-500 dark:hover:border-green-500',
             'transition-all',
             className
