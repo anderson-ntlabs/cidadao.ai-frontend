@@ -73,6 +73,24 @@ export default function ChatPage() {
     }
   }, [error, clearError])
 
+  // Clear messages when switching modes
+  const handleModeChange = (newMode: ChatMode) => {
+    setChatMode(newMode)
+
+    // Clear chat history when switching modes
+    if (typeof window !== 'undefined') {
+      // Create new session for the new mode
+      createNewSession()
+
+      toast.success(
+        newMode === 'maritaca' ? 'Modo Maritaca Ativado' : 'Modo Cidadão.AI Ativado',
+        newMode === 'maritaca'
+          ? 'Conversando diretamente com os modelos base da Maritaca.AI'
+          : 'Sistema multi-agente Cidadão.AI ativado'
+      )
+    }
+  }
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !canSendMessage) return
 
@@ -168,10 +186,13 @@ export default function ChatPage() {
               />
               <div>
                 <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  Cidadão.AI
+                  {chatMode === 'maritaca' ? 'Maritaca.AI Direto' : 'Cidadão.AI'}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Transparência Pública
+                  {chatMode === 'maritaca'
+                    ? `Modelo ${selectedModel === MARITACA_MODELS.SABIA3 ? 'Sabiá-3' : 'Sabiazinho-3'}`
+                    : 'Transparência Pública'
+                  }
                 </p>
               </div>
             </div>
@@ -179,7 +200,7 @@ export default function ChatPage() {
             <div className="flex items-center gap-2">
               <ChatModeToggle
                 mode={chatMode}
-                onModeChange={setChatMode}
+                onModeChange={handleModeChange}
               />
               {chatMode === 'maritaca' && (
                 <MaritacaModelSelector
@@ -306,15 +327,30 @@ export default function ChatPage() {
                       message.role === 'user' ? 'order-first' : ''
                     )}>
                       {/* Agent name for assistant messages with color indicator */}
-                      {message.role === 'assistant' && messageAgent && (
+                      {message.role === 'assistant' && (
                         <div className="mb-1 px-1 flex items-center gap-2">
-                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                            {messageAgent.name}
-                          </span>
-                          {/* Agent role badge */}
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                            • {messageAgent.role.pt}
-                          </span>
+                          {messageAgent ? (
+                            <>
+                              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                {messageAgent.name}
+                              </span>
+                              {/* Agent role badge */}
+                              <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                                • {messageAgent.role.pt}
+                              </span>
+                            </>
+                          ) : (
+                            /* Maritaca direct mode indicator */
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-lg">🦜</span>
+                              <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+                                Maritaca.AI Direto
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                {message.metadata?.model === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
 
