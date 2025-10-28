@@ -71,11 +71,6 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                   >
                     <item.icon className="w-4 h-4" />
                     {item.name}
-                    {item.comingSoon && (
-                      <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-yellow-500 text-white rounded">
-                        EM BREVE
-                      </span>
-                    )}
                   </div>
                 )
               }
@@ -154,11 +149,6 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                     >
                       <item.icon className="w-4 h-4" />
                       {item.name}
-                      {item.comingSoon && (
-                        <span className="ml-auto px-2 py-0.5 text-[10px] font-bold bg-yellow-500 text-white rounded">
-                          EM BREVE
-                        </span>
-                      )}
                     </div>
                   )
                 }
