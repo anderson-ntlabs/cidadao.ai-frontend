@@ -185,7 +185,15 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
         {/* Language and Theme section in mobile */}
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
           <div className="space-y-4">
-            <LanguageSwitcherV2 variant="mobile" />
+            {/* Language Selector - Only show on public pages */}
+            {isPublicPage && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {locale === 'pt' ? 'Idioma' : 'Language'}
+                </span>
+                <LanguageSelector />
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {locale === 'pt' ? 'Tema' : 'Theme'}
