@@ -13,6 +13,9 @@ import { getAgentColorTheme, buildGradientClasses, getAgentRingClass } from '@/l
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { VLibrasWidget } from '@/components/a11y'
+import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
+import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
+import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
 import { logger } from '@/lib/utils/logger'
 
 export default function ChatPage() {
@@ -21,6 +24,8 @@ export default function ChatPage() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [currentAgentId, setCurrentAgentId] = useState<string>('abaporu')
   const [isInitialized, setIsInitialized] = useState(false)
+  const [chatMode, setChatMode] = useState<ChatMode>('cidadao')
+  const [selectedModel, setSelectedModel] = useState<MaritacaModel>(MARITACA_MODELS.SABIAZINHO3)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -76,6 +81,16 @@ export default function ChatPage() {
 
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
+    }
+
+    // Store the selected mode and model in localStorage for the chat service to use
+    if (typeof window !== 'undefined') {
+      if (chatMode === 'maritaca') {
+        localStorage.setItem('maritaca_selected_model', selectedModel)
+      } else {
+        // Clear Maritaca model when in Cidadão.AI mode
+        localStorage.removeItem('maritaca_selected_model')
+      }
     }
 
     await sendMessage(message, false)
@@ -162,6 +177,16 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ChatModeToggle
+                mode={chatMode}
+                onModeChange={setChatMode}
+              />
+              {chatMode === 'maritaca' && (
+                <MaritacaModelSelector
+                  selectedModel={selectedModel}
+                  onModelChange={setSelectedModel}
+                />
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -181,6 +206,11 @@ export default function ChatPage() {
                 Histórico
               </Button>
             </div>
+          </div>
+
+          {/* Mode Description */}
+          <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+            <ChatModeDescription mode={chatMode} />
           </div>
         </div>
       </div>

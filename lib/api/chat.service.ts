@@ -62,13 +62,20 @@ export const chatService = {
       // Use smart chat service if feature is enabled
       if (isFeatureEnabled('smartChatEnabled')) {
         logger.debug('Using Smart Chat Service with caching and optimization');
-        
+
         // Determine model preference based on context
         const modelPreference = request.context?.model_preference || 'auto';
-        
+
+        // Check if Maritaca model is selected in localStorage
+        const maritacaModel = typeof window !== 'undefined'
+          ? localStorage.getItem('maritaca_selected_model') as any
+          : null;
+
         const response = await cachedSmartChatService.sendMessage(sanitizedMessage, {
           preferredModel: modelPreference,
           useDrummond: true,
+          useMaritaca: !!maritacaModel,
+          maritacaModel: maritacaModel || undefined,
         });
 
         return response;

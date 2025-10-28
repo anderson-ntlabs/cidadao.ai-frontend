@@ -3,6 +3,7 @@ import { sendSSEMessage, type SSEMessageOptions } from '@/lib/api/chat-adapter-s
 import { sendBackendMessage } from '@/lib/api/chat-adapter-backend';
 import { sendFallbackMessage } from '@/lib/api/chat-adapter-fallback';
 import { sendChatAsInvestigation } from '@/lib/api/chat-adapter';
+import { sendMaritacaMessage, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca';
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry';
 import { getChatCacheIDB } from '@/lib/services/chat-cache-idb.service';
 import { logger } from '@/lib/utils/logger';
@@ -26,6 +27,8 @@ export interface SmartChatOptions {
   streaming?: boolean; // Enable SSE streaming
   onChunk?: (text: string) => void; // Callback for streaming chunks
   onProgress?: (accumulated: string) => void; // Callback for accumulated text
+  maritacaModel?: MaritacaModel; // Maritaca model selection
+  useMaritaca?: boolean; // Force use of Maritaca adapter
 }
 
 /**
@@ -33,6 +36,17 @@ export interface SmartChatOptions {
  */
 export class SmartChatService {
   private endpoints: ChatEndpoint[] = [
+    {
+      url: '/api/v1/chat/direct/maritaca',
+      name: 'Maritaca Direct (Free)',
+      adapter: async (request) => {
+        // Maritaca adapter will be called with model selection
+        throw new Error('Maritaca adapter requires model selection - use sendMessage with maritacaModel');
+      },
+      model: 'sabiazinho-3',
+      costLevel: 0, // Free tier
+      priority: 1,
+    },
     {
       url: '/api/v1/chat/stream',
       name: 'SSE Streaming (Primary)',
@@ -42,7 +56,7 @@ export class SmartChatService {
       },
       model: 'sabiazinho-3',
       costLevel: 1,
-      priority: 1,
+      priority: 2,
     },
     {
       url: '/api/v1/chat/message',
@@ -50,7 +64,7 @@ export class SmartChatService {
       adapter: sendBackendMessage,
       model: 'sabiazinho-3',
       costLevel: 1,
-      priority: 2,
+      priority: 3,
     },
     {
       url: '/api/v1/chat/fallback',
@@ -58,7 +72,7 @@ export class SmartChatService {
       adapter: sendFallbackMessage,
       model: 'sabiazinho-3',
       costLevel: 1,
-      priority: 3,
+      priority: 4,
     },
     {
       url: '/api/investigate',
@@ -66,7 +80,7 @@ export class SmartChatService {
       adapter: sendChatAsInvestigation,
       model: 'local',
       costLevel: 0,
-      priority: 4,
+      priority: 5,
     },
   ];
 
@@ -77,6 +91,38 @@ export class SmartChatService {
     message: string,
     options: SmartChatOptions = {}
   ): Promise<ChatResponse> {
+    // If Maritaca is explicitly requested, use it directly
+    if (options.useMaritaca || options.maritacaModel) {
+      logger.debug('SmartChat: Using Maritaca direct endpoint');
+
+      const sessionId = `maritaca_${Date.now()}`;
+      const maritacaRequest = {
+        message,
+        session_id: sessionId,
+        model: options.maritacaModel,
+        context: {
+          model_preference: options.preferredModel || 'auto',
+        },
+      };
+
+      try {
+        const response = await sendMaritacaMessage(maritacaRequest);
+
+        // Cache the response
+        try {
+          const cache = await getChatCacheIDB();
+          await cache.set(message, response);
+        } catch (error) {
+          logger.warn('SmartChat: Failed to cache Maritaca response', { error });
+        }
+
+        return response;
+      } catch (error) {
+        logger.error('SmartChat: Maritaca failed, falling back to other adapters', { error });
+        // Continue to fallback logic below
+      }
+    }
+
     // Check cache first (only for non-streaming requests)
     if (!options.streaming) {
       try {
