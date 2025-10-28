@@ -6,9 +6,12 @@
  * and make route changes easier to manage.
  *
  * Route Structure:
- * - Public routes: /pt/* or /en/*
- * - Authenticated routes: /pt/app/* or /en/app/*
+ * - Public routes (bilingual): /pt/* and /en/*
+ * - Authenticated routes (Portuguese only): /pt/app/*
  * - Auth routes: /auth/*
+ *
+ * Note: The authenticated system (/pt/app/*) is only available in Portuguese.
+ * English users are redirected to Portuguese system after login.
  */
 
 // ============================================================================
@@ -38,9 +41,9 @@ export const PUBLIC_ROUTES_EN = {
 } as const
 
 // ============================================================================
-// Authenticated Routes (Portuguese)
+// Authenticated Routes (Portuguese only - system is not bilingual after login)
 // ============================================================================
-export const AUTH_ROUTES_PT = {
+export const AUTH_ROUTES = {
   // Main authenticated pages
   APP: '/pt/app',
   CHAT: '/pt/app/chat',
@@ -52,23 +55,6 @@ export const AUTH_ROUTES_PT = {
 
   // Investigation details (use with ID parameter)
   INVESTIGATION_DETAIL: (id: string) => `/pt/app/investigacoes/${id}`,
-} as const
-
-// ============================================================================
-// Authenticated Routes (English)
-// ============================================================================
-export const AUTH_ROUTES_EN = {
-  // Main authenticated pages
-  APP: '/en/app',
-  CHAT: '/en/app/chat',
-  DASHBOARD: '/en/app/dashboard',
-  INVESTIGATIONS: '/en/app/investigations',
-  PROFILE: '/en/app/profile',
-  SETTINGS: '/en/app/settings',
-  NOTIFICATIONS: '/en/app/notifications',
-
-  // Investigation details (use with ID parameter)
-  INVESTIGATION_DETAIL: (id: string) => `/en/app/investigations/${id}`,
 } as const
 
 // ============================================================================
@@ -93,20 +79,18 @@ export const API_ROUTES = {
 // ============================================================================
 
 /**
- * Get routes for specific locale
+ * Get public routes for specific locale
  */
-export function getRoutes(locale: 'pt' | 'en') {
-  return {
-    public: locale === 'pt' ? PUBLIC_ROUTES_PT : PUBLIC_ROUTES_EN,
-    auth: locale === 'pt' ? AUTH_ROUTES_PT : AUTH_ROUTES_EN,
-  }
+export function getPublicRoutes(locale: 'pt' | 'en') {
+  return locale === 'pt' ? PUBLIC_ROUTES_PT : PUBLIC_ROUTES_EN
 }
 
 /**
  * Check if route requires authentication
+ * Note: Authenticated routes only exist in Portuguese
  */
 export function isAuthRoute(pathname: string): boolean {
-  return pathname.startsWith('/pt/app/') || pathname.startsWith('/en/app/')
+  return pathname.startsWith('/pt/app/')
 }
 
 /**
@@ -128,10 +112,11 @@ export function isPublicRoute(pathname: string): boolean {
 }
 
 /**
- * Get default auth redirect for locale
+ * Get default auth redirect
+ * Note: Always returns Portuguese /pt/app (system is not bilingual after login)
  */
-export function getDefaultAuthRedirect(locale: 'pt' | 'en'): string {
-  return locale === 'pt' ? AUTH_ROUTES_PT.APP : AUTH_ROUTES_EN.APP
+export function getDefaultAuthRedirect(): string {
+  return AUTH_ROUTES.APP
 }
 
 /**
@@ -147,6 +132,5 @@ export function getLoginRoute(locale: 'pt' | 'en'): string {
 
 export type PublicRoutePT = typeof PUBLIC_ROUTES_PT[keyof typeof PUBLIC_ROUTES_PT]
 export type PublicRouteEN = typeof PUBLIC_ROUTES_EN[keyof typeof PUBLIC_ROUTES_EN]
-export type AuthRoutePT = typeof AUTH_ROUTES_PT[keyof typeof AUTH_ROUTES_PT]
-export type AuthRouteEN = typeof AUTH_ROUTES_EN[keyof typeof AUTH_ROUTES_EN]
+export type AuthRoute = typeof AUTH_ROUTES[keyof typeof AUTH_ROUTES]
 export type Locale = 'pt' | 'en'

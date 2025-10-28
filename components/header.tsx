@@ -9,7 +9,7 @@ import { Navigation, NavigationDrawer, type NavigationItem } from './navigation'
 import { Button } from './ui/button'
 import { NotificationDropdown } from './ui/notification-dropdown'
 import { ThemeToggle } from './theme-toggle'
-import { LanguageSwitcherV2 } from './language-switcher-v2'
+import { LanguageSelector } from './language-selector'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -25,9 +25,12 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  
+
   // Check if we're on landing page
   const isLandingPage = pathname === '/pt' || pathname === '/en' || pathname === '/'
+
+  // Check if we're on any public page (not authenticated /pt/app/* or /en/app/*)
+  const isPublicPage = !pathname.startsWith('/pt/app/') && !pathname.startsWith('/en/app/')
   
   const handleLogout = async () => {
     if (onLogout) {
@@ -98,12 +101,12 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Language Switcher - Disabled: System is PT-only */}
-            {/* <LanguageSwitcherV2 /> */}
+            {/* Language Selector - Only show on public pages (landing, login, about, etc.) */}
+            {isPublicPage && <LanguageSelector />}
 
             {/* Notifications - Only show if not on landing page */}
             {!isLandingPage && <NotificationDropdown locale={locale} />}
-            
+
             {/* Theme Toggle */}
             <ThemeToggle />
 
