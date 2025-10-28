@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('redirectAfterLogin')
           router.push(redirectUrl)
         } else {
-          router.push('/pt/home')
+          router.push('/pt/app')
         }
       }
     } catch (error: any) {
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             name: name,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/home`
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/app`
         }
       })
 
@@ -185,7 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/pt/home`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/pt/app`,
         }
       })
 

@@ -85,7 +85,7 @@ export default function NotificationsPage() {
                 </Button>
               )}
               
-              <Link href="/pt/settings#notifications">
+              <Link href="/pt/app/configuracoes#notifications">
                 <Button variant="secondary">
                   <Settings className="w-4 h-4 mr-2" />
                   Configurações

@@ -208,7 +208,7 @@ export default function ConfiguracoesPage() {
                     className="border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                     asChild
                   >
-                    <Link href="/pt/sobre">
+                    <Link href="/pt/about">
                       Sobre o Projeto
                     </Link>
                   </Button>
@@ -218,7 +218,7 @@ export default function ConfiguracoesPage() {
                     className="border-green-300 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900/30"
                     asChild
                   >
-                    <Link href="/pt/privacidade">
+                    <Link href="/pt/privacy">
                       Política de Privacidade
                     </Link>
                   </Button>

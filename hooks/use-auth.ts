@@ -94,7 +94,7 @@ export function useAuth(): UseAuthReturn {
         localStorage.removeItem('redirectAfterLogin')
         router.push(redirectUrl)
       } else {
-        router.push('/pt/home')
+        router.push('/pt/app')
       }
     } catch (error) {
       console.error('Login failed:', error)
@@ -135,7 +135,7 @@ export function useAuth(): UseAuthReturn {
         localStorage.removeItem('redirectAfterLogin')
         router.push(redirectUrl)
       } else {
-        router.push('/pt/home')
+        router.push('/pt/app')
       }
     } catch (error) {
       console.error('Provider login failed:', error)

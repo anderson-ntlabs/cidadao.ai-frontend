@@ -184,12 +184,12 @@ export function MobileNavDrawer({
   const drawerItems: MobileNavItem[] = [
     {
       name: 'Perfil',
-      href: '/pt/perfil',
+      href: '/pt/app/perfil',
       icon: Home // Replace with User icon when available
     },
     {
       name: 'Configurações',
-      href: '/pt/configuracoes',
+      href: '/pt/app/configuracoes',
       icon: Home // Replace with Settings icon when available
     }
   ]
