@@ -13,10 +13,10 @@ export function useRoutePreload() {
     // Determine which modules to preload based on current route
     // System is PT-only (English landing page doesn't use authenticated routes)
     const preloadMap: Record<string, () => void> = {
-      '/pt/chat': () => preloadRouteModules('chat'),
-      '/pt/dashboard': () => preloadRouteModules('dashboard'),
-      '/pt/investigacoes': () => preloadRouteModules('investigations'),
-      '/pt/perfil': () => preloadRouteModules('profile'),
+      '/pt/app/chat': () => preloadRouteModules('chat'),
+      '/pt/app/dashboard': () => preloadRouteModules('dashboard'),
+      '/pt/app/investigacoes': () => preloadRouteModules('investigations'),
+      '/pt/app/perfil': () => preloadRouteModules('profile'),
     };
 
     // Preload modules for current route
@@ -48,11 +48,11 @@ export function useRoutePreload() {
 function getAdjacentRoutes(currentPath: string): string[] {
   // System is PT-only (English landing page doesn't use authenticated routes)
   const routeGraph: Record<string, string[]> = {
-    '/pt/home': ['/pt/chat', '/pt/dashboard'],
-    '/pt/chat': ['/pt/investigacoes', '/pt/dashboard'],
-    '/pt/dashboard': ['/pt/investigacoes', '/pt/chat'],
-    '/pt/investigacoes': ['/pt/chat', '/pt/dashboard'],
-    '/pt/perfil': ['/pt/configuracoes'],
+    '/pt/app': ['/pt/app/chat', '/pt/app/dashboard'],
+    '/pt/app/chat': ['/pt/app/investigacoes', '/pt/app/dashboard'],
+    '/pt/app/dashboard': ['/pt/app/investigacoes', '/pt/app/chat'],
+    '/pt/app/investigacoes': ['/pt/app/chat', '/pt/app/dashboard'],
+    '/pt/app/perfil': ['/pt/app/configuracoes'],
   };
 
   return routeGraph[currentPath] || [];
