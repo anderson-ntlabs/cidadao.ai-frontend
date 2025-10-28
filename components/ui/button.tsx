@@ -7,7 +7,7 @@ import { type VariantProps, cva } from "class-variance-authority"
  * Uses class-variance-authority for type-safe variant management
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
   {
     variants: {
       variant: {
@@ -19,11 +19,11 @@ const buttonVariants = cva(
         warning: "bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600 hover:shadow-xl focus:ring-yellow-500"
       },
       size: {
-        sm: "h-8 px-3 text-sm",
-        md: "h-10 px-4 text-base",
-        lg: "h-12 px-6 text-lg",
-        xl: "h-14 px-8 py-4 text-xl",
-        icon: "h-10 w-10 p-0"
+        sm: "h-11 px-4 text-sm min-h-[44px]",
+        md: "h-12 px-6 text-base min-h-[44px]",
+        lg: "h-14 px-8 text-lg min-h-[48px]",
+        xl: "h-16 px-10 py-4 text-xl min-h-[52px]",
+        icon: "h-11 w-11 p-0 min-h-[44px] min-w-[44px]"
       }
     },
     defaultVariants: {
