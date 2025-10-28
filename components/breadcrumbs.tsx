@@ -67,7 +67,7 @@ export function BreadcrumbsV2({
   spacing,
   separator = 'chevron',
   showHome = true,
-  homeHref = '/pt/home',
+  homeHref = '/pt/app',
   homeLabel = 'Início',
   className,
   maxItems,

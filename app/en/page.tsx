@@ -19,7 +19,7 @@ export default function ENPage() {
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isAuthenticated) {
-      router.push('/pt/home')
+      router.push('/pt/app')
     } else {
       router.push('/pt/login')
     }
