@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/ui'
 
 export default function AgentsPage() {
   return (
@@ -14,7 +15,7 @@ export default function AgentsPage() {
           Our AI Agents
         </h1>
         <p className="text-xl text-gray-700 dark:text-gray-300 mb-12 max-w-3xl">
-          17 Brazilian artificial intelligences working collaboratively to 
+          17 Brazilian artificial intelligences working collaboratively to
           democratize access to public data and strengthen government transparency.
         </p>
 
@@ -22,7 +23,7 @@ export default function AgentsPage() {
         <div className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {agents.map((agent) => (
-              <div key={agent.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <Card key={agent.id} variant="elevated" className="overflow-hidden">
                 <div className="relative h-48 bg-gradient-to-br from-green-400 to-blue-500">
                   <Image
                     src={`/agents/${agent.image}`}
@@ -42,12 +43,12 @@ export default function AgentsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-2">{agent.name}</h3>
-                  <p className="text-sm text-green-600 dark:text-green-400 mb-3 font-medium">
+                  <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-3">
                     {agent.role.en}
                   </p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
                     {agent.description.en}
                   </p>
                   {getWikipediaLink(agent.id, 'en') && (
@@ -60,28 +61,76 @@ export default function AgentsPage() {
                       <ExternalLink className="ml-1 h-3 w-3" />
                     </Link>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
 
 
+        {/* Technical Details */}
+        <Card className="mt-16">
+          <CardHeader>
+            <CardTitle className="text-2xl">How They Work</CardTitle>
+          </CardHeader>
+          <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Network Collaboration</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Each agent has specialized skills and works autonomously yet collaboratively.
+                They share discoveries, cross-validate information, and coordinate actions
+                to maximize efficiency.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li>Asynchronous communication via message brokers</li>
+                <li>Consensus protocol for data validation</li>
+                <li>Reputation system between agents</li>
+                <li>Continuous learning with feedback loops</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-3">AI Technologies</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                We use the most modern artificial intelligence techniques to ensure
+                precision, speed, and reliability in our analyses.
+              </p>
+              <ul className="list-disc pl-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li>Large Language Models (LLMs) for textual analysis</li>
+                <li>Computer Vision for document processing</li>
+                <li>Pattern Recognition for anomaly detection</li>
+                <li>Reinforcement Learning for continuous optimization</li>
+              </ul>
+            </div>
+          </div>
+          </CardContent>
+        </Card>
+
         {/* Call to Action */}
         <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold mb-4">Ready to interact with our agents?</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Access our platform and discover how AI can help you understand public data
+          <h2 className="text-2xl font-bold mb-4">Try It Now</h2>
+          <p className="text-gray-700 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+            Our agents are ready to work. Access the public API and start
+            exploring the power of AI-assisted transparency.
           </p>
-          <Link
-            href="https://cidadao-ai-frontend.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-lg transition-shadow"
-          >
-            Access Platform
-            <ExternalLink size={20} />
-          </Link>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link
+              href="https://cidadao-api-production.up.railway.app/docs"
+              target="_blank"
+            >
+              <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-lg">
+                Access API
+              </Button>
+            </Link>
+            <Link
+              href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+              target="_blank"
+            >
+              <Button variant="secondary">
+                View Source Code
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
