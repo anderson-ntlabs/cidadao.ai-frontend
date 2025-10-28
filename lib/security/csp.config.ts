@@ -80,6 +80,8 @@ export const productionCSP: CSPDirectives = {
     'https://www.google-analytics.com',
     'https://vlibras.gov.br', // VLibras CDN
     'https://*.vlibras.gov.br', // VLibras subdomains
+    'https://cdn.jsdelivr.net', // VLibras plugin from jsdelivr CDN
+    'https://us-assets.i.posthog.com', // PostHog assets
   ],
 
   // Styles: Allow self and inline styles (Next.js requirement)
@@ -112,6 +114,9 @@ export const productionCSP: CSPDirectives = {
     'https://*.sentry.io',
     'https://vlibras.gov.br', // VLibras API
     'https://*.vlibras.gov.br', // VLibras subdomains
+    'https://us.i.posthog.com', // PostHog events
+    'https://us-assets.i.posthog.com', // PostHog assets
+    'https://app.posthog.com', // PostHog app
   ],
 
   // Media: Only self-hosted
