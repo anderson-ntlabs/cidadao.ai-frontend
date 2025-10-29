@@ -97,6 +97,7 @@ export const productionCSP: CSPDirectives = {
     'https://www.google-analytics.com',
     'https://vlibras.gov.br', // VLibras avatars and images
     'https://*.vlibras.gov.br', // VLibras CDN
+    'https://cdn.jsdelivr.net', // VLibras assets from jsdelivr CDN
   ],
 
   // Fonts: Allow self and data URIs
