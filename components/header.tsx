@@ -50,12 +50,12 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
   const userMenuItems: NavigationItem[] = [
     {
       name: locale === 'pt' ? 'Meu Perfil' : 'My Profile',
-      href: `/${locale}/perfil`,
+      href: `/${locale}/app/perfil`,
       icon: UserIcon
     },
     {
       name: locale === 'pt' ? 'Configurações' : 'Settings',
-      href: locale === 'pt' ? `/${locale}/configuracoes` : `/${locale}/settings`,
+      href: `/${locale}/app/configuracoes`,
       icon: Settings
     }
   ]
