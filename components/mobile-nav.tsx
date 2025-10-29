@@ -24,7 +24,7 @@ interface MobileNavItem {
 }
 
 // Mobile navigation items - optimized for thumb reach
-// Phase 1: Only Home and Chat are active
+// All main features accessible from bottom bar
 const mobileNavItems: MobileNavItem[] = [
   {
     name: 'Início',
@@ -35,6 +35,21 @@ const mobileNavItems: MobileNavItem[] = [
     name: 'Chat',
     href: '/pt/app/chat',
     icon: MessageSquare
+  },
+  {
+    name: 'Dashboard',
+    href: '/pt/app/dashboard',
+    icon: LayoutDashboard
+  },
+  {
+    name: 'Investig.',
+    href: '/pt/app/investigacoes',
+    icon: FileSearch
+  },
+  {
+    name: 'Notif.',
+    href: '/pt/app/notificacoes',
+    icon: Bell
   }
 ]
 
@@ -75,7 +90,7 @@ export function MobileNavV2() {
   
   // Update notification badge
   const items = mobileNavItems.map(item =>
-    item.href === '/pt/notificacoes'
+    item.href === '/pt/app/notificacoes'
       ? { ...item, badge: unreadCount > 0 ? unreadCount : undefined }
       : item
   )

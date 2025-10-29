@@ -56,7 +56,7 @@ export default function PTPage() {
         </div>
         
         <div className="hero-container max-w-5xl mx-auto px-6 py-24 text-center relative z-10 stagger-children">
-          <h1 className="hero-title text-5xl sm:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="hero-title text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
             Cidadão.AI
           </h1>
           
@@ -100,7 +100,7 @@ export default function PTPage() {
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-8">
             {/* Dashboard Feature */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-6">
                 <span className="text-3xl">📊</span>
               </div>
@@ -126,7 +126,7 @@ export default function PTPage() {
             </div>
 
             {/* Chat Feature */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
               <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-6">
                 <span className="text-3xl">💬</span>
               </div>
@@ -152,7 +152,7 @@ export default function PTPage() {
             </div>
 
             {/* Real-time Monitoring */}
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
+            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover-lift">
               <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-6">
                 <span className="text-3xl">🔍</span>
               </div>
@@ -187,7 +187,7 @@ export default function PTPage() {
             Por que Confiar no Cidadão.AI?
           </h2>
           
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               <div className="text-4xl font-bold text-green-600 mb-2">100%</div>
               <div className="text-lg font-medium mb-1">Gratuito</div>
