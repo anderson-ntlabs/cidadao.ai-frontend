@@ -24,10 +24,21 @@ export interface MaritacaDirectRequest extends ChatRequest {
  * Maritaca Direct Chat Response from Backend
  */
 export interface MaritacaDirectResponse {
-  session_id: string;
-  message_id: string;
-  response: string;
+  id: string; // Message ID from backend
   model: string;
+  content: string; // The actual response text
+  usage?: {
+    completion_tokens: number;
+    prompt_tokens: number;
+    total_tokens: number;
+  };
+  created_at: string;
+  finish_reason: string; // "stop" when complete
+
+  // Legacy fields for backward compatibility
+  session_id?: string;
+  message_id?: string;
+  response?: string;
   processing_time?: number;
   metadata?: {
     tokens_used?: number;
@@ -82,7 +93,8 @@ export async function sendMaritacaMessage(request: MaritacaDirectRequest): Promi
     logger.performance('Chat Maritaca: Response received', duration);
     logger.debug('Chat Maritaca: Full response', { data });
 
-    const messageText = data.response || '';
+    // Backend returns 'content' not 'response'
+    const messageText = data.content || data.response || '';
 
     // Check if message is empty
     if (!messageText || messageText.trim().length === 0) {
@@ -97,8 +109,8 @@ export async function sendMaritacaMessage(request: MaritacaDirectRequest): Promi
 
     // Convert Maritaca response to frontend ChatResponse format
     return {
-      session_id: data.session_id,
-      message_id: data.message_id,
+      session_id: payload.session_id, // Use request session_id
+      message_id: data.id || data.message_id || `msg_${Date.now()}`, // Backend returns 'id'
       agent_id: 'maritaca-direct',
       agent_name: getModelDisplayName(data.model),
       message: messageText,
@@ -107,12 +119,15 @@ export async function sendMaritacaMessage(request: MaritacaDirectRequest): Promi
       follow_up_questions: [],
       requires_input: null,
       metadata: {
-        ...data.metadata,
         endpoint: 'maritaca-direct',
         model: data.model,
         response_time: duration,
-        processing_time: data.processing_time,
+        finish_reason: data.finish_reason,
+        tokens_used: data.usage?.total_tokens,
+        completion_tokens: data.usage?.completion_tokens,
+        prompt_tokens: data.usage?.prompt_tokens,
         is_free_tier: true,
+        created_at: data.created_at,
       },
     };
 

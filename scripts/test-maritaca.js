@@ -42,7 +42,12 @@ async function testMaritacaModel(model, testMessage) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: testMessage,
+        messages: [
+          {
+            role: 'user',
+            content: testMessage
+          }
+        ],
         session_id: `test_maritaca_${Date.now()}`,
         model: model,
       }),
@@ -59,6 +64,11 @@ async function testMaritacaModel(model, testMessage) {
     const data = await response.json();
 
     log(`✅ Response received (${duration}ms)`, colors.green);
+
+    // Debug: Show full response structure
+    log(`\n🔍 Full Response Structure:`, colors.bright);
+    log(JSON.stringify(data, null, 2), colors.blue);
+
     log(`\n📊 Response Details:`, colors.bright);
     log(`   Model Used: ${data.model}`, colors.blue);
     log(`   Session ID: ${data.session_id}`, colors.blue);
@@ -72,6 +82,21 @@ async function testMaritacaModel(model, testMessage) {
 
     log(`\n💬 Response Message:`, colors.bright);
     log(`   ${data.response}`, colors.cyan);
+    log(`\n📏 Response Length: ${data.response?.length || 0} characters`, colors.blue);
+
+    // Check if response seems truncated
+    const lastChars = data.response?.slice(-50) || '';
+    log(`\n📝 Last 50 characters: "${lastChars}"`, colors.yellow);
+
+    // Check for common truncation indicators
+    const seemsTruncated = !data.response?.endsWith('.') &&
+                          !data.response?.endsWith('!') &&
+                          !data.response?.endsWith('?') &&
+                          data.response?.length > 100;
+
+    if (seemsTruncated) {
+      log(`\n⚠️  WARNING: Response may be truncated (doesn't end with punctuation)`, colors.yellow);
+    }
 
     return true;
   } catch (error) {
