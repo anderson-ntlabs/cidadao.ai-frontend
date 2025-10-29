@@ -155,6 +155,14 @@ export const productionCSP: CSPDirectives = {
   // Frame ancestors: Prevent clickjacking
   'frame-ancestors': ["'none'"],
 
+  // Worker sources: Allow Web Workers for VLibras
+  'worker-src': [
+    "'self'",
+    'blob:', // Required for VLibras Web Workers
+    'https://vlibras.gov.br',
+    'https://*.vlibras.gov.br',
+  ],
+
   // Upgrade insecure requests
   'upgrade-insecure-requests': [],
 
@@ -194,6 +202,7 @@ export const developmentCSP: CSPDirectives = {
   'form-action': ["'self'"],
   'frame-src': ["'self'", 'https://open.spotify.com'],
   'frame-ancestors': ["'none'"],
+  'worker-src': ["'self'", 'blob:', 'https:'], // Permissive for development
 };
 
 /**
