@@ -75,6 +75,7 @@ export const productionCSP: CSPDirectives = {
     "'self'",
     "'unsafe-eval'", // ⚠️ Required for Next.js - see note above
     "'unsafe-inline'", // ⚠️ Required for Next.js - see note above
+    'blob:', // ⚠️ Required for VLibras Unity Web Workers
     'https://vercel.live',
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
@@ -181,6 +182,7 @@ export const developmentCSP: CSPDirectives = {
     "'self'",
     "'unsafe-eval'",
     "'unsafe-inline'", // For hot reload
+    'blob:', // For VLibras and other blob scripts
     'https://vercel.live',
   ],
   'style-src': ["'self'", "'unsafe-inline'"],
