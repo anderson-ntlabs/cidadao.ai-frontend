@@ -6,7 +6,6 @@ import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Shield } from 'lucide-react'
 import { useAuth } from '@/hooks/use-supabase-auth'
 
 export default function LoginPage() {
@@ -69,15 +68,8 @@ export default function LoginPage() {
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo/Branding */}
+        {/* Welcome heading */}
         <div className="text-center mb-8">
-          <Link href="/en" className="inline-flex items-center gap-3 mb-6 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cidadão.AI</span>
-          </Link>
-
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {view === 'sign_in' ? 'Welcome back!' : 'Create account'}
           </h1>
