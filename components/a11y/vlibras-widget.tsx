@@ -43,9 +43,12 @@ interface VLibrasWidgetProps {
 /**
  * Dynamically import VLibras to avoid SSR issues
  * VLibras manipulates the DOM and requires browser APIs
+ *
+ * IMPORTANT: Import default export directly, not as .default
+ * The package exports VLibras as default export
  */
 const VLibras = dynamic(
-  () => import('@djpfs/react-vlibras').then(mod => mod.default),
+  () => import('@djpfs/react-vlibras'),
   {
     ssr: false,
     loading: () => null // No loading state needed for accessibility widget
@@ -90,17 +93,92 @@ export function VLibrasWidget({
   }
 
   return (
-    <div
-      className={`vlibras-widget-container ${className}`}
-      data-testid="vlibras-widget"
-    >
-      <VLibras forceOnload={forceOnload} />
+    <>
+      {/* VLibras Widget with proper styling */}
+      <div
+        className={`vlibras-widget-container fixed bottom-4 right-4 z-[9999] ${className}`}
+        data-testid="vlibras-widget"
+        style={{
+          // Ensure VLibras is always visible and above other elements
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          zIndex: 9999,
+        }}
+      >
+        <VLibras forceOnload={forceOnload} />
+      </div>
 
       {/* Accessibility announcement for screen readers */}
       <div className="sr-only" role="status" aria-live="polite">
         Widget VLibras carregado. Tradução para LIBRAS disponível.
       </div>
-    </div>
+
+      {/* Global styles for VLibras widget */}
+      <style jsx global>{`
+        /* VLibras widget base styles */
+        [vw] {
+          position: fixed !important;
+          bottom: 1rem !important;
+          right: 1rem !important;
+          z-index: 9999 !important;
+        }
+
+        /* VLibras access button */
+        [vw] .access-button {
+          width: 60px !important;
+          height: 60px !important;
+          border-radius: 50% !important;
+          background-color: #1351b4 !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+          transition: all 0.3s ease !important;
+          cursor: pointer !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-center !important;
+        }
+
+        [vw] .access-button:hover {
+          transform: scale(1.1) !important;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* VLibras widget image fix */
+        [vw] img,
+        [vw] svg {
+          max-width: 100% !important;
+          height: auto !important;
+          display: block !important;
+        }
+
+        /* VLibras popup/modal */
+        [vw] .vpw-settings-wrapper,
+        [vw] .vpw-player-wrapper {
+          z-index: 10000 !important;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 640px) {
+          [vw] {
+            bottom: 5rem !important;
+            right: 1rem !important;
+          }
+
+          [vw] .access-button {
+            width: 50px !important;
+            height: 50px !important;
+          }
+        }
+
+        /* Ensure VLibras doesn't interfere with safe areas on mobile */
+        @supports (padding: max(0px)) {
+          [vw] {
+            bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+            right: max(1rem, env(safe-area-inset-right)) !important;
+          }
+        }
+      `}</style>
+    </>
   )
 }
 
