@@ -52,29 +52,44 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen flex items-center justify-center px-4 py-8 relative">
+      {/* Background pattern matching site design */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: `url('/operarios.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.03
+        }}
+      />
+
+      {/* Gradient overlay matching site design */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
           <Link href="/pt" className="inline-flex items-center gap-3 mb-6 group">
             <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">Cidadão.AI</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">Cidadão.AI</span>
           </Link>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {view === 'sign_in' ? 'Bem-vindo de volta!' : 'Criar conta'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {view === 'sign_in'
               ? 'Entre para acessar o sistema'
               : 'Cadastre-se para começar'}
           </p>
         </div>
 
-        {/* Login Form Card */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+        {/* Login Form Card - Glassmorphism effect */}
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
           <Auth
             supabaseClient={supabase}
             view={view}
@@ -146,13 +161,13 @@ export default function LoginPage() {
 
         {/* Toggle Sign In/Sign Up */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {view === 'sign_in' ? (
               <>
                 Não tem uma conta?{' '}
                 <button
                   onClick={() => setView('sign_up')}
-                  className="text-green-600 hover:text-green-700 font-medium underline"
+                  className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium underline"
                 >
                   Cadastre-se gratuitamente
                 </button>
@@ -162,7 +177,7 @@ export default function LoginPage() {
                 Já tem uma conta?{' '}
                 <button
                   onClick={() => setView('sign_in')}
-                  className="text-green-600 hover:text-green-700 font-medium underline"
+                  className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium underline"
                 >
                   Entre aqui
                 </button>
@@ -175,7 +190,7 @@ export default function LoginPage() {
         <div className="mt-4 text-center">
           <Link
             href="/pt"
-            className="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 inline-flex items-center gap-1"
           >
             ← Voltar ao início
           </Link>
