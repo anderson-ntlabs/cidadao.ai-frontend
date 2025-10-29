@@ -16,6 +16,13 @@ export default function ENPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
 
+  // Redirect authenticated users directly to app
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.replace('/pt/app')
+    }
+  }, [isAuthenticated, isLoading, router])
+
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isAuthenticated) {
