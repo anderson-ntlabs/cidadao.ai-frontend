@@ -411,7 +411,7 @@ export default function ChatPage() {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Digite sua pergunta..."
-              className="flex-1 resize-none rounded-2xl px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all text-sm"
+              className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all text-base min-h-[44px]"
               rows={1}
               disabled={!canSendMessage}
             />

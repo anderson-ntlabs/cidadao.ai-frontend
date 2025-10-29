@@ -234,17 +234,15 @@ export default function PTPage() {
           </h2>
 
           <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-            <div className="relative w-full" style={{ minHeight: '352px' }}>
+            {/* Responsive iframe container with aspect ratio */}
+            <div className="relative w-full pt-[56.25%]"> {/* 16:9 aspect ratio */}
               <iframe
-                style={{ borderRadius: '12px' }}
+                className="absolute inset-0 w-full h-full rounded-xl shadow-lg"
                 src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
-                width="100%"
-                height="352"
                 frameBorder="0"
                 allowFullScreen
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
-                className="shadow-lg"
               />
             </div>
           </div>

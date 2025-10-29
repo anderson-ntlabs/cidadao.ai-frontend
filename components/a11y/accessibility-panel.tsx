@@ -271,7 +271,7 @@ export function AccessibilityPanel({ locale, className = '' }: AccessibilityPane
 
             {/* Help Link */}
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium transition-colors">
+              <button className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium transition-colors min-h-[44px] py-2">
                 <HelpCircle className="h-4 w-4" />
                 {t.help}
               </button>
