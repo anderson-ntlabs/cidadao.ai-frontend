@@ -150,7 +150,8 @@ export function MobileNavV2() {
             )
           })}
           
-          {/* More menu button */}
+          {/* More menu button - temporarily disabled until drawer implementation */}
+          {/* TODO: Implement MobileNavDrawer integration
           <button
             className="flex flex-col items-center justify-center relative py-2 px-3 min-w-[64px] min-h-[56px] text-gray-600 dark:text-gray-400 tap-highlight-transparent"
             aria-label="More options"
@@ -161,6 +162,7 @@ export function MobileNavV2() {
             <Menu className="h-6 w-6" aria-hidden="true" />
             <span className="text-xs mt-1 font-medium">Mais</span>
           </button>
+          */}
         </div>
       </nav>
       

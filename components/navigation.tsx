@@ -97,12 +97,9 @@ export function NavigationV2({
 
   const handleNavigation = (item: NavigationItem, e: React.MouseEvent) => {
     if (!item.external) {
-      e.preventDefault()
+      // Let Next.js handle the navigation via Link component
+      // Only call onItemClick callback (e.g., to close mobile menu)
       onItemClick?.(item)
-
-      // Force hard navigation to ensure it always works
-      // Using window.location for reliability across all scenarios
-      window.location.href = item.href
     }
   }
 
