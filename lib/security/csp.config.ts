@@ -100,8 +100,14 @@ export const productionCSP: CSPDirectives = {
     'https://cdn.jsdelivr.net', // VLibras assets from jsdelivr CDN
   ],
 
-  // Fonts: Allow self and data URIs
-  'font-src': ["'self'", 'data:'],
+  // Fonts: Allow self, data URIs, and VLibras CDN fonts
+  'font-src': [
+    "'self'",
+    'data:',
+    'https://cdn.jsdelivr.net', // VLibras fonts from jsdelivr CDN
+    'https://vlibras.gov.br', // VLibras fonts
+    'https://*.vlibras.gov.br', // VLibras subdomains
+  ],
 
   // Connect: API endpoints, analytics, and VLibras
   'connect-src': [
@@ -115,13 +121,19 @@ export const productionCSP: CSPDirectives = {
     'https://*.sentry.io',
     'https://vlibras.gov.br', // VLibras API
     'https://*.vlibras.gov.br', // VLibras subdomains
+    'https://cdn.jsdelivr.net', // VLibras plugin from jsdelivr CDN
     'https://us.i.posthog.com', // PostHog events
     'https://us-assets.i.posthog.com', // PostHog assets
     'https://app.posthog.com', // PostHog app
   ],
 
-  // Media: Only self-hosted
-  'media-src': ["'self'"],
+  // Media: Allow self-hosted and VLibras media (videos, audio for LIBRAS)
+  'media-src': [
+    "'self'",
+    'https://vlibras.gov.br', // VLibras media
+    'https://*.vlibras.gov.br', // VLibras subdomains
+    'https://cdn.jsdelivr.net', // VLibras media from jsdelivr CDN
+  ],
 
   // Objects: Disallow plugins
   'object-src': ["'none'"],

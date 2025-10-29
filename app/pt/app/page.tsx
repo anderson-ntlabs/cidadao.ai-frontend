@@ -58,7 +58,7 @@ export default function HomePage() {
       title: 'Chat com IAs',
       description: 'Converse com nossos agentes especializados em transparência pública',
       icon: MessageSquare,
-      href: '/pt/chat',
+      href: '/pt/app/chat',
       gradient: 'from-blue-500 to-purple-600',
       stats: '17 agentes disponíveis',
       badge: null,
@@ -68,7 +68,7 @@ export default function HomePage() {
       title: 'Dashboard',
       description: 'Acompanhe investigações e análises em tempo real',
       icon: LayoutDashboard,
-      href: '/pt/dashboard',
+      href: '/pt/app/dashboard',
       gradient: 'from-green-500 to-emerald-600',
       stats: 'Em desenvolvimento',
       badge: 'Em Breve',
@@ -78,7 +78,7 @@ export default function HomePage() {
       title: 'Notificações',
       description: 'Central de alertas e atualizações do sistema',
       icon: Bell,
-      href: '/pt/notificacoes',
+      href: '/pt/app/notificacoes',
       gradient: 'from-orange-500 to-red-600',
       stats: 'Em desenvolvimento',
       badge: 'Em Breve',
@@ -88,7 +88,7 @@ export default function HomePage() {
       title: 'Investigações',
       description: 'Detalhes completos das análises realizadas',
       icon: FileSearch,
-      href: '/pt/investigacoes',
+      href: '/pt/app/investigacoes',
       gradient: 'from-purple-500 to-pink-600',
       stats: 'Em desenvolvimento',
       badge: 'Em Breve',
@@ -373,21 +373,21 @@ export default function HomePage() {
               <Button
                 variant="secondary"
                 leftIcon={<MessageSquare className="w-4 h-4" />}
-                onClick={() => router.push('/pt/chat')}
+                onClick={() => router.push('/pt/app/chat')}
               >
                 Iniciar Chat com IAs
               </Button>
               <Button
                 variant="secondary"
                 leftIcon={<Settings className="w-4 h-4" />}
-                onClick={() => router.push('/pt/configuracoes')}
+                onClick={() => router.push('/pt/app/configuracoes')}
               >
                 Configurações
               </Button>
               <Button
                 variant="secondary"
                 leftIcon={<Lock className="w-4 h-4" />}
-                onClick={() => router.push('/pt/perfil')}
+                onClick={() => router.push('/pt/app/perfil')}
               >
                 Meu Perfil
               </Button>
