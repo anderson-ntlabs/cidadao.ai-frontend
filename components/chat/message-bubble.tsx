@@ -243,21 +243,13 @@ export function MessageBubble({
             <>
               {/* Voice Button */}
               {console.log('🎤 RENDERIZANDO VOICE BUTTON!', { agentId, contentLength: content?.length })}
-
-              {/* TEMPORÁRIO: Placeholder visual gigante */}
-              <div className="bg-red-500 text-white font-bold p-4 rounded text-xl">
-                🎤 VOZ AQUI
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
-                <VoiceButton
-                  text={content}
-                  agentId={agentId}
-                  variant="ghost"
-                  size="icon"
-                  className="!p-2 md:!p-1.5"
-                />
-              </div>
+              <VoiceButton
+                text={content}
+                agentId={agentId}
+                variant="ghost"
+                size="icon"
+                className="p-2 md:p-1.5"
+              />
 
               <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
               <button
