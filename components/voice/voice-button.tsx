@@ -44,6 +44,16 @@ export function VoiceButton({
   const ttsService = getTTSService()
 
   const handleSpeak = async () => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[VoiceButton] handleSpeak called', {
+        isSpeaking,
+        isPaused,
+        agentId,
+        textLength: text.length,
+        enabled: settings.enabled
+      })
+    }
+
     if (isSpeaking && !isPaused) {
       // Currently speaking -> pause
       ttsService.pause()
@@ -60,7 +70,7 @@ export function VoiceButton({
       try {
         await ttsService.speak(text, agentId)
       } catch (error) {
-        console.error('TTS error:', error)
+        console.error('[VoiceButton] TTS error:', error)
       } finally {
         setIsSpeaking(false)
         setIsPaused(false)
@@ -104,6 +114,17 @@ export function VoiceButton({
     } else {
       return 'Ouvir mensagem (Ctrl+Shift+S)'
     }
+  }
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[VoiceButton] Render', {
+      isSupported,
+      enabled: settings.enabled,
+      willRender: isSupported && settings.enabled,
+      agentId,
+      textPreview: text.substring(0, 50) + '...'
+    })
   }
 
   // Don't render if not supported or disabled

@@ -36,8 +36,11 @@ interface VoiceState {
   resetSettings: () => void
 }
 
+// Auto-enable in development for easier testing
+const isDevelopment = typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+
 const defaultSettings: VoiceSettings = {
-  enabled: false,  // Disabled by default (opt-in)
+  enabled: isDevelopment,  // Auto-enabled in dev, opt-in in production
   autoSpeak: false,
   volume: 1.0,
   rate: 1.0,
