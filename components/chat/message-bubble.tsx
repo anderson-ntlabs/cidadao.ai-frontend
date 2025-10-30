@@ -44,6 +44,8 @@ export function MessageBubble({
   onComplete,
   metadata
 }: MessageBubbleProps) {
+  console.log('🎯 MessageBubble RENDERIZADO!', { role, agentId, hasContent: !!content, isLoading })
+
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -240,6 +242,13 @@ export function MessageBubble({
           {role === 'assistant' && (
             <>
               {/* Voice Button */}
+              {console.log('🎤 RENDERIZANDO VOICE BUTTON!', { agentId, contentLength: content?.length })}
+
+              {/* TEMPORÁRIO: Placeholder visual gigante */}
+              <div className="bg-red-500 text-white font-bold p-4 rounded text-xl">
+                🎤 VOZ AQUI
+              </div>
+
               <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
                 <VoiceButton
                   text={content}
