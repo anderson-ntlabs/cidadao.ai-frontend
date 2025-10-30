@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { StatCard, StatsGrid } from '@/components/stats'
 import { ActivityTimeline } from '@/components/activity'
+import { InvestigationAnalytics } from '@/components/dashboard/investigation-analytics'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { format } from 'date-fns'
@@ -213,6 +214,9 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* Investigation Analytics - Real Data */}
+      <InvestigationAnalytics />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
