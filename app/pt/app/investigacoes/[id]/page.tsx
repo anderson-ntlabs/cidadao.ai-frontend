@@ -9,6 +9,7 @@ import { useBackendInvestigation } from '@/hooks/use-backend-investigations'
 import { mockInvestigations, type MockInvestigation } from '@/data/investigations'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { AnomalyChart } from '@/components/investigations/anomaly-chart'
 
 /**
  * Investigation Detail Page
@@ -370,6 +371,24 @@ export default function InvestigationDetailPage() {
                 )
               })}
             </div>
+
+            {/* Anomaly Visualizations */}
+            {backendResults.results.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold mb-6">Análise Visual</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <AnomalyChart anomalies={backendResults.results} type="severity" />
+                  </div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <AnomalyChart anomalies={backendResults.results} type="type" />
+                  </div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <AnomalyChart anomalies={backendResults.results} type="confidence" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
