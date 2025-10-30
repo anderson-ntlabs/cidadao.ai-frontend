@@ -34,6 +34,7 @@ export function VoiceSettingsPanel() {
 
   useEffect(() => {
     loadVoices()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadVoices = async () => {

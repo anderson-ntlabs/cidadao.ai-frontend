@@ -41,10 +41,6 @@ export function VoiceButton({
   // Check if TTS is supported
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
-  if (!isSupported || !settings.enabled) {
-    return null // Don't render if not supported or disabled
-  }
-
   const ttsService = getTTSService()
 
   const handleSpeak = async () => {
@@ -108,6 +104,11 @@ export function VoiceButton({
     } else {
       return 'Ouvir mensagem (Ctrl+Shift+S)'
     }
+  }
+
+  // Don't render if not supported or disabled
+  if (!isSupported || !settings.enabled) {
+    return null
   }
 
   return (
