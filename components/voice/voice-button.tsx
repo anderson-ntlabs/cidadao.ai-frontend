@@ -127,8 +127,36 @@ export function VoiceButton({
     })
   }
 
-  // Don't render if not supported or disabled
-  if (!isSupported || !settings.enabled) {
+  // Don't render if not supported
+  if (!isSupported) {
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <div className="text-xs text-red-500 p-2" title="Web Speech API não suportada">
+          🔇 Não suportado
+        </div>
+      )
+    }
+    return null
+  }
+
+  // Show disabled state in development
+  if (!settings.enabled && process.env.NODE_ENV === 'development') {
+    return (
+      <button
+        onClick={() => {
+          alert('Voz desabilitada. Ative em Configurações → Voz e Áudio')
+        }}
+        className="p-2 md:p-1.5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all shadow-sm"
+        title="Clique para saber como ativar a voz"
+        aria-label="Voz desabilitada"
+      >
+        <span className="text-xs">🔇</span>
+      </button>
+    )
+  }
+
+  // Don't render if disabled in production
+  if (!settings.enabled) {
     return null
   }
 
