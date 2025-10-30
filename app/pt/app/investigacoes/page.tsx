@@ -447,14 +447,21 @@ export default function InvestigacoesPage() {
 
         {/* Investigations List */}
         <div className="space-y-4">
-          {sortedInvestigations.map((investigation) => {
-            const TypeIcon = investigationTypes[investigation.type as keyof typeof investigationTypes].icon
-            const StatusIcon = statusConfig[investigation.status as keyof typeof statusConfig].icon
+          {sortedInvestigations.map((investigation: any) => {
+            // Backend data doesn't have 'type', use default icon
+            const invType = investigation.type || 'anomaly'
+            const TypeIcon = investigationTypes[invType as keyof typeof investigationTypes]?.icon || AlertTriangle
+            const StatusIcon = statusConfig[investigation.status as keyof typeof statusConfig]?.icon || Clock
+
+            // Backend uses investigation_id, mock uses id
+            const invId = investigation.investigation_id || investigation.id
+            const invTitle = investigation.title || `Investigation ${invId?.slice(0, 8) || 'N/A'}`
+            const invDescription = investigation.current_phase || investigation.description || 'No description'
 
             return (
               <div
-                key={investigation.id}
-                onClick={() => router.push(`/pt/investigacoes/${investigation.id}`)}
+                key={invId}
+                onClick={() => router.push(`/pt/investigacoes/${invId}`)}
                 className="cursor-pointer"
               >
                 <GlassCard className="hover:shadow-xl transition-all duration-300 group">
@@ -466,67 +473,95 @@ export default function InvestigacoesPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                              {investigation.title}
+                              {invTitle}
                             </h3>
                             <span className="text-sm font-medium text-gray-500">
-                              {investigation.id}
+                              {invId?.slice(0, 8)}
                             </span>
                           </div>
                           <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {investigation.description}
+                            {invDescription}
                           </p>
                         </div>
                       </div>
 
                       {/* Badges */}
                       <div className="flex flex-wrap gap-2 mb-4">
+                        {investigation.type && (
+                          <span className={cn(
+                            "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1",
+                            investigationTypes[invType as keyof typeof investigationTypes]?.color || 'text-gray-600 bg-gray-100'
+                          )}>
+                            <TypeIcon className="w-3 h-3" />
+                            {investigationTypes[invType as keyof typeof investigationTypes]?.label || 'Investigation'}
+                          </span>
+                        )}
+
                         <span className={cn(
                           "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-                          investigationTypes[investigation.type as keyof typeof investigationTypes].color
-                        )}>
-                          <TypeIcon className="w-3 h-3" />
-                          {investigationTypes[investigation.type as keyof typeof investigationTypes].label}
-                        </span>
-                        
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-                          statusConfig[investigation.status as keyof typeof statusConfig].color
+                          statusConfig[investigation.status as keyof typeof statusConfig]?.color || 'text-gray-600 bg-gray-100'
                         )}>
                           <StatusIcon className="w-3 h-3" />
-                          {statusConfig[investigation.status as keyof typeof statusConfig].label}
+                          {statusConfig[investigation.status as keyof typeof statusConfig]?.label || investigation.status}
                         </span>
 
-                        {investigation.riskLevel === 'crítico' && (
+                        {(investigation.riskLevel === 'crítico' || investigation.status === 'failed') && (
                           <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                            ⚠️ Risco Crítico
+                            ⚠️ Atenção
+                          </span>
+                        )}
+
+                        {/* Show progress badge for backend investigations */}
+                        {investigation.progress !== undefined && investigation.status === 'running' && (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            {Math.round(investigation.progress * 100)}% concluído
                           </span>
                         )}
                       </div>
 
                       {/* Meta Info */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        {investigation.value && (
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Valor</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              R$ {(investigation.value / 1000000).toFixed(1)}M
+                            </p>
+                          </div>
+                        )}
+                        {investigation.progress !== undefined && (
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Progresso</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {Math.round(investigation.progress * 100)}%
+                            </p>
+                          </div>
+                        )}
                         <div>
-                          <p className="text-gray-500 dark:text-gray-400">Valor</p>
+                          <p className="text-gray-500 dark:text-gray-400">Anomalias</p>
                           <p className="font-semibold text-gray-900 dark:text-white">
-                            R$ {(investigation.value / 1000000).toFixed(1)}M
+                            {investigation.anomalies_detected || investigation.findings || 0}
                           </p>
                         </div>
+                        {investigation.records_processed !== undefined && (
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Registros</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {investigation.records_processed}
+                            </p>
+                          </div>
+                        )}
                         <div>
-                          <p className="text-gray-500 dark:text-gray-400">Confiança</p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {investigation.confidence}%
+                          <p className="text-gray-500 dark:text-gray-400">
+                            {investigation.created_at ? 'Criado' : 'Atualizado'}
                           </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 dark:text-gray-400">Evidências</p>
                           <p className="font-semibold text-gray-900 dark:text-white">
-                            {investigation.evidence} itens
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 dark:text-gray-400">Atualizado</p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {format(investigation.dateUpdated, 'dd/MM', { locale: ptBR })}
+                            {investigation.created_at
+                              ? format(parseISO(investigation.created_at), 'dd/MM', { locale: ptBR })
+                              : investigation.dateUpdated
+                              ? format(investigation.dateUpdated, 'dd/MM', { locale: ptBR })
+                              : 'N/A'
+                            }
                           </p>
                         </div>
                       </div>
@@ -534,11 +569,19 @@ export default function InvestigacoesPage() {
 
                     {/* Right Side - Department and Actions */}
                     <div className="flex flex-col items-end gap-4">
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{investigation.department}</p>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{investigation.location}</p>
-                      </div>
-                      
+                      {(investigation.department || investigation.location || investigation.current_phase) && (
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {investigation.department || investigation.current_phase || 'Em análise'}
+                          </p>
+                          {investigation.location && (
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {investigation.location}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex gap-2">
                         <Button
                           variant="secondary"
@@ -546,42 +589,46 @@ export default function InvestigacoesPage() {
                           leftIcon={<Eye className="w-4 h-4" />}
                           onClick={(e) => {
                             e.stopPropagation()
-                            router.push(`/pt/investigacoes/${investigation.id}`)
+                            router.push(`/pt/investigacoes/${invId}`)
                           }}
                         >
                           Detalhes
                         </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          leftIcon={<Download className="w-4 h-4" />}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // Download logic
-                          }}
-                        >
-                          PDF
-                        </Button>
-                      </div>
 
-                      {/* Agents */}
-                      <div className="flex -space-x-2">
-                        {investigation.agents.slice(0, 3).map((agent, idx) => (
-                          <div
-                            key={idx}
-                            className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md"
-                            title={agent}
+                        {investigation.status === 'completed' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            leftIcon={<Download className="w-4 h-4" />}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Download logic
+                            }}
                           >
-                            {agent.charAt(0)}
-                          </div>
-                        ))}
-                        {investigation.agents.length > 3 && (
-                          <div className="w-8 h-8 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md">
-                            +{investigation.agents.length - 3}
-                          </div>
+                            Exportar
+                          </Button>
                         )}
                       </div>
+
+                      {/* Agents - only for mock data */}
+                      {investigation.agents && investigation.agents.length > 0 && (
+                        <div className="flex -space-x-2">
+                          {investigation.agents.slice(0, 3).map((agent: string, idx: number) => (
+                            <div
+                              key={idx}
+                              className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md"
+                              title={agent}
+                            >
+                              {agent.charAt(0)}
+                            </div>
+                          ))}
+                          {investigation.agents.length > 3 && (
+                            <div className="w-8 h-8 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md">
+                              +{investigation.agents.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </GlassCardContent>
