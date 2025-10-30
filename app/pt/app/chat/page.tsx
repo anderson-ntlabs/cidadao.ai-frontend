@@ -14,6 +14,7 @@ import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector
 import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
 import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
 import { logger } from '@/lib/utils/logger'
+import { useAnnouncementHelpers } from '@/components/a11y'
 
 // Lazy load heavy components for better initial load performance
 const ChatHistorySidebar = dynamic(() => import('@/components/chat/chat-history-sidebar').then(mod => ({ default: mod.ChatHistorySidebar })), {
@@ -59,6 +60,9 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Accessibility announcements
+  const { announceLoading, announceSuccess, announceError } = useAnnouncementHelpers()
+
   // Direct store access - no wrapper hook
   const messages = useChatStore((state) => state.messages)
   const session = useChatStore((state) => state.session)
@@ -93,15 +97,19 @@ export default function ChatPage() {
       if (lastMessage.agent_id) {
         setCurrentAgentId(lastMessage.agent_id)
       }
+      // Announce response received for screen readers
+      const agentName = agents.find(a => a.id === lastMessage.agent_id)?.name || 'Agente'
+      announceSuccess(`${agentName} respondeu`)
     }
-  }, [messages, scrollToBottom])
+  }, [messages, scrollToBottom, announceSuccess])
 
   useEffect(() => {
     if (error) {
       toast.error('Erro', error)
+      announceError(error) // Screen reader announcement
       clearError()
     }
-  }, [error, clearError])
+  }, [error, clearError, announceError])
 
   // Clear messages when switching modes
   const handleModeChange = async (newMode: ChatMode) => {
@@ -113,6 +121,10 @@ export default function ChatPage() {
       // Create new session for the new mode (this clears messages)
       await createNewSession()
 
+      const modeMessage = newMode === 'maritaca'
+        ? 'Modo Maritaca ativado. Conversando diretamente com modelos base.'
+        : 'Modo Cidadão.AI ativado. Sistema multi-agente pronto.'
+
       // Show toast notification
       toast.success(
         newMode === 'maritaca' ? 'Modo Maritaca Ativado' : 'Modo Cidadão.AI Ativado',
@@ -120,6 +132,9 @@ export default function ChatPage() {
           ? 'Conversando diretamente com os modelos base da Maritaca.AI'
           : 'Sistema multi-agente Cidadão.AI ativado'
       )
+
+      // Screen reader announcement
+      announceSuccess(modeMessage)
     }
   }
 
@@ -132,6 +147,9 @@ export default function ChatPage() {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
+
+    // Screen reader announcement - message sent
+    announceLoading('resposta do agente')
 
     // Store the selected mode and model in localStorage for the chat service to use
     if (typeof window !== 'undefined') {
