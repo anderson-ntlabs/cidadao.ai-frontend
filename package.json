@@ -66,6 +66,7 @@
     "posthog-js": "^1.280.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "recharts": "^3.2.1",
     "serwist": "^9.2.1",
     "tailwind-merge": "^3.3.1",

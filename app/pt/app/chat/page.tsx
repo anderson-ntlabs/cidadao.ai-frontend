@@ -4,17 +4,18 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { agents } from '@/data/agents'
 import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
-import { TypingMessage } from '@/components/chat/typing-message'
 import { toast } from '@/hooks/use-toast'
-import { Send, History, Plus, Brain } from 'lucide-react'
+import { Send, History, Plus, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getAgentColorTheme, buildGradientClasses, getAgentRingClass } from '@/lib/utils/agent-colors'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
 import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
 import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
+import { MessageBubble } from '@/components/chat/message-bubble'
+import { AgentAvatar } from '@/components/chat/agent-avatar'
+import { SmartSuggestions, getContextualSuggestions } from '@/components/chat/smart-suggestions'
 import { logger } from '@/lib/utils/logger'
 
 export default function ChatPage() {
@@ -259,26 +260,18 @@ export default function ChatPage() {
                 Como posso ajudar você a entender melhor os gastos públicos brasileiros?
               </p>
 
-              {/* Quick suggestions */}
-              <div className="flex flex-wrap gap-2 justify-center max-w-2xl">
-                {[
-                  'Investigar contratos suspeitos',
-                  'Analisar anomalias em licitações',
-                  'Relatório de gastos públicos',
-                ].map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setInputMessage(suggestion)}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-all text-sm text-gray-700 dark:text-gray-300"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+              {/* Smart Suggestions */}
+              <div className="max-w-2xl">
+                <SmartSuggestions
+                  suggestions={getContextualSuggestions(0)}
+                  onSelect={setInputMessage}
+                  variant="default"
+                />
               </div>
             </div>
           ) : (
             /* Messages List */
-            <div className="space-y-6 py-4">
+            <div className="space-y-8 py-4">
               {messages.map((message, index) => {
                 const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
                 const messageAgent = message.agent_id
@@ -289,34 +282,19 @@ export default function ChatPage() {
                   <div
                     key={message.id}
                     className={cn(
-                      "flex gap-3",
+                      "flex gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500",
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
-                    {/* Assistant Avatar with agent-specific ring color */}
+                    {/* Assistant Avatar */}
                     {message.role === 'assistant' && (
-                      <div className="flex-shrink-0 relative">
-                        {/* Thinking indicator - only show for latest message when loading */}
-                        {isLatest && isLoading && (
-                          <div className="absolute -top-1 -right-1 z-10">
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full animate-ping opacity-75" />
-                              <Brain className="relative w-4 h-4 text-emerald-500 animate-pulse" />
-                            </div>
-                          </div>
-                        )}
-                        <OptimizedImage
-                          src={messageAgent?.image || '/agents/abaporu.png'}
-                          alt={messageAgent?.name || 'Abaporu'}
-                          width={36}
-                          height={36}
-                          className={cn(
-                            "w-9 h-9 rounded-full object-cover",
-                            getAgentRingClass(message.agent_id),
-                            isLatest && isLoading && "animate-pulse"
-                          )}
-                        />
-                      </div>
+                      <AgentAvatar
+                        agentId={message.agent_id}
+                        agentImage={messageAgent?.image || '/agents/abaporu.png'}
+                        agentName={messageAgent?.name || 'Abaporu'}
+                        isThinking={isLatest && isLoading}
+                        showSparkle={index === 0}
+                      />
                     )}
 
                     {/* Message Bubble */}
@@ -324,65 +302,24 @@ export default function ChatPage() {
                       "max-w-[75%]",
                       message.role === 'user' ? 'order-first' : ''
                     )}>
-                      {/* Agent name for assistant messages with color indicator */}
-                      {message.role === 'assistant' && (
-                        <div className="mb-1 px-1 flex items-center gap-2">
-                          {messageAgent ? (
-                            <>
-                              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                {messageAgent.name}
-                              </span>
-                              {/* Agent role badge */}
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                                • {messageAgent.role.pt}
-                              </span>
-                            </>
-                          ) : (
-                            /* Maritaca direct mode indicator */
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-lg">🦜</span>
-                              <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
-                                Maritaca.AI Direto
-                              </span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                                {message.metadata?.model === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Message content with agent-specific colors for assistant */}
-                      <div
-                        className={cn(
-                          "rounded-2xl px-4 py-3 transition-all duration-300",
-                          message.role === 'user'
-                            ? "bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg"
-                            : cn(
-                                // Agent-specific gradient for assistant messages
-                                "shadow-md border border-opacity-20",
-                                buildGradientClasses(getAgentColorTheme(message.agent_id))
-                              )
-                        )}
-                      >
-                        {message.role === 'assistant' ? (
-                          <TypingMessage
-                            content={message.content || ''}
-                            isLatest={isLatest}
-                            onComplete={() => {
-                              if (isLatest) scrollToBottom()
-                            }}
-                          />
-                        ) : (
-                          <p className="whitespace-pre-wrap text-sm text-white">{message.content}</p>
-                        )}
-                      </div>
+                      <MessageBubble
+                        content={message.content || ''}
+                        role={message.role === 'system' ? 'assistant' : message.role}
+                        agentName={messageAgent?.name}
+                        agentRole={messageAgent?.role.pt}
+                        isLatest={isLatest}
+                        isLoading={isLoading}
+                        onComplete={() => {
+                          if (isLatest) scrollToBottom()
+                        }}
+                        metadata={message.metadata}
+                      />
                     </div>
 
                     {/* User Avatar */}
                     {message.role === 'user' && (
                       <div className="flex-shrink-0">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
                           {user?.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                       </div>
