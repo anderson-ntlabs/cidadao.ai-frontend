@@ -45,7 +45,6 @@ export function MessageBubble({
   metadata
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
-  const [showActions, setShowActions] = useState(false)
 
   const handleCopy = async () => {
     try {
@@ -94,11 +93,7 @@ export function MessageBubble({
   }
 
   return (
-    <div
-      className="group relative"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-    >
+    <div className="group relative">
       {/* Agent Info (only for assistant) */}
       {role === 'assistant' && agentName && (
         <div className="mb-1 px-1 flex items-center gap-2">
@@ -201,16 +196,14 @@ export function MessageBubble({
         )}
       </div>
 
-      {/* Quick Actions - Always visible on mobile, hover on desktop */}
+      {/* Quick Actions - Always visible */}
       {!isLoading && (
         <div
           className={cn(
             "absolute -bottom-6 flex items-center gap-1 transition-all duration-200",
             role === 'user' ? 'right-0' : 'left-0',
-            // Mobile: always visible, Desktop: show on hover
-            "opacity-100 md:opacity-0 translate-y-0 md:-translate-y-1",
-            showActions && "md:opacity-100 md:translate-y-0",
-            !showActions && "md:pointer-events-none"
+            // Always visible for better UX
+            "opacity-100 translate-y-0"
           )}
         >
           <button
