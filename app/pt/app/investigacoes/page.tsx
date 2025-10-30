@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils'
 import { sanitizeSearchQuery } from '@/lib/security/input-validation'
 import { useBackendInvestigations } from '@/hooks/use-backend-investigations'
 import { mockInvestigations } from '@/data/investigations'
-import { CreateInvestigationModal } from '@/components/investigations/create-investigation-modal'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
@@ -82,7 +81,6 @@ export default function InvestigacoesPage() {
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'date' | 'progress' | 'anomalies'>('date')
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   // Use backend investigations with auto-refresh every 5 seconds
   const {
@@ -230,7 +228,7 @@ export default function InvestigacoesPage() {
               <Button
                 variant="primary"
                 leftIcon={<Plus className="w-4 h-4" />}
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => router.push('/pt/app/investigacoes/nova')}
               >
                 Nova Investigação
               </Button>
@@ -576,12 +574,6 @@ export default function InvestigacoesPage() {
           </GlassCard>
         )}
       </div>
-
-      {/* Create Investigation Modal */}
-      <CreateInvestigationModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
     </div>
   )
 }
