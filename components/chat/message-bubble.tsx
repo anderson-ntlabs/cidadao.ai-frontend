@@ -14,6 +14,7 @@ import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { TypingMessage } from './typing-message'
 import { toast } from '@/hooks/use-toast'
+import { VoicePlayer } from '@/components/voice'
 
 // Lazy load ReactMarkdown for better initial performance
 const ReactMarkdown = lazy(() => import('react-markdown'))
@@ -24,6 +25,7 @@ export interface MessageBubbleProps {
   agentName?: string
   agentRole?: string
   agentColor?: string
+  agentId?: string
   isLatest?: boolean
   isLoading?: boolean
   onComplete?: () => void
@@ -36,6 +38,7 @@ export function MessageBubble({
   agentName,
   agentRole,
   agentColor = 'green',
+  agentId,
   isLatest = false,
   isLoading = false,
   onComplete,
@@ -207,6 +210,20 @@ export function MessageBubble({
             "max-md:opacity-100 max-md:translate-y-0 max-md:pointer-events-auto"
           )}
         >
+          {/* Voice Player - Only for assistant messages with content */}
+          {role === 'assistant' && content && (
+            <>
+              <VoicePlayer
+                text={content}
+                agentId={agentId}
+                agentName={agentName}
+                size="sm"
+                variant="default"
+              />
+              <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
+            </>
+          )}
+
           <button
             onClick={handleCopy}
             className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm touch-manipulation"

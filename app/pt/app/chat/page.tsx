@@ -15,6 +15,7 @@ import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components
 import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
+import { VoiceRecorder } from '@/components/voice'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -352,6 +353,7 @@ export default function ChatPage() {
                         role={message.role === 'system' ? 'assistant' : message.role}
                         agentName={messageAgent?.name}
                         agentRole={messageAgent?.role.pt}
+                        agentId={message.agent_id}
                         isLatest={isLatest}
                         isLoading={isLoading}
                         onComplete={() => {
@@ -382,6 +384,20 @@ export default function ChatPage() {
       <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
           <div className="flex gap-2 sm:gap-3 items-end">
+            {/* Voice Recorder */}
+            <VoiceRecorder
+              onTranscript={(transcript) => {
+                setInputMessage(transcript)
+                if (textareaRef.current) {
+                  textareaRef.current.focus()
+                  adjustTextareaHeight()
+                }
+              }}
+              disabled={!canSendMessage}
+              size="md"
+              variant="default"
+            />
+
             <textarea
               ref={textareaRef}
               value={inputMessage}
@@ -390,7 +406,7 @@ export default function ChatPage() {
                 adjustTextareaHeight()
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Digite sua pergunta..."
+              placeholder="Digite ou fale sua pergunta..."
               className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 dark:focus:border-green-500 transition-all text-base min-h-[52px] shadow-sm hover:shadow-md"
               rows={1}
               disabled={!canSendMessage}
