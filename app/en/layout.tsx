@@ -36,6 +36,7 @@ import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
 import { SentryInit } from '@/components/sentry-init'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { LiveAnnouncerProvider } from '@/components/a11y'
 
 export default function ENLayout({
   children,
@@ -64,9 +65,10 @@ export default function ENLayout({
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>
-          <Providers>
-            <AnalyticsProvider>
-              <SentryInit />
+          <LiveAnnouncerProvider>
+            <Providers>
+              <AnalyticsProvider>
+                <SentryInit />
               {/* Fixed background layer with image */}
               <div
                 className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
@@ -87,8 +89,9 @@ export default function ENLayout({
                 <CookieConsent locale="en" />
                 <ToastProvider />
               </div>
-            </AnalyticsProvider>
-          </Providers>
+              </AnalyticsProvider>
+            </Providers>
+          </LiveAnnouncerProvider>
         </WebVitalsProvider>
       </body>
     </html>

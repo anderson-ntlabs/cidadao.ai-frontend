@@ -40,6 +40,7 @@ import { SentryInit } from '@/components/sentry-init'
 import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { LiveAnnouncerProvider } from '@/components/a11y'
 
 export default function PTLayout({
   children,
@@ -69,9 +70,10 @@ export default function PTLayout({
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>
-          <Providers>
-            <AnalyticsProvider>
-              <SentryInit />
+          <LiveAnnouncerProvider>
+            <Providers>
+              <AnalyticsProvider>
+                <SentryInit />
               {/* Camada de fundo fixo com a imagem */}
               <div
                 className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
@@ -95,8 +97,9 @@ export default function PTLayout({
                 {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
                 <VLibrasLazy locale="pt" forceOnload />
               </div>
-            </AnalyticsProvider>
-          </Providers>
+              </AnalyticsProvider>
+            </Providers>
+          </LiveAnnouncerProvider>
         </WebVitalsProvider>
       </body>
     </html>
