@@ -213,9 +213,9 @@ export async function listInvestigations(): Promise<InvestigationStatusResponse[
     );
 
     if (!response.success) {
-      // Not authenticated - return empty array
-      if (response.error?.status === 401) {
-        logger.debug('Investigation Adapter: Not authenticated, returning empty list');
+      // Not authenticated or access denied - return empty array
+      if (response.error?.status === 401 || response.error?.status === 403) {
+        logger.debug('Investigation Adapter: Not authenticated or access denied, returning empty list');
         return [];
       }
       throw new Error(response.error?.message || 'Failed to list investigations');
@@ -227,6 +227,12 @@ export async function listInvestigations(): Promise<InvestigationStatusResponse[
     return investigations;
 
   } catch (error: any) {
+    // Silently handle auth errors (403/401) - this is expected for unauthenticated users
+    if (error?.response?.status === 403 || error?.response?.status === 401) {
+      logger.debug('Investigation Adapter: Access denied (expected for public users), returning empty list');
+      return [];
+    }
+
     logger.error(
       error instanceof Error ? error : new Error(String(error)),
       { context: 'Investigation Adapter - List' }
