@@ -16,18 +16,13 @@ import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-mari
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 
+// Import MessageBubble directly (not lazy-loaded) to support client-side hooks
+import { MessageBubble } from '@/components/chat/message-bubble'
+
 // Lazy load heavy components for better initial load performance
 const ChatHistorySidebar = dynamic(() => import('@/components/chat/chat-history-sidebar').then(mod => ({ default: mod.ChatHistorySidebar })), {
   loading: () => null, // Sidebar doesn't need loading state
   ssr: false
-})
-
-const MessageBubble = dynamic(() => import('@/components/chat/message-bubble').then(mod => ({ default: mod.MessageBubble })), {
-  loading: () => (
-    <div className="animate-pulse">
-      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-2xl" />
-    </div>
-  )
 })
 
 const AgentAvatar = dynamic(() => import('@/components/chat/agent-avatar').then(mod => ({ default: mod.AgentAvatar })), {
