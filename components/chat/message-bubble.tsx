@@ -13,7 +13,6 @@ import { useState, lazy, Suspense } from 'react'
 import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TypingMessage } from './typing-message'
-import { VoiceButton } from '@/components/voice'
 import { toast } from '@/hooks/use-toast'
 
 // Lazy load ReactMarkdown for better initial performance
@@ -22,7 +21,6 @@ const ReactMarkdown = lazy(() => import('react-markdown'))
 export interface MessageBubbleProps {
   content: string
   role: 'user' | 'assistant'
-  agentId?: string
   agentName?: string
   agentRole?: string
   agentColor?: string
@@ -35,7 +33,6 @@ export interface MessageBubbleProps {
 export function MessageBubble({
   content,
   role,
-  agentId,
   agentName,
   agentRole,
   agentColor = 'green',
@@ -44,8 +41,6 @@ export function MessageBubble({
   onComplete,
   metadata
 }: MessageBubbleProps) {
-  console.log('🎯 MessageBubble RENDERIZADO!', { role, agentId, hasContent: !!content, isLoading })
-
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -241,16 +236,6 @@ export function MessageBubble({
 
           {role === 'assistant' && (
             <>
-              {/* Voice Button */}
-              {console.log('🎤 RENDERIZANDO VOICE BUTTON!', { agentId, contentLength: content?.length })}
-              <VoiceButton
-                text={content}
-                agentId={agentId}
-                variant="ghost"
-                size="icon"
-                className="p-2 md:p-1.5"
-              />
-
               <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
               <button
                 onClick={() => handleFeedback(true)}

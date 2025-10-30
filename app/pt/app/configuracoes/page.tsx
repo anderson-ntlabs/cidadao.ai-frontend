@@ -9,7 +9,6 @@ import { ActionPanel, ActionPanelSection, type ActionPanelItem } from '@/compone
 import { FontSizeControl } from '@/components/a11y/font-size-control'
 import { HighContrastToggle } from '@/components/a11y/high-contrast-toggle'
 import { VLibrasToggle } from '@/components/a11y/vlibras-toggle'
-import { VoiceSettingsPanel } from '@/components/voice'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
@@ -189,15 +188,6 @@ export default function ConfiguracoesPage() {
                 </div>
               </GlassCardContent>
             </GlassCard>
-          </ActionPanelSection>
-
-          {/* Voice Settings */}
-          <ActionPanelSection
-            title="Voz e Áudio"
-            description="Configure a narração de mensagens dos agentes"
-            icon={Volume2}
-          >
-            <VoiceSettingsPanel />
           </ActionPanelSection>
 
           {/* Appearance */}
