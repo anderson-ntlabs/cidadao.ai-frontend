@@ -58,14 +58,18 @@ backup-*
 bak_*
 bak-*
 
-# Claude-related files
-CLAUDE.md
+# Claude-related files (AI assistant private context)
+# Note: CLAUDE.md in root is project documentation and should be committed
+# Only block user's private Claude settings
 .claude/
 *.claude
 *.claude.*
 claude_*
 claude-*
 .claude*
+# Specific exclusions for private Claude files
+~/.claude/
+.config/claude/
 
 # Extended backup patterns
 *.backup-*
@@ -77,16 +81,13 @@ old/
 tmp/
 
 # Project planning files
+# Note: Roadmaps and project plans SHOULD be committed for team visibility
+# Only blocking work-in-progress private planning files
 next-steps.md
 *next-steps*
-planning/
 *.planning
-*ROADMAP*
-*PLAN*.md
-*STATUS*.md
-docs/*ROADMAP*
-docs/*PLAN*
-docs/*STATUS*
+*-WIP*.md
+*-DRAFT*.md
 
 # Security sensitive files
 .secrets/
