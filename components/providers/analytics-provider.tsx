@@ -1,7 +1,7 @@
 /**
  * Analytics Provider
  *
- * Initializes PostHog and manages analytics consent
+ * Initializes PostHog, Vercel Analytics and manages analytics consent
  * Must be placed high in the component tree
  */
 
@@ -9,6 +9,7 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { Analytics } from '@vercel/analytics/react'
 import { initPostHog, trackPageView, updateConsentStatus } from '@/lib/analytics/posthog-config'
 
 interface AnalyticsProviderProps {
@@ -44,5 +45,10 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
     }
   }, [])
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <Analytics />
+    </>
+  )
 }
