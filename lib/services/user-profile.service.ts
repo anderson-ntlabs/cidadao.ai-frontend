@@ -40,6 +40,24 @@ export interface UserStats {
   last_active?: string
 }
 
+export interface UserActivity {
+  id: string
+  user_id: string
+  type: 'chat' | 'investigation' | 'agent_interaction' | 'export' | 'settings_update'
+  title: string
+  description?: string
+  metadata?: Record<string, any>
+  created_at: string
+}
+
+export interface ActivityFilters {
+  type?: UserActivity['type']
+  startDate?: string
+  endDate?: string
+  limit?: number
+  offset?: number
+}
+
 class UserProfileService {
   private supabase = createClient()
 
@@ -252,6 +270,152 @@ class UserProfileService {
     } catch (error) {
       logger.error('Failed to delete account', { userId, error })
       throw error
+    }
+  }
+
+  /**
+   * Log user activity
+   */
+  async logActivity(
+    userId: string,
+    type: UserActivity['type'],
+    title: string,
+    description?: string,
+    metadata?: Record<string, any>
+  ): Promise<UserActivity> {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_activities')
+        .insert({
+          user_id: userId,
+          type,
+          title,
+          description,
+          metadata,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      logger.info('Activity logged', { userId, type, title })
+      return data
+    } catch (error) {
+      logger.error('Failed to log activity', { userId, type, title, error })
+      throw error
+    }
+  }
+
+  /**
+   * Get user activities with filters
+   */
+  async getActivities(userId: string, filters?: ActivityFilters): Promise<UserActivity[]> {
+    try {
+      let query = this.supabase
+        .from('user_activities')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      // Apply filters
+      if (filters?.type) {
+        query = query.eq('type', filters.type)
+      }
+
+      if (filters?.startDate) {
+        query = query.gte('created_at', filters.startDate)
+      }
+
+      if (filters?.endDate) {
+        query = query.lte('created_at', filters.endDate)
+      }
+
+      if (filters?.limit) {
+        query = query.limit(filters.limit)
+      }
+
+      if (filters?.offset) {
+        query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        // Table might not exist yet - return empty array
+        if (error.code === 'PGRST116' || error.code === '42P01') {
+          return []
+        }
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      logger.error('Failed to get activities', { userId, filters, error })
+      return []
+    }
+  }
+
+  /**
+   * Get recent activities (last 20)
+   */
+  async getRecentActivities(userId: string, limit: number = 20): Promise<UserActivity[]> {
+    return this.getActivities(userId, { limit })
+  }
+
+  /**
+   * Get activity statistics
+   */
+  async getActivityStats(userId: string): Promise<Record<UserActivity['type'], number>> {
+    try {
+      const activities = await this.getActivities(userId)
+
+      const stats = activities.reduce((acc, activity) => {
+        acc[activity.type] = (acc[activity.type] || 0) + 1
+        return acc
+      }, {} as Record<UserActivity['type'], number>)
+
+      return {
+        chat: stats.chat || 0,
+        investigation: stats.investigation || 0,
+        agent_interaction: stats.agent_interaction || 0,
+        export: stats.export || 0,
+        settings_update: stats.settings_update || 0
+      }
+    } catch (error) {
+      logger.error('Failed to get activity stats', { userId, error })
+      return {
+        chat: 0,
+        investigation: 0,
+        agent_interaction: 0,
+        export: 0,
+        settings_update: 0
+      }
+    }
+  }
+
+  /**
+   * Delete old activities (cleanup)
+   */
+  async cleanupOldActivities(userId: string, daysOld: number = 90): Promise<number> {
+    try {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - daysOld)
+
+      const { data, error } = await this.supabase
+        .from('user_activities')
+        .delete()
+        .eq('user_id', userId)
+        .lt('created_at', cutoffDate.toISOString())
+        .select()
+
+      if (error) throw error
+
+      logger.info('Old activities cleaned up', { userId, count: data?.length || 0 })
+      return data?.length || 0
+    } catch (error) {
+      logger.error('Failed to cleanup old activities', { userId, error })
+      return 0
     }
   }
 

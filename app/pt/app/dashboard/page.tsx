@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/design-system/tokens/index.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   TrendingUp, AlertTriangle, FileSearch, BarChart3, Shield,
@@ -10,9 +10,14 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
+import { StatCard, StatsGrid } from '@/components/stats'
+import { ActivityTimeline } from '@/components/activity'
+import { useAuth } from '@/hooks/use-supabase-auth'
+import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/utils/logger'
 
 // Estatísticas principais
 const statsCards = [
@@ -106,7 +111,51 @@ const agentActivity = [
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d')
+  const [activities, setActivities] = useState<UserActivity[]>([])
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true)
+  const [stats, setStats] = useState({
+    total_sessions: 0,
+    total_messages: 0,
+    total_investigations: 0,
+    member_since: new Date().toISOString()
+  })
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData()
+    }
+  }, [user])
+
+  const loadDashboardData = async () => {
+    if (!user) return
+
+    try {
+      setIsLoadingActivities(true)
+
+      // Load user stats and activities in parallel
+      const [userStats, recentActivities] = await Promise.all([
+        userProfileService.getStats(user.id),
+        userProfileService.getRecentActivities(user.id, 10)
+      ])
+
+      setStats(userStats)
+      setActivities(recentActivities)
+
+      // Log dashboard view activity
+      await userProfileService.logActivity(
+        user.id,
+        'settings_update',
+        'Visualizou o dashboard',
+        'Acesso ao painel de controle principal'
+      ).catch(err => logger.error('Failed to log dashboard activity', { error: err }))
+    } catch (error) {
+      logger.error('Failed to load dashboard data', { error })
+    } finally {
+      setIsLoadingActivities(false)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -284,58 +333,28 @@ export default function DashboardPage() {
           </GlassCardContent>
         </GlassCard>
 
-        {/* Agent Activity */}
+        {/* Recent Activity */}
         <GlassCard>
           <GlassCardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Atividades Recentes
+                </h2>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Atividade dos Agentes
-              </h2>
             </div>
           </GlassCardHeader>
 
           <GlassCardContent>
-            <div className="space-y-4">
-              {agentActivity.map((activity, index) => (
-                <div key={index} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center',
-                      activity.type === 'anomaly' ? 'bg-red-100 dark:bg-red-900/30' :
-                      activity.type === 'analysis' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                      'bg-green-100 dark:bg-green-900/30'
-                    )}>
-                      {activity.type === 'anomaly' ? (
-                        <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                      ) : activity.type === 'analysis' ? (
-                        <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      ) : (
-                        <FileSearch className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      )}
-                    </div>
-                    {index < agentActivity.length - 1 && (
-                      <div className="w-px h-full bg-gray-200 dark:bg-gray-700 mt-2" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 pb-4">
-                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">
-                      {activity.agent}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      {activity.action}
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                      <Clock className="w-3 h-3" />
-                      {format(activity.time, "HH:mm", { locale: ptBR })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ActivityTimeline
+              activities={activities}
+              isLoading={isLoadingActivities}
+              emptyMessage="Suas atividades aparecerão aqui"
+              maxItems={5}
+            />
 
             <Button
               variant="secondary"
