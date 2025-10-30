@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Download, RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle, FileText, TrendingUp, Calendar, Activity } from 'lucide-react'
+import { ArrowLeft, Download, RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle, FileText, TrendingUp, Calendar, Activity, Share2 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useBackendInvestigation } from '@/hooks/use-backend-investigations'
@@ -10,6 +10,7 @@ import { mockInvestigations, type MockInvestigation } from '@/data/investigation
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AnomalyChart } from '@/components/investigations/anomaly-chart'
+import { ShareModal } from '@/components/investigations/share-modal'
 
 /**
  * Investigation Detail Page
@@ -42,6 +43,7 @@ export default function InvestigationDetailPage() {
   const investigationId = params?.id as string
 
   const [exportFormat, setExportFormat] = useState<'pdf' | 'json' | 'csv' | null>(null)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
   // Try to fetch from backend
   const {
@@ -212,6 +214,15 @@ export default function InvestigationDetailPage() {
             >
               <Download className="w-4 h-4 mr-2" />
               Exportar
+            </Button>
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsShareModalOpen(true)}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Compartilhar
             </Button>
           </div>
         </div>
@@ -439,6 +450,13 @@ export default function InvestigationDetailPage() {
         )}
 
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        investigationId={investigationId}
+      />
     </div>
   )
 }
