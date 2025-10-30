@@ -370,6 +370,7 @@ export default function ChatPage() {
                       <MessageBubble
                         content={message.content || ''}
                         role={message.role === 'system' ? 'assistant' : message.role}
+                        agentId={message.agent_id}
                         agentName={messageAgent?.name}
                         agentRole={messageAgent?.role.pt}
                         isLatest={isLatest}
