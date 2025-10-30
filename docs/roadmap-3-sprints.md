@@ -3,8 +3,29 @@
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
 **Data de Criação**: 2025-01-30 18:30:00 -0300
-**Duração Total**: 10-15 dias úteis
+**Última Atualização**: 2025-01-30 19:15:00 -0300
+**Duração Total**: 8-12 dias úteis (ajustado)
 **Objetivo**: Elevar a qualidade, UX e acessibilidade do Cidadão.AI Frontend
+
+---
+
+## 🎉 ATUALIZAÇÃO IMPORTANTE (2025-01-30)
+
+**Descoberta:** O projeto JÁ TEM uma excelente base de testes!
+
+```
+✅ Vitest configurado e funcionando
+✅ 1129 testes passando (56 test files)
+✅ Coverage estimado: 60-70%
+✅ Testing Library instalado
+⚠️  Apenas 11 testes falhando (button size classes - fácil fix)
+```
+
+**Impacto no Roadmap:**
+- ✅ Sprint 1 reduzido de 3-5 dias para 2-3 dias
+- ✅ Foco mudou de "setup" para "expansão"
+- ✅ Duração total: 10-15 dias → 8-12 dias
+- ✅ Mais tempo para visualizações e UX
 
 ---
 
@@ -32,140 +53,127 @@
 
 ---
 
-## 🏃 SPRINT 1: Fundação Sólida (3-5 dias)
+## 🏃 SPRINT 1: Fundação Sólida (2-3 dias)
 
 ### 🎯 Objetivos
-- Estabelecer cultura de testes
+- ✅ **JÁ TEMOS**: Vitest configurado + 1129 testes passando!
+- Corrigir 11 testes falhando (button size classes)
 - Implementar fundações de acessibilidade
-- Criar base para desenvolvimento seguro
+- Aumentar coverage de componentes novos
+
+### 📊 Status Atual dos Testes
+
+```
+✅ Vitest + Testing Library: CONFIGURADO
+✅ Test Files: 56 passed
+✅ Tests: 1129 passed (11 failed - minor)
+✅ Coverage: ~60-70% (estimado)
+✅ Scripts disponíveis:
+   - npm test
+   - npm run test:watch
+   - npm run test:coverage
+   - npm run test:ui
+```
 
 ### 📦 Deliverables
 
-#### 1. Setup de Testes Automatizados
+#### 1. Correção de Testes Existentes
 
-**Dia 1: Configuração Inicial**
+**Dia 1: Fix Failing Tests (1-2h)**
+
+**Testes falhando:**
+- `__tests__/unit/components/button.test.tsx`: 11 failures
+  - Problema: Size classes mudaram (h-8 → h-9, h-12 → h-14, etc)
+  - Solução: Atualizar expectations nos testes
 
 ```bash
-# Instalações necessárias
-npm install --save-dev \
-  @testing-library/react \
-  @testing-library/jest-dom \
-  @testing-library/user-event \
-  jest \
-  jest-environment-jsdom \
-  @types/jest
+# Rodar testes e ver failures
+npm run test:coverage
 
-# Configurar Jest
-touch jest.config.js jest.setup.js
+# Fix específico do button
+npm test button.test
 ```
 
-**Arquivos a criar:**
+**Arquivo a corrigir:**
 
-`jest.config.js`:
-```javascript
-const nextJest = require('next/jest')
-
-const createJestConfig = nextJest({
-  dir: './',
-})
-
-const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  },
-  collectCoverageFrom: [
-    'app/**/*.{js,jsx,ts,tsx}',
-    'components/**/*.{js,jsx,ts,tsx}',
-    'lib/**/*.{js,jsx,ts,tsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-    '!**/.next/**',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
-    },
-  },
-}
-
-module.exports = createJestConfig(customJestConfig)
-```
-
-`jest.setup.js`:
-```javascript
-import '@testing-library/jest-dom'
-```
-
-**Dia 2-3: Testes de Componentes UI**
-
-Criar testes para:
-- ✅ `components/ui/button.test.tsx`
-- ✅ `components/ui/input.test.tsx`
-- ✅ `components/ui/optimized-image.test.tsx`
-- ✅ `components/chat/message-bubble.test.tsx`
-- ✅ `components/chat/agent-avatar.test.tsx`
-- ✅ `components/chat/smart-suggestions.test.tsx`
-
-**Exemplo de teste:**
 ```typescript
-// components/ui/__tests__/button.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react'
-import { Button } from '../button'
+// __tests__/unit/components/button.test.tsx
+// Atualizar expectations para novos tamanhos:
 
-describe('Button', () => {
-  it('renders correctly', () => {
-    render(<Button>Click me</Button>)
-    expect(screen.getByText('Click me')).toBeInTheDocument()
+describe('Sizes', () => {
+  it('applies small size classes', () => {
+    render(<Button size="sm">Small</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveClass('h-9') // Era h-8
   })
 
-  it('handles click events', () => {
-    const handleClick = jest.fn()
-    render(<Button onClick={handleClick}>Click me</Button>)
-    fireEvent.click(screen.getByText('Click me'))
-    expect(handleClick).toHaveBeenCalledTimes(1)
+  it('applies large size classes', () => {
+    render(<Button size="lg">Large</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveClass('h-14') // Era h-12
   })
 
-  it('is accessible with keyboard', () => {
-    render(<Button>Click me</Button>)
-    const button = screen.getByText('Click me')
-    expect(button).toHaveAttribute('type', 'button')
-    // Testa se pode receber focus
-    button.focus()
-    expect(button).toHaveFocus()
-  })
-
-  it('respects disabled state', () => {
-    render(<Button disabled>Click me</Button>)
-    expect(screen.getByText('Click me')).toBeDisabled()
+  it('applies icon size classes', () => {
+    render(<Button size="icon">🔍</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveClass('h-11', 'w-11') // Era h-10 w-10
   })
 })
 ```
 
-**Dia 4: Testes de Stores (Zustand)**
+**Dia 1-2: Testes para Componentes Novos**
 
-- ✅ `store/__tests__/chat-store.test.ts`
-- ✅ `store/__tests__/notification-store.test.ts`
+Adicionar testes para componentes criados recentemente:
+- 🆕 `components/chat/message-bubble.test.tsx`
+- 🆕 `components/chat/agent-avatar.test.tsx`
+- 🆕 `components/chat/smart-suggestions.test.tsx`
+- 🆕 `components/a11y/vlibras-widget.test.tsx`
+- 🆕 `components/a11y/accessibility-panel.test.tsx`
 
-**Dia 5: Testes de Hooks**
+**Exemplo:**
+```typescript
+// components/chat/__tests__/message-bubble.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MessageBubble } from '../message-bubble'
 
-- ✅ `hooks/__tests__/use-supabase-auth.test.ts`
-- ✅ `hooks/__tests__/use-toast.test.ts`
+describe('MessageBubble', () => {
+  it('renders user message correctly', () => {
+    render(
+      <MessageBubble content="Hello" role="user" />
+    )
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+  })
 
-**Comandos novos em package.json:**
-```json
-{
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --maxWorkers=2"
-  }
-}
+  it('renders assistant message with markdown', () => {
+    render(
+      <MessageBubble
+        content="**Bold text**"
+        role="assistant"
+        agentName="Abaporu"
+      />
+    )
+    expect(screen.getByText('Bold text')).toBeInTheDocument()
+  })
+
+  it('shows copy button and handles click', async () => {
+    render(
+      <MessageBubble content="Copy me" role="assistant" />
+    )
+    const copyButton = screen.getByLabelText('Copiar mensagem')
+    fireEvent.click(copyButton)
+    // Verify toast was shown
+    expect(screen.getByText('Copiado!')).toBeInTheDocument()
+  })
+
+  it('is keyboard accessible', () => {
+    render(
+      <MessageBubble content="Test" role="assistant" />
+    )
+    const copyButton = screen.getByLabelText('Copiar mensagem')
+    copyButton.focus()
+    expect(copyButton).toHaveFocus()
+  })
+})
 ```
 
 ---
@@ -1984,13 +1992,17 @@ Meta Após 3 Sprints:
 ### Qualidade
 
 ```
-Antes:
-- Test Coverage: 0%
+Antes (Descoberta em 2025-01-30):
+- Test Coverage: ~60-70% ✅ (1129 testes passando!)
+- Test Files: 56 ✅
+- Vitest: Configurado ✅
 - Accessibility Score: ~85
 - Type Coverage: ~90%
 
-Meta:
-- Test Coverage: >70%
+Meta Após 3 Sprints:
+- Test Coverage: >80% (aumentar mais 10-20%)
+- Test Files: 65+ (adicionar novos componentes)
+- All Tests Passing: 100%
 - Accessibility Score: >98
 - Type Coverage: >95%
 ```
@@ -2007,13 +2019,12 @@ Metas:
 
 ---
 
-## 🎯 CRONOGRAMA RESUMIDO
+## 🎯 CRONOGRAMA RESUMIDO (ATUALIZADO)
 
 ```
 Semana 1:
-├─ Dias 1-2: Sprint 1 Setup (Testes + A11y Base)
-├─ Dias 3-5: Sprint 1 Execução
-└─ Review: Testes rodando, A11y base pronta
+├─ Dias 1-2: Sprint 1 (Corrigir testes + A11y Base)
+└─ Review: 100% testes passando, A11y base pronta
 
 Semana 2:
 ├─ Dias 1-2: Sprint 2 Setup (Viz libs)
