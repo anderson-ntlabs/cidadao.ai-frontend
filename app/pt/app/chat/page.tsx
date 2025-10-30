@@ -204,22 +204,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col relative overflow-hidden">
-      {/* Background with Operários image */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03
-        }}
-      />
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-gray-50/50 via-white/80 to-gray-50/50 dark:from-gray-900/80 dark:via-gray-950/90 dark:to-gray-900/80" />
-
-      {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col min-h-0">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* VLibras is now global in AuthLayout */}
 
       {/* Chat History Sidebar */}
@@ -428,7 +413,6 @@ export default function ChatPage() {
             </div>
           )}
         </div>
-      </div>
       </div>
     </div>
   )

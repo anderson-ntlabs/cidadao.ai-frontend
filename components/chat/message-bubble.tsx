@@ -193,14 +193,18 @@ export function MessageBubble({
         )}
       </div>
 
-      {/* Quick Actions - Always visible */}
+      {/* Quick Actions - Show on hover or touch */}
       {!isLoading && (
         <div
           className={cn(
             "absolute -bottom-6 flex items-center gap-1 transition-all duration-200",
             role === 'user' ? 'right-0' : 'left-0',
-            // Always visible for better UX
-            "opacity-100 translate-y-0"
+            // Hidden by default, visible on group hover or on touch devices
+            "opacity-0 translate-y-1 pointer-events-none",
+            "group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
+            // Always visible on touch devices (mobile)
+            "md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto",
+            "max-md:opacity-100 max-md:translate-y-0 max-md:pointer-events-auto"
           )}
         >
           <button
