@@ -61,11 +61,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       logger.error('Failed to load profile', { error })
-      toast({
-        title: 'Erro ao carregar perfil',
-        description: 'Não foi possível carregar seus dados. Tente novamente.',
-        variant: 'destructive'
-      })
+      toast.error('Erro ao carregar perfil', 'Não foi possível carregar seus dados. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -88,21 +84,13 @@ export default function ProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Arquivo inválido',
-        description: 'Por favor, selecione uma imagem.',
-        variant: 'destructive'
-      })
+      toast.error('Arquivo inválido', 'Por favor, selecione uma imagem.')
       return
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: 'Arquivo muito grande',
-        description: 'A imagem deve ter no máximo 5MB.',
-        variant: 'destructive'
-      })
+      toast.error('Arquivo muito grande', 'A imagem deve ter no máximo 5MB.')
       return
     }
 
@@ -126,10 +114,7 @@ export default function ProfilePage() {
       let avatarUrl = profile?.avatar_url
       if (avatarFile) {
         avatarUrl = await userProfileService.uploadAvatar(user.id, avatarFile)
-        toast({
-          title: 'Avatar atualizado',
-          description: 'Sua foto de perfil foi atualizada com sucesso.'
-        })
+        toast.success('Avatar atualizado', 'Sua foto de perfil foi atualizada com sucesso.')
       }
 
       // Update profile
@@ -145,17 +130,10 @@ export default function ProfilePage() {
       setAvatarFile(null)
       setAvatarPreview(null)
 
-      toast({
-        title: 'Perfil atualizado',
-        description: 'Suas informações foram salvas com sucesso.'
-      })
+      toast.success('Perfil atualizado', 'Suas informações foram salvas com sucesso.')
     } catch (error) {
       logger.error('Failed to save profile', { error })
-      toast({
-        title: 'Erro ao salvar',
-        description: 'Não foi possível atualizar seu perfil. Tente novamente.',
-        variant: 'destructive'
-      })
+      toast.error('Erro ao salvar', 'Não foi possível atualizar seu perfil. Tente novamente.')
     } finally {
       setIsSaving(false)
     }
@@ -471,10 +449,7 @@ export default function ProfilePage() {
                     title: 'Autenticação em Duas Etapas',
                     description: 'Adicione uma camada extra de segurança à sua conta',
                     actionLabel: 'Configurar',
-                    onAction: () => toast({
-                      title: 'Em breve',
-                      description: 'A autenticação em duas etapas estará disponível em breve.'
-                    }),
+                    onAction: () => toast.info('Em breve', 'A autenticação em duas etapas estará disponível em breve.'),
                     badge: 'Recomendado',
                     badgeColor: 'green'
                   },
@@ -482,19 +457,13 @@ export default function ProfilePage() {
                     title: 'Alterar Senha',
                     description: 'Mantenha sua conta segura com uma senha forte',
                     actionLabel: 'Alterar',
-                    onAction: () => toast({
-                      title: 'Em breve',
-                      description: 'A alteração de senha estará disponível em breve.'
-                    })
+                    onAction: () => toast.info('Em breve', 'A alteração de senha estará disponível em breve.')
                   },
                   {
                     title: 'Sessões Ativas',
                     description: 'Gerencie os dispositivos conectados à sua conta',
                     actionLabel: 'Ver Sessões',
-                    onAction: () => toast({
-                      title: 'Em breve',
-                      description: 'O gerenciamento de sessões estará disponível em breve.'
-                    }),
+                    onAction: () => toast.info('Em breve', 'O gerenciamento de sessões estará disponível em breve.'),
                     showChevron: true
                   }
                 ]}

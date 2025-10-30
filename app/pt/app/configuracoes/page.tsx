@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Settings, Type, Eye, Languages, Bell, Shield, Palette, Globe, Volume2, Save } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
@@ -25,6 +26,7 @@ import { logger } from '@/lib/utils/logger'
  */
 
 export default function ConfiguracoesPage() {
+  const router = useRouter()
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -64,17 +66,10 @@ export default function ConfiguracoesPage() {
     try {
       setIsSaving(true)
       await userProfileService.updatePreferences(user.id, preferences)
-      toast({
-        title: 'Preferências salvas',
-        description: 'Suas configurações foram atualizadas com sucesso.'
-      })
+      toast.success('Preferências salvas', 'Suas configurações foram atualizadas com sucesso.')
     } catch (error) {
       logger.error('Failed to save preferences', { error })
-      toast({
-        title: 'Erro ao salvar',
-        description: 'Não foi possível salvar suas preferências. Tente novamente.',
-        variant: 'destructive'
-      })
+      toast.error('Erro ao salvar', 'Não foi possível salvar suas preferências. Tente novamente.')
     } finally {
       setIsSaving(false)
     }
@@ -217,10 +212,7 @@ export default function ConfiguracoesPage() {
                         const currentIndex = themes.indexOf(preferences.theme || 'system')
                         const nextTheme = themes[(currentIndex + 1) % themes.length]
                         setPreferences({ ...preferences, theme: nextTheme })
-                        toast({
-                          title: 'Tema alterado',
-                          description: `Tema alterado para ${nextTheme === 'system' ? 'automático' : nextTheme === 'dark' ? 'escuro' : 'claro'}`
-                        })
+                        toast.info('Tema alterado', `Tema alterado para ${nextTheme === 'system' ? 'automático' : nextTheme === 'dark' ? 'escuro' : 'claro'}`)
                       }
                     }
                   ]}
@@ -248,12 +240,11 @@ export default function ConfiguracoesPage() {
                       actionLabel: preferences.notifications_enabled ? 'Desativar' : 'Ativar',
                       onAction: () => {
                         togglePreference('notifications_enabled')
-                        toast({
-                          title: preferences.notifications_enabled ? 'Notificações desativadas' : 'Notificações ativadas',
-                          description: preferences.notifications_enabled
-                            ? 'Você não receberá mais notificações do sistema'
-                            : 'Você receberá notificações sobre atividades importantes'
-                        })
+                        const enabled = !preferences.notifications_enabled
+                        toast.info(
+                          enabled ? 'Notificações ativadas' : 'Notificações desativadas',
+                          enabled ? 'Você receberá notificações sobre atividades importantes' : 'Você não receberá mais notificações do sistema'
+                        )
                       }
                     },
                     {
@@ -265,12 +256,11 @@ export default function ConfiguracoesPage() {
                       actionLabel: preferences.email_notifications ? 'Desativar' : 'Ativar',
                       onAction: () => {
                         togglePreference('email_notifications')
-                        toast({
-                          title: preferences.email_notifications ? 'Emails desativados' : 'Emails ativados',
-                          description: preferences.email_notifications
-                            ? 'Você não receberá mais emails'
-                            : 'Você receberá resumos e alertas por email'
-                        })
+                        const enabled = !preferences.email_notifications
+                        toast.info(
+                          enabled ? 'Emails ativados' : 'Emails desativados',
+                          enabled ? 'Você receberá resumos e alertas por email' : 'Você não receberá mais emails'
+                        )
                       },
                       disabled: !preferences.notifications_enabled
                     }
@@ -306,7 +296,7 @@ export default function ConfiguracoesPage() {
 
           {/* Privacy */}
           <ActionPanelSection
-            title: "Privacidade e Segurança"
+            title="Privacidade e Segurança"
             description="Gerencie suas configurações de privacidade"
             icon={Shield}
           >
@@ -322,10 +312,7 @@ export default function ConfiguracoesPage() {
                       badgeColor: 'blue',
                       actionLabel: 'Gerenciar',
                       showChevron: true,
-                      onAction: () => toast({
-                        title: 'Em breve',
-                        description: 'As configurações de privacidade estarão disponíveis em breve.'
-                      })
+                      onAction: () => toast.info('Em breve', 'As configurações de privacidade estarão disponíveis em breve.')
                     },
                     {
                       title: 'Histórico de Atividades',
@@ -333,10 +320,7 @@ export default function ConfiguracoesPage() {
                       icon: Shield,
                       actionLabel: 'Ver Histórico',
                       showChevron: true,
-                      onAction: () => toast({
-                        title: 'Em breve',
-                        description: 'O histórico de atividades estará disponível em breve.'
-                      })
+                      onAction: () => router.push('/pt/app/atividades')
                     }
                   ]}
                   showDividers={true}

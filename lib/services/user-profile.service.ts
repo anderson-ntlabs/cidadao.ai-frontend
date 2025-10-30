@@ -262,8 +262,8 @@ class UserProfileService {
       // Mark profile as deleted
       await this.updateProfile(userId, {
         full_name: '[Deleted User]',
-        bio: null,
-        avatar_url: null
+        bio: undefined,
+        avatar_url: undefined
       })
 
       logger.warn('User account deleted', { userId })
