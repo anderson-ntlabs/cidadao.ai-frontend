@@ -1,20 +1,21 @@
 'use client'
 
 import '@/styles/design-system/tokens/index.css'
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search, Filter, TrendingUp, AlertTriangle, FileSearch,
   Calendar, ChevronRight, Download, Eye, Clock,
   BarChart3, Shield, Zap, Target, Activity, Users,
-  CheckCircle, XCircle, AlertCircle, RefreshCw
+  CheckCircle, XCircle, AlertCircle, RefreshCw, Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { sanitizeSearchQuery } from '@/lib/security/input-validation'
+import { useBackendInvestigations } from '@/hooks/use-backend-investigations'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
@@ -41,31 +42,37 @@ const investigationTypes = {
   }
 }
 
-// Status das investigações
+// Status das investigações (mapeamento backend -> frontend)
 const statusConfig = {
-  active: { 
-    label: 'Em Andamento', 
-    color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
-    icon: RefreshCw 
-  },
-  completed: { 
-    label: 'Concluída', 
-    color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-    icon: CheckCircle 
-  },
-  critical: { 
-    label: 'Crítica', 
-    color: 'text-red-600 bg-red-100 dark:bg-red-900/30',
-    icon: XCircle 
-  },
-  pending: { 
-    label: 'Pendente', 
+  pending: {
+    label: 'Pendente',
     color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
-    icon: Clock 
+    icon: Clock
+  },
+  running: {
+    label: 'Em Andamento',
+    color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+    icon: RefreshCw
+  },
+  completed: {
+    label: 'Concluída',
+    color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+    icon: CheckCircle
+  },
+  failed: {
+    label: 'Falhou',
+    color: 'text-red-600 bg-red-100 dark:bg-red-900/30',
+    icon: XCircle
+  },
+  cancelled: {
+    label: 'Cancelada',
+    color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
+    icon: XCircle
   }
 }
 
-// Mock de dados de investigações
+// MOCK DATA REMOVED - Now using real backend data
+// Mock de dados de investigações (DEPRECATED - kept for fallback only)
 const mockInvestigations = [
   {
     id: 'INV-2024-001',
@@ -159,9 +166,19 @@ export default function InvestigacoesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'date' | 'value' | 'confidence'>('date')
-  const [investigations] = useState(mockInvestigations)
-  const [isLoading, setIsLoading] = useState(false)
+  const [sortBy, setSortBy] = useState<'date' | 'progress' | 'anomalies'>('date')
+
+  // Use backend investigations with auto-refresh every 5 seconds
+  const {
+    investigations: backendInvestigations,
+    isLoading,
+    error: backendError,
+    refreshInvestigations
+  } = useBackendInvestigations({ autoRefresh: true, refreshInterval: 5000 })
+
+  // Fallback to mock data if backend returns empty or has error
+  const useMockFallback = backendInvestigations.length === 0 && !isLoading
+  const investigations = useMockFallback ? mockInvestigations : backendInvestigations
 
   // Handler for search input with sanitization
   const handleSearchChange = (value: string) => {
@@ -178,44 +195,76 @@ export default function InvestigacoesPage() {
     return status === 'all' || ['active', 'completed', 'pending', 'critical'].includes(status)
   }
 
-  // Filtrar investigações
-  const filteredInvestigations = investigations.filter(inv => {
-    const matchesSearch = inv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         inv.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         inv.id.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtrar investigações (works with both backend and mock data)
+  const filteredInvestigations = useMemo(() => {
+    return investigations.filter((inv: any) => {
+      // Backend data uses investigation_id, mock uses id
+      const invId = inv.investigation_id || inv.id || ''
+      const invTitle = inv.title || `Investigation ${invId.slice(0, 8)}`
+      const invDescription = inv.current_phase || inv.description || ''
 
-    const matchesType = selectedType === 'all' || inv.type === selectedType
-    const matchesStatus = selectedStatus === 'all' || inv.status === selectedStatus
+      const matchesSearch = invTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           invDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           invId.toLowerCase().includes(searchTerm.toLowerCase())
 
-    return matchesSearch && matchesType && matchesStatus
-  })
+      const matchesType = selectedType === 'all' || inv.type === selectedType
+      const matchesStatus = selectedStatus === 'all' || inv.status === selectedStatus
 
-  // Ordenar investigações
-  const sortedInvestigations = [...filteredInvestigations].sort((a, b) => {
-    switch (sortBy) {
-      case 'value':
-        return b.value - a.value
-      case 'confidence':
-        return b.confidence - a.confidence
-      case 'date':
-      default:
-        return b.dateUpdated.getTime() - a.dateUpdated.getTime()
+      return matchesSearch && matchesType && matchesStatus
+    })
+  }, [investigations, searchTerm, selectedType, selectedStatus])
+
+  // Ordenar investigações (works with both backend and mock data)
+  const sortedInvestigations = useMemo(() => {
+    return [...filteredInvestigations].sort((a: any, b: any) => {
+      switch (sortBy) {
+        case 'progress':
+          return (b.progress || 0) - (a.progress || 0)
+        case 'anomalies':
+          return (b.anomalies_detected || b.findings || 0) - (a.anomalies_detected || a.findings || 0)
+        case 'date':
+        default:
+          // Backend uses created_at, mock uses dateUpdated
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : (a.dateUpdated?.getTime() || 0)
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : (b.dateUpdated?.getTime() || 0)
+          return dateB - dateA
+      }
+    })
+  }, [filteredInvestigations, sortBy])
+
+  // Estatísticas (works with both backend and mock data)
+  const stats = useMemo(() => {
+    const total = investigations.length
+    const running = investigations.filter((i: any) => i.status === 'running' || i.status === 'active').length
+    const completed = investigations.filter((i: any) => i.status === 'completed').length
+    const failed = investigations.filter((i: any) => i.status === 'failed' || i.status === 'critical').length
+
+    // Calculate total anomalies (backend: anomalies_detected, mock: findings)
+    const totalAnomalies = investigations.reduce((sum: number, i: any) =>
+      sum + (i.anomalies_detected || i.findings || 0), 0
+    )
+
+    // Calculate average progress (backend: progress 0-1, convert to %)
+    const avgProgress = investigations.length > 0
+      ? investigations.reduce((sum: number, i: any) => {
+          const progress = i.progress !== undefined ? i.progress * 100 : 0
+          return sum + progress
+        }, 0) / investigations.length
+      : 0
+
+    return {
+      total,
+      running,
+      completed,
+      failed,
+      totalAnomalies,
+      avgProgress: Math.round(avgProgress)
     }
-  })
+  }, [investigations])
 
-  // Estatísticas
-  const stats = {
-    total: investigations.length,
-    critical: investigations.filter(i => i.status === 'critical').length,
-    totalValue: investigations.reduce((sum, i) => sum + i.value, 0),
-    avgConfidence: investigations.reduce((sum, i) => sum + i.confidence, 0) / investigations.length
-  }
-
-  const handleRefresh = async () => {
-    setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-  }
+  const handleRefresh = useCallback(async () => {
+    await refreshInvestigations()
+  }, [refreshInvestigations])
 
   return (
     <div className="min-h-screen relative">
@@ -274,6 +323,9 @@ export default function InvestigacoesPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Investigações</p>
                   <p className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">{stats.total}</p>
+                  {useMockFallback && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
                   <FileSearch className="w-6 h-6 text-white" />
@@ -286,10 +338,32 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Casos Críticos</p>
-                  <p className="text-3xl font-bold mt-2 text-red-600">{stats.critical}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Em Andamento</p>
+                  <p className="text-3xl font-bold mt-2 text-blue-600">{stats.running}</p>
+                  {useMockFallback && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                  )}
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <RefreshCw className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </GlassCardContent>
+          </GlassCard>
+
+          <GlassCard>
+            <GlassCardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Anomalias Detectadas</p>
+                  <p className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">
+                    {stats.totalAnomalies}
+                  </p>
+                  {useMockFallback && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                  )}
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
                   <AlertTriangle className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -300,24 +374,11 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Valor Total Investigado</p>
-                  <p className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">
-                    R$ {(stats.totalValue / 1000000).toFixed(1)}M
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </GlassCardContent>
-          </GlassCard>
-
-          <GlassCard>
-            <GlassCardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Confiança Média</p>
-                  <p className="text-3xl font-bold mt-2 text-purple-600">{stats.avgConfidence.toFixed(1)}%</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Progresso Médio</p>
+                  <p className="text-3xl font-bold mt-2 text-purple-600">{stats.avgProgress}%</p>
+                  {useMockFallback && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
                   <Target className="w-6 h-6 text-white" />
@@ -376,8 +437,8 @@ export default function InvestigacoesPage() {
                   className="px-4 py-3 border border-gray-200/50 dark:border-gray-700/50 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
                 >
                   <option value="date">Mais Recentes</option>
-                  <option value="value">Maior Valor</option>
-                  <option value="confidence">Maior Confiança</option>
+                  <option value="progress">Maior Progresso</option>
+                  <option value="anomalies">Mais Anomalias</option>
                 </select>
               </div>
             </div>
