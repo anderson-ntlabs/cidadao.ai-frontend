@@ -27,13 +27,13 @@ describe('Button', () => {
   it('renders with different sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>)
     const button = screen.getByRole('button')
-    expect(button).toHaveClass('h-8', 'px-3', 'text-sm')
+    expect(button).toHaveClass('h-11', 'px-4', 'text-sm')
 
     rerender(<Button size="lg">Large</Button>)
-    expect(button).toHaveClass('h-12', 'px-6', 'text-lg')
+    expect(button).toHaveClass('h-14', 'px-8', 'text-lg')
 
     rerender(<Button size="icon">Icon</Button>)
-    expect(button).toHaveClass('h-10', 'w-10', 'p-0')
+    expect(button).toHaveClass('h-11', 'w-11', 'p-0')
   })
 
   it('handles click events', async () => {

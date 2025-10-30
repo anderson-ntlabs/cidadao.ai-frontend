@@ -50,25 +50,25 @@ describe('Button Component', () => {
     it('applies medium size classes (default)', () => {
       render(<Button size="md">Medium Size</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('h-10')
+      expect(button).toHaveClass('h-12')
     })
 
     it('applies small size classes', () => {
       render(<Button size="sm">Small</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('h-8')
+      expect(button).toHaveClass('h-11')
     })
 
     it('applies large size classes', () => {
       render(<Button size="lg">Large</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('h-12')
+      expect(button).toHaveClass('h-14')
     })
 
     it('applies icon size classes', () => {
       render(<Button size="icon">🔍</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('h-10', 'w-10')
+      expect(button).toHaveClass('h-11', 'w-11')
     })
   })
 
