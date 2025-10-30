@@ -74,14 +74,16 @@ export default function ChatPage() {
   }, [error, clearError])
 
   // Clear messages when switching modes
-  const handleModeChange = (newMode: ChatMode) => {
+  const handleModeChange = async (newMode: ChatMode) => {
+    // Update mode immediately
     setChatMode(newMode)
 
     // Clear chat history when switching modes
     if (typeof window !== 'undefined') {
-      // Create new session for the new mode
-      createNewSession()
+      // Create new session for the new mode (this clears messages)
+      await createNewSession()
 
+      // Show toast notification
       toast.success(
         newMode === 'maritaca' ? 'Modo Maritaca Ativado' : 'Modo Cidadão.AI Ativado',
         newMode === 'maritaca'
