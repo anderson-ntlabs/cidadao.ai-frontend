@@ -1,22 +1,52 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { agents } from '@/data/agents'
 import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { toast } from '@/hooks/use-toast'
-import { Send, History, Plus, Sparkles } from 'lucide-react'
+import { Send, History, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
 import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
 import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
-import { MessageBubble } from '@/components/chat/message-bubble'
-import { AgentAvatar } from '@/components/chat/agent-avatar'
-import { SmartSuggestions, getContextualSuggestions } from '@/components/chat/smart-suggestions'
 import { logger } from '@/lib/utils/logger'
+
+// Lazy load heavy components for better initial load performance
+const ChatHistorySidebar = dynamic(() => import('@/components/chat/chat-history-sidebar').then(mod => ({ default: mod.ChatHistorySidebar })), {
+  loading: () => null, // Sidebar doesn't need loading state
+  ssr: false
+})
+
+const MessageBubble = dynamic(() => import('@/components/chat/message-bubble').then(mod => ({ default: mod.MessageBubble })), {
+  loading: () => (
+    <div className="animate-pulse">
+      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-2xl" />
+    </div>
+  )
+})
+
+const AgentAvatar = dynamic(() => import('@/components/chat/agent-avatar').then(mod => ({ default: mod.AgentAvatar })), {
+  loading: () => (
+    <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+  )
+})
+
+const SmartSuggestions = dynamic(() => import('@/components/chat/smart-suggestions').then(mod => ({ default: mod.SmartSuggestions })), {
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {[1, 2, 3, 4].map(i => (
+        <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+      ))}
+    </div>
+  )
+})
+
+// Import getContextualSuggestions separately since it's just a function
+import { getContextualSuggestions } from '@/components/chat/smart-suggestions'
 
 export default function ChatPage() {
   const { user } = useAuth()

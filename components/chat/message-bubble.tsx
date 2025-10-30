@@ -9,12 +9,14 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TypingMessage } from './typing-message'
 import { toast } from '@/hooks/use-toast'
-import ReactMarkdown from 'react-markdown'
+
+// Lazy load ReactMarkdown for better initial performance
+const ReactMarkdown = lazy(() => import('react-markdown'))
 
 export interface MessageBubbleProps {
   content: string
@@ -137,48 +139,56 @@ export function MessageBubble({
             />
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown
-                components={{
-                  p: ({ children }) => (
-                    <p className="mb-2 last:mb-0 text-gray-700 dark:text-gray-300">
-                      {children}
-                    </p>
-                  ),
-                  code: ({ inline, children, ...props }: any) => (
-                    inline ? (
-                      <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-mono text-pink-600 dark:text-pink-400">
+              <Suspense fallback={
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
+                </div>
+              }>
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="mb-2 last:mb-0 text-gray-700 dark:text-gray-300">
                         {children}
-                      </code>
-                    ) : (
-                      <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg overflow-x-auto">
-                        <code {...props}>{children}</code>
-                      </pre>
+                      </p>
+                    ),
+                    code: ({ inline, children, ...props }: any) => (
+                      inline ? (
+                        <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-mono text-pink-600 dark:text-pink-400">
+                          {children}
+                        </code>
+                      ) : (
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg overflow-x-auto">
+                          <code {...props}>{children}</code>
+                        </pre>
+                      )
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                        {children}
+                      </ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                        {children}
+                      </ol>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="font-bold text-gray-900 dark:text-gray-100">
+                        {children}
+                      </strong>
+                    ),
+                    em: ({ children }) => (
+                      <em className="italic text-gray-700 dark:text-gray-300">
+                        {children}
+                      </em>
                     )
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                      {children}
-                    </ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                      {children}
-                    </ol>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="font-bold text-gray-900 dark:text-gray-100">
-                      {children}
-                    </strong>
-                  ),
-                  em: ({ children }) => (
-                    <em className="italic text-gray-700 dark:text-gray-300">
-                      {children}
-                    </em>
-                  )
-                }}
-              >
-                {content}
-              </ReactMarkdown>
+                  }}
+                >
+                  {content}
+                </ReactMarkdown>
+              </Suspense>
             </div>
           )
         ) : (
