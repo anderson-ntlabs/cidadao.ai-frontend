@@ -170,6 +170,7 @@ export async function getInvestigationStatus(
 /**
  * Get investigation results
  * Only available when status is 'completed'
+ * Uses public endpoint to avoid authentication issues
  */
 export async function getInvestigationResults(
   investigationId: string
@@ -177,8 +178,9 @@ export async function getInvestigationResults(
   try {
     logger.debug('Investigation Adapter: Fetching results', { investigation_id: investigationId });
 
+    // Try public results endpoint first (Railway logs show /api/v1/investigations/{id}/results returns 403)
     const response = await api.get<InvestigationResultsResponse>(
-      `/api/v1/investigations/${investigationId}/results`
+      `/api/v1/investigations/public/results/${investigationId}`
     );
 
     if (!response.success || !response.data) {
