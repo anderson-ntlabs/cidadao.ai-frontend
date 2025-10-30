@@ -204,7 +204,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="h-screen flex flex-col relative overflow-hidden">
       {/* Background with Operários image */}
       <div
         className="fixed inset-0 z-0"
@@ -219,7 +219,7 @@ export default function ChatPage() {
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-gray-50/50 via-white/80 to-gray-50/50 dark:from-gray-900/80 dark:via-gray-950/90 dark:to-gray-900/80" />
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col min-h-0">
       {/* VLibras is now global in AuthLayout */}
 
       {/* Chat History Sidebar */}
@@ -231,7 +231,7 @@ export default function ChatPage() {
       />
 
       {/* Header - Minimal */}
-      <div className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+      <div className="flex-shrink-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -296,8 +296,8 @@ export default function ChatPage() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="max-w-4xl mx-auto px-4 py-6 h-full">
           {messages.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
@@ -331,7 +331,7 @@ export default function ChatPage() {
             </div>
           ) : (
             /* Messages List */
-            <div className="space-y-6 md:space-y-8 py-4">
+            <div className="space-y-4 md:space-y-6 py-4">
               {messages.map((message, index) => {
                 const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
                 const messageAgent = message.agent_id
@@ -342,7 +342,7 @@ export default function ChatPage() {
                   <div
                     key={message.id}
                     className={cn(
-                      "flex gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                      "flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
@@ -394,9 +394,9 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area - Fixed Bottom */}
-      <div className="sticky bottom-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex gap-3 items-end">
+      <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
+          <div className="flex gap-2 sm:gap-3 items-end">
             <textarea
               ref={textareaRef}
               value={inputMessage}
@@ -406,7 +406,7 @@ export default function ChatPage() {
               }}
               onKeyDown={handleKeyDown}
               placeholder="Digite sua pergunta..."
-              className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all text-base min-h-[44px]"
+              className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 dark:focus:border-green-500 transition-all text-base min-h-[52px] shadow-sm hover:shadow-md"
               rows={1}
               disabled={!canSendMessage}
             />
@@ -414,17 +414,17 @@ export default function ChatPage() {
               onClick={handleSendMessage}
               disabled={!canSendMessage || !inputMessage.trim()}
               loading={isLoading}
-              className="px-6 py-3 h-auto"
-              leftIcon={<Send className="w-4 h-4" />}
+              className="px-5 sm:px-6 py-3 sm:py-4 h-auto rounded-2xl shadow-md hover:shadow-lg transition-all"
+              leftIcon={<Send className="w-4 h-4 sm:w-5 sm:h-5" />}
             >
-              Enviar
+              <span className="hidden sm:inline">Enviar</span>
             </Button>
           </div>
 
           {isLoading && (
-            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-              <span>Processando...</span>
+            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 animate-in fade-in duration-300">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span>Processando sua mensagem...</span>
             </div>
           )}
         </div>
