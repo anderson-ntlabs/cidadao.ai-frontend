@@ -271,7 +271,7 @@ export default function ChatPage() {
             </div>
           ) : (
             /* Messages List */
-            <div className="space-y-8 py-4">
+            <div className="space-y-6 md:space-y-8 py-4">
               {messages.map((message, index) => {
                 const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
                 const messageAgent = message.agent_id
@@ -282,7 +282,7 @@ export default function ChatPage() {
                   <div
                     key={message.id}
                     className={cn(
-                      "flex gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                      "flex gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500",
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
@@ -299,7 +299,7 @@ export default function ChatPage() {
 
                     {/* Message Bubble */}
                     <div className={cn(
-                      "max-w-[75%]",
+                      "max-w-[85%] md:max-w-[75%]",
                       message.role === 'user' ? 'order-first' : ''
                     )}>
                       <MessageBubble

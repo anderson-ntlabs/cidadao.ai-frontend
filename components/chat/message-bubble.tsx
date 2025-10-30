@@ -188,41 +188,47 @@ export function MessageBubble({
         )}
       </div>
 
-      {/* Quick Actions - Show on hover */}
+      {/* Quick Actions - Always visible on mobile, hover on desktop */}
       {!isLoading && (
         <div
           className={cn(
             "absolute -bottom-6 flex items-center gap-1 transition-all duration-200",
             role === 'user' ? 'right-0' : 'left-0',
-            showActions ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
+            // Mobile: always visible, Desktop: show on hover
+            "opacity-100 md:opacity-0 translate-y-0 md:-translate-y-1",
+            showActions && "md:opacity-100 md:translate-y-0",
+            !showActions && "md:pointer-events-none"
           )}
         >
           <button
             onClick={handleCopy}
-            className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+            className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm touch-manipulation"
             title="Copiar mensagem"
+            aria-label="Copiar mensagem"
           >
             {copied ? (
-              <Check className="w-3.5 h-3.5 text-green-600" />
+              <Check className="w-4 h-4 md:w-3.5 md:h-3.5 text-green-600" />
             ) : (
-              <Copy className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+              <Copy className="w-4 h-4 md:w-3.5 md:h-3.5 text-gray-600 dark:text-gray-400" />
             )}
           </button>
 
           <button
             onClick={handleShare}
-            className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+            className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm touch-manipulation"
             title="Compartilhar"
+            aria-label="Compartilhar mensagem"
           >
-            <Share2 className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+            <Share2 className="w-4 h-4 md:w-3.5 md:h-3.5 text-gray-600 dark:text-gray-400" />
           </button>
 
           <button
             onClick={handleExport}
-            className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+            className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm touch-manipulation"
             title="Exportar"
+            aria-label="Exportar mensagem"
           >
-            <Download className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+            <Download className="w-4 h-4 md:w-3.5 md:h-3.5 text-gray-600 dark:text-gray-400" />
           </button>
 
           {role === 'assistant' && (
@@ -230,17 +236,19 @@ export function MessageBubble({
               <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
               <button
                 onClick={() => handleFeedback(true)}
-                className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors shadow-sm group/thumb"
+                className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 active:scale-95 transition-all shadow-sm group/thumb touch-manipulation"
                 title="Útil"
+                aria-label="Marcar como útil"
               >
-                <ThumbsUp className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400 group-hover/thumb:text-green-600" />
+                <ThumbsUp className="w-4 h-4 md:w-3.5 md:h-3.5 text-gray-600 dark:text-gray-400 group-hover/thumb:text-green-600" />
               </button>
               <button
                 onClick={() => handleFeedback(false)}
-                className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shadow-sm group/thumb"
+                className="p-2 md:p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all shadow-sm group/thumb touch-manipulation"
                 title="Não útil"
+                aria-label="Marcar como não útil"
               >
-                <ThumbsDown className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400 group-hover/thumb:text-red-600" />
+                <ThumbsDown className="w-4 h-4 md:w-3.5 md:h-3.5 text-gray-600 dark:text-gray-400 group-hover/thumb:text-red-600" />
               </button>
             </>
           )}
