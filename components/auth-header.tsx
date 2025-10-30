@@ -103,7 +103,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
             
             {/* User Menu */}
             <div className="hidden md:flex items-center gap-3">
-              <Link href={`/${locale}/perfil`}>
+              <Link href={`/${locale}/app/perfil`}>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <User className="w-4 h-4" />
                   {user?.name || 'Perfil'}
@@ -172,16 +172,16 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
               
               <div className="border-t border-gray-200 dark:border-gray-800 pt-3 mt-3">
                 <Link
-                  href={`/${locale}/perfil`}
+                  href={`/${locale}/app/perfil`}
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
                 >
                   <User className="w-4 h-4" />
                   {locale === 'pt' ? 'Meu Perfil' : 'My Profile'}
                 </Link>
-                
+
                 <Link
-                  href={`/${locale}/configuracoes`}
+                  href={`/${locale}/app/configuracoes`}
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300"
                 >
