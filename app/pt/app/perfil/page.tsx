@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { User, Mail, Calendar, Shield, Edit2, Camera, Save, X, TrendingUp, MessageSquare, FileSearch, Clock } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
+import { StatCard, StatsGrid } from '@/components/stats'
+import { ActionPanel, type ActionPanelItem } from '@/components/panels'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserProfile, type UserStats } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
@@ -333,73 +335,34 @@ export default function ProfilePage() {
           </GlassCardContent>
         </GlassCard>
 
-        {/* Statistics Cards */}
+        {/* Statistics Cards - Using reusable StatCard component */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <GlassCard>
-              <GlassCardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats.total_messages}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Mensagens</p>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </GlassCard>
-
-            <GlassCard>
-              <GlassCardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats.total_sessions}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Conversas</p>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </GlassCard>
-
-            <GlassCard>
-              <GlassCardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                    <FileSearch className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stats.total_investigations}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Investigações</p>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </GlassCard>
-
-            <GlassCard>
-              <GlassCardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                    <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {stats.last_active ? formatRelativeTime(stats.last_active) : 'Agora'}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Última atividade</p>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </GlassCard>
-          </div>
+          <StatsGrid columns={4} className="mb-6">
+            <StatCard
+              icon={MessageSquare}
+              value={stats.total_messages}
+              label="Mensagens"
+              color="blue"
+            />
+            <StatCard
+              icon={TrendingUp}
+              value={stats.total_sessions}
+              label="Conversas"
+              color="green"
+            />
+            <StatCard
+              icon={FileSearch}
+              value={stats.total_investigations}
+              label="Investigações"
+              color="purple"
+            />
+            <StatCard
+              icon={Clock}
+              value={stats.last_active ? formatRelativeTime(stats.last_active) : 'Agora'}
+              label="Última atividade"
+              color="orange"
+            />
+          </StatsGrid>
         )}
 
         {/* Profile Information */}
@@ -493,7 +456,7 @@ export default function ProfilePage() {
             </GlassCardContent>
           </GlassCard>
 
-          {/* Security Settings */}
+          {/* Security Settings - Using ActionPanel component */}
           <GlassCard>
             <GlassCardHeader>
               <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -501,30 +464,42 @@ export default function ProfilePage() {
                 Segurança
               </h3>
             </GlassCardHeader>
-            <GlassCardContent className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Autenticação em Duas Etapas</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Adicione uma camada extra de segurança à sua conta
-                  </p>
-                </div>
-                <Button variant="secondary" size="sm">
-                  Configurar
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between py-3">
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Alterar Senha</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Mantenha sua conta segura com uma senha forte
-                  </p>
-                </div>
-                <Button variant="secondary" size="sm">
-                  Alterar
-                </Button>
-              </div>
+            <GlassCardContent>
+              <ActionPanel
+                items={[
+                  {
+                    title: 'Autenticação em Duas Etapas',
+                    description: 'Adicione uma camada extra de segurança à sua conta',
+                    actionLabel: 'Configurar',
+                    onAction: () => toast({
+                      title: 'Em breve',
+                      description: 'A autenticação em duas etapas estará disponível em breve.'
+                    }),
+                    badge: 'Recomendado',
+                    badgeColor: 'green'
+                  },
+                  {
+                    title: 'Alterar Senha',
+                    description: 'Mantenha sua conta segura com uma senha forte',
+                    actionLabel: 'Alterar',
+                    onAction: () => toast({
+                      title: 'Em breve',
+                      description: 'A alteração de senha estará disponível em breve.'
+                    })
+                  },
+                  {
+                    title: 'Sessões Ativas',
+                    description: 'Gerencie os dispositivos conectados à sua conta',
+                    actionLabel: 'Ver Sessões',
+                    onAction: () => toast({
+                      title: 'Em breve',
+                      description: 'O gerenciamento de sessões estará disponível em breve.'
+                    }),
+                    showChevron: true
+                  }
+                ]}
+                showDividers={true}
+              />
             </GlassCardContent>
           </GlassCard>
         </div>
