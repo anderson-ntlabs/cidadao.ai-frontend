@@ -22,11 +22,22 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-pro
 
 export interface VoiceSynthesizeRequest {
   text: string
-  agent_id?: string
   voice_name?: string
   speaking_rate?: number
-  language_code?: string
-  output_format?: 'mp3' | 'ogg_opus' | 'linear16'
+  pitch?: number
+}
+
+// Agent to voice mapping (from backend agent-voices endpoint)
+const AGENT_VOICE_MAP: Record<string, string> = {
+  'abaporu': 'pt-BR-Chirp3-HD-Rasalgethi',
+  'zumbi': 'pt-BR-Chirp3-HD-Fenrir',
+  'anita': 'pt-BR-Chirp3-HD-Callirrhoe',
+  'drummond': 'pt-BR-Chirp3-HD-Zephyr',
+  'ayrton_senna': 'pt-BR-Chirp3-HD-Algenib',
+  'tiradentes': 'pt-BR-Chirp3-HD-Schedar',
+  'machado': 'pt-BR-Chirp3-HD-Iapetus',
+  'nana': 'pt-BR-Chirp3-HD-Leda',
+  // Add more as needed or fetch from backend
 }
 
 export interface TranscriptionResponse {
@@ -147,15 +158,18 @@ export class VoiceManagerService {
 
     logger.debug('VoiceManager: Synthesizing voice', { agentId, textLength: text.length })
 
+    // Map agent_id to voice_name
+    const voiceName = agentId ? AGENT_VOICE_MAP[agentId] : options?.voice_name
+
     const requestBody: VoiceSynthesizeRequest = {
       text,
-      agent_id: agentId,
-      output_format: 'mp3',
-      ...options,
+      voice_name: voiceName,
+      speaking_rate: options?.speaking_rate || 1.0,
+      pitch: options?.pitch || 0.0,
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/voice/synthesize`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/voice/speak`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
