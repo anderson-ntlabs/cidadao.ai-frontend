@@ -36,6 +36,7 @@ export function AuthLayoutV2({
   // Sistema unificado em /pt/app/* para separar área autenticada da landing pública
   const navigationItems: NavigationItem[] = [
     { name: 'Início', href: '/pt/app', icon: Home },
+    { name: 'Dashboard', href: '/pt/app/dashboard', icon: LayoutDashboard },
     { name: 'Chat com IAs', href: '/pt/app/chat', icon: MessageSquare },
     { name: 'Investigações', href: '/pt/app/investigacoes', icon: FileSearch },
     { name: 'Mapa de Transparência', href: '/pt/app/mapa', icon: Map },
