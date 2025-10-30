@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { Home, MessageSquare, LayoutDashboard, FileSearch, Map } from 'lucide-react'
 import type { NavigationItem } from './navigation'
 import { useAuth } from '@/hooks/use-supabase-auth'
+import { VLibrasWidget } from './a11y/vlibras-widget'
 
 interface AuthLayoutV2Props {
   children: React.ReactNode
@@ -163,6 +164,14 @@ export function AuthLayoutV2({
       
       {/* Footer space for mobile navigation if needed */}
       <div className="h-16 md:hidden" aria-hidden="true" />
+
+      {/* VLibras Widget - Global for all authenticated pages (PT only) */}
+      {locale === 'pt' && (
+        <VLibrasWidget
+          locale="pt"
+          forceOnload={true}
+        />
+      )}
     </div>
   )
 }

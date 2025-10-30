@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils'
 import { getAgentColorTheme, buildGradientClasses, getAgentRingClass } from '@/lib/utils/agent-colors'
 import { ChatHistorySidebar } from '@/components/chat/chat-history-sidebar'
 import { OptimizedImage } from '@/components/ui/optimized-image'
-import { VLibrasWidget } from '@/components/a11y'
 import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
 import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
 import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
@@ -160,8 +159,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-      {/* VLibras Widget for Authenticated Area */}
-      <VLibrasWidget locale="pt" forceOnload />
+      {/* VLibras is now global in AuthLayout */}
 
       {/* Chat History Sidebar */}
       <ChatHistorySidebar
