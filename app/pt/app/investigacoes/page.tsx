@@ -7,7 +7,7 @@ import {
   Search, Filter, TrendingUp, AlertTriangle, FileSearch,
   Calendar, ChevronRight, Download, Eye, Clock,
   BarChart3, Shield, Zap, Target, Activity, Users,
-  CheckCircle, XCircle, AlertCircle, RefreshCw, Loader2
+  CheckCircle, XCircle, AlertCircle, RefreshCw, Loader2, Plus
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { sanitizeSearchQuery } from '@/lib/security/input-validation'
 import { useBackendInvestigations } from '@/hooks/use-backend-investigations'
 import { mockInvestigations } from '@/data/investigations'
+import { CreateInvestigationModal } from '@/components/investigations/create-investigation-modal'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
@@ -81,6 +82,7 @@ export default function InvestigacoesPage() {
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'date' | 'progress' | 'anomalies'>('date')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   // Use backend investigations with auto-refresh every 5 seconds
   const {
@@ -224,6 +226,13 @@ export default function InvestigacoesPage() {
                 leftIcon={<Download className="w-4 h-4" />}
               >
                 Exportar Relatório
+              </Button>
+              <Button
+                variant="primary"
+                leftIcon={<Plus className="w-4 h-4" />}
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                Nova Investigação
               </Button>
             </div>
           </div>
@@ -567,6 +576,12 @@ export default function InvestigacoesPage() {
           </GlassCard>
         )}
       </div>
+
+      {/* Create Investigation Modal */}
+      <CreateInvestigationModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   )
 }
