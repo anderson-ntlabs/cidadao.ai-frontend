@@ -31,11 +31,21 @@ export default function PTPage() {
       router.push('/pt/login')
     }
   }
-  
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
+  // If authenticated, show loading screen while redirecting
+  if (isAuthenticated) {
+    return <LoadingScreen />
+  }
+
   return (
     <div className="relative">
       {/* Global background image - very subtle */}
-      <div 
+      <div
         className="fixed inset-0 z-0"
         style={{
           backgroundImage: `url('/operarios.png')`,
@@ -45,9 +55,8 @@ export default function PTPage() {
           opacity: 0.02
         }}
       />
-      
+
       <div className="relative z-10">
-      <LoadingScreen />
       {/* Hero Section */}
       <section className="hero relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Subtle animated gradient overlay */}
