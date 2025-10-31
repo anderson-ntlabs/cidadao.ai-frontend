@@ -76,9 +76,10 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   // Permissions policy
+  // Allow microphone for voice chat feature
   response.headers.set(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(self), interest-cohort=()'
+    'camera=(), microphone=(self), geolocation=(self), interest-cohort=()'
   );
 
   // Remove server header for security
