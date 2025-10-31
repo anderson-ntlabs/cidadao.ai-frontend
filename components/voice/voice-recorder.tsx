@@ -60,21 +60,23 @@ export function VoiceRecorder({
 
   const checkMicrophonePermission = async () => {
     try {
+      console.log('[VoiceRecorder] Checking microphone permission...')
       const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-      setHasPermission(result.state === 'granted')
+      console.log('[VoiceRecorder] Permission state:', result.state)
+
+      // Only disable button if explicitly denied
+      // If state is 'prompt', keep button enabled so user can trigger permission request
+      setHasPermission(result.state !== 'denied')
 
       result.addEventListener('change', () => {
-        setHasPermission(result.state === 'granted')
+        console.log('[VoiceRecorder] Permission changed to:', result.state)
+        setHasPermission(result.state !== 'denied')
       })
     } catch (error) {
-      // Permissions API not supported, try to access microphone directly
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach((track) => track.stop())
-        setHasPermission(true)
-      } catch (error) {
-        setHasPermission(false)
-      }
+      console.log('[VoiceRecorder] Permissions API not supported, enabling button...')
+      // Permissions API not supported, enable button
+      // Permission will be requested when user clicks
+      setHasPermission(true)
     }
   }
 
@@ -199,6 +201,17 @@ export function VoiceRecorder({
   }
 
   const isDisabled = disabled || hasPermission === false || isProcessing
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[VoiceRecorder] State:', {
+      disabled,
+      hasPermission,
+      isProcessing,
+      isDisabled,
+      isRecording
+    })
+  }, [disabled, hasPermission, isProcessing, isDisabled, isRecording])
 
   return (
     <div className="relative inline-block">
