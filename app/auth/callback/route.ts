@@ -7,6 +7,10 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') ?? '/pt/app'
 
+  console.log('[OAuth Callback] Request URL:', requestUrl.href)
+  console.log('[OAuth Callback] Code present:', !!code)
+  console.log('[OAuth Callback] Next parameter:', next)
+
   if (code) {
     try {
       const cookieStore = await cookies()
@@ -34,12 +38,18 @@ export async function GET(request: Request) {
         }
       )
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
       if (error) {
-        console.error('OAuth exchange error:', error.message)
+        console.error('[OAuth Callback] Exchange error:', error.message)
         return NextResponse.redirect(`${requestUrl.origin}/auth/error?message=${encodeURIComponent(error.message)}`)
       }
+
+      console.log('[OAuth Callback] Session created successfully:', {
+        userId: data.session?.user.id,
+        email: data.session?.user.email,
+        expiresAt: data.session?.expires_at
+      })
 
       // Determine correct redirect URL
       const forwardedHost = request.headers.get('x-forwarded-host')
@@ -50,6 +60,8 @@ export async function GET(request: Request) {
         : forwardedHost
           ? `https://${forwardedHost}${next}`
           : `${requestUrl.origin}${next}`
+
+      console.log('[OAuth Callback] Redirecting to:', redirectUrl)
 
       // Create response with redirect
       const response = NextResponse.redirect(redirectUrl)
