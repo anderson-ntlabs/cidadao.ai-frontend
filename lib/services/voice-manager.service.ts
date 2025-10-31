@@ -161,12 +161,19 @@ export class VoiceManagerService {
     // Map agent_id to voice_name
     const voiceName = agentId ? AGENT_VOICE_MAP[agentId] : options?.voice_name
 
-    const requestBody: VoiceSynthesizeRequest = {
+    // Only include voice_name if it's defined (Chirp3-HD voices don't support pitch)
+    const requestBody: any = {
       text,
-      voice_name: voiceName,
       speaking_rate: options?.speaking_rate || 1.0,
-      pitch: options?.pitch || 0.0,
     }
+
+    // Add voice_name only if defined
+    if (voiceName) {
+      requestBody.voice_name = voiceName
+    }
+
+    // Chirp3-HD voices don't support pitch adjustment, so we skip it
+    // pitch: options?.pitch || 0.0,
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/voice/speak`, {
