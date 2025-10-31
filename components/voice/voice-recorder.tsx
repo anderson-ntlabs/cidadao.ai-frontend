@@ -211,6 +211,12 @@ export function VoiceRecorder({
       isDisabled,
       isRecording
     })
+    console.log('[VoiceRecorder] Button disabled because:', {
+      disabledProp: disabled,
+      noPermission: hasPermission === false,
+      processing: isProcessing,
+      finalDecision: isDisabled
+    })
   }, [disabled, hasPermission, isProcessing, isDisabled, isRecording])
 
   return (
