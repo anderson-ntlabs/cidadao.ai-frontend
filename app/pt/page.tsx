@@ -16,9 +16,19 @@ export default function PTPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[PT Page] State:', {
+      isAuthenticated,
+      isLoading,
+      timestamp: new Date().toISOString()
+    })
+  }, [isAuthenticated, isLoading])
+
   // Redirect authenticated users directly to app
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
+      console.log('[PT Page] Redirecting authenticated user to /pt/app')
       router.replace('/pt/app')
     }
   }, [isAuthenticated, isLoading, router])
@@ -34,13 +44,17 @@ export default function PTPage() {
 
   // Show loading screen while checking authentication
   if (isLoading) {
+    console.log('[PT Page] Rendering loading screen (isLoading = true)')
     return <LoadingScreen />
   }
 
   // If authenticated, show loading screen while redirecting
   if (isAuthenticated) {
+    console.log('[PT Page] Rendering loading screen (isAuthenticated = true)')
     return <LoadingScreen />
   }
+
+  console.log('[PT Page] Rendering landing page content')
 
   return (
     <div className="relative">
