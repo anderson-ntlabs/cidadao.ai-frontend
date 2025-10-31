@@ -19,6 +19,37 @@ export interface MaritacaOptions {
   maxTokens?: number
 }
 
+// Model configurations
+export const MARITACA_MODELS = {
+  SABIAZINHO3: 'sabiazinho-3' as MaritacaModel,
+  SABIA3: 'sabia-3' as MaritacaModel
+}
+
+export const MARITACA_MODELS_LIST: MaritacaModel[] = ['sabiazinho-3', 'sabia-3']
+
+export const MODEL_INFO = {
+  'sabiazinho-3': {
+    name: 'Sabiazinho-3',
+    description: 'Modelo otimizado para velocidade e eficiência',
+    contextLength: 8192,
+    costLevel: 1,
+    speed: 'fast',
+    quality: 'good'
+  },
+  'sabia-3': {
+    name: 'Sabiá-3',
+    description: 'Modelo completo com máxima qualidade',
+    contextLength: 32768,
+    costLevel: 2,
+    speed: 'medium',
+    quality: 'excellent'
+  }
+}
+
+export function getModelInfo(model: MaritacaModel) {
+  return MODEL_INFO[model] || MODEL_INFO['sabiazinho-3']
+}
+
 export async function sendMaritacaMessage(
   message: string,
   options: MaritacaOptions = {}
