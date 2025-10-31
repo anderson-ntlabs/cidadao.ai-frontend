@@ -128,9 +128,10 @@ export const productionCSP: CSPDirectives = {
     'https://app.posthog.com', // PostHog app
   ],
 
-  // Media: Allow self-hosted and VLibras media (videos, audio for LIBRAS)
+  // Media: Allow self-hosted, blob URLs (for TTS audio), and VLibras media (videos, audio for LIBRAS)
   'media-src': [
     "'self'",
+    'blob:', // ⚠️ Required for Text-to-Speech audio playback (voiceManager creates blob URLs)
     'https://vlibras.gov.br', // VLibras media
     'https://*.vlibras.gov.br', // VLibras subdomains
     'https://cdn.jsdelivr.net', // VLibras media from jsdelivr CDN
@@ -198,7 +199,7 @@ export const developmentCSP: CSPDirectives = {
     'wss://localhost:*',
     'https://vercel.live',
   ],
-  'media-src': ["'self'"],
+  'media-src': ["'self'", 'blob:'], // Required for TTS audio
   'object-src': ["'none'"],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
