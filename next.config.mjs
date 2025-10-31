@@ -30,7 +30,6 @@ const nextConfig = {
     ],
   },
   // Optimize production builds
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
   images: {
