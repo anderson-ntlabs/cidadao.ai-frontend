@@ -41,9 +41,11 @@ export function VoiceRecorder({
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Check microphone permission on mount
+  // Don't check permission on mount - just enable button
+  // Permission will be requested when user clicks
   useEffect(() => {
-    checkMicrophonePermission()
+    console.log('[VoiceRecorder] Component mounted, enabling button (will request permission on click)')
+    setHasPermission(true)
   }, [])
 
   // Cleanup on unmount
@@ -57,28 +59,6 @@ export function VoiceRecorder({
       }
     }
   }, [isRecording])
-
-  const checkMicrophonePermission = async () => {
-    try {
-      console.log('[VoiceRecorder] Checking microphone permission...')
-      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-      console.log('[VoiceRecorder] Permission state:', result.state)
-
-      // Only disable button if explicitly denied
-      // If state is 'prompt', keep button enabled so user can trigger permission request
-      setHasPermission(result.state !== 'denied')
-
-      result.addEventListener('change', () => {
-        console.log('[VoiceRecorder] Permission changed to:', result.state)
-        setHasPermission(result.state !== 'denied')
-      })
-    } catch (error) {
-      console.log('[VoiceRecorder] Permissions API not supported, enabling button...')
-      // Permissions API not supported, enable button
-      // Permission will be requested when user clicks
-      setHasPermission(true)
-    }
-  }
 
   const startRecording = async () => {
     try {
@@ -121,10 +101,23 @@ export function VoiceRecorder({
       }, 1000)
 
       toast.info('Gravando', 'Fale sua mensagem...')
-    } catch (error) {
-      console.error('Failed to start recording:', error)
-      toast.error('Erro', 'Não foi possível acessar o microfone')
-      setHasPermission(false)
+    } catch (error: any) {
+      console.error('[VoiceRecorder] Failed to start recording:', error)
+
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        toast.error(
+          'Permissão Negada',
+          'Você precisa permitir o acesso ao microfone nas configurações do navegador'
+        )
+        setHasPermission(false)
+      } else if (error.name === 'NotFoundError') {
+        toast.error(
+          'Microfone Não Encontrado',
+          'Nenhum microfone foi detectado no seu dispositivo'
+        )
+      } else {
+        toast.error('Erro', 'Não foi possível acessar o microfone')
+      }
     }
   }
 
