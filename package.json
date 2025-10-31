@@ -30,7 +30,8 @@
     "generate:types": "node scripts/generate-api-types.js",
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server npm run build",
-    "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser npm run build"
+    "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser npm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@djpfs/react-vlibras": "^2.0.2",
@@ -78,6 +79,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.56.0",
@@ -104,8 +107,10 @@
     "eslint-config-next": "^15.1.0",
     "eslint-plugin-storybook": "^0.11.0",
     "happy-dom": "^19.0.2",
+    "husky": "^9.1.7",
     "jest-axe": "^10.0.0",
     "jsdom": "^27.0.0",
+    "lint-staged": "^16.2.6",
     "playwright": "^1.55.0",
     "postcss": "^8.5.6",
     "storybook": "^8.6.14",
