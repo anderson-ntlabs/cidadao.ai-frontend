@@ -1,184 +1,76 @@
-import { api } from './client';
-import type { ChatRequest, ChatResponse } from '@/types/chat';
-import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry';
-import { logger } from '@/lib/utils/logger';
-
 /**
- * Available Maritaca.ai models
- */
-export const MARITACA_MODELS = {
-  SABIA3: 'sabia-3',
-  SABIAZINHO3: 'sabiazinho-3',
-} as const;
-
-export type MaritacaModel = typeof MARITACA_MODELS[keyof typeof MARITACA_MODELS];
-
-/**
- * Maritaca Direct Chat Request
- */
-export interface MaritacaDirectRequest extends ChatRequest {
-  model?: MaritacaModel;
-}
-
-/**
- * Maritaca Direct Chat Response from Backend
- */
-export interface MaritacaDirectResponse {
-  id: string; // Message ID from backend
-  model: string;
-  content: string; // The actual response text
-  usage?: {
-    completion_tokens: number;
-    prompt_tokens: number;
-    total_tokens: number;
-  };
-  created_at: string;
-  finish_reason: string; // "stop" when complete
-
-  // Legacy fields for backward compatibility
-  session_id?: string;
-  message_id?: string;
-  response?: string;
-  processing_time?: number;
-  metadata?: {
-    tokens_used?: number;
-    model_version?: string;
-    [key: string]: any;
-  };
-}
-
-/**
- * Send message directly to Maritaca.ai (free tier for testing)
- * Uses the direct endpoint without agent routing
+ * Compatibility layer for Maritaca adapter
+ * Redirects to new chat system
  *
- * @param request - Chat request with optional model selection
- * @returns Promise<ChatResponse>
+ * @deprecated Use @/lib/chat instead
+ * @author Anderson Henrique da Silva
+ * @location Minas Gerais, Brasil
+ * @date 2025-10-31
  */
-export async function sendMaritacaMessage(request: MaritacaDirectRequest): Promise<ChatResponse> {
-  const startTime = Date.now();
-  const model = request.model || MARITACA_MODELS.SABIAZINHO3;
 
-  try {
-    // Backend expects 'messages' array, not 'message' string
-    const payload = {
-      messages: [
-        {
-          role: 'user',
-          content: request.message
-        }
-      ],
-      session_id: request.session_id || `maritaca_${Date.now()}`,
-      model: model,
-      context: request.context,
-    };
+import { FallbackAdapter } from '@/lib/chat'
+import type { ChatResponse } from '@/types/chat'
 
-    logger.debug('Chat Maritaca: Sending to /api/v1/chat/direct/maritaca', {
-      message: request.message,
-      model: model
-    });
+export type MaritacaModel = 'sabiazinho-3' | 'sabia-3'
 
-    // Track message
-    trackChatMessage(payload.session_id, request.message, 'maritaca-direct');
+export interface MaritacaOptions {
+  model?: MaritacaModel
+  temperature?: number
+  maxTokens?: number
+}
 
-    // Call the Maritaca direct endpoint
-    const response = await api.post<MaritacaDirectResponse>('/api/v1/chat/direct/maritaca', payload);
+// Model configurations
+export const MARITACA_MODELS = {
+  SABIAZINHO3: 'sabiazinho-3' as MaritacaModel,
+  SABIA3: 'sabia-3' as MaritacaModel
+}
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error?.message || 'Failed to send message to Maritaca');
-    }
+export const MARITACA_MODELS_LIST: MaritacaModel[] = ['sabiazinho-3', 'sabia-3']
 
-    const data = response.data;
-    const duration = Date.now() - startTime;
-
-    logger.performance('Chat Maritaca: Response received', duration);
-    logger.debug('Chat Maritaca: Full response', { data });
-
-    // Backend returns 'content' not 'response'
-    const messageText = data.content || data.response || '';
-
-    // Check if message is empty
-    if (!messageText || messageText.trim().length === 0) {
-      logger.error('Chat Maritaca: Received empty message from backend');
-      throw new Error('Empty response from Maritaca');
-    }
-
-    logger.debug('Chat Maritaca: Model used', { model: data.model });
-
-    // Track successful response
-    trackChatResponse(payload.session_id, duration, false);
-
-    // Convert Maritaca response to frontend ChatResponse format
-    return {
-      session_id: payload.session_id, // Use request session_id
-      message_id: data.id || data.message_id || `msg_${Date.now()}`, // Backend returns 'id'
-      agent_id: 'maritaca-direct',
-      agent_name: getModelDisplayName(data.model),
-      message: messageText,
-      confidence: 0.95, // Maritaca direct responses are high quality
-      suggested_actions: [],
-      follow_up_questions: [],
-      requires_input: null,
-      metadata: {
-        endpoint: 'maritaca-direct',
-        model: data.model,
-        response_time: duration,
-        finish_reason: data.finish_reason,
-        tokens_used: data.usage?.total_tokens,
-        completion_tokens: data.usage?.completion_tokens,
-        prompt_tokens: data.usage?.prompt_tokens,
-        is_free_tier: true,
-        created_at: data.created_at,
-      },
-    };
-
-  } catch (error: any) {
-    logger.error(
-      error instanceof Error ? error : new Error(String(error)),
-      { context: 'Chat Maritaca', session_id: request.session_id, model }
-    );
-
-    const duration = Date.now() - startTime;
-    trackChatError(request.session_id || 'unknown', error);
-
-    // Re-throw for proper error handling upstream
-    throw error;
+export const MODEL_INFO = {
+  'sabiazinho-3': {
+    name: 'Sabiazinho-3',
+    description: 'Modelo otimizado para velocidade e eficiência',
+    contextLength: 8192,
+    costLevel: 1,
+    speed: 'fast',
+    quality: 'good'
+  },
+  'sabia-3': {
+    name: 'Sabiá-3',
+    description: 'Modelo completo com máxima qualidade',
+    contextLength: 32768,
+    costLevel: 2,
+    speed: 'medium',
+    quality: 'excellent'
   }
 }
 
-/**
- * Get display name for Maritaca model
- */
-function getModelDisplayName(model: string): string {
-  const modelNames: Record<string, string> = {
-    'sabia-3': 'Maritaca Sabiá-3 (Standard)',
-    'sabiazinho-3': 'Maritaca Sabiazinho-3 (Optimized)',
-  };
-
-  return modelNames[model] || `Maritaca ${model}`;
-}
-
-/**
- * Get model description for UI
- */
-export function getModelDescription(model: MaritacaModel): string {
-  const descriptions: Record<MaritacaModel, string> = {
-    [MARITACA_MODELS.SABIA3]: 'Modelo completo com maior capacidade de raciocínio',
-    [MARITACA_MODELS.SABIAZINHO3]: 'Modelo otimizado para respostas rápidas e eficientes',
-  };
-
-  return descriptions[model];
-}
-
-/**
- * Get model info for display
- */
 export function getModelInfo(model: MaritacaModel) {
-  return {
-    id: model,
-    name: getModelDisplayName(model),
-    description: getModelDescription(model),
-    icon: model === MARITACA_MODELS.SABIA3 ? '🦜' : '🐦',
-    speed: model === MARITACA_MODELS.SABIAZINHO3 ? 'fast' : 'standard',
-    quality: model === MARITACA_MODELS.SABIA3 ? 'high' : 'good',
-  };
+  return MODEL_INFO[model] || MODEL_INFO['sabiazinho-3']
 }
+
+export async function sendMaritacaMessage(
+  message: string,
+  options: MaritacaOptions = {}
+): Promise<ChatResponse> {
+  console.warn('Deprecated: sendMaritacaMessage. Use FallbackAdapter instead')
+
+  const adapter = new FallbackAdapter(options.model || 'sabiazinho-3')
+  const response = await adapter.send({
+    message,
+    context: options
+  })
+
+  return {
+    success: response.success,
+    message: response.data?.response || '',
+    data: response.data,
+    error: response.error?.message
+  } as ChatResponse
+}
+
+// For components that import the model type
+export { MaritacaModel as MaritacaModelType }
+
+export default sendMaritacaMessage
