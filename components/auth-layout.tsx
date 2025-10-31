@@ -84,10 +84,37 @@ export function AuthLayoutV2({
   
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      // Check if we're waiting for OAuth session to complete via cookie
+      const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
+
+      if (oauthInProgress) {
+        console.log('[AuthLayout] OAuth in progress (cookie detected), giving session time to establish...')
+        // Give the session 3 seconds to establish before redirecting
+        const timer = setTimeout(() => {
+          console.log('[AuthLayout] OAuth timeout reached')
+          // Clear the OAuth cookie
+          document.cookie = 'oauth_in_progress=; path=/; max-age=0'
+          // If still not authenticated, redirect to login
+          if (!isAuthenticated) {
+            console.log('[AuthLayout] Still not authenticated after OAuth timeout, redirecting to login')
+            localStorage.setItem('redirectAfterLogin', pathname)
+            router.push('/pt/login')
+          }
+        }, 3000)
+
+        return () => clearTimeout(timer)
+      }
+
+      // Normal redirect to login for unauthenticated users
+      console.log('[AuthLayout] Not authenticated and no OAuth in progress, redirecting to login')
       // Save the URL the user was trying to access for redirect after login
       localStorage.setItem('redirectAfterLogin', pathname)
       // Sistema autenticado está sempre em /pt (sem /en)
       router.push('/pt/login')
+    } else if (isAuthenticated) {
+      // Clear OAuth cookie when successfully authenticated
+      document.cookie = 'oauth_in_progress=; path=/; max-age=0'
+      console.log('[AuthLayout] User authenticated, cleared OAuth cookie')
     }
   }, [isLoading, isAuthenticated, router, pathname])
   

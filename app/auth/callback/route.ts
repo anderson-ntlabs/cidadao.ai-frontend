@@ -51,7 +51,19 @@ export async function GET(request: Request) {
           ? `https://${forwardedHost}${next}`
           : `${requestUrl.origin}${next}`
 
-      return NextResponse.redirect(redirectUrl)
+      // Create response with redirect
+      const response = NextResponse.redirect(redirectUrl)
+
+      // Set a cookie to indicate OAuth is in progress
+      // This prevents AuthLayout from immediately redirecting to login
+      response.cookies.set('oauth_in_progress', 'true', {
+        path: '/',
+        maxAge: 10, // 10 seconds timeout
+        httpOnly: false, // Allow client-side access
+        sameSite: 'lax'
+      })
+
+      return response
     } catch (error) {
       console.error('Unexpected OAuth callback error:', error)
       return NextResponse.redirect(`${requestUrl.origin}/auth/error?message=Unexpected error`)

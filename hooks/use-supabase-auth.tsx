@@ -65,10 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log('[Auth] Checking session...')
         const { data: { session }, error } = await supabase.auth.getSession()
 
         if (error) {
-          console.error('Auth session error:', error)
+          console.error('[Auth] Session error:', error)
           setUser(null)
           setIsAuthenticated(false)
           return
@@ -76,28 +77,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (session?.user) {
           const user = convertSupabaseUser(session.user)
+          console.log('[Auth] Session found:', {
+            userId: user.id,
+            email: user.email,
+            name: user.name
+          })
           setUser(user)
           setIsAuthenticated(true)
         } else {
+          console.log('[Auth] No session found')
           setUser(null)
           setIsAuthenticated(false)
         }
       } catch (error) {
-        console.error('Unexpected auth error:', error)
+        console.error('[Auth] Unexpected error:', error)
         setUser(null)
         setIsAuthenticated(false)
       } finally {
+        console.log('[Auth] Check complete, setting isLoading = false')
         setIsLoading(false)
       }
     }
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.warn('Auth check timeout - forcing loading state to false')
+      console.warn('[Auth] Check timeout (5s) - forcing loading state to false')
       setIsLoading(false)
     }, 5000)
 
-    checkSession().finally(() => clearTimeout(timeout))
+    checkSession().finally(() => {
+      clearTimeout(timeout)
+      console.log('[Auth] Session check finalized')
+    })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
