@@ -9,7 +9,7 @@
  */
 
 import { FallbackAdapter } from '@/lib/chat'
-import type { ChatResponse } from '@/types/chat'
+import type { ChatResponse as TypesChatResponse } from '@/types/chat'
 
 export type MaritacaModel = 'sabiazinho-3' | 'sabia-3'
 
@@ -22,7 +22,7 @@ export interface MaritacaOptions {
 // Model configurations
 export const MARITACA_MODELS = {
   SABIAZINHO3: 'sabiazinho-3' as MaritacaModel,
-  SABIA3: 'sabia-3' as MaritacaModel
+  SABIA3: 'sabia-3' as MaritacaModel,
 }
 
 export const MARITACA_MODELS_LIST: MaritacaModel[] = ['sabiazinho-3', 'sabia-3']
@@ -31,20 +31,22 @@ export const MODEL_INFO = {
   'sabiazinho-3': {
     name: 'Sabiazinho-3',
     description: 'Modelo otimizado para velocidade e eficiência',
+    icon: '🐦',
     contextLength: 8192,
     costLevel: 1,
     speed: 'fast',
-    quality: 'good'
+    quality: 'good',
   },
   'sabia-3': {
     name: 'Sabiá-3',
     description: 'Modelo completo com máxima qualidade',
+    icon: '🦜',
     contextLength: 32768,
     costLevel: 2,
     speed: 'medium',
-    quality: 'excellent'
-  }
-}
+    quality: 'excellent',
+  },
+} as const
 
 export function getModelInfo(model: MaritacaModel) {
   return MODEL_INFO[model] || MODEL_INFO['sabiazinho-3']
@@ -53,24 +55,26 @@ export function getModelInfo(model: MaritacaModel) {
 export async function sendMaritacaMessage(
   message: string,
   options: MaritacaOptions = {}
-): Promise<ChatResponse> {
+): Promise<TypesChatResponse> {
   console.warn('Deprecated: sendMaritacaMessage. Use FallbackAdapter instead')
 
   const adapter = new FallbackAdapter(options.model || 'sabiazinho-3')
   const response = await adapter.send({
     message,
-    context: options
+    context: options,
   })
 
+  // Map to ChatResponse format (types/chat.ts format)
   return {
-    success: response.success,
+    session_id: '',
+    message_id: `msg_${Date.now()}`,
+    agent_id: response.data?.agentId || '',
+    agent_name: response.data?.agentName || '',
     message: response.data?.response || '',
-    data: response.data,
-    error: response.error?.message
-  } as ChatResponse
+    confidence: response.data?.confidence || 0,
+    suggested_actions: response.data?.suggestions,
+    metadata: response.data?.metadata || {},
+  }
 }
-
-// For components that import the model type
-export { MaritacaModel as MaritacaModelType }
 
 export default sendMaritacaMessage

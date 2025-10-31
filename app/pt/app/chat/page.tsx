@@ -11,8 +11,12 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
-import { ChatModeToggle, ChatModeDescription, type ChatMode } from '@/components/chat/chat-mode-toggle'
-import { MARITACA_MODELS, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
+import {
+  ChatModeToggle,
+  ChatModeDescription,
+  type ChatMode,
+} from '@/components/chat/chat-mode-toggle'
+import { type MaritacaModel } from '@/lib/chat'
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 import { VoiceRecorder } from '@/components/voice'
@@ -21,26 +25,41 @@ import { VoiceRecorder } from '@/components/voice'
 import { MessageBubble } from '@/components/chat/message-bubble'
 
 // Lazy load heavy components for better initial load performance
-const ChatHistorySidebar = dynamic(() => import('@/components/chat/chat-history-sidebar').then(mod => ({ default: mod.ChatHistorySidebar })), {
-  loading: () => null, // Sidebar doesn't need loading state
-  ssr: false
-})
+const ChatHistorySidebar = dynamic(
+  () =>
+    import('@/components/chat/chat-history-sidebar').then((mod) => ({
+      default: mod.ChatHistorySidebar,
+    })),
+  {
+    loading: () => null, // Sidebar doesn't need loading state
+    ssr: false,
+  }
+)
 
-const AgentAvatar = dynamic(() => import('@/components/chat/agent-avatar').then(mod => ({ default: mod.AgentAvatar })), {
-  loading: () => (
-    <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-  )
-})
+const AgentAvatar = dynamic(
+  () => import('@/components/chat/agent-avatar').then((mod) => ({ default: mod.AgentAvatar })),
+  {
+    loading: () => (
+      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+    ),
+  }
+)
 
-const SmartSuggestions = dynamic(() => import('@/components/chat/smart-suggestions').then(mod => ({ default: mod.SmartSuggestions })), {
-  loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {[1, 2, 3, 4].map(i => (
-        <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
-      ))}
-    </div>
-  )
-})
+const SmartSuggestions = dynamic(
+  () =>
+    import('@/components/chat/smart-suggestions').then((mod) => ({
+      default: mod.SmartSuggestions,
+    })),
+  {
+    loading: () => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+        ))}
+      </div>
+    ),
+  }
+)
 
 // Import getContextualSuggestions separately since it's just a function
 import { getContextualSuggestions } from '@/components/chat/smart-suggestions'
@@ -52,7 +71,7 @@ export default function ChatPage() {
   const [currentAgentId, setCurrentAgentId] = useState<string>('abaporu')
   const [isInitialized, setIsInitialized] = useState(false)
   const [chatMode, setChatMode] = useState<ChatMode>('cidadao')
-  const [selectedModel, setSelectedModel] = useState<MaritacaModel>(MARITACA_MODELS.SABIAZINHO3)
+  const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabiazinho-3')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -94,7 +113,7 @@ export default function ChatPage() {
         setCurrentAgentId(lastMessage.agent_id)
       }
       // Announce response received for screen readers
-      const agentName = agents.find(a => a.id === lastMessage.agent_id)?.name || 'Agente'
+      const agentName = agents.find((a) => a.id === lastMessage.agent_id)?.name || 'Agente'
       announceSuccess(`${agentName} respondeu`)
     }
   }, [messages, scrollToBottom, announceSuccess])
@@ -117,9 +136,10 @@ export default function ChatPage() {
       // Create new session for the new mode (this clears messages)
       await createNewSession()
 
-      const modeMessage = newMode === 'maritaca'
-        ? 'Modo Maritaca ativado. Conversando diretamente com modelos base.'
-        : 'Modo Cidadão.AI ativado. Sistema multi-agente pronto.'
+      const modeMessage =
+        newMode === 'maritaca'
+          ? 'Modo Maritaca ativado. Conversando diretamente com modelos base.'
+          : 'Modo Cidadão.AI ativado. Sistema multi-agente pronto.'
 
       // Show toast notification
       toast.success(
@@ -182,14 +202,14 @@ export default function ChatPage() {
     } catch (error) {
       logger.error(error instanceof Error ? error : new Error('Failed to load session'), {
         sessionId,
-        userId: user?.id
+        userId: user?.id,
       })
       toast.error('Erro', 'Falha ao carregar conversa')
     }
   }
 
   // Get last assistant message agent for confidence
-  const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant')
+  const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant')
   const confidence = lastAssistantMessage?.metadata?.confidence || 0
 
   // Show loading while initializing
@@ -235,18 +255,14 @@ export default function ChatPage() {
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {chatMode === 'maritaca'
-                    ? `Modelo ${selectedModel === MARITACA_MODELS.SABIA3 ? 'Sabiá-3' : 'Sabiazinho-3'}`
-                    : 'Transparência Pública'
-                  }
+                    ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
+                    : 'Transparência Pública'}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <ChatModeToggle
-                mode={chatMode}
-                onModeChange={handleModeChange}
-              />
+              <ChatModeToggle mode={chatMode} onModeChange={handleModeChange} />
               {chatMode === 'maritaca' && (
                 <MaritacaModelSelector
                   selectedModel={selectedModel}
@@ -319,16 +335,17 @@ export default function ChatPage() {
             /* Messages List */
             <div className="space-y-4 md:space-y-6 py-4">
               {messages.map((message, index) => {
-                const isLatest = index === messages.length - 1 && message.role === 'assistant' && isLoading
+                const isLatest =
+                  index === messages.length - 1 && message.role === 'assistant' && isLoading
                 const messageAgent = message.agent_id
-                  ? agents.find(a => a.id === message.agent_id)
+                  ? agents.find((a) => a.id === message.agent_id)
                   : null
 
                 return (
                   <div
                     key={message.id}
                     className={cn(
-                      "flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
+                      'flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300',
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
@@ -344,10 +361,12 @@ export default function ChatPage() {
                     )}
 
                     {/* Message Bubble */}
-                    <div className={cn(
-                      "max-w-[85%] md:max-w-[75%]",
-                      message.role === 'user' ? 'order-first' : ''
-                    )}>
+                    <div
+                      className={cn(
+                        'max-w-[85%] md:max-w-[75%]',
+                        message.role === 'user' ? 'order-first' : ''
+                      )}
+                    >
                       <MessageBubble
                         content={message.content || ''}
                         role={message.role === 'system' ? 'assistant' : message.role}

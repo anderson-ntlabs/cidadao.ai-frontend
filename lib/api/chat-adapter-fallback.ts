@@ -9,26 +9,29 @@
  */
 
 import { chatService } from '@/lib/chat'
+import type { ChatRequest } from '@/lib/chat/types'
 import type { ChatResponse } from '@/types/chat'
 
-export async function sendFallbackMessage(
-  message: string,
-  sessionId?: string
-): Promise<ChatResponse> {
+export async function sendFallbackMessage(request: ChatRequest): Promise<ChatResponse | null> {
   console.warn('Deprecated: sendFallbackMessage. Use chatService.sendMessage instead')
 
-  const response = await chatService.sendMessage({
-    message,
-    sessionId
-  })
+  const response = await chatService.sendMessage(request)
 
-  // Convert to old format
+  if (!response.success) {
+    return null
+  }
+
+  // Map to ChatResponse format (types/chat.ts format)
   return {
-    success: response.success,
+    session_id: request.sessionId || '',
+    message_id: `msg_${Date.now()}`,
+    agent_id: response.data?.agentId || '',
+    agent_name: response.data?.agentName || '',
     message: response.data?.response || '',
-    data: response.data,
-    error: response.error?.message
-  } as ChatResponse
+    confidence: response.data?.confidence || 0,
+    suggested_actions: response.data?.suggestions,
+    metadata: response.data?.metadata || {},
+  }
 }
 
 export default sendFallbackMessage

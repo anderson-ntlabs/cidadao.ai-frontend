@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown, Zap, Brain } from 'lucide-react'
-import { MARITACA_MODELS, getModelInfo, type MaritacaModel } from '@/lib/api/chat-adapter-maritaca'
+import { type MaritacaModel } from '@/lib/chat'
 import { cn } from '@/lib/utils'
 
 interface MaritacaModelSelectorProps {
@@ -20,14 +20,40 @@ interface MaritacaModelSelectorProps {
   className?: string
 }
 
+// Model configurations
+const MODEL_INFO = {
+  'sabiazinho-3': {
+    name: 'Sabiazinho-3',
+    description: 'Modelo otimizado para velocidade e eficiência',
+    icon: '🐦',
+    contextLength: 8192,
+    costLevel: 1,
+    speed: 'fast',
+    quality: 'good',
+  },
+  'sabia-3': {
+    name: 'Sabiá-3',
+    description: 'Modelo completo com máxima qualidade',
+    icon: '🦜',
+    contextLength: 32768,
+    costLevel: 2,
+    speed: 'medium',
+    quality: 'excellent',
+  },
+} as const
+
+function getModelInfo(model: MaritacaModel) {
+  return MODEL_INFO[model] || MODEL_INFO['sabiazinho-3']
+}
+
 export function MaritacaModelSelector({
   selectedModel,
   onModelChange,
-  className
+  className,
 }: MaritacaModelSelectorProps) {
   const currentModelInfo = getModelInfo(selectedModel)
-  const sabia3Info = getModelInfo(MARITACA_MODELS.SABIA3)
-  const sabiazinho3Info = getModelInfo(MARITACA_MODELS.SABIAZINHO3)
+  const sabia3Info = getModelInfo('sabia-3')
+  const sabiazinho3Info = getModelInfo('sabiazinho-3')
 
   return (
     <DropdownMenu>
@@ -45,7 +71,9 @@ export function MaritacaModelSelector({
         >
           <span className="text-base">{currentModelInfo.icon}</span>
           <span className="hidden sm:inline">{currentModelInfo.name}</span>
-          <span className="sm:hidden">{selectedModel === MARITACA_MODELS.SABIA3 ? 'Sabiá-3' : 'Sabiazinho-3'}</span>
+          <span className="sm:hidden">
+            {selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}
+          </span>
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -58,11 +86,11 @@ export function MaritacaModelSelector({
 
         {/* Sabiazinho-3 - Optimized */}
         <DropdownMenuItem
-          onClick={() => onModelChange(MARITACA_MODELS.SABIAZINHO3)}
+          onClick={() => onModelChange('sabiazinho-3')}
           className={cn(
             'cursor-pointer py-3 px-3',
-            selectedModel === MARITACA_MODELS.SABIAZINHO3 &&
-            'bg-green-50 dark:bg-green-900/20 border-l-2 border-green-500'
+            selectedModel === 'sabiazinho-3' &&
+              'bg-green-50 dark:bg-green-900/20 border-l-2 border-green-500'
           )}
         >
           <div className="flex items-start gap-3 w-full">
@@ -89,7 +117,7 @@ export function MaritacaModelSelector({
                 </span>
               </div>
             </div>
-            {selectedModel === MARITACA_MODELS.SABIAZINHO3 && (
+            {selectedModel === 'sabiazinho-3' && (
               <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
             )}
           </div>
@@ -97,11 +125,11 @@ export function MaritacaModelSelector({
 
         {/* Sabiá-3 - Standard */}
         <DropdownMenuItem
-          onClick={() => onModelChange(MARITACA_MODELS.SABIA3)}
+          onClick={() => onModelChange('sabia-3')}
           className={cn(
             'cursor-pointer py-3 px-3',
-            selectedModel === MARITACA_MODELS.SABIA3 &&
-            'bg-green-50 dark:bg-green-900/20 border-l-2 border-green-500'
+            selectedModel === 'sabia-3' &&
+              'bg-green-50 dark:bg-green-900/20 border-l-2 border-green-500'
           )}
         >
           <div className="flex items-start gap-3 w-full">
@@ -128,7 +156,7 @@ export function MaritacaModelSelector({
                 </span>
               </div>
             </div>
-            {selectedModel === MARITACA_MODELS.SABIA3 && (
+            {selectedModel === 'sabia-3' && (
               <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
             )}
           </div>
