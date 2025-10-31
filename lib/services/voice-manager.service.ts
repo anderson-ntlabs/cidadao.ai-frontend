@@ -347,8 +347,9 @@ export class VoiceManagerService {
     logger.debug('VoiceManager: Transcribing audio', { size: audioFile.size, languageCode })
 
     const formData = new FormData()
-    formData.append('audio_file', audioFile, 'recording.mp3')
-    formData.append('language_code', languageCode)
+    // Backend expects 'audio' (not 'audio_file') and 'sample_rate' (not 'language_code')
+    formData.append('audio', audioFile, 'recording.webm')
+    formData.append('sample_rate', '44100') // Match recording sample rate
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/voice/transcribe`, {
@@ -357,17 +358,29 @@ export class VoiceManagerService {
       })
 
       if (!response.ok) {
-        throw new Error(`Transcription failed: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        throw new Error(`Transcription failed: ${response.status} ${errorText}`)
       }
 
-      const result: TranscriptionResponse = await response.json()
+      const result = await response.json()
+
+      // Adapt backend response to match TranscriptionResponse interface
+      const adaptedResult: TranscriptionResponse = {
+        transcript: result.transcription || '', // Backend uses 'transcription', not 'transcript'
+        confidence: result.confidence || 0,
+        language_code: result.language_detected || languageCode,
+        metadata: {
+          duration_seconds: result.duration_ms ? result.duration_ms / 1000 : 0,
+          audio_format: 'webm'
+        }
+      }
 
       logger.debug('VoiceManager: Transcription successful', {
-        confidence: result.confidence,
-        textLength: result.transcript.length,
+        confidence: adaptedResult.confidence,
+        textLength: adaptedResult.transcript.length,
       })
 
-      return result
+      return adaptedResult
     } catch (error) {
       logger.error('VoiceManager: Transcription failed', { error })
       throw error

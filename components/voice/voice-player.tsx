@@ -39,6 +39,7 @@ export function VoicePlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   // Auto-play on mount (if enabled)
   useEffect(() => {
@@ -58,18 +59,33 @@ export function VoicePlayer({
     try {
       setIsLoading(true)
       setHasError(false)
+      setProgress(0)
 
-      // Synthesize and play
-      await voiceManager.synthesizeAndPlay(text, agentId)
+      // Get toast ID for updates
+      const loadingToast = toast.info('Gerando áudio...', `Voz de ${agentName || 'agente'}`)
 
+      // Synthesize audio
+      const audioBlob = await voiceManager.synthesize(text, agentId)
+
+      setIsLoading(false)
       setIsPlaying(true)
+
+      // Play audio
+      await voiceManager.play(audioBlob)
+
+      // Success
+      setIsPlaying(false)
+      setProgress(100)
+
+      toast.success('Áudio reproduzido', agentName ? `Voz de ${agentName}` : undefined)
     } catch (error) {
       console.error('Voice playback error:', error)
       setHasError(true)
-      toast.error('Erro de Áudio', 'Não foi possível reproduzir o áudio')
+      setIsPlaying(false)
+      setProgress(0)
+      toast.error('Erro de Áudio', 'Não foi possível reproduzir o áudio. Verifique sua conexão.')
     } finally {
       setIsLoading(false)
-      setIsPlaying(false)
     }
   }
 

@@ -257,21 +257,43 @@ export function VoiceRecorder({
         )}
       </button>
 
-      {/* Recording timer */}
+      {/* Recording timer with audio wave animation */}
       {isRecording && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <div className="bg-red-500 text-white text-xs font-mono px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            {formatTime(recordingTime)}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          <div className="flex flex-col items-center gap-1">
+            {/* Audio wave bars */}
+            <div className="flex items-center gap-0.5 h-6">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1 bg-red-500 rounded-full animate-pulse"
+                  style={{
+                    height: `${20 + Math.random() * 80}%`,
+                    animationDelay: `${i * 0.1}s`,
+                    animationDuration: `${0.5 + Math.random() * 0.5}s`
+                  }}
+                />
+              ))}
+            </div>
+            {/* Timer */}
+            <div className="bg-red-500 text-white text-xs font-mono px-2 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <span className="font-semibold">{formatTime(recordingTime)}</span>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Processing indicator */}
+      {/* Processing indicator with animated dots */}
       {isProcessing && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-            Processando...
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="font-medium">Transcrevendo</span>
           </div>
         </div>
       )}
