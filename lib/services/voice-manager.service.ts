@@ -344,12 +344,25 @@ export class VoiceManagerService {
     audioFile: File | Blob,
     languageCode: string = 'pt-BR'
   ): Promise<TranscriptionResponse> {
-    logger.debug('VoiceManager: Transcribing audio', { size: audioFile.size, languageCode })
+    logger.debug('VoiceManager: Transcribing audio', {
+      size: audioFile.size,
+      type: audioFile.type,
+      languageCode
+    })
 
     const formData = new FormData()
+
     // Backend expects 'audio' (not 'audio_file') and 'sample_rate' (not 'language_code')
-    formData.append('audio', audioFile, 'recording.webm')
+    // Try to send with proper MIME type
+    const audioBlob = audioFile instanceof Blob ? audioFile : new Blob([audioFile])
+    formData.append('audio', audioBlob, 'recording.webm')
     formData.append('sample_rate', '44100') // Match recording sample rate
+
+    logger.debug('VoiceManager: Sending transcription request', {
+      url: `${API_BASE_URL}/api/v1/voice/transcribe`,
+      audioSize: audioBlob.size,
+      audioType: audioBlob.type
+    })
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/voice/transcribe`, {
@@ -359,6 +372,11 @@ export class VoiceManagerService {
 
       if (!response.ok) {
         const errorText = await response.text()
+        logger.error('VoiceManager: Transcription request failed', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        })
         throw new Error(`Transcription failed: ${response.status} ${errorText}`)
       }
 
