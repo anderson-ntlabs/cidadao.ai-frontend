@@ -72,6 +72,7 @@ export default function PtLayout({ children }) {
 ### Why PT-only?
 
 LIBRAS is specific to **Brazilian Portuguese**. The widget:
+
 - Only renders on `/pt/*` routes
 - Does NOT load on `/en/*` routes (English)
 - Automatically detects locale from route
@@ -84,9 +85,9 @@ LIBRAS is specific to **Brazilian Portuguese**. The widget:
 
 ```tsx
 interface VLibrasWidgetProps {
-  locale: 'pt' | 'en'        // Current locale (only 'pt' shows widget)
-  forceOnload?: boolean      // Load immediately (default: false)
-  avatar?: string            // Avatar selection: 'guga' | 'icaro' | 'hosana'
+  locale: 'pt' | 'en' // Current locale (only 'pt' shows widget)
+  forceOnload?: boolean // Load immediately (default: false)
+  avatar?: string // Avatar selection: 'guga' | 'icaro' | 'hosana'
 }
 ```
 
@@ -118,6 +119,7 @@ The VLibras widget appears as a **floating button** in the bottom-right corner o
 ```
 
 **Visual Design**:
+
 - Position: `fixed bottom-right`
 - Z-index: High (always visible)
 - Accessibility: ARIA labeled, keyboard accessible
@@ -141,13 +143,14 @@ The VLibras widget is also controllable via the **Accessibility Panel**:
 ```tsx
 <AccessibilityPanel locale="pt">
   {/* Other a11y controls */}
-  <VLibrasToggle />  {/* Toggle VLibras on/off */}
+  <VLibrasToggle /> {/* Toggle VLibras on/off */}
 </AccessibilityPanel>
 ```
 
 **Keyboard Shortcut**: `Alt + A` to open Accessibility Panel
 
 **Panel Features**:
+
 - Toggle VLibras on/off
 - Change avatar preference
 - View LIBRAS status
@@ -183,10 +186,10 @@ function MyComponent() {
 
 ```tsx
 interface UseVLibrasReturn {
-  isEnabled: boolean          // Current VLibras state
-  toggle: () => void          // Toggle on/off
-  enable: () => void          // Enable VLibras
-  disable: () => void         // Disable VLibras
+  isEnabled: boolean // Current VLibras state
+  toggle: () => void // Toggle on/off
+  enable: () => void // Enable VLibras
+  disable: () => void // Disable VLibras
 }
 ```
 
@@ -229,16 +232,17 @@ VLibras requires specific CSP directives to function:
 const cspDirectives = {
   'frame-src': [
     "'self'",
-    'https://vlibras.gov.br',  // Required for VLibras iframe
+    'https://vlibras.gov.br', // Required for VLibras iframe
   ],
   'script-src': [
     "'self'",
-    'https://vlibras.gov.br',  // Required for VLibras scripts
+    'https://vlibras.gov.br', // Required for VLibras scripts
   ],
 }
 ```
 
 **Why Required**:
+
 - VLibras loads content via iframe from `vlibras.gov.br`
 - Official government domain (trusted source)
 - No data leaves user's browser
@@ -252,11 +256,13 @@ const cspDirectives = {
 **Local Development**:
 
 1. Start dev server:
+
    ```bash
    npm run dev
    ```
 
 2. Navigate to any Portuguese page:
+
    ```
    http://localhost:3000/pt
    ```
@@ -276,6 +282,7 @@ node scripts/test-vlibras.js
 ```
 
 **Test Coverage**:
+
 - ✅ Widget loads only on PT pages
 - ✅ Widget does NOT load on EN pages
 - ✅ Preference persistence works
@@ -300,6 +307,7 @@ VLibras widget uses **lazy loading** to avoid blocking initial page render:
 ```
 
 **Impact**:
+
 - No performance penalty for users who don't use VLibras
 - Minimal bundle size increase (~15KB gzipped)
 - Scripts loaded asynchronously
@@ -338,12 +346,14 @@ VLibras helps meet **WCAG 2.1 Level AA** requirements:
 ### Widget Not Appearing
 
 **Possible Causes**:
+
 1. Not on Portuguese page (check URL starts with `/pt/`)
 2. CSP blocking VLibras scripts
 3. JavaScript disabled
 4. Ad blocker interfering
 
 **Solution**:
+
 ```bash
 # Check browser console for errors
 # Verify CSP configuration
@@ -353,11 +363,13 @@ VLibras helps meet **WCAG 2.1 Level AA** requirements:
 ### Widget Loads But No Translation
 
 **Possible Causes**:
+
 1. Content not translatable (images, videos)
 2. Dynamic content loaded after widget initialization
 3. VLibras service temporarily unavailable
 
 **Solution**:
+
 ```typescript
 // Manually trigger re-translation
 window.VLibras.reload()
@@ -366,11 +378,13 @@ window.VLibras.reload()
 ### Preference Not Persisting
 
 **Possible Causes**:
+
 1. localStorage disabled
 2. Private browsing mode
 3. localStorage quota exceeded
 
 **Solution**:
+
 ```typescript
 // Check localStorage availability
 if (typeof window !== 'undefined' && window.localStorage) {

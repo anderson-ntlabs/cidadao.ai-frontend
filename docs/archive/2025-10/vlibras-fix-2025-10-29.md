@@ -9,6 +9,7 @@
 ## 🎯 Problema Identificado
 
 O widget VLibras (acessibilidade LIBRAS) estava completamente desformatado:
+
 - ❌ Imagens dos componentes não apareciam
 - ❌ Botão de acesso invisível ou deformado
 - ❌ Widget não posicionado corretamente
@@ -21,18 +22,15 @@ O widget VLibras (acessibilidade LIBRAS) estava completamente desformatado:
 ## 🔍 Causa Raiz
 
 ### 1. **Import Incorreto do Módulo**
+
 ```typescript
 // ❌ ANTES (Incorreto)
-const VLibras = dynamic(
-  () => import('@djpfs/react-vlibras').then(mod => mod.default),
-  { ssr: false }
-)
+const VLibras = dynamic(() => import('@djpfs/react-vlibras').then((mod) => mod.default), {
+  ssr: false,
+})
 
 // ✅ DEPOIS (Correto)
-const VLibras = dynamic(
-  () => import('@djpfs/react-vlibras'),
-  { ssr: false }
-)
+const VLibras = dynamic(() => import('@djpfs/react-vlibras'), { ssr: false })
 ```
 
 O pacote `@djpfs/react-vlibras` exporta o componente como **default export direto**, não como `mod.default`.
@@ -40,6 +38,7 @@ O pacote `@djpfs/react-vlibras` exporta o componente como **default export diret
 ### 2. **Falta de Estilos CSS**
 
 O widget VLibras usa atributos específicos (`[vw]`) que precisam de estilos CSS globais para funcionar:
+
 - Posicionamento fixo
 - Z-index adequado
 - Dimensões do botão
@@ -48,6 +47,7 @@ O widget VLibras usa atributos específicos (`[vw]`) que precisam de estilos CSS
 ### 3. **Conflitos de Layout Mobile**
 
 Sem ajustes responsivos, o widget conflitava com:
+
 - Navegação bottom bar
 - Safe areas (notch do iPhone)
 - Touch targets pequenos demais
@@ -59,13 +59,10 @@ Sem ajustes responsivos, o widget conflitava com:
 ### 1. **Correção do Import**
 
 ```typescript
-const VLibras = dynamic(
-  () => import('@djpfs/react-vlibras'),
-  {
-    ssr: false,
-    loading: () => null
-  }
-)
+const VLibras = dynamic(() => import('@djpfs/react-vlibras'), {
+  ssr: false,
+  loading: () => null,
+})
 ```
 
 ### 2. **Estilos Globais Abrangentes**
@@ -141,6 +138,7 @@ const VLibras = dynamic(
 ## 📋 Checklist de Teste
 
 ### Desktop (Chrome/Firefox/Safari)
+
 - [ ] Widget aparece no canto inferior direito
 - [ ] Botão azul redondo (60px) visível
 - [ ] Hover no botão aumenta tamanho (scale 1.1)
@@ -150,6 +148,7 @@ const VLibras = dynamic(
 - [ ] Tradução LIBRAS ativa ao clicar em textos
 
 ### Mobile (iOS/Android)
+
 - [ ] Widget aparece acima da navegação bottom (5rem do rodapé)
 - [ ] Botão menor (50px) mas ainda touch-friendly
 - [ ] Não conflita com botões de navegação
@@ -158,6 +157,7 @@ const VLibras = dynamic(
 - [ ] Avatares visíveis no mobile
 
 ### Acessibilidade
+
 - [ ] Screen reader anuncia "Widget VLibras carregado"
 - [ ] Botão tem foco visível ao navegar com teclado
 - [ ] Modal pode ser fechada com ESC
@@ -168,18 +168,21 @@ const VLibras = dynamic(
 ## 🚀 Como Testar Localmente
 
 1. **Verificar ambiente**:
+
 ```bash
 # .env.local deve ter:
 NEXT_PUBLIC_ENABLE_VLIBRAS=true
 ```
 
 2. **Rodar aplicação**:
+
 ```bash
 npm run dev
 # Abrir http://localhost:3000/pt
 ```
 
 3. **Inspecionar elemento**:
+
 ```javascript
 // Console do navegador
 document.querySelector('[vw]') // Deve retornar elemento
@@ -188,13 +191,18 @@ document.querySelector('[vw] img') // Imagens do avatar
 ```
 
 4. **Verificar CSS carregado**:
+
 ```javascript
 // Console
 const styles = Array.from(document.styleSheets)
-  .flatMap(sheet => {
-    try { return Array.from(sheet.cssRules) } catch(e) { return [] }
+  .flatMap((sheet) => {
+    try {
+      return Array.from(sheet.cssRules)
+    } catch (e) {
+      return []
+    }
   })
-  .filter(rule => rule.selectorText?.includes('[vw]'))
+  .filter((rule) => rule.selectorText?.includes('[vw]'))
 console.log(styles) // Deve mostrar regras CSS do VLibras
 ```
 
@@ -203,6 +211,7 @@ console.log(styles) // Deve mostrar regras CSS do VLibras
 ## 📊 Antes vs Depois
 
 ### ANTES ❌
+
 - Widget invisível ou deformado
 - Imagens não carregavam
 - Posicionamento aleatório
@@ -210,6 +219,7 @@ console.log(styles) // Deve mostrar regras CSS do VLibras
 - Z-index incorreto
 
 ### DEPOIS ✅
+
 - Widget visível e estilizado
 - Todas as imagens aparecem
 - Posicionamento fixo correto
@@ -225,6 +235,7 @@ console.log(styles) // Deve mostrar regras CSS do VLibras
 **Linhas alteradas**: 85 adições, 7 deleções
 
 **Principais mudanças**:
+
 1. Correção do import dinâmico (linha 50-56)
 2. Adição de estilos inline no container (linha 98-108)
 3. Adição de `<style jsx global>` com CSS completo (linha 118-180)
@@ -245,15 +256,18 @@ console.log(styles) // Deve mostrar regras CSS do VLibras
 ## 🎨 Design System
 
 ### Cores
+
 - **Botão**: `#1351b4` (Azul do Governo Federal Brasileiro)
 - **Shadow**: `rgba(0, 0, 0, 0.15)` normal, `rgba(0, 0, 0, 0.2)` hover
 
 ### Dimensões
+
 - **Desktop**: 60x60px (botão)
 - **Mobile**: 50x50px (botão)
 - **Border Radius**: 50% (circular)
 
 ### Z-Index Hierarchy
+
 - **Widget base**: 9999
 - **Modal/Settings**: 10000
 - **Resto da aplicação**: < 9999
@@ -272,14 +286,17 @@ console.log(styles) // Deve mostrar regras CSS do VLibras
 ## 🐛 Known Issues & Workarounds
 
 ### Issue 1: VLibras não aparece em desenvolvimento
+
 **Causa**: Hot reload pode não recarregar dynamic imports
 **Workaround**: Hard refresh (Ctrl+Shift+R)
 
 ### Issue 2: Modal não fecha
+
 **Causa**: Z-index conflict com outros modals
 **Fix**: Já resolvido com z-index 10000
 
 ### Issue 3: Imagens 404 na CDN
+
 **Causa**: VLibras CDN instável ocasionalmente
 **Workaround**: Já configurado retry automático no pacote
 

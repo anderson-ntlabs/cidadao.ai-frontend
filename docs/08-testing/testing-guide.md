@@ -30,12 +30,14 @@ npm run test:e2e
 ### Writing Your First Test
 
 1. **Create test file** next to your source file:
+
    ```
    components/my-component.tsx
    components/my-component.test.tsx  ← Create this
    ```
 
 2. **Basic test structure**:
+
    ```typescript
    import { describe, it, expect } from 'vitest'
    import { render, screen } from '@testing-library/react'
@@ -112,7 +114,7 @@ describe('useFetchData', () => {
   it('should fetch data successfully', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ data: 'test' })
+      json: async () => ({ data: 'test' }),
     })
     global.fetch = mockFetch
 
@@ -139,8 +141,8 @@ import { api } from './client'
 // Mock the client module
 vi.mock('./client', () => ({
   api: {
-    post: vi.fn()
-  }
+    post: vi.fn(),
+  },
 }))
 
 describe('sendMessage', () => {
@@ -151,13 +153,13 @@ describe('sendMessage', () => {
   it('should send message via API', async () => {
     vi.mocked(api.post).mockResolvedValue({
       success: true,
-      data: { message: 'sent' }
+      data: { message: 'sent' },
     })
 
     await sendMessage('Hello')
 
     expect(api.post).toHaveBeenCalledWith('/messages', {
-      text: 'Hello'
+      text: 'Hello',
     })
   })
 })
@@ -195,6 +197,7 @@ it('should set error state', () => {
 ### 2. Use Accessible Queries
 
 Priority order (from Testing Library docs):
+
 1. `getByRole` ✅ Best
 2. `getByLabelText` ✅ Good
 3. `getByPlaceholderText` ⚠️ OK
@@ -248,7 +251,7 @@ it('should calculate total price with tax', () => {
   // Arrange - Set up test data
   const items = [
     { price: 10, quantity: 2 },
-    { price: 5, quantity: 3 }
+    { price: 5, quantity: 3 },
   ]
   const taxRate = 0.1
 
@@ -442,6 +445,7 @@ Before submitting your PR, ensure:
 
 **Q: When should I write a test?**
 A: Always! Write tests for:
+
 - New features
 - Bug fixes
 - Refactoring
@@ -449,6 +453,7 @@ A: Always! Write tests for:
 
 **Q: What should I test?**
 A: Test user behavior and outputs, not implementation details:
+
 - ✅ "When user clicks button, modal opens"
 - ❌ "When user clicks button, state.isOpen becomes true"
 
@@ -457,6 +462,7 @@ A: Minimum 80%, target 95%. But focus on quality, not just numbers.
 
 **Q: My test is flaky. What do I do?**
 A: Common causes:
+
 1. Missing `await` on async operations
 2. Race conditions
 3. Shared state between tests

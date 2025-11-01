@@ -15,6 +15,7 @@
 Acesse: https://vercel.com/anderson-henriques-projects/cidadao-ai-frontend/logs
 
 Procure por logs com `[OAuth Callback]` para ver:
+
 - Request URL recebida
 - Parâmetro `next` capturado
 - URL de redirect final
@@ -22,6 +23,7 @@ Procure por logs com `[OAuth Callback]` para ver:
 ### 2. Verificar console do browser
 
 Após fazer login com Google, abra DevTools Console e procure por:
+
 - `[Auth] Checking session...`
 - `[Auth] Session found:` ou `[Auth] No session found`
 - `[AuthLayout] OAuth in progress...`
@@ -31,6 +33,7 @@ Após fazer login com Google, abra DevTools Console e procure por:
 DevTools → Application → Cookies → `https://cidadao-ai-frontend.vercel.app`
 
 Deve ter:
+
 - `sb-pbsiyuattnwgohvkkkks-auth-token` (session token)
 - `oauth_in_progress` (temporário, 10s)
 

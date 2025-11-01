@@ -13,10 +13,12 @@
 ```
 
 **Abrir no navegador:**
+
 - Chrome/Brave: `Ctrl+Shift+N` (janela anônima)
 - Firefox: `Ctrl+Shift+P` (janela privada)
 
 **URL para testar:**
+
 ```
 http://localhost:3001/pt
 ```
@@ -26,6 +28,7 @@ http://localhost:3001/pt
 ### 2️⃣ Abrir DevTools Console (10 segundos)
 
 **Atalho:**
+
 - Windows/Linux: `F12` ou `Ctrl+Shift+I`
 - Mac: `Cmd+Option+I`
 
@@ -44,6 +47,7 @@ http://localhost:3001/pt
 ```
 
 **✅ ESPERADO neste momento:**
+
 - PostHog inicializa
 - Mas está DISABLED porque você ainda não aceitou cookies
 
@@ -100,21 +104,25 @@ http://localhost:3001/pt
 ### 7️⃣ Testar Páginas em Inglês (1 minuto)
 
 **Trocar idioma ou ir direto para:**
+
 ```
 http://localhost:3001/en
 ```
 
 **Console deve mostrar:**
+
 ```
 [PostHog] 📍 Tracking pageview: /en
 ```
 
 **Navegar para:**
+
 ```
 http://localhost:3001/en/chat
 ```
 
 **Console deve mostrar:**
+
 ```
 [PostHog] 📍 Tracking pageview: /en/chat
 ```
@@ -126,11 +134,13 @@ http://localhost:3001/en/chat
 ### 8️⃣ Verificar LocalStorage (30 segundos)
 
 **No DevTools:**
+
 1. Ir para aba **Application**
 2. Menu esquerdo → **Local Storage**
 3. Expandir `http://localhost:3001`
 
 **Você DEVE ver:**
+
 ```
 cookie-consent: "accepted"
 ph_phc_Q2NjgVvg..._posthog: {...} (dados de sessão)
@@ -143,11 +153,13 @@ ph_phc_Q2NjgVvg..._posthog: {...} (dados de sessão)
 ### 9️⃣ Verificar Network Requests (1 minuto)
 
 **No DevTools:**
+
 1. Ir para aba **Network**
 2. Filtrar por: `posthog` ou `capture`
 3. Navegar entre páginas
 
 **Você DEVE ver requests para:**
+
 ```
 POST https://us.i.posthog.com/decide/
 POST https://us.i.posthog.com/e/
@@ -164,15 +176,18 @@ POST https://us.i.posthog.com/e/
 **IMPORTANTE:** Eventos levam 2-3 minutos para aparecer!
 
 **Abrir PostHog Dashboard:**
+
 ```
 https://app.posthog.com/project/YOUR_PROJECT_ID/events
 ```
 
 **Filtrar:**
+
 - Time range: **Last 1 hour**
 - Refresh: Clicar no botão de refresh
 
 **Eventos esperados:**
+
 - `$pageview` - Visualizações de página
 - `$pageleave` - Saídas de página
 - `$autocapture` - Cliques automáticos
@@ -202,11 +217,13 @@ Marque cada item conforme você testa:
 ## ✅ Critérios de Sucesso
 
 ### MÍNIMO (Obrigatório):
+
 1. ✅ Console mostra `Analytics ENABLED` após aceitar cookies
 2. ✅ Pageviews rastreados em PT e EN
 3. ✅ Network requests com status 200
 
 ### IDEAL (Recomendado):
+
 1. ✅ Eventos aparecem no PostHog Dashboard
 2. ✅ Session recordings funcionam
 3. ✅ Autocapture detecta cliques
@@ -218,6 +235,7 @@ Marque cada item conforme você testa:
 ### Problema: Console não mostra logs do PostHog
 
 **Solução:**
+
 ```javascript
 // No console, digite:
 window.posthog
@@ -229,6 +247,7 @@ window.posthog
 ### Problema: "Analytics DISABLED" mesmo após aceitar
 
 **Solução:**
+
 ```javascript
 // No console, verificar consent:
 localStorage.getItem('cookie-consent')
@@ -242,6 +261,7 @@ location.reload()
 ### Problema: Network requests falham (404/403)
 
 **Solução:**
+
 1. Verificar se PostHog service está online:
    - https://status.posthog.com
 2. Verificar se API key está correta:
@@ -250,6 +270,7 @@ location.reload()
 ### Problema: Eventos não aparecem no Dashboard
 
 **Solução:**
+
 1. **Esperar 2-3 minutos** (delay normal)
 2. Forçar refresh do dashboard: `Ctrl+Shift+R`
 3. Mudar filtro para "Last 1 hour"
@@ -260,6 +281,7 @@ location.reload()
 ## 📸 Screenshots Esperados
 
 ### Console (Após aceitar cookies):
+
 ```
 [PostHog] 🚀 Initializing analytics...
 [PostHog] 📊 Config loaded: {...}
@@ -271,6 +293,7 @@ location.reload()
 ```
 
 ### LocalStorage:
+
 ```
 cookie-consent: "accepted"
 ph_phc_Q2NjgVvg4HroMh0Gv7C041m4DC6tqd8OX7AKfWeQrLj_posthog: {
@@ -281,6 +304,7 @@ ph_phc_Q2NjgVvg4HroMh0Gv7C041m4DC6tqd8OX7AKfWeQrLj_posthog: {
 ```
 
 ### Network (Filter: posthog):
+
 ```
 Name                    Status  Type        Size
 decide/                 200     xhr         2.3 KB
@@ -294,6 +318,7 @@ s/                      200     xhr         896 B
 ## 🎉 Sucesso Confirmado!
 
 Se você conseguiu:
+
 1. ✅ Ver logs do PostHog no console
 2. ✅ Analytics ENABLED após aceitar cookies
 3. ✅ Pageviews rastreados em PT e EN
@@ -306,11 +331,13 @@ Se você conseguiu:
 ## 📞 Próximos Passos
 
 ### Agora:
+
 1. ✅ Testar com usuários reais
 2. ✅ Monitorar dashboard por 24 horas
 3. ✅ Verificar session recordings
 
 ### Depois:
+
 1. Configurar dashboard personalizado
 2. Adicionar tracking em componentes
 3. Executar migration Supabase
@@ -322,10 +349,12 @@ Se você conseguiu:
 **Dificuldade:** ⭐ Fácil
 
 **Documentação completa:**
+
 - `docs/analytics/POSTHOG_TROUBLESHOOTING.md` (580 linhas)
 - `docs/analytics/POSTHOG_FIX_SUMMARY.md`
 
 **Teste automatizado:**
+
 ```bash
 node scripts/test-posthog.js
 ```

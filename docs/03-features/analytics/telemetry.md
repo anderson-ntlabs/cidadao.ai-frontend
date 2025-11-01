@@ -83,26 +83,26 @@ chatTelemetry.track({
 
 ```typescript
 type ChatEventType =
-  | 'message_sent'      // User sends message
-  | 'message_received'  // Response received from backend
-  | 'error'             // Request failed
-  | 'retry'             // Automatic retry triggered
-  | 'session_start'     // New chat session created
-  | 'session_end'       // Chat session closed
+  | 'message_sent' // User sends message
+  | 'message_received' // Response received from backend
+  | 'error' // Request failed
+  | 'retry' // Automatic retry triggered
+  | 'session_start' // New chat session created
+  | 'session_end' // Chat session closed
 ```
 
 ### Metrics Tracked
 
-| Metric | Description | Calculation |
-|--------|-------------|-------------|
-| `messagesSent` | Total messages sent by users | Counter |
-| `messagesReceived` | Total responses received | Counter |
-| `errors` | Failed requests count | Counter |
-| `averageResponseTime` | Mean response time (ms) | Rolling average (last 100) |
-| `sessionCount` | Unique chat sessions | Set cardinality |
-| `retryCount` | Automatic retries triggered | Counter |
-| `demoModeUsage` | Requests in demo mode | Counter |
-| `intents` | Intent distribution | Map<intent, count> |
+| Metric                | Description                  | Calculation                |
+| --------------------- | ---------------------------- | -------------------------- |
+| `messagesSent`        | Total messages sent by users | Counter                    |
+| `messagesReceived`    | Total responses received     | Counter                    |
+| `errors`              | Failed requests count        | Counter                    |
+| `averageResponseTime` | Mean response time (ms)      | Rolling average (last 100) |
+| `sessionCount`        | Unique chat sessions         | Set cardinality            |
+| `retryCount`          | Automatic retries triggered  | Counter                    |
+| `demoModeUsage`       | Requests in demo mode        | Counter                    |
+| `intents`             | Intent distribution          | Map<intent, count>         |
 
 ### Intent Classification Tracking
 
@@ -157,31 +157,32 @@ console.log(`Cache hit rate: ${(report.cacheHitRate * 100).toFixed(1)}%`)
 
 ### Model Pricing
 
-| Model | Cost per 1M tokens | Use Case |
-|-------|-------------------|----------|
-| `sabiazinho-3` | $0.20 | Fast responses, economic mode |
-| `sabia-3` | $0.60 | Complex analysis, quality mode |
-| `mixed` | $0.40 (avg) | Automatic selection |
-| `fallback` | $0.00 | Local offline fallback |
+| Model          | Cost per 1M tokens | Use Case                       |
+| -------------- | ------------------ | ------------------------------ |
+| `sabiazinho-3` | $0.20              | Fast responses, economic mode  |
+| `sabia-3`      | $0.60              | Complex analysis, quality mode |
+| `mixed`        | $0.40 (avg)        | Automatic selection            |
+| `fallback`     | $0.00              | Local offline fallback         |
 
 ### Cost Report
 
 ```typescript
 interface CostReport {
-  totalRequests: number        // Total API calls
-  cachedRequests: number       // Requests served from cache
-  modelUsage: {                // Distribution by model
-    'sabiazinho-3': number,
-    'sabia-3': number,
+  totalRequests: number // Total API calls
+  cachedRequests: number // Requests served from cache
+  modelUsage: {
+    // Distribution by model
+    'sabiazinho-3': number
+    'sabia-3': number
   }
-  totalTokens: number          // Total tokens consumed
-  estimatedCost: number        // Total cost in USD
-  avgResponseTime: number      // Average latency (ms)
-  errorRate: number            // Percentage of failed requests
-  cacheHitRate: number         // Cache effectiveness (0-1)
-  costSavings: number          // Savings from cache (USD)
-  periodStart: Date            // Report period start
-  periodEnd: Date              // Report period end
+  totalTokens: number // Total tokens consumed
+  estimatedCost: number // Total cost in USD
+  avgResponseTime: number // Average latency (ms)
+  errorRate: number // Percentage of failed requests
+  cacheHitRate: number // Cache effectiveness (0-1)
+  costSavings: number // Savings from cache (USD)
+  periodStart: Date // Report period start
+  periodEnd: Date // Report period end
 }
 ```
 
@@ -190,11 +191,13 @@ interface CostReport {
 The cost metrics service automatically calculates:
 
 1. **Cache ROI**: How much money caching saves
+
    ```typescript
    costSavings = cachedRequests × avgCostPerRequest
    ```
 
 2. **Model Efficiency**: Compare cost vs quality
+
    ```typescript
    costPerSuccessfulRequest = totalCost / successfulRequests
    ```
@@ -225,12 +228,12 @@ estimatedTokens = messageLength × 0.4 // Rough approximation
 
 The platform tracks Google's Core Web Vitals for performance monitoring:
 
-| Metric | Description | Good Threshold |
-|--------|-------------|----------------|
-| **LCP** | Largest Contentful Paint | < 2.5s |
-| **FID** | First Input Delay | < 100ms |
-| **CLS** | Cumulative Layout Shift | < 0.1 |
-| **TTFB** | Time to First Byte | < 800ms |
+| Metric   | Description              | Good Threshold |
+| -------- | ------------------------ | -------------- |
+| **LCP**  | Largest Contentful Paint | < 2.5s         |
+| **FID**  | First Input Delay        | < 100ms        |
+| **CLS**  | Cumulative Layout Shift  | < 0.1          |
+| **TTFB** | Time to First Byte       | < 800ms        |
 
 ### Implementation
 
@@ -240,10 +243,10 @@ The platform tracks Google's Core Web Vitals for performance monitoring:
 // Automatically called from Next.js built-in Web Vitals reporting
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   const body = {
-    name: metric.name,        // 'LCP', 'FID', 'CLS', etc.
-    value: metric.value,      // Numeric value
-    rating: metric.rating,    // 'good', 'needs-improvement', 'poor'
-    delta: metric.delta,      // Change from previous measurement
+    name: metric.name, // 'LCP', 'FID', 'CLS', etc.
+    value: metric.value, // Numeric value
+    rating: metric.rating, // 'good', 'needs-improvement', 'poor'
+    delta: metric.delta, // Change from previous measurement
     url: window.location.href,
   }
 
@@ -259,10 +262,12 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
 ### Analytics Integration
 
 **Development**:
+
 - Logs to browser console
 - No external service calls
 
 **Production**:
+
 - Can send to Google Analytics 4 (if `NEXT_PUBLIC_GA_ID` set)
 - Can send to Vercel Analytics
 - Can send to custom backend endpoint
@@ -273,21 +278,23 @@ export function reportWebVitals(metric: NextWebVitalsMetric) {
 if (process.env.NEXT_PUBLIC_GA_ID) {
   const ga4Event = {
     client_id: 'web-vitals',
-    events: [{
-      name: 'web_vitals',
-      params: {
-        metric_name: body.name,
-        metric_value: body.value,
-        metric_rating: body.rating,
-        metric_delta: body.delta,
-        page_url: body.url,
-      }
-    }]
+    events: [
+      {
+        name: 'web_vitals',
+        params: {
+          metric_name: body.name,
+          metric_value: body.value,
+          metric_rating: body.rating,
+          metric_delta: body.delta,
+          page_url: body.url,
+        },
+      },
+    ],
   }
 
   await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${GA_ID}`, {
     method: 'POST',
-    body: JSON.stringify(ga4Event)
+    body: JSON.stringify(ga4Event),
   })
 }
 ```
@@ -299,12 +306,14 @@ if (process.env.NEXT_PUBLIC_GA_ID) {
 ### Data Collection Policy
 
 **What We Track**:
+
 - ✅ Performance metrics (response times, error rates)
 - ✅ Usage patterns (feature usage, intent distribution)
 - ✅ Technical data (model used, cache hit rate)
 - ✅ Web Vitals (LCP, FID, CLS, TTFB)
 
 **What We DON'T Track**:
+
 - ❌ User messages content
 - ❌ Personal information (name, email, IP)
 - ❌ Authentication tokens
@@ -324,12 +333,12 @@ if (process.env.NEXT_PUBLIC_GA_ID) {
 
 ### Data Retention
 
-| Data Type | Retention | Storage |
-|-----------|-----------|---------|
-| Chat telemetry | Session only | In-memory |
-| Cost metrics | Session only | In-memory |
-| Web Vitals | 90 days | Analytics service |
-| Error logs | 30 days | Sentry |
+| Data Type      | Retention    | Storage           |
+| -------------- | ------------ | ----------------- |
+| Chat telemetry | Session only | In-memory         |
+| Cost metrics   | Session only | In-memory         |
+| Web Vitals     | 90 days      | Analytics service |
+| Error logs     | 30 days      | Sentry            |
 
 **Note**: All telemetry data is **ephemeral** (lost on page reload). Production systems may implement persistent storage with appropriate retention policies.
 
@@ -346,6 +355,7 @@ node scripts/test-telemetry.js
 ```
 
 **Tests**:
+
 1. Event tracking works
 2. Metrics update correctly
 3. Cost calculations accurate
@@ -361,6 +371,7 @@ npm test lib/telemetry/cost-metrics.test.ts
 ```
 
 **Coverage**:
+
 - Cost estimation accuracy
 - Cache savings calculation
 - Model usage distribution
@@ -471,8 +482,11 @@ if (metrics.averageResponseTime > 3000) {
 }
 
 if (metrics.errors / metrics.messagesSent > 0.05) {
-  console.error('🔴 Error rate above 5%:',
-    (metrics.errors / metrics.messagesSent * 100).toFixed(1), '%')
+  console.error(
+    '🔴 Error rate above 5%:',
+    ((metrics.errors / metrics.messagesSent) * 100).toFixed(1),
+    '%'
+  )
 }
 
 if (metrics.retryCount > 10) {
@@ -541,7 +555,9 @@ Planned: Allow users to opt-out of telemetry:
 const telemetryEnabled = getUserPreference('telemetry_enabled')
 
 if (telemetryEnabled) {
-  chatTelemetry.track({ /* ... */ })
+  chatTelemetry.track({
+    /* ... */
+  })
 }
 ```
 
@@ -554,12 +570,14 @@ if (telemetryEnabled) {
 **Symptoms**: No metrics appearing in logs
 
 **Checks**:
+
 1. Verify imports are correct
 2. Check browser console for errors
 3. Ensure `process.env.NODE_ENV` is set
 4. Verify Web Vitals endpoint is accessible
 
 **Debug**:
+
 ```typescript
 // Enable verbose logging
 chatTelemetry.track({
@@ -575,12 +593,14 @@ console.log('Current metrics:', chatTelemetry.getMetrics())
 **Symptoms**: Cost report shows unexpected values
 
 **Checks**:
+
 1. Verify model pricing in `cost-metrics.ts`
 2. Check token estimation logic
 3. Ensure `from_cache` flag set correctly
 4. Review `success` flag on failed requests
 
 **Debug**:
+
 ```typescript
 const report = costMetricsService.getReport(24)
 console.log('Raw metrics:', costMetricsService.getMetrics())
@@ -592,6 +612,7 @@ console.log('Report:', report)
 **Symptoms**: No Web Vitals in analytics
 
 **Checks**:
+
 1. Verify `/api/web-vitals` endpoint exists
 2. Check network tab for POST requests
 3. Ensure GA_ID is set (if using GA4)
@@ -602,18 +623,21 @@ console.log('Report:', report)
 ## Roadmap
 
 ### Phase 1 (Current)
+
 - ✅ Chat telemetry tracking
 - ✅ Cost metrics calculation
 - ✅ Web Vitals endpoint
 - ✅ In-memory storage
 
 ### Phase 2 (Next Sprint)
+
 - 🚧 Persistent storage (database)
 - 🚧 Real-time dashboard
 - 🚧 User opt-out mechanism
 - 🚧 Advanced cost analysis
 
 ### Phase 3 (Future)
+
 - 🚧 Grafana integration
 - 🚧 Automated alerts
 - 🚧 Predictive cost modeling

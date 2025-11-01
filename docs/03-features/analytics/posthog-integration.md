@@ -9,6 +9,7 @@
 ## 📊 O que foi implementado
 
 ### ✅ 1. PostHog Integration (Session Replay + Heatmaps)
+
 - **API Key**: `phc_Q2NjgVvg4HroMh0Gv7C041m4DC6tqd8OX7AKfWeQrLj`
 - **Host**: `https://app.posthog.com`
 - **Features**:
@@ -18,6 +19,7 @@
   - Privacy-first (IP anonimizado, DNT respeitado)
 
 ### ✅ 2. Supabase Telemetry Storage
+
 - **Tabela**: `usability_events`
 - **5 Views SQL** pré-criadas:
   - `daily_event_summary` - Resumo diário
@@ -27,23 +29,27 @@
   - `performance_metrics` - Métricas de performance
 
 ### ✅ 3. Unified Tracker API
+
 - **Arquivo**: `lib/analytics/usability-tracker.ts`
 - **15+ funções** de tracking
 - Integra PostHog + Supabase + Telemetria Local
 
 ### ✅ 4. Privacy & LGPD Compliance
+
 - **Política de Privacidade** atualizada (Seção 8)
 - **Banner de Consentimento** específico para pesquisa
 - **Base Legal**: LGPD Artigo 7º, IV
 - **Anonimização**: SHA-256 para user IDs
 
 ### ✅ 5. Documentação Completa
+
 - `README.md` - Visão geral
 - `SETUP_GUIDE.md` - Guia passo a passo
 - `USABILITY_ANALYTICS_IMPLEMENTATION.md` - Spec técnica
 - `MIGRATION_INSTRUCTIONS.md` - Instruções da migration
 
 ### ✅ 6. Integration no Layout
+
 - `AnalyticsProvider` ativado em `app/pt/layout.tsx`
 - `ResearchConsentBanner` integrado
 - Preconnect para PostHog configurado
@@ -53,6 +59,7 @@
 ## 💰 Custo
 
 **R$ 0,00** - Tudo no free tier:
+
 - PostHog: 1M eventos/mês grátis
 - Supabase: 500MB database grátis
 
@@ -100,6 +107,7 @@ open http://localhost:3000/pt
 ### 3. Deploy para Produção (Vercel)
 
 1. **Adicionar env variables no Vercel:**
+
    ```
    NEXT_PUBLIC_POSTHOG_KEY=phc_Q2NjgVvg4HroMh0Gv7C041m4DC6tqd8OX7AKfWeQrLj
    NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
@@ -108,6 +116,7 @@ open http://localhost:3000/pt
 2. **Rodar migration no Supabase** (prod)
 
 3. **Deploy:**
+
    ```bash
    git push origin main
    ```
@@ -128,6 +137,7 @@ open http://localhost:3000/pt
 **Login**: Sua conta (Google/GitHub/Email)
 
 **O que você vê:**
+
 - 🎬 **Session Recordings**: Vídeos de uso (SUPER ÚTIL!)
 - 🔥 **Heatmaps**: Onde usuários clicam
 - 📊 **Insights**: Gráficos customizados
@@ -207,8 +217,8 @@ ORDER BY success_rate DESC;
 
 **Resultado em tabela para paper:**
 
-| Agente | Tempo (s) | Passos | Taxa Sucesso (%) | n |
-|--------|-----------|--------|------------------|---|
+| Agente | Tempo (s) | Passos | Taxa Sucesso (%) | n   |
+| ------ | --------- | ------ | ---------------- | --- |
 | Zumbi  | 127.3     | 5.8    | 92.1             | 234 |
 | Anita  | 156.7     | 6.2    | 87.5             | 189 |
 
@@ -216,13 +226,13 @@ ORDER BY success_rate DESC;
 
 ## 📚 Documentação
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `docs/analytics/README.md` | Visão geral do sistema |
-| `docs/analytics/SETUP_GUIDE.md` | Guia completo de setup |
-| `docs/analytics/USABILITY_ANALYTICS_IMPLEMENTATION.md` | Documentação técnica |
-| `docs/analytics/MIGRATION_INSTRUCTIONS.md` | Como rodar a migration |
-| `ANALYTICS_SUMMARY.md` | Este arquivo (resumo executivo) |
+| Arquivo                                                | Descrição                       |
+| ------------------------------------------------------ | ------------------------------- |
+| `docs/analytics/README.md`                             | Visão geral do sistema          |
+| `docs/analytics/SETUP_GUIDE.md`                        | Guia completo de setup          |
+| `docs/analytics/USABILITY_ANALYTICS_IMPLEMENTATION.md` | Documentação técnica            |
+| `docs/analytics/MIGRATION_INSTRUCTIONS.md`             | Como rodar a migration          |
+| `ANALYTICS_SUMMARY.md`                                 | Este arquivo (resumo executivo) |
 
 ---
 
@@ -248,6 +258,7 @@ ORDER BY success_rate DESC;
 ### Base Legal:
 
 **LGPD Artigo 7º, IV:**
+
 > "realização de estudos por órgão de pesquisa, garantida, sempre que possível, a anonimização dos dados pessoais"
 
 ✅ **100% Compliant**
@@ -257,6 +268,7 @@ ORDER BY success_rate DESC;
 ## 🎯 Próximos Passos
 
 ### Fase 1: Implementação Core ✅ CONCLUÍDO
+
 - [x] PostHog integration
 - [x] Supabase schema
 - [x] Unified tracker
@@ -266,12 +278,14 @@ ORDER BY success_rate DESC;
 - [x] Layout integration
 
 ### Fase 2: Migration & Testing 🔄 AGORA
+
 - [ ] **VOCÊ**: Rodar migration Supabase (5min)
 - [ ] Testar localmente
 - [ ] Verificar eventos no PostHog
 - [ ] Verificar dados no Supabase
 
 ### Fase 3: Component Tracking 📊 FUTURO
+
 - [ ] Add tracking to chat page
 - [ ] Add tracking to agent selection
 - [ ] Add tracking to investigations
@@ -279,6 +293,7 @@ ORDER BY success_rate DESC;
 - [ ] Add tracking to accessibility toggles
 
 ### Fase 4: Research & Analysis 🔬 FUTURO
+
 - [ ] Collect 30 days of data
 - [ ] Export dataset
 - [ ] Statistical analysis
@@ -304,6 +319,7 @@ Antes de começar a coletar dados:
 ## 📞 Suporte
 
 **Documentação**:
+
 - PostHog: https://posthog.com/docs
 - Supabase: https://supabase.com/docs
 
@@ -316,9 +332,11 @@ Antes de começar a coletar dados:
 Sistema de analytics **100% implementado, documentado e pronto para uso!**
 
 **Falta apenas 1 passo**:
+
 1. Rodar migration Supabase (5 minutos)
 
 Depois disso, você terá:
+
 - ✅ Session replays automáticos
 - ✅ Dados agregados no Supabase
 - ✅ Queries SQL prontas
@@ -331,6 +349,7 @@ Depois disso, você terá:
 ---
 
 **Commits feitos**:
+
 1. `4dd11a1` - feat(analytics): implement usability research analytics system
 2. `a827e7e` - docs(analytics): add comprehensive research analytics documentation
 3. `9b7512c` - feat(analytics): integrate PostHog and research consent into PT layout

@@ -14,6 +14,7 @@
 **Severity**: 🔴 CRITICAL - Blocks all Cidadão.AI mode requests
 
 **Error Message**:
+
 ```json
 {
   "status": "error",
@@ -23,19 +24,23 @@
 ```
 
 **Reproduction Steps**:
+
 1. Open chat interface in Cidadão.AI mode (not Maritaca Direct)
 2. Send any message (e.g., "Analisar anomalias em licitações")
 3. Observe error in message bubble
 
 **Expected Behavior**:
+
 - Abaporu (master agent) or Anita Garibaldi should respond with analysis
 
 **Actual Behavior**:
+
 - Python exception thrown
 - Error message displayed to user
 - No investigation created
 
 **Root Cause Analysis**:
+
 ```python
 # Backend is trying to instantiate CidadaoAIError with 'agent_id' parameter
 # but __init__() doesn't accept it
@@ -48,11 +53,13 @@ raise CidadaoAIError(
 ```
 
 **Impact**:
+
 - ❌ 100% of Cidadão.AI mode requests fail
 - ❌ Multi-agent system completely broken
 - ✅ Maritaca Direct mode still works (different endpoint)
 
 **Recommendation**:
+
 ```python
 # Option 1: Update CidadaoAIError.__init__ to accept agent_id
 class CidadaoAIError(Exception):
@@ -66,6 +73,7 @@ class CidadaoAIError(Exception):
 ```
 
 **Test Case**:
+
 ```bash
 curl -X POST https://cidadao-api-production.up.railway.app/api/v1/chat \
   -H "Content-Type: application/json" \
@@ -84,6 +92,7 @@ curl -X POST https://cidadao-api-production.up.railway.app/api/v1/chat \
 **Severity**: 🟡 MEDIUM - Affects performance but not functionality
 
 **Errors**:
+
 ```
 /pt/perfil?_rsc=74cas:1      404 (Not Found)
 /pt/home?_rsc=74cas:1        404 (Not Found)
@@ -91,10 +100,12 @@ curl -X POST https://cidadao-api-production.up.railway.app/api/v1/chat \
 ```
 
 **Cause**:
+
 - Frontend is preloading routes that don't exist yet
 - Routes are actually at `/pt/app/perfil`, `/pt/app/home`, etc.
 
 **Impact**:
+
 - ⚠️ Console noise
 - ⚠️ Wasted bandwidth
 - ⚠️ Slower perceived performance
@@ -110,28 +121,32 @@ curl -X POST https://cidadao-api-production.up.railway.app/api/v1/chat \
 **Severity**: 🟡 MEDIUM - PostHog analytics affected
 
 **Errors**:
+
 ```
 sw.js:1 Uncaught (in promise) no-response: no-response
 The FetchEvent for "https://us-assets.i.posthog.com/array/..." resulted in network error
 ```
 
 **Cause**:
+
 - PostHog requests being blocked by:
   1. Ad blockers (ERR_BLOCKED_BY_CLIENT)
   2. Network issues
   3. Service Worker trying to cache failed requests
 
 **Impact**:
+
 - ⚠️ Analytics not tracking properly
 - ⚠️ Console noise
 
 **Recommendation**:
+
 ```typescript
 // Service Worker should gracefully handle analytics failures
 // Don't cache PostHog requests - they should always go to network
-const postHogPattern = /posthog\.com/;
+const postHogPattern = /posthog\.com/
 if (postHogPattern.test(request.url)) {
-  return fetch(request); // Don't cache, don't throw on failure
+  return fetch(request) // Don't cache, don't throw on failure
 }
 ```
 
@@ -142,16 +157,19 @@ if (postHogPattern.test(request.url)) {
 ### Info 1: Unused preloaded resources
 
 **Warnings**:
+
 ```
 The resource <URL> was preloaded using link preload but not used within
 a few seconds from the window's load event.
 ```
 
 **Impact**:
+
 - ℹ️ Minor performance impact
 - ℹ️ Wasted bandwidth on unused resources
 
 **Recommendation**:
+
 - Review `app/pt/layout.tsx` preload tags
 - Remove or lazy-load unused resources
 
@@ -162,6 +180,7 @@ a few seconds from the window's load event.
 **Status**: ✅ FIXED
 
 **Previous Error**:
+
 ```
 Refused to load image 'https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/...'
 CSP directive: "img-src ... https://vlibras.gov.br https://*.vlibras.gov.br"
@@ -173,11 +192,11 @@ CSP directive: "img-src ... https://vlibras.gov.br https://*.vlibras.gov.br"
 
 ## 📊 Error Summary
 
-| Severity | Count | Blocking | Fixed |
-|----------|-------|----------|-------|
-| 🔴 CRITICAL | 1 | ✅ Yes | ❌ No |
-| 🟡 MEDIUM | 3 | ❌ No | ✅ 1/3 |
-| 🟢 LOW | 2 | ❌ No | ✅ 1/2 |
+| Severity    | Count | Blocking | Fixed  |
+| ----------- | ----- | -------- | ------ |
+| 🔴 CRITICAL | 1     | ✅ Yes   | ❌ No  |
+| 🟡 MEDIUM   | 3     | ❌ No    | ✅ 1/3 |
+| 🟢 LOW      | 2     | ❌ No    | ✅ 1/2 |
 
 **Total Errors**: 6
 **Blocking Production**: 1 (CidadaoAIError)
@@ -191,6 +210,7 @@ CSP directive: "img-src ... https://vlibras.gov.br https://*.vlibras.gov.br"
 ### Test Suite 1: Cidadão.AI Mode (Multi-Agent)
 
 #### TC001: Basic Chat Request
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -221,6 +241,7 @@ POST /api/v1/chat
 ---
 
 #### TC002: Anomaly Detection Request (Anita Garibaldi)
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -249,6 +270,7 @@ POST /api/v1/chat
 ---
 
 #### TC003: Investigation Request (Zumbi dos Palmares)
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -278,6 +300,7 @@ POST /api/v1/chat
 ### Test Suite 2: Maritaca Direct Mode
 
 #### TC101: Sabiazinho-3 Basic Request
+
 ```bash
 # Request
 POST /api/v1/chat/direct/maritaca
@@ -304,6 +327,7 @@ POST /api/v1/chat/direct/maritaca
 ---
 
 #### TC102: Sabiá-3 Complex Request
+
 ```bash
 # Request
 POST /api/v1/chat/direct/maritaca
@@ -328,6 +352,7 @@ finish_reason: "stop"
 ### Test Suite 3: Error Handling
 
 #### TC201: Empty Message
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -349,6 +374,7 @@ POST /api/v1/chat
 ---
 
 #### TC202: Invalid Session ID
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -370,6 +396,7 @@ POST /api/v1/chat
 ---
 
 #### TC203: Very Long Message (>10000 chars)
+
 ```bash
 # Request
 POST /api/v1/chat
@@ -395,6 +422,7 @@ POST /api/v1/chat
 ### Priority 1: Fix CidadaoAIError
 
 **Files to check**:
+
 ```python
 # 1. Exception definition
 src/exceptions.py
@@ -409,6 +437,7 @@ src/api/v1/endpoints/chat.py
 ```
 
 **Search for**:
+
 ```python
 # Find all CidadaoAIError instantiations
 grep -r "raise CidadaoAIError" src/
@@ -423,6 +452,7 @@ grep -r "class CidadaoAIError" src/
 ### Priority 2: Verify Error Response Format
 
 **Expected format**:
+
 ```python
 # Standardized error response
 {
@@ -439,6 +469,7 @@ grep -r "class CidadaoAIError" src/
 ```
 
 **Current format** (inconsistent):
+
 ```python
 {
     "status": "error",
@@ -452,6 +483,7 @@ grep -r "class CidadaoAIError" src/
 ## 📝 Recommended Backend Changes
 
 ### Change 1: Update CidadaoAIError class
+
 ```python
 # File: src/exceptions.py (or wherever defined)
 
@@ -482,6 +514,7 @@ class CidadaoAIError(Exception):
 ```
 
 ### Change 2: Standardize error responses
+
 ```python
 # File: src/api/v1/endpoints/chat.py
 
@@ -519,6 +552,7 @@ async def chat_endpoint(request: ChatRequest):
 ```
 
 ### Change 3: Add request validation
+
 ```python
 # File: src/api/v1/schemas/chat.py
 
@@ -548,17 +582,20 @@ class ChatRequest(BaseModel):
 ## 🎯 Action Items for Backend Team
 
 ### Immediate (Fix today)
+
 - [ ] 🔴 Fix `CidadaoAIError.__init__()` to accept `agent_id` parameter
 - [ ] 🔴 Test fix with: "Analisar anomalias em licitações"
 - [ ] 🔴 Verify all agents can be invoked successfully
 
 ### Short term (This week)
+
 - [ ] 🟡 Standardize error response format across all endpoints
 - [ ] 🟡 Add request validation (message length, session ID format)
 - [ ] 🟡 Implement proper None/null serialization for JSON responses
 - [ ] 🟡 Add comprehensive error codes (AGENT_ERROR, INVALID_INPUT, etc.)
 
 ### Medium term (Next sprint)
+
 - [ ] 🟢 Add integration tests for all test cases in this report
 - [ ] 🟢 Implement request/response logging for debugging
 - [ ] 🟢 Add performance monitoring for agent response times
@@ -575,6 +612,7 @@ class ChatRequest(BaseModel):
 **Testing script available**: `scripts/test-backend-comprehensive.js` (to be created)
 
 **Next steps**:
+
 1. Backend team acknowledges report
 2. Fix CidadaoAIError initialization
 3. Deploy fix to staging

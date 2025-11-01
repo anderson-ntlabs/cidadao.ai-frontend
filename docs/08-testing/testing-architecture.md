@@ -66,11 +66,13 @@ cidadao.ai-frontend/
 **Localização**: Arquivo `.test.ts` ou `.test.tsx` ao lado do código fonte
 
 **Exemplos**:
+
 - `lib/utils/retry.test.ts` - Testes de retry utility
 - `hooks/use-chat.test.ts` - Testes do hook de chat
 - `components/ui/button.test.tsx` - Testes de componente
 
 **Características**:
+
 - ✅ Rápidos (< 1s por suite)
 - ✅ Isolados (sem dependências externas)
 - ✅ Determinísticos (sempre mesmo resultado)
@@ -83,11 +85,13 @@ cidadao.ai-frontend/
 **Localização**: `__tests__/integration/`
 
 **Exemplos**:
+
 - `__tests__/integration/auth/use-auth.test.tsx` - Fluxo de autenticação
 - Integration com Supabase
 - Integration com backend API
 
 **Características**:
+
 - ✅ Testam fluxos reais de usuário
 - ✅ Múltiplos componentes trabalhando juntos
 - ✅ Mocks para APIs externas
@@ -100,11 +104,13 @@ cidadao.ai-frontend/
 **Localização**: `__tests__/e2e/` e `e2e/`
 
 **Exemplos**:
+
 - Login flow completo
 - Chat interaction
 - Navigation tests
 
 **Características**:
+
 - ✅ Testa experiência real do usuário
 - ✅ Cross-browser testing
 - ✅ Visual regression testing
@@ -118,6 +124,7 @@ cidadao.ai-frontend/
 **Localização**: `stories/*.stories.tsx`
 
 **Características**:
+
 - ✅ Isolamento visual de componentes
 - ✅ Documentação interativa
 - ✅ Testes de acessibilidade
@@ -198,8 +205,8 @@ mockFetch.mockResolvedValue({
 vi.mock('@/lib/api/client', () => ({
   api: {
     post: vi.fn(),
-    get: vi.fn()
-  }
+    get: vi.fn(),
+  },
 }))
 ```
 
@@ -209,8 +216,8 @@ vi.mock('@/lib/api/client', () => ({
 vi.mock('@/hooks/use-auth', () => ({
   useAuth: () => ({
     user: { id: 'test-user' },
-    isAuthenticated: true
-  })
+    isAuthenticated: true,
+  }),
 }))
 ```
 
@@ -238,6 +245,7 @@ result.current.sendMessage({ message: 'test' })
 ### Vitest
 
 Framework principal de testes, escolhido por:
+
 - ⚡ Performance superior (Vite-powered)
 - 🔄 Hot Module Replacement (HMR)
 - 📊 Coverage nativa com v8
@@ -249,6 +257,7 @@ Framework principal de testes, escolhido por:
 ### Testing Library
 
 Biblioteca para testar React components:
+
 - `@testing-library/react` - Render e queries
 - `@testing-library/user-event` - Simulação de eventos
 - `@testing-library/jest-dom` - Matchers customizados
@@ -258,6 +267,7 @@ Biblioteca para testar React components:
 ### Playwright
 
 Framework E2E para testes de navegador:
+
 - 🌐 Multi-browser (Chrome, Firefox, Safari)
 - 📱 Mobile emulation
 - 📸 Screenshots e videos
@@ -280,14 +290,14 @@ Duration:    ~9.4s
 
 ### Coverage por Categoria
 
-| Categoria | Coverage | Status |
-|-----------|----------|--------|
-| Components | ~85% | ✅ Good |
-| Hooks | ~95% | ✅ Excellent |
-| Utils | ~90% | ✅ Good |
-| Services | ~75% | ⚠️ Needs improvement |
-| API | ~85% | ✅ Good |
-| Stores | ~80% | ✅ Good |
+| Categoria  | Coverage | Status               |
+| ---------- | -------- | -------------------- |
+| Components | ~85%     | ✅ Good              |
+| Hooks      | ~95%     | ✅ Excellent         |
+| Utils      | ~90%     | ✅ Good              |
+| Services   | ~75%     | ⚠️ Needs improvement |
+| API        | ~85%     | ✅ Good              |
+| Stores     | ~80%     | ✅ Good              |
 
 ### Meta de Coverage
 
@@ -296,6 +306,7 @@ Duration:    ~9.4s
 - **Ideal**: 100% (funções críticas)
 
 **Arquivos com Prioridade de Coverage**:
+
 1. `lib/services/*.ts` - Business logic crítica
 2. `lib/api/*.ts` - Integração com backend
 3. `hooks/*.ts` - Lógica de estado compartilhada
@@ -307,6 +318,7 @@ Duration:    ~9.4s
 ### DO ✅
 
 1. **Teste comportamento, não implementação**
+
    ```typescript
    // ✅ BOM
    expect(button).toHaveTextContent('Submit')
@@ -316,6 +328,7 @@ Duration:    ~9.4s
    ```
 
 2. **Use queries acessíveis**
+
    ```typescript
    // ✅ BOM - Usa role acessível
    const button = screen.getByRole('button', { name: 'Submit' })
@@ -325,10 +338,11 @@ Duration:    ~9.4s
    ```
 
 3. **Mocks mínimos e focados**
+
    ```typescript
    // ✅ BOM - Mock apenas o necessário
    vi.mock('@/lib/api/client', () => ({
-     api: { post: vi.fn() }
+     api: { post: vi.fn() },
    }))
 
    // ❌ RUIM - Mock genérico demais
@@ -336,6 +350,7 @@ Duration:    ~9.4s
    ```
 
 4. **Cleanup entre testes**
+
    ```typescript
    beforeEach(() => {
      vi.clearAllMocks()
@@ -347,11 +362,12 @@ Duration:    ~9.4s
    ```
 
 5. **Assertions significativas**
+
    ```typescript
    // ✅ BOM
    expect(response).toMatchObject({
      message: 'Success',
-     status: 200
+     status: 200,
    })
 
    // ❌ RUIM - Muito vago
@@ -375,6 +391,7 @@ Duration:    ~9.4s
 **Sintoma**: Warning sobre updates não wrapped em act()
 
 **Solução**:
+
 ```typescript
 // Wrap async operations
 await act(async () => {
@@ -387,6 +404,7 @@ await act(async () => {
 **Sintoma**: Testes passam mas warnings de promises não tratadas
 
 **Solução**:
+
 ```typescript
 // Attach catch handler imediatamente
 const promise = asyncFunction()
@@ -400,6 +418,7 @@ await expect(promise).rejects.toThrow()
 **Sintoma**: `result.current` é null
 
 **Solução**:
+
 ```typescript
 // Use optional chaining
 expect(result.current?.isLoading).toBe(false)
@@ -413,12 +432,14 @@ expect(result.current).toBeDefined()
 **Sintoma**: Tests passam/falham sem mudanças de código
 
 **Causas Comuns**:
+
 1. Race conditions em async code
 2. Shared state entre testes
 3. Timeouts muito curtos
 4. Mocks não resetados
 
 **Solução**:
+
 ```typescript
 // Reset state entre testes
 beforeEach(() => {
@@ -427,9 +448,12 @@ beforeEach(() => {
 })
 
 // Use waitFor para async
-await waitFor(() => {
-  expect(element).toBeInTheDocument()
-}, { timeout: 3000 })
+await waitFor(
+  () => {
+    expect(element).toBeInTheDocument()
+  },
+  { timeout: 3000 }
+)
 ```
 
 ---
@@ -460,6 +484,7 @@ await waitFor(() => {
 ### 2025-10-25 - Major Test Stabilization
 
 **Fixes**:
+
 - ✅ Resolved unhandled promise rejections in retry tests
 - ✅ Fixed React hooks dependency warnings in a11y components
 - ✅ Updated database field references (session_id vs id)
@@ -468,6 +493,7 @@ await waitFor(() => {
 - ✅ Updated adapter tests for current response structure
 
 **Impact**:
+
 - 23 failing tests → 0 failing tests
 - 943 tests passing
 - 91% coverage maintained

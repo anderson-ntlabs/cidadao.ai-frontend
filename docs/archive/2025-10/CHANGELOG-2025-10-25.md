@@ -13,14 +13,14 @@
 
 **Resultado**: ✅ **100% Sucesso**
 
-| Métrica | Antes | Depois | Delta |
-|---------|-------|--------|-------|
-| **Testes Falhando** | 23 | 0 | -23 ✅ |
-| **ESLint Warnings** | 2 | 0 | -2 ✅ |
-| **TypeScript Errors** | 0 | 0 | 0 ✅ |
-| **Testes Passando** | 931 | 943 | +12 ✅ |
-| **Coverage** | 91% | 91% | 0 |
-| **Arquivos de Teste** | 52 | 52 | 0 |
+| Métrica               | Antes | Depois | Delta  |
+| --------------------- | ----- | ------ | ------ |
+| **Testes Falhando**   | 23    | 0      | -23 ✅ |
+| **ESLint Warnings**   | 2     | 0      | -2 ✅  |
+| **TypeScript Errors** | 0     | 0      | 0 ✅   |
+| **Testes Passando**   | 931   | 943    | +12 ✅ |
+| **Coverage**          | 91%   | 91%    | 0      |
+| **Arquivos de Teste** | 52    | 52     | 0      |
 
 ---
 
@@ -29,16 +29,19 @@
 ### Issue #1: Unhandled Promise Rejections (retry.test.ts)
 
 **Problema**:
+
 - 2 unhandled promise rejections em `lib/utils/retry.test.ts`
 - Vitest reportava errors mesmo com testes passando
 - Promises rejeitadas em mocks não eram capturadas antes de serem avaliadas
 
 **Root Cause**:
+
 - `mockRejectedValue()` cria promises rejeitadas imediatamente
 - Com fake timers, as promises ficavam pendentes na microtask queue
 - `await expect().rejects` não capturava a tempo
 
 **Solução Implementada**:
+
 ```typescript
 // ANTES (causava unhandled rejection)
 const fn = vi.fn().mockRejectedValue(error)
@@ -55,6 +58,7 @@ await expect(promise).rejects.toThrow()
 ```
 
 **Impacto**:
+
 - ✅ 23 testes do retry passando sem errors
 - ✅ Suite de testes mais confiável
 - ✅ Elimina false positives
@@ -66,16 +70,19 @@ await expect(promise).rejects.toThrow()
 ### Issue #2: React Hooks Dependency Warnings (A11y Components)
 
 **Problema**:
+
 - 2 ESLint warnings em componentes de acessibilidade
 - `useEffect` dependencies não estavam corretas
 - Objetos de tradução (`t`) recriados em cada render
 - Função `applyFontSize` não estava em dependencies
 
 **Arquivos Afetados**:
+
 - `components/a11y/accessibility-panel.tsx`
 - `components/a11y/font-size-control.tsx`
 
 **Root Cause**:
+
 ```typescript
 // PROBLEMA: Objeto 't' recriado em cada render
 const t = locale === 'pt' ? { ... } : { ... }
@@ -86,6 +93,7 @@ useEffect(() => {
 ```
 
 **Solução Implementada**:
+
 ```typescript
 // SOLUÇÃO: Memoizar com useMemo
 const t = useMemo(() => locale === 'pt' ? { ... } : { ... }, [locale])
@@ -101,6 +109,7 @@ useEffect(() => {
 ```
 
 **Impacto**:
+
 - ✅ Zero ESLint warnings em todo o codebase
 - ✅ Melhor performance (menos re-renders)
 - ✅ Comportamento correto dos hooks
@@ -113,11 +122,13 @@ useEffect(() => {
 ### Issue #3: Database Field Mismatch (chat-session.service.test.ts)
 
 **Problema**:
+
 - 4 testes falhando em `lib/services/chat-session.service.test.ts`
 - Testes esperavam field `id` mas serviço usa `session_id`
 - Schema do Supabase mudou mas testes não foram atualizados
 
 **Root Cause**:
+
 ```typescript
 // SERVIÇO (correto)
 .eq('session_id', sessionId)
@@ -127,18 +138,21 @@ expect(mockFrom.eq).toHaveBeenCalledWith('id', 'session-123') // ❌
 ```
 
 **Solução Implementada**:
+
 ```typescript
 // Atualizar todos os expects
 expect(mockFrom.eq).toHaveBeenCalledWith('session_id', 'session-123') // ✅
 ```
 
 **Testes Corrigidos**:
+
 1. `getSession` - Line 150
 2. `addMessage` - Line 327
 3. `updateSessionMetadata` - Lines 344, 420
 4. `deleteSession` - Line 477
 
 **Impacto**:
+
 - ✅ 4 testes de sessão passando
 - ✅ Testes alinhados com schema real
 - ✅ Validação correta de queries Supabase
@@ -150,12 +164,14 @@ expect(mockFrom.eq).toHaveBeenCalledWith('session_id', 'session-123') // ✅
 ### Issue #4: Authentication Redirect Path (use-auth.test.ts)
 
 **Problema**:
+
 - 2 testes falhando em `hooks/use-auth.test.ts`
 - Testes esperavam redirect para `/pt/dashboard`
 - Aplicação mudou para redirecionar para `/pt/home`
 
 **Root Cause**:
 Reestruturação de rotas:
+
 ```
 Antiga: /pt/dashboard (default após login)
 Nova:   /pt/home (default após login)
@@ -163,6 +179,7 @@ Nova:   /pt/home (default após login)
 ```
 
 **Solução Implementada**:
+
 ```typescript
 // ANTES
 expect(mockRouter.push).toHaveBeenCalledWith('/pt/dashboard')
@@ -172,6 +189,7 @@ expect(mockRouter.push).toHaveBeenCalledWith('/pt/home')
 ```
 
 **Impacto**:
+
 - ✅ 2 testes de autenticação passando
 - ✅ Testes refletem experiência real do usuário
 - ✅ Validação correta de navegação pós-login
@@ -183,6 +201,7 @@ expect(mockRouter.push).toHaveBeenCalledWith('/pt/home')
 ### Issue #5: Deprecated Chat Architecture (use-chat.test.ts)
 
 **Problema**:
+
 - 15 testes falhando em `hooks/use-chat.test.ts`
 - Testes escritos para arquitetura antiga de investigação
 - Código migrou para endpoint unificado com Maritaca AI
@@ -191,11 +210,20 @@ expect(mockRouter.push).toHaveBeenCalledWith('/pt/home')
 **Root Cause - Migration Completa**:
 
 **Arquitetura Antiga** (que os testes testavam):
+
 ```typescript
 // Investigation flow com múltiplos agents
-/api/agents/zumbi/investigate
-/api/agents/anita/analyze
-/api/agents/tiradentes/report
+;/api/aegnst /
+  zumbi /
+  investigate /
+  api /
+  agents /
+  anita /
+  analyze /
+  api /
+  agents /
+  tiradentes /
+  report
 
 // Respostas hardcoded baseadas em keywords
 if (message.includes('investigar')) {
@@ -204,6 +232,7 @@ if (message.includes('investigar')) {
 ```
 
 **Arquitetura Nova** (implementação atual):
+
 ```typescript
 // Unified endpoint com Maritaca AI
 /api/v1/chat/message
@@ -233,13 +262,14 @@ it('should send message to unified chat endpoint', () => {
   expect(mockFetch).toHaveBeenCalledWith(
     '/api/v1/chat/message',
     expect.objectContaining({
-      body: expect.stringContaining('"message":"Olá"')
+      body: expect.stringContaining('"message":"Olá"'),
     })
   )
 })
 ```
 
 **Novos Testes Criados**:
+
 1. ✅ Unified endpoint integration
 2. ✅ Session ID handling
 3. ✅ Context passing
@@ -249,6 +279,7 @@ it('should send message to unified chat endpoint', () => {
 7. ✅ getSuggestions functionality
 
 **Impacto**:
+
 - ✅ 11 testes relevantes e atualizados
 - ✅ Testes refletem arquitetura atual
 - ✅ Melhor cobertura de edge cases
@@ -261,6 +292,7 @@ it('should send message to unified chat endpoint', () => {
 ### Issue #6: Adapter Response Structure (chat-adapter tests)
 
 **Problema**:
+
 - 2 testes falhando em arquivos de adapter
 - `chat-adapter-backend.test.ts`: Strict equality failing
 - `chat-adapter.test.ts`: Agent status field changed
@@ -268,6 +300,7 @@ it('should send message to unified chat endpoint', () => {
 **Root Cause**:
 
 **Backend Response Evolution**:
+
 ```typescript
 // Estrutura antiga esperada
 {
@@ -284,6 +317,7 @@ it('should send message to unified chat endpoint', () => {
 ```
 
 **Agent Status Change**:
+
 ```typescript
 status: 'available' → status: 'active'
 ```
@@ -291,6 +325,7 @@ status: 'available' → status: 'active'
 **Solução Implementada**:
 
 1. **chat-adapter-backend.test.ts**:
+
 ```typescript
 // ANTES: Strict equality
 expect(result).toEqual({ ... })
@@ -301,6 +336,7 @@ expect(result).toHaveProperty('metadata.response_time')
 ```
 
 2. **chat-adapter.test.ts**:
+
 ```typescript
 // ANTES
 status: 'available'
@@ -310,6 +346,7 @@ status: 'active'
 ```
 
 **Impacto**:
+
 - ✅ 2 testes de adapter passando
 - ✅ Testes resilientes a mudanças não-breaking
 - ✅ Validação de campos core sem rigidez excessiva
@@ -324,6 +361,7 @@ status: 'active'
 ### Code Quality Metrics
 
 **Before**:
+
 ```
 ❌ 23 failing tests
 ❌ 2 ESLint warnings
@@ -332,6 +370,7 @@ status: 'active'
 ```
 
 **After**:
+
 ```
 ✅ 943 tests passing
 ✅ 0 ESLint warnings
@@ -343,16 +382,17 @@ status: 'active'
 
 ### Test Execution Performance
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| **Duration** | ~9.5s | ~9.4s | -0.1s |
-| **Setup Time** | ~11s | ~11s | 0s |
-| **Test Time** | ~14s | ~14.2s | +0.2s |
-| **Flakiness** | High | None | ✅ |
+| Metric         | Before | After  | Change |
+| -------------- | ------ | ------ | ------ |
+| **Duration**   | ~9.5s  | ~9.4s  | -0.1s  |
+| **Setup Time** | ~11s   | ~11s   | 0s     |
+| **Test Time**  | ~14s   | ~14.2s | +0.2s  |
+| **Flakiness**  | High   | None   | ✅     |
 
 ### Pattern Improvements
 
 1. **Better Mock Management**:
+
 ```typescript
 // Agora todos os testes usam:
 beforeEach(() => {
@@ -361,6 +401,7 @@ beforeEach(() => {
 ```
 
 2. **Safer Async Testing**:
+
 ```typescript
 // Pattern estabelecido:
 const promise = asyncFunc()
@@ -369,6 +410,7 @@ await expect(promise).rejects.toThrow()
 ```
 
 3. **Flexible Assertions**:
+
 ```typescript
 // De toEqual → toMatchObject quando apropriado
 expect(result).toMatchObject({ required: 'fields' })
@@ -384,6 +426,7 @@ expect(result).toMatchObject({ required: 'fields' })
 Se você está escrevendo testes para o use-chat hook:
 
 **❌ NÃO FAÇA** (arquitetura antiga):
+
 ```typescript
 // Investigation flow (removido)
 it('should activate Zumbi agent', () => {
@@ -392,6 +435,7 @@ it('should activate Zumbi agent', () => {
 ```
 
 **✅ FAÇA** (arquitetura atual):
+
 ```typescript
 // Unified endpoint testing
 it('should send to unified chat endpoint', async () => {
@@ -413,6 +457,7 @@ it('should send to unified chat endpoint', async () => {
 ### For React Component Tests
 
 **Sempre use**:
+
 ```typescript
 import { act } from '@testing-library/react'
 
@@ -424,6 +469,7 @@ await act(async () => {
 ### For Mocking
 
 **Prefer**:
+
 ```typescript
 // ✅ Flexible matching
 expect(result).toMatchObject({ core: 'fields' })
@@ -516,6 +562,7 @@ expect(result).toEqual({ everything: 'exactly' })
 ## 👥 Contributors
 
 **Anderson Henrique da Silva**
+
 - Test stabilization sprint
 - Documentation creation
 - Code review and commits
@@ -562,5 +609,5 @@ expect(result).toEqual({ everything: 'exactly' })
 
 ---
 
-*Documentado por Anderson Henrique da Silva - Minas Gerais, Brasil*
-*2025-10-25 14:47:03 -0300*
+_Documentado por Anderson Henrique da Silva - Minas Gerais, Brasil_
+_2025-10-25 14:47:03 -0300_
