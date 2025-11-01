@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Settings, Type, Eye, Languages, Bell, Shield, Palette, Globe, Volume2, Save } from 'lucide-react'
+import { Settings, Type, Eye, Bell, Shield, Palette, Volume2, Save } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { ActionPanel, ActionPanelSection, type ActionPanelItem } from '@/components/panels'
@@ -37,7 +37,7 @@ export default function ConfiguracoesPage() {
     high_contrast: false,
     vlibras_enabled: false,
     notifications_enabled: true,
-    email_notifications: false
+    email_notifications: false,
   })
 
   useEffect(() => {
@@ -76,9 +76,9 @@ export default function ConfiguracoesPage() {
   }
 
   const togglePreference = (key: keyof UserPreferences) => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }))
   }
 
@@ -107,7 +107,7 @@ export default function ConfiguracoesPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
@@ -120,9 +120,7 @@ export default function ConfiguracoesPage() {
               <Settings className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Configurações
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Configurações</h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Personalize sua experiência no Cidadão.AI
               </p>
@@ -159,8 +157,14 @@ export default function ConfiguracoesPage() {
                           Tamanho da Fonte
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                          Ajuste o tamanho do texto. Atalhos: <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Alt + +</kbd> e{' '}
-                          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Alt + -</kbd>
+                          Ajuste o tamanho do texto. Atalhos:{' '}
+                          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                            Alt + +
+                          </kbd>{' '}
+                          e{' '}
+                          <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                            Alt + -
+                          </kbd>
                         </p>
                         <FontSizeControl locale="pt" />
                       </div>
@@ -172,16 +176,17 @@ export default function ConfiguracoesPage() {
                     items={[
                       {
                         title: 'Alto Contraste',
-                        description: 'Aumenta o contraste para melhor visualização. Atalho: Alt + H',
+                        description:
+                          'Aumenta o contraste para melhor visualização. Atalho: Alt + H',
                         icon: Eye,
-                        action: <HighContrastToggle />
+                        action: <HighContrastToggle />,
                       },
                       {
                         title: 'VLibras (LIBRAS)',
                         description: 'Tradução automática para Língua Brasileira de Sinais',
                         icon: Volume2,
-                        action: <VLibrasToggle locale="pt" variant="switch" />
-                      }
+                        action: <VLibrasToggle locale="pt" variant="switch" />,
+                      },
                     ]}
                     showDividers={true}
                   />
@@ -204,17 +209,29 @@ export default function ConfiguracoesPage() {
                       title: 'Tema',
                       description: 'Escolha entre claro, escuro ou automático',
                       icon: Palette,
-                      badge: preferences.theme === 'system' ? 'Automático' : preferences.theme === 'dark' ? 'Escuro' : 'Claro',
+                      badge:
+                        preferences.theme === 'system'
+                          ? 'Automático'
+                          : preferences.theme === 'dark'
+                            ? 'Escuro'
+                            : 'Claro',
                       badgeColor: 'blue',
                       actionLabel: 'Alterar',
                       onAction: () => {
-                        const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
+                        const themes: Array<'light' | 'dark' | 'system'> = [
+                          'light',
+                          'dark',
+                          'system',
+                        ]
                         const currentIndex = themes.indexOf(preferences.theme || 'system')
                         const nextTheme = themes[(currentIndex + 1) % themes.length]
                         setPreferences({ ...preferences, theme: nextTheme })
-                        toast.info('Tema alterado', `Tema alterado para ${nextTheme === 'system' ? 'automático' : nextTheme === 'dark' ? 'escuro' : 'claro'}`)
-                      }
-                    }
+                        toast.info(
+                          'Tema alterado',
+                          `Tema alterado para ${nextTheme === 'system' ? 'automático' : nextTheme === 'dark' ? 'escuro' : 'claro'}`
+                        )
+                      },
+                    },
                   ]}
                 />
               </GlassCardContent>
@@ -243,9 +260,11 @@ export default function ConfiguracoesPage() {
                         const enabled = !preferences.notifications_enabled
                         toast.info(
                           enabled ? 'Notificações ativadas' : 'Notificações desativadas',
-                          enabled ? 'Você receberá notificações sobre atividades importantes' : 'Você não receberá mais notificações do sistema'
+                          enabled
+                            ? 'Você receberá notificações sobre atividades importantes'
+                            : 'Você não receberá mais notificações do sistema'
                         )
-                      }
+                      },
                     },
                     {
                       title: 'Notificações por Email',
@@ -259,11 +278,13 @@ export default function ConfiguracoesPage() {
                         const enabled = !preferences.email_notifications
                         toast.info(
                           enabled ? 'Emails ativados' : 'Emails desativados',
-                          enabled ? 'Você receberá resumos e alertas por email' : 'Você não receberá mais emails'
+                          enabled
+                            ? 'Você receberá resumos e alertas por email'
+                            : 'Você não receberá mais emails'
                         )
                       },
-                      disabled: !preferences.notifications_enabled
-                    }
+                      disabled: !preferences.notifications_enabled,
+                    },
                   ]}
                   showDividers={true}
                 />
@@ -271,28 +292,7 @@ export default function ConfiguracoesPage() {
             </GlassCard>
           </ActionPanelSection>
 
-          {/* Language */}
-          <ActionPanelSection
-            title="Idioma"
-            description="Escolha o idioma da interface"
-            icon={Globe}
-          >
-            <GlassCard>
-              <GlassCardContent className="p-6">
-                <ActionPanel
-                  items={[
-                    {
-                      title: 'Idioma do Sistema',
-                      description: 'Português (Brasil) - Sistema autenticado é PT-only',
-                      icon: Languages,
-                      badge: 'Português (BR)',
-                      badgeColor: 'green'
-                    }
-                  ]}
-                />
-              </GlassCardContent>
-            </GlassCard>
-          </ActionPanelSection>
+          {/* Language section removed - authenticated area is Portuguese only */}
 
           {/* Privacy */}
           <ActionPanelSection
@@ -306,22 +306,28 @@ export default function ConfiguracoesPage() {
                   items={[
                     {
                       title: 'Dados de Uso',
-                      description: 'Ajude-nos a melhorar o sistema compartilhando dados de uso anônimos',
+                      description:
+                        'Ajude-nos a melhorar o sistema compartilhando dados de uso anônimos',
                       icon: Shield,
                       badge: 'Ativado',
                       badgeColor: 'blue',
                       actionLabel: 'Gerenciar',
                       showChevron: true,
-                      onAction: () => toast.info('Em breve', 'As configurações de privacidade estarão disponíveis em breve.')
+                      onAction: () =>
+                        toast.info(
+                          'Em breve',
+                          'As configurações de privacidade estarão disponíveis em breve.'
+                        ),
                     },
                     {
                       title: 'Histórico de Atividades',
-                      description: 'Visualize e gerencie seu histórico de conversas e investigações',
+                      description:
+                        'Visualize e gerencie seu histórico de conversas e investigações',
                       icon: Shield,
                       actionLabel: 'Ver Histórico',
                       showChevron: true,
-                      onAction: () => router.push('/pt/app/atividades')
-                    }
+                      onAction: () => router.push('/pt/app/atividades'),
+                    },
                   ]}
                   showDividers={true}
                 />
