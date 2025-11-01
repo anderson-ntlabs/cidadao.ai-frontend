@@ -22,7 +22,7 @@ export function LanguageSelector({ className }: { className?: string }) {
 
   // Detect current language from pathname
   const currentLang = pathname.startsWith('/en') ? 'en' : 'pt'
-  const currentLanguage = languages.find(lang => lang.code === currentLang)
+  const currentLanguage = languages.find((lang) => lang.code === currentLang)
 
   const switchLanguage = (newLang: 'pt' | 'en') => {
     if (newLang === currentLang) return
@@ -85,14 +85,14 @@ export function LanguageSelector({ className }: { className?: string }) {
           variant="ghost"
           size="sm"
           className={cn(
-            'gap-2 text-gray-700 dark:text-gray-300',
+            'text-gray-700 dark:text-gray-300',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
+            'px-2',
             className
           )}
+          aria-label={`Language: ${currentLanguage?.label}`}
         >
-          <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">{currentLanguage?.flag}</span>
-          <span className="hidden md:inline">{currentLanguage?.label}</span>
+          <span className="text-xl">{currentLanguage?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
 
