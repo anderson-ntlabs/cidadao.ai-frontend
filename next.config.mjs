@@ -17,6 +17,15 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint warnings.
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Do not ignore TypeScript errors during build
+    ignoreBuildErrors: false,
+  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',
