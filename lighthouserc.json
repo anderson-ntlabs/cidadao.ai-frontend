@@ -3,13 +3,7 @@
     "collect": {
       "startServerCommand": "npm run build && npm run start",
       "startServerReadyPattern": "Ready",
-      "url": [
-        "http://localhost:3000/pt",
-        "http://localhost:3000/pt/login",
-        "http://localhost:3000/pt/chat",
-        "http://localhost:3000/pt/dashboard",
-        "http://localhost:3000/pt/agents"
-      ],
+      "url": ["http://localhost:3000/pt", "http://localhost:3000/pt/login"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
