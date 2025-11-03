@@ -9,28 +9,33 @@
  */
 
 import { chatService } from '@/lib/chat'
-import type { ChatRequest, ChatResponse } from '@/types/chat'
+import type { ChatRequest } from '@/lib/chat/types'
+import type { ChatResponse } from '@/types/chat'
 
 export class CachedSmartChatService {
-  async sendMessage(
-    message: string,
-    options: any = {}
-  ): Promise<ChatResponse> {
+  async sendMessage(message: string, options: any = {}): Promise<ChatResponse> {
     console.warn('Deprecated: CachedSmartChatService. Use chatService instead')
 
-    const response = await chatService.sendMessage({
+    const request: ChatRequest = {
       message,
       sessionId: options.sessionId,
       agentId: options.agentId,
-      context: options
-    })
+      context: options,
+    }
 
+    const response = await chatService.sendMessage(request)
+
+    // Map to ChatResponse format (types/chat.ts format)
     return {
-      success: response.success,
+      session_id: request.sessionId || '',
+      message_id: `msg_${Date.now()}`,
+      agent_id: response.data?.agentId || '',
+      agent_name: response.data?.agentName || '',
       message: response.data?.response || '',
-      data: response.data,
-      error: response.error?.message
-    } as ChatResponse
+      confidence: response.data?.confidence || 0,
+      suggested_actions: response.data?.suggestions,
+      metadata: response.data?.metadata || {},
+    }
   }
 
   clearCache(): void {

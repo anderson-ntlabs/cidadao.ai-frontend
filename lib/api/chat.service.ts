@@ -1,4 +1,4 @@
-import { api, API_BASE_URL } from './client';
+import { api, API_BASE_URL } from './client'
 import type {
   ChatRequest,
   ChatResponse,
@@ -8,14 +8,18 @@ import type {
   AgentInfo,
   SSEEvent,
   SSEEventType,
-} from '@/types/chat';
-import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter';
-import { sendBackendMessage } from './chat-adapter-backend';
-import { sendFallbackMessage } from './chat-adapter-fallback';
-import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service';
-import { isFeatureEnabled } from '@/lib/feature-flags';
-import { sanitizeSearchQuery, isValidInvestigationId, InputValidator } from '@/lib/security/input-validation';
-import { logger } from '@/lib/utils/logger';
+} from '@/types/chat'
+import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter'
+import { sendBackendMessage } from './chat-adapter-backend'
+import { sendFallbackMessage } from './chat-adapter-fallback'
+import { chatService as unifiedChatService } from '@/lib/chat'
+import { isFeatureEnabled } from '@/lib/feature-flags'
+import {
+  sanitizeSearchQuery,
+  isValidInvestigationId,
+  InputValidator,
+} from '@/lib/security/input-validation'
+import { logger } from '@/lib/utils/logger'
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -26,7 +30,7 @@ const CHAT_ENDPOINTS = {
   HISTORY_PAGINATED: (sessionId: string) => `/api/v1/chat/history/${sessionId}/paginated`,
   CACHE_STATS: '/api/v1/chat/cache/stats',
   AGENTS: '/api/v1/chat/agents',
-};
+}
 
 // Chat service for API interactions
 export const chatService = {
@@ -34,90 +38,137 @@ export const chatService = {
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
       // Validate and sanitize input
-      const validator = new InputValidator();
+      const validator = new InputValidator()
 
       validator
         .required('message', request.message, 'Message')
-        .length('message', request.message, 1, 4000);
+        .length('message', request.message, 1, 4000)
 
       // Validate session_id if provided
       if (request.session_id && !isValidInvestigationId(request.session_id)) {
-        validator.addError('session_id', 'Invalid session ID format');
+        validator.addError('session_id', 'Invalid session ID format')
       }
 
       if (!validator.isValid()) {
-        const errors = validator.getErrors();
-        logger.warn('Chat input validation failed', { errors, request });
-        throw new Error(`Invalid input: ${Object.values(errors).join(', ')}`);
+        const errors = validator.getErrors()
+        logger.warn('Chat input validation failed', { errors, request })
+        throw new Error(`Invalid input: ${Object.values(errors).join(', ')}`)
       }
 
       // Sanitize message to prevent injection
-      const sanitizedMessage = sanitizeSearchQuery(request.message);
+      const sanitizedMessage = sanitizeSearchQuery(request.message)
 
       logger.debug('Chat service: Routing message', {
         messageLength: sanitizedMessage.length,
-        hasSessionId: !!request.session_id
-      });
+        hasSessionId: !!request.session_id,
+      })
 
-      // Use smart chat service if feature is enabled
-      if (isFeatureEnabled('smartChatEnabled')) {
-        logger.debug('Using Smart Chat Service with caching and optimization');
-
-        // Determine model preference based on context
-        const modelPreference = request.context?.model_preference || 'auto';
+      // Use unified chat service if feature is enabled (default)
+      if (isFeatureEnabled('unifiedChatEnabled')) {
+        logger.debug('Using Unified Chat Service (primary + fallback adapters)')
 
         // Check if Maritaca model is selected in localStorage
-        const maritacaModel = typeof window !== 'undefined'
-          ? localStorage.getItem('maritaca_selected_model') as any
-          : null;
+        const maritacaModel =
+          typeof window !== 'undefined'
+            ? (localStorage.getItem('maritaca_selected_model') as any)
+            : null
+
+        // Map ChatRequest to unified chat request format
+        const unifiedRequest = {
+          message: sanitizedMessage,
+          sessionId: request.session_id,
+          agentId: request.context?.agent_id,
+          context: {
+            ...request.context,
+            maritacaModel: maritacaModel || undefined,
+          },
+        }
+
+        const unifiedResponse = await unifiedChatService.sendMessage(unifiedRequest)
+
+        // Map unified response back to ChatResponse format
+        if (unifiedResponse.success && unifiedResponse.data) {
+          return {
+            session_id: request.session_id || '',
+            message_id: `msg_${Date.now()}`,
+            agent_id: unifiedResponse.data.agentId || '',
+            agent_name: unifiedResponse.data.agentName || '',
+            message: unifiedResponse.data.response || '',
+            confidence: unifiedResponse.data.confidence || 0,
+            suggested_actions: unifiedResponse.data.suggestions,
+            metadata: unifiedResponse.data.metadata || {},
+          }
+        } else {
+          // Handle error case
+          logger.error('Unified chat service failed', {
+            error: unifiedResponse.error,
+          })
+          throw new Error(unifiedResponse.error?.message || 'Chat service failed')
+        }
+      }
+
+      // Legacy path: Use smart chat service if feature is enabled
+      if (isFeatureEnabled('smartChatEnabled')) {
+        logger.debug('Using Legacy Smart Chat Service (deprecated)')
+
+        // Check if Maritaca model is selected in localStorage
+        const maritacaModel =
+          typeof window !== 'undefined'
+            ? (localStorage.getItem('maritaca_selected_model') as any)
+            : null
+
+        // Import dynamically to avoid issues if deprecated service is removed
+        const { cachedSmartChatService } = await import('@/lib/services/cached-smart-chat.service')
+
+        // Determine model preference based on context
+        const modelPreference = request.context?.model_preference || 'auto'
 
         const response = await cachedSmartChatService.sendMessage(sanitizedMessage, {
           preferredModel: modelPreference,
           useDrummond: true,
           useMaritaca: !!maritacaModel,
           maritacaModel: maritacaModel || undefined,
-        });
+        })
 
-        return response;
+        return response
       }
 
-      // Use the official backend adapter
-      logger.debug('Using official backend adapter');
+      // Fallback: Use the official backend adapter
+      logger.debug('Using official backend adapter')
 
       // Create sanitized request
       const sanitizedRequest: ChatRequest = {
         ...request,
-        message: sanitizedMessage
-      };
+        message: sanitizedMessage,
+      }
 
       try {
-        const response = await sendBackendMessage(sanitizedRequest);
-        logger.debug('Backend responded successfully');
-        return response;
+        const response = await sendBackendMessage(sanitizedRequest)
+        logger.debug('Backend responded successfully')
+        return response
       } catch (backendError) {
-        logger.warn('Backend adapter failed, falling back', { error: backendError });
+        logger.warn('Backend adapter failed, falling back', { error: backendError })
 
         // Fallback to consolidated fallback adapter
-        const response = await sendFallbackMessage(sanitizedRequest);
-        logger.debug('Chat response from fallback');
+        const response = await sendFallbackMessage(sanitizedRequest)
+        logger.debug('Chat response from fallback')
 
-        return response;
+        return response
       }
-      
     } catch (error) {
       logger.error(error instanceof Error ? error : new Error('Chat service error'), {
         service: 'chatService',
-        action: 'sendMessage'
-      });
-      throw error;
+        action: 'sendMessage',
+      })
+      throw error
     }
   },
 
   // Get quick action suggestions
   async getSuggestions(): Promise<QuickAction[]> {
     // Use mock suggestions while the endpoint is not available
-    return getMockSuggestions();
-    
+    return getMockSuggestions()
+
     // Original code (kept for future use)
     // const response = await api.get<QuickAction[]>(CHAT_ENDPOINTS.SUGGESTIONS);
     // return response.success ? response.data! : [];
@@ -127,30 +178,29 @@ export const chatService = {
   async getAgents(): Promise<AgentInfo[]> {
     try {
       // Use real backend endpoint
-      const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS);
+      const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS)
 
       if (response.success && response.data) {
-        console.log('✅ Loaded agents from backend:', response.data.length);
-        return response.data;
+        console.log('✅ Loaded agents from backend:', response.data.length)
+        return response.data
       }
 
       // Fallback to mocks only if backend fails
-      console.warn('⚠️ Backend agents endpoint failed, using mocks');
-      return getMockAgents();
+      console.warn('⚠️ Backend agents endpoint failed, using mocks')
+      return getMockAgents()
     } catch (error) {
-      console.error('Failed to load agents from backend:', error);
+      console.error('Failed to load agents from backend:', error)
       // Fallback to mocks on error
-      return getMockAgents();
+      return getMockAgents()
     }
   },
 
   // Get chat history
   async getHistory(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
-    const response = await api.get<{ messages: ChatMessage[] }>(
-      CHAT_ENDPOINTS.HISTORY(sessionId),
-      { params: { limit } }
-    );
-    return response.success ? response.data!.messages : [];
+    const response = await api.get<{ messages: ChatMessage[] }>(CHAT_ENDPOINTS.HISTORY(sessionId), {
+      params: { limit },
+    })
+    return response.success ? response.data!.messages : []
   },
 
   // Get paginated chat history
@@ -163,20 +213,20 @@ export const chatService = {
     const response = await api.get<CursorPaginationResponse>(
       CHAT_ENDPOINTS.HISTORY_PAGINATED(sessionId),
       { params: { cursor, limit, direction } }
-    );
-    return response.success ? response.data! : null;
+    )
+    return response.success ? response.data! : null
   },
 
   // Clear chat history
   async clearHistory(sessionId: string): Promise<boolean> {
-    const response = await api.delete(CHAT_ENDPOINTS.HISTORY(sessionId));
-    return response.success;
+    const response = await api.delete(CHAT_ENDPOINTS.HISTORY(sessionId))
+    return response.success
   },
 
   // Get cache statistics (admin feature)
   async getCacheStats(): Promise<any> {
-    const response = await api.get(CHAT_ENDPOINTS.CACHE_STATS);
-    return response.success ? response.data : null;
+    const response = await api.get(CHAT_ENDPOINTS.CACHE_STATS)
+    return response.success ? response.data : null
   },
 
   // Stream chat response using Server-Sent Events
@@ -191,51 +241,59 @@ export const chatService = {
         session_id: request.session_id || '',
         context: JSON.stringify(request.context || {}),
       })}`
-    );
+    )
 
     // Parse SSE events
     eventSource.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        onEvent(data.type || 'chunk', data);
+        const data = JSON.parse(event.data)
+        onEvent(data.type || 'chunk', data)
       } catch (error) {
-        console.error('Error parsing SSE data:', error);
+        console.error('Error parsing SSE data:', error)
       }
-    };
+    }
 
     // Handle specific event types
-    const eventTypes: SSEEventType[] = ['start', 'detecting', 'intent', 'agent_selected', 'chunk', 'complete', 'error'];
-    
+    const eventTypes: SSEEventType[] = [
+      'start',
+      'detecting',
+      'intent',
+      'agent_selected',
+      'chunk',
+      'complete',
+      'error',
+    ]
+
     eventTypes.forEach((eventType) => {
       eventSource.addEventListener(eventType, (event: any) => {
         try {
-          const data = JSON.parse(event.data);
-          onEvent(eventType, data);
+          const data = JSON.parse(event.data)
+          onEvent(eventType, data)
         } catch (error) {
-          console.error(`Error parsing ${eventType} event:`, error);
+          console.error(`Error parsing ${eventType} event:`, error)
         }
-      });
-    });
+      })
+    })
 
     // Handle errors
     eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
-      eventSource.close();
+      console.error('SSE connection error:', error)
+      eventSource.close()
       if (onError) {
-        onError(new Error('Streaming connection failed'));
+        onError(new Error('Streaming connection failed'))
       }
-    };
+    }
 
     // Return cleanup function
     return () => {
-      eventSource.close();
-    };
+      eventSource.close()
+    }
   },
-};
+}
 
 // Helper to create a new session ID
 export function generateSessionId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 }
 
 // Helper to detect investigation intent
@@ -267,25 +325,25 @@ export function detectInvestigationIntent(message: string): boolean {
     'bidding',
     'transparência',
     'transparency',
-  ];
+  ]
 
-  const lowerMessage = message.toLowerCase();
-  return investigationKeywords.some(keyword => lowerMessage.includes(keyword));
+  const lowerMessage = message.toLowerCase()
+  return investigationKeywords.some((keyword) => lowerMessage.includes(keyword))
 }
 
 // Helper to format agent names for display
 export function formatAgentName(agentId: string): string {
   const agentNames: Record<string, string> = {
-    'abaporu': 'Abaporu',
-    'zumbi': 'Zumbi dos Palmares',
-    'anita': 'Anita Garibaldi',
-    'tiradentes': 'Tiradentes',
-    'nana': 'Nanã',
-    'ayrton': 'Ayrton Senna',
-    'machado': 'Machado de Assis',
-    'dandara': 'Dandara',
-    'drummond': 'Carlos Drummond de Andrade',
-  };
-  
-  return agentNames[agentId] || agentId;
+    abaporu: 'Abaporu',
+    zumbi: 'Zumbi dos Palmares',
+    anita: 'Anita Garibaldi',
+    tiradentes: 'Tiradentes',
+    nana: 'Nanã',
+    ayrton: 'Ayrton Senna',
+    machado: 'Machado de Assis',
+    dandara: 'Dandara',
+    drummond: 'Carlos Drummond de Andrade',
+  }
+
+  return agentNames[agentId] || agentId
 }

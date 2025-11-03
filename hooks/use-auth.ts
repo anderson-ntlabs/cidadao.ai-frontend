@@ -31,31 +31,55 @@ export function useAuth(): UseAuthReturn {
 
   const checkAuth = useCallback(async () => {
     try {
-      // Check if we have a token
-      if (!authService.isAuthenticated()) {
-        // Check for mock auth
-        const mockAuth = localStorage.getItem('isAuthenticated') === 'true'
-        const mockUser = localStorage.getItem('user')
-        
-        if (mockAuth && mockUser) {
-          setUser(JSON.parse(mockUser))
-          setIsAuthenticated(true)
-        }
-        
+      // First check backend auth
+      if (authService.isAuthenticated()) {
+        // Try to get current user from backend
+        const userInfo = await authService.getCurrentUser()
+        setUser({
+          id: userInfo.id,
+          name: userInfo.name,
+          email: userInfo.email,
+          role: userInfo.role,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.name)}&background=16a34a&color=fff`,
+        })
+        setIsAuthenticated(true)
         setIsLoading(false)
         return
       }
 
-      // Try to get current user from backend
-      const userInfo = await authService.getCurrentUser()
-      setUser({
-        id: userInfo.id,
-        name: userInfo.name,
-        email: userInfo.email,
-        role: userInfo.role,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.name)}&background=16a34a&color=fff`
-      })
-      setIsAuthenticated(true)
+      // Then check Supabase session (for OAuth users)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {}
+        const name =
+          metadata.full_name ||
+          metadata.name ||
+          metadata.user_name ||
+          metadata.preferred_username ||
+          session.user.email!.split('@')[0]
+
+        const avatar =
+          metadata.avatar_url ||
+          metadata.picture ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff`
+
+        setUser({
+          id: session.user.id,
+          name: name,
+          email: session.user.email!,
+          role: session.user.app_metadata?.role || 'user',
+          avatar: avatar,
+        })
+        setIsAuthenticated(true)
+      } else {
+        setUser(null)
+        setIsAuthenticated(false)
+      }
     } catch (error) {
       console.error('Auth check failed:', error)
       setUser(null)
@@ -70,90 +94,89 @@ export function useAuth(): UseAuthReturn {
     checkAuth()
   }, [checkAuth])
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true)
-    
-    try {
-      // Try real authentication first
-      const response = await authService.login(email, password)
-      
-      setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        role: response.user.role,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(response.user.name)}&background=16a34a&color=fff`
-      })
-      setIsAuthenticated(true)
-      
-      toast.success(`Bem-vindo(a), ${response.user.name}!`, 'Login realizado com sucesso')
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true)
 
-      // Handle redirect
-      const redirectUrl = localStorage.getItem('redirectAfterLogin')
-      if (redirectUrl) {
-        localStorage.removeItem('redirectAfterLogin')
-        router.push(redirectUrl)
-      } else {
-        router.push('/pt/app')
-      }
-    } catch (error) {
-      console.error('Login failed:', error)
-      toast.error('Falha no login', 'Verifique suas credenciais e tente novamente')
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [router])
+      try {
+        // Try real authentication first
+        const response = await authService.login(email, password)
 
-  const loginWithProvider = useCallback(async (provider: string) => {
-    setIsLoading(true)
-    
-    try {
-      // For now, use mock authentication for OAuth providers
-      // TODO: Implement real OAuth flow when backend supports it
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      const mockUser = {
-        id: `${provider}_${Date.now()}`,
-        name: 'João Silva',
-        email: 'joao.silva@email.com',
-        role: 'user',
-        avatar: `https://ui-avatars.com/api/?name=João+Silva&background=16a34a&color=fff`
-      }
-      
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      localStorage.setItem('isAuthenticated', 'true')
-      
-      setUser(mockUser)
-      setIsAuthenticated(true)
-      
-      toast.success(`Bem-vindo(a), ${mockUser.name}!`, 'Login realizado com sucesso')
+        setUser({
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(response.user.name)}&background=16a34a&color=fff`,
+        })
+        setIsAuthenticated(true)
 
-      // Handle redirect
-      const redirectUrl = localStorage.getItem('redirectAfterLogin')
-      if (redirectUrl) {
-        localStorage.removeItem('redirectAfterLogin')
-        router.push(redirectUrl)
-      } else {
-        router.push('/pt/app')
+        toast.success(`Bem-vindo(a), ${response.user.name}!`, 'Login realizado com sucesso')
+
+        // Handle redirect
+        const redirectUrl = localStorage.getItem('redirectAfterLogin')
+        if (redirectUrl) {
+          localStorage.removeItem('redirectAfterLogin')
+          router.push(redirectUrl)
+        } else {
+          router.push('/pt/app')
+        }
+      } catch (error) {
+        console.error('Login failed:', error)
+        toast.error('Falha no login', 'Verifique suas credenciais e tente novamente')
+        throw error
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error('Provider login failed:', error)
-      toast.error('Falha no login', 'Tente novamente mais tarde')
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [router])
+    },
+    [router]
+  )
+
+  const loginWithProvider = useCallback(
+    async (provider: string) => {
+      setIsLoading(true)
+
+      try {
+        // Real OAuth flow using Supabase
+        // Dynamic import to avoid SSR issues
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: provider as 'google' | 'github',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback?next=/pt/app`,
+          },
+        })
+
+        if (error) throw error
+
+        // OAuth will redirect to provider, then back to callback
+        // So we don't set user state here - it happens after redirect
+      } catch (error) {
+        console.error('Provider login failed:', error)
+        toast.error('Falha no login', 'Tente novamente mais tarde')
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [router]
+  )
 
   const logout = useCallback(async () => {
     setIsLoading(true)
-    
+
     try {
-      // Try real logout if authenticated
+      // Try real logout if authenticated with backend
       if (authService.isAuthenticated()) {
         await authService.logout()
       }
+
+      // Also logout from Supabase
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.auth.signOut()
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -161,11 +184,12 @@ export function useAuth(): UseAuthReturn {
       localStorage.removeItem('user')
       localStorage.removeItem('isAuthenticated')
       localStorage.removeItem('redirectAfterLogin')
-      
+      localStorage.removeItem('supabase.auth.token')
+
       setUser(null)
       setIsAuthenticated(false)
       setIsLoading(false)
-      
+
       router.push('/pt/login')
     }
   }, [router])
@@ -177,6 +201,6 @@ export function useAuth(): UseAuthReturn {
     login,
     loginWithProvider,
     logout,
-    checkAuth
+    checkAuth,
   }
 }

@@ -11,42 +11,42 @@
  * - Fast response for cached queries
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { validateChatRequest, validateRequestBody, checkRateLimit } from '@/lib/edge/request-validator';
-import { detectRegion, getBackendUrlForRegion } from '@/lib/edge/geo-detector';
-import { getCachedChat, cacheChat } from '@/lib/cache/multi-layer-cache.service';
+import { NextRequest, NextResponse } from 'next/server'
+import {
+  validateChatRequest,
+  validateRequestBody,
+  checkRateLimit,
+} from '@/lib/edge/request-validator'
+import { detectRegion, getBackendUrlForRegion } from '@/lib/edge/geo-detector'
+import { getCachedChat, cacheChat } from '@/lib/cache/multi-layer-cache.service'
 
 // Enable edge runtime
-export const runtime = 'edge';
+export const runtime = 'edge'
 
 // Configure edge function
-export const preferredRegion = ['iad1', 'fra1', 'sin1']; // US, EU, APAC
+export const preferredRegion = ['iad1', 'fra1', 'sin1'] // US, EU, APAC
 
 /**
  * POST /api/edge/chat
  *
  * Edge-optimized chat endpoint
  */
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const startTime = Date.now()
 
   try {
     // Step 1: Fast request validation (target <5ms)
-    const validation = validateChatRequest(request);
+    const validation = validateChatRequest(request)
 
     if (!validation.valid) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
     // Step 2: Rate limiting check
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'unknown';
+    const ip =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
 
-    const rateLimit = checkRateLimit(ip);
+    const rateLimit = checkRateLimit(ip)
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -55,36 +55,33 @@ export async function POST(request: NextRequest) {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': String(Date.now() + 60000)
-          }
+            'X-RateLimit-Reset': String(Date.now() + 60000),
+          },
         }
-      );
+      )
     }
 
     // Step 3: Detect user's geographic region
-    const geoLocation = detectRegion(request);
+    const geoLocation = detectRegion(request)
 
-    console.log('[Edge Chat] Region detected:', geoLocation.region, geoLocation.country);
+    console.log('[Edge Chat] Region detected:', geoLocation.region, geoLocation.country)
 
     // Step 4: Validate request body
-    const bodyValidation = await validateRequestBody(request);
+    const bodyValidation = await validateRequestBody(request)
 
     if (!bodyValidation.valid) {
-      return NextResponse.json(
-        { error: bodyValidation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: bodyValidation.error }, { status: 400 })
     }
 
-    const message = bodyValidation.sanitized?.message || '';
+    const message = bodyValidation.sanitized?.message || ''
 
     // Step 5: Check cache for existing response
-    const cachedResponse = await getCachedChat(message);
+    const cachedResponse = await getCachedChat(message)
 
     if (cachedResponse) {
-      const totalLatency = Date.now() - startTime;
+      const totalLatency = Date.now() - startTime
 
-      console.log(`[Edge Chat] Cache hit! Latency: ${totalLatency}ms`);
+      console.log(`[Edge Chat] Cache hit! Latency: ${totalLatency}ms`)
 
       return NextResponse.json(
         {
@@ -97,10 +94,10 @@ export async function POST(request: NextRequest) {
               country: geoLocation.country,
               latency: totalLatency,
               rateLimit: {
-                remaining: rateLimit.remaining
-              }
-            }
-          }
+                remaining: rateLimit.remaining,
+              },
+            },
+          },
         },
         {
           headers: {
@@ -108,14 +105,14 @@ export async function POST(request: NextRequest) {
             'X-Edge-Latency': String(totalLatency),
             'X-RateLimit-Remaining': String(rateLimit.remaining),
             'X-Cache-Status': 'HIT',
-            'Cache-Control': 'private, max-age=300'
-          }
+            'Cache-Control': 'private, max-age=300',
+          },
         }
-      );
+      )
     }
 
     // Step 6: Route to appropriate backend
-    const backendUrl = getBackendUrlForRegion(geoLocation.region);
+    const backendUrl = getBackendUrlForRegion(geoLocation.region)
 
     // For now, we'll proxy to the main backend
     // In production, this would route to region-specific backends
@@ -125,7 +122,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'X-Forwarded-For': ip,
         'X-User-Region': geoLocation.region,
-        'X-User-Country': geoLocation.country || 'unknown'
+        'X-User-Country': geoLocation.country || 'unknown',
       },
       body: JSON.stringify({
         message: bodyValidation.sanitized?.message,
@@ -134,21 +131,24 @@ export async function POST(request: NextRequest) {
           ...bodyValidation.sanitized?.metadata,
           edge_processed: true,
           edge_region: geoLocation.region,
-          edge_latency: Date.now() - startTime
-        }
-      })
-    });
+          edge_latency: Date.now() - startTime,
+        },
+      }),
+    })
 
     // Step 7: Return response with edge metadata
-    const responseData = await backendResponse.json();
+    const responseData = (await backendResponse.json()) as {
+      response?: string
+      metadata?: Record<string, unknown>
+    }
 
-    const totalLatency = Date.now() - startTime;
+    const totalLatency = Date.now() - startTime
 
-    console.log(`[Edge Chat] Total latency: ${totalLatency}ms`);
+    console.log(`[Edge Chat] Total latency: ${totalLatency}ms`)
 
     // Cache the response for future requests
     if (responseData.response) {
-      await cacheChat(message, responseData.response);
+      await cacheChat(message, responseData.response)
     }
 
     return NextResponse.json(
@@ -163,10 +163,10 @@ export async function POST(request: NextRequest) {
             country: geoLocation.country,
             latency: totalLatency,
             rateLimit: {
-              remaining: rateLimit.remaining
-            }
-          }
-        }
+              remaining: rateLimit.remaining,
+            },
+          },
+        },
       },
       {
         headers: {
@@ -174,23 +174,22 @@ export async function POST(request: NextRequest) {
           'X-Edge-Latency': String(totalLatency),
           'X-RateLimit-Remaining': String(rateLimit.remaining),
           'X-Cache-Status': 'MISS',
-          'Cache-Control': 'private, max-age=300'
-        }
+          'Cache-Control': 'private, max-age=300',
+        },
       }
-    );
-
+    )
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
 
-    console.error('[Edge Chat] Error:', errorMessage);
+    console.error('[Edge Chat] Error:', errorMessage)
 
     return NextResponse.json(
       {
         error: 'Failed to process request',
-        details: errorMessage
+        details: errorMessage,
       },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -199,14 +198,14 @@ export async function POST(request: NextRequest) {
  *
  * Health check endpoint
  */
-export async function GET(request: NextRequest) {
-  const geoLocation = detectRegion(request);
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const geoLocation = detectRegion(request)
 
   return NextResponse.json({
     status: 'healthy',
     runtime: 'edge',
     region: geoLocation.region,
     country: geoLocation.country,
-    timestamp: new Date().toISOString()
-  });
+    timestamp: new Date().toISOString(),
+  })
 }

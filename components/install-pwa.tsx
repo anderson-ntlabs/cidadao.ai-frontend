@@ -12,19 +12,9 @@ export function InstallPWA() {
       e.preventDefault()
       setDeferredPrompt(e)
 
-      // Check if previously dismissed
-      const dismissedTime = localStorage.getItem('pwa-install-dismissed')
-      if (dismissedTime) {
-        const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24)
-        if (daysSinceDismissed < 7) {
-          return // Don't show if dismissed less than 7 days ago
-        }
-      }
-
-      // Add 30 second delay before showing prompt
-      setTimeout(() => {
-        setShowInstallPrompt(true)
-      }, 30000) // 30 seconds
+      // DISABLED: Auto-show install prompt
+      // Now the prompt is only shown when manually triggered
+      // setShowInstallPrompt(true)
     }
 
     window.addEventListener('beforeinstallprompt', handler)
@@ -42,7 +32,7 @@ export function InstallPWA() {
 
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    
+
     if (outcome === 'accepted') {
       setDeferredPrompt(null)
       setShowInstallPrompt(false)
@@ -65,9 +55,7 @@ export function InstallPWA() {
             <Download className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Instalar Cidadão.AI
-            </h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Instalar Cidadão.AI</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
               Instale o app para acesso rápido e funcionar offline
             </p>

@@ -54,6 +54,9 @@
     "scripts",
     "stories",
     "vitest.setup.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "lib/deprecated/**/*",
+    "store/versioned/**/*",
+    "store/schemas/**/*"
   ]
 }

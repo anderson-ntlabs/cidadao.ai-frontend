@@ -35,6 +35,7 @@ export class ChatService {
    */
   async sendMessage(request: ChatRequest): Promise<ChatResponse> {
     const startTime = Date.now()
+    let usedAdapter: 'primary' | 'fallback' | 'cache' | 'none' = 'none'
 
     // Check cache first
     if (this.cacheEnabled) {
@@ -49,10 +50,18 @@ export class ChatService {
     // Try primary adapter
     let response = await this.tryAdapter(this.primaryAdapter, request, 'primary')
 
+    if (response.success) {
+      usedAdapter = 'primary'
+    }
+
     // Fallback if primary fails
     if (!response.success && this.fallbackAdapter) {
       logger.warn('Primary adapter failed, using fallback')
       response = await this.tryAdapter(this.fallbackAdapter, request, 'fallback')
+
+      if (response.success) {
+        usedAdapter = 'fallback'
+      }
     }
 
     // Cache successful responses
@@ -64,9 +73,7 @@ export class ChatService {
     const duration = Date.now() - startTime
     chatTelemetry.recordMessage({
       success: response.success,
-      adapter: response.success ?
-        (response === await this.tryAdapter(this.primaryAdapter, request, 'primary') ? 'primary' : 'fallback') :
-        'none',
+      adapter: usedAdapter,
       duration,
       error: response.error?.code,
     })
@@ -100,14 +107,17 @@ export class ChatService {
         if (response.error?.code === 'INVALID_REQUEST') {
           break
         }
-
       } catch (error) {
-        logger.error(`${adapterType} adapter error:`, error)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        logger.error(`${adapterType} adapter error: ${errorMessage}`, {
+          adapter: adapterType,
+          attempt,
+        })
         lastError = {
           success: false,
           error: {
             code: 'ADAPTER_ERROR',
-            message: error instanceof Error ? error.message : 'Unknown error',
+            message: errorMessage,
           },
         }
       }
@@ -118,13 +128,15 @@ export class ChatService {
       }
     }
 
-    return lastError || {
-      success: false,
-      error: {
-        code: 'MAX_RETRIES',
-        message: `Failed after ${this.maxRetries} attempts`,
-      },
-    }
+    return (
+      lastError || {
+        success: false,
+        error: {
+          code: 'MAX_RETRIES',
+          message: `Failed after ${this.maxRetries} attempts`,
+        },
+      }
+    )
   }
 
   /**
@@ -182,7 +194,7 @@ export class ChatService {
    * Sleep helper
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   /**

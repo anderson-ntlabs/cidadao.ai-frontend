@@ -45,15 +45,15 @@ ns" alt="ODS 16">
 
 **Implementação:** 82% Completo | **Status:** Production Ready ✅
 
-| Categoria | Status | Detalhes |
-|-----------|--------|----------|
-| **Infraestrutura** | ✅ 100% | Multi-region, Edge Functions, Security A+ |
-| **Chat & Adapters** | ✅ 90% | SSE, IndexedDB, Vercel KV, Smart Routing |
-| **Testes** | ✅ 95% | 161 unit tests, 36 E2E tests (Playwright), CI/CD automation |
-| **Performance** | ✅ 85% | Bundle <400KB, Dynamic imports, Lighthouse CI |
-| **Segurança** | ✅ 100% | OWASP Top 10, CSP, Rate Limiting, CSRF |
-| **Monitoramento** | ✅ 100% | Sentry, Custom Metrics, Dashboards |
-| **Deploy** | ⏳ 95% | Vercel config pronto, aguardando deploy |
+| Categoria           | Status  | Detalhes                                                    |
+| ------------------- | ------- | ----------------------------------------------------------- |
+| **Infraestrutura**  | ✅ 100% | Multi-region, Edge Functions, Security A+                   |
+| **Chat & Adapters** | ✅ 90%  | SSE, IndexedDB, Vercel KV, Smart Routing                    |
+| **Testes**          | ✅ 95%  | 161 unit tests, 36 E2E tests (Playwright), CI/CD automation |
+| **Performance**     | ✅ 85%  | Bundle <400KB, Dynamic imports, Lighthouse CI               |
+| **Segurança**       | ✅ 100% | OWASP Top 10, CSP, Rate Limiting, CSRF                      |
+| **Monitoramento**   | ✅ 100% | Sentry, Custom Metrics, Dashboards                          |
+| **Deploy**          | ⏳ 95%  | Vercel config pronto, aguardando deploy                     |
 
 **Próximos Passos:** Deploy em produção (30 min) → 100% completo! 🎉
 
@@ -62,6 +62,15 @@ ns" alt="ODS 16">
 ## 📖 Sobre
 
 O **Cidadão.AI Frontend** é a interface web da plataforma de transparência pública brasileira que utiliza inteligência artificial para democratizar o acesso aos dados governamentais. O sistema conta com 17 agentes de IA especializados, cada um com identidade cultural brasileira única.
+
+### 📚 Documentação
+
+A documentação completa está organizada na pasta [`/docs`](./docs):
+
+- **[Quick Start Guide](./docs/01-getting-started/quick-start.md)** - Comece em 5 minutos
+- **[Installation Guide](./docs/01-getting-started/installation.md)** - Instalação detalhada
+- **[Environment Setup](./docs/01-getting-started/environment-setup.md)** - Configuração do ambiente
+- **[Documentation Index](./docs/README.md)** - Índice completo da documentação
 
 ### ✨ Principais Funcionalidades
 
@@ -84,15 +93,12 @@ Nossa plataforma contribui diretamente para o ODS 16 através de:
 - **16.5**: Reduzir substancialmente a corrupção em todas as suas formas
   - IA detecta anomalias em contratos e licitações
   - Análise automatizada de padrões suspeitos
-  
 - **16.6**: Desenvolver instituições eficazes, responsáveis e transparentes
   - Dashboards públicos de gastos governamentais
   - Relatórios automáticos de investigações
-  
 - **16.7**: Garantir a tomada de decisão responsiva, inclusiva e participativa
   - Interface acessível em português e inglês
   - Modo de alto contraste para inclusão visual
-  
 - **16.10**: Assegurar o acesso público à informação
   - Chat com IA para simplificar dados complexos
   - Exportação de dados em múltiplos formatos
@@ -134,27 +140,32 @@ Implementamos os pilares do governo aberto:
 ### Passos
 
 1. **Clone o repositório**
+
 ```bash
 git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
 cd cidadao.ai-frontend
 ```
 
 2. **Instale as dependências**
+
 ```bash
 npm install
 ```
 
 3. **Configure as variáveis de ambiente** (opcional)
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. **Execute o servidor de desenvolvimento**
+
 ```bash
 npm run dev
 ```
 
 5. **Acesse a aplicação**
+
 ```
 http://localhost:3000
 ```
@@ -207,17 +218,18 @@ cidadao.ai-frontend/
 │   └── breadcrumbs.tsx   # Navegação breadcrumb
 ├── data/                  # Dados estáticos
 │   └── agents.ts         # Configuração dos 17 agentes
-├── docs/                  # 📚 Documentação Técnica Completa
-│   ├── reports/          # Análises técnicas
-│   │   └── ANALISE_TECNICA_ARQUITETURA_FRONTEND.md
-│   ├── planning/         # Planejamento de Sprints
-│   │   ├── SPRINT_PLANNING_OVERVIEW.md
-│   │   └── sprints/
-│   │       ├── SPRINT_01_QUICK_WINS.md
-│   │       ├── SPRINT_02_INFRASTRUCTURE.md
-│   │       ├── SPRINT_03_EDGE_OPTIMIZATION.md
-│   │       └── SPRINT_04_ML_ADVANCED.md
-│   └── EMAIL_HANDOFF_DEV_TEAM.md
+├── docs/                  # 📚 Documentação Completa Reorganizada
+│   ├── 01-getting-started/    # Guias de início rápido
+│   ├── 02-architecture/       # Arquitetura técnica
+│   ├── 03-features/          # Documentação de features
+│   ├── 04-api/              # Referência de API
+│   ├── 05-guides/           # Guias práticos
+│   ├── 06-development/      # Padrões de desenvolvimento
+│   ├── 07-design/          # Design system
+│   ├── 08-testing/         # Estratégias de teste
+│   ├── 09-deployment/      # Deploy e DevOps
+│   ├── 10-reference/       # Material de referência
+│   └── archive/            # Documentação arquivada
 ├── hooks/                 # React hooks customizados
 │   ├── use-chat.ts       # Hook para chat com backend
 │   └── use-toast.ts      # Hook para notificações
@@ -235,6 +247,7 @@ cidadao.ai-frontend/
 ### Componentes Principais
 
 #### Toast (Sistema de Notificações)
+
 ```tsx
 import { toast } from '@/hooks/use-toast'
 
@@ -246,6 +259,7 @@ toast.warning('Ação irreversível')
 ```
 
 #### Tour (Guia Interativo)
+
 ```tsx
 <Tour
   steps={[
@@ -253,21 +267,17 @@ toast.warning('Ação irreversível')
       target: '.element-selector',
       title: 'Título do Passo',
       content: 'Descrição detalhada',
-      placement: 'bottom'
-    }
+      placement: 'bottom',
+    },
   ]}
   onComplete={() => console.log('Tour concluído')}
 />
 ```
 
 #### Breadcrumbs (Navegação)
+
 ```tsx
-<Breadcrumbs 
-  items={[
-    { label: 'Home', href: '/pt' },
-    { label: 'Dashboard' }
-  ]} 
-/>
+<Breadcrumbs items={[{ label: 'Home', href: '/pt' }, { label: 'Dashboard' }]} />
 ```
 
 ### Agentes de IA
@@ -313,7 +323,7 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
+  disable: process.env.NODE_ENV === 'development',
 })
 ```
 
@@ -322,8 +332,7 @@ const withPWA = require('next-pwa')({
 Configure a URL do backend em `hooks/use-chat.ts`:
 
 ```typescript
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 
-  'https://cidadao-api-production.up.railway.app'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 ```
 
 ## 📊 Métricas de Impacto e Sustentabilidade
@@ -332,12 +341,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ||
 
 Nossa plataforma monitora e reporta os seguintes indicadores:
 
-| Indicador | Meta ODS | Métrica | Status |
-|-----------|----------|---------|--------|
-| Anomalias Detectadas | 16.5 | Contratos suspeitos identificados por IA | 🟢 Ativo |
-| Transparência de Dados | 16.6 | Dados públicos disponibilizados | 🟢 24/7 |
-| Participação Cidadã | 16.7 | Usuários ativos mensais | 🟢 Crescendo |
-| Acesso à Informação | 16.10 | Consultas respondidas por IA | 🟢 100% |
+| Indicador              | Meta ODS | Métrica                                  | Status       |
+| ---------------------- | -------- | ---------------------------------------- | ------------ |
+| Anomalias Detectadas   | 16.5     | Contratos suspeitos identificados por IA | 🟢 Ativo     |
+| Transparência de Dados | 16.6     | Dados públicos disponibilizados          | 🟢 24/7      |
+| Participação Cidadã    | 16.7     | Usuários ativos mensais                  | 🟢 Crescendo |
+| Acesso à Informação    | 16.10    | Consultas respondidas por IA             | 🟢 100%      |
 
 ### 🌱 Pegada de Carbono
 
@@ -386,17 +395,20 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 🔗 Links Importantes
 
 ### Desenvolvimento Sustentável
+
 - [ODS 16 - Nações Unidas Brasil](https://brasil.un.org/pt-br/sdgs/16)
 - [Agenda 2030 - Plataforma Agenda 2030](http://www.agenda2030.com.br/ods/16/)
 - [Open Government Partnership](https://www.opengovpartnership.org/pt/)
 - [Parceria Governo Aberto Brasil](https://www.gov.br/cgu/pt-br/governo-aberto/governo-aberto-no-brasil)
 
 ### Transparência Pública
+
 - [Portal da Transparência](http://www.portaltransparencia.gov.br/)
 - [Lei de Acesso à Informação](https://www.gov.br/acessoainformacao/pt-br)
 - [Controladoria-Geral da União](https://www.gov.br/cgu/pt-br)
 
 ### Padrões e Acessibilidade
+
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Governo Digital - Acessibilidade](https://www.gov.br/governodigital/pt-br/acessibilidade-digital)
 

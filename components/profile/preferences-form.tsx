@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Loader2, Moon, Sun, Monitor, Globe, Bell, Mail } from 'lucide-react'
+import { Save, Loader2, Moon, Sun, Monitor, Bell, Mail } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { profileService } from '@/lib/services/profile.service'
 import type { UserPreferences, UpdatePreferencesData } from '@/types/profile'
@@ -17,15 +17,11 @@ export function PreferencesForm({ preferences, onUpdate }: PreferencesFormProps)
   const [formData, setFormData] = useState<UpdatePreferencesData>(preferences)
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'auto') => {
-    setFormData(prev => ({ ...prev, theme }))
-  }
-
-  const handleLanguageChange = (language: 'pt' | 'en') => {
-    setFormData(prev => ({ ...prev, language }))
+    setFormData((prev) => ({ ...prev, theme }))
   }
 
   const handleToggle = (field: 'notifications_enabled' | 'email_notifications') => {
-    setFormData(prev => ({ ...prev, [field]: !prev[field] }))
+    setFormData((prev) => ({ ...prev, [field]: !prev[field] }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,39 +93,7 @@ export function PreferencesForm({ preferences, onUpdate }: PreferencesFormProps)
         </div>
       </div>
 
-      {/* Language */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          <Globe className="w-4 h-4 inline mr-2" />
-          Idioma
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => handleLanguageChange('pt')}
-            className={`p-3 rounded-md border-2 flex items-center justify-center gap-2 transition-colors ${
-              formData.language === 'pt'
-                ? 'border-green-600 bg-green-50 dark:bg-green-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-            }`}
-          >
-            <span className="text-lg">🇧🇷</span>
-            <span className="text-sm">Português</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleLanguageChange('en')}
-            className={`p-3 rounded-md border-2 flex items-center justify-center gap-2 transition-colors ${
-              formData.language === 'en'
-                ? 'border-green-600 bg-green-50 dark:bg-green-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
-            }`}
-          >
-            <span className="text-lg">🇺🇸</span>
-            <span className="text-sm">English</span>
-          </button>
-        </div>
-      </div>
+      {/* Language selector removed - authenticated area is Portuguese only */}
 
       {/* Notifications */}
       <div className="space-y-4">
@@ -137,7 +101,7 @@ export function PreferencesForm({ preferences, onUpdate }: PreferencesFormProps)
           <Bell className="w-4 h-4 inline mr-2" />
           Notificações
         </h3>
-        
+
         <label className="flex items-center justify-between cursor-pointer">
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Notificações no navegador
@@ -180,11 +144,7 @@ export function PreferencesForm({ preferences, onUpdate }: PreferencesFormProps)
 
       {/* Submit */}
       <div className="flex justify-end pt-4">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="flex items-center gap-2"
-        >
+        <Button type="submit" disabled={isLoading} className="flex items-center gap-2">
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -29,7 +29,8 @@ export class FallbackAdapter implements ChatAdapter {
       // In production, this would go through our backend
       // to keep API keys secure
       const endpoint = '/api/v1/chat/direct/maritaca'
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
@@ -65,7 +66,11 @@ export class FallbackAdapter implements ChatAdapter {
         },
       }
     } catch (error) {
-      logger.error('Fallback adapter error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Fallback adapter error: ${errorMessage}`, {
+        adapter: this.name,
+        model: this.model,
+      })
 
       if (error instanceof Error) {
         return {
