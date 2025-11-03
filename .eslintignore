@@ -1,0 +1,25 @@
+# Test files
+**/__tests__/**
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Build output
+.next/
+out/
+dist/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env*.local
+
+# Generated files
+.storybook/public/
+storybook-static/
+
+# Coverage
+coverage/
+.nyc_output/
