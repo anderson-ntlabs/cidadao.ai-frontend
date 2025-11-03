@@ -41,6 +41,20 @@ vi.mock('@/hooks/use-toast', () => ({
   },
 }))
 
+// Mock Supabase client
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: null },
+        error: null,
+      }),
+      signInWithOAuth: vi.fn().mockResolvedValue({ error: null }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+    },
+  }),
+}))
+
 describe('useAuth Hook - Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -67,15 +81,18 @@ describe('useAuth Hook - Integration Tests', () => {
       })
     })
 
-    it('loads mock user from localStorage on mount', async () => {
-      const mockUser = {
-        id: '123',
-        name: 'Test User',
-        email: 'test@example.com',
-      }
-
+    it('does not load user when both backend and Supabase auth fail', async () => {
+      // Note: The new auth implementation checks backend first, then Supabase
+      // localStorage is no longer checked directly during checkAuth
       localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('user', JSON.stringify(mockUser))
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: '123',
+          name: 'Test User',
+          email: 'test@example.com',
+        })
+      )
       vi.mocked(authService.isAuthenticated).mockReturnValue(false)
 
       const { result } = renderHook(() => useAuth())
@@ -84,8 +101,9 @@ describe('useAuth Hook - Integration Tests', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      expect(result.current.user).toEqual(mockUser)
-      expect(result.current.isAuthenticated).toBe(true)
+      // New behavior: without backend or Supabase session, user is null
+      expect(result.current.user).toBeNull()
+      expect(result.current.isAuthenticated).toBe(false)
     })
 
     it('loads real user when authenticated with backend', async () => {
@@ -162,31 +180,36 @@ describe('useAuth Hook - Integration Tests', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      await expect(act(async () => {
-        await result.current.login('test@example.com', 'wrong-password')
-      })).rejects.toThrow('Network error')
+      await expect(
+        act(async () => {
+          await result.current.login('test@example.com', 'wrong-password')
+        })
+      ).rejects.toThrow('Network error')
     })
   })
 
   describe('Logout Flow', () => {
     it('successfully logs out user', async () => {
-      // Setup authenticated state
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('user', JSON.stringify({ id: '1', name: 'Test', email: 'test@test.com' }))
+      // Setup authenticated state via backend
+      const mockUser = { id: '1', name: 'Test', email: 'test@test.com', role: 'user' }
 
-      vi.mocked(authService.isAuthenticated).mockReturnValue(false)
+      vi.mocked(authService.isAuthenticated).mockReturnValue(true)
+      vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
       vi.mocked(authService.logout).mockResolvedValue(undefined)
 
       const { result } = renderHook(() => useAuth())
 
+      // Wait for user to be authenticated
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(true)
       })
 
+      // Logout
       await act(async () => {
         await result.current.logout()
       })
 
+      // Verify logout cleared state
       await waitFor(() => {
         expect(result.current.user).toBeNull()
         expect(result.current.isAuthenticated).toBe(false)
@@ -197,22 +220,26 @@ describe('useAuth Hook - Integration Tests', () => {
     })
 
     it('redirects to login page after logout', async () => {
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('user', JSON.stringify({ id: '1', name: 'Test', email: 'test@test.com' }))
+      // Setup authenticated state via backend
+      const mockUser = { id: '1', name: 'Test', email: 'test@test.com', role: 'user' }
 
-      vi.mocked(authService.isAuthenticated).mockReturnValue(false)
+      vi.mocked(authService.isAuthenticated).mockReturnValue(true)
+      vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
       vi.mocked(authService.logout).mockResolvedValue(undefined)
 
       const { result } = renderHook(() => useAuth())
 
+      // Wait for user to be authenticated
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(true)
       })
 
+      // Logout
       await act(async () => {
         await result.current.logout()
       })
 
+      // Verify redirect happened
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/pt/login')
       })
@@ -244,9 +271,11 @@ describe('useAuth Hook - Integration Tests', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
-      await expect(act(async () => {
-        await result.current.login('wrong@example.com', 'wrongpass')
-      })).rejects.toThrow('Invalid credentials')
+      await expect(
+        act(async () => {
+          await result.current.login('wrong@example.com', 'wrongpass')
+        })
+      ).rejects.toThrow('Invalid credentials')
 
       // Verify toast.error was called
       const { toast } = await import('@/hooks/use-toast')
@@ -255,7 +284,9 @@ describe('useAuth Hook - Integration Tests', () => {
   })
 
   describe('OAuth Provider Login', () => {
-    it('successfully logs in with OAuth provider', async () => {
+    it('initiates OAuth flow without immediate authentication', async () => {
+      // OAuth is handled by Supabase which redirects to provider
+      // The actual authentication happens after callback
       vi.mocked(authService.isAuthenticated).mockReturnValue(false)
 
       const { result } = renderHook(() => useAuth())
@@ -264,17 +295,14 @@ describe('useAuth Hook - Integration Tests', () => {
         expect(result.current.isLoading).toBe(false)
       })
 
+      // Call loginWithProvider - it should not throw
       await act(async () => {
         await result.current.loginWithProvider('google')
       })
 
-      await waitFor(() => {
-        expect(result.current.isAuthenticated).toBe(true)
-      })
-
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
-      // Check that a user was stored with an email (mock auth uses default user)
-      expect(storedUser.email).toBeTruthy()
+      // OAuth doesn't set authentication state immediately
+      // User stays unauthenticated until callback completes
+      expect(result.current.isAuthenticated).toBe(false)
     })
   })
 
