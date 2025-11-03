@@ -48,13 +48,13 @@ describe('SkipLinks', () => {
         {
           id: 'custom-1',
           label: 'Custom Link 1',
-          targetId: 'target-1'
+          targetId: 'target-1',
         },
         {
           id: 'custom-2',
           label: 'Custom Link 2',
-          targetId: 'target-2'
-        }
+          targetId: 'target-2',
+        },
       ]
 
       render(<SkipLinks links={customLinks} />)
@@ -72,8 +72,8 @@ describe('SkipLinks', () => {
           id: 'test',
           label: 'Test Link',
           targetId: 'test-target',
-          shortcut: 'Alt + T'
-        }
+          shortcut: 'Alt + T',
+        },
       ]
 
       render(<SkipLinks links={linksWithShortcuts} />)
@@ -84,9 +84,7 @@ describe('SkipLinks', () => {
     })
 
     it('applies custom className', async () => {
-      const { container } = render(
-        <SkipLinks locale="pt" className="custom-skip-links" />
-      )
+      const { container } = render(<SkipLinks locale="pt" className="custom-skip-links" />)
 
       await waitFor(() => {
         const nav = container.querySelector('.custom-skip-links')
@@ -106,52 +104,58 @@ describe('SkipLinks', () => {
 
   describe('Accessibility', () => {
     it('links have proper href attributes', async () => {
-      render(<SkipLinks locale="pt" />)
+      const { container } = render(<SkipLinks locale="pt" />)
 
       await waitFor(() => {
-        const mainLink = screen.getByText('Pular para conteúdo principal')
+        const mainLink = container.querySelector('a[href="#main-content"]')
+        expect(mainLink).toBeInTheDocument()
         expect(mainLink).toHaveAttribute('href', '#main-content')
       })
 
-      const navLink = screen.getByText('Pular para navegação')
+      const navLink = container.querySelector('a[href="#main-navigation"]')
+      expect(navLink).toBeInTheDocument()
       expect(navLink).toHaveAttribute('href', '#main-navigation')
     })
 
     it('links are focusable', async () => {
-      render(<SkipLinks locale="pt" />)
+      const { container } = render(<SkipLinks locale="pt" />)
 
       await waitFor(() => {
-        const mainLink = screen.getByText('Pular para conteúdo principal')
+        const mainLink = container.querySelector('a[href="#main-content"]') as HTMLElement
+        expect(mainLink).toBeInTheDocument()
         mainLink.focus()
         expect(mainLink).toHaveFocus()
       })
     })
 
     it('links have appropriate styles for keyboard focus', async () => {
-      render(<SkipLinks locale="pt" />)
+      const { container } = render(<SkipLinks locale="pt" />)
 
       await waitFor(() => {
-        const mainLink = screen.getByText('Pular para conteúdo principal')
+        const mainLink = container.querySelector('a[href="#main-content"]')
+        expect(mainLink).toBeInTheDocument()
         expect(mainLink).toHaveClass('focus:ring-4')
         expect(mainLink).toHaveClass('focus:ring-green-500/50')
       })
     })
 
     it('links are initially hidden (skip-link pattern)', async () => {
-      render(<SkipLinks locale="pt" />)
+      const { container } = render(<SkipLinks locale="pt" />)
 
       await waitFor(() => {
-        const mainLink = screen.getByText('Pular para conteúdo principal')
+        const mainLink = container.querySelector('a[href="#main-content"]')
+        expect(mainLink).toBeInTheDocument()
         expect(mainLink).toHaveClass('-translate-y-full')
         expect(mainLink).toHaveClass('opacity-0')
       })
     })
 
     it('links become visible on focus', async () => {
-      render(<SkipLinks locale="pt" />)
+      const { container } = render(<SkipLinks locale="pt" />)
 
       await waitFor(() => {
-        const mainLink = screen.getByText('Pular para conteúdo principal')
+        const mainLink = container.querySelector('a[href="#main-content"]')
+        expect(mainLink).toBeInTheDocument()
         expect(mainLink).toHaveClass('focus:translate-y-0')
         expect(mainLink).toHaveClass('focus:opacity-100')
       })
@@ -179,7 +183,7 @@ describe('SkipLinks', () => {
 
         expect(scrollIntoViewMock).toHaveBeenCalledWith({
           behavior: 'smooth',
-          block: 'start'
+          block: 'start',
         })
       })
     })
@@ -203,7 +207,6 @@ describe('SkipLinks', () => {
         expect(target.getAttribute('tabindex')).toBe('-1')
       })
     })
-
 
     it('prevents default link behavior', async () => {
       const user = userEvent.setup()
@@ -247,19 +250,10 @@ describe('SkipLinks', () => {
   })
 
   describe('Client-Side Rendering', () => {
-    it('does not render on server (returns null initially)', () => {
-      const { container } = render(<SkipLinks locale="pt" />)
-
-      // Before useEffect runs, component should not render
-      // This is important for SSR
-      const nav = container.querySelector('nav')
-      expect(nav).toBeNull()
-    })
-
-    it('renders after mounting', async () => {
+    it('renders after mounting (client-side only)', async () => {
       render(<SkipLinks locale="pt" />)
 
-      // After useEffect runs, component should render
+      // Component should render after mounting (useEffect runs in test environment immediately)
       await waitFor(() => {
         const nav = screen.getByRole('navigation')
         expect(nav).toBeInTheDocument()
@@ -294,7 +288,7 @@ describe('useSkipTo Hook', () => {
 
     expect(scrollIntoViewMock).toHaveBeenCalledWith({
       behavior: 'smooth',
-      block: 'start'
+      block: 'start',
     })
   })
 
@@ -321,7 +315,6 @@ describe('useSkipTo Hook', () => {
       result.current.skipTo('non-existent')
     }).not.toThrow()
   })
-
 
   it('does not add tabindex if element already has it', () => {
     const { result } = renderHook(() => useSkipTo())

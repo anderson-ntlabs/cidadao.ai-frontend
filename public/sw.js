@@ -1838,11 +1838,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       precacheEntries: [
         {
           revision: '66b89a03b304e4d01de2b80ce38069b3',
-          url: '/_next/static/1Bxqqx8jTb9k5f15Vk4mI/_buildManifest.js',
+          url: '/_next/static/SFTjru1QpUz1XSabq0-GM/_buildManifest.js',
         },
         {
           revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/1Bxqqx8jTb9k5f15Vk4mI/_ssgManifest.js',
+          url: '/_next/static/SFTjru1QpUz1XSabq0-GM/_ssgManifest.js',
         },
         { revision: null, url: '/_next/static/chunks/1249.c02fc7e4f5ea465a.js' },
         { revision: null, url: '/_next/static/chunks/2282.6b667f9b99a4b228.js' },
@@ -1900,7 +1900,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-15dae2c6e0724a24.js' },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/configuracoes/page-b8a6debd0a835928.js',
+          url: '/_next/static/chunks/app/pt/app/configuracoes/page-8cb6a6bcb4e2d096.js',
         },
         {
           revision: null,
@@ -1954,7 +1954,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/chunks/npm.dompurify-a5053f1df03e1869.js' },
         { revision: null, url: '/_next/static/chunks/npm.floating-ui-aea74354215c897a.js' },
         { revision: null, url: '/_next/static/chunks/npm.framer-motion-ee12b262ca6db04d.js' },
-        { revision: null, url: '/_next/static/chunks/npm.lucide-react-2a2b4d858b3f179e.js' },
+        { revision: null, url: '/_next/static/chunks/npm.lucide-react-e992743b02448867.js' },
         {
           revision: null,
           url: '/_next/static/chunks/npm.mdast-util-from-markdown.a51383467c421e6f.js',
@@ -1986,7 +1986,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           revision: '846118c33b2c0e922d7b3a7676f81f6f',
           url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
         },
-        { revision: null, url: '/_next/static/chunks/runtime-7279df0714c4a9d2.js' },
+        { revision: null, url: '/_next/static/chunks/runtime-2c940aa4f3ec6cf8.js' },
         { revision: null, url: '/_next/static/css/081a0afca5a9bd20.css' },
         { revision: null, url: '/_next/static/css/61dd7d41de171632.css' },
         { revision: null, url: '/_next/static/css/956f96d4a383eeda.css' },

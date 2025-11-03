@@ -6,13 +6,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import {
-  LiveAnnouncerProvider,
-  useLiveAnnouncer,
-  useAnnouncementHelpers
-} from '../live-announcer'
+import { LiveAnnouncerProvider, useLiveAnnouncer, useAnnouncementHelpers } from '../live-announcer'
 
 describe('LiveAnnouncerProvider', () => {
   beforeEach(() => {
@@ -94,11 +90,7 @@ describe('LiveAnnouncerProvider', () => {
       function TestComponent() {
         const { announce } = useLiveAnnouncer()
 
-        return (
-          <button onClick={() => announce('Test message')}>
-            Announce
-          </button>
-        )
+        return <button onClick={() => announce('Test message')}>Announce</button>
       }
 
       const { container } = render(
@@ -108,7 +100,7 @@ describe('LiveAnnouncerProvider', () => {
       )
 
       const button = screen.getByText('Announce')
-      button.click()
+      fireEvent.click(button)
 
       const politeRegion = container.querySelector('[aria-live="polite"]')
       expect(politeRegion?.textContent).toContain('Test message')
@@ -119,9 +111,7 @@ describe('LiveAnnouncerProvider', () => {
         const { announce } = useLiveAnnouncer()
 
         return (
-          <button onClick={() => announce('Error message', 'assertive')}>
-            Announce Error
-          </button>
+          <button onClick={() => announce('Error message', 'assertive')}>Announce Error</button>
         )
       }
 
@@ -132,7 +122,7 @@ describe('LiveAnnouncerProvider', () => {
       )
 
       const button = screen.getByText('Announce Error')
-      button.click()
+      fireEvent.click(button)
 
       const assertiveRegion = container.querySelector('[aria-live="assertive"]')
       expect(assertiveRegion?.textContent).toContain('Error message')
@@ -144,15 +134,9 @@ describe('LiveAnnouncerProvider', () => {
 
         return (
           <div>
-            <button onClick={() => announce('Message 1')}>
-              Announce 1
-            </button>
-            <button onClick={() => announce('Message 2')}>
-              Announce 2
-            </button>
-            <button onClick={() => announce('Message 3')}>
-              Announce 3
-            </button>
+            <button onClick={() => announce('Message 1')}>Announce 1</button>
+            <button onClick={() => announce('Message 2')}>Announce 2</button>
+            <button onClick={() => announce('Message 3')}>Announce 3</button>
           </div>
         )
       }
@@ -163,9 +147,9 @@ describe('LiveAnnouncerProvider', () => {
         </LiveAnnouncerProvider>
       )
 
-      screen.getByText('Announce 1').click()
-      screen.getByText('Announce 2').click()
-      screen.getByText('Announce 3').click()
+      fireEvent.click(screen.getByText('Announce 1'))
+      fireEvent.click(screen.getByText('Announce 2'))
+      fireEvent.click(screen.getByText('Announce 3'))
 
       const politeRegion = container.querySelector('[aria-live="polite"]')
       expect(politeRegion?.textContent).toContain('Message 1')
@@ -178,12 +162,14 @@ describe('LiveAnnouncerProvider', () => {
         const { announce } = useLiveAnnouncer()
 
         return (
-          <button onClick={() => {
-            announce('Message 1')
-            announce('Message 2')
-            announce('Message 3')
-            announce('Message 4')
-          }}>
+          <button
+            onClick={() => {
+              announce('Message 1')
+              announce('Message 2')
+              announce('Message 3')
+              announce('Message 4')
+            }}
+          >
             Announce Many
           </button>
         )
@@ -195,7 +181,7 @@ describe('LiveAnnouncerProvider', () => {
         </LiveAnnouncerProvider>
       )
 
-      screen.getByText('Announce Many').click()
+      fireEvent.click(screen.getByText('Announce Many'))
 
       const politeRegion = container.querySelector('[aria-live="polite"]')
       const announcements = politeRegion?.querySelectorAll('div')
@@ -212,11 +198,7 @@ describe('LiveAnnouncerProvider', () => {
       function TestComponent() {
         const { announce } = useLiveAnnouncer()
 
-        return (
-          <button onClick={() => announce('Temporary message')}>
-            Announce
-          </button>
-        )
+        return <button onClick={() => announce('Temporary message')}>Announce</button>
       }
 
       const { container } = render(
@@ -225,20 +207,18 @@ describe('LiveAnnouncerProvider', () => {
         </LiveAnnouncerProvider>
       )
 
-      screen.getByText('Announce').click()
+      fireEvent.click(screen.getByText('Announce'))
 
-      let politeRegion = container.querySelector('[aria-live="polite"]')
+      const politeRegion = container.querySelector('[aria-live="polite"]')
       expect(politeRegion?.textContent).toContain('Temporary message')
 
       // Fast-forward past announcement lifetime
-      act(() => {
-        vi.advanceTimersByTime(1100)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1100)
       })
 
-      await waitFor(() => {
-        politeRegion = container.querySelector('[aria-live="polite"]')
-        expect(politeRegion?.textContent).not.toContain('Temporary message')
-      })
+      // Check that message was cleared
+      expect(politeRegion?.textContent).not.toContain('Temporary message')
     })
   })
 
@@ -249,15 +229,15 @@ describe('LiveAnnouncerProvider', () => {
 
         return (
           <div>
-            <button onClick={() => {
-              announce('Message 1')
-              announce('Message 2', 'assertive')
-            }}>
+            <button
+              onClick={() => {
+                announce('Message 1')
+                announce('Message 2', 'assertive')
+              }}
+            >
               Announce
             </button>
-            <button onClick={clear}>
-              Clear
-            </button>
+            <button onClick={clear}>Clear</button>
           </div>
         )
       }
@@ -268,7 +248,7 @@ describe('LiveAnnouncerProvider', () => {
         </LiveAnnouncerProvider>
       )
 
-      screen.getByText('Announce').click()
+      fireEvent.click(screen.getByText('Announce'))
 
       let politeRegion = container.querySelector('[aria-live="polite"]')
       let assertiveRegion = container.querySelector('[aria-live="assertive"]')
@@ -276,7 +256,7 @@ describe('LiveAnnouncerProvider', () => {
       expect(politeRegion?.textContent).toContain('Message 1')
       expect(assertiveRegion?.textContent).toContain('Message 2')
 
-      screen.getByText('Clear').click()
+      fireEvent.click(screen.getByText('Clear'))
 
       politeRegion = container.querySelector('[aria-live="polite"]')
       assertiveRegion = container.querySelector('[aria-live="assertive"]')
@@ -306,11 +286,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceLoading } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceLoading('data')}>
-          Load Data
-        </button>
-      )
+      return <button onClick={() => announceLoading('data')}>Load Data</button>
     }
 
     const { container } = render(
@@ -319,7 +295,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Load Data').click()
+    fireEvent.click(screen.getByText('Load Data'))
 
     const politeRegion = container.querySelector('[aria-live="polite"]')
     expect(politeRegion?.textContent).toContain('Loading data...')
@@ -329,11 +305,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceSuccess } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceSuccess('Data upload')}>
-          Success
-        </button>
-      )
+      return <button onClick={() => announceSuccess('Data upload')}>Success</button>
     }
 
     const { container } = render(
@@ -342,7 +314,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Success').click()
+    fireEvent.click(screen.getByText('Success'))
 
     const politeRegion = container.querySelector('[aria-live="polite"]')
     expect(politeRegion?.textContent).toContain('Data upload completed successfully')
@@ -352,11 +324,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceError } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceError('Network timeout')}>
-          Error
-        </button>
-      )
+      return <button onClick={() => announceError('Network timeout')}>Error</button>
     }
 
     const { container } = render(
@@ -365,7 +333,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Error').click()
+    fireEvent.click(screen.getByText('Error'))
 
     const assertiveRegion = container.querySelector('[aria-live="assertive"]')
     expect(assertiveRegion?.textContent).toContain('Error: Network timeout')
@@ -375,11 +343,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceNavigation } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceNavigation('Dashboard')}>
-          Navigate
-        </button>
-      )
+      return <button onClick={() => announceNavigation('Dashboard')}>Navigate</button>
     }
 
     const { container } = render(
@@ -388,7 +352,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Navigate').click()
+    fireEvent.click(screen.getByText('Navigate'))
 
     const politeRegion = container.querySelector('[aria-live="polite"]')
     expect(politeRegion?.textContent).toContain('Navigated to Dashboard')
@@ -398,11 +362,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceCount } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceCount(1, 'result')}>
-          Count
-        </button>
-      )
+      return <button onClick={() => announceCount(1, 'result')}>Count</button>
     }
 
     const { container } = render(
@@ -411,7 +371,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Count').click()
+    fireEvent.click(screen.getByText('Count'))
 
     const politeRegion = container.querySelector('[aria-live="polite"]')
     expect(politeRegion?.textContent).toContain('1 result found')
@@ -421,11 +381,7 @@ describe('useAnnouncementHelpers', () => {
     function TestComponent() {
       const { announceCount } = useAnnouncementHelpers()
 
-      return (
-        <button onClick={() => announceCount(5, 'result')}>
-          Count
-        </button>
-      )
+      return <button onClick={() => announceCount(5, 'result')}>Count</button>
     }
 
     const { container } = render(
@@ -434,7 +390,7 @@ describe('useAnnouncementHelpers', () => {
       </LiveAnnouncerProvider>
     )
 
-    screen.getByText('Count').click()
+    fireEvent.click(screen.getByText('Count'))
 
     const politeRegion = container.querySelector('[aria-live="polite"]')
     expect(politeRegion?.textContent).toContain('5 results found')

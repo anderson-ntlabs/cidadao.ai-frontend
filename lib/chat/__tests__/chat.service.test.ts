@@ -35,6 +35,9 @@ describe('ChatService', () => {
   let fallbackAdapter: FallbackAdapter
 
   beforeEach(() => {
+    // Clear all mocks
+    vi.clearAllMocks()
+
     primaryAdapter = new PrimaryAdapter()
     fallbackAdapter = new FallbackAdapter()
     chatService = new ChatService({
@@ -42,6 +45,9 @@ describe('ChatService', () => {
       fallbackAdapter,
       maxRetries: 1, // Reduce retries for predictable test behavior
     })
+
+    // Clear cache between tests
+    chatService.clearCache()
   })
 
   describe('sendMessage', () => {
@@ -142,6 +148,13 @@ describe('ChatService', () => {
         },
       }
 
+      // Create a custom service with maxRetries: 2 for this test
+      const retryService = new ChatService({
+        primaryAdapter,
+        fallbackAdapter,
+        maxRetries: 2,
+      })
+
       // Mock to fail once then succeed
       vi.spyOn(primaryAdapter, 'send')
         .mockResolvedValueOnce(failureResponse)
@@ -150,7 +163,7 @@ describe('ChatService', () => {
       // Reduce retry delay for testing
       vi.useFakeTimers()
 
-      const responsePromise = chatService.sendMessage(request)
+      const responsePromise = retryService.sendMessage(request)
 
       // Advance timers to trigger retry
       await vi.advanceTimersByTimeAsync(2000)
@@ -233,16 +246,21 @@ describe('ChatService', () => {
 
       vi.spyOn(primaryAdapter, 'send').mockResolvedValue(response)
 
+      // Use fake timers for consistent testing
+      vi.useFakeTimers()
+
       // First call - cache it
       await customChatService.sendMessage(request)
       expect(primaryAdapter.send).toHaveBeenCalledTimes(1)
 
-      // Wait for cache to expire
-      await new Promise((resolve) => setTimeout(resolve, 1100))
+      // Advance time past TTL
+      vi.advanceTimersByTime(1100)
 
       // Second call - should hit adapter again
       await customChatService.sendMessage(request)
       expect(primaryAdapter.send).toHaveBeenCalledTimes(2)
+
+      vi.useRealTimers()
     })
 
     it('should not cache failed responses', async () => {

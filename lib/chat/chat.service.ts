@@ -35,6 +35,7 @@ export class ChatService {
    */
   async sendMessage(request: ChatRequest): Promise<ChatResponse> {
     const startTime = Date.now()
+    let usedAdapter: 'primary' | 'fallback' | 'cache' | 'none' = 'none'
 
     // Check cache first
     if (this.cacheEnabled) {
@@ -49,10 +50,18 @@ export class ChatService {
     // Try primary adapter
     let response = await this.tryAdapter(this.primaryAdapter, request, 'primary')
 
+    if (response.success) {
+      usedAdapter = 'primary'
+    }
+
     // Fallback if primary fails
     if (!response.success && this.fallbackAdapter) {
       logger.warn('Primary adapter failed, using fallback')
       response = await this.tryAdapter(this.fallbackAdapter, request, 'fallback')
+
+      if (response.success) {
+        usedAdapter = 'fallback'
+      }
     }
 
     // Cache successful responses
@@ -64,11 +73,7 @@ export class ChatService {
     const duration = Date.now() - startTime
     chatTelemetry.recordMessage({
       success: response.success,
-      adapter: response.success
-        ? response === (await this.tryAdapter(this.primaryAdapter, request, 'primary'))
-          ? 'primary'
-          : 'fallback'
-        : 'none',
+      adapter: usedAdapter,
       duration,
       error: response.error?.code,
     })
