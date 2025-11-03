@@ -10,6 +10,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Folder } from 'lucide-react'
 import { useAuth } from '@/hooks/use-supabase-auth'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('PTPage')
 
 export default function PTPage() {
   const t = getTranslations('pt')
@@ -18,7 +21,7 @@ export default function PTPage() {
 
   // Debug logging
   useEffect(() => {
-    console.log('[PT Page] State:', {
+    logger.debug('Page state', {
       isAuthenticated,
       isLoading,
       timestamp: new Date().toISOString(),
@@ -28,7 +31,7 @@ export default function PTPage() {
   // Redirect authenticated users directly to app
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('[PT Page] Redirecting authenticated user to /pt/app')
+      logger.info('Redirecting authenticated user to /pt/app')
       router.replace('/pt/app')
     }
   }, [isAuthenticated, isLoading, router])
@@ -44,17 +47,17 @@ export default function PTPage() {
 
   // Show loading screen while checking authentication
   if (isLoading) {
-    console.log('[PT Page] Rendering loading screen (isLoading = true)')
+    logger.debug('Rendering loading screen (isLoading = true)')
     return <LoadingScreen />
   }
 
   // If authenticated, show loading screen while redirecting
   if (isAuthenticated) {
-    console.log('[PT Page] Rendering loading screen (isAuthenticated = true)')
+    logger.debug('Rendering loading screen (isAuthenticated = true)')
     return <LoadingScreen />
   }
 
-  console.log('[PT Page] Rendering landing page content')
+  logger.debug('Rendering landing page content')
 
   return (
     <div className="relative">

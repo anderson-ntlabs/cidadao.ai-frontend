@@ -11,6 +11,9 @@ import type { NavigationItem } from './navigation'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { VLibrasWidget } from './a11y/vlibras-widget'
 import { MobileNavV2 } from './mobile-nav'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('AuthLayout')
 
 interface AuthLayoutV2Props {
   children: React.ReactNode
@@ -89,19 +92,15 @@ export function AuthLayoutV2({
       const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
 
       if (oauthInProgress) {
-        console.log(
-          '[AuthLayout] OAuth in progress (cookie detected), giving session time to establish...'
-        )
+        logger.debug('OAuth in progress (cookie detected), giving session time to establish...')
         // Give the session 3 seconds to establish before redirecting
         const timer = setTimeout(() => {
-          console.log('[AuthLayout] OAuth timeout reached')
+          logger.debug('OAuth timeout reached')
           // Clear the OAuth cookie
           document.cookie = 'oauth_in_progress=; path=/; max-age=0'
           // If still not authenticated, redirect to login
           if (!isAuthenticated) {
-            console.log(
-              '[AuthLayout] Still not authenticated after OAuth timeout, redirecting to login'
-            )
+            logger.info('Still not authenticated after OAuth timeout, redirecting to login')
             localStorage.setItem('redirectAfterLogin', pathname)
             router.push('/pt/login')
           }
@@ -111,7 +110,7 @@ export function AuthLayoutV2({
       }
 
       // Normal redirect to login for unauthenticated users
-      console.log('[AuthLayout] Not authenticated and no OAuth in progress, redirecting to login')
+      logger.info('Not authenticated and no OAuth in progress, redirecting to login')
       // Save the URL the user was trying to access for redirect after login
       localStorage.setItem('redirectAfterLogin', pathname)
       // Sistema autenticado está sempre em /pt (sem /en)
@@ -119,7 +118,7 @@ export function AuthLayoutV2({
     } else if (isAuthenticated) {
       // Clear OAuth cookie when successfully authenticated
       document.cookie = 'oauth_in_progress=; path=/; max-age=0'
-      console.log('[AuthLayout] User authenticated, cleared OAuth cookie')
+      logger.debug('User authenticated, cleared OAuth cookie')
     }
   }, [isLoading, isAuthenticated, router, pathname])
 

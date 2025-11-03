@@ -19,6 +19,9 @@ import {
 } from '@/lib/edge/request-validator'
 import { detectRegion, getBackendUrlForRegion } from '@/lib/edge/geo-detector'
 import { getCachedChat, cacheChat } from '@/lib/cache/multi-layer-cache.service'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('EdgeChat')
 
 // Enable edge runtime
 export const runtime = 'edge'
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Step 3: Detect user's geographic region
     const geoLocation = detectRegion(request)
 
-    console.log('[Edge Chat] Region detected:', geoLocation.region, geoLocation.country)
+    logger.info('Region detected', { region: geoLocation.region, country: geoLocation.country })
 
     // Step 4: Validate request body
     const bodyValidation = await validateRequestBody(request)
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (cachedResponse) {
       const totalLatency = Date.now() - startTime
 
-      console.log(`[Edge Chat] Cache hit! Latency: ${totalLatency}ms`)
+      logger.info('Cache hit', { latency: totalLatency })
 
       return NextResponse.json(
         {
@@ -144,7 +147,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const totalLatency = Date.now() - startTime
 
-    console.log(`[Edge Chat] Total latency: ${totalLatency}ms`)
+    logger.info('Total latency', { latency: totalLatency })
 
     // Cache the response for future requests
     if (responseData.response) {
@@ -181,7 +184,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Internal server error'
 
-    console.error('[Edge Chat] Error:', errorMessage)
+    logger.error('Error processing request', error)
 
     return NextResponse.json(
       {

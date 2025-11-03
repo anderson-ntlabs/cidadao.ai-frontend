@@ -6,6 +6,9 @@ import { createPortal } from 'react-dom'
 import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('GuidedTour')
 
 interface TourStep {
   target: string // CSS selector
@@ -22,37 +25,40 @@ const tourSteps: TourStep[] = [
   {
     target: '[data-tour="dashboard-overview"]',
     title: 'Visão Geral do Dashboard',
-    content: 'Aqui você encontra as métricas principais do sistema, incluindo investigações ativas e anomalias detectadas.',
-    placement: 'bottom'
+    content:
+      'Aqui você encontra as métricas principais do sistema, incluindo investigações ativas e anomalias detectadas.',
+    placement: 'bottom',
   },
   {
     target: '[data-tour="agents-section"]',
     title: 'Agentes de IA',
-    content: 'Nossos 17 agentes especializados trabalham 24/7 analisando dados públicos em busca de irregularidades.',
-    placement: 'left'
+    content:
+      'Nossos 17 agentes especializados trabalham 24/7 analisando dados públicos em busca de irregularidades.',
+    placement: 'left',
   },
   {
     target: '[data-tour="chat-button"]',
     title: 'Converse com os Agentes',
-    content: 'Faça perguntas sobre transparência pública e receba análises detalhadas dos nossos agentes de IA.',
+    content:
+      'Faça perguntas sobre transparência pública e receba análises detalhadas dos nossos agentes de IA.',
     placement: 'left',
     action: {
       label: 'Abrir Chat',
-      onClick: () => console.log('Open chat')
-    }
+      onClick: () => logger.info('Open chat action triggered'),
+    },
   },
   {
     target: '[data-tour="export-button"]',
     title: 'Exporte Relatórios',
     content: 'Baixe análises completas em PDF ou CSV para compartilhar ou analisar offline.',
-    placement: 'top'
+    placement: 'top',
   },
   {
     target: '[data-tour="notifications"]',
     title: 'Notificações em Tempo Real',
     content: 'Receba alertas instantâneos sobre novas anomalias e conclusões de investigações.',
-    placement: 'bottom'
-  }
+    placement: 'bottom',
+  },
 ]
 
 interface GuidedTourProps {
@@ -98,7 +104,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     const calculatePosition = () => {
       const targetRect = targetElement.getBoundingClientRect()
       const tooltipRect = tooltipRef.current!.getBoundingClientRect()
-      
+
       let top = 0
       let left = 0
 
@@ -143,7 +149,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     if (targetElement) {
       targetElement.classList.remove('tour-highlight')
     }
-    
+
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
@@ -155,7 +161,7 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
     if (targetElement) {
       targetElement.classList.remove('tour-highlight')
     }
-    
+
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
     }
@@ -173,62 +179,56 @@ export function GuidedTour({ isOpen, onClose }: GuidedTourProps) {
 
   return createPortal(
     <>
-      <div 
-        className="fixed inset-0 bg-black/50 z-[9998]"
-        onClick={handleClose}
-      />
-      
+      <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={handleClose} />
+
       {targetElement && (
         <div
           ref={tooltipRef}
           className="fixed z-[10000] bg-card border shadow-xl rounded-lg p-6 max-w-sm animate-scale-in"
           style={{ top: position.top, left: position.left }}
         >
-            <button
-              onClick={handleClose}
-              className="absolute top-2 right-2 p-1 rounded-md hover:bg-muted"
+          <button
+            onClick={handleClose}
+            className="absolute top-2 right-2 p-1 rounded-md hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+          <p className="text-sm text-muted-foreground mb-4">{step.content}</p>
+
+          {step.action && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={step.action.onClick}
+              className="mb-4 w-full"
             >
-              <X className="h-4 w-4" />
-            </button>
+              {step.action.label}
+            </Button>
+          )}
 
-            <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{step.content}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {currentStep + 1} de {tourSteps.length}
+            </span>
 
-            {step.action && (
+            <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={step.action.onClick}
-                className="mb-4 w-full"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
               >
-                {step.action.label}
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-            )}
-
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
-                {currentStep + 1} de {tourSteps.length}
-              </span>
-              
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={handlePrevious}
-                  disabled={currentStep === 0}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleNext}
-                >
-                  {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Próximo'}
-                  {currentStep < tourSteps.length - 1 && <ChevronRight className="ml-1 h-4 w-4" />}
-                </Button>
-              </div>
+              <Button size="sm" onClick={handleNext}>
+                {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Próximo'}
+                {currentStep < tourSteps.length - 1 && <ChevronRight className="ml-1 h-4 w-4" />}
+              </Button>
             </div>
           </div>
+        </div>
       )}
     </>,
     document.body

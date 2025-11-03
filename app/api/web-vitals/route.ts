@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('WebVitalsAPI')
 
 export async function POST(request: NextRequest) {
   try {
@@ -6,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     // In development, log to console
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Web Vitals API]', body)
+      logger.debug('Web Vitals metric received', body)
     }
 
     // In production, you would send this to your analytics service
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[Web Vitals API Error]', error)
+    logger.error('Failed to process metrics', error)
     return NextResponse.json({ error: 'Failed to process metrics' }, { status: 500 })
   }
 }

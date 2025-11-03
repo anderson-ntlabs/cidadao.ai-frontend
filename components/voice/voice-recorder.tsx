@@ -16,6 +16,9 @@ import { Mic, MicOff, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { voiceManager } from '@/lib/services/voice-manager.service'
 import { toast } from '@/hooks/use-toast'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('VoiceRecorder')
 
 export interface VoiceRecorderProps {
   onTranscript: (text: string) => void
@@ -44,7 +47,7 @@ export function VoiceRecorder({
   // Don't check permission on mount - just enable button
   // Permission will be requested when user clicks
   useEffect(() => {
-    console.log('[VoiceRecorder] Component mounted, enabling button (will request permission on click)')
+    logger.info('Component mounted, enabling button (will request permission on click)')
     setHasPermission(true)
   }, [])
 
@@ -102,7 +105,7 @@ export function VoiceRecorder({
 
       toast.info('Gravando', 'Fale sua mensagem...')
     } catch (error: any) {
-      console.error('[VoiceRecorder] Failed to start recording:', error)
+      logger.error('Failed to start recording', error)
 
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         toast.error(
@@ -111,10 +114,7 @@ export function VoiceRecorder({
         )
         setHasPermission(false)
       } else if (error.name === 'NotFoundError') {
-        toast.error(
-          'Microfone Não Encontrado',
-          'Nenhum microfone foi detectado no seu dispositivo'
-        )
+        toast.error('Microfone Não Encontrado', 'Nenhum microfone foi detectado no seu dispositivo')
       } else {
         toast.error('Erro', 'Não foi possível acessar o microfone')
       }
@@ -142,15 +142,12 @@ export function VoiceRecorder({
 
       if (result.transcript && result.transcript.trim().length > 0) {
         onTranscript(result.transcript)
-        toast.success(
-          'Transcrição Completa',
-          `Confiança: ${Math.round(result.confidence * 100)}%`
-        )
+        toast.success('Transcrição Completa', `Confiança: ${Math.round(result.confidence * 100)}%`)
       } else {
         toast.warning('Nenhuma Fala Detectada', 'Tente novamente')
       }
     } catch (error) {
-      console.error('Transcription error:', error)
+      logger.error('Transcription error', error)
       toast.error('Erro na Transcrição', 'Não foi possível processar o áudio')
     } finally {
       setIsProcessing(false)
@@ -197,18 +194,18 @@ export function VoiceRecorder({
 
   // Debug logging
   useEffect(() => {
-    console.log('[VoiceRecorder] State:', {
+    logger.debug('State', {
       disabled,
       hasPermission,
       isProcessing,
       isDisabled,
-      isRecording
+      isRecording,
     })
-    console.log('[VoiceRecorder] Button disabled because:', {
+    logger.debug('Button disabled because', {
       disabledProp: disabled,
       noPermission: hasPermission === false,
       processing: isProcessing,
-      finalDecision: isDisabled
+      finalDecision: isDisabled,
     })
   }, [disabled, hasPermission, isProcessing, isDisabled, isRecording])
 
@@ -231,14 +228,10 @@ export function VoiceRecorder({
           hasPermission === false
             ? 'Permissão do microfone negada'
             : isRecording
-            ? 'Parar gravação'
-            : 'Gravar mensagem de voz'
+              ? 'Parar gravação'
+              : 'Gravar mensagem de voz'
         }
-        aria-label={
-          isRecording
-            ? 'Parar gravação de áudio'
-            : 'Iniciar gravação de áudio'
-        }
+        aria-label={isRecording ? 'Parar gravação de áudio' : 'Iniciar gravação de áudio'}
       >
         {isProcessing ? (
           <Loader2
@@ -262,8 +255,8 @@ export function VoiceRecorder({
               variant === 'primary'
                 ? 'text-white'
                 : hasPermission === false
-                ? 'text-gray-400'
-                : 'text-gray-600 dark:text-gray-400'
+                  ? 'text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400'
             )}
           />
         )}
@@ -282,7 +275,7 @@ export function VoiceRecorder({
                   style={{
                     height: `${20 + Math.random() * 80}%`,
                     animationDelay: `${i * 0.1}s`,
-                    animationDuration: `${0.5 + Math.random() * 0.5}s`
+                    animationDuration: `${0.5 + Math.random() * 0.5}s`,
                   }}
                 />
               ))}
@@ -301,9 +294,18 @@ export function VoiceRecorder({
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span
+                className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"
+                style={{ animationDelay: '0ms' }}
+              />
+              <span
+                className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"
+                style={{ animationDelay: '150ms' }}
+              />
+              <span
+                className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"
+                style={{ animationDelay: '300ms' }}
+              />
             </div>
             <span className="font-medium">Transcrevendo</span>
           </div>

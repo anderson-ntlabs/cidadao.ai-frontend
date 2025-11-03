@@ -1,15 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('OAuthCallback')
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') ?? '/pt/app'
 
-  console.log('[OAuth Callback] Request URL:', requestUrl.href)
-  console.log('[OAuth Callback] Code present:', !!code)
-  console.log('[OAuth Callback] Next parameter:', next)
+  logger.info('OAuth callback received', {
+    hasCode: !!code,
+    nextUrl: next,
+    requestUrl: requestUrl.href,
+  })
 
   if (code) {
     try {
@@ -31,7 +36,7 @@ export async function GET(request: Request) {
                   cookieStore.set(name, value, options)
                 })
               } catch (error) {
-                console.error('OAuth callback cookie error:', error)
+                logger.error('OAuth callback cookie error', error)
               }
             },
           },
@@ -41,14 +46,16 @@ export async function GET(request: Request) {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
       if (error) {
-        console.error('[OAuth Callback] Exchange error:', error.message)
-        return NextResponse.redirect(`${requestUrl.origin}/auth/error?message=${encodeURIComponent(error.message)}`)
+        logger.error('Exchange error', { message: error.message })
+        return NextResponse.redirect(
+          `${requestUrl.origin}/auth/error?message=${encodeURIComponent(error.message)}`
+        )
       }
 
-      console.log('[OAuth Callback] Session created successfully:', {
+      logger.info('Session created successfully', {
         userId: data.session?.user.id,
         email: data.session?.user.email,
-        expiresAt: data.session?.expires_at
+        expiresAt: data.session?.expires_at,
       })
 
       // Determine correct redirect URL
@@ -61,7 +68,7 @@ export async function GET(request: Request) {
           ? `https://${forwardedHost}${next}`
           : `${requestUrl.origin}${next}`
 
-      console.log('[OAuth Callback] Redirecting to:', redirectUrl)
+      logger.info('Redirecting to', { url: redirectUrl })
 
       // Create response with redirect
       const response = NextResponse.redirect(redirectUrl)
@@ -72,16 +79,16 @@ export async function GET(request: Request) {
         path: '/',
         maxAge: 10, // 10 seconds timeout
         httpOnly: false, // Allow client-side access
-        sameSite: 'lax'
+        sameSite: 'lax',
       })
 
       return response
     } catch (error) {
-      console.error('Unexpected OAuth callback error:', error)
+      logger.error('Unexpected OAuth callback error', error)
       return NextResponse.redirect(`${requestUrl.origin}/auth/error?message=Unexpected error`)
     }
   }
 
-  console.error('OAuth callback missing code parameter')
+  logger.error('OAuth callback missing code parameter')
   return NextResponse.redirect(`${requestUrl.origin}/auth/error?message=No authorization code`)
 }
