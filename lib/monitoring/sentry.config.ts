@@ -4,23 +4,24 @@
  * Error tracking and performance monitoring with Sentry
  */
 
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs'
+import { logger } from '@/lib/logger'
 
 export interface SentryConfig {
-  dsn?: string;
-  environment: string;
-  enabled: boolean;
-  tracesSampleRate: number;
-  replaysSessionSampleRate: number;
-  replaysOnErrorSampleRate: number;
+  dsn?: string
+  environment: string
+  enabled: boolean
+  tracesSampleRate: number
+  replaysSessionSampleRate: number
+  replaysOnErrorSampleRate: number
 }
 
 /**
  * Get Sentry configuration
  */
 export function getSentryConfig(): SentryConfig {
-  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
-  const environment = process.env.NODE_ENV || 'development';
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN
+  const environment = process.env.NODE_ENV || 'development'
 
   return {
     dsn,
@@ -29,18 +30,20 @@ export function getSentryConfig(): SentryConfig {
     tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-  };
+  }
 }
 
 /**
  * Initialize Sentry
  */
 export function initSentry(): void {
-  const config = getSentryConfig();
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    console.log('[Sentry] Disabled - no DSN configured or not in production');
-    return;
+    logger.info('Sentry disabled - no DSN configured or not in production', {
+      context: 'SentryConfig',
+    })
+    return
   }
 
   try {
@@ -62,60 +65,57 @@ export function initSentry(): void {
       beforeSend(event, hint) {
         // Don't send errors in development
         if (config.environment !== 'production') {
-          return null;
+          return null
         }
 
         // Filter out specific errors
-        const error = hint.originalException;
+        const error = hint.originalException
         if (error instanceof Error) {
           // Ignore network errors (user offline)
           if (error.message.includes('NetworkError')) {
-            return null;
+            return null
           }
 
           // Ignore cancelled requests
           if (error.message.includes('AbortError')) {
-            return null;
+            return null
           }
         }
 
-        return event;
+        return event
       },
 
       // Add user context
       beforeBreadcrumb(breadcrumb) {
         // Filter out sensitive data from breadcrumbs
         if (breadcrumb.category === 'console') {
-          return null;
+          return null
         }
 
-        return breadcrumb;
+        return breadcrumb
       },
-    });
+    })
 
-    console.log('[Sentry] Initialized successfully');
+    logger.info('Sentry initialized successfully', { context: 'SentryConfig' })
   } catch (error) {
-    console.error('[Sentry] Failed to initialize:', error);
+    logger.error('Failed to initialize Sentry', error, { context: 'SentryConfig' })
   }
 }
 
 /**
  * Capture exception with context
  */
-export function captureException(
-  error: Error,
-  context?: Record<string, any>
-): void {
-  const config = getSentryConfig();
+export function captureException(error: Error, context?: Record<string, any>): void {
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    console.error('[Error]', error, context);
-    return;
+    logger.error('Error captured (Sentry disabled)', error, { context: 'SentryConfig', ...context })
+    return
   }
 
   Sentry.captureException(error, {
     contexts: context ? { custom: context } : undefined,
-  });
+  })
 }
 
 /**
@@ -126,61 +126,57 @@ export function captureMessage(
   level: Sentry.SeverityLevel = 'info',
   context?: Record<string, any>
 ): void {
-  const config = getSentryConfig();
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    console.log(`[${level}]`, message, context);
-    return;
+    // Map Sentry level to logger level
+    const logLevel = level === 'log' ? 'info' : level
+    if (logLevel in logger && typeof logger[logLevel as keyof typeof logger] === 'function') {
+      ;(logger[logLevel as 'info' | 'warn' | 'error' | 'debug'] as any)(message, { ...context })
+    }
+    return
   }
 
   Sentry.captureMessage(message, {
     level,
     contexts: context ? { custom: context } : undefined,
-  });
+  })
 }
 
 /**
  * Set user context
  */
-export function setUser(user: {
-  id: string;
-  email?: string;
-  username?: string;
-}): void {
-  const config = getSentryConfig();
+export function setUser(user: { id: string; email?: string; username?: string }): void {
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    return;
+    return
   }
 
-  Sentry.setUser(user);
+  Sentry.setUser(user)
 }
 
 /**
  * Clear user context
  */
 export function clearUser(): void {
-  const config = getSentryConfig();
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    return;
+    return
   }
 
-  Sentry.setUser(null);
+  Sentry.setUser(null)
 }
 
 /**
  * Add breadcrumb
  */
-export function addBreadcrumb(
-  message: string,
-  category: string,
-  data?: Record<string, any>
-): void {
-  const config = getSentryConfig();
+export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    return;
+    return
   }
 
   Sentry.addBreadcrumb({
@@ -188,23 +184,19 @@ export function addBreadcrumb(
     category,
     data,
     level: 'info',
-  });
+  })
 }
 
 /**
  * Start span for performance monitoring
  * Note: startTransaction is deprecated in Sentry v8, use startSpan instead
  */
-export function trackPerformance(
-  name: string,
-  op: string,
-  callback: () => void
-): void {
-  const config = getSentryConfig();
+export function trackPerformance(name: string, op: string, callback: () => void): void {
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    callback();
-    return;
+    callback()
+    return
   }
 
   // Use addBreadcrumb for tracking instead of deprecated startTransaction
@@ -212,19 +204,19 @@ export function trackPerformance(
     message: `${op}: ${name}`,
     level: 'info',
     category: 'performance',
-  });
+  })
 
-  callback();
+  callback()
 }
 
 /**
  * Track page load performance
  */
 export function trackPageLoad(pageName: string): void {
-  const config = getSentryConfig();
+  const config = getSentryConfig()
 
   if (!config.enabled) {
-    return;
+    return
   }
 
   // Track page load via breadcrumb
@@ -232,5 +224,5 @@ export function trackPageLoad(pageName: string): void {
     message: `Page loaded: ${pageName}`,
     level: 'info',
     category: 'navigation',
-  });
+  })
 }

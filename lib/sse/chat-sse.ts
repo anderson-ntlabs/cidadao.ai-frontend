@@ -1,6 +1,7 @@
-import { API_BASE_URL } from '@/lib/api/client';
-import type { ChatRequest, ChatResponse } from '@/types/chat';
-import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry';
+import { API_BASE_URL } from '@/lib/api/client'
+import type { ChatRequest, ChatResponse } from '@/types/chat'
+import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry'
+import { logger } from '@/lib/logger'
 
 /**
  * SSE (Server-Sent Events) client for chat streaming
@@ -24,35 +25,35 @@ import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telem
  */
 
 export interface SSEConfig {
-  sessionId: string;
-  endpoint?: string; // Default: /api/v1/chat/stream
-  reconnect?: boolean;
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
+  sessionId: string
+  endpoint?: string // Default: /api/v1/chat/stream
+  reconnect?: boolean
+  reconnectInterval?: number
+  maxReconnectAttempts?: number
 }
 
 export interface SSEHandlers {
-  onMessage?: (chunk: string) => void;
-  onComplete?: (response: ChatResponse) => void;
-  onError?: (error: Error) => void;
-  onConnectionStatus?: (status: 'connecting' | 'connected' | 'disconnected' | 'error') => void;
+  onMessage?: (chunk: string) => void
+  onComplete?: (response: ChatResponse) => void
+  onError?: (error: Error) => void
+  onConnectionStatus?: (status: 'connecting' | 'connected' | 'disconnected' | 'error') => void
 }
 
 interface SSEStreamChunk {
-  type: 'chunk' | 'complete' | 'error';
-  data: any;
-  timestamp?: string;
+  type: 'chunk' | 'complete' | 'error'
+  data: any
+  timestamp?: string
 }
 
 export class ChatSSE {
-  private eventSource: EventSource | null = null;
-  private config: Required<SSEConfig>;
-  private handlers: SSEHandlers;
-  private reconnectAttempts = 0;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
-  private accumulatedMessage: string = '';
-  private currentResponse: Partial<ChatResponse> | null = null;
-  private abortController: AbortController | null = null;
+  private eventSource: EventSource | null = null
+  private config: Required<SSEConfig>
+  private handlers: SSEHandlers
+  private reconnectAttempts = 0
+  private reconnectTimeout: NodeJS.Timeout | null = null
+  private accumulatedMessage: string = ''
+  private currentResponse: Partial<ChatResponse> | null = null
+  private abortController: AbortController | null = null
 
   constructor(config: SSEConfig, handlers: SSEHandlers) {
     this.config = {
@@ -61,46 +62,46 @@ export class ChatSSE {
       reconnectInterval: 3000,
       maxReconnectAttempts: 5,
       ...config,
-    };
-    this.handlers = handlers;
+    }
+    this.handlers = handlers
   }
 
   /**
    * Send a chat message and start SSE streaming
    */
   async sendMessage(message: string, context?: Record<string, any>): Promise<void> {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     // Reset state
-    this.accumulatedMessage = '';
-    this.currentResponse = null;
-    this.reconnectAttempts = 0;
+    this.accumulatedMessage = ''
+    this.currentResponse = null
+    this.reconnectAttempts = 0
 
     // Track message
-    trackChatMessage(this.config.sessionId, message, 'sse');
+    trackChatMessage(this.config.sessionId, message, 'sse')
 
     // Prepare request payload
     const payload: ChatRequest = {
       message,
       session_id: this.config.sessionId,
       context,
-    };
+    }
 
     try {
       // Build SSE URL with POST data as query params (SSE is GET-only)
       // Alternative: Use POST with fetch + ReadableStream
-      await this.streamWithFetch(payload, startTime);
+      await this.streamWithFetch(payload, startTime)
     } catch (error) {
-      const duration = Date.now() - startTime;
-      const err = error as Error;
+      const duration = Date.now() - startTime
+      const err = error as Error
 
-      trackChatError(this.config.sessionId, err);
-      this.handlers.onError?.(err);
-      this.updateConnectionStatus('error');
+      trackChatError(this.config.sessionId, err)
+      this.handlers.onError?.(err)
+      this.updateConnectionStatus('error')
 
       // Attempt reconnection if enabled
       if (this.config.reconnect && this.reconnectAttempts < this.config.maxReconnectAttempts) {
-        this.scheduleReconnect(() => this.sendMessage(message, context));
+        this.scheduleReconnect(() => this.sendMessage(message, context))
       }
     }
   }
@@ -110,67 +111,70 @@ export class ChatSSE {
    * This is the recommended approach for SSE with POST data
    */
   private async streamWithFetch(payload: ChatRequest, startTime: number): Promise<void> {
-    this.updateConnectionStatus('connecting');
-    this.abortController = new AbortController();
+    this.updateConnectionStatus('connecting')
+    this.abortController = new AbortController()
 
-    const url = `${API_BASE_URL}${this.config.endpoint}`;
+    const url = `${API_BASE_URL}${this.config.endpoint}`
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
+          Accept: 'text/event-stream',
         },
         body: JSON.stringify(payload),
         signal: this.abortController.signal,
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
       if (!response.body) {
-        throw new Error('Response body is null');
+        throw new Error('Response body is null')
       }
 
-      this.updateConnectionStatus('connected');
+      this.updateConnectionStatus('connected')
 
       // Read the stream
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
 
       while (true) {
-        const { done, value } = await reader.read();
+        const { done, value } = await reader.read()
 
         if (done) {
           // Stream completed
-          this.handleStreamComplete(startTime);
-          break;
+          this.handleStreamComplete(startTime)
+          break
         }
 
         // Decode chunk
-        buffer += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true })
 
         // Process complete SSE messages (separated by \n\n)
-        const messages = buffer.split('\n\n');
-        buffer = messages.pop() || ''; // Keep incomplete message in buffer
+        const messages = buffer.split('\n\n')
+        buffer = messages.pop() || '' // Keep incomplete message in buffer
 
         for (const message of messages) {
           if (message.trim()) {
-            this.processSSEMessage(message);
+            this.processSSEMessage(message)
           }
         }
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
-        console.log('[SSE] Stream aborted by user');
+        logger.info('SSE stream aborted by user', {
+          context: 'ChatSSE',
+          sessionId: this.config.sessionId,
+        })
       } else {
-        throw error;
+        throw error
       }
     } finally {
-      this.abortController = null;
+      this.abortController = null
     }
   }
 
@@ -181,18 +185,18 @@ export class ChatSSE {
   private processSSEMessage(message: string): void {
     try {
       // Extract data field from SSE format
-      const dataMatch = message.match(/^data: (.+)$/m);
-      if (!dataMatch) return;
+      const dataMatch = message.match(/^data: (.+)$/m)
+      if (!dataMatch) return
 
-      const chunk: SSEStreamChunk = JSON.parse(dataMatch[1]);
+      const chunk: SSEStreamChunk = JSON.parse(dataMatch[1])
 
       switch (chunk.type) {
         case 'chunk':
           // Streaming chunk of the response
-          const text = chunk.data.text || chunk.data.content || '';
-          this.accumulatedMessage += text;
-          this.handlers.onMessage?.(text);
-          break;
+          const text = chunk.data.text || chunk.data.content || ''
+          this.accumulatedMessage += text
+          this.handlers.onMessage?.(text)
+          break
 
         case 'complete':
           // Final response with metadata
@@ -204,15 +208,18 @@ export class ChatSSE {
             confidence: chunk.data.confidence || 0.8,
             suggested_actions: chunk.data.suggested_actions || [],
             metadata: chunk.data.metadata,
-          };
-          break;
+          }
+          break
 
         case 'error':
-          throw new Error(chunk.data.message || 'Server error during streaming');
+          throw new Error(chunk.data.message || 'Server error during streaming')
       }
     } catch (error) {
-      console.error('[SSE] Failed to process message:', error);
-      this.handlers.onError?.(error as Error);
+      logger.error('Failed to process SSE message', error, {
+        context: 'ChatSSE',
+        message: message.substring(0, 100),
+      })
+      this.handlers.onError?.(error as Error)
     }
   }
 
@@ -220,21 +227,17 @@ export class ChatSSE {
    * Handle stream completion
    */
   private handleStreamComplete(startTime: number): void {
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
 
     if (this.currentResponse) {
       // Track success
-      trackChatResponse(
-        this.currentResponse.session_id!,
-        duration,
-        false
-      );
+      trackChatResponse(this.currentResponse.session_id!, duration, false)
 
-      this.handlers.onComplete?.(this.currentResponse as ChatResponse);
+      this.handlers.onComplete?.(this.currentResponse as ChatResponse)
     }
 
-    this.updateConnectionStatus('disconnected');
-    this.reconnectAttempts = 0; // Reset on successful completion
+    this.updateConnectionStatus('disconnected')
+    this.reconnectAttempts = 0 // Reset on successful completion
   }
 
   /**
@@ -242,58 +245,67 @@ export class ChatSSE {
    */
   abort(): void {
     if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
+      this.abortController.abort()
+      this.abortController = null
     }
 
     if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
+      this.eventSource.close()
+      this.eventSource = null
     }
 
-    this.updateConnectionStatus('disconnected');
+    this.updateConnectionStatus('disconnected')
   }
 
   /**
    * Schedule reconnection attempt
    */
   private scheduleReconnect(retryFn: () => Promise<void>): void {
-    if (!this.config.reconnect) return;
+    if (!this.config.reconnect) return
 
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      console.error('[SSE] Max reconnection attempts reached');
-      this.updateConnectionStatus('error');
-      return;
+      logger.error('SSE max reconnection attempts reached', null, {
+        context: 'ChatSSE',
+        maxAttempts: this.config.maxReconnectAttempts,
+      })
+      this.updateConnectionStatus('error')
+      return
     }
 
-    this.reconnectAttempts++;
-    const delay = this.config.reconnectInterval * Math.min(this.reconnectAttempts, 3);
+    this.reconnectAttempts++
+    const delay = this.config.reconnectInterval * Math.min(this.reconnectAttempts, 3)
 
-    console.log(`[SSE] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+    logger.info('Scheduling SSE reconnection', {
+      context: 'ChatSSE',
+      attempt: this.reconnectAttempts,
+      delayMs: delay,
+    })
 
     this.reconnectTimeout = setTimeout(() => {
-      retryFn().catch(error => {
-        console.error('[SSE] Reconnection failed:', error);
-      });
-    }, delay);
+      retryFn().catch((error) => {
+        logger.error('SSE reconnection failed', error, { context: 'ChatSSE' })
+      })
+    }, delay)
   }
 
   /**
    * Update connection status and notify handler
    */
-  private updateConnectionStatus(status: 'connecting' | 'connected' | 'disconnected' | 'error'): void {
-    this.handlers.onConnectionStatus?.(status);
+  private updateConnectionStatus(
+    status: 'connecting' | 'connected' | 'disconnected' | 'error'
+  ): void {
+    this.handlers.onConnectionStatus?.(status)
   }
 
   /**
    * Clean up resources
    */
   dispose(): void {
-    this.abort();
+    this.abort()
 
     if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
+      clearTimeout(this.reconnectTimeout)
+      this.reconnectTimeout = null
     }
   }
 
@@ -301,7 +313,7 @@ export class ChatSSE {
    * Check if currently streaming
    */
   isActive(): boolean {
-    return this.abortController !== null;
+    return this.abortController !== null
   }
 }
 
@@ -322,11 +334,11 @@ export async function streamChatMessage(
       onComplete,
       onError,
     }
-  );
+  )
 
   try {
-    await sse.sendMessage(request.message, request.context);
+    await sse.sendMessage(request.message, request.context)
   } finally {
-    sse.dispose();
+    sse.dispose()
   }
 }

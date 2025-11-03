@@ -8,6 +8,7 @@
  */
 
 import { onCLS, onFCP, onFID, onINP, onLCP, onTTFB, Metric } from 'web-vitals'
+import { logger } from '@/lib/logger'
 
 interface WebVitalsReport {
   name: string
@@ -61,18 +62,18 @@ function sendToAnalytics(metric: Metric) {
 
   // Log in development
   if (process.env.NODE_ENV === 'development') {
-    const emoji = report.rating === 'good' ? '✅' : report.rating === 'needs-improvement' ? '⚠️' : '❌'
-    console.log(
-      `${emoji} Web Vital: ${report.name}`,
-      `\n  Value: ${Math.round(report.value)}ms`,
-      `\n  Rating: ${report.rating}`,
-      `\n  Delta: ${Math.round(report.delta)}ms`
-    )
+    logger.debug('Web Vitals metric captured', {
+      context: 'VitalsTracker',
+      metric: report.name,
+      value: `${Math.round(report.value)}ms`,
+      rating: report.rating,
+      delta: `${Math.round(report.delta)}ms`,
+    })
   }
 
   // Send to Sentry for correlation with errors
   if (typeof window !== 'undefined' && (window as any).Sentry) {
-    (window as any).Sentry.setMeasurement(metric.name, metric.value, 'millisecond')
+    ;(window as any).Sentry.setMeasurement(metric.name, metric.value, 'millisecond')
   }
 }
 
@@ -89,7 +90,7 @@ export function initWebVitals() {
     onLCP(sendToAnalytics)
     onTTFB(sendToAnalytics)
   } catch (err) {
-    console.error('Failed to initialize Web Vitals tracking:', err)
+    logger.error('Failed to initialize Web Vitals tracking', err, { context: 'VitalsTracker' })
   }
 }
 
@@ -113,16 +114,18 @@ export function getPerformanceSummary() {
     domProcessing: navigation?.domComplete - navigation?.domContentLoadedEventStart,
 
     // Paint Timing
-    fcp: paint.find(p => p.name === 'first-contentful-paint')?.startTime,
+    fcp: paint.find((p) => p.name === 'first-contentful-paint')?.startTime,
 
     // Resource Timing
     resources: performance.getEntriesByType('resource').length,
 
     // Memory (if available)
-    memory: (performance as any).memory ? {
-      usedJSHeapSize: Math.round((performance as any).memory.usedJSHeapSize / 1048576), // MB
-      totalJSHeapSize: Math.round((performance as any).memory.totalJSHeapSize / 1048576), // MB
-    } : null,
+    memory: (performance as any).memory
+      ? {
+          usedJSHeapSize: Math.round((performance as any).memory.usedJSHeapSize / 1048576), // MB
+          totalJSHeapSize: Math.round((performance as any).memory.totalJSHeapSize / 1048576), // MB
+        }
+      : null,
   }
 }
 
@@ -149,12 +152,16 @@ export const PerformanceMonitor = {
         const measure = performance.getEntriesByName(name, 'measure')[0]
 
         if (process.env.NODE_ENV === 'development') {
-          console.log(`⏱️ Performance: ${name} = ${Math.round(measure.duration)}ms`)
+          logger.debug('Performance measurement', {
+            context: 'VitalsTracker',
+            name,
+            duration: `${Math.round(measure.duration)}ms`,
+          })
         }
 
         return measure.duration
       } catch (err) {
-        console.error('Failed to measure performance:', err)
+        logger.error('Failed to measure performance', err, { context: 'VitalsTracker', name })
       }
     }
     return 0

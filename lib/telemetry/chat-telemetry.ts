@@ -5,6 +5,8 @@
  * Tracks chat performance, errors, and usage patterns
  */
 
+import { logger } from '@/lib/logger'
+
 export interface ChatMetrics {
   messagesSent: number
   messagesReceived: number
@@ -172,25 +174,17 @@ class ChatTelemetry {
   }
 
   /**
-   * Log event to console in development
+   * Log event to logger in development
    */
   private logEvent(event: ChatEvent): void {
     if (process.env.NODE_ENV === 'development') {
-      const emoji = {
-        message_sent: '📤',
-        message_received: '📥',
-        error: '❌',
-        retry: '🔄',
-        session_start: '🚀',
-        session_end: '🏁',
-        cache_hit: '💾',
-      }[event.type]
-
-      console.log(
-        `${emoji} [Chat Telemetry] ${event.type}`,
-        event.data || '',
-        event.duration ? `(${event.duration}ms)` : ''
-      )
+      logger.debug(`Chat telemetry event: ${event.type}`, {
+        context: 'ChatTelemetry',
+        eventType: event.type,
+        data: event.data,
+        duration: event.duration,
+        sessionId: event.sessionId,
+      })
     }
   }
 

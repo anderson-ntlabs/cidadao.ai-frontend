@@ -11,6 +11,7 @@
  */
 
 import posthog from 'posthog-js'
+import { logger } from '@/lib/logger'
 
 let isInitialized = false
 
@@ -32,7 +33,9 @@ export function initPostHog() {
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
   if (!apiKey) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn('[PostHog] API key not configured. Analytics disabled.')
+      logger.warn('PostHog API key not configured - analytics disabled', {
+        context: 'PostHogConfig',
+      })
     }
     return
   }
@@ -42,27 +45,29 @@ export function initPostHog() {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
 
       // Privacy & LGPD Compliance
-      persistence: 'localStorage',           // Use localStorage for session
-      opt_out_capturing_by_default: false,   // Start in opt-in mode
+      persistence: 'localStorage', // Use localStorage for session
+      opt_out_capturing_by_default: false, // Start in opt-in mode
 
       // Session Recording Configuration
       disable_session_recording: !hasUserConsent(), // Disabled without consent
       session_recording: {
-        maskAllInputs: true,                 // Mask all input fields
-        maskTextSelector: '.sensitive',      // Mask sensitive elements
-        recordCrossOriginIframes: false,     // Don't record iframes
+        maskAllInputs: true, // Mask all input fields
+        maskTextSelector: '.sensitive', // Mask sensitive elements
+        recordCrossOriginIframes: false, // Don't record iframes
       },
 
       // Performance & Features
-      autocapture: true,                     // Enable autocapture for web analytics
-      capture_pageview: true,                // Capture pageview events automatically
-      capture_pageleave: true,               // Track when users leave
+      autocapture: true, // Enable autocapture for web analytics
+      capture_pageview: true, // Capture pageview events automatically
+      capture_pageleave: true, // Track when users leave
 
       // Debugging
       loaded: (ph) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('[PostHog] Initialized successfully')
-          console.log('[PostHog] User consent:', hasUserConsent())
+          logger.debug('PostHog initialized successfully', {
+            context: 'PostHogConfig',
+            userConsent: hasUserConsent(),
+          })
         }
 
         // Apply current consent status immediately
@@ -72,7 +77,7 @@ export function initPostHog() {
 
     isInitialized = true
   } catch (error) {
-    console.error('[PostHog] Initialization failed:', error)
+    logger.error('PostHog initialization failed', error, { context: 'PostHogConfig' })
   }
 }
 
@@ -101,7 +106,9 @@ export function hasUserConsent(): boolean {
 export function updateConsentStatus() {
   if (!isInitialized) {
     if (process.env.NODE_ENV === 'development') {
-      console.log('[PostHog] Not initialized yet, skipping consent update')
+      logger.debug('PostHog not initialized yet - skipping consent update', {
+        context: 'PostHogConfig',
+      })
     }
     return
   }
@@ -109,7 +116,10 @@ export function updateConsentStatus() {
   const hasConsent = hasUserConsent()
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[PostHog] Updating consent status:', hasConsent ? 'ACCEPTED' : 'REJECTED')
+    logger.debug('Updating PostHog consent status', {
+      context: 'PostHogConfig',
+      status: hasConsent ? 'ACCEPTED' : 'REJECTED',
+    })
   }
 
   if (hasConsent) {
@@ -117,14 +127,14 @@ export function updateConsentStatus() {
     posthog.startSessionRecording()
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[PostHog] ✅ Analytics ENABLED - collecting data')
+      logger.info('PostHog analytics enabled - collecting data', { context: 'PostHogConfig' })
     }
   } else {
     posthog.opt_out_capturing()
     posthog.stopSessionRecording()
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[PostHog] ❌ Analytics DISABLED - not collecting data')
+      logger.info('PostHog analytics disabled - not collecting data', { context: 'PostHogConfig' })
     }
   }
 }
@@ -157,10 +167,10 @@ async function hashUserId(userId: string): Promise<string> {
     const data = encoder.encode(userId)
     const hashBuffer = await crypto.subtle.digest('SHA-256', data)
     const hashArray = Array.from(new Uint8Array(hashBuffer))
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
     return hashHex
   } catch (error) {
-    console.error('[PostHog] Failed to hash user ID:', error)
+    logger.error('Failed to hash user ID for PostHog', error, { context: 'PostHogConfig' })
     return userId
   }
 }
@@ -168,10 +178,7 @@ async function hashUserId(userId: string): Promise<string> {
 /**
  * Track custom event
  */
-export function trackEvent(
-  eventName: string,
-  properties?: Record<string, any>
-) {
+export function trackEvent(eventName: string, properties?: Record<string, any>) {
   if (!isInitialized || !hasUserConsent()) return
 
   posthog.capture(eventName, {

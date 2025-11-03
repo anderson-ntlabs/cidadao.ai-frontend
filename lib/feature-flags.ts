@@ -3,6 +3,8 @@
  * Sprint 1 - Épico 1.3
  */
 
+import { logger } from '@/lib/logger'
+
 export interface FeatureFlags {
   // Chat features
   chatV3Enabled: boolean
@@ -66,6 +68,9 @@ export function getEnabledFeatures(): string[] {
 
 // Debug logging for development
 if (process.env.NODE_ENV === 'development') {
-  console.log('🚩 Feature Flags:', featureFlags)
-  console.log('✅ Enabled features:', getEnabledFeatures())
+  logger.info('Feature flags initialized', {
+    context: 'FeatureFlags',
+    flags: featureFlags,
+    enabled: getEnabledFeatures(),
+  })
 }
