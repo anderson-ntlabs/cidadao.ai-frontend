@@ -7,7 +7,10 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { createLogger } from '@/lib/logger'
 import type { ChatSession, ChatMessage } from '@/types/supabase'
+
+const logger = createLogger('ChatSessionService')
 
 export class ChatSessionService {
   private supabase = createClient()
@@ -27,7 +30,7 @@ export class ChatSessionService {
       } = await this.supabase.auth.getUser()
 
       if (!user) {
-        console.warn('No authenticated user, skipping session creation')
+        logger.warn('No authenticated user, skipping session creation')
         return null
       }
 
@@ -49,6 +52,7 @@ export class ChatSessionService {
         return null
       }
 
+      logger.info('Session created', { sessionId: data.session_id, agentId: data.agent_id })
       return session
     } catch (error) {
       console.error('Session creation error:', error)
@@ -66,7 +70,7 @@ export class ChatSessionService {
       } = await this.supabase.auth.getUser()
 
       if (!user) {
-        console.warn('No authenticated user')
+        logger.warn('No authenticated user')
         return null
       }
 
@@ -82,6 +86,7 @@ export class ChatSessionService {
         return null
       }
 
+      logger.debug('Session retrieved', { sessionId, messageCount: session.messages?.length || 0 })
       return session
     } catch (error) {
       console.error('Session retrieval error:', error)
@@ -99,7 +104,7 @@ export class ChatSessionService {
       } = await this.supabase.auth.getUser()
 
       if (!user) {
-        console.warn('No authenticated user')
+        logger.warn('No authenticated user')
         return []
       }
 
@@ -115,6 +120,7 @@ export class ChatSessionService {
         return []
       }
 
+      logger.debug('User sessions retrieved', { count: sessions?.length || 0, limit, offset })
       return sessions || []
     } catch (error) {
       console.error('Sessions retrieval error:', error)
@@ -132,7 +138,7 @@ export class ChatSessionService {
       } = await this.supabase.auth.getUser()
 
       if (!user) {
-        console.warn('No authenticated user')
+        logger.warn('No authenticated user')
         return false
       }
 
@@ -150,6 +156,7 @@ export class ChatSessionService {
         return false
       }
 
+      logger.debug('Session updated', { sessionId })
       return true
     } catch (error) {
       console.error('Session update error:', error)
@@ -167,7 +174,7 @@ export class ChatSessionService {
       } = await this.supabase.auth.getUser()
 
       if (!user) {
-        console.warn('No authenticated user')
+        logger.warn('No authenticated user')
         return false
       }
 
@@ -182,6 +189,7 @@ export class ChatSessionService {
         return false
       }
 
+      logger.info('Session deleted', { sessionId })
       return true
     } catch (error) {
       console.error('Session deletion error:', error)
@@ -206,7 +214,7 @@ export class ChatSessionService {
       const session = await this.getSession(sessionId)
 
       if (!session) {
-        console.warn('Session not found')
+        logger.warn('Session not found', { sessionId })
         return false
       }
 
@@ -222,9 +230,19 @@ export class ChatSessionService {
 
       const updatedMessages = [...(session.messages || []), newMessage]
 
-      return await this.updateSession(sessionId, {
+      const success = await this.updateSession(sessionId, {
         messages: updatedMessages,
       })
+
+      if (success) {
+        logger.debug('Message added to session', {
+          sessionId,
+          role: message.role,
+          agentId: message.agent_id,
+        })
+      }
+
+      return success
     } catch (error) {
       console.error('Message addition error:', error)
       return false

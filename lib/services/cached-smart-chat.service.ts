@@ -9,12 +9,15 @@
  */
 
 import { chatService } from '@/lib/chat'
+import { createLogger } from '@/lib/logger'
 import type { ChatRequest } from '@/lib/chat/types'
 import type { ChatResponse } from '@/types/chat'
 
+const logger = createLogger('CachedSmartChat')
+
 export class CachedSmartChatService {
   async sendMessage(message: string, options: any = {}): Promise<ChatResponse> {
-    console.warn('Deprecated: CachedSmartChatService. Use chatService instead')
+    logger.warn('Deprecated service usage, redirecting to chatService')
 
     const request: ChatRequest = {
       message,

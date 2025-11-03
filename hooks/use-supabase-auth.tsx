@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import { toast } from './use-toast'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('SupabaseAuth')
 
 interface User {
   id: string
@@ -39,25 +42,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Google OAuth provides: full_name, avatar_url, email, provider_id
     // GitHub OAuth provides: user_name, avatar_url, email, preferred_username
     const metadata = supabaseUser.user_metadata || {}
-    
+
     // Get name from different possible fields
-    const name = metadata.full_name || 
-                 metadata.name || 
-                 metadata.user_name ||
-                 metadata.preferred_username ||
-                 supabaseUser.email!.split('@')[0]
-    
+    const name =
+      metadata.full_name ||
+      metadata.name ||
+      metadata.user_name ||
+      metadata.preferred_username ||
+      supabaseUser.email!.split('@')[0]
+
     // Get avatar with fallback
-    const avatar = metadata.avatar_url || 
-                   metadata.picture ||
-                   `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff`
-    
+    const avatar =
+      metadata.avatar_url ||
+      metadata.picture ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff`
+
     return {
       id: supabaseUser.id,
       email: supabaseUser.email!,
       name: name,
       role: supabaseUser.app_metadata?.role || 'user',
-      avatar: avatar
+      avatar: avatar,
     }
   }
 
@@ -65,8 +70,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        console.log('[Auth] Checking session...')
-        const { data: { session }, error } = await supabase.auth.getSession()
+        logger.debug('Checking session...')
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession()
 
         if (error) {
           console.error('[Auth] Session error:', error)
@@ -77,15 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (session?.user) {
           const user = convertSupabaseUser(session.user)
-          console.log('[Auth] Session found:', {
+          logger.info('Session found', {
             userId: user.id,
             email: user.email,
-            name: user.name
+            name: user.name,
           })
           setUser(user)
           setIsAuthenticated(true)
         } else {
-          console.log('[Auth] No session found')
+          logger.debug('No session found')
           setUser(null)
           setIsAuthenticated(false)
         }
@@ -94,24 +102,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setIsAuthenticated(false)
       } finally {
-        console.log('[Auth] Check complete, setting isLoading = false')
+        logger.debug('Check complete, setting isLoading = false')
         setIsLoading(false)
       }
     }
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.warn('[Auth] Check timeout (5s) - forcing loading state to false')
+      logger.warn('Check timeout (5s) - forcing loading state to false')
       setIsLoading(false)
     }, 5000)
 
     checkSession().finally(() => {
       clearTimeout(timeout)
-      console.log('[Auth] Session check finalized')
+      logger.debug('Session check finalized')
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(convertSupabaseUser(session.user))
         setIsAuthenticated(true)
@@ -124,91 +134,103 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [supabase])
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true)
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true)
 
-      if (error) throw error
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
 
-      if (data.user) {
-        const convertedUser = convertSupabaseUser(data.user)
-        setUser(convertedUser)
-        setIsAuthenticated(true)
-        
-        toast.success(`Bem-vindo(a), ${convertedUser.name}!`, 'Login realizado com sucesso')
+        if (error) throw error
 
-        // Handle redirect
-        const redirectUrl = localStorage.getItem('redirectAfterLogin')
-        if (redirectUrl) {
-          localStorage.removeItem('redirectAfterLogin')
-          router.push(redirectUrl)
-        } else {
-          router.push('/pt/app')
+        if (data.user) {
+          const convertedUser = convertSupabaseUser(data.user)
+          setUser(convertedUser)
+          setIsAuthenticated(true)
+
+          toast.success(`Bem-vindo(a), ${convertedUser.name}!`, 'Login realizado com sucesso')
+
+          // Handle redirect
+          const redirectUrl = localStorage.getItem('redirectAfterLogin')
+          if (redirectUrl) {
+            localStorage.removeItem('redirectAfterLogin')
+            router.push(redirectUrl)
+          } else {
+            router.push('/pt/app')
+          }
         }
+      } catch (error: any) {
+        console.error('Login error:', error)
+        toast.error('Falha no login', error.message || 'Verifique suas credenciais')
+        throw error
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error: any) {
-      console.error('Login error:', error)
-      toast.error('Falha no login', error.message || 'Verifique suas credenciais')
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase, router])
+    },
+    [supabase, router]
+  )
 
-  const signup = useCallback(async (email: string, password: string, name: string) => {
-    setIsLoading(true)
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name,
+  const signup = useCallback(
+    async (email: string, password: string, name: string) => {
+      setIsLoading(true)
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name: name,
+            },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/app`,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/pt/app`
+        })
+
+        if (error) throw error
+
+        if (data.user) {
+          toast.success(
+            'Conta criada com sucesso!',
+            'Verifique seu email para confirmar o cadastro'
+          )
         }
-      })
-
-      if (error) throw error
-
-      if (data.user) {
-        toast.success('Conta criada com sucesso!', 'Verifique seu email para confirmar o cadastro')
+      } catch (error: any) {
+        console.error('Signup error:', error)
+        toast.error('Erro ao criar conta', error.message || 'Tente novamente')
+        throw error
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error: any) {
-      console.error('Signup error:', error)
-      toast.error('Erro ao criar conta', error.message || 'Tente novamente')
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
+    },
+    [supabase]
+  )
 
-  const loginWithProvider = useCallback(async (provider: 'google' | 'github') => {
-    setIsLoading(true)
-    
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/pt/app`,
-        }
-      })
+  const loginWithProvider = useCallback(
+    async (provider: 'google' | 'github') => {
+      setIsLoading(true)
 
-      if (error) throw error
-    } catch (error: any) {
-      console.error('OAuth login error:', error)
-      toast.error('Erro no login social', error.message || 'Tente novamente')
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback?next=/pt/app`,
+          },
+        })
+
+        if (error) throw error
+      } catch (error: any) {
+        console.error('OAuth login error:', error)
+        toast.error('Erro no login social', error.message || 'Tente novamente')
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [supabase]
+  )
 
   const logout = useCallback(async () => {
     setIsLoading(true)
@@ -244,9 +266,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSession = useCallback(async () => {
     try {
-      const { data: { session }, error } = await supabase.auth.refreshSession()
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.refreshSession()
       if (error) throw error
-      
+
       if (session?.user) {
         setUser(convertSupabaseUser(session.user))
         setIsAuthenticated(true)
@@ -258,7 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, logout])
 
   return (
-    <AuthContext.Provider 
+    <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
@@ -267,7 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loginWithProvider,
         signup,
         logout,
-        refreshSession
+        refreshSession,
       }}
     >
       {children}

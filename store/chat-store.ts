@@ -13,6 +13,9 @@ import type { ChatSession as SupabaseChatSession } from '@/types/supabase'
 import { chatService, generateSessionId } from '@/lib/api/chat.service'
 import { ChatWebSocket, getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket'
 import { chatSessionService } from '@/lib/services/chat-session.service'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ChatStore')
 
 // Use chat types for the store (simpler, no user_id required)
 type ChatMessage = ChatChatMessage
@@ -179,7 +182,7 @@ export const useChatStore = create<ChatStore>()(
             session_id: sessionId,
           })
 
-          console.log('🔍 Backend response received:', response)
+          logger.debug('Backend response received', { response })
 
           if (response) {
             // Extract message content from response
@@ -188,13 +191,12 @@ export const useChatStore = create<ChatStore>()(
             const messageContent =
               response.message || responseAny.response || responseAny.content || ''
 
-            console.log('📝 Message content extracted:', messageContent)
+            logger.debug('Message content extracted', { messageContent })
 
             if (!messageContent || messageContent.trim().length === 0) {
-              console.error(
-                '⚠️ Empty message from backend! Full response:',
-                JSON.stringify(response)
-              )
+              logger.warn('Empty message from backend', {
+                fullResponse: JSON.stringify(response),
+              })
             }
 
             // Add assistant response
@@ -352,7 +354,7 @@ export const useChatStore = create<ChatStore>()(
     // WebSocket connection
     connectWebSocket: () => {
       // WebSocket not supported by current backend deployment
-      console.log('WebSocket connection skipped - not supported by backend')
+      logger.info('WebSocket connection skipped - not supported by backend')
       set({ connectionStatus: 'disconnected' })
       return
 

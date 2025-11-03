@@ -10,92 +10,97 @@
  * Updated to match Railway backend v2 structure
  */
 
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('TransparencyMapService')
+
 // Backend API structure (Railway v2)
 export interface BackendAPIDetail {
-  name: string;
-  url: string;
-  endpoints: number;
-  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error';
-  response_time_ms?: number | null;
-  error?: string | null;
+  name: string
+  url: string
+  endpoints: number
+  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error'
+  response_time_ms?: number | null
+  error?: string | null
 }
 
 export interface BackendStateData {
-  name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  apis: BackendAPIDetail[];
+  name: string
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  apis: BackendAPIDetail[]
 }
 
 export interface BackendSummaryStats {
-  total_states: number;
-  states_with_apis: number;
-  states_working: number;
-  overall_coverage_percentage: number;
-  total_apis: number;
-  total_endpoints: number;
+  total_states: number
+  states_with_apis: number
+  states_working: number
+  overall_coverage_percentage: number
+  total_apis: number
+  total_endpoints: number
 }
 
 export interface BackendCacheInfo {
-  cached: boolean;
-  last_update: string;
-  age_minutes: number;
-  note?: string;
+  cached: boolean
+  last_update: string
+  age_minutes: number
+  note?: string
 }
 
 export interface BackendTransparencyMapData {
-  last_update: string;
-  summary: BackendSummaryStats;
-  states: Record<string, BackendStateData>;
-  cache_info: BackendCacheInfo;
+  last_update: string
+  summary: BackendSummaryStats
+  states: Record<string, BackendStateData>
+  cache_info: BackendCacheInfo
 }
 
 // Frontend-friendly interface (normalized)
 export interface APIDetail {
-  id: string;
-  name: string;
-  url: string;
-  endpoints: number;
-  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error';
-  response_time_ms?: number | null;
-  error?: string | null;
+  id: string
+  name: string
+  url: string
+  endpoints: number
+  status: 'operational' | 'partial' | 'down' | 'timeout' | 'error'
+  response_time_ms?: number | null
+  error?: string | null
 }
 
 export interface StateData {
-  name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy' | 'no_api';
-  apis: APIDetail[];
-  apiCount: number;
-  endpointCount: number;
-  color: string;
+  name: string
+  status: 'healthy' | 'degraded' | 'unhealthy' | 'no_api'
+  apis: APIDetail[]
+  apiCount: number
+  endpointCount: number
+  color: string
 }
 
 export interface SummaryStats {
-  total_states: number;
-  states_with_apis: number;
-  states_working: number;
-  overall_coverage_percentage: number;
-  total_apis: number;
-  total_endpoints: number;
-  states_no_api: number;
+  total_states: number
+  states_with_apis: number
+  states_working: number
+  overall_coverage_percentage: number
+  total_apis: number
+  total_endpoints: number
+  states_no_api: number
 }
 
 export interface TransparencyMapData {
-  last_update: string;
-  cache_info: BackendCacheInfo;
-  states: Record<string, StateData>;
-  summary: SummaryStats;
+  last_update: string
+  cache_info: BackendCacheInfo
+  states: Record<string, StateData>
+  summary: SummaryStats
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app';
-const COVERAGE_MAP_ENDPOINT = '/api/v1/transparency/coverage/map';
-const CACHE_KEY = 'transparencyMapCache';
-const CACHE_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+const COVERAGE_MAP_ENDPOINT = '/api/v1/transparency/coverage/map'
+const CACHE_KEY = 'transparencyMapCache'
+const CACHE_EXPIRY_MS = 6 * 60 * 60 * 1000 // 6 hours
 
 /**
  * Normalize backend data to frontend format
  */
 function normalizeBackendData(backendData: BackendTransparencyMapData): TransparencyMapData {
-  const normalizedStates: Record<string, StateData> = {};
+  const normalizedStates: Record<string, StateData> = {}
 
   // Convert backend states to frontend format
   Object.entries(backendData.states).forEach(([stateCode, stateData]) => {
@@ -106,10 +111,10 @@ function normalizeBackendData(backendData: BackendTransparencyMapData): Transpar
       endpoints: api.endpoints,
       status: api.status,
       response_time_ms: api.response_time_ms,
-      error: api.error
-    }));
+      error: api.error,
+    }))
 
-    const totalEndpoints = apis.reduce((sum, api) => sum + api.endpoints, 0);
+    const totalEndpoints = apis.reduce((sum, api) => sum + api.endpoints, 0)
 
     normalizedStates[stateCode] = {
       name: stateData.name,
@@ -117,9 +122,9 @@ function normalizeBackendData(backendData: BackendTransparencyMapData): Transpar
       apis,
       apiCount: apis.length,
       endpointCount: totalEndpoints,
-      color: getStateColor(stateData.status)
-    };
-  });
+      color: getStateColor(stateData.status),
+    }
+  })
 
   return {
     last_update: backendData.last_update,
@@ -127,18 +132,20 @@ function normalizeBackendData(backendData: BackendTransparencyMapData): Transpar
     states: normalizedStates,
     summary: {
       ...backendData.summary,
-      states_no_api: 27 - backendData.summary.states_with_apis
-    }
-  };
+      states_no_api: 27 - backendData.summary.states_with_apis,
+    },
+  }
 }
 
 /**
  * Fetch transparency coverage map from backend
  */
 export async function fetchTransparencyMap(): Promise<TransparencyMapData> {
-  const url = `${API_BASE_URL}${COVERAGE_MAP_ENDPOINT}`;
+  const url = `${API_BASE_URL}${COVERAGE_MAP_ENDPOINT}`
 
   try {
+    logger.debug('Fetching transparency map from backend', { url })
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -146,35 +153,45 @@ export async function fetchTransparencyMap(): Promise<TransparencyMapData> {
       },
       // Timeout after 65 seconds (to handle cold start)
       signal: AbortSignal.timeout(65000),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
 
-    const backendData: BackendTransparencyMapData = await response.json();
-    const normalizedData = normalizeBackendData(backendData);
+    const backendData: BackendTransparencyMapData = await response.json()
+    const normalizedData = normalizeBackendData(backendData)
+
+    logger.info('Transparency map loaded successfully', {
+      stateCount: Object.keys(normalizedData.states).length,
+      totalApis: normalizedData.summary.total_apis,
+      coverage: normalizedData.summary.overall_coverage_percentage,
+      cached: backendData.cache_info.cached,
+    })
 
     // Cache data in localStorage
     if (typeof window !== 'undefined') {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        data: normalizedData,
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          data: normalizedData,
+          timestamp: Date.now(),
+        })
+      )
     }
 
-    return normalizedData;
+    return normalizedData
   } catch (error) {
-    console.error('Error fetching transparency map:', error);
+    console.error('Error fetching transparency map:', error)
 
     // Try to return cached data if available
-    const cachedData = getCachedMapData();
+    const cachedData = getCachedMapData()
     if (cachedData) {
-      console.warn('Using cached transparency map data');
-      return cachedData;
+      logger.warn('Using cached transparency map data due to fetch error')
+      return cachedData
     }
 
-    throw error;
+    throw error
   }
 }
 
@@ -183,29 +200,29 @@ export async function fetchTransparencyMap(): Promise<TransparencyMapData> {
  */
 export function getCachedMapData(): TransparencyMapData | null {
   if (typeof window === 'undefined') {
-    return null;
+    return null
   }
 
   try {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(CACHE_KEY)
     if (!cached) {
-      return null;
+      return null
     }
 
-    const { data, timestamp } = JSON.parse(cached);
-    const age = Date.now() - timestamp;
+    const { data, timestamp } = JSON.parse(cached)
+    const age = Date.now() - timestamp
 
     // Return cached data even if expired (better than nothing)
     if (age < CACHE_EXPIRY_MS) {
-      return data;
+      return data
     }
 
     // Mark cache as stale but still return it
-    console.warn('Cache is stale but returning anyway');
-    return data;
+    logger.warn('Cache is stale but returning anyway', { ageMinutes: Math.round(age / 60000) })
+    return data
   } catch (error) {
-    console.error('Error reading cached map data:', error);
-    return null;
+    console.error('Error reading cached map data:', error)
+    return null
   }
 }
 
@@ -214,20 +231,20 @@ export function getCachedMapData(): TransparencyMapData | null {
  */
 export function isCacheFresh(): boolean {
   if (typeof window === 'undefined') {
-    return false;
+    return false
   }
 
   try {
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(CACHE_KEY)
     if (!cached) {
-      return false;
+      return false
     }
 
-    const { timestamp } = JSON.parse(cached);
-    const age = Date.now() - timestamp;
-    return age < CACHE_EXPIRY_MS;
+    const { timestamp } = JSON.parse(cached)
+    const age = Date.now() - timestamp
+    return age < CACHE_EXPIRY_MS
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -236,7 +253,7 @@ export function isCacheFresh(): boolean {
  */
 export function clearCachedMapData(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_KEY)
   }
 }
 
@@ -245,12 +262,12 @@ export function clearCachedMapData(): void {
  */
 export function getStateColor(status: StateData['status']): string {
   const colors: Record<StateData['status'], string> = {
-    healthy: '#22c55e',    // green-500
-    degraded: '#f59e0b',   // amber-500
-    unhealthy: '#ef4444',  // red-500
-    no_api: '#9ca3af'      // gray-400
-  };
-  return colors[status] || colors.no_api;
+    healthy: '#22c55e', // green-500
+    degraded: '#f59e0b', // amber-500
+    unhealthy: '#ef4444', // red-500
+    no_api: '#9ca3af', // gray-400
+  }
+  return colors[status] || colors.no_api
 }
 
 /**
@@ -262,9 +279,9 @@ export function getAPIStatusBadgeClass(status: APIDetail['status']): string {
     partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     timeout: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    down: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  };
-  return classes[status] || classes.down;
+    down: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  }
+  return classes[status] || classes.down
 }
 
 /**
@@ -275,9 +292,9 @@ export function getStateStatusBadgeClass(status: StateData['status']): string {
     healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     degraded: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     unhealthy: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    no_api: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
-  };
-  return classes[status] || classes.no_api;
+    no_api: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
+  }
+  return classes[status] || classes.no_api
 }
 
 /**
@@ -289,9 +306,9 @@ export function getAPIStatusEmoji(status: APIDetail['status']): string {
     partial: '🟡',
     timeout: '🟠',
     error: '🔴',
-    down: '🔴'
-  };
-  return emojis[status] || '⚫';
+    down: '🔴',
+  }
+  return emojis[status] || '⚫'
 }
 
 /**
@@ -302,7 +319,7 @@ export function getStateStatusEmoji(status: StateData['status']): string {
     healthy: '🟢',
     degraded: '🟡',
     unhealthy: '🔴',
-    no_api: '⚫'
-  };
-  return emojis[status] || '⚫';
+    no_api: '⚫',
+  }
+  return emojis[status] || '⚫'
 }

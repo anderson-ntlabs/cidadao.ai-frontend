@@ -10,6 +10,9 @@
 import { StateCreator } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { z } from 'zod'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('VersionedStore')
 
 export interface StoreVersion {
   version: number
@@ -36,7 +39,7 @@ export function createVersionedStore<T>(
   return persist(
     devtools(creator, {
       name: `${name}-store`,
-      enabled: process.env.NODE_ENV === 'development'
+      enabled: process.env.NODE_ENV === 'development',
     }),
     {
       name: `${name}-storage`,
@@ -45,7 +48,7 @@ export function createVersionedStore<T>(
       // Migration function
       migrate: (persistedState: any, persistedVersion: number) => {
         if (debug) {
-          console.log(`[${name}] Migrating from v${persistedVersion} to v${version}`)
+          logger.debug(`Migrating from v${persistedVersion} to v${version}`, { name })
         }
 
         let state = persistedState
@@ -55,7 +58,7 @@ export function createVersionedStore<T>(
           const migration = migrations[v]
           if (migration) {
             if (debug) {
-              console.log(`[${name}] Applying migration v${v}`)
+              logger.debug(`Applying migration v${v}`, { name })
             }
             state = migration(state)
           }
@@ -65,11 +68,14 @@ export function createVersionedStore<T>(
         try {
           const validated = schema.parse(state)
           if (debug) {
-            console.log(`[${name}] Migration successful, state validated`)
+            logger.info('Migration successful, state validated', { name })
           }
           return validated
         } catch (error) {
-          console.error(`[${name}] State validation failed after migration:`, error)
+          logger.warn('State validation failed after migration', {
+            name,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
           // Return fresh state if validation fails
           return creator(undefined as any, undefined as any, undefined as any)
         }
@@ -81,9 +87,8 @@ export function createVersionedStore<T>(
         const { ...serializable } = state as any
 
         // Remove functions and undefined values
-        Object.keys(serializable).forEach(key => {
-          if (typeof serializable[key] === 'function' ||
-              serializable[key] === undefined) {
+        Object.keys(serializable).forEach((key) => {
+          if (typeof serializable[key] === 'function' || serializable[key] === undefined) {
             delete serializable[key]
           }
         })
@@ -98,7 +103,7 @@ export function createVersionedStore<T>(
           ...currentState,
           ...persistedState,
         }
-      }
+      },
     }
   )
 }
@@ -110,7 +115,7 @@ export const exampleMigrations = {
   // Version 1 to 2: Add new field
   2: (state: any) => ({
     ...state,
-    newField: 'default value'
+    newField: 'default value',
   }),
 
   // Version 2 to 3: Rename field
@@ -118,7 +123,7 @@ export const exampleMigrations = {
     const { oldFieldName, ...rest } = state
     return {
       ...rest,
-      newFieldName: oldFieldName || 'default'
+      newFieldName: oldFieldName || 'default',
     }
   },
 
@@ -127,7 +132,7 @@ export const exampleMigrations = {
     ...state,
     settings: {
       theme: state.theme || 'light',
-      language: state.language || 'pt'
-    }
-  })
+      language: state.language || 'pt',
+    },
+  }),
 }
