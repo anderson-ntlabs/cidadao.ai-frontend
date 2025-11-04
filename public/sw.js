@@ -1826,7 +1826,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
     ],
     eS = new ef({
       precacheEntries: [
-        { revision: null, url: '/_next/static/chunks/2734.8f089fcf0bd9d2c4.js' },
+        { revision: null, url: '/_next/static/chunks/2734.c54e8c4521886fc9.js' },
         { revision: null, url: '/_next/static/chunks/7012.b77827d868af0fe0.js' },
         { revision: null, url: '/_next/static/chunks/7781.63a0f7cefa174de5.js' },
         { revision: null, url: '/_next/static/chunks/827.bf51314111519c40.js' },
@@ -1879,7 +1879,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/error-ce6f9458fe4f0647.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/layout-acf6582e93f91a54.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-4ea80c8ca1178bf1.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-a29fd309b6cad65b.js' },
         {
           revision: null,
           url: '/_next/static/chunks/app/pt/app/configuracoes/page-bfbaa9be19f3b843.js',
@@ -1908,9 +1908,9 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           revision: null,
           url: '/_next/static/chunks/app/pt/app/investigacoes/page-a5f7e6114df60668.js',
         },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-817cc10d079a4bb5.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-6c243952a67fba84.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/error-6d4c567adb006bb8.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/page-b65f745086e9aaca.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/page-21bb402aa7a4b89f.js' },
         {
           revision: null,
           url: '/_next/static/chunks/app/pt/app/notificacoes/page-a9bab55dcf046ca2.js',
@@ -1922,11 +1922,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/chunks/app/pt/layout-7738cf821d689a6b.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/login/page-9c58da7c73f0f1fb.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/manifesto/page-7b9f0264b53358c2.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/page-d849ebe9ba445ed9.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/page-a62830d3d95d5e5f.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/privacy/page-1e42cfec45bf180a.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/system/page-7eb120dfd0e36a97.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/terms/page-8839d1daf44d8438.js' },
-        { revision: null, url: '/_next/static/chunks/commons-26e050163a74769a.js' },
+        { revision: null, url: '/_next/static/chunks/commons-5f2b479c00d91a80.js' },
         { revision: null, url: '/_next/static/chunks/framework-b9fd9bcc3ecde907.js' },
         { revision: null, url: '/_next/static/chunks/main-388de7b2142a1859.js' },
         { revision: null, url: '/_next/static/chunks/main-app-c756c3415517cebc.js' },
@@ -1968,19 +1968,19 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           revision: '846118c33b2c0e922d7b3a7676f81f6f',
           url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
         },
-        { revision: null, url: '/_next/static/chunks/runtime-7517802703df7224.js' },
+        { revision: null, url: '/_next/static/chunks/runtime-3f8c7be08fd2271f.js' },
+        {
+          revision: '11985283419537636dcc77c8237372b9',
+          url: '/_next/static/ckQrhqT-OH1dmpnLapYi9/_buildManifest.js',
+        },
+        {
+          revision: 'b6652df95db52feb4daf4eca35380933',
+          url: '/_next/static/ckQrhqT-OH1dmpnLapYi9/_ssgManifest.js',
+        },
         { revision: null, url: '/_next/static/css/081a0afca5a9bd20.css' },
         { revision: null, url: '/_next/static/css/44fcd2099d33abfa.css' },
         { revision: null, url: '/_next/static/css/59e882a6b4251a5a.css' },
         { revision: null, url: '/_next/static/css/8a38bb2669d7ed47.css' },
-        {
-          revision: '11985283419537636dcc77c8237372b9',
-          url: '/_next/static/fIp8PZ1PZk5Gud52itt91/_buildManifest.js',
-        },
-        {
-          revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/fIp8PZ1PZk5Gud52itt91/_ssgManifest.js',
-        },
         {
           revision: '9dda5cfc9a46f256d0e131bb535e46f8',
           url: '/_next/static/media/19cfc7226ec3afaa-s.woff2',
@@ -2073,9 +2073,10 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
   ;(self.addEventListener('fetch', (e) => {
     let t = new URL(e.request.url)
     if (
-      'us.i.posthog.com' === t.hostname ||
-      'us-assets.i.posthog.com' === t.hostname ||
-      t.hostname.includes('sentry.io')
+      'cidadao-api-production.up.railway.app' !== t.hostname &&
+      ('us.i.posthog.com' === t.hostname ||
+        'us-assets.i.posthog.com' === t.hostname ||
+        t.hostname.includes('sentry.io'))
     )
       return void e.respondWith(fetch(e.request).catch(() => new Response(null, { status: 200 })))
   }),

@@ -1,15 +1,15 @@
 /// <reference lib="webworker" />
-import { defaultCache } from '@serwist/next/worker';
-import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
-import { Serwist, NetworkOnly } from 'serwist';
+import { defaultCache } from '@serwist/next/worker'
+import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist'
+import { Serwist, NetworkOnly } from 'serwist'
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
-    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined
   }
 }
 
-declare const self: ServiceWorkerGlobalScope;
+declare const self: ServiceWorkerGlobalScope
 
 /**
  * Custom runtime caching strategy that gracefully handles analytics failures
@@ -27,29 +27,35 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache.map(entry => ({
+  runtimeCaching: defaultCache.map((entry) => ({
     ...entry,
     handler: {
       ...entry.handler,
       // Wrap handler to filter out redirect responses
       handle: async (options: any) => {
-        const response = await (entry.handler as any).handle(options);
+        const response = await (entry.handler as any).handle(options)
 
         // Don't cache redirects (3xx status codes) to avoid "Cache.put() encountered a network error"
         if (response && response.status >= 300 && response.status < 400) {
           // Return response but don't cache it
-          return response;
+          return response
         }
 
-        return response;
-      }
-    }
+        return response
+      },
+    },
   })),
-});
+})
 
-// Add custom fetch event listener for analytics graceful degradation
+// Add custom fetch event listener for analytics graceful degradation and API bypass
 self.addEventListener('fetch', (event: FetchEvent) => {
-  const url = new URL(event.request.url);
+  const url = new URL(event.request.url)
+
+  // Bypass service worker for backend API requests (Railway)
+  if (url.hostname === 'cidadao-api-production.up.railway.app') {
+    // Let the request go directly to the network, don't cache
+    return
+  }
 
   // Intercept analytics and monitoring requests
   if (
@@ -58,11 +64,9 @@ self.addEventListener('fetch', (event: FetchEvent) => {
     url.hostname.includes('sentry.io')
   ) {
     // Return empty successful response for analytics failures
-    event.respondWith(
-      fetch(event.request).catch(() => new Response(null, { status: 200 }))
-    );
-    return;
+    event.respondWith(fetch(event.request).catch(() => new Response(null, { status: 200 })))
+    return
   }
-});
+})
 
-serwist.addEventListeners();
+serwist.addEventListeners()
