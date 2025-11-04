@@ -3,14 +3,15 @@ import { Inter } from 'next/font/google'
 import { cn } from '@/lib/utils'
 import '../../styles/globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
   title: 'Cidadão.AI',
-  description: 'Sistema multi-agente de inteligência artificial para democratizar o acesso aos dados públicos e fortalecer a transparência governamental brasileira.',
+  description:
+    'Sistema multi-agente de inteligência artificial para democratizar o acesso aos dados públicos e fortalecer a transparência governamental brasileira.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -23,8 +24,8 @@ export function generateViewport() {
   return {
     width: 'device-width',
     initialScale: 1,
-    maximumScale: 1, // Prevent zoom on iOS (accessibility considered via font scaling)
-    userScalable: false, // Prevent zoom on input focus
+    // Allow zoom for accessibility (WCAG 2.1 Level AA - 1.4.4 Resize Text)
+    // Users must be able to zoom up to 200% without loss of content
     viewportFit: 'cover', // Support for iPhone notch and safe areas
     themeColor: '#10b981',
   }
@@ -42,11 +43,7 @@ import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 
-export default function PTLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function PTLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -54,8 +51,16 @@ export default function PTLayout({
 
         {/* Resource Hints - Performance Optimization */}
         {/* Preconnect to critical origins */}
-        <link rel="preconnect" href="https://cidadao-api-production.up.railway.app" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://pbsiyuattnwgohvkkkks.supabase.co" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://cidadao-api-production.up.railway.app"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://pbsiyuattnwgohvkkkks.supabase.co"
+          crossOrigin="anonymous"
+        />
         <link rel="preconnect" href="https://app.posthog.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -74,29 +79,27 @@ export default function PTLayout({
             <Providers>
               <AnalyticsProvider>
                 <SentryInit />
-              {/* Camada de fundo fixo com a imagem */}
-              <div
-                className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-                style={{
-                  backgroundImage: 'url(/operarios.png)',
-                }}
-              />
+                {/* Camada de fundo fixo com a imagem */}
+                <div
+                  className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+                  style={{
+                    backgroundImage: 'url(/operarios.png)',
+                  }}
+                />
 
-              {/* Overlay semi-transparente */}
-              <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
+                {/* Overlay semi-transparente */}
+                <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
 
-              {/* Conteúdo principal */}
-              <div className="relative z-20 min-h-screen flex flex-col">
-                <SkipLinks />
-                <PTLayoutWrapper locale="pt">
-                  {children}
-                </PTLayoutWrapper>
-                <CookieConsent locale="pt" />
-                <ToastProvider />
+                {/* Conteúdo principal */}
+                <div className="relative z-20 min-h-screen flex flex-col">
+                  <SkipLinks />
+                  <PTLayoutWrapper locale="pt">{children}</PTLayoutWrapper>
+                  <CookieConsent locale="pt" />
+                  <ToastProvider />
 
-                {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
-                <VLibrasLazy locale="pt" forceOnload />
-              </div>
+                  {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
+                  <VLibrasLazy locale="pt" forceOnload />
+                </div>
               </AnalyticsProvider>
             </Providers>
           </LiveAnnouncerProvider>
