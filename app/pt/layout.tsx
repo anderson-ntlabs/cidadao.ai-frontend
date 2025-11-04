@@ -43,6 +43,7 @@ import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
+import { InstallPrompt, UpdateNotification } from '@/components/pwa'
 
 export default function PTLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -98,6 +99,10 @@ export default function PTLayout({ children }: { children: React.ReactNode }) {
                   <PTLayoutWrapper locale="pt">{children}</PTLayoutWrapper>
                   <CookieConsent locale="pt" />
                   <ToastProvider />
+
+                  {/* PWA Components */}
+                  <InstallPrompt delay={5000} showOnDesktop={false} />
+                  <UpdateNotification autoUpdate={false} showDetails />
 
                   {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
                   <VLibrasLazy locale="pt" forceOnload />

@@ -69,4 +69,11 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   }
 })
 
+// Listen for SKIP_WAITING message from update notification
+self.addEventListener('message', (event: ExtendableMessageEvent) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
+})
+
 serwist.addEventListeners()
