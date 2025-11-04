@@ -47,7 +47,31 @@ export class ChatService {
       }
     }
 
-    // Try primary adapter
+    // Check if Maritaca direct mode is requested (from localStorage)
+    const maritacaModel =
+      typeof window !== 'undefined' ? localStorage.getItem('maritaca_selected_model') : null
+
+    // If Maritaca model is selected, use fallback adapter directly (bypass backend)
+    if (maritacaModel && this.fallbackAdapter) {
+      logger.info(`Using Maritaca direct mode with model: ${maritacaModel}`)
+      const response = await this.tryAdapter(this.fallbackAdapter, request, 'fallback')
+
+      if (response.success && this.cacheEnabled) {
+        this.setCachedResponse(request, response)
+      }
+
+      const duration = Date.now() - startTime
+      chatTelemetry.recordMessage({
+        success: response.success,
+        adapter: 'fallback',
+        duration,
+        error: response.error?.code,
+      })
+
+      return response
+    }
+
+    // Try primary adapter (Cidadão.AI mode)
     let response = await this.tryAdapter(this.primaryAdapter, request, 'primary')
 
     if (response.success) {
