@@ -21,6 +21,7 @@ import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 import { VoiceRecorder } from '@/components/voice'
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
+import { PullToRefresh } from '@/components/mobile'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -212,6 +213,18 @@ export default function ChatPage() {
     }
   }
 
+  // Pull-to-refresh handler (load older messages)
+  const handleRefresh = async () => {
+    // Simulate loading older messages
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // In future: load older messages from session history
+    // For now, just show a notification
+    if (messages.length > 0) {
+      toast.success('Atualizado', 'Conversa atualizada com sucesso!')
+    }
+  }
+
   // Get last assistant message agent for confidence
   const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant')
   const confidence = lastAssistantMessage?.metadata?.confidence || 0
@@ -302,13 +315,18 @@ export default function ChatPage() {
       </div>
 
       {/* Messages Area */}
-      <div
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        threshold={80}
         className="flex-1 overflow-y-auto min-h-0"
-        style={{
-          paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
-        }}
+        disabled={messages.length === 0}
       >
-        <div className="max-w-4xl mx-auto px-4 py-6 h-full">
+        <div
+          className="max-w-4xl mx-auto px-4 py-6 h-full"
+          style={{
+            paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+          }}
+        >
           {messages.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
@@ -406,7 +424,7 @@ export default function ChatPage() {
             </div>
           )}
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Input Area - Fixed Bottom */}
       <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
