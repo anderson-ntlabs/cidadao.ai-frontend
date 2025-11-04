@@ -16,7 +16,8 @@ export class PrimaryAdapter implements ChatAdapter {
   private timeout: number
 
   constructor(baseUrl?: string, timeout = 30000) {
-    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+    this.baseUrl =
+      baseUrl || process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
     this.timeout = timeout
   }
 
@@ -25,7 +26,7 @@ export class PrimaryAdapter implements ChatAdapter {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/chat`, {
+      const response = await fetch(`${this.baseUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

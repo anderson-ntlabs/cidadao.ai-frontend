@@ -64,7 +64,7 @@ describe('PrimaryAdapter', () => {
       expect(response.data?.suggestions).toEqual(['suggestion1', 'suggestion2'])
 
       expect(global.fetch).toHaveBeenCalledWith(
-        `${mockBaseUrl}/api/v1/chat`,
+        `${mockBaseUrl}/api/v1/chat/message`,
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -32,16 +32,25 @@ export class FallbackAdapter implements ChatAdapter {
       const baseUrl =
         process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
+      // Format message in Maritaca's expected format
+      const messages = [
+        {
+          role: 'user',
+          content: request.message,
+        },
+      ]
+
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: request.message,
+          messages,
           model: this.model,
-          session_id: request.sessionId,
-          context: request.context,
+          temperature: 0.7,
+          max_tokens: 2048,
+          stream: false,
         }),
         signal: AbortSignal.timeout(30000),
       })
@@ -55,13 +64,15 @@ export class FallbackAdapter implements ChatAdapter {
       return {
         success: true,
         data: {
-          response: data.response || data.message,
+          response: data.content || data.response || data.message,
           agentId: 'maritaca',
           agentName: `Maritaca (${this.model})`,
           confidence: 0.85, // Fixed confidence for Maritaca
           metadata: {
-            model: this.model,
-            ...data.metadata,
+            model: data.model || this.model,
+            usage: data.usage,
+            id: data.id,
+            finish_reason: data.finish_reason,
           },
         },
       }
