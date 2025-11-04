@@ -20,6 +20,7 @@ import { type MaritacaModel } from '@/lib/chat'
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 import { VoiceRecorder } from '@/components/voice'
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -74,6 +75,9 @@ export default function ChatPage() {
   const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-3')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Mobile keyboard detection (iOS/Android virtual keyboard)
+  const { keyboardHeight, isKeyboardVisible } = useMobileKeyboard()
 
   // Accessibility announcements
   const { announceLoading, announceSuccess, announceError } = useAnnouncementHelpers()
@@ -298,7 +302,12 @@ export default function ChatPage() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div
+        className="flex-1 overflow-y-auto min-h-0"
+        style={{
+          paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+        }}
+      >
         <div className="max-w-4xl mx-auto px-4 py-6 h-full">
           {messages.length === 0 ? (
             /* Empty State */
