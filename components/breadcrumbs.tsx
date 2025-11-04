@@ -1,47 +1,42 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Home, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-const breadcrumbVariants = cva(
-  "flex items-center py-3 text-sm",
-  {
-    variants: {
-      variant: {
-        default: "text-gray-600 dark:text-gray-400",
-        subtle: "text-gray-500 dark:text-gray-500",
-        prominent: "text-gray-700 dark:text-gray-300"
-      },
-      spacing: {
-        compact: "gap-1",
-        normal: "gap-2",
-        relaxed: "gap-3"
-      }
+const breadcrumbVariants = cva('flex items-center py-3 text-sm', {
+  variants: {
+    variant: {
+      default: 'text-gray-600 dark:text-gray-400',
+      subtle: 'text-gray-500 dark:text-gray-500',
+      prominent: 'text-gray-700 dark:text-gray-300',
     },
-    defaultVariants: {
-      variant: "default",
-      spacing: "normal"
-    }
-  }
-)
+    spacing: {
+      compact: 'gap-1',
+      normal: 'gap-2',
+      relaxed: 'gap-3',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+    spacing: 'normal',
+  },
+})
 
-const separatorVariants = cva(
-  "flex-shrink-0 text-gray-400 dark:text-gray-600",
-  {
-    variants: {
-      size: {
-        sm: "w-3 h-3",
-        md: "w-4 h-4",
-        lg: "w-5 h-5"
-      }
+const separatorVariants = cva('flex-shrink-0 text-gray-400 dark:text-gray-600', {
+  variants: {
+    size: {
+      sm: 'w-3 h-3',
+      md: 'w-4 h-4',
+      lg: 'w-5 h-5',
     },
-    defaultVariants: {
-      size: "sm"
-    }
-  }
-)
+  },
+  defaultVariants: {
+    size: 'sm',
+  },
+})
 
 export interface BreadcrumbItemV2 {
   label: string
@@ -61,7 +56,7 @@ interface BreadcrumbsV2Props extends VariantProps<typeof breadcrumbVariants> {
   onItemClick?: (item: BreadcrumbItemV2) => void
 }
 
-export function BreadcrumbsV2({ 
+export function BreadcrumbsV2({
   items,
   variant,
   spacing,
@@ -71,16 +66,13 @@ export function BreadcrumbsV2({
   homeLabel = 'Início',
   className,
   maxItems,
-  onItemClick
+  onItemClick,
 }: BreadcrumbsV2Props) {
   // Handle collapsed breadcrumbs if maxItems is set
-  const displayItems = maxItems && items.length > maxItems
-    ? [
-        ...items.slice(0, 1),
-        { label: '...', href: undefined },
-        ...items.slice(-(maxItems - 1))
-      ]
-    : items
+  const displayItems =
+    maxItems && items.length > maxItems
+      ? [...items.slice(0, 1), { label: '...', href: undefined }, ...items.slice(-(maxItems - 1))]
+      : items
 
   const getSeparator = () => {
     switch (separator) {
@@ -96,26 +88,31 @@ export function BreadcrumbsV2({
   }
 
   return (
-    <nav 
+    <nav
       className={cn(breadcrumbVariants({ variant, spacing }), className)}
       aria-label="Breadcrumb"
     >
-      <ol className="flex items-center" style={{ gap: `var(--breadcrumb-gap, ${spacing === 'compact' ? '0.25rem' : spacing === 'relaxed' ? '0.75rem' : '0.5rem'})` }}>
+      <ol
+        className="flex items-center"
+        style={{
+          gap: `var(--breadcrumb-gap, ${spacing === 'compact' ? '0.25rem' : spacing === 'relaxed' ? '0.75rem' : '0.5rem'})`,
+        }}
+      >
         {/* Home link */}
         {showHome && (
           <>
             <li className="flex items-center">
-              <Link 
-                href={homeHref} 
+              <Link
+                href={homeHref}
                 className={cn(
-                  "flex items-center gap-1 rounded-md px-2 py-1",
-                  "hover:text-brand-green-600 dark:hover:text-brand-green-400",
-                  "hover:bg-gray-100 dark:hover:bg-gray-800",
-                  "transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2",
+                  'flex items-center gap-1 rounded-md px-2 py-1',
+                  'hover:text-brand-green-600 dark:hover:text-brand-green-400',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800',
+                  'transition-all duration-200',
+                  'focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2',
                   "relative after:content-[''] after:absolute after:inset-0",
-                  "after:rounded-md after:transition-transform after:duration-200",
-                  "hover:after:scale-105 active:after:scale-95"
+                  'after:rounded-md after:transition-transform after:duration-200',
+                  'hover:after:scale-105 active:after:scale-95'
                 )}
                 aria-label={homeLabel}
                 onClick={() => onItemClick?.({ label: homeLabel, href: homeHref })}
@@ -131,29 +128,29 @@ export function BreadcrumbsV2({
             )}
           </>
         )}
-        
+
         {/* Breadcrumb items */}
         {displayItems.map((item, index) => {
           const isLast = index === displayItems.length - 1
           const Icon = item.icon
           const isCurrent = item.current || isLast
-          
+
           return (
             <li key={index} className="flex items-center">
               {item.href && !isCurrent ? (
-                <Link 
-                  href={item.href} 
+                <Link
+                  href={item.href}
                   className={cn(
-                    "flex items-center gap-1 rounded-md px-2 py-1",
-                    "hover:text-brand-green-600 dark:hover:text-brand-green-400",
-                    "hover:bg-gray-100 dark:hover:bg-gray-800",
-                    "transition-all duration-200",
-                    "focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2",
+                    'flex items-center gap-1 rounded-md px-2 py-1',
+                    'hover:text-brand-green-600 dark:hover:text-brand-green-400',
+                    'hover:bg-gray-100 dark:hover:bg-gray-800',
+                    'transition-all duration-200',
+                    'focus:outline-none focus:ring-2 focus:ring-brand-green-500 focus:ring-offset-2',
                     "relative after:content-[''] after:absolute after:inset-0",
-                    "after:rounded-md after:transition-transform after:duration-200",
-                    "hover:after:scale-105 active:after:scale-95",
-                    "group",
-                    item.label === '...' && "cursor-default hover:bg-transparent"
+                    'after:rounded-md after:transition-transform after:duration-200',
+                    'hover:after:scale-105 active:after:scale-95',
+                    'group',
+                    item.label === '...' && 'cursor-default hover:bg-transparent'
                   )}
                   onClick={() => onItemClick?.(item)}
                 >
@@ -161,32 +158,36 @@ export function BreadcrumbsV2({
                   <span>{item.label}</span>
                 </Link>
               ) : (
-                <span 
+                <span
                   className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded-md relative",
+                    'flex items-center gap-1 px-2 py-1 rounded-md relative',
                     isCurrent && [
-                      "text-gray-900 dark:text-gray-100 font-semibold",
-                      "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-800/50",
-                      "border border-gray-200 dark:border-gray-700",
-                      "shadow-sm"
+                      'text-gray-900 dark:text-gray-100 font-semibold',
+                      'bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-800/50',
+                      'border border-gray-200 dark:border-gray-700',
+                      'shadow-sm',
                     ]
                   )}
-                  aria-current={isCurrent ? "page" : undefined}
+                  aria-current={isCurrent ? 'page' : undefined}
                 >
-                  {Icon && <Icon className={cn(
-                    "w-4 h-4",
-                    isCurrent && "text-brand-green-600 dark:text-brand-green-400"
-                  )} />}
+                  {Icon && (
+                    <Icon
+                      className={cn(
+                        'w-4 h-4',
+                        isCurrent && 'text-brand-green-600 dark:text-brand-green-400'
+                      )}
+                    />
+                  )}
                   <span>{item.label}</span>
                   {isCurrent && (
-                    <span 
+                    <span
                       className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-green-500 rounded-full"
                       aria-hidden="true"
                     />
                   )}
                 </span>
               )}
-              
+
               {!isLast && (
                 <span aria-hidden="true" className="ml-2">
                   {getSeparator()}
@@ -200,64 +201,154 @@ export function BreadcrumbsV2({
   )
 }
 
-// Mobile-optimized breadcrumbs
-export function BreadcrumbsV2Mobile({ 
+// Mobile-optimized breadcrumbs with collapsible menu
+export function BreadcrumbsV2Mobile({
   items,
   className,
-  onBack
-}: { 
+  onBack,
+}: {
   items: BreadcrumbItemV2[]
   className?: string
-  onBack?: () => void 
+  onBack?: () => void
 }) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const currentPage = items[items.length - 1]
   const previousPage = items.length > 1 ? items[items.length - 2] : null
-  
+  const hasMultipleLevels = items.length > 2
+
+  // Mobile: Show only current and previous (collapsed by default)
   return (
-    <div className={cn("flex items-center gap-2 py-3", className)}>
-      {previousPage && (
-        <Link
-          href={previousPage.href || '#'}
-          onClick={(e) => {
-            if (onBack) {
-              e.preventDefault()
-              onBack()
-            }
-          }}
+    <div className={cn('relative', className)}>
+      {/* Collapsed view - Only back + current */}
+      <div className="flex items-center gap-2 py-3">
+        {previousPage && (
+          <Link
+            href={previousPage.href || '#'}
+            onClick={(e) => {
+              if (onBack) {
+                e.preventDefault()
+                onBack()
+              }
+            }}
+            className={cn(
+              'flex items-center gap-1 text-sm',
+              'text-gray-600 dark:text-gray-400',
+              'hover:text-brand-green-600 dark:hover:text-brand-green-400',
+              'transition-colors duration-200',
+              'touch-manipulation min-h-[44px]' // WCAG 2.1 Level AAA touch target
+            )}
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            <span className="truncate max-w-[120px]">{previousPage.label}</span>
+          </Link>
+        )}
+
+        {/* Show expand button if more than 2 levels */}
+        {hasMultipleLevels && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={cn(
+              'p-2 rounded-md transition-colors',
+              'text-gray-600 dark:text-gray-400',
+              'hover:bg-gray-100 dark:hover:bg-gray-800',
+              'focus:outline-none focus:ring-2 focus:ring-brand-green-500',
+              'touch-manipulation min-h-[44px] min-w-[44px]' // WCAG touch target
+            )}
+            aria-label={isExpanded ? 'Ocultar caminho completo' : 'Mostrar caminho completo'}
+            aria-expanded={isExpanded}
+          >
+            <ChevronRight
+              className={cn('w-4 h-4 transition-transform', isExpanded ? 'rotate-90' : 'rotate-0')}
+            />
+          </button>
+        )}
+
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate flex-1">
+          {currentPage?.label}
+        </h1>
+      </div>
+
+      {/* Expanded view - Full breadcrumb path */}
+      {hasMultipleLevels && isExpanded && (
+        <div
           className={cn(
-            "flex items-center gap-1 text-sm",
-            "text-gray-600 dark:text-gray-400",
-            "hover:text-brand-green-600 dark:hover:text-brand-green-400",
-            "transition-colors duration-200"
+            'mb-4 p-3 rounded-lg',
+            'bg-gray-50 dark:bg-gray-800/50',
+            'border border-gray-200 dark:border-gray-700',
+            'animate-in slide-in-from-top-2 fade-in duration-200'
           )}
         >
-          <ChevronRight className="w-4 h-4 rotate-180" />
-          <span>{previousPage.label}</span>
-        </Link>
-      )}
-      
-      {!previousPage && currentPage && (
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {currentPage.label}
-        </h1>
+          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+            Caminho completo:
+          </div>
+          <ol className="flex flex-wrap items-center gap-1">
+            {items.map((item, index) => {
+              const isLast = index === items.length - 1
+              const Icon = item.icon
+
+              return (
+                <li key={index} className="flex items-center gap-1">
+                  {item.href && !isLast ? (
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-1 px-2 py-1 rounded-md text-sm',
+                        'text-gray-600 dark:text-gray-400',
+                        'hover:text-brand-green-600 dark:hover:text-brand-green-400',
+                        'hover:bg-white dark:hover:bg-gray-800',
+                        'transition-colors duration-200',
+                        'touch-manipulation min-h-[44px]' // WCAG touch target
+                      )}
+                    >
+                      {Icon && <Icon className="w-4 h-4" />}
+                      <span>{item.label}</span>
+                    </Link>
+                  ) : (
+                    <span
+                      className={cn(
+                        'flex items-center gap-1 px-2 py-1 rounded-md text-sm',
+                        isLast
+                          ? 'text-gray-900 dark:text-gray-100 font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                          : 'text-gray-600 dark:text-gray-400'
+                      )}
+                    >
+                      {Icon && <Icon className="w-4 h-4" />}
+                      <span>{item.label}</span>
+                    </span>
+                  )}
+
+                  {!isLast && <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-600" />}
+                </li>
+              )
+            })}
+          </ol>
+        </div>
       )}
     </div>
   )
 }
 
 // Structured data for SEO
-export function BreadcrumbsV2Schema({ items, baseUrl }: { items: BreadcrumbItemV2[], baseUrl: string }) {
-  const schemaItems = items.map((item, index) => ({
-    "@type": "ListItem",
-    "position": index + 1,
-    "name": item.label,
-    "item": item.href ? `${baseUrl}${item.href}` : undefined
-  })).filter(item => item.item)
+export function BreadcrumbsV2Schema({
+  items,
+  baseUrl,
+}: {
+  items: BreadcrumbItemV2[]
+  baseUrl: string
+}) {
+  const schemaItems = items
+    .map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.label,
+      item: item.href ? `${baseUrl}${item.href}` : undefined,
+    }))
+    .filter((item) => item.item)
 
   const schema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": schemaItems
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: schemaItems,
   }
 
   return (

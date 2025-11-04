@@ -4,9 +4,21 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  TrendingUp, AlertTriangle, FileSearch, BarChart3, Shield,
-  Activity, Users, Eye, DollarSign, Clock, ChevronRight,
-  ArrowUpRight, ArrowDownRight, Search, Filter
+  TrendingUp,
+  AlertTriangle,
+  FileSearch,
+  BarChart3,
+  Shield,
+  Activity,
+  Users,
+  Eye,
+  DollarSign,
+  Clock,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  Search,
+  Filter,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -19,6 +31,8 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
+import { SwipeableCard, SwipeActions } from '@/components/mobile'
+import { toast } from '@/hooks/use-toast'
 
 // Estatísticas principais
 const statsCards = [
@@ -29,7 +43,7 @@ const statsCards = [
     trend: 'up',
     icon: FileSearch,
     color: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-100 dark:bg-blue-900/30'
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
   },
   {
     title: 'Anomalias Detectadas',
@@ -38,7 +52,7 @@ const statsCards = [
     trend: 'up',
     icon: AlertTriangle,
     color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-100 dark:bg-red-900/30'
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
   },
   {
     title: 'Valor Investigado',
@@ -47,7 +61,7 @@ const statsCards = [
     trend: 'up',
     icon: DollarSign,
     color: 'text-green-600 dark:text-green-400',
-    bgColor: 'bg-green-100 dark:bg-green-900/30'
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
   },
   {
     title: 'Taxa de Precisão',
@@ -56,8 +70,8 @@ const statsCards = [
     trend: 'up',
     icon: Shield,
     color: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-100 dark:bg-purple-900/30'
-  }
+    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+  },
 ]
 
 // Investigações recentes mock
@@ -68,7 +82,7 @@ const recentInvestigations = [
     status: 'critical',
     value: 2340000,
     confidence: 94.5,
-    date: new Date('2024-01-20')
+    date: new Date('2024-01-20'),
   },
   {
     id: 'INV-002',
@@ -76,7 +90,7 @@ const recentInvestigations = [
     status: 'active',
     value: 8900000,
     confidence: 87.3,
-    date: new Date('2024-01-19')
+    date: new Date('2024-01-19'),
   },
   {
     id: 'INV-003',
@@ -84,8 +98,8 @@ const recentInvestigations = [
     status: 'completed',
     value: 1200000,
     confidence: 91.8,
-    date: new Date('2024-01-18')
-  }
+    date: new Date('2024-01-18'),
+  },
 ]
 
 // Atividades dos agentes mock
@@ -94,20 +108,20 @@ const agentActivity = [
     agent: 'Zumbi dos Palmares',
     action: 'Detectou anomalia em licitação',
     time: new Date('2024-01-20T14:30:00'),
-    type: 'anomaly'
+    type: 'anomaly',
   },
   {
     agent: 'Anita Garibaldi',
     action: 'Analisou padrões de contratos',
     time: new Date('2024-01-20T13:45:00'),
-    type: 'analysis'
+    type: 'analysis',
   },
   {
     agent: 'Tiradentes',
     action: 'Gerou relatório de investigação',
     time: new Date('2024-01-20T12:15:00'),
-    type: 'report'
-  }
+    type: 'report',
+  },
 ]
 
 export default function DashboardPage() {
@@ -120,7 +134,7 @@ export default function DashboardPage() {
     total_sessions: 0,
     total_messages: 0,
     total_investigations: 0,
-    member_since: new Date().toISOString()
+    member_since: new Date().toISOString(),
   })
 
   useEffect(() => {
@@ -138,19 +152,21 @@ export default function DashboardPage() {
       // Load user stats and activities in parallel
       const [userStats, recentActivities] = await Promise.all([
         userProfileService.getStats(user.id),
-        userProfileService.getRecentActivities(user.id, 10)
+        userProfileService.getRecentActivities(user.id, 10),
       ])
 
       setStats(userStats)
       setActivities(recentActivities)
 
       // Log dashboard view activity
-      await userProfileService.logActivity(
-        user.id,
-        'settings_update',
-        'Visualizou o dashboard',
-        'Acesso ao painel de controle principal'
-      ).catch(err => logger.error('Failed to log dashboard activity', { error: err }))
+      await userProfileService
+        .logActivity(
+          user.id,
+          'settings_update',
+          'Visualizou o dashboard',
+          'Acesso ao painel de controle principal'
+        )
+        .catch((err) => logger.error('Failed to log dashboard activity', { error: err }))
     } catch (error) {
       logger.error('Failed to load dashboard data', { error })
     } finally {
@@ -163,7 +179,7 @@ export default function DashboardPage() {
       critical: 'text-red-600 bg-red-100 dark:bg-red-900/30',
       active: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
       completed: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-      pending: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30'
+      pending: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
     }
     return colors[status as keyof typeof colors] || colors.pending
   }
@@ -173,8 +189,21 @@ export default function DashboardPage() {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value)
+  }
+
+  // Handle swipe actions on investigation cards
+  const handleArchiveInvestigation = async (id: string) => {
+    // TODO: Implement actual archive logic with backend
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    toast.success('Investigação arquivada', `${id} foi movida para o arquivo`)
+  }
+
+  const handleDeleteInvestigation = async (id: string) => {
+    // TODO: Implement actual delete logic with backend
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    toast.error('Investigação excluída', `${id} foi removida permanentemente`)
   }
 
   return (
@@ -238,19 +267,16 @@ export default function DashboardPage() {
                     ) : (
                       <ArrowDownRight className="w-4 h-4 text-red-600" />
                     )}
-                    <span className={cn(
-                      'font-medium',
-                      isPositive ? 'text-green-600' : 'text-red-600'
-                    )}>
+                    <span
+                      className={cn('font-medium', isPositive ? 'text-green-600' : 'text-red-600')}
+                    >
                       {stat.change}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    {stat.title}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.title}</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {stat.value}
                   </p>
@@ -288,12 +314,14 @@ export default function DashboardPage() {
           </GlassCardHeader>
 
           <GlassCardContent>
-            <div className="space-y-4">
+            <div className="space-y-2">
               {recentInvestigations.map((inv) => (
-                <div
+                <SwipeableCard
                   key={inv.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
                   onClick={() => router.push(`/pt/app/investigacoes/${inv.id}`)}
+                  leftAction={SwipeActions.archive(() => handleArchiveInvestigation(inv.id))}
+                  rightAction={SwipeActions.delete(() => handleDeleteInvestigation(inv.id))}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -301,12 +329,17 @@ export default function DashboardPage() {
                         <span className="text-sm font-mono text-gray-500 dark:text-gray-400">
                           {inv.id}
                         </span>
-                        <span className={cn(
-                          'px-2 py-0.5 rounded-full text-xs font-medium',
-                          getStatusColor(inv.status)
-                        )}>
-                          {inv.status === 'critical' ? 'Crítico' :
-                           inv.status === 'active' ? 'Ativo' : 'Concluído'}
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-xs font-medium',
+                            getStatusColor(inv.status)
+                          )}
+                        >
+                          {inv.status === 'critical'
+                            ? 'Crítico'
+                            : inv.status === 'active'
+                              ? 'Ativo'
+                              : 'Concluído'}
                         </span>
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -331,7 +364,7 @@ export default function DashboardPage() {
                       {format(inv.date, "d 'de' MMM", { locale: ptBR })}
                     </span>
                   </div>
-                </div>
+                </SwipeableCard>
               ))}
             </div>
           </GlassCardContent>
@@ -375,9 +408,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <GlassCard>
         <GlassCardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Ações Rápidas
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Ações Rápidas</h2>
         </GlassCardHeader>
 
         <GlassCardContent>
@@ -432,12 +463,8 @@ export default function DashboardPage() {
                   <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    Agentes IA
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Conhecer especialistas
-                  </p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Agentes IA</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Conhecer especialistas</p>
                 </div>
               </div>
             </Button>
