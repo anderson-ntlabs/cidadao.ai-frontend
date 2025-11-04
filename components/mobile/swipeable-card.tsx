@@ -5,6 +5,7 @@ import { Trash2, Archive, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
 import { useHaptic } from '@/hooks/use-haptic'
+import { touchFeedback, gestureHint } from '@/lib/mobile-touch'
 
 interface SwipeAction {
   /** Action identifier */
@@ -199,8 +200,12 @@ export function SwipeableCard({
       <div
         ref={cardRef}
         className={cn(
-          'relative bg-white dark:bg-gray-800 transition-transform',
-          onClick && !isSwiping && 'cursor-pointer',
+          'relative bg-white dark:bg-gray-800',
+          // Touch feedback when tappable
+          onClick && !isSwiping && touchFeedback.card,
+          // Swipe gesture hint
+          (leftAction || rightAction) && gestureHint.swipeable,
+          // Disabled state during execution
           isExecuting && 'opacity-50 pointer-events-none',
           className
         )}

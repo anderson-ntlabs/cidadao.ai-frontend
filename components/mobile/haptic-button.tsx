@@ -3,6 +3,7 @@
 import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useHaptic, type HapticFeedbackType } from '@/hooks/use-haptic'
+import { touchFeedback, tapTarget } from '@/lib/mobile-touch'
 
 export interface HapticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Haptic feedback pattern (default: 'medium') */
@@ -119,15 +120,17 @@ export const HapticButton = forwardRef<HTMLButtonElement, HapticButtonProps>(
         className={cn(
           // Base styles
           'inline-flex items-center justify-center gap-2',
-          'font-medium rounded-lg transition-all duration-150',
-          'touch-manipulation select-none',
+          'font-medium rounded-lg',
           'focus:outline-none focus:ring-2 focus:ring-offset-2',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'disabled:opacity-50 disabled:cursor-not-allowed select-none',
 
-          // Size variants (minimum 44px for touch accessibility)
-          size === 'sm' && 'min-h-[44px] px-4 py-2.5 text-sm',
-          size === 'md' && 'min-h-[48px] px-6 py-3 text-base',
-          size === 'lg' && 'min-h-[56px] px-8 py-4 text-lg',
+          // Touch feedback (standardized)
+          touchFeedback.button,
+
+          // Size variants with tap targets (minimum 44px for WCAG AAA)
+          size === 'sm' && cn(tapTarget.small, 'px-4 py-2.5 text-sm'),
+          size === 'md' && cn(tapTarget.medium, 'px-6 py-3 text-base'),
+          size === 'lg' && cn(tapTarget.large, 'px-8 py-4 text-lg'),
 
           // Variant styles
           variant === 'default' &&
@@ -260,12 +263,13 @@ export const HapticFAB = forwardRef<
       ref={ref}
       variant="primary"
       className={cn(
-        // Circular shape
-        'w-[56px] h-[56px] rounded-full p-0',
+        // Circular shape with large tap target
+        tapTarget.large,
+        'rounded-full p-0',
         // Elevated shadow
         'shadow-lg hover:shadow-xl',
-        // Animation
-        'transform hover:scale-105 active:scale-95',
+        // FAB-specific feedback (overrides button default)
+        touchFeedback.fab,
         className
       )}
       {...props}

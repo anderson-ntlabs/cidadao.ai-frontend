@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSwipeGesture } from '@/hooks/use-swipe-gesture'
+import { touchFeedback, tapTarget } from '@/lib/mobile-touch'
 
 interface BottomSheetProps {
   /** Whether the bottom sheet is open */
@@ -173,7 +174,11 @@ export function BottomSheet({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className={cn(
+                  'ml-auto p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors',
+                  touchFeedback.icon,
+                  tapTarget.medium
+                )}
                 aria-label="Fechar"
               >
                 <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />

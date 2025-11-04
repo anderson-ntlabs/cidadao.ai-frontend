@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHaptic } from '@/hooks/use-haptic'
+import { touchFeedback, tapTarget, safeArea } from '@/lib/mobile-touch'
 
 export interface ActionSheetAction {
   /** Unique identifier for the action */
@@ -191,7 +192,7 @@ export function ActionSheet({
           'transform transition-transform duration-300 ease-out',
           'max-h-[85vh] overflow-hidden',
           // Safe area insets for notched devices
-          'pb-safe',
+          safeArea.bottom,
           className
         )}
         role="dialog"
@@ -238,8 +239,10 @@ export function ActionSheet({
               disabled={action.disabled}
               className={cn(
                 // Base styles
-                'w-full min-h-[56px] px-6 py-4 flex items-center gap-4',
-                'transition-colors duration-150 touch-manipulation',
+                'w-full px-6 py-4 flex items-center gap-4',
+                // Touch feedback and tap target
+                touchFeedback.listItem,
+                tapTarget.large,
                 // Border (except last item)
                 index < actions.length - 1 && 'border-b border-gray-200 dark:border-gray-700',
                 // Variant styles
@@ -268,12 +271,13 @@ export function ActionSheet({
           <button
             onClick={handleCancel}
             className={cn(
-              'w-full min-h-[56px] px-6 py-4 rounded-xl',
+              'w-full px-6 py-4 rounded-xl',
               'bg-gray-100 dark:bg-gray-800',
               'text-gray-900 dark:text-white font-semibold text-base',
               'hover:bg-gray-200 dark:hover:bg-gray-700',
-              'active:bg-gray-300 dark:active:bg-gray-600',
-              'transition-colors duration-150 touch-manipulation'
+              // Touch feedback and tap target
+              touchFeedback.button,
+              tapTarget.large
             )}
           >
             {cancelText}
