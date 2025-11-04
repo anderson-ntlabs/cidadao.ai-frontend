@@ -41,6 +41,7 @@ import { SentryInit } from '@/components/sentry-init'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
+import { OfflineBanner } from '@/components/mobile'
 
 export default function ENLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -91,6 +92,7 @@ export default function ENLayout({ children }: { children: React.ReactNode }) {
                 {/* Main content */}
                 <div className="relative z-20 min-h-screen flex flex-col">
                   <SkipLinks />
+                  <OfflineBanner />
                   <PTLayoutWrapper locale="en">{children}</PTLayoutWrapper>
                   <CookieConsent locale="en" />
                   <ToastProvider />

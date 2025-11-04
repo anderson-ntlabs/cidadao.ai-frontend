@@ -42,6 +42,7 @@ import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
+import { OfflineBanner } from '@/components/mobile'
 
 export default function PTLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -93,6 +94,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }) {
                 {/* Conteúdo principal */}
                 <div className="relative z-20 min-h-screen flex flex-col">
                   <SkipLinks />
+                  <OfflineBanner />
                   <PTLayoutWrapper locale="pt">{children}</PTLayoutWrapper>
                   <CookieConsent locale="pt" />
                   <ToastProvider />
