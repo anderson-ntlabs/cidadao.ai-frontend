@@ -1,13 +1,30 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Mail, Calendar, Shield, Edit2, Camera, Save, X, TrendingUp, MessageSquare, FileSearch, Clock } from 'lucide-react'
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Edit2,
+  Camera,
+  Save,
+  X,
+  TrendingUp,
+  MessageSquare,
+  FileSearch,
+  Clock,
+} from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { StatCard, StatsGrid } from '@/components/stats'
 import { ActionPanel, type ActionPanelItem } from '@/components/panels'
 import { useAuth } from '@/hooks/use-supabase-auth'
-import { userProfileService, type UserProfile, type UserStats } from '@/lib/services/user-profile.service'
+import {
+  userProfileService,
+  type UserProfile,
+  type UserStats,
+} from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import { logger } from '@/lib/utils/logger'
@@ -26,7 +43,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     full_name: '',
     username: '',
-    bio: ''
+    bio: '',
   })
 
   // Load profile and stats
@@ -49,19 +66,22 @@ export default function ProfilePage() {
         setFormData({
           full_name: profileData.full_name || user.name || '',
           username: profileData.username || user.email?.split('@')[0] || '',
-          bio: profileData.bio || ''
+          bio: profileData.bio || '',
         })
       } else {
         // Create initial profile from auth user
         setFormData({
           full_name: user.name || '',
           username: user.email?.split('@')[0] || '',
-          bio: ''
+          bio: '',
         })
       }
     } catch (error) {
       logger.error('Failed to load profile', { error })
-      toast.error('Erro ao carregar perfil', 'Não foi possível carregar seus dados. Tente novamente.')
+      toast.error(
+        'Erro ao carregar perfil',
+        'Não foi possível carregar seus dados. Tente novamente.'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -122,7 +142,7 @@ export default function ProfilePage() {
         full_name: formData.full_name,
         username: formData.username,
         bio: formData.bio,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
       })
 
       setProfile(updated)
@@ -149,7 +169,7 @@ export default function ProfilePage() {
       setFormData({
         full_name: profile.full_name || user?.name || '',
         username: profile.username || user?.email?.split('@')[0] || '',
-        bio: profile.bio || ''
+        bio: profile.bio || '',
       })
     }
   }
@@ -158,7 +178,7 @@ export default function ProfilePage() {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
@@ -202,7 +222,7 @@ export default function ProfilePage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
 
@@ -212,9 +232,7 @@ export default function ProfilePage() {
       <div className="relative z-10 max-w-5xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Meu Perfil
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Meu Perfil</h1>
           <p className="text-gray-600 dark:text-gray-400">
             Gerencie suas informações pessoais e veja suas estatísticas
           </p>
@@ -236,7 +254,8 @@ export default function ProfilePage() {
                 ) : (
                   <div className="w-[120px] h-[120px] rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center ring-4 ring-white/50 dark:ring-gray-800/50">
                     <span className="text-4xl text-white font-bold">
-                      {formData.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
+                      {formData.full_name?.charAt(0)?.toUpperCase() ||
+                        user.email?.charAt(0)?.toUpperCase()}
                     </span>
                   </div>
                 )}
@@ -362,11 +381,15 @@ export default function ProfilePage() {
                     type="text"
                     value={formData.full_name}
                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white touch-manipulation"
                     placeholder="Seu nome completo"
+                    autoComplete="name"
+                    inputMode="text"
                   />
                 ) : (
-                  <p className="text-gray-900 dark:text-white">{formData.full_name || 'Não informado'}</p>
+                  <p className="text-gray-900 dark:text-white">
+                    {formData.full_name || 'Não informado'}
+                  </p>
                 )}
               </div>
 
@@ -393,9 +416,16 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+                        })
+                      }
+                      className="flex-1 min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white touch-manipulation"
                       placeholder="nome_usuario"
+                      autoComplete="username"
+                      inputMode="text"
                     />
                   </div>
                 ) : (
@@ -412,11 +442,14 @@ export default function ProfilePage() {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white"
+                    inputMode="text"
+                    className="w-full min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-white touch-manipulation"
                     placeholder="Conte um pouco sobre você..."
                   />
                 ) : (
-                  <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{formData.bio || 'Nenhuma bio adicionada ainda'}</p>
+                  <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                    {formData.bio || 'Nenhuma bio adicionada ainda'}
+                  </p>
                 )}
               </div>
 
@@ -449,23 +482,32 @@ export default function ProfilePage() {
                     title: 'Autenticação em Duas Etapas',
                     description: 'Adicione uma camada extra de segurança à sua conta',
                     actionLabel: 'Configurar',
-                    onAction: () => toast.info('Em breve', 'A autenticação em duas etapas estará disponível em breve.'),
+                    onAction: () =>
+                      toast.info(
+                        'Em breve',
+                        'A autenticação em duas etapas estará disponível em breve.'
+                      ),
                     badge: 'Recomendado',
-                    badgeColor: 'green'
+                    badgeColor: 'green',
                   },
                   {
                     title: 'Alterar Senha',
                     description: 'Mantenha sua conta segura com uma senha forte',
                     actionLabel: 'Alterar',
-                    onAction: () => toast.info('Em breve', 'A alteração de senha estará disponível em breve.')
+                    onAction: () =>
+                      toast.info('Em breve', 'A alteração de senha estará disponível em breve.'),
                   },
                   {
                     title: 'Sessões Ativas',
                     description: 'Gerencie os dispositivos conectados à sua conta',
                     actionLabel: 'Ver Sessões',
-                    onAction: () => toast.info('Em breve', 'O gerenciamento de sessões estará disponível em breve.'),
-                    showChevron: true
-                  }
+                    onAction: () =>
+                      toast.info(
+                        'Em breve',
+                        'O gerenciamento de sessões estará disponível em breve.'
+                      ),
+                    showChevron: true,
+                  },
                 ]}
                 showDividers={true}
               />
