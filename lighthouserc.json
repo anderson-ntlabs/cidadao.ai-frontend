@@ -3,34 +3,47 @@
     "collect": {
       "startServerCommand": "npm run build && npm run start",
       "startServerReadyPattern": "Ready",
-      "url": ["http://localhost:3000/pt", "http://localhost:3000/pt/login"],
+      "url": [
+        "http://localhost:3000/pt",
+        "http://localhost:3000/pt/login",
+        "http://localhost:3000/pt/app/mapa",
+        "http://localhost:3000/pt/app/chat"
+      ],
       "numberOfRuns": 3,
       "settings": {
-        "preset": "desktop",
-        "throttlingMethod": "simulate",
+        "preset": "mobile",
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1600,
+          "cpuSlowdownMultiplier": 4,
+          "requestLatencyMs": 150,
+          "downloadThroughputKbps": 1600,
+          "uploadThroughputKbps": 750
+        },
         "screenEmulation": {
-          "mobile": false,
-          "width": 1350,
-          "height": 940,
-          "deviceScaleFactor": 1,
+          "mobile": true,
+          "width": 360,
+          "height": 640,
+          "deviceScaleFactor": 2,
           "disabled": false
-        }
+        },
+        "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
       }
     },
     "assert": {
       "preset": "lighthouse:recommended",
       "assertions": {
-        "categories:performance": ["warn", { "minScore": 0.65 }],
+        "categories:performance": ["warn", { "minScore": 0.7 }],
         "categories:accessibility": ["error", { "minScore": 0.9 }],
         "categories:best-practices": ["warn", { "minScore": 0.85 }],
-        "categories:seo": ["warn", { "minScore": 0.8 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }],
 
-        "first-contentful-paint": ["warn", { "maxNumericValue": 3000 }],
-        "largest-contentful-paint": ["warn", { "maxNumericValue": 4500 }],
-        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.15 }],
-        "total-blocking-time": ["warn", { "maxNumericValue": 600 }],
-        "speed-index": ["warn", { "maxNumericValue": 5000 }],
-        "interactive": ["warn", { "maxNumericValue": 6000 }],
+        "first-contentful-paint": ["warn", { "maxNumericValue": 2500 }],
+        "largest-contentful-paint": ["warn", { "maxNumericValue": 3500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
+        "speed-index": ["warn", { "maxNumericValue": 4000 }],
+        "interactive": ["warn", { "maxNumericValue": 5000 }],
 
         "uses-responsive-images": "off",
         "offscreen-images": "off",
