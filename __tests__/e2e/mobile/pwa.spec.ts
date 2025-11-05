@@ -44,6 +44,9 @@ test.describe('PWA Manifest', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for page to be fully loaded
+    await page.waitForSelector('body', { state: 'visible', timeout: 10000 })
+
     const themeColor = await page.locator('meta[name="theme-color"]').getAttribute('content')
     expect(themeColor).toBeTruthy()
     expect(themeColor).toMatch(/^#[0-9a-fA-F]{6}$/) // Valid hex color
@@ -229,6 +232,9 @@ test.describe('Offline Functionality', () => {
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')
 
+    // Wait for app to be fully loaded
+    await page.waitForSelector('body', { state: 'visible', timeout: 10000 })
+
     // Go offline
     await context.setOffline(true)
 
@@ -249,6 +255,9 @@ test.describe('Offline Functionality', () => {
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')
 
+    // Wait for app to be fully loaded
+    await page.waitForSelector('body', { state: 'visible', timeout: 10000 })
+
     // Go offline
     await context.setOffline(true)
     await page.waitForTimeout(1000)
@@ -267,6 +276,9 @@ test.describe('Offline Functionality', () => {
   test('should allow basic navigation while offline', async ({ page, context }) => {
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')
+
+    // Wait for app to be fully loaded
+    await page.waitForSelector('body', { state: 'visible', timeout: 10000 })
 
     // Go offline
     await context.setOffline(true)

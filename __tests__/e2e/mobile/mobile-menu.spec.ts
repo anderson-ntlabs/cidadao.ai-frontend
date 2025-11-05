@@ -24,6 +24,12 @@ test.describe('Mobile Menu - Public Pages', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+
     const menuButton = page.getByRole('button', { name: /open menu/i })
     await expect(menuButton).toBeVisible()
 
@@ -36,6 +42,12 @@ test.describe('Mobile Menu - Public Pages', () => {
   test('should open menu when button is tapped', async ({ page }) => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
+
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
 
     // Tap menu button
     const menuButton = page.getByRole('button', { name: /open menu/i })
@@ -57,6 +69,12 @@ test.describe('Mobile Menu - Public Pages', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+
     // Open menu
     await page.getByRole('button', { name: /open menu/i }).tap()
     await page.waitForTimeout(500)
@@ -76,6 +94,12 @@ test.describe('Mobile Menu - Public Pages', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+
     // Open menu
     await page.getByRole('button', { name: /open menu/i }).tap()
     await page.waitForTimeout(500)
@@ -94,6 +118,12 @@ test.describe('Mobile Menu - Public Pages', () => {
   test('should navigate to page when menu item is tapped', async ({ page }) => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
+
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
 
     // Open menu
     await page.getByRole('button', { name: /open menu/i }).tap()
@@ -117,6 +147,12 @@ test.describe('Mobile Menu - Public Pages', () => {
   test('should lock body scroll when menu is open', async ({ page }) => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
+
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
 
     // Check initial body overflow
     const initialOverflow = await page.evaluate(() => document.body.style.overflow)
@@ -197,6 +233,12 @@ test.describe('Mobile Menu - Accessibility', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+
     // Menu button should have proper label
     const menuButton = page.getByRole('button', { name: /open menu/i })
     const ariaLabel = await menuButton.getAttribute('aria-label')
@@ -220,6 +262,12 @@ test.describe('Mobile Menu - Accessibility', () => {
   test('should support keyboard navigation', async ({ page }) => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
+
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
 
     // Tab to menu button
     await page.keyboard.press('Tab')
@@ -252,6 +300,12 @@ test.describe('Mobile Menu - Animation', () => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
 
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+
     const menuDrawer = page.getByRole('dialog', { name: /mobile navigation menu/i })
 
     // Initial state: menu should be off-screen (translate-x-full)
@@ -274,6 +328,12 @@ test.describe('Mobile Menu - Animation', () => {
   test('should have smooth backdrop fade-in', async ({ page }) => {
     await page.goto('/pt')
     await page.waitForLoadState('networkidle')
+
+    // Wait for menu button to be ready
+    await page.waitForSelector('button[aria-label*="menu"], button[aria-label*="Menu"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
 
     const backdrop = page.locator('.fixed.inset-0.z-40.bg-black\\/50')
 
