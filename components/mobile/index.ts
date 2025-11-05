@@ -33,3 +33,25 @@ export type { SafeAreaViewProps } from './safe-area-view'
 
 export { HapticButton, HapticIconButton, HapticFAB } from './haptic-button'
 export type { HapticButtonProps } from './haptic-button'
+
+// Sprint 5 components - Mobile Chat & Navigation
+export {
+  MobileChatContainer,
+  MobileChatMessageList,
+  MobileChatHeader,
+} from './mobile-chat-container'
+export type {
+  MobileChatContainerProps,
+  MobileChatMessageListProps,
+  MobileChatHeaderProps,
+} from './mobile-chat-container'
+
+export { MobileChatInput, MobileChatSuggestions, MobileChatActionBar } from './mobile-chat-input'
+export type {
+  MobileChatInputProps,
+  MobileChatSuggestionsProps,
+  MobileChatActionBarProps,
+} from './mobile-chat-input'
+
+export { BottomNavigation, CompactBottomNavigation } from './bottom-navigation'
+export type { BottomNavigationProps, BottomNavItem } from './bottom-navigation'
