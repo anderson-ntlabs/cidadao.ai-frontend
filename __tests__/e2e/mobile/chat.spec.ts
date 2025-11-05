@@ -28,6 +28,16 @@ test.describe('Mobile Chat Experience', () => {
     // Navigate to chat page
     await page.goto('/pt/app/chat')
     await page.waitForLoadState('networkidle')
+
+    // Wait for critical elements to be ready
+    await page.waitForSelector('[data-testid="chat-messages"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
+    await page.waitForSelector(
+      'input[placeholder*="Digite sua mensagem"], input[placeholder*="Type your message"]',
+      { state: 'visible', timeout: 10000 }
+    )
   })
 
   test('should display chat interface correctly on mobile', async ({ page }) => {

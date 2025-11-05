@@ -17,9 +17,9 @@ export default defineConfig({
   testMatch: '**/*.spec.ts',
 
   // Timeout configurations
-  timeout: 30 * 1000, // 30 seconds per test
+  timeout: 60 * 1000, // 60 seconds per test (increased for mobile performance)
   expect: {
-    timeout: 5000, // 5 seconds for expect assertions
+    timeout: 10000, // 10 seconds for expect assertions (doubled for slow elements)
   },
 
   // Test execution

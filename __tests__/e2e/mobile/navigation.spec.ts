@@ -26,6 +26,12 @@ test.describe('Mobile Bottom Navigation', () => {
 
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')
+
+    // Wait for bottom navigation to be ready
+    await page.waitForSelector('[data-testid="bottom-navigation"]', {
+      state: 'visible',
+      timeout: 10000,
+    })
   })
 
   test('should display bottom navigation bar', async ({ page }) => {
