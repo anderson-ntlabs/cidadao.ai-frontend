@@ -236,6 +236,7 @@ export function NavigationV2Drawer({
 
       {/* Drawer */}
       <div
+        data-testid="navigation-drawer"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-900',
           'transform transition-transform duration-300 ease-in-out lg:hidden',

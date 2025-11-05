@@ -133,6 +133,7 @@ export function BottomNavigation({
 
   return (
     <nav
+      data-testid="bottom-navigation"
       className={cn(
         'bottom-navigation',
         'fixed bottom-0 left-0 right-0 z-50',
