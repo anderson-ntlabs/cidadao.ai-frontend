@@ -375,6 +375,7 @@ export default function ChatPage() {
           maxLength={2000}
           disabled={!canSendMessage}
           showCharCount
+          locale="pt"
         />
       </MobileChatContainer>
     )

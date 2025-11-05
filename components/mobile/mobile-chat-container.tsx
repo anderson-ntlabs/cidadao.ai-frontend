@@ -127,6 +127,7 @@ export function MobileChatContainer({
     >
       {/* Message List Area */}
       <div
+        data-testid="chat-messages"
         ref={messageListRef}
         className={cn(
           'message-list flex-1 overflow-y-auto overscroll-none',

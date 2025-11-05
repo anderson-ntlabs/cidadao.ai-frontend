@@ -57,6 +57,9 @@ export interface MobileChatInputProps {
 
   /** Auto-focus on mount */
   autoFocus?: boolean
+
+  /** Locale for internationalization */
+  locale?: 'pt' | 'en'
 }
 
 export function MobileChatInput({
@@ -70,6 +73,7 @@ export function MobileChatInput({
   className,
   showCharCount = false,
   autoFocus = false,
+  locale = 'pt',
 }: MobileChatInputProps) {
   // Controlled vs uncontrolled state
   const [internalValue, setInternalValue] = useState('')
@@ -220,7 +224,7 @@ export function MobileChatInput({
             tapTarget.large, // 56px touch target
             canSend && 'hover:bg-blue-600 active:scale-95'
           )}
-          aria-label="Send message"
+          aria-label={locale === 'pt' ? 'Enviar mensagem' : 'Send message'}
         >
           {loading ? (
             <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
