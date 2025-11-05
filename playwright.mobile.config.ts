@@ -37,8 +37,8 @@ export default defineConfig({
 
   // Shared settings for all projects
   use: {
-    // Base URL
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000',
+    // Base URL (port 3001 to avoid conflict with Grafana on port 3000)
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3001',
 
     // Collect trace on failure
     trace: 'on-first-retry',
@@ -173,11 +173,11 @@ export default defineConfig({
     },
   ],
 
-  // Web server for local testing
+  // Web server for local testing (port 3001 to avoid Grafana conflict)
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'npm run dev:test',
+    port: 3001,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000, // 3 minutes for initial compilation
   },
 })
