@@ -37,6 +37,7 @@ export const mockUser: TestUser = {
  * Setup authentication for E2E tests
  *
  * Creates a mock authenticated session by:
+ * - Intercepting Supabase auth API calls with mock responses
  * - Setting Supabase auth cookies
  * - Configuring localStorage with user data
  * - Marking user as authenticated
@@ -44,6 +45,61 @@ export const mockUser: TestUser = {
 export async function setupAuth(page: Page, context: BrowserContext): Promise<void> {
   // Mock Supabase access token (JWT format)
   const mockAccessToken = createMockJWT(mockUser)
+
+  // Intercept Supabase auth API calls and return mock session
+  await page.route('**/auth/v1/token**', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        access_token: mockAccessToken,
+        token_type: 'bearer',
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        refresh_token: 'mock-refresh-token',
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+          aud: 'authenticated',
+          role: 'authenticated',
+          user_metadata: {
+            name: mockUser.name,
+            avatar_url: mockUser.avatar,
+          },
+          app_metadata: {
+            provider: 'email',
+            providers: ['email'],
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      }),
+    })
+  })
+
+  // Intercept Supabase user session check
+  await page.route('**/auth/v1/user**', (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: mockUser.id,
+        email: mockUser.email,
+        aud: 'authenticated',
+        role: 'authenticated',
+        user_metadata: {
+          name: mockUser.name,
+          avatar_url: mockUser.avatar,
+        },
+        app_metadata: {
+          provider: 'email',
+          providers: ['email'],
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }),
+    })
+  })
 
   // Set Supabase auth cookies
   await context.addCookies([
