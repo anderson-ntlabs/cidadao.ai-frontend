@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { setupAuth } from '../helpers/auth.setup'
 
 /**
  * Mobile Chat E2E Tests
@@ -20,7 +21,10 @@ test.use({
 })
 
 test.describe('Mobile Chat Experience', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Setup authentication
+    await setupAuth(page, context)
+
     // Navigate to chat page
     await page.goto('/pt/app/chat')
     await page.waitForLoadState('networkidle')
