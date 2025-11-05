@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { setupAuth } from '../../helpers/auth.setup'
 
 /**
  * PWA (Progressive Web App) E2E Tests
@@ -219,6 +220,11 @@ test.describe('Update Notification', () => {
 })
 
 test.describe('Offline Functionality', () => {
+  test.beforeEach(async ({ page, context }) => {
+    // Setup authentication for authenticated routes
+    await setupAuth(page, context)
+  })
+
   test('should display offline banner when connection is lost', async ({ page, context }) => {
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')

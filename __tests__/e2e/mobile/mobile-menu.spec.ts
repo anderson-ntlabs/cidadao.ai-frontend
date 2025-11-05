@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { setupAuth } from '../../helpers/auth.setup'
 
 /**
  * Mobile Menu E2E Tests
@@ -152,6 +153,11 @@ test.describe('Mobile Menu - Public Pages', () => {
 })
 
 test.describe('Mobile Menu - Authenticated Pages', () => {
+  test.beforeEach(async ({ page, context }) => {
+    // Setup authentication for authenticated routes
+    await setupAuth(page, context)
+  })
+
   test('should NOT display menu button on authenticated pages', async ({ page }) => {
     const authenticatedPages = [
       '/pt/app',
