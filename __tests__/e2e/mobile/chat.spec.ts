@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
-import { setupAuth } from '../helpers/auth.setup'
+import { setupAuth } from '../../helpers/auth.setup'
 
 /**
  * Mobile Chat E2E Tests
