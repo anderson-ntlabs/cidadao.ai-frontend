@@ -43,78 +43,130 @@ export const mockUser: TestUser = {
  * - Marking user as authenticated
  */
 export async function setupAuth(page: Page, context: BrowserContext): Promise<void> {
+  // Set header to bypass auth in middleware
+  await page.setExtraHTTPHeaders({
+    'x-playwright-test': 'true',
+  })
+
   // Mock Supabase access token (JWT format)
   const mockAccessToken = createMockJWT(mockUser)
 
-  // Intercept Supabase auth API calls and return mock session
-  await page.route('**/auth/v1/token**', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        access_token: mockAccessToken,
-        token_type: 'bearer',
-        expires_in: 3600,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        refresh_token: 'mock-refresh-token',
-        user: {
-          id: mockUser.id,
-          email: mockUser.email,
-          aud: 'authenticated',
-          role: 'authenticated',
-          user_metadata: {
-            name: mockUser.name,
-            avatar_url: mockUser.avatar,
-          },
-          app_metadata: {
-            provider: 'email',
-            providers: ['email'],
-          },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      }),
-    })
-  })
+  const mockUserData = {
+    id: mockUser.id,
+    email: mockUser.email,
+    aud: 'authenticated',
+    role: 'authenticated',
+    user_metadata: {
+      name: mockUser.name,
+      avatar_url: mockUser.avatar,
+    },
+    app_metadata: {
+      provider: 'email',
+      providers: ['email'],
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
 
-  // Intercept Supabase user session check
-  await page.route('**/auth/v1/user**', (route) => {
+  // Intercept ALL Supabase auth API calls and return mock authenticated user
+  // This needs to be done BEFORE any navigation to bypass middleware checks
+  await page.route('**/*.supabase.co/auth/v1/**', (route) => {
+    const url = route.request().url()
+
+    // Handle getUser / user endpoint - most important for middleware
+    if (url.includes('/auth/v1/user')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        },
+        body: JSON.stringify(mockUserData),
+      })
+    }
+
+    // Handle token endpoint
+    if (url.includes('/auth/v1/token')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        },
+        body: JSON.stringify({
+          access_token: mockAccessToken,
+          token_type: 'bearer',
+          expires_in: 3600,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          refresh_token: 'mock-refresh-token',
+          user: mockUserData,
+        }),
+      })
+    }
+
+    // Handle session endpoint
+    if (url.includes('/auth/v1/session')) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        },
+        body: JSON.stringify({
+          access_token: mockAccessToken,
+          refresh_token: 'mock-refresh-token',
+          expires_in: 3600,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          user: mockUserData,
+        }),
+      })
+    }
+
+    // For any other auth endpoint, return success
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        id: mockUser.id,
-        email: mockUser.email,
-        aud: 'authenticated',
-        role: 'authenticated',
-        user_metadata: {
-          name: mockUser.name,
-          avatar_url: mockUser.avatar,
-        },
-        app_metadata: {
-          provider: 'email',
-          providers: ['email'],
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }),
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': '*',
+      },
+      body: JSON.stringify({ success: true }),
     })
   })
 
   // Set Supabase auth cookies
+  // Supabase uses sb-<project-ref>-auth-token format, but we'll use a generic project ref for testing
+  // The actual cookie format needs to match what Supabase SSR expects
+  const mockAuthToken = {
+    access_token: mockAccessToken,
+    refresh_token: 'mock-refresh-token',
+    expires_in: 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    token_type: 'bearer',
+    user: {
+      id: mockUser.id,
+      email: mockUser.email,
+      aud: 'authenticated',
+      role: 'authenticated',
+      user_metadata: {
+        name: mockUser.name,
+        avatar_url: mockUser.avatar,
+      },
+    },
+  }
+
+  // Set the Supabase auth token cookie (base64 encoded JSON)
   await context.addCookies([
     {
-      name: 'sb-access-token',
-      value: mockAccessToken,
-      domain: 'localhost',
-      path: '/',
-      httpOnly: false,
-      secure: false,
-      sameSite: 'Lax',
-    },
-    {
-      name: 'sb-refresh-token',
-      value: 'mock-refresh-token',
+      name: 'sb-localhost-auth-token',
+      value: Buffer.from(JSON.stringify(mockAuthToken)).toString('base64'),
       domain: 'localhost',
       path: '/',
       httpOnly: false,
@@ -128,6 +180,9 @@ export async function setupAuth(page: Page, context: BrowserContext): Promise<vo
 
   // Set localStorage with auth data
   await page.evaluate((user) => {
+    // Set E2E test mode flag to bypass auth redirects
+    localStorage.setItem('e2e_test_mode', 'true')
+
     // Set user data
     localStorage.setItem('user', JSON.stringify(user))
 
@@ -197,6 +252,7 @@ export async function clearAuth(page: Page, context: BrowserContext): Promise<vo
 
   // Clear localStorage
   await page.evaluate(() => {
+    localStorage.removeItem('e2e_test_mode')
     localStorage.removeItem('user')
     localStorage.removeItem('isAuthenticated')
     localStorage.removeItem('supabase.auth.token')

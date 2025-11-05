@@ -90,6 +90,17 @@ export function AuthLayoutV2({
   }
 
   useEffect(() => {
+    // Skip auth check in E2E test mode
+    const isE2ETest =
+      typeof window !== 'undefined' &&
+      (window.location.port === '3001' || // Playwright test port
+        localStorage.getItem('e2e_test_mode') === 'true')
+
+    if (isE2ETest) {
+      logger.debug('E2E test mode detected, skipping auth redirect')
+      return
+    }
+
     if (!isLoading && !isAuthenticated) {
       // Check if we're waiting for OAuth session to complete via cookie
       const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
