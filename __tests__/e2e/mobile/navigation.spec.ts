@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { setupAuth } from '../../helpers/auth.setup'
 
 /**
  * Mobile Navigation & Gestures E2E Tests
@@ -19,7 +20,10 @@ test.use({
 })
 
 test.describe('Mobile Bottom Navigation', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Setup authentication for authenticated routes
+    await setupAuth(page, context)
+
     await page.goto('/pt/app')
     await page.waitForLoadState('networkidle')
   })
