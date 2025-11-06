@@ -34,10 +34,6 @@ export default function ManifestoPage() {
             <p className="text-sm font-medium text-green-800 dark:text-green-200">
               "Antropofagia" (1929) - Tarsila do Amaral
             </p>
-            <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-              Símbolo do Movimento Antropofágico: devorando e transformando influências externas em
-              algo genuinamente brasileiro
-            </p>
           </div>
         </div>
 
