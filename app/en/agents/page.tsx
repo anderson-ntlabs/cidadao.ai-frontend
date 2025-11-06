@@ -26,7 +26,7 @@ export default function AgentsPage() {
               <Card key={agent.id} variant="elevated" className="overflow-hidden">
                 <div className="relative h-48 bg-gradient-to-br from-green-400 to-blue-500">
                   <Image
-                    src={`/agents/${agent.image}`}
+                    src={agent.image}
                     alt={agent.name}
                     fill
                     className="object-cover mix-blend-overlay opacity-50"
@@ -34,7 +34,7 @@ export default function AgentsPage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
                       <Image
-                        src={`/agents/${agent.image}`}
+                        src={agent.image}
                         alt={agent.name}
                         width={128}
                         height={128}
