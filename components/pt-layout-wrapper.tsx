@@ -23,8 +23,12 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
     pathname.includes('/perfil') ||
     pathname.includes('/settings')
 
-  // Check if we're on the landing page (root locale path)
+  // Check if we're on the landing page (root locale path) or login page
   const isLandingPage = pathname === `/${locale}` || pathname === `/${locale}/`
+  const isLoginPage = pathname === `/${locale}/login` || pathname === `/${locale}/login/`
+
+  // Use simplified header for landing page AND login page
+  const useSimplifiedHeader = isLandingPage || isLoginPage
 
   const publicNavigationItems: NavigationItem[] =
     locale === 'pt'
@@ -47,8 +51,8 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
     <>
       {/* Show appropriate header based on route */}
       {!isAuthenticatedRoute &&
-        (isLandingPage ? (
-          // Simplified header for landing page
+        (useSimplifiedHeader ? (
+          // Simplified header for landing page and login page
           <SimplifiedHeader locale={locale} />
         ) : (
           // Full header for other public pages
