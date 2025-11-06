@@ -159,6 +159,7 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             {/* Mobile Menu Button - Only show on landing/public pages, not in authenticated app */}
             {!pathname.startsWith('/pt/app/') && !pathname.startsWith('/en/app/') && (
               <Button
+                data-testid="mobile-menu-trigger"
                 variant="ghost"
                 size="icon"
                 className="lg:hidden"

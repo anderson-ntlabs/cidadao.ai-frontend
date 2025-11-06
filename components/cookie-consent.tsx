@@ -39,7 +39,8 @@ export function CookieConsent({ locale }: CookieConsentProps) {
   const texts = {
     pt: {
       title: 'Cookies & Privacidade',
-      message: 'Usamos cookies essenciais para funcionamento do site e coletamos dados anônimos de uso para pesquisa científica sobre transparência pública.',
+      message:
+        'Usamos cookies essenciais para funcionamento do site e coletamos dados anônimos de uso para pesquisa científica sobre transparência pública.',
       features: [
         '🍪 Cookies essenciais',
         '📊 Analytics anônimos (PostHog)',
@@ -48,11 +49,12 @@ export function CookieConsent({ locale }: CookieConsentProps) {
       policy: 'Política de Privacidade',
       cookies: 'Política de Cookies',
       accept: 'Aceitar Tudo',
-      reject: 'Apenas Essenciais'
+      reject: 'Apenas Essenciais',
     },
     en: {
       title: 'Cookies & Privacy',
-      message: 'We use essential cookies for site functionality and collect anonymous usage data for scientific research on public transparency.',
+      message:
+        'We use essential cookies for site functionality and collect anonymous usage data for scientific research on public transparency.',
       features: [
         '🍪 Essential cookies',
         '📊 Anonymous analytics (PostHog)',
@@ -61,8 +63,8 @@ export function CookieConsent({ locale }: CookieConsentProps) {
       policy: 'Privacy Policy',
       cookies: 'Cookie Policy',
       accept: 'Accept All',
-      reject: 'Essential Only'
-    }
+      reject: 'Essential Only',
+    },
   }
 
   const t = texts[locale]
@@ -77,9 +79,7 @@ export function CookieConsent({ locale }: CookieConsentProps) {
               <div className="p-2 bg-white/20 rounded-lg">
                 <Cookie className="h-5 w-5 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                {t.title}
-              </h3>
+              <h3 className="text-base sm:text-lg font-bold text-white">{t.title}</h3>
             </div>
             <button
               onClick={handleReject}
@@ -91,17 +91,12 @@ export function CookieConsent({ locale }: CookieConsentProps) {
           </div>
 
           {/* Message */}
-          <p className="text-sm text-white/95 leading-relaxed">
-            {t.message}
-          </p>
+          <p className="text-sm text-white/95 leading-relaxed">{t.message}</p>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-white/90">
             {t.features.map((feature, index) => (
-              <div
-                key={index}
-                className="bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm"
-              >
+              <div key={index} className="bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
                 {feature}
               </div>
             ))}
@@ -124,11 +119,11 @@ export function CookieConsent({ locale }: CookieConsentProps) {
               {t.cookies}
             </Link>
             <Link
-              href={`/${locale}/sobre`}
+              href={`/${locale}/about`}
               className="hover:text-white hover:underline flex items-center gap-1"
             >
               <GraduationCap className="h-3 w-3" />
-              {locale === 'pt' ? 'Pesquisa Científica' : 'Scientific Research'}
+              {locale === 'pt' ? 'Conheça o Projeto' : 'About the Project'}
             </Link>
           </div>
 

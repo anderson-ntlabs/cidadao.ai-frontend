@@ -68,8 +68,27 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+    font-family:
+      var(--font-inter),
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
+  /* Accessibility: Respect user's motion preferences (WCAG 2.1 Level AAA - 2.3.3 Animation from Interactions) */
+  /* Reduces battery impact on mobile and prevents vestibular motion disorders */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -95,19 +114,51 @@
       linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
   }
-  
+
   /* Topography pattern - elegant contour lines */
   .bg-topography-pattern {
     background-color: transparent;
-    background-image: 
-      radial-gradient(circle at 20% 80%, transparent 50%, rgba(16, 185, 129, 0.1) 50.5%, rgba(16, 185, 129, 0.1) 55%, transparent 55.5%),
-      radial-gradient(circle at 80% 20%, transparent 50%, rgba(59, 130, 246, 0.1) 50.5%, rgba(59, 130, 246, 0.1) 55%, transparent 55.5%),
-      radial-gradient(circle at 40% 40%, transparent 45%, rgba(234, 179, 8, 0.1) 45.5%, rgba(234, 179, 8, 0.1) 50%, transparent 50.5%),
-      radial-gradient(circle at 60% 60%, transparent 45%, rgba(16, 185, 129, 0.1) 45.5%, rgba(16, 185, 129, 0.1) 50%, transparent 50.5%);
-    background-size: 400px 400px, 350px 350px, 450px 450px, 300px 300px;
-    background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
+    background-image:
+      radial-gradient(
+        circle at 20% 80%,
+        transparent 50%,
+        rgba(16, 185, 129, 0.1) 50.5%,
+        rgba(16, 185, 129, 0.1) 55%,
+        transparent 55.5%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        transparent 50%,
+        rgba(59, 130, 246, 0.1) 50.5%,
+        rgba(59, 130, 246, 0.1) 55%,
+        transparent 55.5%
+      ),
+      radial-gradient(
+        circle at 40% 40%,
+        transparent 45%,
+        rgba(234, 179, 8, 0.1) 45.5%,
+        rgba(234, 179, 8, 0.1) 50%,
+        transparent 50.5%
+      ),
+      radial-gradient(
+        circle at 60% 60%,
+        transparent 45%,
+        rgba(16, 185, 129, 0.1) 45.5%,
+        rgba(16, 185, 129, 0.1) 50%,
+        transparent 50.5%
+      );
+    background-size:
+      400px 400px,
+      350px 350px,
+      450px 450px,
+      300px 300px;
+    background-position:
+      0% 0%,
+      100% 0%,
+      0% 100%,
+      100% 100%;
   }
-  
+
   /* Diagonal stripes pattern */
   .bg-stripes-diagonal {
     background-image: repeating-linear-gradient(
@@ -118,26 +169,32 @@
       rgba(16, 185, 129, 0.5) 70px
     );
   }
-  
+
   /* Gradient conic for rotating effect */
   .bg-gradient-conic {
-    background: conic-gradient(from 0deg, var(--tw-gradient-from), var(--tw-gradient-to), var(--tw-gradient-from));
+    background: conic-gradient(
+      from 0deg,
+      var(--tw-gradient-from),
+      var(--tw-gradient-to),
+      var(--tw-gradient-from)
+    );
   }
-  
+
   /* Agent float animation */
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translate(-50%, -50%) translateY(0px);
     }
     50% {
       transform: translate(-50%, -50%) translateY(-10px);
     }
   }
-  
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
-  
+
   /* Fade in animation for elements */
   @keyframes fade-in {
     from {
@@ -149,11 +206,11 @@
       transform: translateY(0);
     }
   }
-  
+
   .animate-in {
     animation: fade-in 0.5s ease-out forwards;
   }
-  
+
   /* Blob animation */
   @keyframes blob {
     0% {
@@ -169,19 +226,19 @@
       transform: translate(0px, 0px) scale(1);
     }
   }
-  
+
   .animate-blob {
     animation: blob 15s ease-in-out infinite;
   }
-  
+
   .animation-delay-2000 {
     animation-delay: 2s;
   }
-  
+
   .animation-delay-4000 {
     animation-delay: 4s;
   }
-  
+
   /* Slow spin animation */
   @keyframes spin-slow {
     from {
@@ -191,11 +248,11 @@
       transform: rotate(360deg);
     }
   }
-  
+
   .animate-spin-slow {
     animation: spin-slow 120s linear infinite;
   }
-  
+
   /* Scroll animations */
   @keyframes slide-up {
     from {
@@ -207,7 +264,7 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes slide-left {
     from {
       opacity: 0;
@@ -218,7 +275,7 @@
       transform: translateX(0);
     }
   }
-  
+
   @keyframes slide-right {
     from {
       opacity: 0;
@@ -229,7 +286,7 @@
       transform: translateX(0);
     }
   }
-  
+
   @keyframes scale-up {
     from {
       opacity: 0;
@@ -240,23 +297,23 @@
       transform: scale(1);
     }
   }
-  
+
   .animate-slide-up {
     animation: slide-up 0.6s ease-out forwards;
   }
-  
+
   .animate-slide-left {
     animation: slide-left 0.6s ease-out forwards;
   }
-  
+
   .animate-slide-right {
     animation: slide-right 0.6s ease-out forwards;
   }
-  
+
   .animate-scale-up {
     animation: scale-up 0.6s ease-out forwards;
   }
-  
+
   @keyframes fade-in-up {
     from {
       opacity: 0;
@@ -267,54 +324,74 @@
       transform: translateY(0);
     }
   }
-  
+
   .animate-fade-in-up {
     animation: fade-in-up 0.6s ease-out forwards;
   }
-  
+
   /* Stagger children animations */
   .stagger-children > * {
     animation: slide-up 0.6s ease-out forwards;
   }
-  
-  .stagger-children > *:nth-child(1) { animation-delay: 0s; }
-  .stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
-  .stagger-children > *:nth-child(3) { animation-delay: 0.2s; }
-  .stagger-children > *:nth-child(4) { animation-delay: 0.3s; }
-  .stagger-children > *:nth-child(5) { animation-delay: 0.4s; }
-  .stagger-children > *:nth-child(6) { animation-delay: 0.5s; }
-  
+
+  .stagger-children > *:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .stagger-children > *:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .stagger-children > *:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .stagger-children > *:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .stagger-children > *:nth-child(5) {
+    animation-delay: 0.4s;
+  }
+  .stagger-children > *:nth-child(6) {
+    animation-delay: 0.5s;
+  }
+
   /* Hover effects */
   .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
   }
-  
+
   .hover-lift:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.2);
   }
-  
+
   /* Glow effect */
   .hover-glow {
     transition: box-shadow 0.3s ease;
   }
-  
+
   .hover-glow:hover {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
-  
+
   /* Text gradient animation */
   @keyframes gradient-text-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
-  
+
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient-text-shift 3s ease infinite;
   }
-  
+
   /* Overlay gradient animation */
   @keyframes gradient-shift {
     0% {
@@ -329,11 +406,11 @@
       opacity: 0.3;
     }
   }
-  
+
   .animate-gradient-shift {
     animation: gradient-shift 20s ease-in-out infinite;
   }
-  
+
   /* Toast Animations */
   @keyframes slide-in-right {
     from {
@@ -345,11 +422,11 @@
       opacity: 1;
     }
   }
-  
+
   .animate-slide-in-right {
     animation: slide-in-right 0.3s ease-out;
   }
-  
+
   /* Tour Guide Styles */
   .tour-highlight {
     position: relative;

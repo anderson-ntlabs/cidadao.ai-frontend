@@ -16,15 +16,22 @@
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "description": "Ver investigações",
-      "url": "/pt/dashboard",
+      "description": "Ver investigações e estatísticas",
+      "url": "/pt/app/dashboard",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Chat com IA",
       "short_name": "Chat",
-      "description": "Conversar com Abaporu",
-      "url": "/pt/chat",
+      "description": "Conversar com agentes IA",
+      "url": "/pt/app/chat",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Investigações",
+      "short_name": "Investigações",
+      "description": "Ver suas investigações",
+      "url": "/pt/app/investigacoes",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],

@@ -22,6 +22,7 @@ import { useNotificationStore } from '@/store/notification-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/hooks/use-toast'
+import { useHaptic } from '@/hooks/use-haptic'
 
 interface MobileNavItem {
   name: string
@@ -64,6 +65,7 @@ export function MobileNavV2() {
   const { getUnreadCount } = useNotificationStore()
   const { user, logout } = useAuth()
   const menuRef = useRef<HTMLDivElement>(null)
+  const { vibrate } = useHaptic()
 
   // Update notification badge
   const unreadCount = getUnreadCount()
@@ -201,6 +203,7 @@ export function MobileNavV2() {
 
             <button
               onClick={() => {
+                vibrate('medium')
                 setIsMenuOpen(false)
                 handleLogout()
               }}
@@ -234,6 +237,7 @@ export function MobileNavV2() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => vibrate('light')}
                 className={cn(
                   'flex flex-col items-center justify-center',
                   'relative py-2 px-3 min-w-[64px] min-h-[56px]',
@@ -290,7 +294,10 @@ export function MobileNavV2() {
                 : 'text-gray-600 dark:text-gray-400'
             )}
             aria-label="Menu do usuário"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => {
+              vibrate('light')
+              setIsMenuOpen(!isMenuOpen)
+            }}
           >
             <div className="relative">
               {isMenuOpen ? (

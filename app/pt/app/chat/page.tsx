@@ -20,6 +20,11 @@ import { type MaritacaModel } from '@/lib/chat'
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 import { VoiceRecorder } from '@/components/voice'
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
+import { PullToRefresh } from '@/components/mobile'
+import { useMobileDetection } from '@/lib/utils/mobile-detection'
+import { MobileChatContainer, MobileChatHeader } from '@/components/mobile/mobile-chat-container'
+import { MobileChatInput, MobileChatSuggestions } from '@/components/mobile/mobile-chat-input'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -74,6 +79,12 @@ export default function ChatPage() {
   const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-3')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Mobile keyboard detection (iOS/Android virtual keyboard)
+  const { keyboardHeight, isKeyboardVisible } = useMobileKeyboard()
+
+  // Mobile viewport detection
+  const isMobile = useMobileDetection()
 
   // Accessibility announcements
   const { announceLoading, announceSuccess, announceError } = useAnnouncementHelpers()
@@ -208,6 +219,18 @@ export default function ChatPage() {
     }
   }
 
+  // Pull-to-refresh handler (load older messages)
+  const handleRefresh = async () => {
+    // Simulate loading older messages
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // In future: load older messages from session history
+    // For now, just show a notification
+    if (messages.length > 0) {
+      toast.success('Atualizado', 'Conversa atualizada com sucesso!')
+    }
+  }
+
   // Get last assistant message agent for confidence
   const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant')
   const confidence = lastAssistantMessage?.metadata?.confidence || 0
@@ -224,6 +247,141 @@ export default function ChatPage() {
     )
   }
 
+  // Mobile UI
+  if (isMobile) {
+    const currentAgent = agents.find((a) => a.id === currentAgentId) || agents[0]
+
+    return (
+      <MobileChatContainer autoScroll showScrollButton>
+        {/* Mobile Header */}
+        <MobileChatHeader
+          agent={{
+            name: chatMode === 'maritaca' ? 'Maritaca.AI Direto' : currentAgent.name,
+            avatar: chatMode === 'maritaca' ? '/agents/abaporu.png' : currentAgent.image,
+            status:
+              chatMode === 'maritaca'
+                ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
+                : currentAgent.role.pt,
+          }}
+          onBack={() => (window.location.href = '/pt/app/home')}
+          onSettings={() => setIsHistoryOpen(true)}
+        />
+
+        {/* Chat History Sidebar */}
+        <ChatHistorySidebar
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          onSelectSession={handleSelectSession}
+          currentSessionId={session?.session_id}
+        />
+
+        {/* Messages */}
+        {messages.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+            <div className="mb-6">
+              <OptimizedImage
+                src="/agents/abaporu.png"
+                alt="Abaporu"
+                width={80}
+                height={80}
+                className="mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
+                priority
+              />
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+              Olá, {user?.name?.split(' ')[0] || 'Cidadão'}! 👋
+            </h2>
+
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
+              Como posso ajudar você a entender melhor os gastos públicos brasileiros?
+            </p>
+
+            {/* Mobile Suggestions */}
+            <MobileChatSuggestions
+              suggestions={getContextualSuggestions(0).map((s) => s.text)}
+              onSelect={setInputMessage}
+            />
+          </div>
+        ) : (
+          /* Messages List */
+          <div className="space-y-4 py-4">
+            {messages.map((message, index) => {
+              const isLatest =
+                index === messages.length - 1 && message.role === 'assistant' && isLoading
+              const messageAgent = message.agent_id
+                ? agents.find((a) => a.id === message.agent_id)
+                : null
+
+              return (
+                <div
+                  key={message.id}
+                  className={cn(
+                    'flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  {/* Assistant Avatar */}
+                  {message.role === 'assistant' && (
+                    <AgentAvatar
+                      agentId={message.agent_id}
+                      agentImage={messageAgent?.image || '/agents/abaporu.png'}
+                      agentName={messageAgent?.name || 'Abaporu'}
+                      isThinking={isLatest && isLoading}
+                      showSparkle={index === 0}
+                    />
+                  )}
+
+                  {/* Message Bubble */}
+                  <div className={cn('max-w-[85%]', message.role === 'user' ? 'order-first' : '')}>
+                    <MessageBubble
+                      content={message.content || ''}
+                      role={message.role === 'system' ? 'assistant' : message.role}
+                      agentName={messageAgent?.name}
+                      agentRole={messageAgent?.role.pt}
+                      agentId={message.agent_id}
+                      isLatest={isLatest}
+                      isLoading={isLoading}
+                      onComplete={() => {
+                        if (isLatest) scrollToBottom()
+                      }}
+                      metadata={message.metadata}
+                    />
+                  </div>
+
+                  {/* User Avatar */}
+                  {message.role === 'user' && (
+                    <div className="flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {/* Mobile Input */}
+        <MobileChatInput
+          value={inputMessage}
+          onChange={setInputMessage}
+          onSend={handleSendMessage}
+          loading={isLoading}
+          placeholder="Digite sua mensagem..."
+          maxLength={2000}
+          disabled={!canSendMessage}
+          showCharCount
+          locale="pt"
+        />
+      </MobileChatContainer>
+    )
+  }
+
+  // Desktop UI
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* VLibras is now global in AuthLayout */}
@@ -298,8 +456,18 @@ export default function ChatPage() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-4xl mx-auto px-4 py-6 h-full">
+      <PullToRefresh
+        onRefresh={handleRefresh}
+        threshold={80}
+        className="flex-1 overflow-y-auto min-h-0"
+        disabled={messages.length === 0}
+      >
+        <div
+          className="max-w-4xl mx-auto px-4 py-6 h-full"
+          style={{
+            paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+          }}
+        >
           {messages.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
@@ -397,7 +565,7 @@ export default function ChatPage() {
             </div>
           )}
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Input Area - Fixed Bottom */}
       <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">

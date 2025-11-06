@@ -2,14 +2,15 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '../../styles/globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
   title: 'Cidadão.AI',
-  description: 'Multi-agent artificial intelligence system to democratize access to public data and strengthen Brazilian government transparency.',
+  description:
+    'Multi-agent artificial intelligence system to democratize access to public data and strengthen Brazilian government transparency.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -22,7 +23,10 @@ export function generateViewport() {
   return {
     width: 'device-width',
     initialScale: 1,
+    // Allow zoom for accessibility (WCAG 2.1 Level AA - 1.4.4 Resize Text)
+    // maximumScale: 5 allows users to zoom up to 500% without restrictions
     maximumScale: 5,
+    viewportFit: 'cover', // Support for iPhone notch and safe areas
     themeColor: '#10b981',
   }
 }
@@ -37,12 +41,9 @@ import { SentryInit } from '@/components/sentry-init'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
+import { OfflineBanner } from '@/components/mobile'
 
-export default function ENLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function ENLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
@@ -50,8 +51,16 @@ export default function ENLayout({
 
         {/* Resource Hints - Performance Optimization */}
         {/* Preconnect to critical origins */}
-        <link rel="preconnect" href="https://cidadao-api-production.up.railway.app" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://pbsiyuattnwgohvkkkks.supabase.co" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://cidadao-api-production.up.railway.app"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://pbsiyuattnwgohvkkkks.supabase.co"
+          crossOrigin="anonymous"
+        />
         <link rel="preconnect" href="https://app.posthog.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -69,26 +78,25 @@ export default function ENLayout({
             <Providers>
               <AnalyticsProvider>
                 <SentryInit />
-              {/* Fixed background layer with image */}
-              <div
-                className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-                style={{
-                  backgroundImage: 'url(/operarios.png)',
-                }}
-              />
+                {/* Fixed background layer with image */}
+                <div
+                  className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
+                  style={{
+                    backgroundImage: 'url(/operarios.png)',
+                  }}
+                />
 
-              {/* Semi-transparent overlay */}
-              <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
+                {/* Semi-transparent overlay */}
+                <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
 
-              {/* Main content */}
-              <div className="relative z-20 min-h-screen flex flex-col">
-                <SkipLinks />
-                <PTLayoutWrapper locale="en">
-                  {children}
-                </PTLayoutWrapper>
-                <CookieConsent locale="en" />
-                <ToastProvider />
-              </div>
+                {/* Main content */}
+                <div className="relative z-20 min-h-screen flex flex-col">
+                  <SkipLinks />
+                  <OfflineBanner />
+                  <PTLayoutWrapper locale="en">{children}</PTLayoutWrapper>
+                  <CookieConsent locale="en" />
+                  <ToastProvider />
+                </div>
               </AnalyticsProvider>
             </Providers>
           </LiveAnnouncerProvider>

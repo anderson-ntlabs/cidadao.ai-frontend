@@ -8,11 +8,11 @@
  * Interactive map showing transparency API coverage across Brazilian states
  */
 
-'use client';
+'use client'
 
-import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import {
   fetchTransparencyMap,
   getCachedMapData,
@@ -23,61 +23,69 @@ import {
   getStateStatusEmoji,
   type TransparencyMapData,
   type StateData,
-  type APIDetail
-} from '@/lib/services/transparency-map.service';
-import { estadoNomes } from '@/data/transparency-apis';
-import { logger } from '@/lib/utils/logger';
+  type APIDetail,
+} from '@/lib/services/transparency-map.service'
+import { estadoNomes } from '@/data/transparency-apis'
+import { logger } from '@/lib/utils/logger'
+
+// Lazy load framer-motion for better initial bundle size
+// This reduces the mapa page bundle by ~30 kB
+const MotionDiv = dynamic(() => import('framer-motion').then((mod) => mod.motion.div), {
+  ssr: false,
+  loading: () => <div className="opacity-0" />, // Invisible placeholder during load
+})
 
 interface GeoJSONStateData {
-  type: string;
+  type: string
   geometry: {
-    type: string;
-    coordinates: number[][][][]; // MultiPolygon: [[[lon, lat]]]
-  };
+    type: string
+    coordinates: number[][][][] // MultiPolygon: [[[lon, lat]]]
+  }
   properties: {
-    sigla: string;
-    nome: string;
-    regiao: string;
-  };
+    sigla: string
+    nome: string
+    regiao: string
+  }
 }
 
 export default function MapaTransparencia() {
-  const [estadoSelecionado, setEstadoSelecionado] = useState<string>('');
-  const [hoveredState, setHoveredState] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
-  const [geoStatesData, setGeoStatesData] = useState<GeoJSONStateData[]>([]);
-  const [apiMapData, setApiMapData] = useState<TransparencyMapData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingAPI, setIsLoadingAPI] = useState(true);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [viewBox, setViewBox] = useState('0 0 1000 1000');
-  const [showModal, setShowModal] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [estadoSelecionado, setEstadoSelecionado] = useState<string>('')
+  const [hoveredState, setHoveredState] = useState<string | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null)
+  const [geoStatesData, setGeoStatesData] = useState<GeoJSONStateData[]>([])
+  const [apiMapData, setApiMapData] = useState<TransparencyMapData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingAPI, setIsLoadingAPI] = useState(true)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [viewBox, setViewBox] = useState('0 0 1000 1000')
+  const [showModal, setShowModal] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Validate state code (UF) format
   const isValidStateCode = (code: string): boolean => {
-    const validStates = Object.keys(estadoNomes);
-    return validStates.includes(code.toUpperCase());
+    const validStates = Object.keys(estadoNomes)
+    return validStates.includes(code.toUpperCase())
   }
 
   // Handler for state selection with validation
   const handleStateSelection = (code: string) => {
-    const upperCode = code.toUpperCase();
+    const upperCode = code.toUpperCase()
     if (isValidStateCode(upperCode)) {
-      setEstadoSelecionado(upperCode);
+      setEstadoSelecionado(upperCode)
     } else {
-      logger.warn('Invalid state code attempted', { code });
+      logger.warn('Invalid state code attempted', { code })
     }
-  };
+  }
 
   // Carregar dados do estado selecionado
-  const estadoInfo = estadoSelecionado && apiMapData?.states[estadoSelecionado]
-    ? apiMapData.states[estadoSelecionado]
-    : null;
+  const estadoInfo =
+    estadoSelecionado && apiMapData?.states[estadoSelecionado]
+      ? apiMapData.states[estadoSelecionado]
+      : null
 
   // Calcular estatísticas do estado para o tooltip
   const getStateStats = (sigla: string) => {
-    const stateData = apiMapData?.states[sigla];
+    const stateData = apiMapData?.states[sigla]
     if (!stateData) {
       return {
         name: estadoNomes[sigla] || sigla,
@@ -86,13 +94,13 @@ export default function MapaTransparencia() {
         partialAPIs: 0,
         downAPIs: 0,
         totalEndpoints: 0,
-        hasData: false as const
-      };
+        hasData: false as const,
+      }
     }
 
-    const operationalAPIs = stateData.apis.filter(api => api.status === 'operational').length;
-    const partialAPIs = stateData.apis.filter(api => api.status === 'partial').length;
-    const downAPIs = stateData.apis.filter(api => api.status === 'down').length;
+    const operationalAPIs = stateData.apis.filter((api) => api.status === 'operational').length
+    const partialAPIs = stateData.apis.filter((api) => api.status === 'partial').length
+    const downAPIs = stateData.apis.filter((api) => api.status === 'down').length
 
     return {
       name: stateData.name,
@@ -102,186 +110,208 @@ export default function MapaTransparencia() {
       downAPIs,
       totalEndpoints: stateData.endpointCount,
       hasData: true as const,
-      status: stateData.status
-    };
-  };
+      status: stateData.status,
+    }
+  }
 
   // Handler para mouse move no mapa
   const handleMouseMove = (e: React.MouseEvent<SVGPathElement>, sigla: string) => {
-    setHoveredState(sigla);
-    setTooltipPosition({ x: e.clientX, y: e.clientY });
-  };
+    setHoveredState(sigla)
+    setTooltipPosition({ x: e.clientX, y: e.clientY })
+  }
 
   const handleMouseLeave = () => {
-    setHoveredState(null);
-    setTooltipPosition(null);
-  };
+    setHoveredState(null)
+    setTooltipPosition(null)
+  }
 
   // Projeção Mercator simplificada
   const projectCoordinate = useCallback((lon: number, lat: number): [number, number] => {
-    const scale = 1500;
-    const centerLon = -53;
-    const centerLat = -15;
+    const scale = 1500
+    const centerLon = -53
+    const centerLat = -15
 
-    const x = Number((lon - centerLon) * scale);
-    const y = Number(-(lat - centerLat) * scale);
+    const x = Number((lon - centerLon) * scale)
+    const y = Number(-(lat - centerLat) * scale)
 
-    return [x, y];
-  }, []);
+    return [x, y]
+  }, [])
 
-  const calculateBounds = useCallback((features: GeoJSONStateData[]) => {
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const calculateBounds = useCallback(
+    (features: GeoJSONStateData[]) => {
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity
 
-    features.forEach(feature => {
-      if (feature.geometry.type === 'MultiPolygon') {
-        feature.geometry.coordinates.forEach(polygon => {
-          polygon.forEach(ring => {
-            ring.forEach((coord: number[]) => {
-              const [x, y] = projectCoordinate(coord[0], coord[1]);
-              minX = Math.min(minX, x);
-              minY = Math.min(minY, y);
-              maxX = Math.max(maxX, x);
-              maxY = Math.max(maxY, y);
-            });
-          });
-        });
-      }
-    });
+      features.forEach((feature) => {
+        if (feature.geometry.type === 'MultiPolygon') {
+          feature.geometry.coordinates.forEach((polygon) => {
+            polygon.forEach((ring) => {
+              ring.forEach((coord: number[]) => {
+                const [x, y] = projectCoordinate(coord[0], coord[1])
+                minX = Math.min(minX, x)
+                minY = Math.min(minY, y)
+                maxX = Math.max(maxX, x)
+                maxY = Math.max(maxY, y)
+              })
+            })
+          })
+        }
+      })
 
-    return { minX, minY, maxX, maxY };
-  }, [projectCoordinate]);
+      return { minX, minY, maxX, maxY }
+    },
+    [projectCoordinate]
+  )
 
   // Carregar GeoJSON do mapa do Brasil
   useEffect(() => {
     fetch('/brazil-states.json')
-      .then(res => res.json())
-      .then(data => {
-        setGeoStatesData(data.features);
-        setIsLoading(false);
+      .then((res) => res.json())
+      .then((data) => {
+        setGeoStatesData(data.features)
+        setIsLoading(false)
 
         // Calcular viewBox baseado nos dados
-        const bounds = calculateBounds(data.features);
-        const padding = 50;
-        const width = bounds.maxX - bounds.minX + padding * 2;
-        const height = bounds.maxY - bounds.minY + padding * 2;
-        setViewBox(`${bounds.minX - padding} ${bounds.minY - padding} ${width} ${height}`);
+        const bounds = calculateBounds(data.features)
+        const padding = 50
+        const width = bounds.maxX - bounds.minX + padding * 2
+        const height = bounds.maxY - bounds.minY + padding * 2
+        setViewBox(`${bounds.minX - padding} ${bounds.minY - padding} ${width} ${height}`)
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error(err instanceof Error ? err : new Error('Erro ao carregar mapa'), {
           component: 'MapPage',
-          action: 'loadGeoJSON'
-        });
-        setIsLoading(false);
-      });
-  }, [calculateBounds]);
+          action: 'loadGeoJSON',
+        })
+        setIsLoading(false)
+      })
+  }, [calculateBounds])
 
   // Carregar dados da API de transparência
   useEffect(() => {
-    setIsLoadingAPI(true);
-    setApiError(null);
+    setIsLoadingAPI(true)
+    setApiError(null)
 
     // Try to get cached data first for instant display
-    const cachedData = getCachedMapData();
+    const cachedData = getCachedMapData()
     if (cachedData) {
-      setApiMapData(cachedData);
+      setApiMapData(cachedData)
     }
 
     // Then fetch fresh data
     fetchTransparencyMap()
-      .then(data => {
-        setApiMapData(data);
-        setIsLoadingAPI(false);
-        setApiError(null);
+      .then((data) => {
+        setApiMapData(data)
+        setIsLoadingAPI(false)
+        setApiError(null)
       })
-      .catch(error => {
+      .catch((error) => {
         logger.error(error instanceof Error ? error : new Error('Error loading API data'), {
           component: 'MapPage',
           action: 'fetchTransparencyMap',
-          hasCachedData: !!cachedData
-        });
-        setApiError(error.message);
-        setIsLoadingAPI(false);
+          hasCachedData: !!cachedData,
+        })
+        setApiError(error.message)
+        setIsLoadingAPI(false)
         // Keep cached data if fetch fails
-      });
-  }, []);
+      })
+  }, [])
 
   useEffect(() => {
     if (estadoSelecionado) {
-      setShowModal(true);
+      setShowModal(true)
     }
-  }, [estadoSelecionado]);
+  }, [estadoSelecionado])
 
   // Handler para refresh manual dos dados
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    setApiError(null);
+    setIsRefreshing(true)
+    setApiError(null)
 
     try {
-      const data = await fetchTransparencyMap();
-      setApiMapData(data);
+      const data = await fetchTransparencyMap()
+      setApiMapData(data)
     } catch (error) {
       logger.error(error instanceof Error ? error : new Error('Error refreshing map data'), {
         component: 'MapPage',
-        action: 'handleRefresh'
-      });
-      setApiError(error instanceof Error ? error.message : 'Erro ao atualizar dados');
+        action: 'handleRefresh',
+      })
+      setApiError(error instanceof Error ? error.message : 'Erro ao atualizar dados')
     } finally {
-      setIsRefreshing(false);
+      setIsRefreshing(false)
     }
-  };
+  }
 
   const createPath = (coordinates: number[][][][]) => {
-    let path = '';
+    let path = ''
 
     coordinates.forEach((polygon, polygonIndex) => {
       polygon.forEach((ring, ringIndex) => {
         ring.forEach((coord: number[], coordIndex) => {
-          const [x, y] = projectCoordinate(coord[0], coord[1]);
+          const [x, y] = projectCoordinate(coord[0], coord[1])
 
           if (coordIndex === 0) {
-            path += `${polygonIndex > 0 || ringIndex > 0 ? ' ' : ''}M ${x} ${y}`;
+            path += `${polygonIndex > 0 || ringIndex > 0 ? ' ' : ''}M ${x} ${y}`
           } else {
-            path += ` L ${x} ${y}`;
+            path += ` L ${x} ${y}`
           }
-        });
-        path += ' Z';
-      });
-    });
+        })
+        path += ' Z'
+      })
+    })
 
-    return path;
-  };
+    return path
+  }
 
   const getStateColorLocal = (sigla: string): string => {
     // Use API data color if available
-    const apiState = apiMapData?.states[sigla];
+    const apiState = apiMapData?.states[sigla]
     if (apiState?.color) {
       // Apply opacity variations for hover/selected states
       if (hoveredState === sigla) {
-        return apiState.color; // Slightly brighter on hover
+        return apiState.color // Slightly brighter on hover
       }
       if (estadoSelecionado === sigla) {
-        return apiState.color; // Keep same color when selected
+        return apiState.color // Keep same color when selected
       }
-      return apiState.color;
+      return apiState.color
     }
 
     // Fallback to gray if no data
-    return '#e5e7eb'; // gray-200 (no API)
-  };
+    return '#e5e7eb' // gray-200 (no API)
+  }
 
   const getStatusBadge = (status: StateData['status']) => {
     switch (status) {
       case 'healthy':
-        return <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">🟢 Online</span>;
+        return (
+          <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">
+            🟢 Online
+          </span>
+        )
       case 'degraded':
-        return <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">🟡 Degradado</span>;
+        return (
+          <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">
+            🟡 Degradado
+          </span>
+        )
       case 'unhealthy':
-        return <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">🔴 Erro</span>;
+        return (
+          <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">
+            🔴 Erro
+          </span>
+        )
       case 'no_api':
       default:
-        return <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">⚫ Sem API</span>;
+        return (
+          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 rounded text-xs">
+            ⚫ Sem API
+          </span>
+        )
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -324,7 +354,9 @@ export default function MapaTransparencia() {
                 title="Atualizar dados"
               >
                 <span className={isRefreshing ? 'animate-spin' : ''}>🔄</span>
-                <span className="hidden sm:inline">{isRefreshing ? 'Atualizando...' : 'Atualizar'}</span>
+                <span className="hidden sm:inline">
+                  {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+                </span>
               </button>
             </div>
           </div>
@@ -335,7 +367,7 @@ export default function MapaTransparencia() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Estatísticas Resumidas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <motion.div
+          <MotionDiv
             whileHover={{ scale: 1.02 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
@@ -343,9 +375,9 @@ export default function MapaTransparencia() {
               {apiMapData?.summary?.states_with_apis || 0}/27
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Estados com APIs</div>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             whileHover={{ scale: 1.02 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
@@ -353,19 +385,21 @@ export default function MapaTransparencia() {
               {apiMapData?.summary?.total_apis || 0}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">APIs Mapeadas</div>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             whileHover={{ scale: 1.02 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
             <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
               {apiMapData?.summary?.total_endpoints || 0}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Endpoints Disponíveis</div>
-          </motion.div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Endpoints Disponíveis
+            </div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             whileHover={{ scale: 1.02 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center border border-gray-200 dark:border-gray-700"
           >
@@ -373,7 +407,7 @@ export default function MapaTransparencia() {
               {apiMapData?.summary?.overall_coverage_percentage?.toFixed(0) || 0}%
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Cobertura Nacional</div>
-          </motion.div>
+          </MotionDiv>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -401,8 +435,8 @@ export default function MapaTransparencia() {
                     style={{ backgroundColor: '#f9fafb' }}
                   >
                     {geoStatesData.map((state, index) => {
-                      const sigla = state.properties?.sigla || '';
-                      const hasAPI = apiMapData?.states[sigla];
+                      const sigla = state.properties?.sigla || ''
+                      const hasAPI = apiMapData?.states[sigla]
 
                       return (
                         <g key={index}>
@@ -417,7 +451,7 @@ export default function MapaTransparencia() {
                             onClick={() => hasAPI && handleStateSelection(sigla)}
                           />
                         </g>
-                      );
+                      )
                     })}
                   </svg>
 
@@ -430,7 +464,9 @@ export default function MapaTransparencia() {
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-amber-400 rounded"></div>
-                        <span className="text-gray-700 dark:text-gray-300">Problemas/Degradado</span>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          Problemas/Degradado
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-red-400 rounded"></div>
@@ -445,7 +481,8 @@ export default function MapaTransparencia() {
 
                   <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                      💡 Clique em um estado no mapa ou selecione na lista para ver detalhes das APIs de transparência disponíveis.
+                      💡 Clique em um estado no mapa ou selecione na lista para ver detalhes das
+                      APIs de transparência disponíveis.
                     </p>
                   </div>
                 </>
@@ -470,7 +507,8 @@ export default function MapaTransparencia() {
                 <option value="">Selecione um estado</option>
                 {Object.entries(estadoNomes).map(([sigla, nome]) => (
                   <option key={sigla} value={sigla}>
-                    {nome} {apiMapData?.states[sigla] && `(${apiMapData.states[sigla].apis.length} APIs)`}
+                    {nome}{' '}
+                    {apiMapData?.states[sigla] && `(${apiMapData.states[sigla].apis.length} APIs)`}
                   </option>
                 ))}
               </select>
@@ -478,7 +516,7 @@ export default function MapaTransparencia() {
 
             {/* Informações do Estado Selecionado */}
             {estadoInfo && (
-              <motion.div
+              <MotionDiv
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700"
@@ -496,15 +534,21 @@ export default function MapaTransparencia() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">APIs Disponíveis:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.apiCount}</span>
+                    <span className="text-gray-900 dark:text-white font-medium">
+                      {estadoInfo.apiCount}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Endpoints:</span>
-                    <span className="text-gray-900 dark:text-white font-medium">{estadoInfo.endpointCount}</span>
+                    <span className="text-gray-900 dark:text-white font-medium">
+                      {estadoInfo.endpointCount}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Status Geral:</span>
-                    <span className="text-gray-900 dark:text-white font-medium capitalize">{estadoInfo.status}</span>
+                    <span className="text-gray-900 dark:text-white font-medium capitalize">
+                      {estadoInfo.status}
+                    </span>
                   </div>
                 </div>
 
@@ -518,7 +562,9 @@ export default function MapaTransparencia() {
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h5 className="font-medium text-gray-900 dark:text-white mb-1">{api.name}</h5>
+                          <h5 className="font-medium text-gray-900 dark:text-white mb-1">
+                            {api.name}
+                          </h5>
                           <a
                             href={api.url}
                             target="_blank"
@@ -528,26 +574,35 @@ export default function MapaTransparencia() {
                             🔗 {api.url}
                           </a>
                         </div>
-                        <span className={`ml-2 px-2 py-1 rounded text-xs whitespace-nowrap ${getAPIStatusBadgeClass(api.status)}`}>
-                          {getAPIStatusEmoji(api.status)} {
-                            api.status === 'operational' ? 'Operacional' :
-                            api.status === 'partial' ? 'Parcial' :
-                            api.status === 'timeout' ? 'Timeout' :
-                            api.status === 'error' ? 'Erro' :
-                            'Fora do Ar'
-                          }
+                        <span
+                          className={`ml-2 px-2 py-1 rounded text-xs whitespace-nowrap ${getAPIStatusBadgeClass(api.status)}`}
+                        >
+                          {getAPIStatusEmoji(api.status)}{' '}
+                          {api.status === 'operational'
+                            ? 'Operacional'
+                            : api.status === 'partial'
+                              ? 'Parcial'
+                              : api.status === 'timeout'
+                                ? 'Timeout'
+                                : api.status === 'error'
+                                  ? 'Erro'
+                                  : 'Fora do Ar'}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mb-2">
                         <div className="flex items-center gap-1">
-                          <span className="text-purple-600 dark:text-purple-400 font-semibold">{api.endpoints}</span>
+                          <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                            {api.endpoints}
+                          </span>
                           <span>endpoint{api.endpoints !== 1 ? 's' : ''}</span>
                         </div>
                         {api.response_time_ms && (
                           <div className="flex items-center gap-1">
                             <span>⏱️</span>
-                            <span className="text-green-600 dark:text-green-400 font-semibold">{api.response_time_ms}ms</span>
+                            <span className="text-green-600 dark:text-green-400 font-semibold">
+                              {api.response_time_ms}ms
+                            </span>
                           </div>
                         )}
                       </div>
@@ -562,14 +617,15 @@ export default function MapaTransparencia() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </MotionDiv>
             )}
 
             {!estadoSelecionado && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700 text-center">
                 <div className="text-4xl mb-3">🗺️</div>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Selecione um estado no mapa ou na lista acima para ver as APIs de transparência disponíveis.
+                  Selecione um estado no mapa ou na lista acima para ver as APIs de transparência
+                  disponíveis.
                 </p>
               </div>
             )}
@@ -579,7 +635,7 @@ export default function MapaTransparencia() {
 
       {/* Tooltip Flutuante */}
       {hoveredState && tooltipPosition && (
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -592,7 +648,7 @@ export default function MapaTransparencia() {
         >
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border-2 border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
             {(() => {
-              const stats = getStateStats(hoveredState);
+              const stats = getStateStats(hoveredState)
               return (
                 <>
                   {/* Header */}
@@ -679,11 +735,11 @@ export default function MapaTransparencia() {
                     </div>
                   )}
                 </>
-              );
+              )
             })()}
           </div>
-        </motion.div>
+        </MotionDiv>
       )}
     </div>
-  );
+  )
 }
