@@ -270,6 +270,24 @@ export default function PTPage() {
           </div>
         </section>
 
+        {/* Spotify Playlist */}
+        <section className="py-20 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+              <div className="relative w-full pt-[56.25%]">
+                <iframe
+                  className="absolute inset-0 w-full h-full rounded-xl shadow-lg"
+                  src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Links Sections */}
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-6">
