@@ -14,56 +14,60 @@ interface TimelineEvent {
 
 const timelineEvents: TimelineEvent[] = [
   {
-    date: '2024-09',
+    date: 'Março 2025',
     title: 'Concepção do Projeto',
-    description: 'Identificação do problema de acesso aos dados públicos brasileiros e definição da proposta de TCC.',
+    description:
+      'Identificação do problema de acesso aos dados públicos brasileiros e definição da proposta de TCC.',
     icon: Sparkles,
     category: 'milestone',
     highlights: [
       'Escolha do tema: Transparência Pública + IA',
       'Aprovação da proposta pela banca',
-      'Definição dos 17 agentes brasileiros'
-    ]
+      'Definição dos 17 agentes brasileiros',
+    ],
   },
   {
-    date: '2024-10',
+    date: 'Abril 2025',
     title: 'Arquitetura Multi-Agente',
-    description: 'Desenvolvimento da arquitetura de sistema multi-agente com identidades culturais brasileiras.',
+    description:
+      'Desenvolvimento da arquitetura de sistema multi-agente com identidades culturais brasileiras.',
     icon: Users,
     category: 'development',
     highlights: [
       'Design dos 17 agentes com nomes de figuras históricas',
       'Abaporu como orquestrador principal',
-      'Sistema de reflexão e qualidade (threshold 0.8)'
-    ]
+      'Sistema de reflexão e qualidade (threshold 0.8)',
+    ],
   },
   {
-    date: '2024-11',
+    date: 'Maio 2025',
     title: 'Backend FastAPI',
-    description: 'Implementação completa do backend com FastAPI, agents CrewAI e integração com Portal da Transparência.',
+    description:
+      'Implementação completa do backend com FastAPI, agents CrewAI e integração com Portal da Transparência.',
     icon: Code,
     category: 'development',
     highlights: [
       '8 de 17 agentes operacionais',
       'FastAPI com documentação temática brasileira',
-      '80% de cobertura de testes'
-    ]
+      '80% de cobertura de testes',
+    ],
   },
   {
-    date: '2024-12',
+    date: 'Junho 2025',
     title: 'Frontend Next.js 15',
-    description: 'Desenvolvimento do frontend moderno com Next.js 15, PWA e sistema de chat em tempo real.',
+    description:
+      'Desenvolvimento do frontend moderno com Next.js 15, PWA e sistema de chat em tempo real.',
     icon: Code,
     category: 'development',
     highlights: [
       'Next.js 15 App Router + React Server Components',
       'Sistema de chat com SSE streaming',
       'PWA com Serwist para uso offline',
-      'Acessibilidade WCAG AA + VLibras (LIBRAS)'
-    ]
+      'Acessibilidade WCAG AA + VLibras (LIBRAS)',
+    ],
   },
   {
-    date: '2025-01',
+    date: 'Julho 2025',
     title: 'Deploy em Produção',
     description: 'Sistema completo no ar com backend Railway e frontend Vercel.',
     icon: Rocket,
@@ -72,11 +76,11 @@ const timelineEvents: TimelineEvent[] = [
       'Backend: Railway (HuggingFace Spaces backup)',
       'Frontend: Vercel com CI/CD',
       'Monitoramento: Grafana + Prometheus + Sentry',
-      'Integração Portal da Transparência (22% endpoints)'
-    ]
+      'Integração Portal da Transparência (22% endpoints)',
+    ],
   },
   {
-    date: '2025-01',
+    date: 'Setembro 2025',
     title: 'Documentação Completa',
     description: 'Documentação técnica abrangente com 97 arquivos cobrindo toda a arquitetura.',
     icon: Award,
@@ -85,11 +89,11 @@ const timelineEvents: TimelineEvent[] = [
       '11.400+ linhas de documentação técnica',
       'Guias de API, deployment, testes e segurança',
       'Documentação de 41 scripts de teste manual',
-      'Sistema de geração automática de types'
-    ]
+      'Sistema de geração automática de types',
+    ],
   },
   {
-    date: '2025-02',
+    date: 'Novembro 2025',
     title: 'Defesa do TCC',
     description: 'Apresentação do trabalho para a banca examinadora do IFSULDEMINAS.',
     icon: Award,
@@ -97,21 +101,21 @@ const timelineEvents: TimelineEvent[] = [
     highlights: [
       'Apresentação da arquitetura multi-agente',
       'Demonstração do sistema em produção',
-      'Resultados e impacto social'
-    ]
-  }
+      'Resultados e impacto social',
+    ],
+  },
 ]
 
 const categoryColors = {
   development: 'from-blue-500 to-blue-600',
   milestone: 'from-green-500 to-green-600',
-  achievement: 'from-yellow-500 to-yellow-600'
+  achievement: 'from-yellow-500 to-yellow-600',
 }
 
 const categoryLabels = {
   development: 'Desenvolvimento',
   milestone: 'Marco',
-  achievement: 'Conquista'
+  achievement: 'Conquista',
 }
 
 export function ProjectTimeline() {
@@ -150,15 +154,18 @@ export function ProjectTimeline() {
                     onClick={() => setSelectedEvent(isSelected ? null : index)}
                     className={`
                       w-full p-6 rounded-lg transition-all duration-300
-                      ${isSelected
-                        ? 'bg-white dark:bg-gray-800 shadow-xl scale-105'
-                        : 'bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-800 shadow-md hover:shadow-lg'
+                      ${
+                        isSelected
+                          ? 'bg-white dark:bg-gray-800 shadow-xl scale-105'
+                          : 'bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-800 shadow-md hover:shadow-lg'
                       }
                       border border-gray-200 dark:border-gray-700
                     `}
                   >
                     {/* Data */}
-                    <div className={`flex items-center gap-2 mb-2 ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`flex items-center gap-2 mb-2 ${isLeft ? 'justify-end' : 'justify-start'}`}
+                    >
                       <Calendar className="h-4 w-4 text-gray-500" />
                       <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         {event.date}
@@ -171,24 +178,31 @@ export function ProjectTimeline() {
                     </h3>
 
                     {/* Categoria */}
-                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${categoryColors[event.category]} mb-3`}>
+                    <div
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${categoryColors[event.category]} mb-3`}
+                    >
                       {categoryLabels[event.category]}
                     </div>
 
                     {/* Descrição */}
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      {event.description}
-                    </p>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">{event.description}</p>
 
                     {/* Highlights (expandido) */}
                     {isSelected && event.highlights && (
-                      <div className={`mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 ${isLeft ? 'text-right' : 'text-left'}`}>
+                      <div
+                        className={`mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 ${isLeft ? 'text-right' : 'text-left'}`}
+                      >
                         <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           Destaques:
                         </p>
-                        <ul className={`space-y-1 text-sm text-gray-600 dark:text-gray-400 ${isLeft ? 'text-right' : 'text-left'}`}>
+                        <ul
+                          className={`space-y-1 text-sm text-gray-600 dark:text-gray-400 ${isLeft ? 'text-right' : 'text-left'}`}
+                        >
                           {event.highlights.map((highlight, i) => (
-                            <li key={i} className={`flex items-start gap-2 ${isLeft ? 'justify-end' : 'justify-start'}`}>
+                            <li
+                              key={i}
+                              className={`flex items-start gap-2 ${isLeft ? 'justify-end' : 'justify-start'}`}
+                            >
                               <span className="text-green-500">•</span>
                               <span>{highlight}</span>
                             </li>
@@ -208,12 +222,14 @@ export function ProjectTimeline() {
 
                 {/* Ícone central */}
                 <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
-                  <div className={`
+                  <div
+                    className={`
                     w-16 h-16 rounded-full flex items-center justify-center
                     bg-gradient-to-br ${categoryColors[event.category]}
                     shadow-lg transition-transform duration-300
                     ${isSelected ? 'scale-125' : 'hover:scale-110'}
-                  `}>
+                  `}
+                  >
                     <Icon className="h-8 w-8 text-white" />
                   </div>
                 </div>
