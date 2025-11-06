@@ -1,28 +1,25 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
-**Última Atualização**: 2025-10-22 14:43:27 -0300
+**Última Atualização**: 2025-11-06
 
 ---
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 🚨 Critical Implementation Patterns
 
-## 🚨 Recent Critical Fixes
+### OAuth Authentication in Route Handlers
 
-### OAuth Authentication (2025-10-22) ✅ RESOLVED
+**Critical Rule**: Route Handlers require `createServerClient()` with explicit cookie handling. Never use the `createClient()` helper.
 
-**Issue**: 15-day production blocker - OAuth (Google/GitHub) authentication not persisting sessions.
-
-**Root Cause**: OAuth callback route handler (`app/auth/callback/route.ts`) was using `createClient()` helper designed for Server Components, which silently fails to set cookies in Route Handler context.
-
-**Solution**: Use `createServerClient()` directly with explicit cookie handling:
+**Correct Pattern** (`app/auth/callback/route.ts`):
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-// In Route Handlers, ALWAYS use createServerClient with explicit cookies
 const cookieStore = await cookies()
 const supabase = createServerClient(url, key, {
   cookies: {
@@ -38,165 +35,240 @@ const supabase = createServerClient(url, key, {
 })
 ```
 
-**Documentation**: See `/docs/oauth-authentication-fix.md` for complete technical report.
+**Why**: The `createClient()` helper is designed for Server Components and silently fails to set cookies in Route Handler context.
 
-**Lesson**: Route Handlers ≠ Server Components. Check Supabase docs for your specific context.
-
-## Documentation Standard
-
-All new documentation files in `/docs` should include this header:
-
-```markdown
-# [Document Title]
-
-**Autor**: Anderson Henrique da Silva
-**Localização**: Minas Gerais, Brasil
-**Data de Criação**: [YYYY-MM-DD HH:MM:SS -0300]
-```
-
-Use Brazilian timezone (America/Sao_Paulo) for timestamps.
+---
 
 ## Project Overview
 
-Cidadão.AI Frontend is a Next.js 15 Progressive Web App (PWA) that serves as the main web interface for the Cidadão.AI government transparency platform. It features a multi-agent AI system with 17 specialized agents, each with Brazilian cultural identities, designed to democratize access to government data through conversational AI.
+Cidadão.AI Frontend is a Next.js 15 Progressive Web App (PWA) that democratizes access to Brazilian government data through a multi-agent AI system. Features 17 specialized agents with Brazilian cultural identities, bilingual interface (PT/EN), and comprehensive accessibility (WCAG AAA, VLibras).
+
+**Production Status**: 82% complete, production-ready infrastructure
+
+---
 
 ## Key Development Commands
 
 ```bash
 # Development
-npm run dev          # Start development server with Turbopack (http://localhost:3000)
-npm run build        # Create production build
-npm run start        # Start production server
-npm run lint         # Run ESLint for code quality
-npm run type-check   # Run TypeScript type checking
+npm run dev                    # Dev server with Turbopack (http://localhost:3000)
+npm run dev:test              # Dev server on port 3001 (for parallel testing)
+npm run build                 # Production build
+npm run start                 # Production server
+npm run lint                  # ESLint
+npm run type-check            # TypeScript validation
 
-# Storybook
-npm run storybook    # Start Storybook dev server (http://localhost:6006)
-npm run build-storybook  # Build static Storybook site
+# Testing - Unit Tests (Vitest)
+npm run test                  # Watch mode
+npm run test:ui               # UI interface
+npm run test:coverage         # Coverage report (target: 60%)
 
-# Testing - Unit & E2E
-npm run test              # Run Vitest unit tests in watch mode
-npm run test:ui           # Run Vitest with UI interface
-npm run test:coverage     # Generate coverage report (target: 91%)
-npm run test:playwright   # Run all Playwright E2E tests
-npm run test:playwright:ui # Run Playwright with UI mode
-npm run test:e2e          # Run E2E tests only
-npm run test:design-system # Run design system E2E tests
+# Testing - E2E Tests (Playwright)
+npm run test:playwright       # All E2E tests
+npm run test:playwright:ui    # Playwright UI mode
+npm run test:e2e              # E2E only
+npm run test:e2e:ui           # E2E with UI
+npm run test:mobile           # Mobile-specific tests
+npm run test:mobile:ui        # Mobile tests with UI
+npm run test:design-system    # Design system E2E tests
 
 # Testing - Manual Integration Scripts
-node scripts/test-backend.js        # Test backend connectivity and endpoints
-node scripts/test-chat-adapters.js  # Test all chat adapter implementations
-node scripts/test-vlibras.js        # Test VLibras (LIBRAS) integration
-node scripts/monitor-backend.js     # Monitor backend performance over time
+node scripts/test-backend.js        # Backend connectivity
+node scripts/test-chat-adapters.js  # Chat adapters
+node scripts/test-vlibras.js        # VLibras (LIBRAS)
+node scripts/monitor-backend.js     # Performance monitoring
 
-# Bundle Analysis
-npm run analyze          # Analyze bundle size (both server & browser)
-npm run analyze:server   # Analyze server bundle only
-npm run analyze:browser  # Analyze browser bundle only
+# Component Development
+npm run storybook             # Storybook dev server (http://localhost:6006)
+npm run build-storybook       # Static Storybook build
 
-# Code Quality
-npm run lighthouse       # Run Lighthouse CI audits
+# Performance & Analysis
+npm run analyze               # Bundle analysis (server + browser)
+npm run analyze:server        # Server bundle only
+npm run analyze:browser       # Browser bundle only
+npm run lighthouse            # Lighthouse CI audits
 ```
+
+---
 
 ## High-Level Architecture
 
-### Core Application Structure
+### Application Structure
 
-The application uses Next.js 15 App Router with internationalization:
+Next.js 15 App Router with internationalization (`/pt/*` and `/en/*` routes):
 
 ```
 app/
-├── pt/                    # Portuguese routes (default)
-│   ├── (authenticated)/   # Protected routes requiring login
-│   │   ├── chat/          # AI chat interface
-│   │   ├── dashboard/     # Investigation dashboard
-│   │   ├── home/          # User home page
-│   │   ├── investigacoes/ # Detailed investigations
-│   │   ├── perfil/        # User profile
-│   │   ├── notificacoes/  # Notifications center
-│   │   ├── configuracoes/ # Settings
-│   │   └── help/          # Help page
-│   ├── login/             # Authentication page
-│   └── [public pages]     # About, agents, privacy, etc.
-├── en/                    # English routes (mirror structure)
-└── api/                   # API routes for telemetry
+├── pt/                      # Portuguese (default)
+│   ├── (authenticated)/     # Protected routes (requires auth)
+│   │   ├── app/            # Authenticated area without header
+│   │   ├── chat/           # AI chat interface
+│   │   ├── dashboard/      # Investigations dashboard
+│   │   └── [other protected routes]
+│   ├── login/              # Authentication page
+│   └── [public pages]      # Landing, about, agents, etc.
+├── en/                      # English (mirror structure)
+└── api/                     # API routes
 ```
 
-### Multi-Adapter Chat Architecture
+**Key Layout Pattern**: The `PTLayoutWrapper` component conditionally renders headers:
 
-The chat system implements multiple adapter patterns for robustness:
+- **SimplifiedHeader**: Landing pages and login (logo, theme, PT/EN, login button)
+- **Full Header**: Public content pages (includes navigation menu)
+- **No Header**: Authenticated `/app/*` routes
 
-1. **Chat Adapters** (`lib/api/chat-adapter-*.ts`):
-   - `v1`: Original implementation with streaming
-   - `v2`: Enhanced with better error handling
-   - `v3`: Optimized with retry logic
-   - `simple`: Minimal implementation for fallback (100% Maritaca)
-   - `stable`: Production-ready with circuit breakers
-   - `optimized`: Performance-focused with caching
+### Chat System Architecture (Simplified - Jan 2025)
 
-2. **Smart Chat Service** (`lib/services/smart-chat.service.ts`):
-   - Automatically selects best adapter based on performance
-   - Implements intelligent fallback mechanisms
-   - Tracks success rates and response times
-   - Provides seamless failover between adapters
-   - Cost optimization with economic vs quality modes
+**Consolidation**: Reduced from 6 adapters + SmartChatService to 2 adapters with simple failback.
 
-3. **Caching Layer** (`lib/services/chat-cache.service.ts`):
-   - In-memory cache with TTL (5 minutes default)
-   - Response deduplication
-   - Suggestion caching
-   - Performance metrics tracking
-   - Cache hit rate monitoring
+**Core Components**:
+
+1. **ChatService** (`lib/chat/chat.service.ts`):
+   - Main orchestrator with automatic fallback
+   - Built-in 5-minute in-memory cache
+   - Exponential backoff retry logic (max 2 retries)
+   - Supports two modes:
+     - **Cidadão.AI Mode**: Uses backend multi-agent system (Primary Adapter)
+     - **Maritaca Direct Mode**: Direct LLM calls, bypassing backend (Fallback Adapter)
+
+2. **Primary Adapter** (`lib/chat/adapters/primary.adapter.ts`):
+   - Connects to Cidadão.AI backend (Railway)
+   - Full multi-agent orchestration (Abaporu, Zumbi, Anita, etc.)
+   - Supports SSE streaming
+   - Investigation tracking and agent coordination
+
+3. **Fallback Adapter** (`lib/chat/adapters/fallback.adapter.ts`):
+   - Direct Maritaca AI integration (100% LLM)
+   - Used when backend is unavailable OR user selects Maritaca Direct Mode
+   - Bypasses multi-agent system for simple Q&A
+   - Model selection: Sabiazinho-3 (optimized) or Sabiá-3 (standard)
+
+**Mode Selection**:
+
+- Default: Cidadão.AI Mode (Primary → Fallback on failure)
+- User can switch to Maritaca Direct Mode via localStorage: `maritaca_selected_model`
+- When Maritaca model is selected, ChatService uses Fallback Adapter exclusively
+
+**Flow**:
+
+```
+User Message → ChatService
+                    ↓
+         Check localStorage for maritaca_selected_model
+                    ↓
+    ┌───────────────┴───────────────┐
+    │                               │
+Maritaca Model Set?            No Model Set
+    │                               │
+    ↓                               ↓
+Fallback Adapter              Primary Adapter (backend)
+(Direct LLM)                       ↓
+                              Success? → Response
+                                   ↓
+                              Failure? → Fallback Adapter
+                                          (Direct LLM)
+```
 
 ### State Management
 
-Uses Zustand for global state with persistence:
+**Zustand Stores** with devtools and localStorage persistence:
 
-- **Chat Store** (`store/chat-store.ts`): Chat sessions, messages, suggestions
-- **Notification Store** (`store/notification-store.ts`): Toast notifications
-- Both stores implement devtools integration and localStorage persistence
+- `store/chat-store.ts`: Chat sessions, messages, agent info, investigations
+- `store/notification-store.ts`: Toast notifications
+- `store/tooltip-store.ts`: Tooltip state management
+
+**Key Chat Store Actions**:
+
+- `initializeChat()`: Load or create session
+- `sendMessage()`: REST API message sending
+- `sendStreamingMessage()`: SSE streaming (fallbacks to REST)
+- `createNewSession()`: Generate new chat session
+- `loadSession()`: Load existing session from Supabase
 
 ### Agent System
 
-17 specialized AI agents defined in `data/agents.ts`:
+17 specialized AI agents with Brazilian cultural identities (`data/agents.ts`):
 
-- Each agent has unique Brazilian cultural identity
-- Specialized roles (orchestrator, investigator, analyst, etc.)
-- Custom avatars and capabilities
-- Multilingual support (PT/EN)
-
-Key agents:
+**Tier 1 - Fully Operational (10)**:
 
 - **Abaporu**: Master orchestrator
 - **Zumbi dos Palmares**: Anomaly detection
 - **Anita Garibaldi**: Pattern analysis
 - **Tiradentes**: Report generation
+- **Ayrton Senna**: Router/traffic director
+- **Nanã**: Memory/context management
+- **José Bonifácio**: Constitution/legal expert
+- **Machado de Assis**: Communication/writing
+- (2 more operational agents)
 
-### Progressive Web App Features
+**Tier 2-3**: Framework implemented, functionality pending
 
-**Migration Note (Jan 2025)**: Migrated from `@ducanh2912/next-pwa` to `@serwist/next` for Next.js 15 compatibility.
+### Progressive Web App (Serwist)
 
-Configured in `next.config.mjs` with Serwist:
+**Migration** (Jan 2025): `@ducanh2912/next-pwa` → `@serwist/next` for Next.js 15 compatibility.
+
+**Configuration** (`next.config.mjs`):
 
 - Service Worker: `app/sw.ts` (manual implementation)
-- Offline support with NetworkFirst caching strategy
-- skipWaiting and clientsClaim enabled
-- navigationPreload for faster page loads
-- Disabled in development for better DX
-- Manifest file for installability
+- Disabled in development (`DISABLE_PWA=true`)
+- NetworkFirst caching strategy
+- Offline support with graceful degradation
+- `skipWaiting: true`, `clientsClaim: true`
+- Navigation preload enabled
 
-**Documentation**: See `docs/10-reference/migration-guides/pwa-migration.md` (coming soon)
+**PWA Components**:
 
-### Key Technical Patterns
+- `InstallPrompt`: Prompts user to install app (mobile-first)
+- `UpdateNotification`: Notifies when new version available
+- `OfflineBanner`: Shows connectivity status
 
-1. **Type Safety**: Strict TypeScript with comprehensive type definitions
-2. **Accessibility**: Dedicated a11y components (skip links, live regions)
-3. **Internationalization**: Full i18n with Next.js routing
-4. **Theming**: Dark/light mode with system preference detection
-5. **Performance**: Lazy loading, code splitting, image optimization
-6. **Real-time**: WebSocket support for live chat updates (infrastructure ready)
-7. **Error Boundaries**: Comprehensive error handling at adapter level
-8. **Glass Morphism Design**: V3 design system with glassmorphism effects (consolidated as default)
+### Performance Optimizations
+
+**Webpack Configuration** (`next.config.mjs`):
+
+- Custom chunk splitting for optimal loading
+- Separate chunks: framework, charts, animations, pdf-export
+- `runtimeChunk: 'single'` for shared runtime
+- Package optimization: lucide-react, recharts, d3, jspdf, html2canvas
+
+**Image Optimization**:
+
+- AVIF + WebP formats
+- Responsive device sizes (640px → 3840px)
+- Remote pattern allowlist (Supabase, GitHub, Google avatars)
+- Minimum cache TTL: 60s
+
+**Code Splitting**:
+
+- Dynamic imports for heavy components (PDF export, charts)
+- Lazy loading for VLibras, export services
+- Route-based code splitting (automatic)
+
+### Testing Infrastructure
+
+**Unit Tests** (Vitest + jsdom):
+
+- 80+ test files covering lib, components, hooks
+- Coverage target: 60% (lines, functions, branches, statements)
+- Test environment: jsdom with React Testing Library
+- Setup: `vitest.setup.ts` (global mocks, test utilities)
+
+**E2E Tests** (Playwright):
+
+- 9 E2E test files covering critical user flows
+- Multi-browser: Chromium, Firefox, WebKit
+- Mobile testing: Pixel 5, iPhone 12
+- Separate mobile config: `playwright.mobile.config.ts`
+- CI: Retry 2 times, sequential execution
+
+**Manual Integration Scripts**:
+
+- `scripts/test-backend.js`: Backend health check
+- `scripts/test-chat-adapters.js`: All adapters validation
+- `scripts/test-vlibras.js`: VLibras integration
+- `scripts/monitor-backend.js`: Performance monitoring over time
+
+---
 
 ## Environment Configuration
 
@@ -205,210 +277,51 @@ Configured in `next.config.mjs` with Serwist:
 NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
 
 # Supabase Authentication (Required for OAuth)
-NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # Analytics (Optional)
-NEXT_PUBLIC_GA_ID=           # Google Analytics tracking ID
-NEXT_PUBLIC_POSTHOG_KEY=     # PostHog analytics key
+NEXT_PUBLIC_GA_ID=                    # Google Analytics
+NEXT_PUBLIC_POSTHOG_KEY=              # PostHog (usability research)
 NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
 
 # Development (Optional)
-NODE_ENV=development         # Environment mode
-DISABLE_PWA=true             # Disable PWA in development
-NEXT_PUBLIC_FEATURE_WEBSOCKET=false  # WebSocket toggle (disabled by default)
+NODE_ENV=development
+DISABLE_PWA=true                      # Disable PWA in dev
+NEXT_PUBLIC_FEATURE_WEBSOCKET=false   # WebSocket (not yet supported)
 
 # Accessibility (Optional)
-NEXT_PUBLIC_ENABLE_VLIBRAS=false  # Enable VLibras (Brazilian Sign Language) on PT pages
+NEXT_PUBLIC_ENABLE_VLIBRAS=false      # Brazilian Sign Language (LIBRAS)
 
-# Cache (Production)
-# Vercel KV Redis - automatically injected by Vercel
-KV_URL=                      # Vercel KV URL
-KV_REST_API_URL=            # Vercel KV REST API URL
-KV_REST_API_TOKEN=          # Vercel KV REST API token
-KV_REST_API_READ_ONLY_TOKEN= # Vercel KV REST API read-only token
+# Vercel KV Cache (Production - auto-injected by Vercel)
+KV_URL=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+KV_REST_API_READ_ONLY_TOKEN=
 ```
 
-**Setup Instructions:**
+**Setup**:
 
-1. Copy `.env.example` to `.env.local`
-2. Fill in Supabase credentials (required for authentication)
-3. Backend URL defaults to production if not specified
-4. Analytics keys are optional (app works without them)
-5. Never commit `.env.local` to version control
+1. `cp .env.example .env.local`
+2. Fill Supabase credentials (required for auth)
+3. Backend URL defaults to Railway production
+4. Analytics optional (app works without)
+5. Never commit `.env.local`
 
-## Important Implementation Details
+---
 
-1. **Authentication**: Supabase Auth with OAuth (Google, GitHub) integration
-   - **Critical**: Route Handlers require `createServerClient()` with explicit cookie handling
-   - See `app/auth/callback/route.ts` for correct OAuth implementation pattern
-2. **API Integration**: Railway production backend (https://cidadao-api-production.up.railway.app)
-3. **Testing Strategy**: Dual approach - Vitest for unit tests + Playwright for E2E
-   - Unit: 161 tests with 91% coverage target (Vitest + jsdom)
-   - E2E: 36 Playwright tests covering critical user flows
-   - Manual: Integration scripts in `/scripts` for backend connectivity
-4. **Cultural Theme**: UI inspired by Tarsila do Amaral's "Operários" painting
-5. **Telemetry**: Custom event tracking system with batching (`lib/telemetry/`)
-6. **Design System**: V3 glass morphism design consolidated as default (Jan 2025 refactor)
-7. **Route Structure**: Bilingual with locale prefixes (`/pt/*` and `/en/*`)
-   - Protected routes under `(authenticated)` route group
-8. **AI Models**: Supports Sabiazinho-3 (optimized) and Sabiá-3 (standard)
-9. **Export Features**: Lazy-loaded PDF, JSON, CSV export for investigations
-10. **Accessibility**: VLibras (LIBRAS) integration for Brazilian Sign Language support
+## Key Technical Patterns
 
-## Component Development
+### 1. Supabase Client Creation
 
-Use Storybook for isolated component development:
-
-```bash
-npm run storybook
-```
-
-Key component patterns:
-
-- Glass morphism effects with backdrop-blur
-- Consistent loading states with skeletons
-- Toast notifications for user feedback
-- Breadcrumb navigation for context
-- Interactive tour system for onboarding
-- Responsive design with mobile-first approach
-
-## Performance Considerations
-
-- Chat responses cached for 5 minutes
-- Image optimization with AVIF/WebP formats
-- Gzip compression enabled
-- ETags for efficient caching
-- Turbopack for fast development builds
-- Lazy loading for heavy components
-- Debounced search inputs
-- Virtual scrolling for large lists (planned)
-
-## Deployment
-
-### Vercel Configuration
-
-- Build Command: `npm run build`
-- Output Directory: `.next`
-- Install Command: `npm install`
-- Framework Preset: Next.js (auto-detected)
-
-### Production Checklist
-
-1. Set `NODE_ENV=production`
-2. Configure `NEXT_PUBLIC_API_URL` to production backend
-3. Enable PWA (remove `DISABLE_PWA`)
-4. Set up Google Analytics tracking ID
-5. Enable VLibras (`NEXT_PUBLIC_ENABLE_VLIBRAS=true`)
-6. Test all chat adapters with production backend
-7. Run accessibility audit (`npx lighthouse --only-categories=accessibility`)
-
-## Accessibility (A11y) Features
-
-### VLibras Integration (Brazilian Sign Language - LIBRAS)
-
-The platform integrates VLibras, the official Brazilian government tool for translating web content into Brazilian Sign Language (LIBRAS).
-
-**Setup:**
-
-```bash
-# 1. Package is already installed
-npm install @djpfs/react-vlibras
-
-# 2. Enable in environment
-NEXT_PUBLIC_ENABLE_VLIBRAS=true
-
-# 3. Test integration
-node scripts/test-vlibras.js
-```
-
-**Components:**
-
-- `components/a11y/vlibras-widget.tsx` - Main VLibras widget component
-- `components/a11y/index.ts` - Accessibility components barrel export
-
-**Features:**
-
-- ✅ Automatic content translation to LIBRAS
-- ✅ Avatar selection (Guga, Ícaro, Hozana)
-- ✅ User preference persistence (localStorage)
-- ✅ Only loads on Portuguese pages
-- ✅ CSP-compliant configuration
-- ✅ Programmatic control via `useVLibras()` hook
-
-**Usage:**
-The VLibrasWidget is automatically included in `app/pt/layout.tsx`. It only renders on Portuguese pages since LIBRAS is specific to Brazilian Portuguese.
-
-```tsx
-import { VLibrasWidget } from '@/components/a11y'
-
-;<VLibrasWidget locale="pt" forceOnload />
-```
-
-**Programmatic Control:**
-
-```tsx
-import { useVLibras } from '@/components/a11y'
-
-const { isEnabled, toggle, enable, disable } = useVLibras()
-```
-
-**Testing:**
-Access http://localhost:3000/pt and look for the VLibras widget in the bottom-right corner. Click to activate LIBRAS translation.
-
-**Detailed Documentation**: See `docs/accessibility-vlibras.md` for complete integration guide.
-
-### Accessibility Panel (Unified Controls)
-
-The platform includes a comprehensive accessibility panel that consolidates all a11y features in one place.
-
-**Access:**
-
-- FAB button in bottom-right corner (green gear icon)
-- Keyboard shortcut: `Alt + A`
-- Mobile responsive design
-
-**Features:**
-
-1. **Font Size Control**: 4 sizes (small, normal, large, xlarge)
-2. **High Contrast Toggle**: Enhanced visibility mode
-3. **VLibras Toggle**: Enable/disable LIBRAS translation (PT only)
-4. **Keyboard Shortcuts Guide**: Built-in reference
-
-**Keyboard Shortcuts:**
-
-- `Alt + A`: Open/close accessibility panel
-- `Alt + H`: Toggle high contrast
-- `Alt + +`: Increase font size
-- `Alt + -`: Decrease font size
-
-**Components:**
-
-```tsx
-import { AccessibilityPanel } from '@/components/a11y'
-
-;<AccessibilityPanel locale="pt" />
-```
-
-### Other Accessibility Features
-
-- **Skip Links**: Keyboard navigation shortcuts
-- **Screen Reader Support**: ARIA labels throughout
-- **Form Accessibility**: Accessible form field components
-- **Persistent Preferences**: All settings saved in localStorage
-
-## Common Pitfalls & Solutions
-
-### Supabase Client Creation
-
-**❌ Wrong** - Using helper in Route Handlers:
+**Server Components** (`lib/supabase/server.ts`):
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
-const supabase = await createClient() // Fails to set cookies in Route Handlers
+const supabase = await createClient() // ✅ OK for Server Components
 ```
 
-**✅ Correct** - Direct createServerClient in Route Handlers:
+**Route Handlers** (CRITICAL):
 
 ```typescript
 import { createServerClient } from '@supabase/ssr'
@@ -427,159 +340,326 @@ const supabase = createServerClient(url, key, {
 })
 ```
 
-### Chat Adapter Selection
+### 2. Chat Mode Detection
 
-The chat system has multiple adapters. When implementing new features:
+The ChatService automatically detects Maritaca Direct Mode:
 
-1. **Primary Adapter**: `lib/chat/adapters/primary.adapter.ts` - Default implementation
-2. **Fallback Adapter**: `lib/chat/adapters/fallback.adapter.ts` - When primary fails
-3. **Smart Router**: `lib/services/cached-smart-chat.service.ts` - Automatic failover
+```typescript
+// In ChatService.sendMessage()
+const maritacaModel =
+  typeof window !== 'undefined' ? localStorage.getItem('maritaca_selected_model') : null
 
-Always test with backend connectivity issues to ensure fallback works.
+if (maritacaModel && this.fallbackAdapter) {
+  // Use Fallback Adapter directly (bypass backend)
+  return await this.tryAdapter(this.fallbackAdapter, request, 'fallback')
+}
 
-### Environment Variables
+// Otherwise, use Primary Adapter (backend multi-agent system)
+```
 
-- **Client-side**: Must be prefixed with `NEXT_PUBLIC_`
-- **Server-side**: No prefix needed
-- **Build time**: Environment variables are embedded at build time
-- **Runtime**: Use `process.env.NEXT_PUBLIC_*` for dynamic runtime values
+### 3. Internationalization Routing
 
-### Testing Best Practices
+Routes structured as `/pt/*` and `/en/*` with shared layout logic:
 
-1. **Unit tests** (`__tests__/unit/`): Pure logic, no DOM/network dependencies
-2. **Integration tests** (`__tests__/integration/`): Component + hooks + state
-3. **E2E tests** (`__tests__/e2e/`): Full user flows with Playwright
-4. **Manual scripts** (`scripts/`): Backend integration verification
+```typescript
+// app/pt/layout.tsx and app/en/layout.tsx
+<PTLayoutWrapper locale="pt">{children}</PTLayoutWrapper>
+```
 
-Never mock Supabase client in E2E tests - use real test database.
+The wrapper conditionally renders:
 
-### PWA Development
+- SimplifiedHeader for landing/login
+- Full Header for public content
+- No header for `/app/*` authenticated routes
 
-- **Development**: PWA disabled by default (`DISABLE_PWA=true`)
-- **Testing PWA**: Remove `DISABLE_PWA` and use production build
-- **Service Worker**: `app/sw.ts` - Manual Serwist implementation
-- **Manifest**: `public/manifest.json` - Updated for each major release
+### 4. Accessibility Patterns
 
-### Performance Optimization
+**VLibras Integration** (`components/a11y/vlibras-lazy.tsx`):
 
-1. **Dynamic imports**: Use `next/dynamic` for heavy components
-2. **Image optimization**: Always use `next/image` with AVIF/WebP
-3. **Bundle analysis**: Run `npm run analyze` before major releases
-4. **Code splitting**: Webpack config in `next.config.mjs` handles automatic splitting
+- Lazy loaded to reduce initial bundle
+- Only renders on Portuguese pages
+- User preference persistence (localStorage)
+- Programmatic control via `useVLibras()` hook
 
-## Critical Files Reference
+**Accessibility Panel** (`components/a11y/accessibility-panel.tsx`):
 
-### Authentication Flow
+- FAB button (bottom-right)
+- Keyboard shortcuts (Alt+A, Alt+H, Alt++, Alt+-)
+- Font size control (4 sizes)
+- High contrast mode
+- VLibras toggle
 
-- `app/auth/callback/route.ts` - OAuth callback handler (CRITICAL: uses createServerClient)
-- `lib/supabase/client.ts` - Client-side Supabase client
-- `lib/supabase/server.ts` - Server-side Supabase helpers
-- `lib/supabase/middleware.ts` - Session refresh middleware
+**Screen Reader Support**:
 
-### Chat Implementation
+- `LiveAnnouncerProvider`: Dynamic content announcements
+- `SkipLinks`: Keyboard navigation shortcuts
+- ARIA labels throughout
+- Semantic HTML structure
 
-- `lib/chat/chat.service.ts` - Main chat orchestrator
-- `lib/chat/adapters/primary.adapter.ts` - Primary backend adapter
-- `lib/services/cached-smart-chat.service.ts` - Caching + smart routing
-- `store/chat-store.ts` - Zustand store for chat state
+### 5. Performance Patterns
 
-### State Management
+**Lazy Loading** (`lib/utils/code-splitting.ts`):
 
-- `store/chat-store.ts` - Chat sessions, messages, suggestions
-- `store/notification-store.ts` - Toast notifications system
-- `hooks/use-chat-store.ts` - Chat store hook with selectors
+```typescript
+import { lazyLoad } from '@/lib/utils/code-splitting'
 
-### Testing Infrastructure
+const PDFExport = lazyLoad(() => import('@/lib/export-service'))
+```
 
-- `vitest.config.mjs` - Vitest configuration (91% coverage target)
-- `playwright.config.ts` - Playwright E2E configuration
-- `vitest.setup.ts` - Global test setup (DOM, mocks)
-- `__tests__/` - All test files organized by type
-
-## Development Workflow
-
-### Feature Development
-
-1. **Create feature branch**: `git checkout -b feat/feature-name`
-2. **Implement feature**: Follow TypeScript strict mode
-3. **Write tests**: Unit tests + E2E tests for user-facing features
-4. **Check quality**: Run `npm run type-check && npm run lint`
-5. **Run tests**: `npm run test:coverage` (ensure >60% coverage)
-6. **Test E2E**: `npm run test:playwright` for critical flows
-7. **Commit**: Follow conventional commits (feat/fix/docs/refactor/test/chore)
-8. **Push and create PR**: GitHub Actions runs full CI
-
-### Pre-Production Checklist
-
-1. ✅ All unit tests passing (`npm run test`)
-2. ✅ All E2E tests passing (`npm run test:playwright`)
-3. ✅ Type checking clean (`npm run type-check`)
-4. ✅ Linting clean (`npm run lint`)
-5. ✅ Coverage above 60% (`npm run test:coverage`)
-6. ✅ Lighthouse scores acceptable (`npm run lighthouse`)
-7. ✅ Bundle size acceptable (`npm run analyze`)
-8. ✅ Manual testing on mobile viewport
-9. ✅ Accessibility audit passed (Lighthouse accessibility score)
-10. ✅ Backend integration verified (`node scripts/test-backend.js`)
-
-### Debugging Tips
-
-**Chat not working:**
+**Bundle Analysis**:
 
 ```bash
-# 1. Check backend connectivity
+ANALYZE=true npm run build  # Opens webpack-bundle-analyzer
+```
+
+**Web Vitals Tracking** (`lib/web-vitals.ts`):
+
+- CLS, FID, FCP, LCP, TTFB monitoring
+- Integration with Vercel Analytics
+- Custom telemetry events
+
+---
+
+## Common Development Tasks
+
+### Adding a New Agent
+
+1. Define agent in `data/agents.ts`
+2. Create avatar image in `public/agents/`
+3. Update type definitions in `types/chat.ts`
+4. Backend: Implement agent logic in `cidadao.ai-backend`
+
+### Implementing a New Feature
+
+1. Create feature branch: `git checkout -b feat/feature-name`
+2. Implement with TypeScript strict mode
+3. Write unit tests (target >60% coverage)
+4. Write E2E tests for user-facing features
+5. Check quality: `npm run type-check && npm run lint`
+6. Run test suite: `npm run test:coverage`
+7. Test E2E: `npm run test:playwright`
+8. Commit with conventional commits (feat/fix/docs/refactor/test/chore)
+
+### Debugging Chat Issues
+
+```bash
+# 1. Backend connectivity
 node scripts/test-backend.js
 
-# 2. Check specific adapter
+# 2. Test all adapters
 node scripts/test-chat-adapters.js
 
 # 3. Check browser console for CORS/network errors
-# 4. Verify environment variable NEXT_PUBLIC_API_URL
+# 4. Verify NEXT_PUBLIC_API_URL in .env.local
+# 5. Check localStorage for maritaca_selected_model
 ```
 
-**Authentication issues:**
+### Debugging Authentication
 
 ```bash
-# 1. Check Supabase credentials in .env.local
-# 2. Verify OAuth redirect URLs in Supabase dashboard
+# 1. Verify Supabase credentials in .env.local
+# 2. Check OAuth redirect URLs in Supabase dashboard:
+#    - http://localhost:3000/auth/callback (dev)
+#    - https://your-domain.vercel.app/auth/callback (prod)
 # 3. Clear browser cookies and localStorage
 # 4. Check browser console for Supabase errors
+# 5. Verify Route Handler uses createServerClient (not createClient)
 ```
 
-**Build failures:**
+### Build Failures
 
 ```bash
-# 1. Clear Next.js cache
+# Clear Next.js cache
 rm -rf .next
 
-# 2. Clear node_modules and reinstall
+# Reinstall dependencies
 rm -rf node_modules package-lock.json
 npm install
 
-# 3. Check TypeScript errors
+# Check TypeScript errors
 npm run type-check
 
-# 4. Check for circular dependencies
+# Check for circular dependencies
 npm run build 2>&1 | grep -i "circular"
 ```
 
-**Performance issues:**
+---
+
+## Deployment
+
+### Vercel Configuration
+
+- **Build Command**: `npm run build`
+- **Output Directory**: `.next`
+- **Install Command**: `npm install`
+- **Framework Preset**: Next.js (auto-detected)
+- **Node Version**: 18.x or higher
+
+### Pre-Production Checklist
+
+1. ✅ All unit tests pass (`npm run test`)
+2. ✅ All E2E tests pass (`npm run test:playwright`)
+3. ✅ Type checking clean (`npm run type-check`)
+4. ✅ Linting clean (`npm run lint`)
+5. ✅ Coverage >60% (`npm run test:coverage`)
+6. ✅ Lighthouse scores acceptable (`npm run lighthouse`)
+7. ✅ Bundle size acceptable (`npm run analyze`)
+8. ✅ Manual mobile testing
+9. ✅ Accessibility audit passed
+10. ✅ Backend integration verified (`node scripts/test-backend.js`)
+
+### Environment Variables (Production)
+
+1. Configure in Vercel dashboard:
+   - `NEXT_PUBLIC_API_URL`: Railway backend URL
+   - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anon key
+   - `NEXT_PUBLIC_GA_ID`: Google Analytics (optional)
+   - `NEXT_PUBLIC_POSTHOG_KEY`: PostHog (optional)
+   - `NEXT_PUBLIC_ENABLE_VLIBRAS`: true (for production)
+
+2. Remove development flags:
+   - `DISABLE_PWA`: Remove or set to false
+   - `NODE_ENV`: Set to production
+
+3. Vercel KV: Auto-injected (no manual config)
+
+---
+
+## Accessibility (A11y)
+
+### VLibras - Brazilian Sign Language (LIBRAS)
+
+Official Brazilian government tool for LIBRAS translation.
+
+**Components**:
+
+- `VLibrasLazy`: Lazy-loaded widget (auto-included in PT layout)
+- `useVLibras()`: Hook for programmatic control
+
+**Features**:
+
+- ✅ Automatic content translation
+- ✅ Avatar selection (Guga, Ícaro, Hozana)
+- ✅ User preference persistence
+- ✅ PT pages only
+- ✅ CSP-compliant
+
+**Testing**:
 
 ```bash
-# 1. Analyze bundle
-npm run analyze
-
-# 2. Check for unnecessary re-renders
-# Use React DevTools Profiler
-
-# 3. Check network waterfall
-# Use browser DevTools Network tab
-
-# 4. Run Lighthouse
-npm run lighthouse
+NEXT_PUBLIC_ENABLE_VLIBRAS=true npm run dev
+# Visit http://localhost:3000/pt
+# Look for VLibras widget in bottom-right corner
 ```
 
-### Quick Start for New Developers
+### Accessibility Panel
+
+Unified a11y controls with FAB button and keyboard shortcuts.
+
+**Features**:
+
+- Font size control (4 sizes)
+- High contrast toggle (WCAG AAA)
+- VLibras toggle
+- Keyboard shortcuts guide
+
+**Keyboard Shortcuts**:
+
+- `Alt + A`: Open/close panel
+- `Alt + H`: Toggle high contrast
+- `Alt + +`: Increase font size
+- `Alt + -`: Decrease font size
+
+### WCAG Compliance
+
+**WCAG AAA Features**:
+
+- Touch targets ≥44x44px (mobile)
+- Contrast ratio >7:1 (high contrast mode)
+- 100% keyboard navigable
+- Screen reader support (ARIA labels)
+- Skip links for main content
+- Form field accessibility
+
+---
+
+## Critical Files Reference
+
+### Authentication
+
+- `app/auth/callback/route.ts` - OAuth callback (uses createServerClient)
+- `lib/supabase/client.ts` - Client-side Supabase
+- `lib/supabase/server.ts` - Server-side helpers
+- `lib/supabase/middleware.ts` - Session refresh middleware
+
+### Chat System
+
+- `lib/chat/chat.service.ts` - Main orchestrator (simplified)
+- `lib/chat/adapters/primary.adapter.ts` - Backend multi-agent
+- `lib/chat/adapters/fallback.adapter.ts` - Direct Maritaca LLM
+- `store/chat-store.ts` - Zustand chat state
+
+### Testing
+
+- `vitest.config.mjs` - Vitest config (60% coverage)
+- `playwright.config.ts` - Playwright E2E config
+- `playwright.mobile.config.ts` - Mobile testing config
+- `vitest.setup.ts` - Global test setup
+
+### Performance
+
+- `next.config.mjs` - Next.js config + Serwist + bundle analyzer
+- `app/sw.ts` - Service Worker implementation
+- `lib/web-vitals.ts` - Web Vitals tracking
+
+---
+
+## Documentation Structure
+
+Complete documentation in `/docs` directory:
+
+- `01-getting-started/`: Installation, quick start, environment setup
+- `02-architecture/`: System architecture, design decisions
+- `03-features/`: Feature documentation (analytics, mobile, accessibility)
+- `04-api/`: API reference
+- `05-guides/`: Development guides
+- `06-development/`: Patterns, conventions
+- `07-design/`: Design system
+- `08-testing/`: Testing strategies
+- `09-deployment/`: Deployment guides
+- `10-reference/`: Reference material, migration guides
+- `archive/`: Archived documentation
+
+**Main Entry**: `/docs/README.md` - Complete documentation index
+
+---
+
+## Project Status (Nov 2025)
+
+**Production Ready**: 82% complete
+
+**Completed**:
+
+- ✅ Core infrastructure (Next.js 15, TypeScript, Tailwind)
+- ✅ Authentication (Supabase OAuth - Google, GitHub)
+- ✅ Chat system (simplified 2-adapter architecture)
+- ✅ Testing infrastructure (Vitest + Playwright)
+- ✅ PWA capabilities (Serwist)
+- ✅ Accessibility (WCAG AAA, VLibras)
+- ✅ Monitoring (Sentry)
+- ✅ Performance optimization (bundle splitting, lazy loading)
+
+**Remaining**:
+
+- ⏳ Final production deployment to Vercel
+- ⏳ Load testing with production traffic
+- ⏳ User acceptance testing (UAT)
+- ⏳ Documentation site (Docusaurus)
+
+---
+
+## Quick Start for New Developers
 
 ```bash
 # 1. Clone and setup
@@ -589,7 +669,7 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
+# Edit .env.local with Supabase credentials
 
 # 3. Start development
 npm run dev
@@ -597,31 +677,16 @@ npm run dev
 # 4. Open browser
 # http://localhost:3000
 
-# 5. Run tests (in separate terminal)
+# 5. Run tests (separate terminal)
 npm run test:ui
 
-# 6. View components in Storybook (optional)
+# 6. View components (optional)
 npm run storybook
 ```
 
-### Project Status & Roadmap
+**First-Time Setup Notes**:
 
-**Current Status:** Production Ready (82% complete)
-
-- ✅ Core infrastructure
-- ✅ Authentication & authorization
-- ✅ Chat system with multi-adapter failover
-- ✅ Testing infrastructure (Vitest + Playwright)
-- ✅ PWA capabilities
-- ✅ Accessibility (WCAG AAA ready, VLibras)
-- ✅ Monitoring (Sentry)
-- ⏳ Deployment to production (95% ready)
-
-**Remaining Work:**
-
-1. Final production deployment to Vercel
-2. Load testing with production traffic
-3. User acceptance testing (UAT)
-4. Documentation site (Docusaurus)
-
-For more details, see `/docs/README.md` for complete documentation index.
+- Supabase credentials required for OAuth (Google/GitHub login)
+- Backend URL defaults to production Railway deployment
+- PWA disabled by default in development
+- VLibras disabled by default (enable with env var)
