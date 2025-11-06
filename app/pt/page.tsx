@@ -105,10 +105,10 @@ export default function PTPage() {
                 Acessar o Sistema
               </button>
               <Link
-                href="#features"
+                href="#about-project"
                 className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 transition-all duration-300"
               >
-                Ver Demonstração
+                Conheça o Projeto
               </Link>
             </div>
           </div>
@@ -116,6 +116,66 @@ export default function PTPage() {
 
         {/* PWA Installation Section - Right after Hero */}
         <InstallPWASection />
+
+        {/* Conheça o Projeto Section */}
+        <section
+          id="about-project"
+          className="py-20 bg-gradient-to-b from-green-50/50 to-transparent dark:from-green-900/10"
+        >
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                Conheça o Projeto Cidadão.AI
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                Um sistema inovador de inteligência artificial dedicado à transparência pública
+                brasileira
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg">
+                <div className="text-4xl mb-4">🎓</div>
+                <h3 className="text-2xl font-bold mb-3">Projeto Acadêmico</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Trabalho de Conclusão de Curso em Ciência da Computação no IFSULDEMINAS, que
+                  combina pesquisa científica com impacto social real.
+                </p>
+                <Link
+                  href="/pt/about"
+                  className="text-green-600 hover:text-green-700 font-medium hover:underline inline-flex items-center gap-2"
+                >
+                  Saiba mais sobre o projeto →
+                </Link>
+              </div>
+
+              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg">
+                <div className="text-4xl mb-4">🇧🇷</div>
+                <h3 className="text-2xl font-bold mb-3">17 Agentes Brasileiros</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Cada IA carrega o nome de um herói nacional - de Zumbi dos Palmares a Ayrton Senna
+                  - trabalhando pela transparência e democracia.
+                </p>
+                <Link
+                  href="/pt/agents"
+                  className="text-green-600 hover:text-green-700 font-medium hover:underline inline-flex items-center gap-2"
+                >
+                  Conheça nossos agentes →
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-8 rounded-2xl shadow-xl text-center">
+              <p className="text-xl font-medium mb-4">
+                "A transparência é o melhor remédio contra a corrupção. A tecnologia é a ferramenta
+                que torna esse remédio acessível a todos."
+              </p>
+              <p className="text-green-100 text-sm">
+                Sistema multi-agente 100% open source e gratuito
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
         <section id="features" className="py-20">
