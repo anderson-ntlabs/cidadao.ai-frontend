@@ -16,6 +16,8 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
 
   // Check if we're in an authenticated route by looking for the (authenticated) route group
   const isAuthenticatedRoute =
+    pathname.includes('/app/') ||
+    pathname === `/${locale}/app` ||
     pathname.includes('/dashboard') ||
     pathname.includes('/chat') ||
     pathname.includes('/investigacoes') ||
