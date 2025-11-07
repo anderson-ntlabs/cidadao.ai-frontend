@@ -3,6 +3,7 @@
 import '@/styles/design-system/tokens/index.css'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import {
   TrendingUp,
   AlertTriangle,
@@ -23,16 +24,63 @@ import {
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { StatCard, StatsGrid } from '@/components/stats'
-import { ActivityTimeline } from '@/components/activity'
-import { InvestigationAnalytics } from '@/components/dashboard/investigation-analytics'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
-import { SwipeableCard, SwipeActions } from '@/components/mobile'
+import { SwipeActions } from '@/components/mobile'
 import { toast } from '@/hooks/use-toast'
+
+// Lazy load heavy chart/visualization components
+const InvestigationAnalytics = dynamic(
+  () =>
+    import('@/components/dashboard/investigation-analytics').then((mod) => ({
+      default: mod.InvestigationAnalytics,
+    })),
+  {
+    loading: () => (
+      <GlassCard>
+        <GlassCardHeader>
+          <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+        </GlassCardHeader>
+        <GlassCardContent>
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />
+        </GlassCardContent>
+      </GlassCard>
+    ),
+    ssr: false,
+  }
+)
+
+const ActivityTimeline = dynamic(
+  () => import('@/components/activity').then((mod) => ({ default: mod.ActivityTimeline })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-start gap-4">
+            <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 mt-2" />
+            <div className="flex-1">
+              <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2" />
+              <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const SwipeableCard = dynamic(
+  () => import('@/components/mobile').then((mod) => ({ default: mod.SwipeableCard })),
+  {
+    loading: () => <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg" />,
+    ssr: false,
+  }
+)
 
 // Estatísticas principais
 const statsCards = [
