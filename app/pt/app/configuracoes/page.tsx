@@ -2,17 +2,75 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { Settings, Type, Eye, Bell, Shield, Palette, Volume2, Save } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
-import { ActionPanel, ActionPanelSection, type ActionPanelItem } from '@/components/panels'
-import { FontSizeControl } from '@/components/a11y/font-size-control'
-import { HighContrastToggle } from '@/components/a11y/high-contrast-toggle'
-import { VLibrasToggle } from '@/components/a11y/vlibras-toggle'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
 import { logger } from '@/lib/utils/logger'
+
+// Lazy load heavy panel components
+const ActionPanel = dynamic(
+  () => import('@/components/panels').then((mod) => ({ default: mod.ActionPanel })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const ActionPanelSection = dynamic(
+  () => import('@/components/panels').then((mod) => ({ default: mod.ActionPanelSection })),
+  {
+    loading: () => (
+      <div className="mb-6">
+        <div className="h-8 w-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2" />
+        <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-4" />
+        <div className="h-32 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+// Lazy load accessibility controls
+const FontSizeControl = dynamic(
+  () =>
+    import('@/components/a11y/font-size-control').then((mod) => ({ default: mod.FontSizeControl })),
+  {
+    loading: () => <div className="h-12 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg" />,
+    ssr: false,
+  }
+)
+
+const HighContrastToggle = dynamic(
+  () =>
+    import('@/components/a11y/high-contrast-toggle').then((mod) => ({
+      default: mod.HighContrastToggle,
+    })),
+  {
+    loading: () => (
+      <div className="h-10 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-full" />
+    ),
+    ssr: false,
+  }
+)
+
+const VLibrasToggle = dynamic(
+  () => import('@/components/a11y/vlibras-toggle').then((mod) => ({ default: mod.VLibrasToggle })),
+  {
+    loading: () => (
+      <div className="h-10 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-full" />
+    ),
+    ssr: false,
+  }
+)
 
 /**
  * Página de Configurações
