@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
 import {
   User,
   Mail,
@@ -17,8 +18,6 @@ import {
 } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
-import { StatCard, StatsGrid } from '@/components/stats'
-import { ActionPanel, type ActionPanelItem } from '@/components/panels'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import {
   userProfileService,
@@ -28,6 +27,53 @@ import {
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import { logger } from '@/lib/utils/logger'
+
+// Lazy load statistics components
+const StatCard = dynamic(
+  () => import('@/components/stats').then((mod) => ({ default: mod.StatCard })),
+  {
+    loading: () => (
+      <div className="p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const StatsGrid = dynamic(
+  () => import('@/components/stats').then((mod) => ({ default: mod.StatsGrid })),
+  {
+    loading: () => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+          </div>
+        ))}
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+// Lazy load action panel component
+const ActionPanel = dynamic(
+  () => import('@/components/panels').then((mod) => ({ default: mod.ActionPanel })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
 
 export default function ProfilePage() {
   const { user } = useAuth()
