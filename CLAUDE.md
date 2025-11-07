@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
-**Última Atualização**: 2025-11-06
+**Última Atualização**: 2025-11-07
 
 ---
 
@@ -47,6 +47,37 @@ Cidadão.AI Frontend is a Next.js 15 Progressive Web App (PWA) that democratizes
 
 ---
 
+## Quick Command Reference
+
+**Most Common Commands**:
+
+```bash
+npm run dev                           # Start dev server
+npm run build && npm run start        # Production build + start
+npm run test:ui                       # Test with UI
+npm run test:playwright:ui            # E2E tests with UI
+npm run type-check && npm run lint    # Quality check
+node scripts/test-backend.js          # Test backend connectivity
+```
+
+**Debugging Specific Issues**:
+
+```bash
+# Chat not working
+node scripts/test-chat-adapters.js
+
+# Auth issues
+# Check Route Handler uses createServerClient (not createClient)
+
+# Build failing
+rm -rf .next node_modules && npm install && npm run build
+
+# Tests failing
+npx playwright install && npm run test:playwright
+```
+
+---
+
 ## Key Development Commands
 
 ```bash
@@ -62,6 +93,13 @@ npm run type-check            # TypeScript validation
 npm run test                  # Watch mode
 npm run test:ui               # UI interface
 npm run test:coverage         # Coverage report (target: 60%)
+npm run test:watch            # Watch mode (alternative)
+
+# Testing - Specific test execution
+npx vitest run __tests__/unit/utils/cn.test.ts           # Single unit test
+npx vitest run __tests__/unit/components/toast.test.tsx   # Single component test
+npx vitest run __tests__/integration/                     # All integration tests
+npx vitest --coverage __tests__/unit/components/          # Coverage for specific folder
 
 # Testing - E2E Tests (Playwright)
 npm run test:playwright       # All E2E tests
@@ -71,6 +109,12 @@ npm run test:e2e:ui           # E2E with UI
 npm run test:mobile           # Mobile-specific tests
 npm run test:mobile:ui        # Mobile tests with UI
 npm run test:design-system    # Design system E2E tests
+
+# Testing - Specific E2E execution
+npx playwright test __tests__/e2e/auth.spec.ts            # Single E2E test
+npx playwright test __tests__/e2e/mobile/                 # Mobile tests only
+npx playwright test --headed                              # Watch test execution
+npx playwright test --debug                               # Debug mode
 
 # Testing - Manual Integration Scripts
 node scripts/test-backend.js        # Backend connectivity
@@ -243,6 +287,32 @@ Fallback Adapter              Primary Adapter (backend)
 - Dynamic imports for heavy components (PDF export, charts)
 - Lazy loading for VLibras, export services
 - Route-based code splitting (automatic)
+
+### Component Architecture Patterns
+
+**Mobile/Desktop Responsive Components**:
+
+The codebase uses a pattern of separate mobile and desktop components for complex UI:
+
+- `components/mobile/mobile-nav.tsx`: Mobile-specific navigation
+- `components/mobile-nav.tsx`: Main navigation wrapper that conditionally renders mobile/desktop versions
+- Pattern: Use CSS `hidden md:block` and `block md:hidden` for responsive switching
+- Mobile components live in `components/mobile/` directory
+- Desktop-first approach with mobile overrides
+
+**Landing Page Components** (`components/landing/`):
+
+- `SimplifiedHeader`: Minimalist header for landing/login pages
+- `ContentCard`: Clickable cards with hover effects
+- `ExternalLinkCard`: Cards for external links
+- `LandingModal`: Modal wrapper for landing page modals
+
+**Accessibility Components** (`components/a11y/`):
+
+- `vlibras-lazy.tsx`: Lazy-loaded VLibras widget (LIBRAS)
+- `accessibility-panel.tsx`: Unified accessibility controls
+- `announcer.tsx`: Screen reader announcements
+- `skip-links.tsx`: Keyboard navigation shortcuts
 
 ### Testing Infrastructure
 
@@ -418,6 +488,70 @@ ANALYZE=true npm run build  # Opens webpack-bundle-analyzer
 - Integration with Vercel Analytics
 - Custom telemetry events
 
+### 6. Performance Debugging
+
+**Bundle Size Analysis**:
+
+```bash
+# Analyze production bundle
+ANALYZE=true npm run build
+
+# Analyze server bundle only
+npm run analyze:server
+
+# Analyze browser bundle only
+npm run analyze:browser
+
+# Check bundle size breakdown
+# Opens webpack-bundle-analyzer in browser
+```
+
+**Lighthouse Audits**:
+
+```bash
+# Run Lighthouse CI
+npm run lighthouse
+
+# Collect metrics only
+npm run lighthouse:collect
+
+# Assert against thresholds
+npm run lighthouse:assert
+
+# Manual Lighthouse (Chrome DevTools)
+# Open DevTools > Lighthouse tab > Generate report
+```
+
+**Performance Monitoring**:
+
+```bash
+# Monitor backend response times
+node scripts/monitor-backend.js
+
+# Track Web Vitals in production
+# Automatically sent to Vercel Analytics
+# View in Vercel dashboard > Analytics > Web Vitals
+```
+
+**Common Performance Issues**:
+
+1. **Large bundle size**: Check for unoptimized imports
+   - ❌ `import _ from 'lodash'` (imports entire library)
+   - ✅ `import debounce from 'lodash/debounce'` (tree-shakeable)
+
+2. **Slow page loads**: Check for blocking resources
+   - Use `next/dynamic` for heavy components
+   - Lazy load PDF export, charts, VLibras
+
+3. **Poor CLS scores**: Check for layout shifts
+   - Reserve space for images with width/height
+   - Avoid inserting content above existing content
+
+4. **High FCP/LCP**: Optimize critical rendering path
+   - Preload critical resources
+   - Minimize server response time
+   - Use edge functions for faster responses
+
 ---
 
 ## Common Development Tasks
@@ -481,6 +615,60 @@ npm run type-check
 
 # Check for circular dependencies
 npm run build 2>&1 | grep -i "circular"
+```
+
+### Playwright Test Failures
+
+```bash
+# Install/update Playwright browsers
+npm run test:install
+
+# Or manually
+npx playwright install
+
+# For webkit on Linux (if libicu issues)
+./fix-playwright-libicu.sh
+
+# Run with headed mode to debug
+npx playwright test --headed
+
+# Debug specific test
+npx playwright test --debug __tests__/e2e/auth.spec.ts
+
+# Clear test results
+rm -rf test-results/ playwright-report/
+```
+
+### PWA/Service Worker Issues
+
+```bash
+# Service worker not updating:
+# 1. Clear browser cache (Ctrl+Shift+Delete)
+# 2. Unregister service worker in DevTools > Application > Service Workers
+# 3. Hard reload (Ctrl+Shift+R)
+
+# During development, PWA is disabled
+# Check DISABLE_PWA in .env.local or NODE_ENV
+
+# Force rebuild service worker
+rm -rf public/sw.js .next
+npm run build
+```
+
+### VLibras Not Loading
+
+```bash
+# 1. Check environment variable
+echo $NEXT_PUBLIC_ENABLE_VLIBRAS  # Should be 'true'
+
+# 2. Test VLibras specifically
+node scripts/test-vlibras.js
+
+# 3. Check CSP headers (VLibras requires external script)
+# VLibras domains should be in CSP: vlibras.gov.br
+
+# 4. VLibras only loads on Portuguese pages (/pt/*)
+# Navigate to http://localhost:3000/pt to test
 ```
 
 ---
@@ -584,6 +772,53 @@ Unified a11y controls with FAB button and keyboard shortcuts.
 
 ---
 
+## Library Organization
+
+### Core Utilities (`lib/`)
+
+**Chat System**:
+
+- `lib/chat/chat.service.ts`: Main chat orchestrator
+- `lib/chat/adapters/`: Primary and Fallback adapters
+- `lib/chat/types.ts`: TypeScript types for chat
+
+**State & Caching**:
+
+- `lib/cache/`: Caching implementations (in-memory, IndexedDB, Vercel KV)
+- `lib/sse/`: Server-Sent Events client for streaming
+
+**Security & Monitoring**:
+
+- `lib/security/`: CSP configuration, rate limiting, OWASP protection
+- `lib/monitoring/`: Performance monitoring, custom metrics
+- `lib/telemetry/`: Chat telemetry, web vitals tracking
+- `lib/logger/`: Structured logging with pino
+
+**Services**:
+
+- `lib/export/`: PDF/CSV export services
+- `lib/analytics/`: Analytics tracking utilities
+- `lib/websocket/`: WebSocket client (infrastructure ready, not yet enabled)
+
+**Utilities**:
+
+- `lib/utils/`: Common utilities (cn, code-splitting, formatters)
+- `lib/constants/`: App constants and configuration
+- `lib/api/`: API client utilities
+
+### Data & Types
+
+**Agent Configuration** (`data/agents.ts`):
+
+- 17 agent definitions with Brazilian cultural identities
+- Agent metadata: name, role, tier, avatar, description
+- Used throughout the app for agent selection and display
+
+**TypeScript Types** (`types/`):
+
+- `types/chat.ts`: Chat-related types
+- Global type definitions for consistent typing
+
 ## Critical Files Reference
 
 ### Authentication
@@ -658,6 +893,81 @@ Complete documentation in `/docs` directory:
 - ⏳ Documentation site (Docusaurus)
 
 ---
+
+## Git Workflow & Commit Standards
+
+### Commit Message Format
+
+**CRITICAL**: Follow conventional commits in English. Never mention AI assistance in commits.
+
+```
+<type>(scope): <summary>
+
+<optional body>
+```
+
+**Types**:
+
+- `feat`: New features
+- `fix`: Bug fixes
+- `docs`: Documentation only
+- `refactor`: Code changes without fixing bugs or adding features
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks (dependencies, config)
+- `perf`: Performance improvements
+- `style`: Code style changes (formatting, missing semicolons)
+
+**Examples**:
+
+```
+feat(chat): add SSE streaming support for real-time responses
+fix(auth): correct OAuth redirect handling in production
+docs(readme): update installation instructions for Node 18
+refactor(chat): simplify adapter architecture to 2-adapter pattern
+test(e2e): add mobile navigation tests for Pixel 5
+```
+
+### Branch Workflow
+
+```bash
+# Feature development
+git checkout -b feat/feature-name
+# ... make changes, test, commit ...
+git push origin feat/feature-name
+# Create PR on GitHub
+
+# Bug fixes
+git checkout -b fix/issue-description
+# ... fix, test, commit ...
+
+# Hotfix (for production issues)
+git checkout -b hotfix/critical-issue
+```
+
+### Pre-commit Checks
+
+The project uses Husky for pre-commit hooks:
+
+1. **Linting**: ESLint automatically runs
+2. **Type checking**: TypeScript validation
+3. **Commit message validation**: commitlint enforces conventional commits
+
+**To bypass hooks** (not recommended):
+
+```bash
+git commit --no-verify -m "message"
+```
+
+### Quality Gates Before Push
+
+Always run before pushing:
+
+```bash
+npm run type-check          # Must pass
+npm run lint                # Must pass
+npm run test:coverage       # Must meet 60% threshold
+npm run test:playwright     # E2E tests must pass
+```
 
 ## Quick Start for New Developers
 
