@@ -65,15 +65,16 @@ export default function PTLayout({ children }: { children: React.ReactNode }) {
           crossOrigin="anonymous"
         />
         <link rel="preconnect" href="https://app.posthog.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
         {/* DNS Prefetch for external resources */}
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
         <link rel="dns-prefetch" href="https://vlibras.gov.br" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
         {/* Preload critical assets - Above the fold */}
-        <link rel="preload" href="/operarios.png" as="image" type="image/png" />
+        <link rel="preload" href="/operarios.png" as="image" type="image/avif" />
         <link rel="preload" href="/images/Tarsila_Antropofagia.jpg" as="image" type="image/jpeg" />
 
         {/* Preload key agent avatars for modal */}
