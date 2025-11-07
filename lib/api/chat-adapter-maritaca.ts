@@ -1,4 +1,10 @@
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ChatAdapterMaritaca')
+
 /**
+
+
  * Compatibility layer for Maritaca adapter
  * Redirects to new chat system
  *
@@ -56,7 +62,7 @@ export async function sendMaritacaMessage(
   message: string,
   options: MaritacaOptions = {}
 ): Promise<TypesChatResponse> {
-  console.warn('Deprecated: sendMaritacaMessage. Use FallbackAdapter instead')
+  logger.warn('Deprecated: sendMaritacaMessage. Use FallbackAdapter instead')
 
   const adapter = new FallbackAdapter(options.model || 'sabiazinho-3')
   const response = await adapter.send({

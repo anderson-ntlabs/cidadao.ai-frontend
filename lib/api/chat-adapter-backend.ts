@@ -1,4 +1,10 @@
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ChatAdapterBackend')
+
 /**
+
+
  * Compatibility layer for backend adapter
  * Redirects to new chat system
  *
@@ -13,7 +19,7 @@ import type { ChatRequest } from '@/lib/chat/types'
 import type { ChatResponse } from '@/types/chat'
 
 export async function sendBackendMessage(request: ChatRequest): Promise<ChatResponse | null> {
-  console.warn('Deprecated: sendBackendMessage. Use chatService.sendMessage instead')
+  logger.warn('Deprecated: sendBackendMessage. Use chatService.sendMessage instead')
 
   const response = await chatService.sendMessage(request)
 

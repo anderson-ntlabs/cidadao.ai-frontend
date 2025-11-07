@@ -1,4 +1,8 @@
 import { api, API_BASE_URL } from './client'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ChatService')
+
 import type {
   ChatRequest,
   ChatResponse,
@@ -19,7 +23,6 @@ import {
   isValidInvestigationId,
   InputValidator,
 } from '@/lib/security/input-validation'
-import { logger } from '@/lib/utils/logger'
 
 // Chat API endpoints
 const CHAT_ENDPOINTS = {
@@ -156,9 +159,10 @@ export const chatService = {
         return response
       }
     } catch (error) {
-      logger.error(error instanceof Error ? error : new Error('Chat service error'), {
+      logger.error('Chat service error', {
         service: 'chatService',
         action: 'sendMessage',
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
       throw error
     }
@@ -181,12 +185,12 @@ export const chatService = {
       const response = await api.get<AgentInfo[]>(CHAT_ENDPOINTS.AGENTS)
 
       if (response.success && response.data) {
-        console.log('✅ Loaded agents from backend:', response.data.length)
+        logger.info('✅ Loaded agents from backend:', response.data.length)
         return response.data
       }
 
       // Fallback to mocks only if backend fails
-      console.warn('⚠️ Backend agents endpoint failed, using mocks')
+      logger.warn('⚠️ Backend agents endpoint failed, using mocks')
       return getMockAgents()
     } catch (error) {
       console.error('Failed to load agents from backend:', error)

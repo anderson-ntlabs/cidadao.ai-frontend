@@ -1,82 +1,88 @@
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('FindBackendURL')
+
 // Try to find the correct backend URL
 export async function findBackendURL() {
   // Railway is the primary backend (HuggingFace Spaces is deprecated/offline)
-  const possibleURLs = [
-    'https://cidadao-api-production.up.railway.app',
-  ];
+  const possibleURLs = ['https://cidadao-api-production.up.railway.app']
 
-  console.log('=== Searching for Backend URL ===');
-  
+  logger.info('Searching for backend URL')
+
   for (const url of possibleURLs) {
-    console.log(`\nTrying ${url}...`);
-    
+    logger.info('Trying backend URL', { url })
+
     try {
       // First try the root endpoint
       const rootResponse = await fetch(url, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json, text/html',
+          Accept: 'application/json, text/html',
         },
-      });
-      
-      console.log(`${url} - Root status: ${rootResponse.status}`);
-      
+      })
+
+      logger.info('Root endpoint response', { url, status: rootResponse.status })
+
       // If root returns 404, try /docs
       if (rootResponse.status === 404 || rootResponse.status === 200) {
         const docsResponse = await fetch(`${url}/docs`, {
           method: 'GET',
           headers: {
-            'Accept': 'text/html',
+            Accept: 'text/html',
           },
-        });
-        
-        console.log(`${url}/docs - Status: ${docsResponse.status}`);
-        
+        })
+
+        logger.info('Docs endpoint response', { url, status: docsResponse.status })
+
         if (docsResponse.status === 200) {
-          console.log(`✅ Found working backend at: ${url}`);
-          
+          logger.info('Found working backend', { url })
+
           // Test if API endpoints work
           const apiTest = await fetch(`${url}/api/v1/chat/suggestions`, {
             method: 'GET',
             headers: {
-              'Accept': 'application/json',
+              Accept: 'application/json',
             },
-          });
-          
-          console.log(`${url}/api/v1/chat/suggestions - Status: ${apiTest.status}`);
-          
+          })
+
+          logger.info('API test response', {
+            url,
+            endpoint: '/api/v1/chat/suggestions',
+            status: apiTest.status,
+          })
+
           if (apiTest.status !== 404) {
-            return url;
+            return url
           }
         }
       }
     } catch (error) {
-      console.error(`${url} - Error:`, error);
+      logger.error('Backend URL connection failed', { url, error })
     }
   }
-  
+
   // Fallback to Railway if no URL worked (shouldn't happen)
-  console.log('\n⚠️  No backend URL found from list, using Railway as fallback');
-  const railwayUrl = 'https://cidadao-api-production.up.railway.app';
+  logger.warn('No backend URL found from list, using Railway as fallback')
+  const railwayUrl = 'https://cidadao-api-production.up.railway.app'
 
   try {
     const healthResponse = await fetch(`${railwayUrl}/health`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
-    });
+    })
 
-    console.log(`${railwayUrl}/health - Status: ${healthResponse.status}`);
+    logger.info('Railway health check', { status: healthResponse.status })
 
     if (healthResponse.ok) {
-      console.log(`✅ Railway backend is available: ${railwayUrl}`);
-      return railwayUrl;
+      logger.info('Railway backend is available', { url: railwayUrl })
+      return railwayUrl
     }
   } catch (error) {
-    console.error('Failed to connect to Railway:', error);
+    logger.error('Failed to connect to Railway', { error })
   }
-  
-  console.log('\n❌ Could not find working backend URL');
-  return null;
+
+  logger.error('Could not find working backend URL')
+  return null
 }

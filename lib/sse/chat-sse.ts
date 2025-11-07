@@ -1,7 +1,10 @@
 import { API_BASE_URL } from '@/lib/api/client'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ChatSse')
+
 import type { ChatRequest, ChatResponse } from '@/types/chat'
 import { trackChatMessage, trackChatResponse, trackChatError } from '@/lib/telemetry/chat-telemetry'
-import { logger } from '@/lib/logger'
 
 /**
  * SSE (Server-Sent Events) client for chat streaming
@@ -16,8 +19,8 @@ import { logger } from '@/lib/logger'
  * ```typescript
  * const sse = new ChatSSE({
  *   sessionId: 'session_123',
- *   onMessage: (chunk) => console.log(chunk),
- *   onComplete: (response) => console.log('Done!', response)
+ *   onMessage: (chunk) => logger.info(chunk),
+ *   onComplete: (response) => logger.info('Done!', response)
  * });
  *
  * await sse.sendMessage('Hello!');
