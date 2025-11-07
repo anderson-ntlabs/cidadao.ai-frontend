@@ -40,18 +40,31 @@ export class FallbackAdapter implements ChatAdapter {
         },
       ]
 
+      // Build request payload with optional fields
+      const payload: Record<string, unknown> = {
+        messages,
+        model: this.model,
+        temperature: 0.7,
+        max_tokens: 2048,
+        stream: false,
+      }
+
+      // Include session ID if provided
+      if (request.sessionId) {
+        payload.session_id = request.sessionId
+      }
+
+      // Include context if provided
+      if (request.context) {
+        payload.context = request.context
+      }
+
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages,
-          model: this.model,
-          temperature: 0.7,
-          max_tokens: 2048,
-          stream: false,
-        }),
+        body: JSON.stringify(payload),
         signal: AbortSignal.timeout(30000),
       })
 
@@ -61,6 +74,24 @@ export class FallbackAdapter implements ChatAdapter {
 
       const data = await response.json()
 
+      // Build metadata, prioritizing data.metadata fields
+      const metadata: Record<string, unknown> = {
+        model: data.metadata?.model || data.model || this.model,
+      }
+
+      // Merge metadata from response (if it exists as nested object)
+      if (data.metadata && typeof data.metadata === 'object') {
+        Object.assign(metadata, data.metadata)
+      }
+
+      // Include legacy top-level fields for backward compatibility
+      if (data.usage !== undefined) metadata.usage = data.usage
+      if (data.id !== undefined) metadata.id = data.id
+      if (data.finish_reason !== undefined) metadata.finish_reason = data.finish_reason
+      if (data.tokens !== undefined) metadata.tokens = data.tokens
+      if (data.cost !== undefined) metadata.cost = data.cost
+      if (data.processingTime !== undefined) metadata.processingTime = data.processingTime
+
       return {
         success: true,
         data: {
@@ -68,12 +99,7 @@ export class FallbackAdapter implements ChatAdapter {
           agentId: 'maritaca',
           agentName: `Maritaca (${this.model})`,
           confidence: 0.85, // Fixed confidence for Maritaca
-          metadata: {
-            model: data.model || this.model,
-            usage: data.usage,
-            id: data.id,
-            finish_reason: data.finish_reason,
-          },
+          metadata,
         },
       }
     } catch (error) {
