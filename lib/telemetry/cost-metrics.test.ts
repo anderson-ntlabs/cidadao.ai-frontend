@@ -82,27 +82,38 @@ describe('CostMetricsService', () => {
       expect(metrics[0].model_used).toBe('model-5') // First 5 should be removed
     })
 
-    it('should log warnings for failed requests', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    it('should log warnings for failed requests', async () => {
+      // Import logger to spy on it
+      const { logger } = await import('@/lib/logger')
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
 
       service.record({
         success: false,
         error: 'Network error',
       })
 
-      expect(warnSpy).toHaveBeenCalledWith('[CostMetrics] Request failed:', 'Network error')
+      expect(warnSpy).toHaveBeenCalledWith('Cost metric request failed', {
+        context: 'CostMetrics',
+        error: 'Network error',
+        endpoint: undefined,
+      })
       warnSpy.mockRestore()
     })
 
-    it('should log cache hits', () => {
-      const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    it('should log cache hits', async () => {
+      // Import logger to spy on it
+      const { logger } = await import('@/lib/logger')
+      const debugSpy = vi.spyOn(logger, 'debug').mockImplementation(() => {})
 
       service.record({
         from_cache: true,
       })
 
-      expect(logSpy).toHaveBeenCalledWith('[CostMetrics] Cache hit - saved API call')
-      logSpy.mockRestore()
+      expect(debugSpy).toHaveBeenCalledWith('Cache hit - saved API call', {
+        context: 'CostMetrics',
+        endpoint: undefined,
+      })
+      debugSpy.mockRestore()
     })
   })
 

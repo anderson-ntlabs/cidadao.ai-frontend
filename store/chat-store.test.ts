@@ -1,18 +1,20 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { useChatStore } from './chat-store';
-import { chatService } from '@/lib/api/chat.service';
-import { chatSessionService } from '@/lib/services/chat-session.service';
-import { getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket';
-import type { ChatMessage, ChatResponse } from '@/types/chat';
-import * as chatServiceModule from '@/lib/api/chat.service';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { useChatStore } from './chat-store'
+import { chatService } from '@/lib/api/chat.service'
+import { chatSessionService } from '@/lib/services/chat-session.service'
+import { getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket'
+import type { ChatMessage, ChatResponse } from '@/types/chat'
+import * as chatServiceModule from '@/lib/api/chat.service'
 
 // Mock generateSessionId
-vi.spyOn(chatServiceModule, 'generateSessionId').mockImplementation(() => 'test-session-' + Date.now());
+vi.spyOn(chatServiceModule, 'generateSessionId').mockImplementation(
+  () => 'test-session-' + Date.now()
+)
 
 // Mock dependencies
-vi.mock('@/lib/api/chat.service');
-vi.mock('@/lib/services/chat-session.service');
-vi.mock('@/lib/websocket/chat-websocket');
+vi.mock('@/lib/api/chat.service')
+vi.mock('@/lib/services/chat-session.service')
+vi.mock('@/lib/websocket/chat-websocket')
 
 // Mock Supabase client
 vi.mock('@/lib/supabase/client', () => ({
@@ -36,7 +38,7 @@ vi.mock('@/lib/supabase/client', () => ({
       delete: vi.fn(),
     })),
   })),
-}));
+}))
 
 describe('ChatStore', () => {
   beforeEach(() => {
@@ -53,60 +55,64 @@ describe('ChatStore', () => {
       error: null,
       isLoading: false,
       ws: null,
-    });
-    
+    })
+
     // Clear all mocks
-    vi.clearAllMocks();
-  });
+    vi.clearAllMocks()
+  })
 
   afterEach(() => {
-    vi.resetAllMocks();
-  });
+    vi.resetAllMocks()
+  })
 
   describe('Initial State', () => {
     it('should have correct initial state', () => {
-      const state = useChatStore.getState();
-      expect(state.messages).toEqual([]);
-      expect(state.session).toBeNull();
-      expect(state.connectionStatus).toBe('disconnected');
-      expect(state.isTyping).toBe(false);
-      expect(state.agentTyping).toBe(false);
-      expect(state.activeAgents).toEqual([]);
-      expect(state.suggestedActions).toEqual([]);
-      expect(state.currentInvestigation).toBeNull();
-      expect(state.error).toBeNull();
-      expect(state.isLoading).toBe(false);
-      expect(state.ws).toBeNull();
-    });
-  });
+      const state = useChatStore.getState()
+      expect(state.messages).toEqual([])
+      expect(state.session).toBeNull()
+      expect(state.connectionStatus).toBe('disconnected')
+      expect(state.isTyping).toBe(false)
+      expect(state.agentTyping).toBe(false)
+      expect(state.activeAgents).toEqual([])
+      expect(state.suggestedActions).toEqual([])
+      expect(state.currentInvestigation).toBeNull()
+      expect(state.error).toBeNull()
+      expect(state.isLoading).toBe(false)
+      expect(state.ws).toBeNull()
+    })
+  })
 
   describe('initializeChat', () => {
     it('should create new session and load initial data', async () => {
-      const mockAgents = [{ id: 'agent1', name: 'Agent 1' }];
-      const mockSuggestions = [{ id: 'sug1', label: 'Suggestion 1', action: 'action1', icon: 'icon' }];
-      
-      vi.mocked(chatService.getAgents).mockResolvedValue(mockAgents as any);
-      vi.mocked(chatService.getSuggestions).mockResolvedValue(mockSuggestions);
-      vi.mocked(chatSessionService.createSession).mockResolvedValue({ id: 'session1' } as any);
+      const mockAgents = [{ id: 'agent1', name: 'Agent 1' }]
+      const mockSuggestions = [
+        { id: 'sug1', label: 'Suggestion 1', action: 'action1', icon: 'icon' },
+      ]
 
-      await useChatStore.getState().initializeChat();
+      vi.mocked(chatService.getAgents).mockResolvedValue(mockAgents as any)
+      vi.mocked(chatService.getSuggestions).mockResolvedValue(mockSuggestions)
+      vi.mocked(chatSessionService.createSession).mockResolvedValue({ id: 'session1' } as any)
 
-      const state = useChatStore.getState();
-      expect(state.session).toBeTruthy();
-      expect(state.session?.session_id).toBeTruthy();
-      expect(state.activeAgents).toEqual(mockAgents);
-      expect(state.suggestedActions).toEqual(mockSuggestions);
-      expect(state.connectionStatus).toBe('disconnected');
-    });
+      await useChatStore.getState().initializeChat()
+
+      const state = useChatStore.getState()
+      expect(state.session).toBeTruthy()
+      expect(state.session?.session_id).toBeTruthy()
+      expect(state.activeAgents).toEqual(mockAgents)
+      expect(state.suggestedActions).toEqual(mockSuggestions)
+      expect(state.connectionStatus).toBe('disconnected')
+    })
 
     it('should handle errors during initialization gracefully', async () => {
-      vi.mocked(chatService.getAgents).mockRejectedValue(new Error('Failed to load agents'));
-      vi.mocked(chatService.getSuggestions).mockRejectedValue(new Error('Failed to load suggestions'));
+      vi.mocked(chatService.getAgents).mockRejectedValue(new Error('Failed to load agents'))
+      vi.mocked(chatService.getSuggestions).mockRejectedValue(
+        new Error('Failed to load suggestions')
+      )
 
       // Should not throw
-      await expect(useChatStore.getState().initializeChat()).resolves.not.toThrow();
-    });
-  });
+      await expect(useChatStore.getState().initializeChat()).resolves.not.toThrow()
+    })
+  })
 
   describe('sendMessage', () => {
     beforeEach(() => {
@@ -117,11 +123,11 @@ describe('ChatStore', () => {
           created_at: new Date().toISOString(),
           metadata: {},
         },
-      });
-    });
+      })
+    })
 
     it('should send message and add user and assistant messages', async () => {
-      const userContent = 'Hello, AI!';
+      const userContent = 'Hello, AI!'
       const mockResponse: ChatResponse = {
         message: 'Hello, human!',
         session_id: 'test-session',
@@ -129,70 +135,70 @@ describe('ChatStore', () => {
         agent_name: 'Agent 1',
         confidence: 0.9,
         suggested_actions: ['Action 1', 'Action 2'],
-      };
+      }
 
-      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse);
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any);
+      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
+      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
 
-      await useChatStore.getState().sendMessage(userContent);
+      await useChatStore.getState().sendMessage(userContent)
 
-      const messages = useChatStore.getState().messages;
-      expect(messages).toHaveLength(2);
-      
+      const messages = useChatStore.getState().messages
+      expect(messages).toHaveLength(2)
+
       // Check user message
-      expect(messages[0].role).toBe('user');
-      expect(messages[0].content).toBe(userContent);
-      
+      expect(messages[0].role).toBe('user')
+      expect(messages[0].content).toBe(userContent)
+
       // Check assistant message
-      expect(messages[1].role).toBe('assistant');
-      expect(messages[1].content).toBe(mockResponse.message);
-      expect(messages[1].agent_id).toBe(mockResponse.agent_id);
-      expect(messages[1].agent_name).toBe(mockResponse.agent_name);
+      expect(messages[1].role).toBe('assistant')
+      expect(messages[1].content).toBe(mockResponse.message)
+      expect(messages[1].agent_id).toBe(mockResponse.agent_id)
+      expect(messages[1].agent_name).toBe(mockResponse.agent_name)
 
       // Check suggested actions
-      const suggestedActions = useChatStore.getState().suggestedActions;
-      expect(suggestedActions).toHaveLength(2);
-      expect(suggestedActions[0].label).toBe('Action 1');
-      expect(suggestedActions[1].label).toBe('Action 2');
-    });
+      const suggestedActions = useChatStore.getState().suggestedActions
+      expect(suggestedActions).toHaveLength(2)
+      expect(suggestedActions[0].label).toBe('Action 1')
+      expect(suggestedActions[1].label).toBe('Action 2')
+    })
 
     it('should handle empty response gracefully', async () => {
-      vi.mocked(chatService.sendMessage).mockResolvedValue(null as any);
+      vi.mocked(chatService.sendMessage).mockResolvedValue(null as any)
 
-      await useChatStore.getState().sendMessage('Test message');
+      await useChatStore.getState().sendMessage('Test message')
 
-      const state = useChatStore.getState();
-      expect(state.error).toBe('No response from server');
-      expect(state.isLoading).toBe(false);
-    });
+      const state = useChatStore.getState()
+      expect(state.error).toBe('No response from server')
+      expect(state.isLoading).toBe(false)
+    })
 
     it('should handle errors when sending message', async () => {
-      const errorMessage = 'Network error';
-      vi.mocked(chatService.sendMessage).mockRejectedValue(new Error(errorMessage));
+      const errorMessage = 'Network error'
+      vi.mocked(chatService.sendMessage).mockRejectedValue(new Error(errorMessage))
 
-      await useChatStore.getState().sendMessage('Test message');
+      await useChatStore.getState().sendMessage('Test message')
 
-      const state = useChatStore.getState();
-      expect(state.error).toBe(errorMessage);
-      expect(state.isLoading).toBe(false);
-      expect(state.agentTyping).toBe(false);
-    });
+      const state = useChatStore.getState()
+      expect(state.error).toBe(errorMessage)
+      expect(state.isLoading).toBe(false)
+      expect(state.agentTyping).toBe(false)
+    })
 
     it('should create session if none exists', async () => {
-      useChatStore.setState({ session: null });
+      useChatStore.setState({ session: null })
 
       const mockResponse: ChatResponse = {
         message: 'Response',
         session_id: 'new-session',
-      };
-      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse);
+      }
+      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
 
-      await useChatStore.getState().sendMessage('Test');
+      await useChatStore.getState().sendMessage('Test')
 
-      const state = useChatStore.getState();
-      expect(state.session).toBeTruthy();
-      expect(state.session?.session_id).toBeTruthy();
-    });
+      const state = useChatStore.getState()
+      expect(state.session).toBeTruthy()
+      expect(state.session?.session_id).toBeTruthy()
+    })
 
     it('should update investigation if metadata contains investigation_id', async () => {
       const mockResponse: ChatResponse = {
@@ -204,47 +210,47 @@ describe('ChatStore', () => {
           investigation_title: 'Test Investigation',
         },
         confidence: 0.85,
-      };
+      }
 
-      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse);
+      vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
 
-      await useChatStore.getState().sendMessage('Investigate this');
+      await useChatStore.getState().sendMessage('Investigate this')
 
-      const investigation = useChatStore.getState().currentInvestigation;
-      expect(investigation).toBeTruthy();
-      expect(investigation?.id).toBe('inv123');
-      expect(investigation?.title).toBe('Test Investigation');
-      expect(investigation?.status).toBe('in_progress');
-      expect(investigation?.confidence_score).toBe(0.85);
-    });
-  });
+      const investigation = useChatStore.getState().currentInvestigation
+      expect(investigation).toBeTruthy()
+      expect(investigation?.id).toBe('inv123')
+      expect(investigation?.title).toBe('Test Investigation')
+      expect(investigation?.status).toBe('in_progress')
+      expect(investigation?.confidence_score).toBe(0.85)
+    })
+  })
 
   describe('UI State Actions', () => {
     it('should set typing state', () => {
-      useChatStore.getState().setTyping(true);
-      expect(useChatStore.getState().isTyping).toBe(true);
-      
-      useChatStore.getState().setTyping(false);
-      expect(useChatStore.getState().isTyping).toBe(false);
-    });
+      useChatStore.getState().setTyping(true)
+      expect(useChatStore.getState().isTyping).toBe(true)
+
+      useChatStore.getState().setTyping(false)
+      expect(useChatStore.getState().isTyping).toBe(false)
+    })
 
     it('should set agent typing state', () => {
-      useChatStore.getState().setAgentTyping(true);
-      expect(useChatStore.getState().agentTyping).toBe(true);
-      
-      useChatStore.getState().setAgentTyping(false);
-      expect(useChatStore.getState().agentTyping).toBe(false);
-    });
+      useChatStore.getState().setAgentTyping(true)
+      expect(useChatStore.getState().agentTyping).toBe(true)
+
+      useChatStore.getState().setAgentTyping(false)
+      expect(useChatStore.getState().agentTyping).toBe(false)
+    })
 
     it('should set and clear error', () => {
-      const errorMessage = 'Test error';
-      useChatStore.getState().setError(errorMessage);
-      expect(useChatStore.getState().error).toBe(errorMessage);
-      
-      useChatStore.getState().clearError();
-      expect(useChatStore.getState().error).toBeNull();
-    });
-  });
+      const errorMessage = 'Test error'
+      useChatStore.getState().setError(errorMessage)
+      expect(useChatStore.getState().error).toBe(errorMessage)
+
+      useChatStore.getState().clearError()
+      expect(useChatStore.getState().error).toBeNull()
+    })
+  })
 
   describe('Message Actions', () => {
     it('should add message', () => {
@@ -254,14 +260,14 @@ describe('ChatStore', () => {
         role: 'user',
         content: 'Test message',
         timestamp: new Date().toISOString(),
-      };
+      }
 
-      useChatStore.getState().addMessage(message);
-      
-      const messages = useChatStore.getState().messages;
-      expect(messages).toHaveLength(1);
-      expect(messages[0]).toEqual(message);
-    });
+      useChatStore.getState().addMessage(message)
+
+      const messages = useChatStore.getState().messages
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual(message)
+    })
 
     it('should update existing message', () => {
       const message: ChatMessage = {
@@ -270,14 +276,14 @@ describe('ChatStore', () => {
         role: 'user',
         content: 'Original content',
         timestamp: new Date().toISOString(),
-      };
+      }
 
-      useChatStore.setState({ messages: [message] });
-      useChatStore.getState().updateMessage('msg1', { content: 'Updated content' });
-      
-      const messages = useChatStore.getState().messages;
-      expect(messages[0].content).toBe('Updated content');
-    });
+      useChatStore.setState({ messages: [message] })
+      useChatStore.getState().updateMessage('msg1', { content: 'Updated content' })
+
+      const messages = useChatStore.getState().messages
+      expect(messages[0].content).toBe('Updated content')
+    })
 
     it('should not update non-existent message', () => {
       const message: ChatMessage = {
@@ -286,28 +292,28 @@ describe('ChatStore', () => {
         role: 'user',
         content: 'Original content',
         timestamp: new Date().toISOString(),
-      };
+      }
 
-      useChatStore.setState({ messages: [message] });
-      useChatStore.getState().updateMessage('msg2', { content: 'Updated content' });
-      
-      const messages = useChatStore.getState().messages;
-      expect(messages[0].content).toBe('Original content');
-    });
-  });
+      useChatStore.setState({ messages: [message] })
+      useChatStore.getState().updateMessage('msg2', { content: 'Updated content' })
+
+      const messages = useChatStore.getState().messages
+      expect(messages[0].content).toBe('Original content')
+    })
+  })
 
   describe('Session Actions', () => {
     it('should create new session', async () => {
-      vi.mocked(chatSessionService.createSession).mockResolvedValue({} as any);
+      vi.mocked(chatSessionService.createSession).mockResolvedValue({} as any)
 
-      await useChatStore.getState().createNewSession();
-      
-      const state = useChatStore.getState();
-      expect(state.session).toBeTruthy();
-      expect(state.session?.session_id).toBeTruthy();
-      expect(state.messages).toEqual([]);
-      expect(state.currentInvestigation).toBeNull();
-    });
+      await useChatStore.getState().createNewSession()
+
+      const state = useChatStore.getState()
+      expect(state.session).toBeTruthy()
+      expect(state.session?.session_id).toBeTruthy()
+      expect(state.messages).toEqual([])
+      expect(state.currentInvestigation).toBeNull()
+    })
 
     it('should update session', () => {
       useChatStore.setState({
@@ -316,21 +322,21 @@ describe('ChatStore', () => {
           created_at: new Date().toISOString(),
           metadata: {},
         },
-      });
+      })
 
-      useChatStore.getState().updateSession({ metadata: { updated: true } });
-      
-      const session = useChatStore.getState().session;
-      expect(session?.metadata).toEqual({ updated: true });
-    });
+      useChatStore.getState().updateSession({ metadata: { updated: true } })
+
+      const session = useChatStore.getState().session
+      expect(session?.metadata).toEqual({ updated: true })
+    })
 
     it('should not update session if none exists', () => {
-      useChatStore.setState({ session: null });
-      useChatStore.getState().updateSession({ metadata: { updated: true } });
-      
-      expect(useChatStore.getState().session).toBeNull();
-    });
-  });
+      useChatStore.setState({ session: null })
+      useChatStore.getState().updateSession({ metadata: { updated: true } })
+
+      expect(useChatStore.getState().session).toBeNull()
+    })
+  })
 
   describe('Chat History', () => {
     it('should load chat history', async () => {
@@ -349,27 +355,27 @@ describe('ChatStore', () => {
           content: 'Message 2',
           timestamp: new Date().toISOString(),
         },
-      ];
+      ]
 
-      vi.mocked(chatService.getHistory).mockResolvedValue(mockMessages);
+      vi.mocked(chatService.getHistory).mockResolvedValue(mockMessages)
 
-      await useChatStore.getState().loadChatHistory('session1');
-      
-      const state = useChatStore.getState();
-      expect(state.messages).toEqual(mockMessages);
-      expect(state.isLoading).toBe(false);
-    });
+      await useChatStore.getState().loadChatHistory('session1')
+
+      const state = useChatStore.getState()
+      expect(state.messages).toEqual(mockMessages)
+      expect(state.isLoading).toBe(false)
+    })
 
     it('should handle errors when loading history', async () => {
-      const errorMessage = 'Failed to load';
-      vi.mocked(chatService.getHistory).mockRejectedValue(new Error(errorMessage));
+      const errorMessage = 'Failed to load'
+      vi.mocked(chatService.getHistory).mockRejectedValue(new Error(errorMessage))
 
-      await useChatStore.getState().loadChatHistory('session1');
-      
-      const state = useChatStore.getState();
-      expect(state.error).toBe(errorMessage);
-      expect(state.isLoading).toBe(false);
-    });
+      await useChatStore.getState().loadChatHistory('session1')
+
+      const state = useChatStore.getState()
+      expect(state.error).toBe(errorMessage)
+      expect(state.isLoading).toBe(false)
+    })
 
     it('should clear chat', async () => {
       useChatStore.setState({
@@ -398,74 +404,72 @@ describe('ChatStore', () => {
           anomalies_count: 0,
           confidence_score: 0,
         },
-      });
+      })
 
-      vi.mocked(chatService.clearHistory).mockResolvedValue(undefined);
+      vi.mocked(chatService.clearHistory).mockResolvedValue(undefined)
 
-      await useChatStore.getState().clearChat();
-      
-      const state = useChatStore.getState();
-      expect(state.messages).toEqual([]);
-      expect(state.currentInvestigation).toBeNull();
-    });
-  });
+      await useChatStore.getState().clearChat()
+
+      const state = useChatStore.getState()
+      expect(state.messages).toEqual([])
+      expect(state.currentInvestigation).toBeNull()
+    })
+  })
 
   describe('WebSocket Actions', () => {
     it('should not connect WebSocket (backend does not support)', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
-      useChatStore.getState().connectWebSocket();
-      
-      expect(consoleSpy).toHaveBeenCalledWith('WebSocket connection skipped - not supported by backend');
-      expect(useChatStore.getState().connectionStatus).toBe('disconnected');
-      
-      consoleSpy.mockRestore();
-    });
+      // Test the actual behavior, not the logging (which is an implementation detail)
+      useChatStore.getState().connectWebSocket()
+
+      // Verify the connection status remains disconnected (WebSocket not supported)
+      expect(useChatStore.getState().connectionStatus).toBe('disconnected')
+      expect(useChatStore.getState().ws).toBeNull()
+    })
 
     it('should disconnect WebSocket', () => {
-      useChatStore.getState().disconnectWebSocket();
-      
-      expect(closeChatWebSocket).toHaveBeenCalled();
-      expect(useChatStore.getState().ws).toBeNull();
-      expect(useChatStore.getState().connectionStatus).toBe('disconnected');
-    });
-  });
+      useChatStore.getState().disconnectWebSocket()
+
+      expect(closeChatWebSocket).toHaveBeenCalled()
+      expect(useChatStore.getState().ws).toBeNull()
+      expect(useChatStore.getState().connectionStatus).toBe('disconnected')
+    })
+  })
 
   describe('Load Actions', () => {
     it('should load agents', async () => {
       const mockAgents = [
         { id: 'agent1', name: 'Agent 1' },
         { id: 'agent2', name: 'Agent 2' },
-      ];
-      vi.mocked(chatService.getAgents).mockResolvedValue(mockAgents as any);
+      ]
+      vi.mocked(chatService.getAgents).mockResolvedValue(mockAgents as any)
 
-      await useChatStore.getState().loadAgents();
-      
-      expect(useChatStore.getState().activeAgents).toEqual(mockAgents);
-    });
+      await useChatStore.getState().loadAgents()
+
+      expect(useChatStore.getState().activeAgents).toEqual(mockAgents)
+    })
 
     it('should handle errors when loading agents', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.mocked(chatService.getAgents).mockRejectedValue(new Error('Failed to load'));
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(chatService.getAgents).mockRejectedValue(new Error('Failed to load'))
 
-      await useChatStore.getState().loadAgents();
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to load agents:', expect.any(Error));
-      consoleSpy.mockRestore();
-    });
+      await useChatStore.getState().loadAgents()
+
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to load agents:', expect.any(Error))
+      consoleSpy.mockRestore()
+    })
 
     it('should load suggestions', async () => {
       const mockSuggestions = [
         { id: 'sug1', label: 'Suggestion 1', action: 'action1', icon: 'icon1' },
         { id: 'sug2', label: 'Suggestion 2', action: 'action2', icon: 'icon2' },
-      ];
-      vi.mocked(chatService.getSuggestions).mockResolvedValue(mockSuggestions);
+      ]
+      vi.mocked(chatService.getSuggestions).mockResolvedValue(mockSuggestions)
 
-      await useChatStore.getState().loadSuggestions();
-      
-      expect(useChatStore.getState().suggestedActions).toEqual(mockSuggestions);
-    });
-  });
+      await useChatStore.getState().loadSuggestions()
+
+      expect(useChatStore.getState().suggestedActions).toEqual(mockSuggestions)
+    })
+  })
 
   describe('Pagination', () => {
     it('should load more messages with pagination', async () => {
@@ -477,8 +481,8 @@ describe('ChatStore', () => {
           content: 'Message 2',
           timestamp: new Date().toISOString(),
         },
-      ];
-      
+      ]
+
       const olderMessages: ChatMessage[] = [
         {
           id: 'msg1',
@@ -487,7 +491,7 @@ describe('ChatStore', () => {
           content: 'Message 1',
           timestamp: new Date().toISOString(),
         },
-      ];
+      ]
 
       useChatStore.setState({
         session: {
@@ -496,21 +500,21 @@ describe('ChatStore', () => {
           metadata: {},
         },
         messages: existingMessages,
-      });
+      })
 
       vi.mocked(chatService.getHistoryPaginated).mockResolvedValue({
         items: olderMessages,
         has_more: false,
         cursor: null,
-      } as any);
+      } as any)
 
-      await useChatStore.getState().loadMoreMessages('cursor1', 'prev');
-      
-      const messages = useChatStore.getState().messages;
-      expect(messages).toHaveLength(2);
-      expect(messages[0].id).toBe('msg1'); // Older message first
-      expect(messages[1].id).toBe('msg2'); // Existing message second
-    });
+      await useChatStore.getState().loadMoreMessages('cursor1', 'prev')
+
+      const messages = useChatStore.getState().messages
+      expect(messages).toHaveLength(2)
+      expect(messages[0].id).toBe('msg1') // Older message first
+      expect(messages[1].id).toBe('msg2') // Existing message second
+    })
 
     it('should append newer messages', async () => {
       const existingMessages: ChatMessage[] = [
@@ -521,8 +525,8 @@ describe('ChatStore', () => {
           content: 'Message 1',
           timestamp: new Date().toISOString(),
         },
-      ];
-      
+      ]
+
       const newerMessages: ChatMessage[] = [
         {
           id: 'msg2',
@@ -531,7 +535,7 @@ describe('ChatStore', () => {
           content: 'Message 2',
           timestamp: new Date().toISOString(),
         },
-      ];
+      ]
 
       useChatStore.setState({
         session: {
@@ -540,20 +544,20 @@ describe('ChatStore', () => {
           metadata: {},
         },
         messages: existingMessages,
-      });
+      })
 
       vi.mocked(chatService.getHistoryPaginated).mockResolvedValue({
         items: newerMessages,
         has_more: false,
         cursor: null,
-      } as any);
+      } as any)
 
-      await useChatStore.getState().loadMoreMessages('cursor1', 'next');
-      
-      const messages = useChatStore.getState().messages;
-      expect(messages).toHaveLength(2);
-      expect(messages[0].id).toBe('msg1'); // Existing message first
-      expect(messages[1].id).toBe('msg2'); // Newer message second
-    });
-  });
-});
+      await useChatStore.getState().loadMoreMessages('cursor1', 'next')
+
+      const messages = useChatStore.getState().messages
+      expect(messages).toHaveLength(2)
+      expect(messages[0].id).toBe('msg1') // Existing message first
+      expect(messages[1].id).toBe('msg2') // Newer message second
+    })
+  })
+})

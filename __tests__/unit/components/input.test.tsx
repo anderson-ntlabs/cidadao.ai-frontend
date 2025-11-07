@@ -53,44 +53,34 @@ describe('Input Component', () => {
   describe('Sizes', () => {
     it('applies default size classes', () => {
       render(<Input inputSize="default" data-testid="input" />)
-      expect(screen.getByTestId('input')).toHaveClass('h-10')
+      expect(screen.getByTestId('input')).toHaveClass('h-11') // Mobile-optimized: 44px (WCAG AAA)
     })
 
     it('applies small size classes', () => {
       render(<Input inputSize="sm" data-testid="input" />)
-      expect(screen.getByTestId('input')).toHaveClass('h-9')
+      expect(screen.getByTestId('input')).toHaveClass('h-10') // 40px (WCAG AA)
     })
 
     it('applies large size classes', () => {
       render(<Input inputSize="lg" data-testid="input" />)
-      expect(screen.getByTestId('input')).toHaveClass('h-11')
+      expect(screen.getByTestId('input')).toHaveClass('h-12') // 48px
     })
 
     it('applies extra large size classes', () => {
       render(<Input inputSize="xl" data-testid="input" />)
-      expect(screen.getByTestId('input')).toHaveClass('h-12')
+      expect(screen.getByTestId('input')).toHaveClass('h-14') // 56px
     })
   })
 
   describe('Icons', () => {
     it('renders with left icon', () => {
-      render(
-        <Input
-          leftIcon={<span data-testid="left-icon">🔍</span>}
-          data-testid="input"
-        />
-      )
+      render(<Input leftIcon={<span data-testid="left-icon">🔍</span>} data-testid="input" />)
       expect(screen.getByTestId('left-icon')).toBeInTheDocument()
       expect(screen.getByTestId('input')).toHaveClass('pl-10')
     })
 
     it('renders with right icon', () => {
-      render(
-        <Input
-          rightIcon={<span data-testid="right-icon">✓</span>}
-          data-testid="input"
-        />
-      )
+      render(<Input rightIcon={<span data-testid="right-icon">✓</span>} data-testid="input" />)
       expect(screen.getByTestId('right-icon')).toBeInTheDocument()
       expect(screen.getByTestId('input')).toHaveClass('pr-10')
     })
@@ -148,7 +138,10 @@ describe('Input Component', () => {
 
     it('applies disabled styles', () => {
       render(<Input disabled data-testid="input" />)
-      expect(screen.getByTestId('input')).toHaveClass('disabled:cursor-not-allowed', 'disabled:opacity-50')
+      expect(screen.getByTestId('input')).toHaveClass(
+        'disabled:cursor-not-allowed',
+        'disabled:opacity-50'
+      )
     })
 
     it('shows placeholder text', () => {
@@ -264,13 +257,7 @@ describe('Input Component', () => {
     })
 
     it('supports aria-describedby for helper text', () => {
-      render(
-        <Input
-          aria-describedby="helper"
-          helperText="Helper text"
-          data-testid="input"
-        />
-      )
+      render(<Input aria-describedby="helper" helperText="Helper text" data-testid="input" />)
       expect(screen.getByTestId('input')).toHaveAttribute('aria-describedby', 'helper')
     })
 
