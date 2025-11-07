@@ -6,6 +6,7 @@ import '../../styles/globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'optional', // Prevent CLS - use fallback if font not loaded fast enough
 })
 
 export const metadata: Metadata = {
@@ -71,9 +72,14 @@ export default function PTLayout({ children }: { children: React.ReactNode }) {
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
         <link rel="dns-prefetch" href="https://vlibras.gov.br" />
 
-        {/* Preload critical assets */}
+        {/* Preload critical assets - Above the fold */}
         <link rel="preload" href="/operarios.png" as="image" type="image/png" />
+        <link rel="preload" href="/images/Tarsila_Antropofagia.jpg" as="image" type="image/jpeg" />
+
+        {/* Preload key agent avatars for modal */}
         <link rel="preload" href="/agents/abaporu.png" as="image" type="image/png" />
+        <link rel="preload" href="/agents/zumbi.png" as="image" type="image/png" />
+        <link rel="preload" href="/agents/anita.png" as="image" type="image/png" />
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>

@@ -330,6 +330,7 @@ export default function PTPage() {
                   src={agent.image}
                   alt={agent.name}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
                   className="object-cover mix-blend-overlay opacity-50"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -339,6 +340,7 @@ export default function PTPage() {
                       alt={agent.name}
                       width={128}
                       height={128}
+                      sizes="128px"
                       className="object-cover"
                     />
                   </div>
@@ -420,6 +422,7 @@ export default function PTPage() {
             alt="Antropofagia por Tarsila do Amaral - Movimento Antropofágico Brasileiro"
             width={1200}
             height={800}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
             className="w-full h-auto"
             priority
           />
