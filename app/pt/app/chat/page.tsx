@@ -10,21 +10,12 @@ import { Send, History, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { OptimizedImage } from '@/components/ui/optimized-image'
-import { MaritacaModelSelector } from '@/components/chat/maritaca-model-selector'
-import {
-  ChatModeToggle,
-  ChatModeDescription,
-  type ChatMode,
-} from '@/components/chat/chat-mode-toggle'
+import { type ChatMode } from '@/components/chat/chat-mode-toggle'
 import { type MaritacaModel } from '@/lib/chat'
 import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
-import { VoiceRecorder } from '@/components/voice'
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
-import { PullToRefresh } from '@/components/mobile'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
-import { MobileChatContainer, MobileChatHeader } from '@/components/mobile/mobile-chat-container'
-import { MobileChatInput, MobileChatSuggestions } from '@/components/mobile/mobile-chat-input'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -47,6 +38,108 @@ const AgentAvatar = dynamic(
     loading: () => (
       <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
     ),
+  }
+)
+
+// Lazy load model selector and mode toggle (heavy UI components)
+const MaritacaModelSelector = dynamic(
+  () =>
+    import('@/components/chat/maritaca-model-selector').then((mod) => ({
+      default: mod.MaritacaModelSelector,
+    })),
+  {
+    loading: () => (
+      <div className="h-10 w-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-md" />
+    ),
+    ssr: false,
+  }
+)
+
+const ChatModeToggle = dynamic(
+  () =>
+    import('@/components/chat/chat-mode-toggle').then((mod) => ({
+      default: mod.ChatModeToggle,
+    })),
+  {
+    loading: () => (
+      <div className="h-10 w-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-md" />
+    ),
+    ssr: false,
+  }
+)
+
+const ChatModeDescription = dynamic(
+  () =>
+    import('@/components/chat/chat-mode-toggle').then((mod) => ({
+      default: mod.ChatModeDescription,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
+// Lazy load voice recorder (heavy audio processing)
+const VoiceRecorder = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
+// Lazy load mobile-specific components
+const PullToRefresh = dynamic(
+  () => import('@/components/mobile').then((mod) => ({ default: mod.PullToRefresh })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
+const MobileChatContainer = dynamic(
+  () =>
+    import('@/components/mobile/mobile-chat-container').then((mod) => ({
+      default: mod.MobileChatContainer,
+    })),
+  {
+    loading: () => <div className="min-h-screen bg-white dark:bg-gray-900" />,
+    ssr: false,
+  }
+)
+
+const MobileChatHeader = dynamic(
+  () =>
+    import('@/components/mobile/mobile-chat-container').then((mod) => ({
+      default: mod.MobileChatHeader,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
+const MobileChatInput = dynamic(
+  () =>
+    import('@/components/mobile/mobile-chat-input').then((mod) => ({
+      default: mod.MobileChatInput,
+    })),
+  {
+    loading: () => (
+      <div className="h-16 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700" />
+    ),
+    ssr: false,
+  }
+)
+
+const MobileChatSuggestions = dynamic(
+  () =>
+    import('@/components/mobile/mobile-chat-input').then((mod) => ({
+      default: mod.MobileChatSuggestions,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
   }
 )
 
