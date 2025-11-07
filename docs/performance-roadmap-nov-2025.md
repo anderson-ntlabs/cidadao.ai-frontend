@@ -873,3 +873,228 @@ If multiple developers available:
 
 **Status**: Roadmap created, ready for execution  
 **Next Step**: Start Phase 1 - Emergency CLS Fix
+
+---
+
+## 🆕 UPDATE: PostHog Data Analysis (2025-11-07)
+
+### New Critical Finding: Dashboard CLS Worse Than Landing
+
+**PostHog Web Vitals reveal**:
+
+- `/pt/app` (Dashboard): **CLS 0.97** (worse than landing!)
+- `/pt` (Landing): CLS 0.88
+- `/pt/app/chat`: CLS 0.75
+- `/pt/app/investigacoes`: CLS 0.82
+- `/pt/agents`: CLS 0.71
+
+**Good examples to reference**:
+
+- `/pt/login`: CLS 0.03 ✅
+- `/pt/privacy`: CLS 0.00 ✅
+- `/pt/system`: CLS 0.00 ✅
+
+### Root Cause Analysis
+
+**Why dashboard has WORSE CLS than landing**:
+
+1. **Dynamic data loading**:
+   - Investigation cards loading
+   - Agent status updates
+   - Real-time metrics
+   - Chart rendering
+
+2. **Multiple skeletons → content transitions**:
+   - Dashboard uses skeleton screens
+   - BUT: Skeletons don't match final content size
+   - Causes layout shift when data loads
+
+3. **Chart libraries (Recharts/D3)**:
+   - Charts render after JavaScript loads
+   - No reserved space for charts
+   - Dynamic height calculation
+
+4. **Infinite scroll / pagination**:
+   - New content injected
+   - No height reservation
+
+### Revised Phase 1: Expand to Dashboard
+
+**New Priority Order**:
+
+1. **Dashboard (`/pt/app`)** - CLS 0.97 → <0.1
+2. **Landing (`/pt`)** - CLS 0.88 → <0.1
+3. **Chat (`/pt/app/chat`)** - CLS 0.75 → <0.1
+4. **Investigations** - CLS 0.82 → <0.1
+
+### Additional Fixes Required
+
+#### 1.6 Fix Dashboard Skeletons (60 min)
+
+```typescript
+// components/dashboard/investigation-skeleton.tsx
+export function InvestigationSkeleton() {
+  return (
+    <div className="space-y-4">
+      {/* Match EXACT final card dimensions */}
+      <Card className="h-[240px]"> {/* Fixed height matching real card */}
+        <CardHeader className="h-[72px]">
+          <Skeleton className="h-6 w-[200px]" />
+          <Skeleton className="h-4 w-[300px]" />
+        </CardHeader>
+        <CardContent className="h-[168px]">
+          <Skeleton className="h-full w-full" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// app/pt/app/page.tsx
+export default function DashboardPage() {
+  const { investigations, isLoading } = useInvestigations()
+
+  if (isLoading) {
+    return (
+      <>
+        {/* Render EXACT number of expected cards */}
+        {Array.from({ length: 6 }).map((_, i) => (
+          <InvestigationSkeleton key={i} />
+        ))}
+      </>
+    )
+  }
+
+  return <InvestigationGrid investigations={investigations} />
+}
+```
+
+**Files to create/modify**:
+
+- `components/dashboard/investigation-skeleton.tsx` (new)
+- `components/dashboard/metric-skeleton.tsx` (new)
+- `app/pt/app/page.tsx` (modify)
+
+#### 1.7 Reserve Chart Spaces (45 min)
+
+```typescript
+// components/charts/chart-container.tsx
+export function ChartContainer({ children, height = 300 }: Props) {
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  return (
+    <div className="relative" style={{ height: `${height}px` }}>
+      {/* Reserve exact space */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-muted animate-pulse rounded-lg" />
+      )}
+
+      {/* Chart renders in reserved space */}
+      <div
+        className={cn("transition-opacity", isLoaded ? "opacity-100" : "opacity-0")}
+        onLoad={() => setIsLoaded(true)}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Usage in dashboard
+<ChartContainer height={300}>
+  <BarChart data={data} />
+</ChartContainer>
+```
+
+**Files to create**:
+
+- `components/charts/chart-container.tsx` (new)
+
+#### 1.8 Fix Infinite Scroll (30 min)
+
+```typescript
+// components/dashboard/investigation-grid.tsx
+export function InvestigationGrid({ investigations }: Props) {
+  return (
+    <div className="grid gap-4">
+      {investigations.map((inv) => (
+        <InvestigationCard key={inv.id} investigation={inv} />
+      ))}
+
+      {/* Reserve space for loading more */}
+      {hasMore && (
+        <div className="h-[240px]"> {/* Same as card height */}
+          <InvestigationSkeleton />
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### Revised Phase 1 Timeline
+
+| Task                        | Original     | Revised      | Reason            |
+| --------------------------- | ------------ | ------------ | ----------------- |
+| 1.1 Image dimensions        | 45min        | 60min        | +Dashboard images |
+| 1.2 Preload assets          | 30min        | 30min        | Same              |
+| 1.3 Font optimization       | 20min        | 20min        | Same              |
+| 1.4 Landing skeletons       | 45min        | 45min        | Same              |
+| 1.5 VLibras lazy load       | 15min        | 15min        | Same              |
+| **1.6 Dashboard skeletons** | -            | **60min**    | NEW               |
+| **1.7 Chart containers**    | -            | **45min**    | NEW               |
+| **1.8 Infinite scroll**     | -            | **30min**    | NEW               |
+| **TOTAL**                   | **2h 35min** | **4h 45min** | +2h 10min         |
+
+### Revised Success Metrics
+
+**Phase 1 (Revised)**:
+
+- Dashboard CLS: 0.97 → <0.1
+- Landing CLS: 0.88 → <0.1
+- Chat CLS: 0.75 → <0.1
+- Overall RES: 72 → 80-85 (more conservative due to multiple routes)
+
+**Execution**: Split into two sub-phases
+
+- **Phase 1A** (2.5h): Landing page CLS fix
+- **Phase 1B** (2.5h): Dashboard CLS fix
+
+### New Reference Implementation
+
+**Use `/pt/login` (CLS 0.03) as blueprint**:
+
+```bash
+# Compare login page structure
+git diff app/pt/login/page.tsx app/pt/page.tsx
+
+# What makes login page have CLS 0.03?
+# 1. Fixed layout - no dynamic content
+# 2. All images have dimensions
+# 3. No lazy loading
+# 4. No charts/graphs
+# 5. Simple form with fixed sizes
+```
+
+**Apply login page patterns to dashboard**:
+
+- Reserve ALL spaces upfront
+- Use aspect-ratio for responsive containers
+- No content injection after load
+
+---
+
+## 📊 Updated Priority Matrix
+
+Based on PostHog data:
+
+| Route                   | CLS  | Traffic | Impact   | Priority |
+| ----------------------- | ---- | ------- | -------- | -------- |
+| `/pt/app`               | 0.97 | High    | Critical | 🔴 P0    |
+| `/pt`                   | 0.88 | High    | Critical | 🔴 P0    |
+| `/pt/app/investigacoes` | 0.82 | Medium  | High     | 🟡 P1    |
+| `/pt/app/chat`          | 0.75 | High    | High     | 🟡 P1    |
+| `/pt/agents`            | 0.71 | Medium  | Medium   | 🟢 P2    |
+| `/pt/app/mapa`          | 0.47 | Low     | Low      | 🟢 P3    |
+
+**Strategy**: Fix P0 routes first (dashboard + landing), then measure impact before continuing.
