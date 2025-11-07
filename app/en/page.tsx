@@ -320,6 +320,7 @@ export default function ENPage() {
                     alt={agent.name}
                     width={64}
                     height={64}
+                    sizes="64px"
                     className="rounded-lg object-cover shadow-md"
                   />
                   <div className="flex-1">

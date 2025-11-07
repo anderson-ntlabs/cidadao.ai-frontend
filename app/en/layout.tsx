@@ -5,6 +5,7 @@ import '../../styles/globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'optional', // Prevent CLS - use fallback if font not loaded fast enough
 })
 
 export const metadata: Metadata = {
@@ -68,9 +69,13 @@ export default function ENLayout({ children }: { children: React.ReactNode }) {
         {/* DNS Prefetch for external resources */}
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
 
-        {/* Preload critical assets */}
+        {/* Preload critical assets - Above the fold */}
         <link rel="preload" href="/operarios.png" as="image" type="image/png" />
+
+        {/* Preload key agent avatars for quick display */}
         <link rel="preload" href="/agents/abaporu.png" as="image" type="image/png" />
+        <link rel="preload" href="/agents/zumbi.png" as="image" type="image/png" />
+        <link rel="preload" href="/agents/anita.png" as="image" type="image/png" />
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>

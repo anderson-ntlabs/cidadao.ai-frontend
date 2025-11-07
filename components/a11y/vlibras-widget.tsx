@@ -47,34 +47,33 @@ interface VLibrasWidgetProps {
  * IMPORTANT: Import default export directly, not as .default
  * The package exports VLibras as default export
  */
-const VLibras = dynamic(
-  () => import('@djpfs/react-vlibras'),
-  {
-    ssr: false,
-    loading: () => null // No loading state needed for accessibility widget
-  }
-)
+const VLibras = dynamic(() => import('@djpfs/react-vlibras'), {
+  ssr: false,
+  loading: () => null, // No loading state needed for accessibility widget
+})
 
-export function VLibrasWidget({
-  locale,
-  forceOnload = true,
-  className = ''
-}: VLibrasWidgetProps) {
+export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VLibrasWidgetProps) {
   const [isEnabled, setIsEnabled] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
 
-    // Check if VLibras is enabled via environment variable
-    const envEnabled = process.env.NEXT_PUBLIC_ENABLE_VLIBRAS === 'true'
+    // Delay VLibras initialization to avoid CLS during initial page load
+    // VLibras widget appears in bottom-right corner and can cause layout shift
+    const initTimer = setTimeout(() => {
+      // Check if VLibras is enabled via environment variable
+      const envEnabled = process.env.NEXT_PUBLIC_ENABLE_VLIBRAS === 'true'
 
-    // Check user preference from localStorage
-    const userPreference = localStorage.getItem('vlibras-enabled')
-    const userEnabled = userPreference === null ? true : userPreference === 'true'
+      // Check user preference from localStorage
+      const userPreference = localStorage.getItem('vlibras-enabled')
+      const userEnabled = userPreference === null ? true : userPreference === 'true'
 
-    // Enable if both env and user preference allow it
-    setIsEnabled(envEnabled && userEnabled)
+      // Enable if both env and user preference allow it
+      setIsEnabled(envEnabled && userEnabled)
+    }, 2000) // Load after 2s to prevent CLS
+
+    return () => clearTimeout(initTimer)
   }, [])
 
   // Only render for Portuguese locale (LIBRAS is Brazilian Sign Language)
@@ -200,31 +199,37 @@ export function useVLibras() {
     localStorage.setItem('vlibras-enabled', String(newState))
 
     // Dispatch custom event for other components to listen
-    window.dispatchEvent(new CustomEvent('vlibras-toggle', {
-      detail: { enabled: newState }
-    }))
+    window.dispatchEvent(
+      new CustomEvent('vlibras-toggle', {
+        detail: { enabled: newState },
+      })
+    )
   }
 
   const enable = () => {
     setIsEnabled(true)
     localStorage.setItem('vlibras-enabled', 'true')
-    window.dispatchEvent(new CustomEvent('vlibras-toggle', {
-      detail: { enabled: true }
-    }))
+    window.dispatchEvent(
+      new CustomEvent('vlibras-toggle', {
+        detail: { enabled: true },
+      })
+    )
   }
 
   const disable = () => {
     setIsEnabled(false)
     localStorage.setItem('vlibras-enabled', 'false')
-    window.dispatchEvent(new CustomEvent('vlibras-toggle', {
-      detail: { enabled: false }
-    }))
+    window.dispatchEvent(
+      new CustomEvent('vlibras-toggle', {
+        detail: { enabled: false },
+      })
+    )
   }
 
   return {
     isEnabled,
     toggle,
     enable,
-    disable
+    disable,
   }
 }
