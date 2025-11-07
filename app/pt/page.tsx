@@ -12,18 +12,35 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { LoadingScreen } from '@/components/loading-screen'
-import { InstallPWASection } from '@/components/install-pwa-section'
 import { ContentCard, ExternalLinkCard, LandingModal } from '@/components/landing'
-import { ProjectTimeline } from '@/components/timeline/project-timeline'
 import { agents } from '@/data/agents'
 import { Card, CardContent } from '@/components/ui'
 import { ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
 import { createLogger } from '@/lib/logger'
+
+// Lazy load heavy components for better performance
+const InstallPWASection = dynamic(
+  () =>
+    import('@/components/install-pwa-section').then((mod) => ({ default: mod.InstallPWASection })),
+  {
+    ssr: false,
+  }
+)
+const ProjectTimeline = dynamic(
+  () =>
+    import('@/components/timeline/project-timeline').then((mod) => ({
+      default: mod.ProjectTimeline,
+    })),
+  {
+    loading: () => <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  }
+)
 
 const logger = createLogger('PTPage')
 
@@ -79,16 +96,17 @@ export default function PTPage() {
   return (
     <div className="relative">
       {/* Global background image - very subtle */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.02,
-        }}
-      />
+      <div className="fixed inset-0 z-0 opacity-[0.02]">
+        <Image
+          src="/operarios.png"
+          alt=""
+          fill
+          priority
+          quality={85}
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+      </div>
 
       <div className="relative z-10">
         {/* Hero Section - COMPACTO (60vh ao invés de 90vh) */}
@@ -167,14 +185,20 @@ export default function PTPage() {
         <section className="py-12 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
           <div className="max-w-4xl mx-auto px-6">
             <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-              <div className="relative w-full pt-[56.25%]">
+              <div
+                className="relative w-full"
+                style={{ paddingBottom: '56.25%', minHeight: '352px' }}
+              >
                 <iframe
                   className="absolute inset-0 w-full h-full rounded-xl shadow-lg"
                   src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
+                  width="100%"
+                  height="352"
                   frameBorder="0"
                   allowFullScreen
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   loading="lazy"
+                  title="Cidadão.AI Playlist - Brazilian Music"
                 />
               </div>
             </div>

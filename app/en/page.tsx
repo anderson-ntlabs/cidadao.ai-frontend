@@ -12,13 +12,24 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ContentCard, ExternalLinkCard, LandingModal } from '@/components/landing'
-import { ProjectTimeline } from '@/components/timeline/project-timeline'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { agents } from '@/data/agents'
+
+// Lazy load heavy components for better performance
+const ProjectTimeline = dynamic(
+  () =>
+    import('@/components/timeline/project-timeline').then((mod) => ({
+      default: mod.ProjectTimeline,
+    })),
+  {
+    loading: () => <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
+  }
+)
 
 export default function ENPage() {
   const router = useRouter()
