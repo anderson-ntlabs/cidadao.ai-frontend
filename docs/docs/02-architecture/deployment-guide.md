@@ -857,7 +857,6 @@ images: {
 
 ```tsx
 import Image from 'next/image'
-
 ;<Image
   src="/hero.png"
   alt="Hero image"

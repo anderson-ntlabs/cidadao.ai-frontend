@@ -323,7 +323,6 @@ Use Next.js Image component:
 
 ```tsx
 import Image from 'next/image'
-
 ;<Image
   src="/hero.jpg"
   alt="Hero image"

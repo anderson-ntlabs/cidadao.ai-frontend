@@ -253,7 +253,6 @@ const hapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
 
 ```tsx
 import PullToRefresh from 'react-simple-pull-to-refresh'
-
 ;<PullToRefresh
   onRefresh={async () => {
     await loadMoreMessages()

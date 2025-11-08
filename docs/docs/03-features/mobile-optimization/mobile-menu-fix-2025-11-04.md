@@ -186,7 +186,7 @@ Total: **143 tests** across **11 mobile devices**:
 
 ### Created
 
-2. ****tests**/e2e/mobile/mobile-menu.spec.ts** (new file, 285 lines)
+2. \***\*tests**/e2e/mobile/mobile-menu.spec.ts\*\* (new file, 285 lines)
    - Comprehensive E2E test suite
    - 13 test scenarios across 11 devices
 

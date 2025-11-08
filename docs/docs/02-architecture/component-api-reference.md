@@ -117,7 +117,6 @@ interface FontSizeControlProps {
 
 ```tsx
 import { FontSizeControl } from '@/components/a11y'
-
 ;<FontSizeControl locale="pt" />
 ```
 
@@ -153,7 +152,6 @@ localStorage.setItem('cidadao-font-size', 'large')
 
 ```tsx
 import { HighContrastToggle } from '@/components/a11y'
-
 ;<HighContrastToggle />
 ```
 
@@ -465,7 +463,6 @@ interface AreaChartProps extends LineChartProps {
 
 ```tsx
 import { AreaChart } from '@/components/charts'
-
 ;<AreaChart
   data={data}
   lines={[
@@ -903,7 +900,6 @@ interface TourControlsProps {
 
 ```tsx
 import { TourControls } from '@/components/tour'
-
 ;<TourControls
   currentStep={3}
   totalSteps={15}
@@ -940,7 +936,6 @@ interface TourTriggerProps {
 
 ```tsx
 import { TourTrigger } from '@/components/tour'
-
 ;<TourTrigger mode="complete">
   <button className="...">Fazer Tour Completo</button>
 </TourTrigger>
@@ -979,7 +974,6 @@ interface OnboardingFlowProps {
 
 ```tsx
 import { OnboardingFlow } from '@/components/onboarding'
-
 ;<OnboardingFlow
   onComplete={() => {
     router.push('/pt/home')

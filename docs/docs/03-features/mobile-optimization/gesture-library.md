@@ -59,7 +59,6 @@ touchFeedback.minimal // Only removes tap highlight
 
 ```tsx
 import { touchFeedback } from '@/lib/mobile-touch'
-
 ;<button className={touchFeedback.button}>Click Me</button>
 ```
 
@@ -82,7 +81,6 @@ tapTarget.xlarge // 64x64px (Large FABs)
 ```tsx
 import { tapTarget, touchFeedback } from '@/lib/mobile-touch'
 import { cn } from '@/lib/utils'
-
 ;<button
   className={cn(touchFeedback.button, tapTarget.medium, 'rounded-lg bg-blue-600 text-white')}
 >
@@ -98,7 +96,6 @@ Combines touch feedback, tap target, and custom classes:
 
 ```tsx
 import { mobileTouchClasses } from '@/lib/mobile-touch'
-
 ;<button
   className={mobileTouchClasses({
     feedback: 'button',
@@ -116,7 +113,6 @@ Add touch feedback to existing classes:
 
 ```tsx
 import { withTouchFeedback } from '@/lib/mobile-touch'
-
 ;<div className={withTouchFeedback('card', 'p-4 bg-white rounded-lg')}>Card Content</div>
 ```
 
@@ -126,7 +122,6 @@ Ensure minimum touch target size:
 
 ```tsx
 import { withTapTarget } from '@/lib/mobile-touch'
-
 ;<button className={withTapTarget('large', 'rounded-full bg-blue-500')}>+</button>
 ```
 
@@ -421,7 +416,6 @@ zIndex: {
 
 ```tsx
 import { tapTarget, touchFeedback } from '@/lib/mobile-touch'
-
 ;<button className={cn(tapTarget.medium, touchFeedback.button, 'px-6 text-base')}>
   Proper Size
 </button>
@@ -439,7 +433,6 @@ import { tapTarget, touchFeedback } from '@/lib/mobile-touch'
 
 ```tsx
 import { touchFeedback } from '@/lib/mobile-touch'
-
 ;<button className={touchFeedback.button} onClick={handleClick}>
   Has Feedback
 </button>
@@ -487,7 +480,6 @@ function DeleteButton() {
 
 ```tsx
 import { safeArea } from '@/lib/mobile-touch'
-
 ;<div className={cn('fixed bottom-0 w-full', safeArea.bottom)}>
   Navigation (respects safe areas)
 </div>

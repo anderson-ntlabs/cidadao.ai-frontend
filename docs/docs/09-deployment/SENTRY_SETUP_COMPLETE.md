@@ -225,6 +225,7 @@ node scripts/test-sentry.js https://cidadao-ai.vercel.app
    - Breakdown por operação
 
 3. **Releases:**
+
    ```
    sentry.io/organizations/[ORG]/releases/
    ```
