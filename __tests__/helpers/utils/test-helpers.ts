@@ -19,7 +19,7 @@ export const setupUserEvent = () => {
 }
 
 export const waitForAsync = async (ms: number = 100) => {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export const mockFetch = (response: any, options: { ok?: boolean; status?: number } = {}) => {
@@ -29,14 +29,14 @@ export const mockFetch = (response: any, options: { ok?: boolean; status?: numbe
     json: async () => response,
     text: async () => JSON.stringify(response),
     headers: new Headers({
-      'content-type': 'application/json'
-    })
+      'content-type': 'application/json',
+    }),
   })
 }
 
 export const mockLocalStorage = () => {
   const storage: Record<string, string> = {}
-  
+
   return {
     getItem: vi.fn((key: string) => storage[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -46,7 +46,7 @@ export const mockLocalStorage = () => {
       delete storage[key]
     }),
     clear: vi.fn(() => {
-      Object.keys(storage).forEach(key => delete storage[key])
-    })
+      Object.keys(storage).forEach((key) => delete storage[key])
+    }),
   }
 }
