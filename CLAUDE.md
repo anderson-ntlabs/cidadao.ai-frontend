@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
-**Última Atualização**: 2025-11-07
+**Última Atualização**: 2025-11-09
 
 ---
 
@@ -52,19 +52,19 @@ Cidadão.AI Frontend is a Next.js 15 Progressive Web App (PWA) that democratizes
 **Most Common Commands**:
 
 ```bash
-npm run dev                           # Start dev server
-npm run build && npm run start        # Production build + start
-npm run test:ui                       # Test with UI
-npm run test:playwright:ui            # E2E tests with UI
-npm run type-check && npm run lint    # Quality check
-node scripts/test-backend.js          # Test backend connectivity
+npm run dev                                         # Start dev server
+npm run build && npm run start                      # Production build + start
+npm run test:ui                                     # Test with UI
+npm run test:playwright:ui                          # E2E tests with UI
+npm run type-check && npm run lint                  # Quality check
+node scripts/testing/test-backend-comprehensive.js  # Test backend connectivity
 ```
 
 **Debugging Specific Issues**:
 
 ```bash
 # Chat not working
-node scripts/test-chat-adapters.js
+node scripts/testing/test-chat-live.js
 
 # Auth issues
 # Check Route Handler uses createServerClient (not createClient)
@@ -117,10 +117,24 @@ npx playwright test --headed                              # Watch test execution
 npx playwright test --debug                               # Debug mode
 
 # Testing - Manual Integration Scripts
-node scripts/test-backend.js        # Backend connectivity
-node scripts/test-chat-adapters.js  # Chat adapters
-node scripts/test-vlibras.js        # VLibras (LIBRAS)
-node scripts/monitor-backend.js     # Performance monitoring
+# Scripts organizados em diretórios categorizados (Nov 2025):
+# - scripts/testing/      - Scripts de teste (test-*.js)
+# - scripts/diagnostics/  - Diagnóstico (diagnose-*.js)
+# - scripts/monitoring/   - Monitoramento (monitor-*.js)
+# - scripts/analysis/     - Análise (analyze-*.js)
+# - scripts/generation/   - Geração de código (generate-*.js)
+# - scripts/utilities/    - Utilitários gerais
+# - scripts/debug/        - Ferramentas de debug
+
+# Scripts mais usados:
+node scripts/testing/test-backend-comprehensive.js   # Suite completa de testes do backend
+node scripts/testing/test-backend.js                 # Verificação rápida do backend
+node scripts/testing/test-chat-live.js               # Teste de chat em tempo real
+node scripts/testing/test-vlibras.js                 # VLibras (LIBRAS)
+node scripts/diagnostics/diagnose-vlibras.js         # Troubleshooting VLibras
+node scripts/monitoring/monitor-backend.js           # Monitoramento de performance
+
+# Ver scripts/README.md para documentação completa (40+ scripts)
 
 # Component Development
 npm run storybook             # Storybook dev server (http://localhost:6006)
@@ -331,12 +345,14 @@ The codebase uses a pattern of separate mobile and desktop components for comple
 - Separate mobile config: `playwright.mobile.config.ts`
 - CI: Retry 2 times, sequential execution
 
-**Manual Integration Scripts**:
+**Manual Integration Scripts** (organizados em `/scripts` - ver `scripts/README.md`):
 
-- `scripts/test-backend.js`: Backend health check
-- `scripts/test-chat-adapters.js`: All adapters validation
-- `scripts/test-vlibras.js`: VLibras integration
-- `scripts/monitor-backend.js`: Performance monitoring over time
+- `scripts/testing/test-backend-comprehensive.js`: Suite completa de testes do backend
+- `scripts/testing/test-chat-live.js`: Teste de chat em tempo real
+- `scripts/testing/test-vlibras.js`: Integração VLibras (LIBRAS)
+- `scripts/diagnostics/diagnose-vlibras.js`: Troubleshooting completo VLibras
+- `scripts/monitoring/monitor-backend.js`: Monitoramento de performance contínuo
+- **40+ scripts disponíveis** - consultar `scripts/README.md` para lista completa
 
 ---
 
@@ -578,14 +594,17 @@ node scripts/monitor-backend.js
 
 ```bash
 # 1. Backend connectivity
-node scripts/test-backend.js
+node scripts/testing/test-backend.js
 
-# 2. Test all adapters
-node scripts/test-chat-adapters.js
+# 2. Test chat integration
+node scripts/testing/test-chat-live.js
 
-# 3. Check browser console for CORS/network errors
-# 4. Verify NEXT_PUBLIC_API_URL in .env.local
-# 5. Check localStorage for maritaca_selected_model
+# 3. Comprehensive backend test
+node scripts/testing/test-backend-comprehensive.js
+
+# 4. Check browser console for CORS/network errors
+# 5. Verify NEXT_PUBLIC_API_URL in .env.local
+# 6. Check localStorage for maritaca_selected_model
 ```
 
 ### Debugging Authentication
@@ -662,12 +681,15 @@ npm run build
 echo $NEXT_PUBLIC_ENABLE_VLIBRAS  # Should be 'true'
 
 # 2. Test VLibras specifically
-node scripts/test-vlibras.js
+node scripts/testing/test-vlibras.js
 
-# 3. Check CSP headers (VLibras requires external script)
+# 3. Diagnostic tool (troubleshooting completo)
+node scripts/diagnostics/diagnose-vlibras.js
+
+# 4. Check CSP headers (VLibras requires external script)
 # VLibras domains should be in CSP: vlibras.gov.br
 
-# 4. VLibras only loads on Portuguese pages (/pt/*)
+# 5. VLibras only loads on Portuguese pages (/pt/*)
 # Navigate to http://localhost:3000/pt to test
 ```
 
@@ -694,7 +716,7 @@ node scripts/test-vlibras.js
 7. ✅ Bundle size acceptable (`npm run analyze`)
 8. ✅ Manual mobile testing
 9. ✅ Accessibility audit passed
-10. ✅ Backend integration verified (`node scripts/test-backend.js`)
+10. ✅ Backend integration verified (`node scripts/testing/test-backend-comprehensive.js`)
 
 ### Environment Variables (Production)
 
