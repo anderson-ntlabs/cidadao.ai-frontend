@@ -11,6 +11,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
+      include: [
+        'lib/**/*.{ts,tsx}',
+        'hooks/**/*.{ts,tsx}',
+        'components/**/*.{ts,tsx}',
+        'store/**/*.{ts,tsx}',
+        'contexts/**/*.{ts,tsx}',
+        'data/**/*.{ts,tsx}',
+      ],
       exclude: [
         'node_modules/',
         '.next/',
@@ -20,6 +28,13 @@ export default defineConfig({
         '**/mockData',
         'coverage/',
         '__tests__/',
+        'test/',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+        '**/*.stories.{ts,tsx}',
+        'vitest.setup.ts',
+        'stories/**',
+        '.storybook/**',
       ],
       thresholds: {
         lines: 60,
