@@ -1,0 +1,113 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration for Cidadão.AI Frontend - Automated dependency management",
+  "extends": [
+    "config:recommended",
+    ":enableVulnerabilityAlertsWithLabel(security)",
+    ":semanticCommits",
+    ":timezone(America/Sao_Paulo)"
+  ],
+  "assignees": ["anderson-ufrj"],
+  "labels": ["dependencies", "automated"],
+  "schedule": ["before 5am on monday and thursday"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "packageRules": [
+    {
+      "description": "Automerge patch updates (safe bug fixes)",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Group Next.js ecosystem updates together",
+      "matchPackageNames": ["next", "react", "react-dom"],
+      "groupName": "Next.js ecosystem",
+      "automerge": false
+    },
+    {
+      "description": "Group Supabase updates together",
+      "matchPackagePatterns": ["^@supabase/"],
+      "groupName": "Supabase",
+      "automerge": false
+    },
+    {
+      "description": "Group testing tools together",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/ui",
+        "@playwright/test",
+        "@testing-library/react",
+        "@testing-library/jest-dom"
+      ],
+      "groupName": "Testing tools",
+      "schedule": ["before 5am on sunday"],
+      "automerge": false
+    },
+    {
+      "description": "Group ESLint and Prettier updates",
+      "matchPackagePatterns": ["^eslint", "^@typescript-eslint/", "prettier"],
+      "groupName": "Linting and formatting",
+      "automerge": true
+    },
+    {
+      "description": "Security updates - high priority, separate PRs",
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": "!/^0/",
+      "matchDatasources": ["npm"],
+      "groupName": null,
+      "schedule": ["at any time"],
+      "prPriority": 10,
+      "labels": ["dependencies", "security", "automated"]
+    },
+    {
+      "description": "Major updates require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major-update", "needs-review"],
+      "schedule": ["before 5am on sunday"]
+    },
+    {
+      "description": "DevDependencies can be more aggressive",
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "matchUpdateTypes": ["patch", "minor"]
+    },
+    {
+      "description": "Pin GitHub Actions to commit SHA for security",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    },
+    {
+      "description": "Group TypeScript updates",
+      "matchPackageNames": ["typescript", "@types/node", "@types/react", "@types/react-dom"],
+      "groupName": "TypeScript",
+      "automerge": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security", "vulnerability"],
+    "assignees": ["anderson-ufrj"],
+    "schedule": ["at any time"],
+    "prPriority": 20
+  },
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🤖 Renovate Dependency Dashboard",
+  "semanticCommits": "enabled",
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
+  "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}",
+  "prTitle": "{{semanticPrefix}}{{#if isPin}}pin{{else}}update{{/if}} {{depName}} to {{#if isRange}}{{newValue}}{{else}}{{#if isMajor}}v{{newMajor}}{{else}}{{newVersion}}{{/if}}{{/if}}",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on the first day of the month"]
+  },
+  "postUpdateOptions": ["npmDedupe"],
+  "rangeStrategy": "bump",
+  "ignoreDeps": [],
+  "ignorePresets": [],
+  "platformAutomerge": true
+}

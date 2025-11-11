@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Autor**: Anderson Henrique da Silva
 **Localização**: Minas Gerais, Brasil
-**Última Atualização**: 2025-11-09
+**Última Atualização**: 2025-11-11
 
 ---
 
@@ -906,6 +906,7 @@ Complete documentation in `/docs` directory:
 - ✅ Accessibility (WCAG AAA, VLibras)
 - ✅ Monitoring (Sentry)
 - ✅ Performance optimization (bundle splitting, lazy loading)
+- ✅ Automated dependency management (Renovate)
 
 **Remaining**:
 
@@ -990,6 +991,113 @@ npm run lint                # Must pass
 npm run test:coverage       # Must meet 60% threshold
 npm run test:playwright     # E2E tests must pass
 ```
+
+---
+
+## Dependency Management (Renovate)
+
+The project uses [Renovate](https://github.com/apps/renovate) for automated dependency updates.
+
+### Quick Reference
+
+**Configuration**: `renovate.json` (project root)
+**Documentation**: `docs/10-reference/renovate-guide.md`
+**Setup Guide**: `RENOVATE_SETUP.md`
+
+### How It Works
+
+Renovate automatically:
+
+1. Scans 80+ dependencies for updates
+2. Creates PRs with updated `package.json` and `package-lock.json`
+3. Runs CI/CD tests on each PR
+4. Automerges safe updates (patches, devDependencies)
+5. Notifies for major updates requiring review
+
+### Update Schedule
+
+- **Mon/Thu 5am BRT**: Patches and minors
+- **Sunday 5am BRT**: Major updates
+- **Immediately**: Security patches
+- **1st of month**: Lock file maintenance
+
+### Automerge Rules
+
+✅ **Automerged**:
+
+- Patch updates (e.g., `1.0.0` → `1.0.1`)
+- DevDependencies minors (e.g., `eslint 8.0` → `8.1`)
+- Linting/formatting tools
+
+❌ **Manual review required**:
+
+- Major updates (e.g., `14.x` → `15.x`)
+- Next.js, React, Supabase (grouped updates)
+- Production dependency minors
+
+### Working with Renovate PRs
+
+**Review a PR**:
+
+```bash
+# Checkout PR locally
+gh pr checkout <PR-number>
+npm install
+npm run test
+npm run dev
+
+# If OK, merge on GitHub
+# If issues, comment and close PR
+```
+
+**Renovate commands** (comment on PR):
+
+```bash
+@renovate rebase      # Update PR with main
+@renovate retry       # Retry if failed
+@renovate pause       # Pause this PR
+@renovate check       # Force immediate check
+```
+
+### Dependency Dashboard
+
+Renovate creates a GitHub Issue: "🤖 Renovate Dependency Dashboard"
+
+Features:
+
+- 📊 All pending updates overview
+- 🔒 Security vulnerabilities detected
+- ⏸️ Paused/rate-limited updates
+- ❌ Failed attempts with errors
+
+**Pin (⭐) this issue** for quick access!
+
+### Configuration Highlights
+
+```json
+{
+  "schedule": ["before 5am on monday and thursday"],
+  "prConcurrentLimit": 5,
+  "automerge": true,
+  "packageRules": [
+    // Next.js ecosystem grouped
+    // Supabase grouped
+    // Testing tools grouped
+    // Security patches prioritized
+  ]
+}
+```
+
+### First-Time Setup
+
+1. Install: https://github.com/apps/renovate
+2. Select repository: `cidadao.ai-frontend`
+3. Merge Onboarding PR
+4. Review Dependency Dashboard
+5. Let automerge handle patches
+6. Manually review majors
+
+See `RENOVATE_SETUP.md` for detailed instructions.
 
 ## Quick Start for New Developers
 
