@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createLogger } from '@/lib/logger'
 
+// Use Edge Runtime for faster response times
+export const runtime = 'edge'
+
 const logger = createLogger('WebVitalsAPI')
 
 export async function POST(request: NextRequest) {
