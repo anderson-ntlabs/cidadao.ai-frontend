@@ -69,22 +69,24 @@ export function LandingModal({
       <ModalContent
         size={size}
         className={cn(
-          // Enable scroll
-          'max-h-[90vh] overflow-y-auto',
+          // Enable scroll - Mobile optimized height
+          'max-h-[85vh] sm:max-h-[90vh] overflow-y-auto',
           // Custom scrollbar
           'scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700',
           'scrollbar-track-gray-100 dark:scrollbar-track-gray-900',
+          // Mobile optimization
+          'mx-4 sm:mx-auto',
           className
         )}
       >
-        <ModalHeader>
-          <ModalTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+        <ModalHeader className="sticky top-0 bg-white dark:bg-gray-900 z-10 pb-4">
+          <ModalTitle className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent pr-8">
             {title}
           </ModalTitle>
         </ModalHeader>
 
-        {/* Content with proper padding and spacing */}
-        <div className="mt-6 space-y-6">{children}</div>
+        {/* Content with proper padding and spacing - Mobile optimized */}
+        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6 pb-4">{children}</div>
       </ModalContent>
     </Modal>
   )

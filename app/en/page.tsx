@@ -58,34 +58,34 @@ export default function ENPage() {
 
   return (
     <div className="relative">
-      {/* Hero Section - COMPACT (60vh instead of 90vh) */}
-      <section className="hero relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+      {/* Hero Section - Mobile Optimized */}
+      <section className="hero relative min-h-[50vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden">
         {/* Subtle animated gradient overlay */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10"></div>
         </div>
 
-        <div className="hero-container max-w-5xl mx-auto px-6 py-16 text-center relative z-10">
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+        <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16 text-center relative z-10">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
             Cidadão.AI
           </h1>
 
-          <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-6 max-w-3xl mx-auto">
+          <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
             Artificial Intelligence for Transparency and Social Control
           </p>
 
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+          <p className="hidden sm:block text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-3xl mx-auto">
             Monitor public spending, detect anomalies and track investigations in real time. Our
             network of Brazilian AIs works 24/7 analyzing data from the Transparency Portal.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* CTA Buttons - Mobile optimized */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
             <Button
               onClick={handleAccessSystem}
               variant="primary"
               size="lg"
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-xl transition-all duration-300"
+              className="min-h-[44px] bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-xl active:scale-95 transition-all duration-300 touch-manipulation"
             >
               Access the System
             </Button>
@@ -93,22 +93,22 @@ export default function ENPage() {
               onClick={() => setAboutModalOpen(true)}
               variant="secondary"
               size="lg"
-              className="border-2 border-gray-300 dark:border-gray-600 hover:border-green-600 dark:hover:border-green-400"
+              className="min-h-[44px] border-2 border-gray-300 dark:border-gray-600 hover:border-green-600 dark:hover:border-green-400 active:scale-95 touch-manipulation"
             >
               About the Project
             </Button>
           </div>
 
-          <p className="mt-6 text-xs text-gray-400 dark:text-gray-500 italic">
+          <p className="mt-4 sm:mt-6 text-xs text-gray-400 dark:text-gray-500 italic">
             Note: Full system available in Portuguese only
           </p>
         </div>
       </section>
 
-      {/* Content Cards Grid - 3 columns */}
-      <section className="py-12 bg-gradient-to-b from-transparent via-gray-50/50 dark:via-gray-900/20 to-transparent">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Content Cards Grid - Mobile Optimized */}
+      <section className="py-8 sm:py-12 bg-gradient-to-b from-transparent via-gray-50/50 dark:via-gray-900/20 to-transparent">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <ContentCard
               icon="🎓"
               title="About the Project"
@@ -134,13 +134,16 @@ export default function ENPage() {
         </div>
       </section>
 
-      {/* Spotify Section - NO TITLE */}
-      <section className="py-8">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
-            <div className="relative w-full" style={{ minHeight: '352px' }}>
+      {/* Spotify Section - Mobile Optimized */}
+      <section className="py-8 sm:py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl">
+            <div
+              className="relative w-full"
+              style={{ paddingBottom: '56.25%', minHeight: '280px' }}
+            >
               <iframe
-                style={{ borderRadius: '12px' }}
+                className="absolute inset-0 w-full h-full rounded-lg sm:rounded-xl shadow-lg"
                 src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
                 width="100%"
                 height="352"
@@ -148,7 +151,6 @@ export default function ENPage() {
                 allowFullScreen
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
-                className="shadow-lg"
                 title="Cidadão.AI Transparency Soundtrack"
               />
             </div>
@@ -156,17 +158,17 @@ export default function ENPage() {
         </div>
       </section>
 
-      {/* External Links Section - 3 columns */}
-      <section className="py-12">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+      {/* External Links Section - Mobile Optimized */}
+      <section className="py-8 sm:py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
             Additional Resources
           </h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-8 text-sm">
+          <p className="text-xs sm:text-sm text-center text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 px-4">
             For developers, researchers and those interested in technical details
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <ExternalLinkCard
               icon="🐙"
               title="GitHub"
