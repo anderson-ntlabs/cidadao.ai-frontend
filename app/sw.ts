@@ -24,8 +24,8 @@ declare const self: ServiceWorkerGlobalScope
  */
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
-  skipWaiting: true,
-  clientsClaim: true,
+  skipWaiting: true, // Immediately activate new SW
+  clientsClaim: true, // Take control of clients immediately
   navigationPreload: true,
   runtimeCaching: defaultCache.map((entry) => ({
     ...entry,
@@ -45,6 +45,30 @@ const serwist = new Serwist({
       },
     },
   })),
+})
+
+// Force update check on install (aggressive update strategy)
+self.addEventListener('install', (event: ExtendableEvent) => {
+  // Skip waiting immediately to activate new SW
+  event.waitUntil(self.skipWaiting())
+})
+
+// Take control of all clients immediately on activation
+self.addEventListener('activate', (event: ExtendableEvent) => {
+  event.waitUntil(
+    Promise.all([
+      // Clear old caches to force fresh content
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((cacheName) => cacheName.startsWith('serwist-'))
+            .map((cacheName) => caches.delete(cacheName))
+        )
+      }),
+      // Take control of all clients immediately
+      self.clients.claim(),
+    ])
+  )
 })
 
 // Add custom fetch event listener for analytics graceful degradation and API bypass

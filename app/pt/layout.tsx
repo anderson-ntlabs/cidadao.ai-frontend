@@ -109,7 +109,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }) {
 
                   {/* PWA Components */}
                   <InstallPrompt delay={5000} showOnDesktop={false} />
-                  <UpdateNotification autoUpdate={false} showDetails />
+                  <UpdateNotification autoUpdate={true} showDetails />
 
                   {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
                   <VLibrasLazy locale="pt" forceOnload />

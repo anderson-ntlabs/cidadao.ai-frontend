@@ -43,6 +43,7 @@ import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
+import { InstallPrompt, UpdateNotification } from '@/components/pwa'
 
 export default function ENLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -102,6 +103,10 @@ export default function ENLayout({ children }: { children: React.ReactNode }) {
                   <PTLayoutWrapper locale="en">{children}</PTLayoutWrapper>
                   <CookieConsent locale="en" />
                   <ToastProvider />
+
+                  {/* PWA Components */}
+                  <InstallPrompt delay={5000} showOnDesktop={false} />
+                  <UpdateNotification autoUpdate={true} showDetails />
                 </div>
               </AnalyticsProvider>
             </Providers>

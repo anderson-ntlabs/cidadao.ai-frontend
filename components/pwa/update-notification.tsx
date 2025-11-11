@@ -91,12 +91,28 @@ export function UpdateNotification({
           })
         })
 
-        // Periodic check for updates (every 10 minutes)
+        // Aggressive update check strategy
+        // Check immediately on mount
+        registration.update()
+
+        // Check every 30 seconds for the first 5 minutes (aggressive initial check)
+        const aggressiveCheck = setInterval(() => {
+          registration.update()
+        }, 30 * 1000)
+
+        setTimeout(
+          () => {
+            clearInterval(aggressiveCheck)
+          },
+          5 * 60 * 1000
+        )
+
+        // After 5 minutes, check every 5 minutes (normal check)
         const intervalId = setInterval(
           () => {
             registration.update()
           },
-          10 * 60 * 1000
+          5 * 60 * 1000
         )
 
         return () => clearInterval(intervalId)
