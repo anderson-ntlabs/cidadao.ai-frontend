@@ -5,7 +5,7 @@
  */
 
 export interface CSPDirectives {
-  [key: string]: string[];
+  [key: string]: string[]
 }
 
 /**
@@ -13,33 +13,30 @@ export interface CSPDirectives {
  */
 export function generateNonce(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
+    return crypto.randomUUID()
   }
   // Fallback for environments without crypto
-  return Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15)
 }
 
 /**
  * Build CSP header string from directives
  */
-export function buildCSP(
-  directives: CSPDirectives,
-  nonce?: string
-): string {
-  const policies: string[] = [];
+export function buildCSP(directives: CSPDirectives, nonce?: string): string {
+  const policies: string[] = []
 
   for (const [directive, sources] of Object.entries(directives)) {
-    let sourceList = sources;
+    let sourceList = sources
 
     // Add nonce to script-src and style-src if provided
     if (nonce && (directive === 'script-src' || directive === 'style-src')) {
-      sourceList = [...sources, `'nonce-${nonce}'`];
+      sourceList = [...sources, `'nonce-${nonce}'`]
     }
 
-    policies.push(`${directive} ${sourceList.join(' ')}`);
+    policies.push(`${directive} ${sourceList.join(' ')}`)
   }
 
-  return policies.join('; ');
+  return policies.join('; ')
 }
 
 /**
@@ -146,12 +143,13 @@ export const productionCSP: CSPDirectives = {
   // Forms: Allow self only
   'form-action': ["'self'"],
 
-  // Frame sources: Allow Spotify embeds and VLibras
+  // Frame sources: Allow Spotify embeds, VLibras, and Vercel Live
   'frame-src': [
     "'self'",
     'https://open.spotify.com',
     'https://vlibras.gov.br', // VLibras widget iframe
     'https://*.vlibras.gov.br', // VLibras subdomains
+    'https://vercel.live', // Vercel Live preview toolbar
   ],
 
   // Frame ancestors: Prevent clickjacking
@@ -170,7 +168,7 @@ export const productionCSP: CSPDirectives = {
 
   // Block all mixed content
   'block-all-mixed-content': [],
-};
+}
 
 /**
  * Development CSP Configuration
@@ -206,14 +204,14 @@ export const developmentCSP: CSPDirectives = {
   'frame-src': ["'self'", 'https://open.spotify.com'],
   'frame-ancestors': ["'none'"],
   'worker-src': ["'self'", 'blob:', 'https:'], // Permissive for development
-};
+}
 
 /**
  * Get CSP configuration based on environment
  */
 export function getCSPConfig(): CSPDirectives {
-  const isProduction = process.env.NODE_ENV === 'production';
-  return isProduction ? productionCSP : developmentCSP;
+  const isProduction = process.env.NODE_ENV === 'production'
+  return isProduction ? productionCSP : developmentCSP
 }
 
 /**
@@ -222,4 +220,4 @@ export function getCSPConfig(): CSPDirectives {
 export const reportOnlyCSP: CSPDirectives = {
   ...productionCSP,
   'report-uri': ['/api/security/csp-report'],
-};
+}

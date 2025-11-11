@@ -52,8 +52,22 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   const url = new URL(event.request.url)
 
   // Bypass service worker for backend API requests (Railway)
+  // This prevents Mixed Content errors and ensures direct network access
   if (url.hostname === 'cidadao-api-production.up.railway.app') {
     // Let the request go directly to the network, don't cache
+    // Don't call event.respondWith() - just return to let browser handle it
+    return
+  }
+
+  // Block any HTTP requests (enforce HTTPS only)
+  if (url.protocol === 'http:' && url.hostname !== 'localhost') {
+    // Block HTTP requests in production (except localhost for dev)
+    event.respondWith(
+      new Response('Mixed Content: This request has been blocked', {
+        status: 400,
+        statusText: 'Bad Request - HTTP not allowed',
+      })
+    )
     return
   }
 
