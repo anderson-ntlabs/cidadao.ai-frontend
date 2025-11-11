@@ -19,10 +19,15 @@ interface AnalyticsProviderProps {
 export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const pathname = usePathname()
 
-  // Initialize PostHog on mount
+  // Initialize PostHog after a delay to improve initial page load
   useEffect(() => {
-    initPostHog()
-    updateConsentStatus()
+    // Delay analytics initialization to prioritize critical rendering
+    const timer = setTimeout(() => {
+      initPostHog()
+      updateConsentStatus()
+    }, 2000) // 2 second delay
+
+    return () => clearTimeout(timer)
   }, [])
 
   // Track page views on route change

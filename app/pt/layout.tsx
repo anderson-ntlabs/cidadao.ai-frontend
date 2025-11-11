@@ -6,7 +6,8 @@ import '../../styles/globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'optional', // Prevent CLS - use fallback if font not loaded fast enough
+  display: 'swap', // Prevent FOIT, show fallback immediately
+  preload: true, // Preload font for better performance
 })
 
 export const metadata: Metadata = {
