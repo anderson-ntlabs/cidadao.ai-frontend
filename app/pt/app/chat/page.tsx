@@ -173,6 +173,8 @@ export default function ChatPage() {
   const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-3')
   const [showErrorBanner, setShowErrorBanner] = useState(false)
   const [lastFailedMessage, setLastFailedMessage] = useState<string>('')
+  const [sendingProgress, setSendingProgress] = useState(0) // 0-100 for progress bar
+  const [optimisticMessage, setOptimisticMessage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -273,6 +275,21 @@ export default function ChatPage() {
       textareaRef.current.style.height = 'auto'
     }
 
+    // Optimistic UI: Show user message immediately
+    setOptimisticMessage(message)
+
+    // Progress simulation for better UX
+    setSendingProgress(10)
+    const progressInterval = setInterval(() => {
+      setSendingProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval)
+          return 90
+        }
+        return prev + 10
+      })
+    }, 200)
+
     // Screen reader announcement - message sent
     announceLoading('resposta do agente')
 
@@ -286,7 +303,21 @@ export default function ChatPage() {
       }
     }
 
-    await sendMessage(message, false)
+    try {
+      await sendMessage(message, false)
+      // Success: Complete progress and clear optimistic message
+      clearInterval(progressInterval)
+      setSendingProgress(100)
+      setTimeout(() => {
+        setSendingProgress(0)
+        setOptimisticMessage(null)
+      }, 300)
+    } catch (error) {
+      // Error: Reset progress and keep optimistic message for retry
+      clearInterval(progressInterval)
+      setSendingProgress(0)
+      // Optimistic message will be cleared when error banner is dismissed
+    }
   }
 
   const handleRetry = async () => {
@@ -305,6 +336,7 @@ export default function ChatPage() {
   const handleDismissError = () => {
     setShowErrorBanner(false)
     clearError()
+    setOptimisticMessage(null) // Clear optimistic message on error dismiss
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -441,6 +473,20 @@ export default function ChatPage() {
         ) : (
           /* Messages List */
           <div className="space-y-4 py-4">
+            {/* Optimistic User Message (shown immediately before server confirms) */}
+            {optimisticMessage && (
+              <div className="flex gap-3 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="max-w-[85%] order-first">
+                  <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
+                    <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
+                  </div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              </div>
+            )}
+
             {messages.map((message, index) => {
               const isLatest =
                 index === messages.length - 1 && message.role === 'assistant' && isLoading
@@ -500,17 +546,33 @@ export default function ChatPage() {
         )}
 
         {/* Mobile Input */}
-        <MobileChatInput
-          value={inputMessage}
-          onChange={setInputMessage}
-          onSend={handleSendMessage}
-          loading={isLoading}
-          placeholder="Digite sua mensagem..."
-          maxLength={2000}
-          disabled={!canSendMessage}
-          showCharCount
-          locale="pt"
-        />
+        <div className="relative">
+          {/* Progress Bar - Mobile */}
+          {sendingProgress > 0 && sendingProgress < 100 && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden z-50">
+              <div
+                className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
+                style={{ width: `${sendingProgress}%` }}
+                role="progressbar"
+                aria-valuenow={sendingProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Enviando mensagem"
+              />
+            </div>
+          )}
+          <MobileChatInput
+            value={inputMessage}
+            onChange={setInputMessage}
+            onSend={handleSendMessage}
+            loading={isLoading}
+            placeholder="Digite sua mensagem..."
+            maxLength={2000}
+            disabled={!canSendMessage}
+            showCharCount
+            locale="pt"
+          />
+        </div>
       </MobileChatContainer>
     )
   }
@@ -650,6 +712,20 @@ export default function ChatPage() {
           ) : (
             /* Messages List */
             <div className="space-y-4 md:space-y-6 py-4">
+              {/* Optimistic User Message - Desktop (shown immediately before server confirms) */}
+              {optimisticMessage && (
+                <div className="flex gap-3 md:gap-4 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="max-w-[75%] order-first">
+                    <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
+                      <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                </div>
+              )}
+
               {messages.map((message, index) => {
                 const isLatest =
                   index === messages.length - 1 && message.role === 'assistant' && isLoading
@@ -717,6 +793,20 @@ export default function ChatPage() {
 
       {/* Input Area - Fixed Bottom */}
       <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
+        {/* Progress Bar - Shows when sending message */}
+        {sendingProgress > 0 && sendingProgress < 100 && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
+              style={{ width: `${sendingProgress}%` }}
+              role="progressbar"
+              aria-valuenow={sendingProgress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Enviando mensagem"
+            />
+          </div>
+        )}
         <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
           <div className="flex gap-2 sm:gap-3 items-end">
             {/* Voice Recorder */}
