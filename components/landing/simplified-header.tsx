@@ -31,7 +31,11 @@ export function SimplifiedHeader({ locale, className }: SimplifiedHeaderProps) {
 
   const toggleLanguage = () => {
     const newLocale = locale === 'pt' ? 'en' : 'pt'
-    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`)
+    // Replace only the first occurrence of the locale in the path
+    const currentPath = pathname || `/${locale}`
+    const newPath = currentPath.replace(new RegExp(`^/${locale}`), `/${newLocale}`)
+
+    console.log('Language toggle:', { currentPath, newPath, locale, newLocale })
     router.push(newPath)
   }
 
