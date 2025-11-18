@@ -19,6 +19,7 @@ import { useMobileDetection } from '@/lib/utils/mobile-detection'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
+import { ChatEmptyState } from '@/components/chat/empty-state'
 
 // Lazy load heavy components for better initial load performance
 const ChatHistorySidebar = dynamic(
@@ -425,33 +426,18 @@ export default function ChatPage() {
 
         {/* Messages */}
         {messages.length === 0 ? (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-            <div className="mb-6">
-              <OptimizedImage
-                src="/agents/abaporu.png"
-                alt="Abaporu"
-                width={80}
-                height={80}
-                className="mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
-                priority
-              />
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-              Olá, {user?.name?.split(' ')[0] || 'Cidadão'}! 👋
-            </h2>
-
-            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
-              Como posso ajudar você a entender melhor os gastos públicos brasileiros?
-            </p>
-
-            {/* Mobile Suggestions */}
-            <MobileChatSuggestions
-              suggestions={getContextualSuggestions(0).map((s) => s.text)}
-              onSelect={setInputMessage}
-            />
-          </div>
+          /* Empty State - Modern & Engaging */
+          <ChatEmptyState
+            userName={user?.name || 'Cidadão'}
+            onSuggestionClick={(suggestion) => {
+              setInputMessage(suggestion)
+              // Auto-focus on input for better UX
+              setTimeout(() => {
+                const input = document.querySelector('textarea') as HTMLTextAreaElement
+                input?.focus()
+              }, 100)
+            }}
+          />
         ) : (
           /* Messages List */
           <div className="space-y-4 py-4">
@@ -650,36 +636,17 @@ export default function ChatPage() {
           )}
 
           {messages.length === 0 ? (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-              <div className="mb-6">
-                <OptimizedImage
-                  src="/agents/abaporu.png"
-                  alt="Abaporu"
-                  width={80}
-                  height={80}
-                  className="mx-auto rounded-full shadow-xl object-cover ring-4 ring-green-500/20"
-                  priority
-                />
-              </div>
-
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                Olá, {user?.name?.split(' ')[0] || 'Cidadão'}! 👋
-              </h2>
-
-              <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
-                Como posso ajudar você a entender melhor os gastos públicos brasileiros?
-              </p>
-
-              {/* Smart Suggestions */}
-              <div className="max-w-2xl">
-                <SmartSuggestions
-                  suggestions={getContextualSuggestions(0)}
-                  onSelect={setInputMessage}
-                  variant="default"
-                />
-              </div>
-            </div>
+            /* Empty State - Modern & Engaging */
+            <ChatEmptyState
+              userName={user?.name || 'Cidadão'}
+              onSuggestionClick={(suggestion) => {
+                setInputMessage(suggestion)
+                // Auto-focus on input for better UX
+                setTimeout(() => {
+                  textareaRef.current?.focus()
+                }, 100)
+              }}
+            />
           ) : (
             /* Messages List */
             <div className="space-y-4 md:space-y-6 py-4">
