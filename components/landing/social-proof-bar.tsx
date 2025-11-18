@@ -60,7 +60,7 @@ export function SocialProofBar() {
   return (
     <section className="py-12 bg-gradient-to-r from-green-50/80 via-blue-50/50 to-green-50/80 dark:from-green-900/10 dark:via-blue-900/10 dark:to-green-900/10">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <Stat
             icon="🤖"
             number="17"
@@ -81,13 +81,6 @@ export function SocialProofBar() {
             label="Acessibilidade"
             sublabel="Inclusivo"
             gradient="from-purple-600 to-pink-600"
-          />
-          <Stat
-            icon="🔒"
-            number="R$ 0"
-            label="Custo"
-            sublabel="Grátis para sempre"
-            gradient="from-yellow-600 to-orange-600"
           />
         </div>
       </div>
