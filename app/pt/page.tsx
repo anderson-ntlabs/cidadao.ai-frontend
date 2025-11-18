@@ -128,7 +128,7 @@ export default function PTPage() {
         {/* HERO SECTION - Optimized for performance */}
         <section
           id="hero"
-          className="hero relative h-[30vh] sm:h-[35vh] flex items-center justify-center overflow-hidden bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"
+          className="hero relative h-[20vh] sm:h-[25vh] md:h-[30vh] flex items-center justify-center overflow-hidden bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"
         >
           <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center relative z-10">
             {/* Logo + Title Combined - Fixed dimensions for CLS */}
@@ -165,6 +165,8 @@ export default function PTPage() {
 
               <button
                 onClick={() => setAboutModalOpen(true)}
+                aria-haspopup="dialog"
+                aria-label="Abrir modal: Ver como funciona"
                 className="h-[66px] px-8 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 hover:scale-[1.02] active:scale-95 transition-all duration-200 touch-manipulation flex items-center justify-center gap-2"
               >
                 <PlayCircle className="w-5 h-5 flex-shrink-0" />

@@ -90,12 +90,12 @@ export function ContentCard({
         </h3>
 
         {/* Description - Mobile optimized */}
-        <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed">
+        <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
           {description}
         </p>
 
         {/* Click indicator - Hidden on mobile */}
-        <div className="hidden sm:block mt-2 text-xs text-gray-500 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="hidden sm:block mt-2 text-xs text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
           Clique para saber mais →
         </div>
       </div>

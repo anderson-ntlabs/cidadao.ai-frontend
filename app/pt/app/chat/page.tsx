@@ -6,7 +6,7 @@ import { agents } from '@/data/agents'
 import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { toast } from '@/hooks/use-toast'
-import { Send, History, Plus } from 'lucide-react'
+import { Send, History, Plus, AlertCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { OptimizedImage } from '@/components/ui/optimized-image'
@@ -170,6 +170,8 @@ export default function ChatPage() {
   const [isInitialized, setIsInitialized] = useState(false)
   const [chatMode, setChatMode] = useState<ChatMode>('cidadao')
   const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-3')
+  const [showErrorBanner, setShowErrorBanner] = useState(false)
+  const [lastFailedMessage, setLastFailedMessage] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -224,11 +226,12 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (error) {
+      setShowErrorBanner(true)
       toast.error('Erro', error)
       announceError(error) // Screen reader announcement
-      clearError()
+      // Don't clear error immediately - let user dismiss banner
     }
-  }, [error, clearError, announceError])
+  }, [error, announceError])
 
   // Clear messages when switching modes
   const handleModeChange = async (newMode: ChatMode) => {
@@ -263,6 +266,7 @@ export default function ChatPage() {
 
     const message = inputMessage
     setInputMessage('')
+    setLastFailedMessage(message) // Store for retry
 
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -282,6 +286,24 @@ export default function ChatPage() {
     }
 
     await sendMessage(message, false)
+  }
+
+  const handleRetry = async () => {
+    if (!lastFailedMessage) return
+
+    setShowErrorBanner(false)
+    clearError()
+    setInputMessage(lastFailedMessage)
+
+    // Auto-send after brief delay
+    setTimeout(async () => {
+      await handleSendMessage()
+    }, 100)
+  }
+
+  const handleDismissError = () => {
+    setShowErrorBanner(false)
+    clearError()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -367,6 +389,39 @@ export default function ChatPage() {
           onSelectSession={handleSelectSession}
           currentSessionId={session?.session_id}
         />
+
+        {/* Error Banner - Mobile - Persistent */}
+        {showErrorBanner && error && (
+          <div
+            className="mx-4 mt-4 mb-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in slide-in-from-top duration-300"
+            role="alert"
+            aria-live="assertive"
+          >
+            <div className="flex items-start gap-2 mb-2">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-red-800 dark:text-red-200 text-sm mb-1">
+                  Erro ao processar mensagem
+                </h3>
+                <p className="text-xs text-red-700 dark:text-red-300">{error}</p>
+              </div>
+              <button
+                onClick={handleDismissError}
+                className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Fechar aviso de erro"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <button
+              onClick={handleRetry}
+              className="w-full px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 active:scale-95 transition-all min-h-[44px]"
+              aria-label="Tentar enviar novamente"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
 
         {/* Messages */}
         {messages.length === 0 ? (
@@ -561,6 +616,39 @@ export default function ChatPage() {
             paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
           }}
         >
+          {/* Error Banner - Persistent */}
+          {showErrorBanner && error && (
+            <div
+              className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300"
+              role="alert"
+              aria-live="assertive"
+            >
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-red-800 dark:text-red-200 mb-1">
+                  Erro ao processar mensagem
+                </h3>
+                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={handleRetry}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 active:scale-95 transition-all min-h-[36px]"
+                  aria-label="Tentar enviar novamente"
+                >
+                  Tentar Novamente
+                </button>
+                <button
+                  onClick={handleDismissError}
+                  className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors min-h-[36px] min-w-[36px]"
+                  aria-label="Fechar aviso de erro"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {messages.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
