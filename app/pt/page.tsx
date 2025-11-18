@@ -24,33 +24,63 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { LoadingScreen } from '@/components/loading-screen'
-import {
-  ContentCard,
-  ExternalLinkCard,
-  LandingModal,
-  HowItWorks,
-  SocialProofBar,
-  VideoTutorial,
-  FAQSection,
-} from '@/components/landing'
+import { ContentCard, ExternalLinkCard, LandingModal } from '@/components/landing'
 import { agents } from '@/data/agents'
 import { Card, CardContent } from '@/components/ui'
 import { ExternalLink, ArrowRight, PlayCircle } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
 import { createLogger } from '@/lib/logger'
 
-// Lazy load heavy components
+// Lazy load sections below the fold for better initial load
+const HowItWorks = dynamic(
+  () => import('@/components/landing').then((m) => ({ default: m.HowItWorks })),
+  {
+    ssr: false,
+    loading: () => <div className="py-16 animate-pulse bg-gray-50 dark:bg-gray-900" />,
+  }
+)
+
+const SocialProofBar = dynamic(
+  () => import('@/components/landing').then((m) => ({ default: m.SocialProofBar })),
+  {
+    ssr: false,
+    loading: () => <div className="py-12 animate-pulse bg-gray-50 dark:bg-gray-900" />,
+  }
+)
+
+const VideoTutorial = dynamic(
+  () => import('@/components/landing').then((m) => ({ default: m.VideoTutorial })),
+  {
+    ssr: false,
+    loading: () => <div className="py-16 animate-pulse bg-white dark:bg-gray-950" />,
+  }
+)
+
+const FAQSection = dynamic(
+  () => import('@/components/landing').then((m) => ({ default: m.FAQSection })),
+  {
+    ssr: false,
+    loading: () => <div className="py-16 animate-pulse bg-gray-50 dark:bg-gray-900" />,
+  }
+)
+
+// Lazy load heavy components for better performance
 const InstallPWASection = dynamic(
   () =>
     import('@/components/install-pwa-section').then((mod) => ({ default: mod.InstallPWASection })),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => null, // No loading state, prevents CLS
+  }
 )
+
 const ProjectTimeline = dynamic(
   () =>
     import('@/components/timeline/project-timeline').then((mod) => ({
       default: mod.ProjectTimeline,
     })),
   {
+    ssr: false, // Timeline only in modal, defer loading
     loading: () => <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
   }
 )
@@ -116,26 +146,28 @@ export default function PTPage() {
               </h1>
             </div>
 
-            {/* Tagline - Simple and clear */}
-            <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-8 max-w-3xl mx-auto">
+            {/* Tagline - Fixed height to prevent CLS */}
+            <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-8 max-w-3xl mx-auto min-h-[3rem]">
               Transparência Pública com Inteligência Artificial
             </p>
 
-            {/* CTA Buttons - Clear value proposition */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto mb-6">
+            {/* CTA Buttons - Fixed dimensions to prevent CLS */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
               <button
                 onClick={handleAccessSystem}
-                className="group min-h-[50px] px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-xl active:scale-95 transition-all duration-300 touch-manipulation flex flex-col items-center"
+                className="h-[66px] px-8 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-200 touch-manipulation flex flex-col items-center justify-center"
               >
-                <span className="text-lg">Começar Grátis</span>
-                <span className="text-xs opacity-90">Login com Google • 2 minutos</span>
+                <span className="text-lg leading-tight">Começar Grátis</span>
+                <span className="text-xs opacity-90 leading-tight">
+                  Login com Google • 2 minutos
+                </span>
               </button>
 
               <button
                 onClick={() => setAboutModalOpen(true)}
-                className="group min-h-[50px] px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 active:scale-95 transition-all duration-300 touch-manipulation flex items-center justify-center gap-2"
+                className="h-[66px] px-8 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 hover:scale-[1.02] active:scale-95 transition-all duration-200 touch-manipulation flex items-center justify-center gap-2"
               >
-                <PlayCircle className="w-5 h-5" />
+                <PlayCircle className="w-5 h-5 flex-shrink-0" />
                 <span>Ver Como Funciona</span>
               </button>
             </div>
