@@ -186,11 +186,8 @@ export default function PTPage() {
                   <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-green-500/20 via-blue-500/20 to-purple-500/20 rounded-xl">
                       <PlayCircle className="w-16 h-16 text-gray-400 mb-3" />
-                      <p className="text-gray-600 dark:text-gray-400 text-base font-medium mb-1">
+                      <p className="text-gray-600 dark:text-gray-400 text-base font-medium">
                         Vídeo Tutorial em Breve
-                      </p>
-                      <p className="text-gray-500 dark:text-gray-500 text-sm">
-                        Aprenda a investigar gastos públicos
                       </p>
                     </div>
                   </div>
