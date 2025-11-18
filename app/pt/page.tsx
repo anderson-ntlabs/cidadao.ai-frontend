@@ -94,40 +94,24 @@ export default function PTPage() {
 
   return (
     <div className="relative">
-      {/* Global background image - very subtle */}
-      <div className="fixed inset-0 z-0 opacity-[0.02]">
-        <Image
-          src="/operarios.png"
-          alt=""
-          fill
-          priority
-          quality={85}
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-      </div>
-
-      <div className="relative z-10">
-        {/* HERO SECTION - Redesigned (25vh instead of 60vh) */}
+      <div className="relative">
+        {/* HERO SECTION - Optimized for performance */}
         <section
           id="hero"
-          className="hero relative min-h-[30vh] sm:min-h-[35vh] flex items-center justify-center overflow-hidden"
+          className="hero relative h-[30vh] sm:h-[35vh] flex items-center justify-center overflow-hidden bg-gradient-to-tr from-green-500/5 via-transparent to-blue-500/5"
         >
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10"></div>
-          </div>
-
           <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center relative z-10">
-            {/* Logo + Title Combined */}
-            <div className="flex items-center justify-center gap-4 mb-6">
+            {/* Logo + Title Combined - Fixed dimensions for CLS */}
+            <div className="flex items-center justify-center gap-4 mb-6 h-[60px]">
               <Image
                 src="/forum-icon.png"
                 width={60}
                 height={60}
                 alt="Cidadão.AI"
                 className="rounded-lg shadow-lg"
+                priority
               />
-              <h1 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent leading-none">
                 Cidadão.AI
               </h1>
             </div>
