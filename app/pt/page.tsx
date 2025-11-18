@@ -1,11 +1,18 @@
 /**
- * Landing Page - Portuguese Version
+ * Landing Page - Portuguese Version (UX Redesign)
  *
- * Redesigned with modal-based architecture for better space utilization
- * and modern UX. Features simplified header and compact grid layout.
+ * Complete UX overhaul focusing on usability, clarity, and conversion.
+ * Key improvements:
+ * - Hero reduced from 60vh to 25vh
+ * - Social proof bar added
+ * - How it works (3 steps) section
+ * - Video tutorial placeholder
+ * - FAQ accordion
+ * - Better Spotify context
+ * - Clearer CTAs throughout
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-11-06 (Redesign)
+ * Redesign: 2025-11-18
  */
 
 'use client'
@@ -14,23 +21,29 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { LoadingScreen } from '@/components/loading-screen'
-import { ContentCard, ExternalLinkCard, LandingModal } from '@/components/landing'
+import {
+  ContentCard,
+  ExternalLinkCard,
+  LandingModal,
+  HowItWorks,
+  SocialProofBar,
+  VideoTutorial,
+  FAQSection,
+} from '@/components/landing'
 import { agents } from '@/data/agents'
 import { Card, CardContent } from '@/components/ui'
-import { ExternalLink } from 'lucide-react'
-import Image from 'next/image'
+import { ExternalLink, ArrowRight, PlayCircle } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
 import { createLogger } from '@/lib/logger'
 
-// Lazy load heavy components for better performance
+// Lazy load heavy components
 const InstallPWASection = dynamic(
   () =>
     import('@/components/install-pwa-section').then((mod) => ({ default: mod.InstallPWASection })),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 )
 const ProjectTimeline = dynamic(
   () =>
@@ -53,16 +66,7 @@ export default function PTPage() {
   const [agentsModalOpen, setAgentsModalOpen] = useState(false)
   const [manifestoModalOpen, setManifestoModalOpen] = useState(false)
 
-  // Debug logging
-  useEffect(() => {
-    logger.debug('Page state', {
-      isAuthenticated,
-      isLoading,
-      timestamp: new Date().toISOString(),
-    })
-  }, [isAuthenticated, isLoading])
-
-  // Redirect authenticated users directly to app
+  // Redirect authenticated users
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       logger.info('Redirecting authenticated user to /pt/app')
@@ -79,15 +83,10 @@ export default function PTPage() {
     }
   }
 
-  // Show loading screen while checking authentication
-  if (isLoading) {
-    logger.debug('Rendering loading screen (isLoading = true)')
-    return <LoadingScreen />
-  }
-
-  // If authenticated, show loading screen while redirecting
-  if (isAuthenticated) {
-    logger.debug('Rendering loading screen (isAuthenticated = true)')
+  // Show loading screen while checking authentication or redirecting
+  if (isLoading || isAuthenticated) {
+    const message = isAuthenticated ? 'Redirecionando...' : 'Carregando...'
+    logger.debug(`Rendering loading screen: ${message}`)
     return <LoadingScreen />
   }
 
@@ -109,44 +108,51 @@ export default function PTPage() {
       </div>
 
       <div className="relative z-10">
-        {/* Hero Section - Mobile Optimized */}
-        <section className="hero relative min-h-[50vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden">
-          {/* Subtle animated gradient overlay */}
+        {/* HERO SECTION - Redesigned (25vh instead of 60vh) */}
+        <section
+          id="hero"
+          className="hero relative min-h-[30vh] sm:min-h-[35vh] flex items-center justify-center overflow-hidden"
+        >
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10"></div>
           </div>
 
-          <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16 text-center relative z-10">
-            {/* Title - Mobile optimized sizing */}
-            <h1 className="hero-title text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
-              Cidadão.AI
-            </h1>
+          <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center relative z-10">
+            {/* Logo + Title Combined */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Image
+                src="/forum-icon.png"
+                width={60}
+                height={60}
+                alt="Cidadão.AI"
+                className="rounded-lg shadow-lg"
+              />
+              <h1 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
+                Cidadão.AI
+              </h1>
+            </div>
 
-            {/* Subtitle - Responsive sizing */}
-            <p className="hero-subtitle-large text-xl sm:text-3xl font-medium text-gray-800 dark:text-gray-200 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
-              Inteligência Artificial para Transparência e Controle Social
+            {/* Tagline - Simple and clear */}
+            <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-8 max-w-3xl mx-auto">
+              Transparência Pública com Inteligência Artificial
             </p>
 
-            {/* Description - Hidden on very small screens */}
-            <p className="hero-description hidden sm:block text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-10 max-w-3xl mx-auto">
-              Monitore gastos públicos, detecte anomalias e acompanhe investigações em tempo real.
-              Nossa rede de IAs brasileiras trabalha 24/7 analisando dados do Portal da
-              Transparência.
-            </p>
-
-            {/* CTA Buttons - Mobile optimized */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
+            {/* CTA Buttons - Clear value proposition */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto mb-6">
               <button
                 onClick={handleAccessSystem}
-                className="min-h-[44px] px-6 sm:px-8 py-3 sm:py-4 bg-green-600 text-white rounded-lg text-base sm:text-lg font-medium hover:bg-green-700 active:scale-95 transition-all touch-manipulation"
+                className="group min-h-[50px] px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-medium hover:shadow-xl active:scale-95 transition-all duration-300 touch-manipulation flex flex-col items-center"
               >
-                Acessar o Sistema
+                <span className="text-lg">Começar Grátis</span>
+                <span className="text-xs opacity-90">Login com Google • 2 minutos</span>
               </button>
+
               <button
                 onClick={() => setAboutModalOpen(true)}
-                className="min-h-[44px] px-6 sm:px-8 py-3 sm:py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-base sm:text-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 active:scale-95 transition-all duration-300 touch-manipulation"
+                className="group min-h-[50px] px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:border-green-600 dark:hover:border-green-400 active:scale-95 transition-all duration-300 touch-manipulation flex items-center justify-center gap-2"
               >
-                Conheça o Projeto
+                <PlayCircle className="w-5 h-5" />
+                <span>Ver Como Funciona</span>
               </button>
             </div>
           </div>
@@ -155,94 +161,176 @@ export default function PTPage() {
         {/* PWA Installation Section */}
         <InstallPWASection />
 
-        {/* Content Cards Grid - Mobile Optimized */}
-        <section className="py-8 sm:py-12 bg-gradient-to-b from-transparent via-green-50/30 dark:via-green-900/10 to-transparent">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <ContentCard
-                icon="🎓"
-                title="Sobre o Projeto"
-                description="TCC de Ciência da Computação que combina pesquisa científica com impacto social real"
-                onClick={() => setAboutModalOpen(true)}
-                gradient="from-green-500 to-emerald-600"
-              />
-              <ContentCard
-                icon="🇧🇷"
-                title="Nossos Agentes"
-                description="17 inteligências artificiais com identidades de heróis brasileiros trabalhando pela transparência"
-                onClick={() => setAgentsModalOpen(true)}
-                gradient="from-blue-500 to-cyan-600"
-              />
-              <ContentCard
-                icon="📜"
-                title="Manifesto"
-                description="Nossa visão de uma democracia mais forte, transparente e participativa através da tecnologia"
-                onClick={() => setManifestoModalOpen(true)}
-                gradient="from-yellow-500 to-orange-600"
-              />
-            </div>
-          </div>
-        </section>
+        {/* SOCIAL PROOF BAR - NEW */}
+        <SocialProofBar />
 
-        {/* Spotify Playlist - Mobile Optimized */}
-        <section className="py-8 sm:py-12 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl">
-              <div
-                className="relative w-full"
-                style={{ paddingBottom: '56.25%', minHeight: '280px' }}
-              >
-                <iframe
-                  className="absolute inset-0 w-full h-full rounded-lg sm:rounded-xl shadow-lg"
-                  src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
-                  width="100%"
-                  height="352"
-                  frameBorder="0"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  title="Cidadão.AI Playlist - Brazilian Music"
-                />
+        {/* HOW IT WORKS - NEW */}
+        <HowItWorks />
+
+        {/* TWO-COLUMN LAYOUT - Video + Content Cards (Desktop optimization) */}
+        <section className="py-12 bg-gradient-to-b from-transparent via-green-50/30 dark:via-green-900/10 to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+              {/* Left Column - Video Tutorial */}
+              <div className="w-full">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                    Veja Como Funciona
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-base">
+                    Tutorial completo em 5 minutos
+                  </p>
+                </div>
+
+                <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl">
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-green-500/20 via-blue-500/20 to-purple-500/20 rounded-xl">
+                      <PlayCircle className="w-16 h-16 text-gray-400 mb-3" />
+                      <p className="text-gray-600 dark:text-gray-400 text-base font-medium mb-1">
+                        Vídeo Tutorial em Breve
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-500 text-sm">
+                        Aprenda a investigar gastos públicos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Content Cards */}
+              <div className="w-full">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                    Conheça o Projeto
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-base">
+                    Clique nos cards para saber mais
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <ContentCard
+                    icon="🎓"
+                    title="Sobre o Projeto"
+                    description="TCC de Ciência da Computação que combina pesquisa científica com impacto social real"
+                    onClick={() => setAboutModalOpen(true)}
+                    gradient="from-green-500 to-emerald-600"
+                  />
+                  <ContentCard
+                    icon="🇧🇷"
+                    title="Nossos Agentes"
+                    description="17 inteligências artificiais com identidades de heróis brasileiros"
+                    onClick={() => setAgentsModalOpen(true)}
+                    gradient="from-blue-500 to-cyan-600"
+                  />
+                  <ContentCard
+                    icon="📜"
+                    title="Manifesto"
+                    description="Nossa visão de democracia transparente e participativa através da tecnologia"
+                    onClick={() => setManifestoModalOpen(true)}
+                    gradient="from-yellow-500 to-orange-600"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* External Links - Mobile Optimized */}
-        <section className="py-8 sm:py-12">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">
-              Recursos Adicionais
-            </h2>
-            <p className="text-sm sm:text-base text-center text-gray-600 dark:text-gray-400 mb-6 sm:mb-10 max-w-3xl mx-auto px-4">
-              Para desenvolvedores, pesquisadores e interessados nos detalhes técnicos
-            </p>
+        {/* TWO-COLUMN LAYOUT - FAQ + Spotify (Desktop optimization) */}
+        <section className="py-12 bg-gradient-to-b from-transparent via-green-50/50 dark:via-green-900/10 to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+              {/* Left Column - FAQ */}
+              <div className="w-full">
+                <FAQSection />
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <ExternalLinkCard
-                icon="🐙"
-                title="Código Aberto"
-                description="Repositórios no GitHub"
-                href="https://github.com/anderson-ufrj/cidadao.ai-backend"
-              />
-              <ExternalLinkCard
-                icon="📚"
-                title="Documentação"
-                description="Guias técnicos completos"
-                href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
-              />
-              <ExternalLinkCard
-                icon="⚡"
-                title="API REST"
-                description="Documentação interativa"
-                href="https://cidadao-api-production.up.railway.app/docs"
-              />
+              {/* Right Column - Spotify + Developer Links */}
+              <div className="w-full space-y-8">
+                {/* Spotify Playlist */}
+                <div>
+                  <div className="text-center mb-6">
+                    <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed max-w-lg mx-auto">
+                      O idealizador do projeto Cidadão.AI criou uma playlist que é a cara do Brasil.
+                      Claro que parte do desenvolvimento desse projeto foi regado a muito café ☕🇧🇷
+                    </p>
+                  </div>
+
+                  <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                    <div
+                      className="relative w-full"
+                      style={{ paddingBottom: '100%', minHeight: '280px' }}
+                    >
+                      <iframe
+                        className="absolute inset-0 w-full h-full rounded-xl shadow-lg"
+                        src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
+                        width="100%"
+                        height="352"
+                        frameBorder="0"
+                        allowFullScreen
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        title="Cidadão.AI Playlist - Brazilian Music"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Developer Links */}
+                <div>
+                  <h3 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                    Para Desenvolvedores
+                  </h3>
+                  <p className="text-center text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                    Código aberto e documentação completa
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <ExternalLinkCard
+                      icon="🐙"
+                      title="Código Aberto"
+                      description="Repositórios no GitHub"
+                      href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+                    />
+                    <ExternalLinkCard
+                      icon="📚"
+                      title="Documentação"
+                      description="Guias técnicos completos"
+                      href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
+                    />
+                    <ExternalLinkCard
+                      icon="⚡"
+                      title="API REST"
+                      description="Documentação interativa"
+                      href="https://cidadao-api-production.up.railway.app/docs"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="py-16 bg-gradient-to-r from-green-600 to-blue-600">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Pronto para Começar?</h2>
+            <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+              Junte-se a centenas de cidadãos fiscalizando gastos públicos com inteligência
+              artificial
+            </p>
+            <button
+              onClick={handleAccessSystem}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 rounded-lg font-bold text-lg hover:shadow-2xl active:scale-95 transition-all duration-300"
+            >
+              Começar Agora - É Grátis
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </section>
       </div>
 
-      {/* MODAIS */}
+      {/* MODAIS - Kept from original */}
 
       {/* About Modal */}
       <LandingModal
