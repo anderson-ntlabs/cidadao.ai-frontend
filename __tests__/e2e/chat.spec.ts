@@ -2,12 +2,13 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Chat Interaction', () => {
   // NOTE: Chat interface is at /pt/app/chat (authenticated route)
-  // These tests currently skip because they require authentication setup
-  // TODO: Implement auth state setup for E2E tests (see Playwright auth docs)
+  // Authentication state is configured via playwright/auth.setup.ts
 
-  test.skip('should display chat interface', async ({ page }) => {
-    // Skipped: Requires authentication
-    // Correct URL: /pt/app/chat (not /pt/chat)
+  // Use authenticated state for these tests
+  test.use({ storageState: 'playwright/.auth/user.json' })
+
+  test('should display chat interface', async ({ page }) => {
+    // Navigate to authenticated chat route
     await page.goto('/pt/app/chat')
 
     // Check page loaded - accepting "Cidadão.AI - Transparência para Todos" or similar
@@ -24,8 +25,7 @@ test.describe('Chat Interaction', () => {
     }
   })
 
-  test.skip('should allow typing in chat input', async ({ page }) => {
-    // Skipped: Requires authentication
+  test('should allow typing in chat input', async ({ page }) => {
     await page.goto('/pt/app/chat')
 
     const chatInput = page.getByPlaceholder(/digite.*mensagem|escreva/i)
