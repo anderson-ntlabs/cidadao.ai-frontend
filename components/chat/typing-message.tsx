@@ -9,12 +9,16 @@ interface TypingMessageProps {
   onComplete?: () => void
 }
 
-export function TypingMessage({ content, isLatest = false, onComplete }: TypingMessageProps) {
+export function TypingMessage({
+  content,
+  isLatest = false,
+  onComplete,
+}: TypingMessageProps): JSX.Element {
   const { displayedText, isTyping } = useTypingEffect(content, {
     speed: 20,
-    onComplete
+    onComplete,
   })
-  
+
   return (
     <div className="relative">
       <MarkdownMessage content={isLatest ? displayedText : content} />
