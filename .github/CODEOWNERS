@@ -1,0 +1,17 @@
+# CODEOWNERS - Automatic code review assignments
+
+# Default owners for everything
+* @anderson-ufrj
+
+# Frontend specific
+/components/** @anderson-ufrj
+/app/** @anderson-ufrj
+/lib/** @anderson-ufrj
+
+# Configuration and tooling
+/.github/** @anderson-ufrj
+/scripts/** @anderson-ufrj
+
+# Documentation
+/docs/** @anderson-ufrj
+/*.md @anderson-ufrj
