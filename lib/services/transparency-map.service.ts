@@ -182,7 +182,7 @@ export async function fetchTransparencyMap(): Promise<TransparencyMapData> {
 
     return normalizedData
   } catch (error) {
-    console.error('Error fetching transparency map:', error)
+    logger.error('Error fetching transparency map:', error)
 
     // Try to return cached data if available
     const cachedData = getCachedMapData()
@@ -221,7 +221,7 @@ export function getCachedMapData(): TransparencyMapData | null {
     logger.warn('Cache is stale but returning anyway', { ageMinutes: Math.round(age / 60000) })
     return data
   } catch (error) {
-    console.error('Error reading cached map data:', error)
+    logger.error('Error reading cached map data:', error)
     return null
   }
 }

@@ -5,33 +5,36 @@
  * Provides multi-layer caching with smart TTL strategies
  */
 
-import { kv } from '@vercel/kv';
+import { kv } from '@vercel/kv'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('KVCache')
 
 export interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  ttl: number;
-  hits: number;
+  data: T
+  timestamp: number
+  ttl: number
+  hits: number
 }
 
 export interface CacheStats {
-  hits: number;
-  misses: number;
-  hitRate: number;
-  totalKeys: number;
-  memoryUsage: number;
+  hits: number
+  misses: number
+  hitRate: number
+  totalKeys: number
+  memoryUsage: number
 }
 
 /**
  * TTL strategies (in seconds)
  */
 export const TTL_STRATEGIES = {
-  VERY_SHORT: 60,          // 1 minute - real-time data
-  SHORT: 300,              // 5 minutes - chat responses
-  MEDIUM: 3600,            // 1 hour - user profiles
-  LONG: 86400,             // 24 hours - static content
-  VERY_LONG: 604800,       // 7 days - rarely changing data
-} as const;
+  VERY_SHORT: 60, // 1 minute - real-time data
+  SHORT: 300, // 5 minutes - chat responses
+  MEDIUM: 3600, // 1 hour - user profiles
+  LONG: 86400, // 24 hours - static content
+  VERY_LONG: 604800, // 7 days - rarely changing data
+} as const
 
 /**
  * Cache key prefixes for organization
@@ -44,7 +47,7 @@ export const CACHE_PREFIXES = {
   INVESTIGATION: 'investigation:',
   GEO: 'geo:',
   RATE_LIMIT: 'ratelimit:',
-} as const;
+} as const
 
 /**
  * KV Cache Service
@@ -53,62 +56,58 @@ export class KVCacheService {
   private stats = {
     hits: 0,
     misses: 0,
-  };
+  }
 
   /**
    * Get value from cache
    */
   async get<T>(key: string): Promise<T | null> {
     try {
-      const entry = await kv.get<CacheEntry<T>>(key);
+      const entry = await kv.get<CacheEntry<T>>(key)
 
       if (!entry) {
-        this.stats.misses++;
-        return null;
+        this.stats.misses++
+        return null
       }
 
       // Check if expired (safety check, KV handles this but good to verify)
-      const now = Date.now();
+      const now = Date.now()
       if (now - entry.timestamp > entry.ttl * 1000) {
-        this.stats.misses++;
-        await this.delete(key);
-        return null;
+        this.stats.misses++
+        await this.delete(key)
+        return null
       }
 
       // Increment hit counter
-      this.stats.hits++;
-      entry.hits++;
-      await kv.set(key, entry, { ex: entry.ttl });
+      this.stats.hits++
+      entry.hits++
+      await kv.set(key, entry, { ex: entry.ttl })
 
-      return entry.data;
+      return entry.data
     } catch (error) {
-      console.error('[KV Cache] Get error:', error);
-      this.stats.misses++;
-      return null;
+      logger.error('Get error', error)
+      this.stats.misses++
+      return null
     }
   }
 
   /**
    * Set value in cache with TTL
    */
-  async set<T>(
-    key: string,
-    value: T,
-    ttl: number = TTL_STRATEGIES.SHORT
-  ): Promise<boolean> {
+  async set<T>(key: string, value: T, ttl: number = TTL_STRATEGIES.SHORT): Promise<boolean> {
     try {
       const entry: CacheEntry<T> = {
         data: value,
         timestamp: Date.now(),
         ttl,
         hits: 0,
-      };
+      }
 
-      await kv.set(key, entry, { ex: ttl });
-      return true;
+      await kv.set(key, entry, { ex: ttl })
+      return true
     } catch (error) {
-      console.error('[KV Cache] Set error:', error);
-      return false;
+      logger.error('Set error', error)
+      return false
     }
   }
 
@@ -117,11 +116,11 @@ export class KVCacheService {
    */
   async delete(key: string): Promise<boolean> {
     try {
-      await kv.del(key);
-      return true;
+      await kv.del(key)
+      return true
     } catch (error) {
-      console.error('[KV Cache] Delete error:', error);
-      return false;
+      logger.error('Delete error', error)
+      return false
     }
   }
 
@@ -130,11 +129,11 @@ export class KVCacheService {
    */
   async exists(key: string): Promise<boolean> {
     try {
-      const result = await kv.exists(key);
-      return result === 1;
+      const result = await kv.exists(key)
+      return result === 1
     } catch (error) {
-      console.error('[KV Cache] Exists error:', error);
-      return false;
+      logger.error('Exists error', error)
+      return false
     }
   }
 
@@ -143,28 +142,28 @@ export class KVCacheService {
    */
   async mget<T>(keys: string[]): Promise<(T | null)[]> {
     try {
-      const entries = await kv.mget<CacheEntry<T>[]>(...keys);
+      const entries = await kv.mget<CacheEntry<T>[]>(...keys)
 
       return entries.map((entry, index) => {
         if (!entry) {
-          this.stats.misses++;
-          return null;
+          this.stats.misses++
+          return null
         }
 
         // Check expiration
-        const now = Date.now();
+        const now = Date.now()
         if (now - entry.timestamp > entry.ttl * 1000) {
-          this.stats.misses++;
-          this.delete(keys[index]);
-          return null;
+          this.stats.misses++
+          this.delete(keys[index])
+          return null
         }
 
-        this.stats.hits++;
-        return entry.data;
-      });
+        this.stats.hits++
+        return entry.data
+      })
     } catch (error) {
-      console.error('[KV Cache] Mget error:', error);
-      return keys.map(() => null);
+      logger.error('Mget error', error)
+      return keys.map(() => null)
     }
   }
 
@@ -173,11 +172,11 @@ export class KVCacheService {
    */
   async keys(pattern: string): Promise<string[]> {
     try {
-      const keys = await kv.keys(pattern);
-      return keys;
+      const keys = await kv.keys(pattern)
+      return keys
     } catch (error) {
-      console.error('[KV Cache] Keys error:', error);
-      return [];
+      logger.error('Keys error', error)
+      return []
     }
   }
 
@@ -186,16 +185,16 @@ export class KVCacheService {
    */
   async increment(key: string, ttl?: number): Promise<number> {
     try {
-      const value = await kv.incr(key);
+      const value = await kv.incr(key)
 
       if (ttl && value === 1) {
-        await kv.expire(key, ttl);
+        await kv.expire(key, ttl)
       }
 
-      return value;
+      return value
     } catch (error) {
-      console.error('[KV Cache] Increment error:', error);
-      return 0;
+      logger.error('Increment error', error)
+      return 0
     }
   }
 
@@ -203,8 +202,8 @@ export class KVCacheService {
    * Get cache statistics
    */
   getStats(): CacheStats {
-    const total = this.stats.hits + this.stats.misses;
-    const hitRate = total > 0 ? this.stats.hits / total : 0;
+    const total = this.stats.hits + this.stats.misses
+    const hitRate = total > 0 ? this.stats.hits / total : 0
 
     return {
       hits: this.stats.hits,
@@ -212,7 +211,7 @@ export class KVCacheService {
       hitRate,
       totalKeys: 0, // Would need separate query
       memoryUsage: 0, // KV doesn't expose this
-    };
+    }
   }
 
   /**
@@ -222,7 +221,7 @@ export class KVCacheService {
     this.stats = {
       hits: 0,
       misses: 0,
-    };
+    }
   }
 
   /**
@@ -230,17 +229,17 @@ export class KVCacheService {
    */
   async clearPrefix(prefix: string): Promise<number> {
     try {
-      const keys = await this.keys(`${prefix}*`);
+      const keys = await this.keys(`${prefix}*`)
 
       if (keys.length === 0) {
-        return 0;
+        return 0
       }
 
-      await kv.del(...keys);
-      return keys.length;
+      await kv.del(...keys)
+      return keys.length
     } catch (error) {
-      console.error('[KV Cache] Clear prefix error:', error);
-      return 0;
+      logger.error('Clear prefix error', error)
+      return 0
     }
   }
 
@@ -249,11 +248,11 @@ export class KVCacheService {
    */
   async getTTL(key: string): Promise<number> {
     try {
-      const ttl = await kv.ttl(key);
-      return ttl;
+      const ttl = await kv.ttl(key)
+      return ttl
     } catch (error) {
-      console.error('[KV Cache] Get TTL error:', error);
-      return -1;
+      logger.error('Get TTL error', error)
+      return -1
     }
   }
 
@@ -262,11 +261,11 @@ export class KVCacheService {
    */
   async expire(key: string, seconds: number): Promise<boolean> {
     try {
-      const result = await kv.expire(key, seconds);
-      return result === 1;
+      const result = await kv.expire(key, seconds)
+      return result === 1
     } catch (error) {
-      console.error('[KV Cache] Expire error:', error);
-      return false;
+      logger.error('Expire error', error)
+      return false
     }
   }
 }
@@ -274,7 +273,7 @@ export class KVCacheService {
 /**
  * Singleton instance
  */
-export const kvCache = new KVCacheService();
+export const kvCache = new KVCacheService()
 
 /**
  * Helper functions for common cache operations
@@ -288,18 +287,16 @@ export async function cacheChatResponse(
   response: string,
   ttl: number = TTL_STRATEGIES.SHORT
 ): Promise<boolean> {
-  const key = `${CACHE_PREFIXES.CHAT}${hashMessage(message)}`;
-  return kvCache.set(key, response, ttl);
+  const key = `${CACHE_PREFIXES.CHAT}${hashMessage(message)}`
+  return kvCache.set(key, response, ttl)
 }
 
 /**
  * Get cached chat response
  */
-export async function getCachedChatResponse(
-  message: string
-): Promise<string | null> {
-  const key = `${CACHE_PREFIXES.CHAT}${hashMessage(message)}`;
-  return kvCache.get<string>(key);
+export async function getCachedChatResponse(message: string): Promise<string | null> {
+  const key = `${CACHE_PREFIXES.CHAT}${hashMessage(message)}`
+  return kvCache.get<string>(key)
 }
 
 /**
@@ -310,18 +307,16 @@ export async function cacheSuggestions(
   suggestions: string[],
   ttl: number = TTL_STRATEGIES.MEDIUM
 ): Promise<boolean> {
-  const key = `${CACHE_PREFIXES.SUGGESTIONS}${hashMessage(context)}`;
-  return kvCache.set(key, suggestions, ttl);
+  const key = `${CACHE_PREFIXES.SUGGESTIONS}${hashMessage(context)}`
+  return kvCache.set(key, suggestions, ttl)
 }
 
 /**
  * Get cached suggestions
  */
-export async function getCachedSuggestions(
-  context: string
-): Promise<string[] | null> {
-  const key = `${CACHE_PREFIXES.SUGGESTIONS}${hashMessage(context)}`;
-  return kvCache.get<string[]>(key);
+export async function getCachedSuggestions(context: string): Promise<string[] | null> {
+  const key = `${CACHE_PREFIXES.SUGGESTIONS}${hashMessage(context)}`
+  return kvCache.get<string[]>(key)
 }
 
 /**
@@ -332,29 +327,29 @@ export async function checkRateLimit(
   limit: number,
   window: number // seconds
 ): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
-  const key = `${CACHE_PREFIXES.RATE_LIMIT}${identifier}`;
+  const key = `${CACHE_PREFIXES.RATE_LIMIT}${identifier}`
 
   try {
-    const count = await kvCache.increment(key, window);
-    const remaining = Math.max(0, limit - count);
-    const allowed = count <= limit;
+    const count = await kvCache.increment(key, window)
+    const remaining = Math.max(0, limit - count)
+    const allowed = count <= limit
 
-    const ttl = await kvCache.getTTL(key);
-    const resetTime = Date.now() + (ttl * 1000);
+    const ttl = await kvCache.getTTL(key)
+    const resetTime = Date.now() + ttl * 1000
 
     return {
       allowed,
       remaining,
       resetTime,
-    };
+    }
   } catch (error) {
-    console.error('[KV Cache] Rate limit error:', error);
+    logger.error('Rate limit error', error)
     // Fail open - allow request if cache error
     return {
       allowed: true,
       remaining: limit,
       resetTime: Date.now() + window * 1000,
-    };
+    }
   }
 }
 
@@ -362,11 +357,11 @@ export async function checkRateLimit(
  * Simple hash function for cache keys
  */
 function hashMessage(message: string): string {
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < message.length; i++) {
-    const char = message.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    const char = message.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
   }
-  return Math.abs(hash).toString(36);
+  return Math.abs(hash).toString(36)
 }
