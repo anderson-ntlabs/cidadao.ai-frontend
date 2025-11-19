@@ -35,7 +35,7 @@ export function SimplifiedHeader({ locale, className }: SimplifiedHeaderProps) {
     const currentPath = pathname || `/${locale}`
     const newPath = currentPath.replace(new RegExp(`^/${locale}`), `/${newLocale}`)
 
-    console.log('Language toggle:', { currentPath, newPath, locale, newLocale })
+    // console.log('Language toggle:', { currentPath, newPath, locale, newLocale })
     router.push(newPath)
   }
 
