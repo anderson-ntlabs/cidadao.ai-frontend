@@ -145,6 +145,6 @@ function extractBrowser(userAgent: string): string {
 }
 
 // Allow only POST requests
-export async function GET(): Promise<NextResponse> {
+export function GET(): NextResponse {
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }
