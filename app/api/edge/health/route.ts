@@ -44,7 +44,9 @@ async function checkBackendHealth(): Promise<boolean> {
   }
 }
 
-export async function GET() {
+export async function GET(): Promise<
+  NextResponse<HealthStatus | { status: string; timestamp: string; error: string }>
+> {
   try {
     // Use KV cache to reduce backend health check frequency
     const backendStatus = await getOrSet('health:backend', checkBackendHealth, { ttl: CACHE_TTL })
@@ -65,7 +67,7 @@ export async function GET() {
         'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
       },
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         status: 'down',

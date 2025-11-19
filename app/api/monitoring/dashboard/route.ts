@@ -10,10 +10,25 @@ import { multiLayerCache } from '@/lib/cache/multi-layer-cache.service'
 
 export const runtime = 'edge'
 
+interface CacheStats {
+  hits?: number
+  misses: number
+  hitRate: number
+  total?: number
+  memoryHits?: number
+  kvHits?: number
+  memoryHitRate?: number
+  memoryEntries?: number
+  memorySize?: number
+  memoryUtilization?: number
+  promotions?: number
+  evictions?: number
+}
+
 interface DashboardData {
   cache: {
-    kv: any
-    multiLayer: any
+    kv: CacheStats
+    multiLayer: CacheStats
   }
   metrics: {
     total: number
@@ -109,9 +124,11 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
  *
  * Reset metrics (for testing)
  */
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<{ success: boolean; message: string } | { error: string }>> {
   try {
-    const { action } = await request.json()
+    const { action } = (await request.json()) as { action: string }
 
     if (action === 'reset-metrics') {
       // Clear all metrics

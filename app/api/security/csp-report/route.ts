@@ -34,9 +34,9 @@ interface CSPReport {
  *
  * Receive CSP violation reports
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse<{ error: string } | null>> {
   try {
-    const report: CSPReport = await request.json()
+    const report = (await request.json()) as CSPReport
     const violation = report['csp-report']
 
     // Log violation to console in development
