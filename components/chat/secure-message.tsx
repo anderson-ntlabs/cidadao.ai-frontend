@@ -11,7 +11,12 @@ interface SecureMessageProps {
   allowHtml?: boolean
 }
 
-export function SecureMessage({ content, role, className, allowHtml = false }: SecureMessageProps) {
+export function SecureMessage({
+  content,
+  role,
+  className,
+  allowHtml = false,
+}: SecureMessageProps): JSX.Element {
   const { sanitizeChatMessage, escapeHtml } = useSanitizer()
 
   const processedContent = useMemo(() => {
@@ -26,18 +31,14 @@ export function SecureMessage({ content, role, className, allowHtml = false }: S
 
   if (allowHtml && role === 'assistant') {
     return (
-      <div 
+      <div
         className={cn('prose prose-sm max-w-none', className)}
         dangerouslySetInnerHTML={{ __html: processedContent }}
       />
     )
   }
 
-  return (
-    <div className={cn('whitespace-pre-wrap', className)}>
-      {processedContent}
-    </div>
-  )
+  return <div className={cn('whitespace-pre-wrap', className)}>{processedContent}</div>
 }
 
 // Message wrapper with proper styling
@@ -51,7 +52,7 @@ interface ChatMessageProps {
   className?: string
 }
 
-export function ChatMessage({ message, className }: ChatMessageProps) {
+export function ChatMessage({ message, className }: ChatMessageProps): JSX.Element {
   const isUser = message.role === 'user'
 
   return (
@@ -74,9 +75,7 @@ export function ChatMessage({ message, className }: ChatMessageProps) {
       </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">
-            {isUser ? 'Você' : 'Assistente'}
-          </span>
+          <span className="font-medium text-sm">{isUser ? 'Você' : 'Assistente'}</span>
           {message.timestamp && (
             <span className="text-xs text-gray-500">
               {new Date(message.timestamp).toLocaleTimeString('pt-BR')}

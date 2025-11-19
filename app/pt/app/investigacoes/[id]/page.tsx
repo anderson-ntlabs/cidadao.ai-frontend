@@ -2,7 +2,20 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Download, RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle, FileText, TrendingUp, Calendar, Activity, Share2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Download,
+  RefreshCw,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  FileText,
+  TrendingUp,
+  Calendar,
+  Activity,
+  Share2,
+} from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useBackendInvestigation } from '@/hooks/use-backend-investigations'
@@ -53,11 +66,11 @@ export default function InvestigationDetailPage() {
     error,
     startPolling,
     stopPolling,
-    refresh
+    refresh,
   } = useBackendInvestigation({
     investigationId,
     autoPoll: true,
-    pollInterval: 2000
+    pollInterval: 2000,
   })
 
   // Find mock investigation as fallback
@@ -71,31 +84,71 @@ export default function InvestigationDetailPage() {
 
   // Status configuration
   const statusConfig = {
-    pending: { label: 'Pendente', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300', icon: Clock },
-    running: { label: 'Em Andamento', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300', icon: RefreshCw },
-    active: { label: 'Em Andamento', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300', icon: RefreshCw },
-    completed: { label: 'Concluída', color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300', icon: CheckCircle },
-    failed: { label: 'Falhou', color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300', icon: XCircle },
-    cancelled: { label: 'Cancelada', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300', icon: XCircle }
+    pending: {
+      label: 'Pendente',
+      color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      icon: Clock,
+    },
+    running: {
+      label: 'Em Andamento',
+      color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      icon: RefreshCw,
+    },
+    active: {
+      label: 'Em Andamento',
+      color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      icon: RefreshCw,
+    },
+    completed: {
+      label: 'Concluída',
+      color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      icon: CheckCircle,
+    },
+    failed: {
+      label: 'Falhou',
+      color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+      icon: XCircle,
+    },
+    cancelled: {
+      label: 'Cancelada',
+      color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      icon: XCircle,
+    },
   }
 
   // Severity configuration
   const severityConfig = {
-    high: { label: 'Alta', color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300', icon: AlertTriangle },
-    medium: { label: 'Média', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300', icon: AlertTriangle },
-    low: { label: 'Baixa', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300', icon: AlertTriangle }
+    high: {
+      label: 'Alta',
+      color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+      icon: AlertTriangle,
+    },
+    medium: {
+      label: 'Média',
+      color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+      icon: AlertTriangle,
+    },
+    low: {
+      label: 'Baixa',
+      color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      icon: AlertTriangle,
+    },
   }
 
   // Handle export
-  const handleExport = async (format: 'pdf' | 'json' | 'csv') => {
+  const handleExport = (format: 'pdf' | 'json' | 'csv') => {
     setExportFormat(format)
 
     try {
       if (format === 'json') {
-        const data = JSON.stringify({
-          investigation,
-          results: backendResults
-        }, null, 2)
+        const data = JSON.stringify(
+          {
+            investigation,
+            results: backendResults,
+          },
+          null,
+          2
+        )
 
         const blob = new Blob([data], { type: 'application/json' })
         const url = URL.createObjectURL(blob)
@@ -111,7 +164,7 @@ export default function InvestigationDetailPage() {
           ['ID', 'Type', 'Severity', 'Confidence', 'Description'].join(','),
           ...anomalies.map((a: AnomalyResult) =>
             [a.anomaly_id, a.type, a.severity, a.confidence, `"${a.description}"`].join(',')
-          )
+          ),
         ]
 
         const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' })
@@ -168,12 +221,15 @@ export default function InvestigationDetailPage() {
   // Extract data with fallbacks
   const invId = (investigation as any).investigation_id || (investigation as any).id
   const invTitle = (investigation as any).title || `Investigação ${invId?.slice(0, 8) || 'N/A'}`
-  const invDescription = (investigation as any).current_phase || (investigation as any).description || 'Sem descrição'
+  const invDescription =
+    (investigation as any).current_phase || (investigation as any).description || 'Sem descrição'
   const invStatus = (investigation as any).status || 'pending'
-  const invProgress = (investigation as any).progress !== undefined
-    ? Math.round((investigation as any).progress * 100)
-    : 0
-  const invAnomalies = (investigation as any).anomalies_detected || (investigation as any).findings || 0
+  const invProgress =
+    (investigation as any).progress !== undefined
+      ? Math.round((investigation as any).progress * 100)
+      : 0
+  const invAnomalies =
+    (investigation as any).anomalies_detected || (investigation as any).findings || 0
   const invRecords = (investigation as any).records_processed || 0
   const invCreatedAt = (investigation as any).created_at || (investigation as any).dateCreated
   const invCompletedAt = (investigation as any).completed_at || null
@@ -183,7 +239,6 @@ export default function InvestigationDetailPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-8">
-
         {/* Header */}
         <div className="flex items-center justify-between">
           <Button
@@ -196,12 +251,7 @@ export default function InvestigationDetailPage() {
           </Button>
 
           <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => refresh()}
-              disabled={isLoading}
-            >
+            <Button variant="secondary" size="sm" onClick={() => refresh()} disabled={isLoading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
@@ -216,11 +266,7 @@ export default function InvestigationDetailPage() {
               Exportar
             </Button>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsShareModalOpen(true)}
-            >
+            <Button variant="primary" size="sm" onClick={() => setIsShareModalOpen(true)}>
               <Share2 className="w-4 h-4 mr-2" />
               Compartilhar
             </Button>
@@ -291,9 +337,7 @@ export default function InvestigationDetailPage() {
                 <AlertTriangle className="w-4 h-4" />
                 Anomalias
               </div>
-              <p className="text-xl font-semibold text-red-600 dark:text-red-400">
-                {invAnomalies}
-              </p>
+              <p className="text-xl font-semibold text-red-600 dark:text-red-400">{invAnomalies}</p>
             </div>
 
             <div>
@@ -302,11 +346,13 @@ export default function InvestigationDetailPage() {
                 Iniciada
               </div>
               <p className="text-sm font-medium">
-                {invCreatedAt ? format(
-                  typeof invCreatedAt === 'string' ? parseISO(invCreatedAt) : invCreatedAt,
-                  "dd 'de' MMM, yyyy",
-                  { locale: ptBR }
-                ) : 'N/A'}
+                {invCreatedAt
+                  ? format(
+                      typeof invCreatedAt === 'string' ? parseISO(invCreatedAt) : invCreatedAt,
+                      "dd 'de' MMM, yyyy",
+                      { locale: ptBR }
+                    )
+                  : 'N/A'}
               </p>
             </div>
 
@@ -411,8 +457,9 @@ export default function InvestigationDetailPage() {
               Descobertas
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Esta investigação encontrou {(mockInvestigation as any).findings} possíveis irregularidades.
-              Detalhes completos estarão disponíveis quando a análise for concluída pelo backend.
+              Esta investigação encontrou {(mockInvestigation as any).findings} possíveis
+              irregularidades. Detalhes completos estarão disponíveis quando a análise for concluída
+              pelo backend.
             </p>
           </div>
         )}
@@ -448,7 +495,6 @@ export default function InvestigationDetailPage() {
             )}
           </div>
         )}
-
       </div>
 
       {/* Share Modal */}

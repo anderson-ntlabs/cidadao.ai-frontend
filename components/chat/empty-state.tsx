@@ -48,7 +48,7 @@ const suggestions = [
   },
 ]
 
-export function ChatEmptyState({ userName, onSuggestionClick }: ChatEmptyStateProps) {
+export function ChatEmptyState({ userName, onSuggestionClick }: ChatEmptyStateProps): JSX.Element {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   return (

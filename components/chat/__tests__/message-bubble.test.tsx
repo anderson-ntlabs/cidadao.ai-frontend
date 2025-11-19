@@ -14,10 +14,10 @@ import { MessageBubble } from '../message-bubble'
 const mockWriteText = vi.fn().mockResolvedValue(undefined)
 Object.defineProperty(navigator, 'clipboard', {
   value: {
-    writeText: mockWriteText
+    writeText: mockWriteText,
   },
   writable: true,
-  configurable: true
+  configurable: true,
 })
 
 // Mock toast
@@ -25,8 +25,8 @@ vi.mock('@/hooks/use-toast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
-    info: vi.fn()
-  }
+    info: vi.fn(),
+  },
 }))
 
 describe('MessageBubble', () => {
@@ -37,20 +37,12 @@ describe('MessageBubble', () => {
 
   describe('Rendering', () => {
     it('renders user message correctly', () => {
-      render(
-        <MessageBubble content="Hello, world!" role="user" />
-      )
+      render(<MessageBubble content="Hello, world!" role="user" />)
       expect(screen.getByText('Hello, world!')).toBeInTheDocument()
     })
 
     it('renders assistant message correctly', async () => {
-      render(
-        <MessageBubble
-          content="I can help you!"
-          role="assistant"
-          agentName="Abaporu"
-        />
-      )
+      render(<MessageBubble content="I can help you!" role="assistant" agentName="Abaporu" />)
 
       // Content should be visible
       await waitFor(() => {
@@ -59,13 +51,7 @@ describe('MessageBubble', () => {
     })
 
     it('displays agent name for assistant messages', () => {
-      render(
-        <MessageBubble
-          content="Test message"
-          role="assistant"
-          agentName="Zumbi"
-        />
-      )
+      render(<MessageBubble content="Test message" role="assistant" agentName="Zumbi" />)
       expect(screen.getByText('Zumbi')).toBeInTheDocument()
     })
 
@@ -94,17 +80,13 @@ describe('MessageBubble', () => {
     })
 
     it('applies correct styles for user messages', () => {
-      const { container } = render(
-        <MessageBubble content="User message" role="user" />
-      )
+      const { container } = render(<MessageBubble content="User message" role="user" />)
       const bubble = container.querySelector('.from-green-500')
       expect(bubble).toBeInTheDocument()
     })
 
     it('applies correct styles for assistant messages', () => {
-      const { container } = render(
-        <MessageBubble content="Assistant message" role="assistant" />
-      )
+      const { container } = render(<MessageBubble content="Assistant message" role="assistant" />)
       const bubble = container.querySelector('.bg-white')
       expect(bubble).toBeInTheDocument()
     })
@@ -112,38 +94,28 @@ describe('MessageBubble', () => {
 
   describe('Actions', () => {
     it('shows copy button', () => {
-      render(
-        <MessageBubble content="Copy me" role="assistant" />
-      )
+      render(<MessageBubble content="Copy me" role="assistant" />)
       expect(screen.getByLabelText('Copiar mensagem')).toBeInTheDocument()
     })
 
     it('shows share button', () => {
-      render(
-        <MessageBubble content="Share me" role="assistant" />
-      )
+      render(<MessageBubble content="Share me" role="assistant" />)
       expect(screen.getByLabelText('Compartilhar mensagem')).toBeInTheDocument()
     })
 
     it('shows export button', () => {
-      render(
-        <MessageBubble content="Export me" role="assistant" />
-      )
+      render(<MessageBubble content="Export me" role="assistant" />)
       expect(screen.getByLabelText('Exportar mensagem')).toBeInTheDocument()
     })
 
     it('shows feedback buttons for assistant messages', () => {
-      render(
-        <MessageBubble content="Rate me" role="assistant" />
-      )
+      render(<MessageBubble content="Rate me" role="assistant" />)
       expect(screen.getByLabelText('Marcar como útil')).toBeInTheDocument()
       expect(screen.getByLabelText('Marcar como não útil')).toBeInTheDocument()
     })
 
     it('does not show feedback buttons for user messages', () => {
-      render(
-        <MessageBubble content="My message" role="user" />
-      )
+      render(<MessageBubble content="My message" role="user" />)
       expect(screen.queryByLabelText('Marcar como útil')).not.toBeInTheDocument()
     })
   })
@@ -153,9 +125,7 @@ describe('MessageBubble', () => {
       const user = userEvent.setup()
       const { toast } = await import('@/hooks/use-toast')
 
-      render(
-        <MessageBubble content="Copy this text" role="assistant" />
-      )
+      render(<MessageBubble content="Copy this text" role="assistant" />)
 
       const copyButton = screen.getByLabelText('Copiar mensagem')
       await user.click(copyButton)
@@ -172,9 +142,7 @@ describe('MessageBubble', () => {
     it('shows check icon after successful copy', async () => {
       const user = userEvent.setup()
 
-      render(
-        <MessageBubble content="Test" role="assistant" />
-      )
+      render(<MessageBubble content="Test" role="assistant" />)
 
       const copyButton = screen.getByLabelText('Copiar mensagem')
       await user.click(copyButton)
@@ -194,9 +162,7 @@ describe('MessageBubble', () => {
       global.URL.createObjectURL = vi.fn(() => 'blob:test')
       global.URL.revokeObjectURL = vi.fn()
 
-      render(
-        <MessageBubble content="Export this" role="assistant" />
-      )
+      render(<MessageBubble content="Export this" role="assistant" />)
 
       const exportButton = screen.getByLabelText('Exportar mensagem')
       await user.click(exportButton)
@@ -211,26 +177,19 @@ describe('MessageBubble', () => {
       const user = userEvent.setup()
       const { toast } = await import('@/hooks/use-toast')
 
-      render(
-        <MessageBubble content="Rate me" role="assistant" />
-      )
+      render(<MessageBubble content="Rate me" role="assistant" />)
 
       const thumbsUpButton = screen.getByLabelText('Marcar como útil')
       await user.click(thumbsUpButton)
 
-      expect(toast.info).toHaveBeenCalledWith(
-        'Obrigado!',
-        'Seu feedback ajuda a melhorar'
-      )
+      expect(toast.info).toHaveBeenCalledWith('Obrigado!', 'Seu feedback ajuda a melhorar')
     })
 
     it('handles negative feedback', async () => {
       const user = userEvent.setup()
       const { toast } = await import('@/hooks/use-toast')
 
-      render(
-        <MessageBubble content="Rate me" role="assistant" />
-      )
+      render(<MessageBubble content="Rate me" role="assistant" />)
 
       const thumbsDownButton = screen.getByLabelText('Marcar como não útil')
       await user.click(thumbsDownButton)
@@ -245,25 +204,14 @@ describe('MessageBubble', () => {
   describe('Loading States', () => {
     it('shows TypingMessage when isLatest and isLoading', () => {
       render(
-        <MessageBubble
-          content="Loading..."
-          role="assistant"
-          isLatest={true}
-          isLoading={true}
-        />
+        <MessageBubble content="Loading..." role="assistant" isLatest={true} isLoading={true} />
       )
       // TypingMessage component should be rendered
       // (Would need to check for specific TypingMessage indicators)
     })
 
     it('hides actions when loading', () => {
-      render(
-        <MessageBubble
-          content="Loading..."
-          role="assistant"
-          isLoading={true}
-        />
-      )
+      render(<MessageBubble content="Loading..." role="assistant" isLoading={true} />)
       // Actions should not be visible during loading
       expect(screen.queryByLabelText('Copiar mensagem')).not.toBeInTheDocument()
     })
@@ -279,7 +227,8 @@ describe('MessageBubble', () => {
           metadata={{ confidence: 0.95 }}
         />
       )
-      expect(screen.getByText('95% confiança')).toBeInTheDocument()
+      expect(screen.getByText('95%')).toBeInTheDocument()
+      expect(screen.getByLabelText('Confiança da resposta: 95%')).toBeInTheDocument()
     })
 
     it('displays correct confidence color for high confidence', () => {
@@ -314,7 +263,7 @@ describe('MessageBubble', () => {
           content="Test"
           role="assistant"
           agentName="Tiradentes"
-          metadata={{ confidence: 0.60 }}
+          metadata={{ confidence: 0.6 }}
         />
       )
       const confidenceBar = container.querySelector('.bg-orange-500')
@@ -324,9 +273,7 @@ describe('MessageBubble', () => {
 
   describe('Accessibility', () => {
     it('has proper aria-labels for all action buttons', () => {
-      render(
-        <MessageBubble content="Test" role="assistant" />
-      )
+      render(<MessageBubble content="Test" role="assistant" />)
 
       expect(screen.getByLabelText('Copiar mensagem')).toBeInTheDocument()
       expect(screen.getByLabelText('Compartilhar mensagem')).toBeInTheDocument()
@@ -339,9 +286,7 @@ describe('MessageBubble', () => {
       const user = userEvent.setup()
       const { toast } = await import('@/hooks/use-toast')
 
-      render(
-        <MessageBubble content="Test" role="assistant" />
-      )
+      render(<MessageBubble content="Test" role="assistant" />)
 
       const copyButton = screen.getByLabelText('Copiar mensagem')
 
@@ -359,9 +304,7 @@ describe('MessageBubble', () => {
     })
 
     it('has touch-friendly button sizes on mobile', () => {
-      render(
-        <MessageBubble content="Test" role="assistant" />
-      )
+      render(<MessageBubble content="Test" role="assistant" />)
 
       const copyButton = screen.getByLabelText('Copiar mensagem')
       // Button should have p-2 class for mobile (44px+ touch target)
@@ -390,12 +333,7 @@ describe('MessageBubble', () => {
 
   describe('Markdown Support', () => {
     it('renders markdown content for assistant messages', async () => {
-      render(
-        <MessageBubble
-          content="**Bold text**"
-          role="assistant"
-        />
-      )
+      render(<MessageBubble content="**Bold text**" role="assistant" />)
 
       // Should render markdown (wrapped in Suspense)
       await waitFor(() => {
@@ -407,12 +345,7 @@ describe('MessageBubble', () => {
     })
 
     it('does not render markdown for user messages', () => {
-      render(
-        <MessageBubble
-          content="**Not bold**"
-          role="user"
-        />
-      )
+      render(<MessageBubble content="**Not bold**" role="user" />)
 
       // Should render as plain text
       expect(screen.getByText('**Not bold**')).toBeInTheDocument()

@@ -320,7 +320,7 @@ export default function ChatPage() {
     }
   }
 
-  const handleRetry = async () => {
+  const handleRetry = () => {
     if (!lastFailedMessage) return
 
     setShowErrorBanner(false)

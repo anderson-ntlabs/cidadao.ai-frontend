@@ -24,7 +24,6 @@ export interface MessageBubbleProps {
   role: 'user' | 'assistant'
   agentName?: string
   agentRole?: string
-  agentColor?: string
   agentId?: string
   isLatest?: boolean
   isLoading?: boolean
@@ -37,7 +36,6 @@ export function MessageBubble({
   role,
   agentName,
   agentRole,
-  agentColor = 'green',
   agentId,
   isLatest = false,
   isLoading = false,

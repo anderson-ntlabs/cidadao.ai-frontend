@@ -201,7 +201,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  *
  * Health check endpoint
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export function GET(request: NextRequest): NextResponse {
   const geoLocation = detectRegion(request)
 
   return NextResponse.json({

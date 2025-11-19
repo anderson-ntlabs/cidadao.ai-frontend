@@ -1,0 +1,4 @@
+# Playwright auth storage
+/.auth/
+*.json
+!.gitkeep
