@@ -8,6 +8,15 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap', // Prevent FOIT, show fallback immediately
   preload: true, // Preload font for better performance
+  adjustFontFallback: true, // Adjusts fallback font to reduce CLS
+  fallback: [
+    'system-ui',
+    '-apple-system',
+    'BlinkMacSystemFont',
+    'Segoe UI',
+    'Roboto',
+    'sans-serif',
+  ],
 })
 
 export const metadata: Metadata = {

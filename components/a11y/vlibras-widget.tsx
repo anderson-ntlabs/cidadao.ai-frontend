@@ -41,16 +41,11 @@ interface VLibrasWidgetProps {
 }
 
 /**
- * Dynamically import VLibras to avoid SSR issues
- * VLibras manipulates the DOM and requires browser APIs
- *
- * IMPORTANT: Import default export directly, not as .default
- * The package exports VLibras as default export
+ * VLibras component removed - library was uninstalled
+ * To re-enable VLibras, install @djpfs/react-vlibras:
+ * npm install @djpfs/react-vlibras
  */
-const VLibras = dynamic(() => import('@djpfs/react-vlibras'), {
-  ssr: false,
-  loading: () => null, // No loading state needed for accessibility widget
-})
+const VLibras = null
 
 export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VLibrasWidgetProps) {
   const [isEnabled, setIsEnabled] = useState(false)
@@ -105,7 +100,7 @@ export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VL
           zIndex: 9999,
         }}
       >
-        <VLibras forceOnload={forceOnload} />
+        {/* VLibras temporarily disabled - library was uninstalled */}
       </div>
 
       {/* Accessibility announcement for screen readers */}

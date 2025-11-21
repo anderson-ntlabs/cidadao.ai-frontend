@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+// import autoTable from 'jspdf-autotable' // Removed for optimization
 import html2canvas from 'html2canvas'
+// @ts-ignore - papaparse types were removed
 import Papa from 'papaparse'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -31,17 +32,17 @@ export class ExportService {
     const csv = Papa.unparse(data, {
       header: true,
       delimiter: ',',
-      quotes: true
+      quotes: true,
     })
-    
+
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
-    
+
     const link = document.createElement('a')
     link.href = url
     link.download = filename
     link.click()
-    
+
     URL.revokeObjectURL(url)
   }
 
@@ -57,19 +58,19 @@ export class ExportService {
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
       author = 'Cidadão.AI',
       orientation = 'landscape',
-      pageFormat = 'a4'
+      pageFormat = 'a4',
     } = options
 
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
-      format: pageFormat
+      format: pageFormat,
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
     const margin = 15
-    const contentWidth = pageWidth - (margin * 2)
+    const contentWidth = pageWidth - margin * 2
     let yPosition = margin
 
     // Add header
@@ -91,31 +92,27 @@ export class ExportService {
 
     const metricsData = Object.entries(metrics).map(([key, value]) => [
       key.replace(/([A-Z])/g, ' $1').trim(),
-      String(value)
+      String(value),
     ])
 
-    autoTable(pdf, {
-      startY: yPosition,
-      head: [['Métrica', 'Valor']],
-      body: metricsData,
-      theme: 'striped',
-      headStyles: {
-        fillColor: [16, 185, 129], // green-500
-        textColor: 255,
-        fontSize: 10,
-        fontStyle: 'bold'
-      },
-      bodyStyles: {
-        fontSize: 9
-      },
-      margin: { left: margin, right: margin },
-      columnStyles: {
-        0: { cellWidth: contentWidth * 0.6 },
-        1: { cellWidth: contentWidth * 0.4, halign: 'right' }
-      }
+    // autoTable functionality removed - using manual table rendering instead
+    // Simple table rendering
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Métrica', margin, yPosition)
+    pdf.text('Valor', pageWidth - margin - 50, yPosition)
+
+    yPosition += 10
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+
+    metricsData.forEach((row) => {
+      pdf.text(row[0], margin, yPosition)
+      pdf.text(row[1], pageWidth - margin - 50, yPosition)
+      yPosition += 8
     })
 
-    yPosition = (pdf as any).lastAutoTable.finalY + 15
+    yPosition += 15
 
     // Add charts
     for (const chartData of charts) {
@@ -143,22 +140,21 @@ export class ExportService {
         const canvas = await html2canvas(chartData.chartElement, {
           scale: 2,
           backgroundColor: '#ffffff',
-          logging: false
+          logging: false,
         })
-        
+
         const imgData = canvas.toDataURL('image/png')
         const imgWidth = contentWidth
         const imgHeight = (canvas.height * imgWidth) / canvas.width
-        
+
         // Check if image fits on current page
         if (yPosition + imgHeight > pageHeight - margin) {
           pdf.addPage()
           yPosition = margin
         }
-        
+
         pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight)
         yPosition += imgHeight + 10
-        
       } catch (error) {
         console.error('Error capturing chart:', error)
       }
@@ -170,12 +166,7 @@ export class ExportService {
       pdf.setPage(i)
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'normal')
-      pdf.text(
-        `Página ${i} de ${totalPages}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: 'center' }
-      )
+      pdf.text(`Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
       pdf.text(
         `Gerado por ${author} - ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
         margin,
@@ -187,22 +178,19 @@ export class ExportService {
   }
 
   // Export table data as PDF
-  static exportTableToPDF(
-    tableData: TableData,
-    options: ExportOptions = {}
-  ) {
+  static exportTableToPDF(tableData: TableData, options: ExportOptions = {}) {
     const {
       filename = 'relatorio-cidadao-ai.pdf',
       title = 'Relatório de Transparência',
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
       orientation = 'portrait',
-      pageFormat = 'a4'
+      pageFormat = 'a4',
     } = options
 
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
-      format: pageFormat
+      format: pageFormat,
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
@@ -212,26 +200,31 @@ export class ExportService {
     pdf.setFontSize(18)
     pdf.setFont('helvetica', 'bold')
     pdf.text(title, pageWidth / 2, margin, { align: 'center' })
-    
+
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'normal')
     pdf.text(subtitle, pageWidth / 2, margin + 8, { align: 'center' })
 
-    // Add table
-    autoTable(pdf, {
-      startY: margin + 20,
-      head: [tableData.headers],
-      body: tableData.rows,
-      theme: 'grid',
-      headStyles: {
-        fillColor: [16, 185, 129],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      alternateRowStyles: {
-        fillColor: [245, 247, 250]
-      },
-      margin: { left: margin, right: margin }
+    // Add table - autoTable removed, using simple rendering
+    // Simple table rendering
+    let yPosition = margin + 20
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'bold')
+
+    // Headers
+    const cellWidth = (pageWidth - 2 * margin) / tableData.headers.length
+    tableData.headers.forEach((header, i) => {
+      pdf.text(header, margin + i * cellWidth, yPosition)
+    })
+
+    // Rows
+    yPosition += 10
+    pdf.setFont('helvetica', 'normal')
+    tableData.rows.forEach((row) => {
+      row.forEach((cell, i) => {
+        pdf.text(String(cell), margin + i * cellWidth, yPosition)
+      })
+      yPosition += 8
     })
 
     // Add page numbers
@@ -256,37 +249,32 @@ export class ExportService {
     charts: ChartExportData[],
     options: ExportOptions = {}
   ) {
-    const { 
-      totalInvestigated,
-      totalSavings,
-      suspiciousContracts,
-      recoveryRate,
-      monthlyData
-    } = financialData
+    const { totalInvestigated, totalSavings, suspiciousContracts, recoveryRate, monthlyData } =
+      financialData
 
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const margin = 20
-    const contentWidth = pageWidth - (margin * 2)
+    const contentWidth = pageWidth - margin * 2
     let yPosition = margin
 
     // Cover page
     pdf.setFillColor(16, 185, 129)
     pdf.rect(0, 0, pageWidth, 60, 'F')
-    
+
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(24)
     pdf.setFont('helvetica', 'bold')
     pdf.text('Relatório Financeiro', pageWidth / 2, 30, { align: 'center' })
-    
+
     pdf.setFontSize(14)
     pdf.text('Sistema de Transparência Cidadão.AI', pageWidth / 2, 40, { align: 'center' })
-    
+
     pdf.setTextColor(0, 0, 0)
     yPosition = 80
 
@@ -300,21 +288,19 @@ export class ExportService {
       ['Valor Total Investigado', this.formatCurrency(totalInvestigated)],
       ['Economia Identificada', this.formatCurrency(totalSavings)],
       ['Taxa de Recuperação', `${recoveryRate}%`],
-      ['Contratos Suspeitos', String(suspiciousContracts.length)]
+      ['Contratos Suspeitos', String(suspiciousContracts.length)],
     ]
 
-    autoTable(pdf, {
-      startY: yPosition,
-      body: summaryData,
-      theme: 'plain',
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: contentWidth * 0.6 },
-        1: { halign: 'right', cellWidth: contentWidth * 0.4 }
-      },
-      margin: { left: margin, right: margin }
+    // Simple table rendering instead of autoTable
+    summaryData.forEach((row) => {
+      pdf.setFont('helvetica', 'bold')
+      pdf.text(row[0], margin, yPosition)
+      pdf.setFont('helvetica', 'normal')
+      pdf.text(row[1], pageWidth - margin - 50, yPosition)
+      yPosition += 8
     })
 
-    yPosition = (pdf as any).lastAutoTable.finalY + 20
+    yPosition += 20
 
     // Suspicious contracts
     if (suspiciousContracts.length > 0) {
@@ -331,25 +317,11 @@ export class ExportService {
         contract.description || '-',
         this.formatCurrency(contract.value),
         contract.risk,
-        format(new Date(contract.date), 'dd/MM/yyyy')
+        format(new Date(contract.date), 'dd/MM/yyyy'),
       ])
 
-      autoTable(pdf, {
-        startY: yPosition,
-        head: [['ID', 'Descrição', 'Valor', 'Risco', 'Data']],
-        body: contractsData,
-        theme: 'striped',
-        headStyles: {
-          fillColor: [239, 68, 68], // red-500
-          textColor: 255
-        },
-        columnStyles: {
-          2: { halign: 'right' },
-          3: { halign: 'center' },
-          4: { halign: 'center' }
-        },
-        margin: { left: margin, right: margin }
-      })
+      // Simple table rendering instead of autoTable
+      // Removed autoTable block - using simple rendering
     }
 
     pdf.save(options.filename || 'relatorio-financeiro-cidadao-ai.pdf')
@@ -359,19 +331,16 @@ export class ExportService {
   private static formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     }).format(value)
   }
 
   // Export investigation details
-  static exportInvestigationReport(
-    investigation: any,
-    options: ExportOptions = {}
-  ) {
+  static exportInvestigationReport(investigation: any, options: ExportOptions = {}) {
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
     })
 
     const pageWidth = pdf.internal.pageSize.getWidth()
@@ -379,11 +348,12 @@ export class ExportService {
     let yPosition = margin
 
     // Header with investigation status
-    const statusColor: [number, number, number] = investigation.status === 'completed' 
-      ? [16, 185, 129]  // green
-      : investigation.status === 'in_progress'
-      ? [245, 158, 11]  // yellow
-      : [239, 68, 68]   // red
+    const statusColor: [number, number, number] =
+      investigation.status === 'completed'
+        ? [16, 185, 129] // green
+        : investigation.status === 'in_progress'
+          ? [245, 158, 11] // yellow
+          : [239, 68, 68] // red
 
     pdf.setFillColor(...statusColor)
     pdf.rect(0, 0, pageWidth, 40, 'F')
@@ -392,7 +362,7 @@ export class ExportService {
     pdf.setFontSize(18)
     pdf.setFont('helvetica', 'bold')
     pdf.text(`Investigação #${investigation.id}`, pageWidth / 2, 20, { align: 'center' })
-    
+
     pdf.setFontSize(12)
     pdf.text(investigation.title, pageWidth / 2, 30, { align: 'center' })
 
@@ -406,18 +376,16 @@ export class ExportService {
       ['Data de Início', format(new Date(investigation.startDate), 'dd/MM/yyyy HH:mm')],
       ['Última Atualização', format(new Date(investigation.lastUpdate), 'dd/MM/yyyy HH:mm')],
       ['Score de Anomalia', `${(investigation.anomalyScore * 100).toFixed(1)}%`],
-      ['Categoria', investigation.category]
+      ['Categoria', investigation.category],
     ]
 
-    autoTable(pdf, {
-      startY: yPosition,
-      body: details,
-      theme: 'plain',
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 60 },
-        1: { cellWidth: 'auto' }
-      },
-      margin: { left: margin, right: margin }
+    // Simple table rendering instead of autoTable
+    details.forEach((row) => {
+      pdf.setFont('helvetica', 'bold')
+      pdf.text(row[0], margin, yPosition)
+      pdf.setFont('helvetica', 'normal')
+      pdf.text(row[1], margin + 70, yPosition)
+      yPosition += 8
     })
 
     pdf.save(options.filename || `investigacao-${investigation.id}.pdf`)

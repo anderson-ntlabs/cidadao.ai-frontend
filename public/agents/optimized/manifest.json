@@ -1,0 +1,95 @@
+{
+  "generated": "2025-11-21T16:25:45.664Z",
+  "images": {
+    "abaporu": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "abaporu-placeholder.json"
+    },
+    "anita": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "anita-placeholder.json"
+    },
+    "bonifacio": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "bonifacio-placeholder.json"
+    },
+    "ceuci": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "ceuci-placeholder.json"
+    },
+    "dandara": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "dandara-placeholder.json"
+    },
+    "deodoro": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "deodoro-placeholder.json"
+    },
+    "drummond": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "drummond-placeholder.json"
+    },
+    "lampiao": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "lampiao-placeholder.json"
+    },
+    "machado": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "machado-placeholder.json"
+    },
+    "nana": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "nana-placeholder.json"
+    },
+    "niemeyer": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "niemeyer-placeholder.json"
+    },
+    "obaluaie": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "obaluaie-placeholder.json"
+    },
+    "oxossi": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "oxossi-placeholder.json"
+    },
+    "quiteria": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "quiteria-placeholder.json"
+    },
+    "senna": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "senna-placeholder.json"
+    },
+    "system": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "system-placeholder.json"
+    },
+    "tiradentes": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "tiradentes-placeholder.json"
+    },
+    "zumbi": {
+      "sizes": [64, 128, 256, 512],
+      "formats": ["avif", "webp", "png"],
+      "placeholder": "zumbi-placeholder.json"
+    }
+  }
+}

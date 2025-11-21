@@ -1,4 +1,4 @@
-import pino from 'pino'
+// import pino from 'pino' // Removed for optimization - using custom logger
 
 // Define log levels
 export const LogLevel = {
@@ -10,7 +10,7 @@ export const LogLevel = {
   TRACE: 'trace',
 } as const
 
-export type LogLevelType = typeof LogLevel[keyof typeof LogLevel]
+export type LogLevelType = (typeof LogLevel)[keyof typeof LogLevel]
 
 // Logger configuration based on environment
 const isDevelopment = process.env.NODE_ENV === 'development'
@@ -25,12 +25,12 @@ const browserConfig = {
       level: isProduction ? LogLevel.WARN : LogLevel.DEBUG,
       send: function (level: string, logEvent: any) {
         if (isProduction && level === LogLevel.DEBUG) return
-        
+
         // In production, we could send logs to a service
         // For now, we'll use console methods based on level
         const msg = logEvent.messages[0]
         const extra = logEvent.messages.slice(1)
-        
+
         switch (level) {
           case LogLevel.ERROR:
           case LogLevel.FATAL:
@@ -48,69 +48,84 @@ const browserConfig = {
           default:
             console.log(msg, ...extra)
         }
-      }
-    }
-  }
+      },
+    },
+  },
 }
 
-// Create base logger
-const baseLogger = pino({
-  level: isProduction ? LogLevel.INFO : LogLevel.DEBUG,
-  browser: browserConfig.browser,
-})
+// Simple logger implementation to replace pino
+const logLevel = isProduction ? LogLevel.INFO : LogLevel.DEBUG
 
 // Logger wrapper with consistent interface
 export class Logger {
   private context: string
-  private logger: pino.Logger
+  private minLevel: string
 
   constructor(context: string) {
     this.context = context
-    this.logger = baseLogger.child({ context })
+    this.minLevel = logLevel
+  }
+
+  private shouldLog(level: string): boolean {
+    const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
+    return levels.indexOf(level) >= levels.indexOf(this.minLevel)
+  }
+
+  private log(level: string, message: string, ...args: any[]) {
+    if (!this.shouldLog(level)) return
+
+    const timestamp = new Date().toISOString()
+    const logMessage = `[${timestamp}] [${level.toUpperCase()}] [${this.context}] ${message}`
+
+    switch (level) {
+      case 'fatal':
+      case 'error':
+        console.error(logMessage, ...args)
+        break
+      case 'warn':
+        console.warn(logMessage, ...args)
+        break
+      case 'info':
+        console.info(logMessage, ...args)
+        break
+      case 'debug':
+      case 'trace':
+        console.log(logMessage, ...args)
+        break
+    }
   }
 
   fatal(message: string, ...args: any[]) {
-    this.logger.fatal({ context: this.context }, message, ...args)
+    this.log('fatal', message, ...args)
   }
 
   error(message: string, error?: Error | any, ...args: any[]) {
     if (error instanceof Error) {
-      this.logger.error(
-        {
-          context: this.context,
-          error: {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
-          },
-        },
-        message,
-        ...args
-      )
+      this.log('error', `${message} - ${error.message}`, error.stack, ...args)
     } else {
-      this.logger.error({ context: this.context, error }, message, ...args)
+      this.log('error', message, error, ...args)
     }
   }
 
   warn(message: string, ...args: any[]) {
-    this.logger.warn({ context: this.context }, message, ...args)
+    this.log('warn', message, ...args)
   }
 
   info(message: string, ...args: any[]) {
-    this.logger.info({ context: this.context }, message, ...args)
+    this.log('info', message, ...args)
   }
 
   debug(message: string, ...args: any[]) {
-    this.logger.debug({ context: this.context }, message, ...args)
+    this.log('debug', message, ...args)
   }
 
   trace(message: string, ...args: any[]) {
-    this.logger.trace({ context: this.context }, message, ...args)
+    this.log('trace', message, ...args)
   }
 
-  // Log with custom data
-  log(level: LogLevelType, message: string, data?: any) {
-    this.logger[level]({ context: this.context, ...data }, message)
+  // Method overload to handle different signatures
+  logWithData(level: LogLevelType, message: string, data?: any) {
+    this.log(level, message, data)
   }
 
   // Create child logger with additional context
@@ -154,7 +169,7 @@ export const logger = createLogger('App')
 // Replace console methods in production
 if (isProduction && typeof window !== 'undefined') {
   const noop = () => {}
-  
+
   // Keep error and warn in production
   window.console.log = noop
   window.console.debug = noop

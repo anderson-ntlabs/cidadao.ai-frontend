@@ -1,16 +1,38 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Activity, Filter, Calendar, Search, Download, RefreshCw } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
-import { ActivityTimeline } from '@/components/activity'
 import { useAuth } from '@/hooks/use-supabase-auth'
-import { userProfileService, type UserActivity, type ActivityFilters } from '@/lib/services/user-profile.service'
+import {
+  userProfileService,
+  type UserActivity,
+  type ActivityFilters,
+} from '@/lib/services/user-profile.service'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { format, subDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+
+// Lazy load the heavy ActivityTimeline component
+const ActivityTimeline = dynamic(
+  () => import('@/components/activity').then((mod) => ({ default: mod.ActivityTimeline })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse">
+            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mb-2" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+          </div>
+        ))}
+      </div>
+    ),
+    ssr: false,
+  }
+)
 
 /**
  * Página de Atividades
@@ -23,14 +45,14 @@ const activityTypes: Array<{ value: UserActivity['type']; label: string }> = [
   { value: 'investigation', label: 'Investigações' },
   { value: 'agent_interaction', label: 'Agentes IA' },
   { value: 'export', label: 'Exportações' },
-  { value: 'settings_update', label: 'Configurações' }
+  { value: 'settings_update', label: 'Configurações' },
 ]
 
 const timeRanges = [
   { value: '7d', label: 'Últimos 7 dias', days: 7 },
   { value: '30d', label: 'Últimos 30 dias', days: 30 },
   { value: '90d', label: 'Últimos 90 dias', days: 90 },
-  { value: 'all', label: 'Todos', days: null }
+  { value: 'all', label: 'Todos', days: null },
 ]
 
 export default function AtividadesPage() {
@@ -72,22 +94,21 @@ export default function AtividadesPage() {
 
     // Filter by type
     if (selectedType !== 'all') {
-      filtered = filtered.filter(a => a.type === selectedType)
+      filtered = filtered.filter((a) => a.type === selectedType)
     }
 
     // Filter by time range
-    const range = timeRanges.find(r => r.value === selectedTimeRange)
+    const range = timeRanges.find((r) => r.value === selectedTimeRange)
     if (range && range.days) {
       const cutoffDate = subDays(new Date(), range.days)
-      filtered = filtered.filter(a => new Date(a.created_at) >= cutoffDate)
+      filtered = filtered.filter((a) => new Date(a.created_at) >= cutoffDate)
     }
 
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(a =>
-        a.title.toLowerCase().includes(query) ||
-        a.description?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (a) => a.title.toLowerCase().includes(query) || a.description?.toLowerCase().includes(query)
       )
     }
 
@@ -139,7 +160,7 @@ export default function AtividadesPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
@@ -157,18 +178,14 @@ export default function AtividadesPage() {
                   Histórico de Atividades
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {filteredActivities.length} {filteredActivities.length === 1 ? 'atividade' : 'atividades'} encontradas
+                  {filteredActivities.length}{' '}
+                  {filteredActivities.length === 1 ? 'atividade' : 'atividades'} encontradas
                 </p>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading}
-              >
+              <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={isLoading}>
                 <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
                 Atualizar
               </Button>
