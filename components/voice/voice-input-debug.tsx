@@ -44,9 +44,13 @@ export function VoiceInputDebug() {
       } else {
         // Fallback: try to get user media to check permission
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          stream.getTracks().forEach((track) => track.stop())
-          setPermissionStatus('granted')
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            stream.getTracks().forEach((track) => track.stop())
+            setPermissionStatus('granted')
+          } else {
+            setPermissionStatus('not available')
+          }
         } catch (err) {
           setPermissionStatus('denied or not requested')
         }
@@ -75,6 +79,10 @@ export function VoiceInputDebug() {
 
   const testMicrophone = async () => {
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('Microphone API not available in this browser')
+        return
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       setError('')
       setPermissionStatus('granted - microphone working!')
