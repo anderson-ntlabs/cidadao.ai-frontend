@@ -1,15 +1,9 @@
 'use client'
 
-import React, { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useTooltipStore } from '@/store/tooltip-store'
 import { cn } from '@/lib/utils'
-
-// Lazy load framer-motion only when needed
-const AnimatePresence = lazy(() =>
-  import('framer-motion').then((mod) => ({ default: mod.AnimatePresence }))
-)
-const motion = lazy(() => import('framer-motion').then((mod) => ({ default: mod.motion })))
 
 interface TooltipProps {
   content: string | React.ReactNode
@@ -145,60 +139,81 @@ export function Tooltip({
 
       {typeof window !== 'undefined' &&
         createPortal(
-          <AnimatePresence>
-            {isVisible && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.15 }}
-                className={cn(
-                  'fixed z-50 px-3 py-2 text-sm bg-gray-900 text-white rounded-md shadow-lg',
-                  'max-w-xs break-words',
-                  position === 'top' && '-translate-x-1/2 -translate-y-full',
-                  position === 'bottom' && '-translate-x-1/2',
-                  position === 'left' && '-translate-x-full -translate-y-1/2',
-                  position === 'right' && '-translate-y-1/2',
-                  className
-                )}
-                style={{
-                  left: `${coords.x}px`,
-                  top: `${coords.y}px`,
-                }}
-                role="tooltip"
-                aria-label={ariaLabel}
-              >
-                {content}
-
-                {dismissible && (
-                  <button
-                    onClick={handleDismiss}
-                    className="ml-2 text-gray-400 hover:text-white"
-                    aria-label="Fechar dica"
-                  >
-                    ✕
-                  </button>
-                )}
-
-                {/* Arrow */}
-                <div
-                  className={cn(
-                    'absolute w-0 h-0 border-solid',
-                    position === 'top' &&
-                      'bottom-[-8px] left-1/2 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-gray-900',
-                    position === 'bottom' &&
-                      'top-[-8px] left-1/2 -translate-x-1/2 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-900',
-                    position === 'left' &&
-                      'right-[-8px] top-1/2 -translate-y-1/2 border-t-[8px] border-b-[8px] border-l-[8px] border-t-transparent border-b-transparent border-l-gray-900',
-                    position === 'right' &&
-                      'left-[-8px] top-1/2 -translate-y-1/2 border-t-[8px] border-b-[8px] border-r-[8px] border-t-transparent border-b-transparent border-r-gray-900'
-                  )}
-                />
-              </motion.div>
+          <div
+            className={cn(
+              'tooltip-container fixed z-50 px-3 py-2 text-sm bg-gray-900 text-white rounded-md shadow-lg',
+              'max-w-xs break-words transition-all duration-150',
+              position === 'top' && '-translate-x-1/2 -translate-y-full',
+              position === 'bottom' && '-translate-x-1/2',
+              position === 'left' && '-translate-x-full -translate-y-1/2',
+              position === 'right' && '-translate-y-1/2',
+              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none',
+              className
             )}
-          </AnimatePresence>,
+            style={{
+              left: `${coords.x}px`,
+              top: `${coords.y}px`,
+            }}
+            role="tooltip"
+            aria-label={ariaLabel}
+          >
+            {content}
+
+            {dismissible && (
+              <button
+                onClick={handleDismiss}
+                className="ml-2 text-gray-400 hover:text-white"
+                aria-label="Fechar dica"
+              >
+                ✕
+              </button>
+            )}
+
+            {/* Arrow */}
+            <div
+              className={cn(
+                'absolute w-0 h-0 border-solid',
+                position === 'top' &&
+                  'bottom-[-8px] left-1/2 -translate-x-1/2 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-gray-900',
+                position === 'bottom' &&
+                  'top-[-8px] left-1/2 -translate-x-1/2 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-gray-900',
+                position === 'left' &&
+                  'right-[-8px] top-1/2 -translate-y-1/2 border-t-[8px] border-b-[8px] border-l-[8px] border-t-transparent border-b-transparent border-l-gray-900',
+                position === 'right' &&
+                  'left-[-8px] top-1/2 -translate-y-1/2 border-t-[8px] border-b-[8px] border-r-[8px] border-t-transparent border-b-transparent border-r-gray-900'
+              )}
+            />
+          </div>,
           document.body
         )}
+
+      <style jsx>{`
+        .tooltip-container {
+          transform-origin: center;
+        }
+
+        @keyframes tooltipFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes tooltipFadeOut {
+          from {
+            opacity: 1;
+            transform: scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+        }
+      `}</style>
     </>
   )
 }
