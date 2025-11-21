@@ -7,6 +7,7 @@
  * @date 2025-10-31
  */
 
+// @ts-ignore - papaparse types were removed
 import Papa from 'papaparse' // CSV is lightweight, keep it
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -37,7 +38,7 @@ export class LazyExportService {
     const csv = Papa.unparse(data, {
       header: true,
       delimiter: ',',
-      quotes: true
+      quotes: true,
     })
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -66,15 +67,9 @@ export class LazyExportService {
   }
 
   // Export to PDF - lazy load heavy libraries
-  static async exportToPDF(
-    data: TableData,
-    options: ExportOptions = {}
-  ): Promise<void> {
+  static async exportToPDF(data: TableData, options: ExportOptions = {}): Promise<void> {
     // Dynamically import jsPDF only when needed
-    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
-      import('jspdf'),
-      import('jspdf-autotable')
-    ])
+    const { default: jsPDF } = await import('jspdf')
 
     const {
       filename = `export_${format(new Date(), 'yyyy-MM-dd', { locale: ptBR })}.pdf`,
@@ -82,21 +77,21 @@ export class LazyExportService {
       subtitle = '',
       author = 'Cidadão.AI',
       orientation = 'portrait',
-      pageFormat = 'a4'
+      pageFormat = 'a4',
     } = options
 
     // Create PDF document
     const doc = new jsPDF({
       orientation,
       unit: 'mm',
-      format: pageFormat
+      format: pageFormat,
     })
 
     // Add metadata
     doc.setProperties({
       title,
       author,
-      creator: 'Cidadão.AI Platform'
+      creator: 'Cidadão.AI Platform',
     })
 
     // Add title
@@ -116,12 +111,12 @@ export class LazyExportService {
       theme: 'grid',
       styles: {
         fontSize: 10,
-        cellPadding: 3
+        cellPadding: 3,
       },
       headStyles: {
         fillColor: [41, 128, 185],
-        textColor: 255
-      }
+        textColor: 255,
+      },
     })
 
     // Save PDF
@@ -138,7 +133,7 @@ export class LazyExportService {
 
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
-      scale: 2 // Higher quality
+      scale: 2, // Higher quality
     })
 
     // Convert to blob and download
@@ -161,20 +156,15 @@ export class LazyExportService {
     options: ExportOptions = {}
   ): Promise<void> {
     // Dynamically import heavy libraries
-    const [
-      { default: jsPDF },
-      { default: autoTable },
-      { default: html2canvas }
-    ] = await Promise.all([
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
       import('jspdf'),
-      import('jspdf-autotable'),
-      import('html2canvas')
+      import('html2canvas'),
     ])
 
     const doc = new jsPDF({
       orientation: options.orientation || 'portrait',
       unit: 'mm',
-      format: options.pageFormat || 'a4'
+      format: options.pageFormat || 'a4',
     })
 
     // Add title page
@@ -186,7 +176,7 @@ export class LazyExportService {
       head: [tableData.headers],
       body: tableData.rows,
       startY: 50,
-      theme: 'grid'
+      theme: 'grid',
     })
 
     // Add charts
@@ -203,7 +193,7 @@ export class LazyExportService {
       // Convert chart to image
       const canvas = await html2canvas(chartData.chartElement, {
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
       })
 
       const imgData = canvas.toDataURL('image/png')
@@ -212,8 +202,7 @@ export class LazyExportService {
 
     // Save PDF
     doc.save(
-      options.filename ||
-      `report_${format(new Date(), 'yyyy-MM-dd_HHmm', { locale: ptBR })}.pdf`
+      options.filename || `report_${format(new Date(), 'yyyy-MM-dd_HHmm', { locale: ptBR })}.pdf`
     )
   }
 }
