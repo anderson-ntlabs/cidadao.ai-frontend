@@ -18,7 +18,8 @@
 
 import { logger } from '@/lib/utils/logger'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
 export interface VoiceSynthesizeRequest {
   text: string
@@ -29,14 +30,14 @@ export interface VoiceSynthesizeRequest {
 
 // Agent to voice mapping (from backend agent-voices endpoint)
 const AGENT_VOICE_MAP: Record<string, string> = {
-  'abaporu': 'pt-BR-Chirp3-HD-Rasalgethi',
-  'zumbi': 'pt-BR-Chirp3-HD-Fenrir',
-  'anita': 'pt-BR-Chirp3-HD-Callirrhoe',
-  'drummond': 'pt-BR-Chirp3-HD-Zephyr',
-  'ayrton_senna': 'pt-BR-Chirp3-HD-Algenib',
-  'tiradentes': 'pt-BR-Chirp3-HD-Schedar',
-  'machado': 'pt-BR-Chirp3-HD-Iapetus',
-  'nana': 'pt-BR-Chirp3-HD-Leda',
+  abaporu: 'pt-BR-Chirp3-HD-Rasalgethi',
+  zumbi: 'pt-BR-Chirp3-HD-Fenrir',
+  anita: 'pt-BR-Chirp3-HD-Callirrhoe',
+  drummond: 'pt-BR-Chirp3-HD-Zephyr',
+  ayrton_senna: 'pt-BR-Chirp3-HD-Algenib',
+  tiradentes: 'pt-BR-Chirp3-HD-Schedar',
+  machado: 'pt-BR-Chirp3-HD-Iapetus',
+  nana: 'pt-BR-Chirp3-HD-Leda',
   // Add more as needed or fetch from backend
 }
 
@@ -347,7 +348,7 @@ export class VoiceManagerService {
     logger.debug('VoiceManager: Transcribing audio', {
       size: audioFile.size,
       type: audioFile.type,
-      languageCode
+      languageCode,
     })
 
     const formData = new FormData()
@@ -361,7 +362,7 @@ export class VoiceManagerService {
     logger.debug('VoiceManager: Sending transcription request', {
       url: `${API_BASE_URL}/api/v1/voice/transcribe`,
       audioSize: audioBlob.size,
-      audioType: audioBlob.type
+      audioType: audioBlob.type,
     })
 
     try {
@@ -375,8 +376,14 @@ export class VoiceManagerService {
         logger.error('VoiceManager: Transcription request failed', {
           status: response.status,
           statusText: response.statusText,
-          errorText
+          errorText,
         })
+        // If API returns 400/404, suggest using Speech-to-Text button
+        if (response.status === 400 || response.status === 404) {
+          throw new Error(
+            'Serviço de transcrição de áudio indisponível no momento. Por favor, use o botão de Speech-to-Text (microfone azul) que funciona diretamente no navegador.'
+          )
+        }
         throw new Error(`Transcription failed: ${response.status} ${errorText}`)
       }
 
@@ -389,8 +396,8 @@ export class VoiceManagerService {
         language_code: result.language_detected || languageCode,
         metadata: {
           duration_seconds: result.duration_ms ? result.duration_ms / 1000 : 0,
-          audio_format: 'webm'
-        }
+          audio_format: 'webm',
+        },
       }
 
       logger.debug('VoiceManager: Transcription successful', {
