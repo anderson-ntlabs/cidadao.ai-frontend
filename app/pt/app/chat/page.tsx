@@ -89,6 +89,15 @@ const VoiceRecorder = dynamic(
   }
 )
 
+// Lazy load voice input button (speech-to-text)
+const VoiceInputButton = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
 // Lazy load mobile-specific components
 const PullToRefresh = dynamic(
   () => import('@/components/mobile').then((mod) => ({ default: mod.PullToRefresh })),
@@ -809,7 +818,7 @@ export default function ChatPage() {
         )}
         <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
           <div className="flex gap-2 sm:gap-3 items-end">
-            {/* Voice Recorder */}
+            {/* Voice Recorder (Audio Recording) */}
             <VoiceRecorder
               onTranscript={(transcript) => {
                 setInputMessage(transcript)
@@ -821,6 +830,27 @@ export default function ChatPage() {
               disabled={!canSendMessage}
               size="md"
               variant="default"
+            />
+
+            {/* Voice Input (Speech-to-Text) */}
+            <VoiceInputButton
+              onTranscript={(transcript) => {
+                setInputMessage((prev) => prev + ' ' + transcript)
+                if (textareaRef.current) {
+                  textareaRef.current.focus()
+                  adjustTextareaHeight()
+                }
+              }}
+              onInterimTranscript={(transcript) => {
+                // Optional: Show interim results in a tooltip or indicator
+                console.log('Interim:', transcript)
+              }}
+              disabled={!canSendMessage}
+              size="md"
+              variant="secondary"
+              lang="pt-BR"
+              showTooltip={true}
+              tooltipContent="Clique e fale (Speech-to-Text)"
             />
 
             <textarea
