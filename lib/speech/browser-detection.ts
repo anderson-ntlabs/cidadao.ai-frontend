@@ -35,9 +35,9 @@ export function isSpeechRecognitionSupported(): boolean {
  * Get the SpeechRecognition constructor
  * Handles vendor prefixes (webkit for Chrome)
  *
- * @returns {typeof SpeechRecognition | null} SpeechRecognition constructor or null
+ * @returns {any | null} SpeechRecognition constructor or null
  */
-export function getSpeechRecognition(): typeof SpeechRecognition | null {
+export function getSpeechRecognition(): any | null {
   if (typeof window === 'undefined') {
     return null
   }

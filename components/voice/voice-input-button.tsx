@@ -1,5 +1,5 @@
 /**
- * Voice Input Button Component
+ * Voice Input Button Component - Fixed Version
  *
  * Button component for activating speech-to-text input
  * with visual feedback and browser compatibility handling.
@@ -14,7 +14,7 @@
 import { useEffect, useState } from 'react'
 import { Mic, MicOff, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip } from '@/components/ui/tooltip'
 import { useVoiceInput } from '@/hooks/use-voice-input'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -35,9 +35,9 @@ interface VoiceInputButtonProps {
   /** Custom class name */
   className?: string
   /** Button size */
-  size?: 'sm' | 'default' | 'lg' | 'icon'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'icon'
   /** Button variant */
-  variant?: 'default' | 'outline' | 'ghost' | 'secondary'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'success' | 'warning'
   /** Disabled state */
   disabled?: boolean
   /** Show tooltip */
@@ -68,7 +68,7 @@ export function VoiceInputButton({
   showTranscript = false,
   className,
   size = 'icon',
-  variant = 'outline',
+  variant = 'secondary',
   disabled = false,
   showTooltip = true,
   tooltipContent,
@@ -128,25 +128,22 @@ export function VoiceInputButton({
         : `Your browser (${browserInfo.name}) doesn't support voice input. Use Chrome or Edge.`
 
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size={size} variant={variant} className={cn('relative', className)} disabled>
-              <MicOff className="h-4 w-4 opacity-50" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className="max-w-xs">
-              <p className="font-semibold mb-1">
-                {lang === 'pt-BR'
-                  ? '🎤 Entrada de voz não disponível'
-                  : '🎤 Voice input not available'}
-              </p>
-              <p className="text-sm">{message}</p>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip
+        content={
+          <div className="max-w-xs">
+            <p className="font-semibold mb-1">
+              {lang === 'pt-BR'
+                ? '🎤 Entrada de voz não disponível'
+                : '🎤 Voice input not available'}
+            </p>
+            <p className="text-sm">{message}</p>
+          </div>
+        }
+      >
+        <Button size={size} variant={variant} className={cn('relative', className)} disabled>
+          <MicOff className="h-4 w-4 opacity-50" />
+        </Button>
+      </Tooltip>
     )
   }
 
@@ -277,14 +274,7 @@ export function VoiceInputButton({
 
   // Wrap with tooltip if enabled
   const button = showTooltip ? (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{buttonContent}</TooltipTrigger>
-        <TooltipContent>
-          <p>{getTooltipContent()}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip content={getTooltipContent()}>{buttonContent}</Tooltip>
   ) : (
     buttonContent
   )
@@ -396,10 +386,10 @@ export function VoiceInputCard({
             <p className="text-sm">{localTranscript}</p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" variant="default" onClick={handleSubmit} className="flex-1">
+            <Button size="sm" variant="primary" onClick={handleSubmit} className="flex-1">
               {lang === 'pt-BR' ? 'Enviar' : 'Send'}
             </Button>
-            <Button size="sm" variant="outline" onClick={handleClear}>
+            <Button size="sm" variant="secondary" onClick={handleClear}>
               {lang === 'pt-BR' ? 'Limpar' : 'Clear'}
             </Button>
           </div>
