@@ -5,7 +5,7 @@ import { createLogger } from '@/lib/logger'
 
 const logger = createLogger('OAuthCallback')
 
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<NextResponse> {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') ?? '/pt/app'

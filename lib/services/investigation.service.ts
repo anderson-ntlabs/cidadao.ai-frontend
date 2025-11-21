@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/client'
+import { createLogger } from '@/lib/logger'
 import type { Investigation } from '@/types/supabase'
 
 export class InvestigationService {
   private supabase = createClient()
+  private logger = createLogger('InvestigationService')
 
   async createInvestigation(data: {
     title: string
@@ -10,7 +12,9 @@ export class InvestigationService {
     agents_used?: string[]
     metadata?: Record<string, any>
   }): Promise<Investigation | null> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
     const { data: investigation, error } = await this.supabase
@@ -21,13 +25,13 @@ export class InvestigationService {
         description: data.description,
         agents_used: data.agents_used || [],
         metadata: data.metadata || {},
-        status: 'active'
+        status: 'active',
       })
       .select()
       .single()
 
     if (error) {
-      console.error('Error creating investigation:', error)
+      this.logger.error('Error creating investigation:', error)
       return null
     }
 
@@ -37,7 +41,9 @@ export class InvestigationService {
   async getUserInvestigations(
     status?: 'active' | 'completed' | 'archived'
   ): Promise<Investigation[]> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser()
     if (!user) return []
 
     let query = this.supabase
@@ -53,7 +59,7 @@ export class InvestigationService {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching investigations:', error)
+      this.logger.error('Error fetching investigations:', error)
       return []
     }
 
@@ -61,7 +67,9 @@ export class InvestigationService {
   }
 
   async getInvestigation(id: string): Promise<Investigation | null> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser()
     if (!user) return null
 
     const { data, error } = await this.supabase
@@ -72,7 +80,7 @@ export class InvestigationService {
       .single()
 
     if (error) {
-      console.error('Error fetching investigation:', error)
+      this.logger.error('Error fetching investigation:', error)
       return null
     }
 
@@ -83,14 +91,16 @@ export class InvestigationService {
     id: string,
     updates: Partial<Investigation>
   ): Promise<Investigation | null> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser()
     if (!user) return null
 
     const { data, error } = await this.supabase
       .from('investigations')
       .update({
         ...updates,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
       .eq('user_id', user.id)
@@ -98,7 +108,7 @@ export class InvestigationService {
       .single()
 
     if (error) {
-      console.error('Error updating investigation:', error)
+      this.logger.error('Error updating investigation:', error)
       return null
     }
 
@@ -106,7 +116,9 @@ export class InvestigationService {
   }
 
   async deleteInvestigation(id: string): Promise<boolean> {
-    const { data: { user } } = await this.supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser()
     if (!user) return false
 
     const { error } = await this.supabase
@@ -116,7 +128,7 @@ export class InvestigationService {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting investigation:', error)
+      this.logger.error('Error deleting investigation:', error)
       return false
     }
 

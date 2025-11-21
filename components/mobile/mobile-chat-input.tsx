@@ -22,10 +22,20 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react'
+import dynamic from 'next/dynamic'
 import { cn } from '@/lib/utils'
 import { useVirtualKeyboard, useKeyboardAwareInput } from '@/hooks/use-virtual-keyboard'
 import { touchFeedback, tapTarget, safeArea } from '@/lib/mobile-touch'
 import { useHaptic } from '@/hooks/use-haptic'
+
+// Lazy load voice input button
+const VoiceInputButton = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
 export interface MobileChatInputProps {
   /** Current input value (controlled) */
@@ -161,7 +171,22 @@ export function MobileChatInput({
         transition: 'transform 0.2s ease-out',
       }}
     >
-      <div className="flex items-end gap-3">
+      <div className="flex items-end gap-2">
+        {/* Voice Input Button (Speech-to-Text) */}
+        <VoiceInputButton
+          onTranscript={(transcript) => {
+            const currentValue = value || ''
+            setValue(currentValue + (currentValue ? ' ' : '') + transcript)
+            vibrate('light')
+          }}
+          disabled={disabled || loading}
+          size="icon"
+          variant="secondary"
+          lang={locale === 'pt' ? 'pt-BR' : 'en-US'}
+          showTooltip={false}
+          className={cn(tapTarget.medium)}
+        />
+
         {/* Textarea Input */}
         <div className="flex-1 relative">
           <textarea

@@ -13,3 +13,9 @@ export type { VoicePlayerProps } from './voice-player'
 
 export { VoiceRecorder } from './voice-recorder'
 export type { VoiceRecorderProps } from './voice-recorder'
+
+// Speech-to-Text components
+export { VoiceInputButton, VoiceInputIndicator, VoiceInputCard } from './voice-input-button'
+
+// Re-export types for convenience
+export type { SpeechRecognitionError, SpeechRecognitionState } from '@/lib/speech/types'

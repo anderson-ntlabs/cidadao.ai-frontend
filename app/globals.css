@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Gradient animation for hero title */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
 @layer base {
   :root {
     /* Design System Colors */
@@ -57,18 +75,20 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
   /* Mobile optimizations */
   @media (max-width: 640px) {
     /* Increase touch targets */
     button,
-    a[role="button"],
-    [role="checkbox"],
-    [role="radio"],
-    input[type="checkbox"],
-    input[type="radio"] {
+    a[role='button'],
+    [role='checkbox'],
+    [role='radio'],
+    input[type='checkbox'],
+    input[type='radio'] {
       min-height: 44px;
       min-width: 44px;
     }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { logger } from '@/lib/utils/logger'
+import { getSecureApiUrl } from '@/lib/utils/ensure-https'
 
 /**
  * Backend Health Check Hook
@@ -29,18 +30,14 @@ interface UseBackendHealthOptions {
 }
 
 export function useBackendHealth(options: UseBackendHealthOptions = {}) {
-  const {
-    checkInterval = 30000,
-    timeout = 5000,
-    enabled = true
-  } = options
+  const { checkInterval = 30000, timeout = 5000, enabled = true } = options
 
   const [health, setHealth] = useState<BackendHealthState>({
     status: 'checking',
     isAvailable: false,
     lastCheck: null,
     error: null,
-    responseTime: null
+    responseTime: null,
   })
 
   useEffect(() => {
@@ -61,7 +58,7 @@ export function useBackendHealth(options: UseBackendHealthOptions = {}) {
         const endpoints = [
           '/health', // Backend health endpoint (returns 200)
           '/', // Root endpoint (returns 200)
-          '/api/v1/investigations/' // Investigations endpoint (might return 401)
+          '/api/v1/investigations/', // Investigations endpoint (might return 401)
         ]
 
         let lastError: Error | null = null
@@ -69,16 +66,16 @@ export function useBackendHealth(options: UseBackendHealthOptions = {}) {
 
         for (const endpoint of endpoints) {
           try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
-              {
-                method: 'GET',
-                signal: controller.signal,
-                headers: {
-                  'Accept': 'application/json'
-                }
-              }
-            )
+            // Always use HTTPS to prevent Mixed Content errors
+            const apiUrl = getSecureApiUrl()
+
+            const response = await fetch(`${apiUrl}${endpoint}`, {
+              method: 'GET',
+              signal: controller.signal,
+              headers: {
+                Accept: 'application/json',
+              },
+            })
 
             clearTimeout(timeoutId)
             const responseTime = Date.now() - startTime
@@ -92,13 +89,13 @@ export function useBackendHealth(options: UseBackendHealthOptions = {}) {
                 isAvailable: true,
                 lastCheck: new Date(),
                 error: null,
-                responseTime
+                responseTime,
               })
 
               logger.debug('Backend Health: Check succeeded', {
                 endpoint,
                 status: response.status,
-                responseTime
+                responseTime,
               })
 
               break
@@ -113,24 +110,21 @@ export function useBackendHealth(options: UseBackendHealthOptions = {}) {
         if (!succeeded && lastError) {
           throw lastError
         }
-
       } catch (error: any) {
         const responseTime = Date.now() - startTime
-        const errorMessage = error.name === 'AbortError'
-          ? 'Request timeout'
-          : error.message || 'Unknown error'
+        const errorMessage =
+          error.name === 'AbortError' ? 'Request timeout' : error.message || 'Unknown error'
 
-        logger.error(
-          error instanceof Error ? error : new Error(String(error)),
-          { context: 'Backend Health Check' }
-        )
+        logger.error(error instanceof Error ? error : new Error(String(error)), {
+          context: 'Backend Health Check',
+        })
 
         setHealth({
           status: 'unavailable',
           isAvailable: false,
           lastCheck: new Date(),
           error: errorMessage,
-          responseTime
+          responseTime,
         })
       }
     }

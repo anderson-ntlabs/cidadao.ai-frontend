@@ -6,9 +6,19 @@ export const runtime = 'edge'
 
 const logger = createLogger('WebVitalsAPI')
 
-export async function POST(request: NextRequest) {
+interface WebVitalMetric {
+  name: string
+  value: number
+  rating: string
+  delta: number
+  url: string
+}
+
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<{ success: boolean } | { error: string }>> {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as WebVitalMetric
 
     // In development, log to console
     if (process.env.NODE_ENV === 'development') {
@@ -18,23 +28,22 @@ export async function POST(request: NextRequest) {
     // In production, you would send this to your analytics service
     // Example: Google Analytics, Vercel Analytics, custom backend
     if (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_GA_ID) {
-      // Send to Google Analytics
-      const _ga4Event = {
-        client_id: 'web-vitals',
-        events: [
-          {
-            name: 'web_vitals',
-            params: {
-              metric_name: body.name,
-              metric_value: body.value,
-              metric_rating: body.rating,
-              metric_delta: body.delta,
-              page_url: body.url,
-            },
-          },
-        ],
-      }
-
+      // Send to Google Analytics (currently disabled)
+      // const ga4Event = {
+      //   client_id: 'web-vitals',
+      //   events: [
+      //     {
+      //       name: 'web_vitals',
+      //       params: {
+      //         metric_name: body.name,
+      //         metric_value: body.value,
+      //         metric_rating: body.rating,
+      //         metric_delta: body.delta,
+      //         page_url: body.url,
+      //       },
+      //     },
+      //   ],
+      // }
       // This would be your actual GA4 Measurement Protocol endpoint
       // await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${process.env.NEXT_PUBLIC_GA_ID}`, {
       //   method: 'POST',

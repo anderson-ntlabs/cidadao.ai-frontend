@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase/client'
-import type { UserProfile, UserPreferences, UpdateProfileData, UpdatePreferencesData } from '@/types/profile'
+import type {
+  UserProfile,
+  UserPreferences,
+  UpdateProfileData,
+  UpdatePreferencesData,
+} from '@/types/profile'
 import { createLogger } from '@/lib/logger'
 
 export class ProfileService {
@@ -8,7 +13,9 @@ export class ProfileService {
 
   async getProfile(): Promise<UserProfile | null> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       if (!user) return null
 
       const { data, error } = await this.supabase
@@ -24,7 +31,7 @@ export class ProfileService {
 
       return {
         ...data,
-        email: user.email!
+        email: user.email!,
       }
     } catch (error) {
       this.logger.error('Profile fetch error', error)
@@ -34,29 +41,30 @@ export class ProfileService {
 
   async updateProfile(updates: UpdateProfileData): Promise<boolean> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       if (!user) return false
 
-      const { error } = await this.supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
+      const { error } = await this.supabase.from('profiles').update(updates).eq('id', user.id)
 
       if (error) {
-        console.error('Error updating profile:', error)
+        this.logger.error('Error updating profile', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Profile update error:', error)
+      this.logger.error('Profile update error', error)
       return false
     }
   }
 
   async getPreferences(): Promise<UserPreferences | null> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       if (!user) return null
 
       const { data, error } = await this.supabase
@@ -66,20 +74,22 @@ export class ProfileService {
         .single()
 
       if (error) {
-        console.error('Error fetching preferences:', error)
+        this.logger.error('Error fetching preferences', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Preferences fetch error:', error)
+      this.logger.error('Preferences fetch error', error)
       return null
     }
   }
 
   async updatePreferences(updates: UpdatePreferencesData): Promise<boolean> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       if (!user) return false
 
       const { error } = await this.supabase
@@ -88,7 +98,7 @@ export class ProfileService {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error updating preferences:', error)
+        this.logger.error('Error updating preferences', error)
         return false
       }
 
@@ -99,38 +109,36 @@ export class ProfileService {
 
       return true
     } catch (error) {
-      console.error('Preferences update error:', error)
+      this.logger.error('Preferences update error', error)
       return false
     }
   }
 
   async uploadAvatar(file: File): Promise<string | null> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       if (!user) return null
 
       const fileExt = file.name.split('.').pop()
       const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`
 
-      const { data, error } = await this.supabase.storage
-        .from('avatars')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        })
+      const { data, error } = await this.supabase.storage.from('avatars').upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: true,
+      })
 
       if (error) {
-        console.error('Error uploading avatar:', error)
+        this.logger.error('Error uploading avatar', error)
         return null
       }
 
-      const { data: urlData } = this.supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName)
+      const { data: urlData } = this.supabase.storage.from('avatars').getPublicUrl(fileName)
 
       return urlData.publicUrl
     } catch (error) {
-      console.error('Avatar upload error:', error)
+      this.logger.error('Avatar upload error', error)
       return null
     }
   }

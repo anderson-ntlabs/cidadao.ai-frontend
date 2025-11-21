@@ -48,14 +48,14 @@ export class ChatSessionService {
         .single()
 
       if (error) {
-        console.error('Failed to create session:', error)
+        logger.error('Failed to create session', error)
         return null
       }
 
       logger.info('Session created', { sessionId: data.session_id, agentId: data.agent_id })
       return session
     } catch (error) {
-      console.error('Session creation error:', error)
+      logger.error('Session creation error', error)
       return null
     }
   }
@@ -82,14 +82,14 @@ export class ChatSessionService {
         .single()
 
       if (error) {
-        console.error('Failed to get session:', error)
+        logger.error('Failed to get session', error)
         return null
       }
 
       logger.debug('Session retrieved', { sessionId, messageCount: session.messages?.length || 0 })
       return session
     } catch (error) {
-      console.error('Session retrieval error:', error)
+      logger.error('Session retrieval error', error)
       return null
     }
   }
@@ -116,14 +116,14 @@ export class ChatSessionService {
         .range(offset, offset + limit - 1)
 
       if (error) {
-        console.error('Failed to get user sessions:', error)
+        logger.error('Failed to get user sessions', error)
         return []
       }
 
       logger.debug('User sessions retrieved', { count: sessions?.length || 0, limit, offset })
       return sessions || []
     } catch (error) {
-      console.error('Sessions retrieval error:', error)
+      logger.error('Sessions retrieval error', error)
       return []
     }
   }
@@ -152,14 +152,14 @@ export class ChatSessionService {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Failed to update session:', error)
+        logger.error('Failed to update session', error)
         return false
       }
 
       logger.debug('Session updated', { sessionId })
       return true
     } catch (error) {
-      console.error('Session update error:', error)
+      logger.error('Session update error', error)
       return false
     }
   }
@@ -185,14 +185,14 @@ export class ChatSessionService {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Failed to delete session:', error)
+        logger.error('Failed to delete session', error)
         return false
       }
 
       logger.info('Session deleted', { sessionId })
       return true
     } catch (error) {
-      console.error('Session deletion error:', error)
+      logger.error('Session deletion error', error)
       return false
     }
   }
@@ -244,7 +244,7 @@ export class ChatSessionService {
 
       return success
     } catch (error) {
-      console.error('Message addition error:', error)
+      logger.error('Message addition error', error)
       return false
     }
   }
