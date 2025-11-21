@@ -1,15 +1,10 @@
 'use client'
 
-import React, { useState, useRef, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useTooltipStore } from '@/store/tooltip-store'
 import { cn } from '@/lib/utils'
-
-// Lazy load framer-motion only when needed
-const AnimatePresence = lazy(() =>
-  import('framer-motion').then((mod) => ({ default: mod.AnimatePresence }))
-)
-const motion = lazy(() => import('framer-motion').then((mod) => ({ default: mod.motion })))
 
 interface TooltipProps {
   content: string | React.ReactNode
