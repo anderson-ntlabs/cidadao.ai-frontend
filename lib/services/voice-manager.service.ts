@@ -17,9 +17,9 @@
  */
 
 import { logger } from '@/lib/utils/logger'
+import { getSecureApiUrl } from '@/lib/utils/ensure-https'
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+const API_BASE_URL = getSecureApiUrl()
 
 export interface VoiceSynthesizeRequest {
   text: string
