@@ -41,19 +41,17 @@ export function VoiceInputDebug() {
         result.addEventListener('change', () => {
           setPermissionStatus(result.state)
         })
-      } else {
+      } else if (typeof window !== 'undefined' && 'mediaDevices' in navigator) {
         // Fallback: try to get user media to check permission
         try {
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            stream.getTracks().forEach((track) => track.stop())
-            setPermissionStatus('granted')
-          } else {
-            setPermissionStatus('not available')
-          }
+          const stream = await (navigator as any).mediaDevices.getUserMedia({ audio: true })
+          stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
+          setPermissionStatus('granted')
         } catch (err) {
           setPermissionStatus('denied or not requested')
         }
+      } else {
+        setPermissionStatus('not available')
       }
     } catch (err) {
       setPermissionStatus('unable to check')
@@ -89,7 +87,7 @@ export function VoiceInputDebug() {
 
       // Stop the stream after testing
       setTimeout(() => {
-        stream.getTracks().forEach((track) => track.stop())
+        stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
       }, 1000)
     } catch (err: any) {
       setError(`Microphone error: ${err.message}`)
