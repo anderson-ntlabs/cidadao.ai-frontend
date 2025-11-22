@@ -7,7 +7,7 @@ import { ExternalLink } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/ui'
 
-export default function AgentsPage() {
+export default function AgentsPage(): JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-6 py-24">

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     'Plataforma de inteligência artificial para transparência e controle social do governo brasileiro',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <>
       {children}

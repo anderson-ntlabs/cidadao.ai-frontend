@@ -20,7 +20,7 @@ import { LandingClientWrapper } from '@/components/landing/landing-client-wrappe
 // Export metadata for better SEO
 export { metadata } from './metadata'
 
-export default function PTPageOptimized() {
+export default function PTPageOptimized(): JSX.Element {
   return (
     <div className="relative">
       {/* HERO SECTION - Static with fixed dimensions to prevent CLS */}

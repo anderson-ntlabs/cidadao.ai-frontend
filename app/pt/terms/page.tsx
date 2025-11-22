@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Termos de Uso | Cidadão.AI',
-  description: 'Termos e condições de uso do Cidadão.AI. Conheça as regras e diretrizes para utilizar nosso sistema de transparência pública.',
+  description:
+    'Termos e condições de uso do Cidadão.AI. Conheça as regras e diretrizes para utilizar nosso sistema de transparência pública.',
   robots: 'index, follow',
   openGraph: {
     title: 'Termos de Uso - Cidadão.AI',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function TermsPage() {
+export default function TermsPage(): JSX.Element {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold mb-8">Termos de Uso</h1>
@@ -65,30 +66,29 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">4. Dados e Privacidade</h2>
           <p>
-            Coletamos apenas dados necessários para o funcionamento do sistema. Suas consultas
-            e investigações são armazenadas de forma segura e não são compartilhadas com terceiros.
+            Coletamos apenas dados necessários para o funcionamento do sistema. Suas consultas e
+            investigações são armazenadas de forma segura e não são compartilhadas com terceiros.
           </p>
           <p className="mt-4">
             Para mais informações, consulte nossa{' '}
             <a href="/pt/privacy" className="text-green-600 hover:text-green-700 underline">
               Política de Privacidade
-            </a>.
+            </a>
+            .
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">5. Propriedade Intelectual</h2>
-          <p>
-            O código-fonte do Cidadão.AI é de código aberto sob licença MIT. Você pode:
-          </p>
+          <p>O código-fonte do Cidadão.AI é de código aberto sob licença MIT. Você pode:</p>
           <ul className="list-disc pl-6 mt-4">
             <li>Visualizar e estudar o código</li>
             <li>Modificar para uso pessoal</li>
             <li>Contribuir com melhorias via pull requests</li>
           </ul>
           <p className="mt-4">
-            Os dados governamentais são públicos e propriedade do governo brasileiro. A análise
-            e insights gerados pelos agentes de IA são considerados derivações dos dados públicos.
+            Os dados governamentais são públicos e propriedade do governo brasileiro. A análise e
+            insights gerados pelos agentes de IA são considerados derivações dos dados públicos.
           </p>
         </section>
 
@@ -123,9 +123,7 @@ export default function TermsPage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">8. Disponibilidade do Serviço</h2>
-          <p>
-            Como projeto acadêmico, o Cidadão.AI pode estar:
-          </p>
+          <p>Como projeto acadêmico, o Cidadão.AI pode estar:</p>
           <ul className="list-disc pl-6 mt-4">
             <li>Temporariamente indisponível para manutenção</li>
             <li>Sujeito a mudanças sem aviso prévio</li>
@@ -150,16 +148,14 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">10. Lei Aplicável</h2>
           <p>
-            Estes termos são regidos pelas leis brasileiras. Quaisquer disputas serão resolvidas
-            nos tribunais competentes do Brasil.
+            Estes termos são regidos pelas leis brasileiras. Quaisquer disputas serão resolvidas nos
+            tribunais competentes do Brasil.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">11. Contato</h2>
-          <p>
-            Para dúvidas sobre estes termos, entre em contato:
-          </p>
+          <p>Para dúvidas sobre estes termos, entre em contato:</p>
           <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="font-medium">Anderson Henrique da Silva</p>
             <p className="text-gray-600 dark:text-gray-400">Desenvolvedor e Pesquisador</p>
@@ -181,7 +177,8 @@ export default function TermsPage() {
               Agradecemos por usar o Cidadão.AI para promover a transparência pública!
             </p>
             <p className="mt-2 text-green-700 dark:text-green-300">
-              Juntos, tornamos os dados governamentais mais acessíveis e compreensíveis para todos os brasileiros.
+              Juntos, tornamos os dados governamentais mais acessíveis e compreensíveis para todos
+              os brasileiros.
             </p>
           </div>
         </section>

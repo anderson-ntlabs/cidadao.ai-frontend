@@ -31,7 +31,7 @@ const ProjectTimeline = dynamic(
   }
 )
 
-export default function ENPage() {
+export default function ENPage(): JSX.Element {
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
 

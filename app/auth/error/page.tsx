@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { AlertCircle, Home, RefreshCw } from 'lucide-react'
 
-export default function AuthErrorPage() {
+export default function AuthErrorPage(): JSX.Element {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-700/25 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
-      
+
       <div className="relative max-w-md w-full space-y-8 p-8">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
           {/* Error Icon */}
@@ -15,18 +15,18 @@ export default function AuthErrorPage() {
               <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
           </div>
-          
+
           {/* Error Message */}
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Ops! Algo deu errado
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Ocorreu um erro durante o processo de autenticação. 
-              Isso pode acontecer se você cancelou o login ou se houve um problema temporário.
+              Ocorreu um erro durante o processo de autenticação. Isso pode acontecer se você
+              cancelou o login ou se houve um problema temporário.
             </p>
           </div>
-          
+
           {/* Actions */}
           <div className="space-y-3">
             <Link
@@ -36,7 +36,7 @@ export default function AuthErrorPage() {
               <RefreshCw className="w-4 h-4" />
               Tentar novamente
             </Link>
-            
+
             <Link
               href="/pt"
               className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -45,7 +45,7 @@ export default function AuthErrorPage() {
               Voltar ao início
             </Link>
           </div>
-          
+
           {/* Help text */}
           <p className="text-center text-xs text-gray-500 dark:text-gray-400">
             Se o problema persistir, entre em contato com o suporte

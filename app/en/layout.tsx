@@ -55,7 +55,7 @@ import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { InstallPrompt, UpdateNotification } from '@/components/pwa'
 
-export default function ENLayout({ children }: { children: React.ReactNode }) {
+export default function ENLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>

@@ -3,8 +3,16 @@ import { ProjectTimeline } from '@/components/timeline'
 
 export const metadata: Metadata = {
   title: 'About Cidadão.AI | Public Transparency with Artificial Intelligence',
-  description: 'Innovative academic project combining AI, public transparency and social responsibility to democratize access to Brazilian government data.',
-  keywords: ['public transparency', 'artificial intelligence', 'government data', 'Brazil', 'thesis', 'IFSULDEMINAS'],
+  description:
+    'Innovative academic project combining AI, public transparency and social responsibility to democratize access to Brazilian government data.',
+  keywords: [
+    'public transparency',
+    'artificial intelligence',
+    'government data',
+    'Brazil',
+    'thesis',
+    'IFSULDEMINAS',
+  ],
   authors: [{ name: 'Anderson Henrique da Silva' }],
   openGraph: {
     title: 'About Cidadão.AI',
@@ -14,7 +22,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function AboutPage() {
+export default function AboutPage(): JSX.Element {
   return (
     <div
       className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 relative bg-cover bg-center bg-fixed bg-no-repeat"
@@ -32,16 +40,17 @@ export default function AboutPage() {
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <p className="text-xl text-gray-700 dark:text-gray-300 mb-6">
-            Cidadão.AI is an innovative academic project developed as a Final Course Project
-            in Computer Science at IFSULDEMINAS, which combines artificial intelligence, public
-            transparency and social responsibility to democratize access to Brazilian government data.
+            Cidadão.AI is an innovative academic project developed as a Final Course Project in
+            Computer Science at IFSULDEMINAS, which combines artificial intelligence, public
+            transparency and social responsibility to democratize access to Brazilian government
+            data.
           </p>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4">Our Mission</h2>
           <p>
-            Develop a multi-agent artificial intelligence system that works 24/7 to monitor,
-            analyze and report public data in a clear, accessible and auditable way, strengthening
-            social control and citizen participation.
+            Develop a multi-agent artificial intelligence system that works 24/7 to monitor, analyze
+            and report public data in a clear, accessible and auditable way, strengthening social
+            control and citizen participation.
           </p>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4">How It Works</h2>
@@ -89,14 +98,14 @@ export default function AboutPage() {
           <h2 className="text-2xl font-semibold mt-8 mb-4">Academic Context</h2>
           <p>
             This project is developed as a Final Course Project (TCC) to obtain the Bachelor's
-            degree in Computer Science at IFSULDEMINAS - Muzambinho Campus, under the guidance
-            of Prof. Dr. Aracele Garcia de Oliveira Fassbinder.
+            degree in Computer Science at IFSULDEMINAS - Muzambinho Campus, under the guidance of
+            Prof. Dr. Aracele Garcia de Oliveira Fassbinder.
           </p>
 
           <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg mt-6">
             <p className="font-medium text-green-800 dark:text-green-200">
-              "Transparency is the best remedy against corruption. Technology is the tool
-              that makes this remedy accessible to everyone."
+              "Transparency is the best remedy against corruption. Technology is the tool that makes
+              this remedy accessible to everyone."
             </p>
           </div>
         </div>

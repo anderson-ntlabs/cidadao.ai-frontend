@@ -56,7 +56,7 @@ import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { InstallPrompt, UpdateNotification } from '@/components/pwa'
 
-export default function PTLayout({ children }: { children: React.ReactNode }) {
+export default function PTLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <html lang="pt" className={inter.variable} suppressHydrationWarning>
       <head>

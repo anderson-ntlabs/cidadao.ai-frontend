@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-export default function ManifestoPage() {
+export default function ManifestoPage(): JSX.Element {
   return (
     <div
       className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 relative bg-cover bg-center bg-fixed bg-no-repeat"
