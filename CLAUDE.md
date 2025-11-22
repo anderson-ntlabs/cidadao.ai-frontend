@@ -244,7 +244,7 @@ Key actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `cre
 
 - 9 test files, multi-browser (Chromium, Firefox, WebKit)
 - Mobile: Pixel 5, iPhone 12
-- Config: `playwright.config.ts`, `playwright.mobile.config.ts`
+- Config: `config/playwright.config.ts`, `config/playwright.mobile.config.ts`
 
 **Manual Scripts**: 40+ scripts in `/scripts` - see `scripts/README.md`
 
@@ -404,7 +404,7 @@ const PDFExport = lazyLoad(() => import('@/lib/export-service'))
 
 **Testing**:
 
-- `vitest.config.mjs`, `playwright.config.ts`, `playwright.mobile.config.ts`
+- `config/vitest.config.mjs`, `config/playwright.config.ts`, `config/playwright.mobile.config.ts`
 - `vitest.setup.ts` - Test setup
 
 **Performance**:

@@ -110,6 +110,7 @@ secret-*
 *.swp
 *.swo
 *~
+.eslintrc.local.json
 
 # Logs and debugging
 logs/
