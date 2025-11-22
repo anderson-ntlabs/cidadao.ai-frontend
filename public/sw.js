@@ -1828,11 +1828,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       precacheEntries: [
         {
           revision: 'a25fc98704848104ee4b2bf32d633fb6',
-          url: '/_next/static/-oWp957drH8g3q6y6Ksvp/_buildManifest.js',
+          url: '/_next/static/0ImVNXPviK9RJ7xJlqKNw/_buildManifest.js',
         },
         {
           revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/-oWp957drH8g3q6y6Ksvp/_ssgManifest.js',
+          url: '/_next/static/0ImVNXPviK9RJ7xJlqKNw/_ssgManifest.js',
         },
         { revision: null, url: '/_next/static/chunks/1091.3e0f6ca343915ff4.js' },
         { revision: null, url: '/_next/static/chunks/1401.03ea562301633450.js' },
@@ -1898,7 +1898,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/error-fc840b0bf1c8f498.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/layout-acf6582e93f91a54.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-410bb5eb13094cc9.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-fea24c55a567abde.js' },
         {
           revision: null,
           url: '/_next/static/chunks/app/pt/app/configuracoes/page-5f10adbbc3ce1de8.js',
@@ -1909,7 +1909,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/dashboard/page-1f5b1f6b38a32f0a.js',
+          url: '/_next/static/chunks/app/pt/app/dashboard/page-0f06d9de6e7611f9.js',
         },
         {
           revision: null,
@@ -1946,7 +1946,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/chunks/app/pt/system/page-7eb120dfd0e36a97.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/terms/page-8839d1daf44d8438.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/test-voice/page-1ae93ae918942775.js' },
-        { revision: null, url: '/_next/static/chunks/commons-969154b10a817d3c.js' },
+        { revision: null, url: '/_next/static/chunks/commons-b6450bca439677ca.js' },
         { revision: null, url: '/_next/static/chunks/framework-b9fd9bcc3ecde907.js' },
         { revision: null, url: '/_next/static/chunks/main-388de7b2142a1859.js' },
         { revision: null, url: '/_next/static/chunks/main-app-c756c3415517cebc.js' },
@@ -1988,9 +1988,9 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           revision: '846118c33b2c0e922d7b3a7676f81f6f',
           url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
         },
-        { revision: null, url: '/_next/static/chunks/runtime-582eadf6f7d1e238.js' },
-        { revision: null, url: '/_next/static/css/3561f2b654f6997e.css' },
+        { revision: null, url: '/_next/static/chunks/runtime-05de4a32d3e761cd.js' },
         { revision: null, url: '/_next/static/css/59e882a6b4251a5a.css' },
+        { revision: null, url: '/_next/static/css/6dc94dd7d4f8c07c.css' },
         { revision: null, url: '/_next/static/css/8a38bb2669d7ed47.css' },
         { revision: null, url: '/_next/static/css/b5ccccc69160d62d.css' },
         {
@@ -2043,7 +2043,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'd1557b71090a0b998faf53cfd399816b', url: '/agents/optimized/abaporu-64.png' },
         { revision: '085df2148046b0a89e977590dacb3df0', url: '/agents/optimized/abaporu-64.webp' },
         {
-          revision: '75ce574da71ba34521304651c0ce6944',
+          revision: 'a531899c29b4260ecf157233ee221582',
           url: '/agents/optimized/abaporu-placeholder.json',
         },
         { revision: '9c3409c849f794f967db92d4551fa147', url: '/agents/optimized/anita-128.avif' },
@@ -2056,7 +2056,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'e12e16c5e16d2e1c298107e5610ffa1b', url: '/agents/optimized/anita-64.png' },
         { revision: 'be54cdce5d0c81e1503eaf8b978dc9f2', url: '/agents/optimized/anita-64.webp' },
         {
-          revision: '0346b6001b27c3dd68ea23212bedf12a',
+          revision: '16590bfefeed2aef816f99f67058723f',
           url: '/agents/optimized/anita-placeholder.json',
         },
         {
@@ -2093,7 +2093,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           url: '/agents/optimized/bonifacio-64.webp',
         },
         {
-          revision: '4b7da35139d890288da2848aeb96c253',
+          revision: 'a8d9c3cf37f120cc9331605b7c941e2a',
           url: '/agents/optimized/bonifacio-placeholder.json',
         },
         { revision: '4c83ffab00e82800d59a1ceac070f9ee', url: '/agents/optimized/ceuci-128.avif' },
@@ -2106,7 +2106,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '08f079cf533bf5985cc0fbc48e39d1fa', url: '/agents/optimized/ceuci-64.png' },
         { revision: '2e13aa84e0751d130667d9c1c60e0468', url: '/agents/optimized/ceuci-64.webp' },
         {
-          revision: '857a766a2b16cdd3404c0bc0ba8c97a3',
+          revision: 'a2a84cdd570712ba10bbe75420a88d0f',
           url: '/agents/optimized/ceuci-placeholder.json',
         },
         { revision: '5ecae47610795ee83ebd4b1a3a2ca1ee', url: '/agents/optimized/dandara-128.avif' },
@@ -2119,7 +2119,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'cb63d05bf0968d5cf2369b82e0f5be16', url: '/agents/optimized/dandara-64.png' },
         { revision: '4f03b6766186e104d2d28c4df0b2067f', url: '/agents/optimized/dandara-64.webp' },
         {
-          revision: 'aeb3ba4c365765eb513e52ee738d8826',
+          revision: 'd6086bef7d432973088bb908046d4d8c',
           url: '/agents/optimized/dandara-placeholder.json',
         },
         { revision: 'cf9da62e30ffe89ad0fa4f6a70111590', url: '/agents/optimized/deodoro-128.avif' },
@@ -2129,7 +2129,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'bd9342e2737a2d90e31f8e3d07729652', url: '/agents/optimized/deodoro-64.png' },
         { revision: '3cddb8f2d388225bfce2dec661850a8a', url: '/agents/optimized/deodoro-64.webp' },
         {
-          revision: '334bd12c36e2b7e8f458f4a6efa93f7c',
+          revision: '84af3c327dc66a95f5665c91aff6a17c',
           url: '/agents/optimized/deodoro-placeholder.json',
         },
         {
@@ -2145,7 +2145,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '3a49d65cbb3beb95aebb0265813d5293', url: '/agents/optimized/drummond-64.png' },
         { revision: '60d95d60fb985c5162b9b9f4d1d1b707', url: '/agents/optimized/drummond-64.webp' },
         {
-          revision: '9610825ebce729b4d67d1b775da265df',
+          revision: '80e7e381df623f9093afd0c55f53c7c9',
           url: '/agents/optimized/drummond-placeholder.json',
         },
         { revision: '166d34ee8d18d0f5c94603b7edda9527', url: '/agents/optimized/lampiao-128.avif' },
@@ -2158,7 +2158,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'cfdda6b4aab249cbad8a9cf579df8e7e', url: '/agents/optimized/lampiao-64.png' },
         { revision: '1814aa2b4cf58dd98c933d78cb192fbf', url: '/agents/optimized/lampiao-64.webp' },
         {
-          revision: '3acdaf0807602ff856018408dadd8bd2',
+          revision: '6b7485c4b32fed9071d6ede03de3272e',
           url: '/agents/optimized/lampiao-placeholder.json',
         },
         { revision: 'eb2b0ff44c765767ce52d26fe524f59a', url: '/agents/optimized/machado-128.avif' },
@@ -2171,10 +2171,10 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'e63f96bc9e8fb8414d5da4b2fe4ca0a1', url: '/agents/optimized/machado-64.png' },
         { revision: 'b4206fc26df9f326eaa891bb35661fa9', url: '/agents/optimized/machado-64.webp' },
         {
-          revision: '85a899436a21dd59e89325a2062fe3a6',
+          revision: '6cdd67b27fa0244d5b0725e5d3f3a409',
           url: '/agents/optimized/machado-placeholder.json',
         },
-        { revision: '432eb908fe7fe7484e52c9fe228307c6', url: '/agents/optimized/manifest.json' },
+        { revision: '6700952dd2390165d76d20ec965c236e', url: '/agents/optimized/manifest.json' },
         { revision: 'a81bd835a2b95f2c8d0399b339fb78c0', url: '/agents/optimized/nana-128.avif' },
         { revision: '656db3df47e36f362e7407b433c1530f', url: '/agents/optimized/nana-128.png' },
         { revision: 'e1cd664a3676ff3fbc42a0a08e8af6cb', url: '/agents/optimized/nana-128.webp' },
@@ -2182,7 +2182,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '2d72152225be30cee67226318ff334c5', url: '/agents/optimized/nana-64.png' },
         { revision: 'a43af5b8177ef7d059dc77a210bdf9a4', url: '/agents/optimized/nana-64.webp' },
         {
-          revision: '354b368f6e48c52bc835f444bf372a2c',
+          revision: '041919f6d4bd06d8e8d999bed5f0833d',
           url: '/agents/optimized/nana-placeholder.json',
         },
         {
@@ -2198,7 +2198,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'd9873580900970ddb2ef34d3f6bb1a2c', url: '/agents/optimized/niemeyer-64.png' },
         { revision: '0a02efb5729911834fbac666c6c10ef9', url: '/agents/optimized/niemeyer-64.webp' },
         {
-          revision: '0993fe3d511a882c9adaa55e6da9ab16',
+          revision: '4f43f0a8864c0147e65cda12a2bb006c',
           url: '/agents/optimized/niemeyer-placeholder.json',
         },
         {
@@ -2214,7 +2214,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'dfdf82de07d9a71a71cc7fba0f88a6e4', url: '/agents/optimized/obaluaie-64.png' },
         { revision: '5d0fbec2260573d5faa6678747fd711f', url: '/agents/optimized/obaluaie-64.webp' },
         {
-          revision: '2b61447d74227aaf7b9b4c83df876b1a',
+          revision: 'a10bd6e46ecb3bc73cdfbd3f3124ef28',
           url: '/agents/optimized/obaluaie-placeholder.json',
         },
         { revision: 'a21bba3e9e2d3314fb9ba85afebdc22b', url: '/agents/optimized/oxossi-128.avif' },
@@ -2224,7 +2224,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'dfdf82de07d9a71a71cc7fba0f88a6e4', url: '/agents/optimized/oxossi-64.png' },
         { revision: '5d0fbec2260573d5faa6678747fd711f', url: '/agents/optimized/oxossi-64.webp' },
         {
-          revision: '2b61447d74227aaf7b9b4c83df876b1a',
+          revision: 'a10bd6e46ecb3bc73cdfbd3f3124ef28',
           url: '/agents/optimized/oxossi-placeholder.json',
         },
         {
@@ -2240,7 +2240,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: 'e2309753dde3d222e877073f39ad6237', url: '/agents/optimized/quiteria-64.png' },
         { revision: 'f65af31746114053fea1bdae97cd7085', url: '/agents/optimized/quiteria-64.webp' },
         {
-          revision: '151c766aba58d12252bfc98d66adc15d',
+          revision: '21ae23d6c31eab5f6160d5159360018c',
           url: '/agents/optimized/quiteria-placeholder.json',
         },
         { revision: '9aea7a3447ba3359c2e2877bb5237b13', url: '/agents/optimized/senna-128.avif' },
@@ -2253,7 +2253,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '3406428e7b511476f7fda22a1339aa52', url: '/agents/optimized/senna-64.png' },
         { revision: 'd4fcf998abaf8e420c2635dea8238bcc', url: '/agents/optimized/senna-64.webp' },
         {
-          revision: '130d0d32147d5df08379dfb2a5e1e64d',
+          revision: '176ec2a059022cb4733890de8301af5d',
           url: '/agents/optimized/senna-placeholder.json',
         },
         { revision: '98c0c409376b7d2a16a4b883663c2a44', url: '/agents/optimized/system-128.avif' },
@@ -2263,7 +2263,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '3a49d65cbb3beb95aebb0265813d5293', url: '/agents/optimized/system-64.png' },
         { revision: '60d95d60fb985c5162b9b9f4d1d1b707', url: '/agents/optimized/system-64.webp' },
         {
-          revision: '9610825ebce729b4d67d1b775da265df',
+          revision: '80e7e381df623f9093afd0c55f53c7c9',
           url: '/agents/optimized/system-placeholder.json',
         },
         {
@@ -2315,7 +2315,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           url: '/agents/optimized/tiradentes-64.webp',
         },
         {
-          revision: '5f58a48db7ba9790f78049f5f5aac2a3',
+          revision: '91b3329993b80d3e8106434bc8d78645',
           url: '/agents/optimized/tiradentes-placeholder.json',
         },
         { revision: '6c836fba1aed93ffe354a7ed6cbb960d', url: '/agents/optimized/zumbi-128.avif' },
@@ -2328,7 +2328,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: '092d91e5d26def6134a42b43d80243b9', url: '/agents/optimized/zumbi-64.png' },
         { revision: 'a24aea70312613c6805c39bd4f565bcb', url: '/agents/optimized/zumbi-64.webp' },
         {
-          revision: '77d70ce2a764ebfe2ace8b82d9eeb430',
+          revision: '2705160aea35293dd5f064788cd6c790',
           url: '/agents/optimized/zumbi-placeholder.json',
         },
         { revision: '7554770e0e6ac50796a5de88aee852a3', url: '/agents/oxossi.png' },
