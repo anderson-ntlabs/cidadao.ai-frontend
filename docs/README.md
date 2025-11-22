@@ -1,9 +1,16 @@
 # Cidadão.AI Frontend Documentation
 
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Test Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](https://github.com/anderson-ufrj/cidadao.ai-frontend)
+[![Bundle Size](https://img.shields.io/badge/bundle-254kB-success)](./11-performance/bundle-analysis-2025-11-22.md)
+[![Lighthouse](https://img.shields.io/badge/lighthouse-97.8-success)](./11-performance/bundle-analysis-2025-11-22.md)
+[![License](https://img.shields.io/badge/license-MIT-blue)](../LICENSE)
+
 **Project**: Cidadão.AI - Brazilian Government Transparency Platform
 **Repository**: cidadao.ai-frontend
 **Tech Stack**: Next.js 15, TypeScript, Tailwind CSS, Supabase Auth
-**Last Updated**: November 8, 2025
+**Last Updated**: November 22, 2025
 
 ---
 
@@ -141,6 +148,7 @@ Development standards and patterns:
 
 - **[Component Documentation](./06-development/COMPONENT_DOCS.md)** - Component API reference
 - **[Type Generation](./06-development/TYPE_GENERATION.md)** - TypeScript type generation
+- **[Patches](./06-development/patches/)** - Code patches and fixes
 
 ---
 
@@ -197,9 +205,10 @@ Deployment and infrastructure documentation:
 - **[Production Deployment](./09-deployment/PRODUCTION_DEPLOYMENT.md)** - Deployment guide
 - **[Lighthouse CI Guide](./09-deployment/lighthouse-ci-guide.md)** - Performance CI
 - **[Monitoring Setup](./09-deployment/MONITORING_SETUP.md)** - Sentry configuration
+- **[Sentry Integration](./09-deployment/sentry-integration.md)** - Comprehensive Sentry guide (NEW)
+- **[Sentry Setup Complete](./09-deployment/SENTRY_SETUP_COMPLETE.md)** - Error monitoring
 - **[Security Hardening](./09-deployment/SECURITY_HARDENING.md)** - Security best practices
 - **[Security Hardening Guide](./09-deployment/security-hardening-guide.md)** - Detailed security
-- **[Sentry Setup Complete](./09-deployment/SENTRY_SETUP_COMPLETE.md)** - Error monitoring
 - **[Vercel KV Setup](./09-deployment/VERCEL_KV_SETUP.md)** - Cache configuration
 - **[Vercel KV Setup Complete](./09-deployment/VERCEL_KV_SETUP_COMPLETE.md)** - KV implementation
 
@@ -211,6 +220,8 @@ Reference materials and migration guides:
 
 - **[Migration Guides](./10-reference/migration-guides/)** - Version migration documentation
   - [Chat Migration](./10-reference/migration-guides/chat-migration.md) - Chat system refactor
+  - [General Migration Guide 2025-11-08](./10-reference/migration-guides/MIGRATION-GUIDE-2025-11-08.md) - Migration procedures (NEW)
+- **[Renovate Guide](./10-reference/renovate-guide.md)** - Automated dependency updates
 
 ---
 
@@ -218,13 +229,30 @@ Reference materials and migration guides:
 
 Performance optimization and analysis documentation:
 
+### Current Reports (2025)
+
+- **[Bundle Analysis 2025-11-22](./11-performance/bundle-analysis-2025-11-22.md)** - Latest bundle analysis (NEW)
 - **[Performance Roadmap Nov 2025](./11-performance/performance-roadmap-nov-2025.md)** - Performance strategy
-- **[Bundle Optimization Opportunities](./11-performance/bundle-optimization-opportunities.md)** - Bundle size reduction
+- **[Optimization Roadmap 2025](./11-performance/optimization-roadmap-2025.md)** - Comprehensive roadmap (NEW)
+
+### Implementation Reports
+
+- **[Performance Optimization Report](./11-performance/performance-optimization-report.md)** - General optimizations (NEW)
+- **[Quick Wins Implementation](./11-performance/quick-wins-implementation.md)** - Fast improvements (NEW)
+
+### Phase Reports
+
+- **[Phase 2 Optimization Report](./11-performance/phase-2-optimization-report.md)** - Phase 2 results (NEW)
+- **[Phase 3 Optimization Report](./11-performance/phase-3-optimization-report.md)** - Phase 3 results (NEW)
 - **[Phase 1B: CLS Analysis](./11-performance/phase1b-cls-analysis.md)** - Cumulative Layout Shift fixes
 - **[Phase 1B: Implementation Summary](./11-performance/phase1b-implementation-summary.md)** - Results
 - **[Phase 2: Bundle Analysis](./11-performance/phase2-bundle-analysis.md)** - Bundle deep-dive
 - **[Phase 2: Completion Analysis](./11-performance/phase2-completion-analysis.md)** - Phase 2 results
 - **[Phase 3: LCP Optimization Summary](./11-performance/phase3-lcp-optimization-summary.md)** - Largest Contentful Paint
+
+### Tools & Guides
+
+- **[Bundle Optimization Opportunities](./11-performance/bundle-optimization-opportunities.md)** - Bundle size reduction
 
 ---
 
@@ -320,5 +348,5 @@ Historical documentation and reports organized by date:
 ---
 
 **Maintainer**: Anderson Henrique da Silva
-**Last Updated**: November 8, 2025
-**Status**: ✅ Documentation Reorganization Complete
+**Last Updated**: November 22, 2025
+**Status**: ✅ Documentation Fully Organized & Updated
