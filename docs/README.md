@@ -222,6 +222,7 @@ Reference materials and migration guides:
   - [Chat Migration](./10-reference/migration-guides/chat-migration.md) - Chat system refactor
   - [General Migration Guide 2025-11-08](./10-reference/migration-guides/MIGRATION-GUIDE-2025-11-08.md) - Migration procedures (NEW)
 - **[Renovate Guide](./10-reference/renovate-guide.md)** - Automated dependency updates
+- **[Renovate Setup](./10-reference/RENOVATE_SETUP.md)** - Renovate configuration guide (NEW)
 
 ---
 
