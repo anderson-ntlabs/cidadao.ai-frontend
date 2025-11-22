@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { agents } from '@/data/agents'
 import { useChatStore } from '@/store/chat-store'
@@ -355,12 +355,18 @@ export default function ChatPage() {
     }
   }
 
-  const adjustTextareaHeight = () => {
+  const adjustTextareaHeight = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`
     }
-  }
+  }, [])
+
+  // Adjust textarea height whenever inputMessage changes
+  // Using useLayoutEffect to prevent infinite loop and ensure synchronous DOM update
+  useLayoutEffect(() => {
+    adjustTextareaHeight()
+  }, [inputMessage, adjustTextareaHeight])
 
   const handleSelectSession = async (sessionId: string) => {
     setIsHistoryOpen(false)
@@ -824,7 +830,6 @@ export default function ChatPage() {
                 setInputMessage(transcript)
                 if (textareaRef.current) {
                   textareaRef.current.focus()
-                  adjustTextareaHeight()
                 }
               }}
               disabled={!canSendMessage}
@@ -838,7 +843,6 @@ export default function ChatPage() {
                 setInputMessage((prev) => prev + ' ' + transcript)
                 if (textareaRef.current) {
                   textareaRef.current.focus()
-                  adjustTextareaHeight()
                 }
               }}
               onInterimTranscript={(transcript) => {
@@ -858,7 +862,6 @@ export default function ChatPage() {
               value={inputMessage}
               onChange={(e) => {
                 setInputMessage(e.target.value)
-                adjustTextareaHeight()
               }}
               onKeyDown={handleKeyDown}
               placeholder="Digite ou fale sua pergunta..."
