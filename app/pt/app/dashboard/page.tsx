@@ -28,6 +28,7 @@ import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { ErrorBoundary } from '@/components/error-boundary'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
 import { SwipeActions } from '@/components/mobile'
@@ -255,270 +256,286 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Dashboard de Investigações
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Visão geral das análises e monitoramento de transparência
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
-            {(['7d', '30d', '90d'] as const).map((range) => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={cn(
-                  'px-4 py-2 rounded-md text-sm font-medium transition-colors',
-                  timeRange === range
-                    ? 'bg-green-600 text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                )}
-              >
-                {range === '7d' ? '7 dias' : range === '30d' ? '30 dias' : '90 dias'}
-              </button>
-            ))}
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        logger.error('Dashboard page error:', { error, errorInfo })
+        toast.error('Erro no Dashboard', 'Ocorreu um erro ao carregar o dashboard.')
+      }}
+    >
+      <div className="space-y-6 p-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Dashboard de Investigações
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Visão geral das análises e monitoramento de transparência
+            </p>
           </div>
 
-          <Button variant="secondary" size="sm">
-            <Filter className="w-4 h-4 mr-2" />
-            Filtros
-          </Button>
-        </div>
-      </div>
-
-      {/* Investigation Analytics - Real Data */}
-      <InvestigationAnalytics />
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsCards.map((stat, index) => {
-          const Icon = stat.icon
-          const isPositive = stat.trend === 'up'
-
-          return (
-            <GlassCard key={index} className="hover:shadow-lg transition-all duration-200">
-              <GlassCardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={cn('p-3 rounded-lg', stat.bgColor)}>
-                    <Icon className={cn('w-6 h-6', stat.color)} />
-                  </div>
-
-                  <div className="flex items-center gap-1 text-sm">
-                    {isPositive ? (
-                      <ArrowUpRight className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4 text-red-600" />
-                    )}
-                    <span
-                      className={cn('font-medium', isPositive ? 'text-green-600' : 'text-red-600')}
-                    >
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {stat.value}
-                  </p>
-                </div>
-              </GlassCardContent>
-            </GlassCard>
-          )
-        })}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Investigations */}
-        <GlassCard className="lg:col-span-2">
-          <GlassCardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <FileSearch className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                  Investigações Recentes
-                </h2>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/pt/app/investigacoes')}
-              >
-                Ver todas
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-          </GlassCardHeader>
-
-          <GlassCardContent>
-            <div className="space-y-2">
-              {recentInvestigations.map((inv) => (
-                <SwipeableCard
-                  key={inv.id}
-                  onClick={() => router.push(`/pt/app/investigacoes/${inv.id}`)}
-                  leftAction={SwipeActions.archive(() => handleArchiveInvestigation(inv.id))}
-                  rightAction={SwipeActions.delete(() => handleDeleteInvestigation(inv.id))}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          <div className="flex items-center gap-3">
+            <div className="flex bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
+              {(['7d', '30d', '90d'] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={cn(
+                    'px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                    timeRange === range
+                      ? 'bg-green-600 text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  )}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-mono text-gray-500 dark:text-gray-400">
-                          {inv.id}
-                        </span>
-                        <span
-                          className={cn(
-                            'px-2 py-0.5 rounded-full text-xs font-medium',
-                            getStatusColor(inv.status)
-                          )}
-                        >
-                          {inv.status === 'critical'
-                            ? 'Crítico'
-                            : inv.status === 'active'
-                              ? 'Ativo'
-                              : 'Concluído'}
-                        </span>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                        {inv.title}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                        <DollarSign className="w-4 h-4" />
-                        <span>{formatValue(inv.value)}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                        <Shield className="w-4 h-4" />
-                        <span>{inv.confidence.toFixed(1)}%</span>
-                      </div>
-                    </div>
-
-                    <span className="text-gray-500 dark:text-gray-400">
-                      {format(inv.date, "d 'de' MMM", { locale: ptBR })}
-                    </span>
-                  </div>
-                </SwipeableCard>
+                  {range === '7d' ? '7 dias' : range === '30d' ? '30 dias' : '90 dias'}
+                </button>
               ))}
             </div>
-          </GlassCardContent>
-        </GlassCard>
 
-        {/* Recent Activity */}
+            <Button variant="secondary" size="sm">
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros
+            </Button>
+          </div>
+        </div>
+
+        {/* Investigation Analytics - Real Data */}
+        <InvestigationAnalytics />
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statsCards.map((stat, index) => {
+            const Icon = stat.icon
+            const isPositive = stat.trend === 'up'
+
+            return (
+              <GlassCard key={index} className="hover:shadow-lg transition-all duration-200">
+                <GlassCardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={cn('p-3 rounded-lg', stat.bgColor)}>
+                      <Icon className={cn('w-6 h-6', stat.color)} />
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sm">
+                      {isPositive ? (
+                        <ArrowUpRight className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDownRight className="w-4 h-4 text-red-600" />
+                      )}
+                      <span
+                        className={cn(
+                          'font-medium',
+                          isPositive ? 'text-green-600' : 'text-red-600'
+                        )}
+                      >
+                        {stat.change}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                      {stat.value}
+                    </p>
+                  </div>
+                </GlassCardContent>
+              </GlassCard>
+            )
+          })}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Investigations */}
+          <GlassCard className="lg:col-span-2">
+            <GlassCardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <FileSearch className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Investigações Recentes
+                  </h2>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/pt/app/investigacoes')}
+                >
+                  Ver todas
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </GlassCardHeader>
+
+            <GlassCardContent>
+              <div className="space-y-2">
+                {recentInvestigations.map((inv) => (
+                  <SwipeableCard
+                    key={inv.id}
+                    onClick={() => router.push(`/pt/app/investigacoes/${inv.id}`)}
+                    leftAction={SwipeActions.archive(() => handleArchiveInvestigation(inv.id))}
+                    rightAction={SwipeActions.delete(() => handleDeleteInvestigation(inv.id))}
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-mono text-gray-500 dark:text-gray-400">
+                            {inv.id}
+                          </span>
+                          <span
+                            className={cn(
+                              'px-2 py-0.5 rounded-full text-xs font-medium',
+                              getStatusColor(inv.status)
+                            )}
+                          >
+                            {inv.status === 'critical'
+                              ? 'Crítico'
+                              : inv.status === 'active'
+                                ? 'Ativo'
+                                : 'Concluído'}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                          {inv.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <DollarSign className="w-4 h-4" />
+                          <span>{formatValue(inv.value)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                          <Shield className="w-4 h-4" />
+                          <span>{inv.confidence.toFixed(1)}%</span>
+                        </div>
+                      </div>
+
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {format(inv.date, "d 'de' MMM", { locale: ptBR })}
+                      </span>
+                    </div>
+                  </SwipeableCard>
+                ))}
+              </div>
+            </GlassCardContent>
+          </GlassCard>
+
+          {/* Recent Activity */}
+          <GlassCard>
+            <GlassCardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                    Atividades Recentes
+                  </h2>
+                </div>
+              </div>
+            </GlassCardHeader>
+
+            <GlassCardContent>
+              <ActivityTimeline
+                activities={activities}
+                isLoading={isLoadingActivities}
+                emptyMessage="Suas atividades aparecerão aqui"
+                maxItems={5}
+              />
+
+              <Button
+                variant="secondary"
+                className="w-full mt-4"
+                onClick={() => router.push('/pt/app/chat')}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Conversar com Agentes
+              </Button>
+            </GlassCardContent>
+          </GlassCard>
+        </div>
+
+        {/* Quick Actions */}
         <GlassCard>
           <GlassCardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                  Atividades Recentes
-                </h2>
-              </div>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Ações Rápidas
+            </h2>
           </GlassCardHeader>
 
           <GlassCardContent>
-            <ActivityTimeline
-              activities={activities}
-              isLoading={isLoadingActivities}
-              emptyMessage="Suas atividades aparecerão aqui"
-              maxItems={5}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button
+                variant="secondary"
+                className="h-auto py-4 px-6 justify-start"
+                onClick={() => router.push('/pt/app/chat')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Search className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Nova Investigação
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Iniciar análise com IAs
+                    </p>
+                  </div>
+                </div>
+              </Button>
 
-            <Button
-              variant="secondary"
-              className="w-full mt-4"
-              onClick={() => router.push('/pt/app/chat')}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Conversar com Agentes
-            </Button>
+              <Button
+                variant="secondary"
+                className="h-auto py-4 px-6 justify-start"
+                onClick={() => router.push('/pt/app/investigacoes')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <Eye className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Ver Investigações
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Acessar todas as análises
+                    </p>
+                  </div>
+                </div>
+              </Button>
+
+              <Button
+                variant="secondary"
+                className="h-auto py-4 px-6 justify-start"
+                onClick={() => router.push('/pt/agents')}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Agentes IA
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Conhecer especialistas
+                    </p>
+                  </div>
+                </div>
+              </Button>
+            </div>
           </GlassCardContent>
         </GlassCard>
       </div>
-
-      {/* Quick Actions */}
-      <GlassCard>
-        <GlassCardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Ações Rápidas</h2>
-        </GlassCardHeader>
-
-        <GlassCardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              variant="secondary"
-              className="h-auto py-4 px-6 justify-start"
-              onClick={() => router.push('/pt/app/chat')}
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Search className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    Nova Investigação
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Iniciar análise com IAs
-                  </p>
-                </div>
-              </div>
-            </Button>
-
-            <Button
-              variant="secondary"
-              className="h-auto py-4 px-6 justify-start"
-              onClick={() => router.push('/pt/app/investigacoes')}
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Eye className="w-6 h-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    Ver Investigações
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Acessar todas as análises
-                  </p>
-                </div>
-              </div>
-            </Button>
-
-            <Button
-              variant="secondary"
-              className="h-auto py-4 px-6 justify-start"
-              onClick={() => router.push('/pt/agents')}
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Agentes IA</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Conhecer especialistas</p>
-                </div>
-              </div>
-            </Button>
-          </div>
-        </GlassCardContent>
-      </GlassCard>
-    </div>
+    </ErrorBoundary>
   )
 }

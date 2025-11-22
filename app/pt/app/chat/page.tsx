@@ -16,6 +16,7 @@ import { logger } from '@/lib/utils/logger'
 import { useAnnouncementHelpers } from '@/components/a11y'
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -594,300 +595,309 @@ export default function ChatPage() {
 
   // Desktop UI
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* VLibras is now global in AuthLayout */}
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        logger.error('Chat page error:', { error, errorInfo })
+        toast.error('Erro no Chat', 'Ocorreu um erro inesperado. Por favor, recarregue a página.')
+      }}
+    >
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* VLibras is now global in AuthLayout */}
 
-      {/* Chat History Sidebar */}
-      <ChatHistorySidebar
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        onSelectSession={handleSelectSession}
-        currentSessionId={session?.session_id}
-      />
+        {/* Chat History Sidebar */}
+        <ChatHistorySidebar
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+          onSelectSession={handleSelectSession}
+          currentSessionId={session?.session_id}
+        />
 
-      {/* Header - Minimal */}
-      <div className="flex-shrink-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <OptimizedImage
-                src="/agents/abaporu.png"
-                alt="Cidadão.AI"
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/20"
-                priority
-              />
-              <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {chatMode === 'maritaca' ? 'Maritaca.AI Direto' : 'Cidadão.AI'}
-                </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {chatMode === 'maritaca'
-                    ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
-                    : 'Transparência Pública'}
-                </p>
+        {/* Header - Minimal */}
+        <div className="flex-shrink-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <OptimizedImage
+                  src="/agents/abaporu.png"
+                  alt="Cidadão.AI"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/20"
+                  priority
+                />
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    {chatMode === 'maritaca' ? 'Maritaca.AI Direto' : 'Cidadão.AI'}
+                  </h1>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {chatMode === 'maritaca'
+                      ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
+                      : 'Transparência Pública'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <ChatModeToggle mode={chatMode} onModeChange={handleModeChange} />
+                {chatMode === 'maritaca' && (
+                  <MaritacaModelSelector
+                    selectedModel={selectedModel}
+                    onModelChange={setSelectedModel}
+                  />
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => createNewSession()}
+                  leftIcon={<Plus className="w-4 h-4" />}
+                  title="Nova conversa"
+                >
+                  Nova
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsHistoryOpen(true)}
+                  leftIcon={<History className="w-4 h-4" />}
+                  title="Histórico"
+                >
+                  Histórico
+                </Button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <ChatModeToggle mode={chatMode} onModeChange={handleModeChange} />
-              {chatMode === 'maritaca' && (
-                <MaritacaModelSelector
-                  selectedModel={selectedModel}
-                  onModelChange={setSelectedModel}
-                />
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => createNewSession()}
-                leftIcon={<Plus className="w-4 h-4" />}
-                title="Nova conversa"
-              >
-                Nova
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsHistoryOpen(true)}
-                leftIcon={<History className="w-4 h-4" />}
-                title="Histórico"
-              >
-                Histórico
-              </Button>
+            {/* Mode Description */}
+            <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
+              <ChatModeDescription mode={chatMode} />
             </div>
-          </div>
-
-          {/* Mode Description */}
-          <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-gray-700/50">
-            <ChatModeDescription mode={chatMode} />
           </div>
         </div>
-      </div>
 
-      {/* Messages Area */}
-      <PullToRefresh
-        onRefresh={handleRefresh}
-        threshold={80}
-        className="flex-1 overflow-y-auto min-h-0"
-        disabled={messages.length === 0}
-      >
-        <div
-          className="max-w-4xl mx-auto px-4 py-6 h-full"
-          style={{
-            paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
-          }}
+        {/* Messages Area */}
+        <PullToRefresh
+          onRefresh={handleRefresh}
+          threshold={80}
+          className="flex-1 overflow-y-auto min-h-0"
+          disabled={messages.length === 0}
         >
-          {/* Error Banner - Persistent */}
-          {showErrorBanner && error && (
-            <div
-              className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300"
-              role="alert"
-              aria-live="assertive"
-            >
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-red-800 dark:text-red-200 mb-1">
-                  Erro ao processar mensagem
-                </h3>
-                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          <div
+            className="max-w-4xl mx-auto px-4 py-6 h-full"
+            style={{
+              paddingBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+            }}
+          >
+            {/* Error Banner - Persistent */}
+            {showErrorBanner && error && (
+              <div
+                className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300"
+                role="alert"
+                aria-live="assertive"
+              >
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-red-800 dark:text-red-200 mb-1">
+                    Erro ao processar mensagem
+                  </h3>
+                  <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={handleRetry}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 active:scale-95 transition-all min-h-[36px]"
+                    aria-label="Tentar enviar novamente"
+                  >
+                    Tentar Novamente
+                  </button>
+                  <button
+                    onClick={handleDismissError}
+                    className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors min-h-[36px] min-w-[36px]"
+                    aria-label="Fechar aviso de erro"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={handleRetry}
-                  className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 active:scale-95 transition-all min-h-[36px]"
-                  aria-label="Tentar enviar novamente"
-                >
-                  Tentar Novamente
-                </button>
-                <button
-                  onClick={handleDismissError}
-                  className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors min-h-[36px] min-w-[36px]"
-                  aria-label="Fechar aviso de erro"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
+            )}
 
-          {messages.length === 0 ? (
-            /* Empty State - Modern & Engaging */
-            <ChatEmptyState
-              userName={user?.name || 'Cidadão'}
-              onSuggestionClick={(suggestion) => {
-                setInputMessage(suggestion)
-                // Auto-focus on input for better UX
-                setTimeout(() => {
-                  textareaRef.current?.focus()
-                }, 100)
-              }}
-            />
-          ) : (
-            /* Messages List */
-            <div className="space-y-4 md:space-y-6 py-4">
-              {/* Optimistic User Message - Desktop (shown immediately before server confirms) */}
-              {optimisticMessage && (
-                <div className="flex gap-3 md:gap-4 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="max-w-[75%] order-first">
-                    <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
-                      <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
+            {messages.length === 0 ? (
+              /* Empty State - Modern & Engaging */
+              <ChatEmptyState
+                userName={user?.name || 'Cidadão'}
+                onSuggestionClick={(suggestion) => {
+                  setInputMessage(suggestion)
+                  // Auto-focus on input for better UX
+                  setTimeout(() => {
+                    textareaRef.current?.focus()
+                  }, 100)
+                }}
+              />
+            ) : (
+              /* Messages List */
+              <div className="space-y-4 md:space-y-6 py-4">
+                {/* Optimistic User Message - Desktop (shown immediately before server confirms) */}
+                {optimisticMessage && (
+                  <div className="flex gap-3 md:gap-4 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="max-w-[75%] order-first">
+                      <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
+                        <p className="whitespace-pre-wrap text-sm text-white">
+                          {optimisticMessage}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                </div>
-              )}
+                )}
 
-              {messages.map((message, index) => {
-                const isLatest =
-                  index === messages.length - 1 && message.role === 'assistant' && isLoading
-                const messageAgent = message.agent_id
-                  ? agents.find((a) => a.id === message.agent_id)
-                  : null
+                {messages.map((message, index) => {
+                  const isLatest =
+                    index === messages.length - 1 && message.role === 'assistant' && isLoading
+                  const messageAgent = message.agent_id
+                    ? agents.find((a) => a.id === message.agent_id)
+                    : null
 
-                return (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      'flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300',
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    )}
-                  >
-                    {/* Assistant Avatar */}
-                    {message.role === 'assistant' && (
-                      <AgentAvatar
-                        agentId={message.agent_id}
-                        agentImage={messageAgent?.image || '/agents/abaporu.png'}
-                        agentName={messageAgent?.name || 'Abaporu'}
-                        isThinking={isLatest && isLoading}
-                        showSparkle={index === 0}
-                      />
-                    )}
-
-                    {/* Message Bubble */}
+                  return (
                     <div
+                      key={message.id}
                       className={cn(
-                        'max-w-[85%] md:max-w-[75%]',
-                        message.role === 'user' ? 'order-first' : ''
+                        'flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300',
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
                       )}
                     >
-                      <MessageBubble
-                        content={message.content || ''}
-                        role={message.role === 'system' ? 'assistant' : message.role}
-                        agentName={messageAgent?.name}
-                        agentRole={messageAgent?.role.pt}
-                        agentId={message.agent_id}
-                        isLatest={isLatest}
-                        isLoading={isLoading}
-                        onComplete={() => {
-                          if (isLatest) scrollToBottom()
-                        }}
-                        metadata={message.metadata}
-                      />
-                    </div>
+                      {/* Assistant Avatar */}
+                      {message.role === 'assistant' && (
+                        <AgentAvatar
+                          agentId={message.agent_id}
+                          agentImage={messageAgent?.image || '/agents/abaporu.png'}
+                          agentName={messageAgent?.name || 'Abaporu'}
+                          isThinking={isLatest && isLoading}
+                          showSparkle={index === 0}
+                        />
+                      )}
 
-                    {/* User Avatar */}
-                    {message.role === 'user' && (
-                      <div className="flex-shrink-0">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
-                          {user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
+                      {/* Message Bubble */}
+                      <div
+                        className={cn(
+                          'max-w-[85%] md:max-w-[75%]',
+                          message.role === 'user' ? 'order-first' : ''
+                        )}
+                      >
+                        <MessageBubble
+                          content={message.content || ''}
+                          role={message.role === 'system' ? 'assistant' : message.role}
+                          agentName={messageAgent?.name}
+                          agentRole={messageAgent?.role.pt}
+                          agentId={message.agent_id}
+                          isLatest={isLatest}
+                          isLoading={isLoading}
+                          onComplete={() => {
+                            if (isLatest) scrollToBottom()
+                          }}
+                          metadata={message.metadata}
+                        />
                       </div>
-                    )}
-                  </div>
-                )
-              })}
-              <div ref={messagesEndRef} />
+
+                      {/* User Avatar */}
+                      {message.role === 'user' && (
+                        <div className="flex-shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+        </PullToRefresh>
+
+        {/* Input Area - Fixed Bottom */}
+        <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
+          {/* Progress Bar - Shows when sending message */}
+          {sendingProgress > 0 && sendingProgress < 100 && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
+                style={{ width: `${sendingProgress}%` }}
+                role="progressbar"
+                aria-valuenow={sendingProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Enviando mensagem"
+              />
             </div>
           )}
-        </div>
-      </PullToRefresh>
+          <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
+            <div className="flex gap-2 sm:gap-3 items-end">
+              {/* Voice Recorder (Audio Recording) */}
+              <VoiceRecorder
+                onTranscript={(transcript) => {
+                  setInputMessage(transcript)
+                  if (textareaRef.current) {
+                    textareaRef.current.focus()
+                  }
+                }}
+                disabled={!canSendMessage}
+                size="md"
+                variant="default"
+              />
 
-      {/* Input Area - Fixed Bottom */}
-      <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
-        {/* Progress Bar - Shows when sending message */}
-        {sendingProgress > 0 && sendingProgress < 100 && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
-              style={{ width: `${sendingProgress}%` }}
-              role="progressbar"
-              aria-valuenow={sendingProgress}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Enviando mensagem"
-            />
-          </div>
-        )}
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:py-5">
-          <div className="flex gap-2 sm:gap-3 items-end">
-            {/* Voice Recorder (Audio Recording) */}
-            <VoiceRecorder
-              onTranscript={(transcript) => {
-                setInputMessage(transcript)
-                if (textareaRef.current) {
-                  textareaRef.current.focus()
-                }
-              }}
-              disabled={!canSendMessage}
-              size="md"
-              variant="default"
-            />
+              {/* Voice Input (Speech-to-Text) */}
+              <VoiceInputButton
+                onTranscript={(transcript) => {
+                  setInputMessage((prev) => prev + ' ' + transcript)
+                  if (textareaRef.current) {
+                    textareaRef.current.focus()
+                  }
+                }}
+                onInterimTranscript={(transcript) => {
+                  // Optional: Show interim results in a tooltip or indicator
+                  console.log('Interim:', transcript)
+                }}
+                disabled={!canSendMessage}
+                size="md"
+                variant="secondary"
+                lang="pt-BR"
+                showTooltip={true}
+                tooltipContent="Clique e fale (Speech-to-Text)"
+              />
 
-            {/* Voice Input (Speech-to-Text) */}
-            <VoiceInputButton
-              onTranscript={(transcript) => {
-                setInputMessage((prev) => prev + ' ' + transcript)
-                if (textareaRef.current) {
-                  textareaRef.current.focus()
-                }
-              }}
-              onInterimTranscript={(transcript) => {
-                // Optional: Show interim results in a tooltip or indicator
-                console.log('Interim:', transcript)
-              }}
-              disabled={!canSendMessage}
-              size="md"
-              variant="secondary"
-              lang="pt-BR"
-              showTooltip={true}
-              tooltipContent="Clique e fale (Speech-to-Text)"
-            />
-
-            <textarea
-              ref={textareaRef}
-              value={inputMessage}
-              onChange={(e) => {
-                setInputMessage(e.target.value)
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder="Digite ou fale sua pergunta..."
-              className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 dark:focus:border-green-500 transition-all text-base min-h-[52px] shadow-sm hover:shadow-md"
-              rows={1}
-              disabled={!canSendMessage}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!canSendMessage || !inputMessage.trim()}
-              loading={isLoading}
-              className="px-5 sm:px-6 py-3 sm:py-4 h-auto rounded-2xl shadow-md hover:shadow-lg transition-all"
-              leftIcon={<Send className="w-4 h-4 sm:w-5 sm:h-5" />}
-            >
-              <span className="hidden sm:inline">Enviar</span>
-            </Button>
-          </div>
-
-          {isLoading && (
-            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 animate-in fade-in duration-300">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span>Processando sua mensagem...</span>
+              <textarea
+                ref={textareaRef}
+                value={inputMessage}
+                onChange={(e) => {
+                  setInputMessage(e.target.value)
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="Digite ou fale sua pergunta..."
+                className="flex-1 resize-none rounded-2xl px-4 py-3 sm:py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 dark:focus:border-green-500 transition-all text-base min-h-[52px] shadow-sm hover:shadow-md"
+                rows={1}
+                disabled={!canSendMessage}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!canSendMessage || !inputMessage.trim()}
+                loading={isLoading}
+                className="px-5 sm:px-6 py-3 sm:py-4 h-auto rounded-2xl shadow-md hover:shadow-lg transition-all"
+                leftIcon={<Send className="w-4 h-4 sm:w-5 sm:h-5" />}
+              >
+                <span className="hidden sm:inline">Enviar</span>
+              </Button>
             </div>
-          )}
+
+            {isLoading && (
+              <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 animate-in fade-in duration-300">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span>Processando sua mensagem...</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   )
 }
