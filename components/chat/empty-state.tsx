@@ -1,12 +1,12 @@
 /**
- * Chat Empty State Component - Engaging first impression
+ * Chat Empty State Component - Personalized agent greeting
  *
- * Modern empty state with contextual suggestions and welcoming design
- * Reduces cognitive load and guides users to take action
+ * Shows personalized welcome when an agent is selected
+ * Adapts to Maritaca mode with model-specific greeting
  *
  * @see https://www.nngroup.com/articles/empty-state-interface/
  * @author Anderson Henrique da Silva
- * @date 2025-11-18
+ * @date 2025-11-25
  */
 
 'use client'
@@ -15,13 +15,23 @@ import { useState } from 'react'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { Sparkles, MessageSquare, TrendingUp, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { agents } from '@/data/agents'
+import { getAgentVisualConfig, MARITACA_CONFIG } from '@/data/agent-config'
+import type { MaritacaModel } from '@/lib/chat'
 
 interface ChatEmptyStateProps {
   userName?: string
   onSuggestionClick: (suggestion: string) => void
+  /** Selected agent ID (null = automatic) */
+  selectedAgentId?: string | null
+  /** Chat mode */
+  chatMode?: 'cidadao' | 'maritaca'
+  /** Selected Maritaca model */
+  maritacaModel?: MaritacaModel
 }
 
-const suggestions = [
+// Default suggestions for automatic mode
+const defaultSuggestions = [
   {
     icon: TrendingUp,
     text: 'Analisar gastos públicos de 2024',
@@ -48,9 +58,182 @@ const suggestions = [
   },
 ]
 
-export function ChatEmptyState({ userName, onSuggestionClick }: ChatEmptyStateProps): JSX.Element {
+export function ChatEmptyState({
+  userName,
+  onSuggestionClick,
+  selectedAgentId,
+  chatMode = 'cidadao',
+  maritacaModel = 'sabia-3',
+}: ChatEmptyStateProps): JSX.Element {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
+  // Get the appropriate config based on mode
+  const isMaritacaMode = chatMode === 'maritaca'
+  const maritacaConfig = MARITACA_CONFIG[maritacaModel] || MARITACA_CONFIG['sabia-3']
+
+  // Get agent config (for Cidadão.AI mode)
+  const selectedAgent = selectedAgentId ? agents.find((a) => a.id === selectedAgentId) : null
+  const agentConfig = getAgentVisualConfig(selectedAgentId)
+
+  // Determine what to show
+  const showPersonalized = isMaritacaMode || selectedAgentId
+
+  // Get display info
+  const displayImage = isMaritacaMode
+    ? '/agents/abaporu.png' // Use abaporu for Maritaca (parrot theme)
+    : selectedAgent?.image || '/agents/abaporu.png'
+
+  const displayName = isMaritacaMode ? maritacaConfig.name : selectedAgent?.name || 'Abaporu'
+
+  const displayRole = isMaritacaMode
+    ? maritacaConfig.role
+    : selectedAgent?.role.pt || 'Orquestrador Master'
+
+  const displayIcon = isMaritacaMode ? maritacaConfig.icon : agentConfig.icon
+
+  const displayGreeting = isMaritacaMode ? maritacaConfig.greeting : agentConfig.greeting
+
+  const displayColor = isMaritacaMode ? maritacaConfig.color : agentConfig.color
+
+  const displayAccent = isMaritacaMode ? maritacaConfig.accentColor : agentConfig.accentColor
+
+  const displayGradient = isMaritacaMode ? maritacaConfig.bgGradient : agentConfig.bgGradient
+
+  const displaySuggestions = isMaritacaMode
+    ? maritacaConfig.suggestions
+    : selectedAgentId
+      ? agentConfig.suggestions
+      : defaultSuggestions.map((s) => s.text)
+
+  // For personalized view
+  if (showPersonalized) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        {/* Avatar with agent-themed glow */}
+        <div className="mb-6 relative">
+          <div
+            className={cn('absolute inset-0 rounded-full blur-xl opacity-30 animate-pulse')}
+            style={{ backgroundColor: displayAccent }}
+          />
+          <OptimizedImage
+            src={displayImage}
+            alt={displayName}
+            width={120}
+            height={120}
+            className="relative mx-auto rounded-full shadow-2xl object-cover ring-4 ring-white/40 dark:ring-gray-700/40 animate-bounce-in"
+            priority
+          />
+          <div
+            className="absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-lg"
+            style={{ backgroundColor: displayColor }}
+          >
+            {displayIcon}
+          </div>
+        </div>
+
+        {/* Agent Name and Role */}
+        <div className="mb-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: displayColor }}>
+            {displayIcon} {displayName}
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400">{displayRole}</p>
+        </div>
+
+        {/* Personalized Greeting */}
+        <div className="max-w-2xl mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100">
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+            {displayGreeting}
+          </p>
+        </div>
+
+        {/* Agent-specific Suggestions */}
+        <div className="w-full max-w-2xl">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wide animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200">
+            💡 O que posso fazer por você
+          </h3>
+
+          <div className="flex flex-col gap-3">
+            {displaySuggestions.map((suggestion, index) => {
+              const isHovered = hoveredIndex === index
+              const delay = 300 + index * 100
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => onSuggestionClick(suggestion)}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className={cn(
+                    'group relative p-4 text-left',
+                    'bg-white dark:bg-gray-800/50 backdrop-blur-sm',
+                    'border-2 border-gray-200 dark:border-gray-700',
+                    'rounded-xl',
+                    'hover:shadow-xl transition-all duration-300',
+                    'hover:-translate-y-0.5',
+                    'active:scale-[0.99]',
+                    'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                    'animate-in fade-in slide-in-from-bottom-3'
+                  )}
+                  style={{
+                    animationDelay: `${delay}ms`,
+                    animationDuration: '500ms',
+                    borderColor: isHovered ? displayAccent : undefined,
+                    // @ts-ignore - CSS custom property
+                    '--tw-ring-color': displayAccent,
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        'flex-shrink-0 w-10 h-10 rounded-lg',
+                        'flex items-center justify-center text-white text-lg',
+                        'transform transition-transform duration-300',
+                        isHovered && 'scale-110'
+                      )}
+                      style={{
+                        background: `linear-gradient(135deg, ${displayColor}, ${displayAccent})`,
+                      }}
+                    >
+                      {displayIcon}
+                    </div>
+
+                    <span className="flex-1 font-medium text-gray-900 dark:text-gray-100">
+                      {suggestion}
+                    </span>
+
+                    <svg
+                      className={cn(
+                        'w-5 h-5 text-gray-400 transition-all duration-300',
+                        isHovered && 'translate-x-1'
+                      )}
+                      style={{ color: isHovered ? displayAccent : undefined }}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Tip */}
+        <p className="mt-8 text-xs text-gray-400 dark:text-gray-600 animate-in fade-in duration-500 delay-700">
+          💬 Digite sua pergunta abaixo para começar a conversa
+        </p>
+      </div>
+    )
+  }
+
+  // Default view (Cidadão.AI automatic mode)
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
       {/* Avatar with subtle animation */}
@@ -92,7 +275,7 @@ export function ChatEmptyState({ userName, onSuggestionClick }: ChatEmptyStatePr
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {suggestions.map((suggestion, index) => {
+          {defaultSuggestions.map((suggestion, index) => {
             const Icon = suggestion.icon
             const isHovered = hoveredIndex === index
             const delay = 400 + index * 100

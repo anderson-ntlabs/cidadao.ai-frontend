@@ -504,7 +504,7 @@ export default function ChatPage() {
 
         {/* Messages */}
         {messages.length === 0 ? (
-          /* Empty State - Modern & Engaging */
+          /* Empty State - Personalized per agent/mode */
           <ChatEmptyState
             userName={user?.name || 'Cidadão'}
             onSuggestionClick={(suggestion) => {
@@ -515,6 +515,9 @@ export default function ChatPage() {
                 input?.focus()
               }, 100)
             }}
+            selectedAgentId={selectedAgentId}
+            chatMode={chatMode}
+            maritacaModel={selectedModel}
           />
         ) : (
           /* Messages List */
@@ -779,7 +782,7 @@ export default function ChatPage() {
             )}
 
             {messages.length === 0 ? (
-              /* Empty State - Modern & Engaging */
+              /* Empty State - Personalized per agent/mode */
               <ChatEmptyState
                 userName={user?.name || 'Cidadão'}
                 onSuggestionClick={(suggestion) => {
@@ -789,6 +792,9 @@ export default function ChatPage() {
                     textareaRef.current?.focus()
                   }, 100)
                 }}
+                selectedAgentId={selectedAgentId}
+                chatMode={chatMode}
+                maritacaModel={selectedModel}
               />
             ) : (
               /* Messages List */

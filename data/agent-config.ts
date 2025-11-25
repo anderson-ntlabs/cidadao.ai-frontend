@@ -16,6 +16,8 @@ export interface AgentVisualConfig {
   bgGradient: string
   icon: string
   specialty: string
+  greeting: string
+  suggestions: string[]
 }
 
 export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
@@ -27,6 +29,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-orange-500 to-amber-500',
     icon: '🎭',
     specialty: 'Coordenação de investigações complexas',
+    greeting:
+      'Olá! Sou o Abaporu, o orquestrador do Cidadão.AI. Posso coordenar investigações complexas envolvendo múltiplos agentes. Como posso ajudar você hoje?',
+    suggestions: [
+      'Iniciar uma investigação completa',
+      'Coordenar análise de gastos públicos',
+      'Gerar relatório consolidado',
+    ],
   },
   anita: {
     name: 'Anita Garibaldi',
@@ -36,6 +45,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-red-600 to-rose-500',
     icon: '📊',
     specialty: 'Análise de padrões e tendências',
+    greeting:
+      'Olá! Sou Anita Garibaldi, especialista em detectar padrões suspeitos e anomalias nos dados públicos. Minha precisão é militar. O que você gostaria de analisar?',
+    suggestions: [
+      'Detectar anomalias em contratos',
+      'Analisar padrões de gastos',
+      'Identificar outliers estatísticos',
+    ],
   },
   senna: {
     name: 'Ayrton Senna',
@@ -45,6 +61,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-yellow-500 to-amber-400',
     icon: '🏎️',
     specialty: 'Otimização e velocidade',
+    greeting:
+      'E aí! Sou o Senna, veloz e preciso como nas pistas. Otimizo consultas e entrego resultados em tempo recorde. Preparado para acelerar?',
+    suggestions: [
+      'Otimizar busca de dados',
+      'Consulta rápida de informações',
+      'Análise em tempo real',
+    ],
   },
   zumbi: {
     name: 'Zumbi dos Palmares',
@@ -54,6 +77,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-amber-700 to-orange-600',
     icon: '🏹',
     specialty: 'Detecção de fraudes e irregularidades',
+    greeting:
+      'Salve! Sou Zumbi dos Palmares, guardião da transparência. Luto para que os dados públicos sejam acessíveis a todos. Que irregularidade você quer investigar?',
+    suggestions: [
+      'Investigar possíveis fraudes',
+      'Verificar transparência de órgãos',
+      'Denunciar irregularidades',
+    ],
   },
   tiradentes: {
     name: 'Tiradentes',
@@ -63,6 +93,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-green-700 to-emerald-600',
     icon: '📜',
     specialty: 'Relatórios e documentação',
+    greeting:
+      'Liberdade ainda que tardia! Sou Tiradentes, e minha missão é reportar irregularidades em contratos e licitações. Que documento você quer que eu analise?',
+    suggestions: [
+      'Gerar relatório de licitações',
+      'Documentar irregularidades',
+      'Criar dossiê de investigação',
+    ],
   },
   obaluaie: {
     name: 'Obaluaiê',
@@ -72,6 +109,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-purple-700 to-fuchsia-600',
     icon: '💜',
     specialty: 'Limpeza e cura de dados',
+    greeting:
+      'Atotô! Sou Obaluaiê, o curandeiro de dados. Limpo inconsistências e curo a corrupção nos registros públicos. Que dados precisam de tratamento?',
+    suggestions: [
+      'Limpar dados inconsistentes',
+      'Validar integridade de registros',
+      'Corrigir informações duplicadas',
+    ],
   },
   niemeyer: {
     name: 'Oscar Niemeyer',
@@ -81,6 +125,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-blue-500 to-cyan-500',
     icon: '🏛️',
     specialty: 'Estruturação de informações',
+    greeting:
+      'A arquitetura é minha linguagem! Sou Niemeyer, e projeto estruturas de dados elegantes e interfaces intuitivas. Como posso estruturar suas informações?',
+    suggestions: [
+      'Estruturar dados complexos',
+      'Criar visualizações elegantes',
+      'Organizar informações hierárquicas',
+    ],
   },
   nana: {
     name: 'Nanã Buruku',
@@ -90,6 +141,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-indigo-700 to-purple-600',
     icon: '🌙',
     specialty: 'Preservação de registros históricos',
+    greeting:
+      'Salubá Nanã! Sou a guardiã da memória institucional. Preservo registros históricos e mantenho viva a história. Que memória você busca?',
+    suggestions: [
+      'Consultar registros históricos',
+      'Comparar dados ao longo do tempo',
+      'Preservar documentação importante',
+    ],
   },
   lampiao: {
     name: 'Lampião',
@@ -99,6 +157,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-amber-800 to-yellow-700',
     icon: '🤠',
     specialty: 'Auditoria em regiões remotas',
+    greeting:
+      'Ôxente! Sou Lampião, o rei do cangaço e auditor do sertão. Fiscalizo gastos públicos em regiões esquecidas. Qual município quer auditar?',
+    suggestions: [
+      'Auditar gastos municipais',
+      'Verificar repasses federais',
+      'Fiscalizar obras em municípios',
+    ],
   },
   ceuci: {
     name: 'Ceuci',
@@ -108,6 +173,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-green-600 to-lime-500',
     icon: '🌿',
     specialty: 'Proteção de recursos naturais',
+    greeting:
+      'Sou Ceuci, mãe da natureza tupi-guarani. Protejo os recursos naturais e monitoro concessões ambientais. Que área ambiental você quer verificar?',
+    suggestions: [
+      'Monitorar licenças ambientais',
+      'Verificar desmatamento ilegal',
+      'Analisar concessões de mineração',
+    ],
   },
   dandara: {
     name: 'Dandara dos Palmares',
@@ -117,6 +189,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-purple-600 to-violet-500',
     icon: '⚖️',
     specialty: 'Equidade e inclusão social',
+    greeting:
+      'Guerreira de Palmares presente! Sou Dandara, e luto pela equidade e justiça social nos dados públicos. Como posso defender seus direitos?',
+    suggestions: [
+      'Analisar políticas de inclusão',
+      'Verificar equidade em programas',
+      'Avaliar acessibilidade de serviços',
+    ],
   },
   machado: {
     name: 'Machado de Assis',
@@ -126,6 +205,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-slate-700 to-gray-600',
     icon: '📖',
     specialty: 'Análise de documentos oficiais',
+    greeting:
+      'Prezado leitor! Sou Machado de Assis, mestre das letras. Transformo dados complexos em narrativas compreensíveis. Que história os dados contam?',
+    suggestions: [
+      'Resumir documentos extensos',
+      'Traduzir juridiquês para português',
+      'Criar narrativa dos dados',
+    ],
   },
   bonifacio: {
     name: 'José Bonifácio',
@@ -135,6 +221,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-blue-800 to-indigo-600',
     icon: '🎖️',
     specialty: 'Padrões éticos e integridade',
+    greeting:
+      'Saudações! Sou José Bonifácio, o Patriarca da Integridade. Estabeleço padrões éticos e verifico a conformidade dos atos públicos. Em que posso ser útil?',
+    suggestions: [
+      'Verificar conformidade legal',
+      'Avaliar padrões éticos',
+      'Analisar conflitos de interesse',
+    ],
   },
   deodoro: {
     name: 'Marechal Deodoro',
@@ -144,6 +237,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-olive-600 to-green-600',
     icon: '⚔️',
     specialty: 'Execução de ações corretivas',
+    greeting:
+      'Em posição! Sou Marechal Deodoro, executor de comandos. Tomo ações corretivas com autoridade e precisão. Qual ação você precisa executar?',
+    suggestions: [
+      'Executar verificação em massa',
+      'Aplicar correções automáticas',
+      'Processar lote de documentos',
+    ],
   },
   drummond: {
     name: 'Carlos Drummond de Andrade',
@@ -153,6 +253,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-slate-600 to-stone-500',
     icon: '✍️',
     specialty: 'Comunicação clara e acessível',
+    greeting:
+      'No meio do caminho tinha uma pedra... Sou Drummond, e encontro poesia e significado nos números. Vamos conversar sobre o que os dados revelam?',
+    suggestions: [
+      'Explicar dados de forma simples',
+      'Criar resumo executivo',
+      'Interpretar estatísticas',
+    ],
   },
   quiteria: {
     name: 'Maria Quitéria',
@@ -162,6 +269,13 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-yellow-700 to-amber-500',
     icon: '🛡️',
     specialty: 'Combate à desinformação',
+    greeting:
+      'Primeira mulher soldado do Brasil, presente! Sou Maria Quitéria, e combato a desinformação com coragem. Que fake news você quer verificar?',
+    suggestions: [
+      'Verificar veracidade de informação',
+      'Checar fonte de dados',
+      'Combater desinformação',
+    ],
   },
   oxossi: {
     name: 'Oxóssi',
@@ -171,6 +285,47 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
     bgGradient: 'from-green-600 to-emerald-500',
     icon: '🎯',
     specialty: 'Busca em múltiplas fontes',
+    greeting:
+      'Okê Arô! Sou Oxóssi, o caçador certeiro. Rastreio fraudes e busco informações em múltiplas fontes com precisão. Qual é o alvo da busca?',
+    suggestions: [
+      'Rastrear origem de recursos',
+      'Cruzar dados de múltiplas fontes',
+      'Identificar conexões ocultas',
+    ],
+  },
+}
+
+/**
+ * Maritaca AI mode configuration
+ */
+export const MARITACA_CONFIG = {
+  'sabia-3': {
+    name: 'Sabiá-3',
+    role: 'Modelo Completo',
+    color: '#6366F1',
+    accentColor: '#818CF8',
+    bgGradient: 'from-indigo-500 to-purple-500',
+    icon: '🦜',
+    specialty: 'Modelo avançado para tarefas complexas',
+    greeting:
+      'Olá! Sou o Sabiá-3, o modelo mais avançado da Maritaca AI. Fui treinado especificamente para entender português brasileiro com todas as suas nuances. Como posso ajudar?',
+    suggestions: [
+      'Conversar sobre qualquer tema',
+      'Analisar textos complexos',
+      'Ajudar com redação',
+    ],
+  },
+  'sabiazinho-3': {
+    name: 'Sabiazinho-3',
+    role: 'Modelo Otimizado',
+    color: '#10B981',
+    accentColor: '#34D399',
+    bgGradient: 'from-emerald-500 to-teal-500',
+    icon: '🐦',
+    specialty: 'Respostas rápidas e eficientes',
+    greeting:
+      'Oi! Sou o Sabiazinho-3, versão otimizada para respostas rápidas. Posso ajudar com tarefas do dia a dia de forma ágil. O que você precisa?',
+    suggestions: ['Tirar dúvidas rápidas', 'Resumir informações', 'Responder perguntas diretas'],
   },
 }
 

@@ -23,8 +23,13 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
   private timeout: number
 
   constructor(baseUrl?: string, timeout = 60000) {
-    this.baseUrl =
+    let url =
       baseUrl || process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+    // Ensure HTTPS in production to avoid Mixed Content errors
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      url = url.replace(/^http:/, 'https:')
+    }
+    this.baseUrl = url
     this.timeout = timeout
   }
 
