@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils'
 import { Home, MessageSquare, LayoutDashboard, FileSearch, Map } from 'lucide-react'
 import type { NavigationItem } from './navigation'
 import { useAuth } from '@/hooks/use-supabase-auth'
-import { VLibrasWidget } from './a11y/vlibras-widget'
 import { MobileNavV2 } from './mobile-nav'
 import { BottomNavigation } from './mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
@@ -237,8 +236,7 @@ export function AuthLayoutV2({
         <MobileNavV2 />
       )}
 
-      {/* VLibras Widget - Global for all authenticated pages (PT only) */}
-      {locale === 'pt' && <VLibrasWidget locale="pt" />}
+      {/* VLibras is rendered globally in app/pt/layout.tsx */}
     </div>
   )
 }
