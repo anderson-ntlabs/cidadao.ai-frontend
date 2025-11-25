@@ -222,10 +222,16 @@ export default function ChatPage() {
     }
   }, [isInitialized, initializeChat])
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  const scrollToBottom = useCallback((instant = false) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: instant ? 'instant' : 'smooth',
+        block: 'end',
+      })
+    }
   }, [])
 
+  // Scroll when new messages arrive
   useEffect(() => {
     const lastMessage = messages[messages.length - 1]
     if (lastMessage && lastMessage.role === 'assistant') {
@@ -234,11 +240,20 @@ export default function ChatPage() {
       if (lastMessage.agent_id) {
         setCurrentAgentId(lastMessage.agent_id)
       }
-      // Announce response received for screen readers
-      const agentName = agents.find((a) => a.id === lastMessage.agent_id)?.name || 'Agente'
-      announceSuccess(`${agentName} respondeu`)
+      // Announce response received for screen readers (only when complete)
+      if (!streaming.isStreaming) {
+        const agentName = agents.find((a) => a.id === lastMessage.agent_id)?.name || 'Agente'
+        announceSuccess(`${agentName} respondeu`)
+      }
     }
-  }, [messages, scrollToBottom, announceSuccess])
+  }, [messages, scrollToBottom, announceSuccess, streaming.isStreaming])
+
+  // Auto-scroll during streaming (as content updates)
+  useEffect(() => {
+    if (streaming.isStreaming && streaming.accumulatedContent) {
+      scrollToBottom(true) // instant scroll during streaming
+    }
+  }, [streaming.isStreaming, streaming.accumulatedContent, scrollToBottom])
 
   useEffect(() => {
     if (error) {
@@ -551,6 +566,9 @@ export default function ChatPage() {
                       agentId={message.agent_id}
                       isLatest={isLatest}
                       isLoading={isLoading}
+                      isStreaming={
+                        streaming.isStreaming && message.id === streaming.streamingMessageId
+                      }
                       onComplete={() => {
                         if (isLatest) scrollToBottom()
                       }}
@@ -569,7 +587,7 @@ export default function ChatPage() {
                 </div>
               )
             })}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} className="h-4" />
           </div>
         )}
 
@@ -803,6 +821,9 @@ export default function ChatPage() {
                           agentId={message.agent_id}
                           isLatest={isLatest}
                           isLoading={isLoading}
+                          isStreaming={
+                            streaming.isStreaming && message.id === streaming.streamingMessageId
+                          }
                           onComplete={() => {
                             if (isLatest) scrollToBottom()
                           }}
@@ -821,7 +842,7 @@ export default function ChatPage() {
                     </div>
                   )
                 })}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} className="h-4" />
               </div>
             )}
           </div>
