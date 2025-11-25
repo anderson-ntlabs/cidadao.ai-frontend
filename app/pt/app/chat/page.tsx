@@ -222,7 +222,7 @@ export default function ChatPage() {
   }, [isInitialized, initializeChat])
 
   // Check if user is near bottom of scroll (within threshold)
-  const isNearBottom = useCallback((threshold = 150) => {
+  const isNearBottom = (threshold = 150): boolean => {
     const container = messagesContainerRef.current
     if (!container) return true
 
@@ -231,27 +231,24 @@ export default function ChatPage() {
     const clientHeight = container.clientHeight
 
     return scrollHeight - scrollTop - clientHeight < threshold
-  }, [])
+  }
 
-  const scrollToBottom = useCallback(
-    (instant = false, force = false) => {
-      // Don't auto-scroll if user is manually scrolling up (unless forced)
-      if (!force && userIsScrollingRef.current && !isNearBottom()) {
-        return
-      }
+  const scrollToBottom = (instant = false, force = false) => {
+    // Don't auto-scroll if user is manually scrolling up (unless forced)
+    if (!force && userIsScrollingRef.current && !isNearBottom()) {
+      return
+    }
 
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({
-          behavior: instant ? 'instant' : 'smooth',
-          block: 'end',
-        })
-      }
-    },
-    [isNearBottom]
-  )
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: instant ? 'instant' : 'smooth',
+        block: 'end',
+      })
+    }
+  }
 
   // Handle scroll events to detect user manual scrolling
-  const handleScroll = useCallback(() => {
+  const handleScroll = () => {
     const container = messagesContainerRef.current
     if (!container) return
 
@@ -268,7 +265,7 @@ export default function ChatPage() {
     }
 
     lastScrollTopRef.current = currentScrollTop
-  }, [isNearBottom])
+  }
 
   // Scroll when new messages arrive
   useEffect(() => {
@@ -285,14 +282,16 @@ export default function ChatPage() {
         announceSuccess(`${agentName} respondeu`)
       }
     }
-  }, [messages, scrollToBottom, announceSuccess, streaming.isStreaming])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, announceSuccess, streaming.isStreaming])
 
   // Auto-scroll during streaming (as content updates)
   useEffect(() => {
     if (streaming.isStreaming && streaming.accumulatedContent) {
       scrollToBottom(true) // instant scroll during streaming
     }
-  }, [streaming.isStreaming, streaming.accumulatedContent, scrollToBottom])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streaming.isStreaming, streaming.accumulatedContent])
 
   useEffect(() => {
     if (error) {
