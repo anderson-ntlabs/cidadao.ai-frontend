@@ -116,6 +116,11 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
                     callbacks.onAgentSelected?.(agentId || '', agentName || '')
                     break
 
+                  case 'thinking':
+                    logger.debug('Agent thinking', { message: event.message })
+                    callbacks.onThinking?.(event.message || 'Processando...')
+                    break
+
                   case 'chunk':
                     if (event.content) {
                       accumulatedContent += event.content

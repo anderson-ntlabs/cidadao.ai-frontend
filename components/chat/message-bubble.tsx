@@ -15,6 +15,7 @@ import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { VoicePlayer } from '@/components/voice'
+import { getAgentVisualConfig } from '@/data/agent-config'
 
 // Lazy load ReactMarkdown for better initial performance
 const ReactMarkdown = lazy(() => import('react-markdown'))
@@ -155,13 +156,20 @@ export function MessageBubble({
     )
   }
 
+  // Get agent visual config for theming
+  const agentConfig = getAgentVisualConfig(agentId)
+
   // Assistant message - clean text, no bubble
   return (
     <div className="group relative">
       {/* Agent Info Header */}
       {agentName && (
         <div className="mb-2 flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {/* Agent Icon */}
+          <span className="text-base" role="img" aria-hidden="true">
+            {agentConfig.icon}
+          </span>
+          <span className="text-sm font-semibold" style={{ color: agentConfig.color }}>
             {agentName}
           </span>
           {agentRole && (

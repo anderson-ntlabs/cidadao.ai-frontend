@@ -69,6 +69,7 @@ export type StreamEventType =
   | 'detecting'
   | 'intent'
   | 'agent_selected'
+  | 'thinking'
   | 'chunk'
   | 'complete'
   | 'error'
@@ -91,6 +92,7 @@ export interface StreamCallbacks {
   onDetecting?: (message: string) => void
   onIntent?: (intent: string, confidence: number) => void
   onAgentSelected?: (agentId: string, agentName: string) => void
+  onThinking?: (message: string) => void
   onChunk?: (content: string) => void
   onComplete?: (suggestedActions?: string[]) => void
   onError?: (message: string) => void

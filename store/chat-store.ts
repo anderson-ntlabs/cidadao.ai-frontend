@@ -25,7 +25,15 @@ type ChatSession = ChatChatSession
 // Streaming state for UI
 export interface StreamingState {
   isStreaming: boolean
-  phase: 'idle' | 'detecting' | 'intent' | 'agent_selected' | 'responding' | 'complete' | 'error'
+  phase:
+    | 'idle'
+    | 'detecting'
+    | 'intent'
+    | 'agent_selected'
+    | 'thinking'
+    | 'responding'
+    | 'complete'
+    | 'error'
   statusMessage: string
   currentAgentId: string | null
   currentAgentName: string | null
@@ -419,6 +427,19 @@ export const useChatStore = create<ChatStore>()(
             agent_id: agentId,
             agent_name: agentName,
           })
+        },
+
+        onThinking: (message: string) => {
+          logger.debug('Agent thinking', { message })
+          const currentState = get()
+          const agentName = currentState.streaming.currentAgentName || 'Agente'
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              phase: 'thinking',
+              statusMessage: message || `${agentName} está pensando...`,
+            },
+          }))
         },
 
         onChunk: (chunk: string) => {
