@@ -381,6 +381,7 @@ export function MessageBubble({
               onClick={handleCopy}
               className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
               title="Copiar"
+              aria-label="Copiar mensagem"
             >
               {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -389,6 +390,7 @@ export function MessageBubble({
               onClick={handleShare}
               className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
               title="Compartilhar"
+              aria-label="Compartilhar mensagem"
             >
               <Share2 className="w-4 h-4" />
             </button>
@@ -397,6 +399,7 @@ export function MessageBubble({
               onClick={handleExport}
               className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
               title="Exportar"
+              aria-label="Exportar mensagem"
             >
               <Download className="w-4 h-4" />
             </button>
@@ -407,6 +410,7 @@ export function MessageBubble({
               onClick={() => handleFeedback(true)}
               className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-all"
               title="Útil"
+              aria-label="Marcar como útil"
             >
               <ThumbsUp className="w-4 h-4" />
             </button>
@@ -415,6 +419,7 @@ export function MessageBubble({
               onClick={() => handleFeedback(false)}
               className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
               title="Não útil"
+              aria-label="Marcar como não útil"
             >
               <ThumbsDown className="w-4 h-4" />
             </button>
@@ -424,7 +429,14 @@ export function MessageBubble({
 
       {/* Confidence Badge */}
       {metadata?.confidence && (
-        <div className="mt-3 flex items-center gap-2">
+        <div
+          className="mt-3 flex items-center gap-2"
+          role="meter"
+          aria-label={`Confiança da resposta: ${Math.round(metadata.confidence * 100)}%`}
+          aria-valuenow={Math.round(metadata.confidence * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className={cn(
@@ -438,8 +450,8 @@ export function MessageBubble({
               style={{ width: `${metadata.confidence * 100}%` }}
             />
           </div>
-          <span className="text-xs text-gray-500">
-            {Math.round(metadata.confidence * 100)}% confianca
+          <span className="text-xs text-gray-500" aria-hidden="true">
+            {Math.round(metadata.confidence * 100)}%
           </span>
         </div>
       )}

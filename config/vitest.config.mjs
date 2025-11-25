@@ -7,7 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['../vitest.setup.ts'],
+    setupFiles: [path.resolve(__dirname, '../vitest.setup.ts')],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -47,6 +47,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '../'),
+      // Mock modules that are not installed but used in tests
+      'jspdf-autotable': path.resolve(__dirname, '../__mocks__/jspdf-autotable.ts'),
+      'driver.js': path.resolve(__dirname, '../__mocks__/driver.js.ts'),
     },
   },
 })

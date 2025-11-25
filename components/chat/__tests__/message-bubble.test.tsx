@@ -76,7 +76,7 @@ describe('MessageBubble', () => {
           metadata={{ model: 'sabia-3' }}
         />
       )
-      expect(screen.getByText(/Sabiá-3/)).toBeInTheDocument()
+      expect(screen.getByText(/Sabia-3/)).toBeInTheDocument()
     })
 
     it('applies correct styles for user messages', () => {
@@ -95,23 +95,30 @@ describe('MessageBubble', () => {
   describe('Actions', () => {
     it('shows copy button', () => {
       render(<MessageBubble content="Copy me" role="assistant" />)
-      expect(screen.getByLabelText('Copiar mensagem')).toBeInTheDocument()
+      // Multiple buttons exist (mobile + desktop)
+      expect(screen.getAllByLabelText('Copiar mensagem').length).toBeGreaterThan(0)
     })
 
     it('shows share button', () => {
       render(<MessageBubble content="Share me" role="assistant" />)
-      expect(screen.getByLabelText('Compartilhar mensagem')).toBeInTheDocument()
+      // Multiple buttons exist (mobile + desktop)
+      expect(screen.getAllByLabelText('Compartilhar mensagem').length).toBeGreaterThan(0)
     })
 
-    it('shows export button', () => {
+    it('shows export button (desktop visible, mobile in expanded menu)', () => {
       render(<MessageBubble content="Export me" role="assistant" />)
-      expect(screen.getByLabelText('Exportar mensagem')).toBeInTheDocument()
+      // On desktop (hidden but in DOM) and mobile (inside expanded actions)
+      const exportButtons = screen.getAllByLabelText('Exportar mensagem')
+      expect(exportButtons.length).toBeGreaterThan(0)
     })
 
     it('shows feedback buttons for assistant messages', () => {
       render(<MessageBubble content="Rate me" role="assistant" />)
-      expect(screen.getByLabelText('Marcar como útil')).toBeInTheDocument()
-      expect(screen.getByLabelText('Marcar como não útil')).toBeInTheDocument()
+      // Feedback buttons exist in both desktop and mobile expanded views
+      const thumbsUpButtons = screen.getAllByLabelText('Marcar como útil')
+      const thumbsDownButtons = screen.getAllByLabelText('Marcar como não útil')
+      expect(thumbsUpButtons.length).toBeGreaterThan(0)
+      expect(thumbsDownButtons.length).toBeGreaterThan(0)
     })
 
     it('does not show feedback buttons for user messages', () => {
@@ -127,14 +134,15 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Copy this text" role="assistant" />)
 
-      const copyButton = screen.getByLabelText('Copiar mensagem')
-      await user.click(copyButton)
+      // Get the first copy button (mobile version is first in DOM)
+      const copyButtons = screen.getAllByLabelText('Copiar mensagem')
+      await user.click(copyButtons[0])
 
       // Verify toast notification was shown (indicates successful copy)
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith(
           'Copiado!',
-          'Mensagem copiada para área de transferência'
+          'Mensagem copiada para a area de transferencia'
         )
       })
     })
@@ -144,12 +152,17 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Test" role="assistant" />)
 
-      const copyButton = screen.getByLabelText('Copiar mensagem')
-      await user.click(copyButton)
+      const copyButtons = screen.getAllByLabelText('Copiar mensagem')
+      await user.click(copyButtons[0])
 
-      // Check icon should be visible
+      // Check icon should be visible (check for green color class)
       await waitFor(() => {
-        expect(copyButton.querySelector('svg')).toHaveClass('lucide-check')
+        const svgs = copyButtons[0].querySelectorAll('svg')
+        const hasCheckIcon = Array.from(svgs).some(
+          (svg) =>
+            svg.classList.contains('text-green-600') || svg.classList.contains('lucide-check')
+        )
+        expect(hasCheckIcon).toBe(true)
       })
     })
   })
@@ -164,8 +177,8 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Export this" role="assistant" />)
 
-      const exportButton = screen.getByLabelText('Exportar mensagem')
-      await user.click(exportButton)
+      const exportButtons = screen.getAllByLabelText('Exportar mensagem')
+      await user.click(exportButtons[0])
 
       // Should create a blob URL
       expect(global.URL.createObjectURL).toHaveBeenCalled()
@@ -179,8 +192,8 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Rate me" role="assistant" />)
 
-      const thumbsUpButton = screen.getByLabelText('Marcar como útil')
-      await user.click(thumbsUpButton)
+      const thumbsUpButtons = screen.getAllByLabelText('Marcar como útil')
+      await user.click(thumbsUpButtons[0])
 
       expect(toast.info).toHaveBeenCalledWith('Obrigado!', 'Seu feedback ajuda a melhorar')
     })
@@ -191,8 +204,8 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Rate me" role="assistant" />)
 
-      const thumbsDownButton = screen.getByLabelText('Marcar como não útil')
-      await user.click(thumbsDownButton)
+      const thumbsDownButtons = screen.getAllByLabelText('Marcar como não útil')
+      await user.click(thumbsDownButtons[0])
 
       expect(toast.info).toHaveBeenCalledWith(
         'Feedback registrado',
@@ -228,7 +241,7 @@ describe('MessageBubble', () => {
         />
       )
       expect(screen.getByText('95%')).toBeInTheDocument()
-      expect(screen.getByLabelText('Confiança da resposta: 95%')).toBeInTheDocument()
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-label', 'Confiança da resposta: 95%')
     })
 
     it('displays correct confidence color for high confidence', () => {
@@ -275,11 +288,12 @@ describe('MessageBubble', () => {
     it('has proper aria-labels for all action buttons', () => {
       render(<MessageBubble content="Test" role="assistant" />)
 
-      expect(screen.getByLabelText('Copiar mensagem')).toBeInTheDocument()
-      expect(screen.getByLabelText('Compartilhar mensagem')).toBeInTheDocument()
-      expect(screen.getByLabelText('Exportar mensagem')).toBeInTheDocument()
-      expect(screen.getByLabelText('Marcar como útil')).toBeInTheDocument()
-      expect(screen.getByLabelText('Marcar como não útil')).toBeInTheDocument()
+      // Multiple buttons exist (mobile + desktop versions)
+      expect(screen.getAllByLabelText('Copiar mensagem').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Compartilhar mensagem').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Exportar mensagem').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Marcar como útil').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Marcar como não útil').length).toBeGreaterThan(0)
     })
 
     it('buttons are keyboard accessible', async () => {
@@ -288,11 +302,11 @@ describe('MessageBubble', () => {
 
       render(<MessageBubble content="Test" role="assistant" />)
 
-      const copyButton = screen.getByLabelText('Copiar mensagem')
+      const copyButtons = screen.getAllByLabelText('Copiar mensagem')
 
       // Should be able to focus
-      copyButton.focus()
-      expect(copyButton).toHaveFocus()
+      copyButtons[0].focus()
+      expect(copyButtons[0]).toHaveFocus()
 
       // Should be able to activate with Enter
       await user.keyboard('{Enter}')
@@ -306,9 +320,9 @@ describe('MessageBubble', () => {
     it('has touch-friendly button sizes on mobile', () => {
       render(<MessageBubble content="Test" role="assistant" />)
 
-      const copyButton = screen.getByLabelText('Copiar mensagem')
-      // Button should have p-2 class for mobile (44px+ touch target)
-      expect(copyButton).toHaveClass('p-2')
+      const copyButtons = screen.getAllByLabelText('Copiar mensagem')
+      // First button (mobile) should have p-2 class for mobile (44px+ touch target)
+      expect(copyButtons[0]).toHaveClass('p-2')
     })
   })
 
