@@ -238,7 +238,7 @@ export function AuthLayoutV2({
       )}
 
       {/* VLibras Widget - Global for all authenticated pages (PT only) */}
-      {locale === 'pt' && <VLibrasWidget locale="pt" forceOnload={true} />}
+      {locale === 'pt' && <VLibrasWidget locale="pt" />}
     </div>
   )
 }

@@ -127,7 +127,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
                   <UpdateNotification autoUpdate={true} showDetails />
 
                   {/* VLibras - Brazilian Sign Language (Official Widget) - Lazy Loaded */}
-                  <VLibrasLazy locale="pt" forceOnload />
+                  <VLibrasLazy locale="pt" />
                 </div>
               </AnalyticsProvider>
             </Providers>

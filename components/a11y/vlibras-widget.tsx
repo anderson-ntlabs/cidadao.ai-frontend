@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 // Extend JSX.IntrinsicElements to accept VLibras custom attributes
 declare module 'react' {
@@ -17,18 +17,8 @@ declare module 'react' {
  * Integrates VLibras (Brazilian Sign Language - LIBRAS) translation service
  * using the official government script (https://vlibras.gov.br/).
  *
- * This implementation uses the official VLibras script directly instead of
- * third-party npm packages for better reliability and updates.
- *
  * @see https://vlibras.gov.br/
  * @see https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/vlibras
- *
- * Features:
- * - Automatic content translation to LIBRAS
- * - Avatar-based sign language interpreter
- * - Respects user preferences (localStorage)
- * - Only loads on Portuguese pages (LIBRAS is Brazilian)
- * - Works across the entire application including chat
  *
  * @author Anderson Henrique da Silva
  * @date 2025-11-25
@@ -39,134 +29,75 @@ interface VLibrasWidgetProps {
    * Current locale - VLibras only renders for 'pt' (Portuguese/Brazil)
    */
   locale: 'pt' | 'en'
-
-  /**
-   * Force VLibras to load on component mount
-   * @default true
-   */
-  forceOnload?: boolean
-
-  /**
-   * Additional CSS classes for the widget container
-   */
-  className?: string
 }
 
-// VLibras script URL (official government source)
+// VLibras script URL (official government CDN)
 const VLIBRAS_SCRIPT_URL = 'https://vlibras.gov.br/app/vlibras-plugin.js'
 
-export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VLibrasWidgetProps) {
-  const [isEnabled, setIsEnabled] = useState(false)
+export function VLibrasWidget({ locale }: VLibrasWidgetProps) {
   const [isMounted, setIsMounted] = useState(false)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const scriptLoadedRef = useRef(false)
 
-  // Initialize VLibras widget
-  const initializeVLibras = useCallback(() => {
-    // Check if VLibras is already initialized
-    if (typeof window !== 'undefined' && (window as any).VLibras) {
-      const vlibras = new (window as any).VLibras.Widget('https://vlibras.gov.br/app')
-      // Force widget to scan the page for translatable content
-      if (forceOnload) {
-        setTimeout(() => {
-          vlibras.forceOnload()
-        }, 500)
-      }
-      setIsLoaded(true)
-    }
-  }, [forceOnload])
-
-  // Load VLibras script
   useEffect(() => {
-    if (!isEnabled || locale !== 'pt') return
+    setIsMounted(true)
+  }, [])
 
-    // Check if script is already loaded
-    const existingScript = document.querySelector(`script[src="${VLIBRAS_SCRIPT_URL}"]`)
-    if (existingScript) {
-      initializeVLibras()
+  // Load VLibras script after component mounts
+  useEffect(() => {
+    if (!isMounted || locale !== 'pt') return
+
+    // Prevent double loading
+    if (scriptLoadedRef.current) return
+
+    // Check if VLibras is already initialized
+    if ((window as any).VLibras) {
+      scriptLoadedRef.current = true
       return
     }
+
+    // Check if script tag already exists
+    const existingScript = document.querySelector('script[src*="vlibras"]')
+    if (existingScript) {
+      scriptLoadedRef.current = true
+      return
+    }
+
+    scriptLoadedRef.current = true
 
     // Create and load the VLibras script
     const script = document.createElement('script')
     script.src = VLIBRAS_SCRIPT_URL
     script.async = true
-    script.onload = () => {
-      initializeVLibras()
-    }
     script.onerror = () => {
-      console.error('[VLibras] Failed to load VLibras script')
+      console.error('[VLibras] Failed to load script')
+      scriptLoadedRef.current = false
     }
-
-    document.head.appendChild(script)
-
-    return () => {
-      // Don't remove script on unmount as it may break VLibras
-      // VLibras manages its own cleanup
+    script.onload = () => {
+      // Initialize VLibras after script loads
+      if ((window as any).VLibras) {
+        try {
+          new (window as any).VLibras.Widget('https://vlibras.gov.br/app')
+        } catch (error) {
+          console.error('[VLibras] Failed to initialize widget:', error)
+        }
+      }
     }
-  }, [isEnabled, locale, initializeVLibras])
+    document.body.appendChild(script)
+  }, [isMounted, locale])
 
-  // Check if VLibras should be enabled
-  useEffect(() => {
-    setIsMounted(true)
-
-    // Delay initialization to prevent layout shift during page load
-    const initTimer = setTimeout(() => {
-      // Check user preference from localStorage
-      const userPreference = localStorage.getItem('vlibras-enabled')
-      // Default to enabled (true) if no preference is set
-      const userEnabled = userPreference === null ? true : userPreference === 'true'
-
-      setIsEnabled(userEnabled)
-    }, 1000) // Load after 1s to reduce initial page load
-
-    return () => clearTimeout(initTimer)
-  }, [])
-
-  // Listen for toggle events from other components
-  useEffect(() => {
-    const handleToggle = (event: CustomEvent<{ enabled: boolean }>) => {
-      setIsEnabled(event.detail.enabled)
-    }
-
-    window.addEventListener('vlibras-toggle', handleToggle as EventListener)
-    return () => {
-      window.removeEventListener('vlibras-toggle', handleToggle as EventListener)
-    }
-  }, [])
-
-  // Only render for Portuguese locale (LIBRAS is Brazilian Sign Language)
-  if (locale !== 'pt') {
+  // Only render for Portuguese locale
+  if (locale !== 'pt' || !isMounted) {
     return null
   }
 
-  // Don't render on server
-  if (!isMounted) {
-    return null
-  }
-
-  // Don't render if disabled by user
-  if (!isEnabled) {
-    return null
-  }
-
+  // VLibras container - must be in DOM before script initializes
   return (
-    <>
-      {/* VLibras Widget Container - Required by the official script */}
-      {/* The script handles its own positioning and styling */}
-      <div vw="true" className="enabled">
-        <div vw-access-button="true" className="active" />
-        <div vw-plugin-wrapper="true">
-          <div className="vw-plugin-top-wrapper" />
-        </div>
+    <div vw="true" className="enabled">
+      <div vw-access-button="true" className="active" />
+      <div vw-plugin-wrapper="true">
+        <div className="vw-plugin-top-wrapper" />
       </div>
-
-      {/* Accessibility announcement for screen readers */}
-      {isLoaded && (
-        <div className="sr-only" role="status" aria-live="polite">
-          Widget VLibras carregado. Traduz o conteudo para LIBRAS (Lingua Brasileira de Sinais).
-        </div>
-      )}
-    </>
+    </div>
   )
 }
 
