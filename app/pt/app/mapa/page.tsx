@@ -410,6 +410,100 @@ export default function MapaTransparencia() {
           </MotionDiv>
         </div>
 
+        {/* APIs Federais - Destaque */}
+        {apiMapData?.states['BR'] && (
+          <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-6 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🇧🇷</span>
+                <div>
+                  <h2 className="text-xl font-bold">APIs Federais</h2>
+                  <p className="text-blue-200 text-sm">Portais e APIs do Governo Federal</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {apiMapData.states['BR'].status === 'healthy' ? (
+                  <span className="px-3 py-1 bg-green-500/20 text-green-200 rounded-full text-sm font-medium">
+                    🟢 Online
+                  </span>
+                ) : apiMapData.states['BR'].status === 'degraded' ? (
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-200 rounded-full text-sm font-medium">
+                    🟡 Degradado
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 bg-red-500/20 text-red-200 rounded-full text-sm font-medium">
+                    🔴 Problemas
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold">{apiMapData.states['BR'].apiCount}</div>
+                <div className="text-xs text-blue-200">APIs</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold">{apiMapData.states['BR'].endpointCount}</div>
+                <div className="text-xs text-blue-200">Endpoints</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold">
+                  {apiMapData.states['BR'].apis.filter((a) => a.status === 'operational').length}
+                </div>
+                <div className="text-xs text-blue-200">Operacionais</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold">
+                  {apiMapData.states['BR'].apis.filter((a) => a.status !== 'operational').length}
+                </div>
+                <div className="text-xs text-blue-200">Com Problemas</div>
+              </div>
+            </div>
+
+            {/* Lista de APIs Federais */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {apiMapData.states['BR'].apis.map((api) => (
+                <div
+                  key={api.id}
+                  className="bg-white/10 backdrop-blur rounded-lg p-3 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className="font-medium text-sm leading-tight">{api.name}</h4>
+                    <span
+                      className={`flex-shrink-0 w-2 h-2 rounded-full mt-1 ${
+                        api.status === 'operational'
+                          ? 'bg-green-400'
+                          : api.status === 'partial'
+                            ? 'bg-amber-400'
+                            : 'bg-red-400'
+                      }`}
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-blue-200">
+                    <span>{api.endpoints} endpoints</span>
+                    {api.response_time_ms && <span>⏱️ {api.response_time_ms}ms</span>}
+                  </div>
+                  {api.error && (
+                    <p className="mt-1 text-xs text-red-300 truncate" title={api.error}>
+                      ⚠️ {api.error}
+                    </p>
+                  )}
+                  <a
+                    href={api.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 text-xs text-blue-300 hover:text-white hover:underline block truncate"
+                  >
+                    🔗 {api.url}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Mapa SVG */}
           <div className="lg:col-span-2">
