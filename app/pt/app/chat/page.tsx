@@ -22,6 +22,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 import { MessageBubble } from '@/components/chat/message-bubble'
 import { ChatEmptyState } from '@/components/chat/empty-state'
 import { StreamingStatus } from '@/components/chat/streaming-status'
+import { AgentSelector } from '@/components/chat/agent-selector'
 
 // Lazy load heavy components for better initial load performance
 const ChatHistorySidebar = dynamic(
@@ -210,6 +211,8 @@ export default function ChatPage() {
   const loadSession = useChatStore((state) => state.loadSession)
   const createNewSession = useChatStore((state) => state.createNewSession)
   const initializeChat = useChatStore((state) => state.initializeChat)
+  const selectedAgentId = useChatStore((state) => state.selectedAgentId)
+  const setSelectedAgent = useChatStore((state) => state.setSelectedAgent)
 
   const canSendMessage = !isLoading && error === null && !streaming.isStreaming
 
@@ -647,32 +650,58 @@ export default function ChatPage() {
           <div className="max-w-4xl mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <OptimizedImage
-                  src="/agents/abaporu.png"
-                  alt="Cidadão.AI"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/20"
-                  priority
-                />
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    {chatMode === 'maritaca' ? 'Maritaca.AI Direto' : 'Cidadão.AI'}
-                  </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {chatMode === 'maritaca'
+                {(() => {
+                  const selectedAgent = selectedAgentId
+                    ? agents.find((a) => a.id === selectedAgentId)
+                    : null
+                  const displayImage =
+                    chatMode === 'maritaca'
+                      ? '/agents/abaporu.png'
+                      : selectedAgent?.image || '/agents/abaporu.png'
+                  const displayName =
+                    chatMode === 'maritaca'
+                      ? 'Maritaca.AI Direto'
+                      : selectedAgent?.name || 'Cidadão.AI'
+                  const displaySubtitle =
+                    chatMode === 'maritaca'
                       ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
-                      : 'Transparência Pública'}
-                  </p>
-                </div>
+                      : selectedAgent?.role.pt || 'Sistema Multi-Agente'
+
+                  return (
+                    <>
+                      <OptimizedImage
+                        src={displayImage}
+                        alt={displayName}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/20"
+                        priority
+                      />
+                      <div>
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                          {displayName}
+                        </h1>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {displaySubtitle}
+                        </p>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
 
               <div className="flex items-center gap-2">
                 <ChatModeToggle mode={chatMode} onModeChange={handleModeChange} />
-                {chatMode === 'maritaca' && (
+                {chatMode === 'maritaca' ? (
                   <MaritacaModelSelector
                     selectedModel={selectedModel}
                     onModelChange={setSelectedModel}
+                  />
+                ) : (
+                  <AgentSelector
+                    selectedAgentId={selectedAgentId}
+                    onSelectAgent={setSelectedAgent}
+                    disabled={streaming.isStreaming || isLoading}
                   />
                 )}
                 <Button

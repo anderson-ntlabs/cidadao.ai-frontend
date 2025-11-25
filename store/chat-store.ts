@@ -46,6 +46,9 @@ interface ChatStore {
   error: string | null
   isLoading: boolean
 
+  // Selected agent for conversation mode
+  selectedAgentId: string | null
+
   // Streaming state
   streaming: StreamingState
 
@@ -56,6 +59,7 @@ interface ChatStore {
   initializeChat: (sessionId?: string) => Promise<void>
   sendMessage: (content: string, useWebSocket?: boolean) => Promise<void>
   sendStreamingMessage: (content: string) => Promise<void>
+  setSelectedAgent: (agentId: string | null) => void
   resetStreamingState: () => void
   loadChatHistory: (sessionId: string) => Promise<void>
   loadMoreMessages: (cursor: string, direction?: 'next' | 'prev') => Promise<void>
@@ -116,6 +120,7 @@ export const useChatStore = create<ChatStore>()(
     currentInvestigation: null,
     error: null,
     isLoading: false,
+    selectedAgentId: null,
     streaming: initialStreamingState,
     ws: null,
 
@@ -307,6 +312,12 @@ export const useChatStore = create<ChatStore>()(
       set({ streaming: initialStreamingState })
     },
 
+    // Set selected agent for conversation mode
+    setSelectedAgent: (agentId: string | null) => {
+      set({ selectedAgentId: agentId })
+      logger.debug('Selected agent changed', { agentId })
+    },
+
     // Send streaming message via SSE - Real implementation
     sendStreamingMessage: async (content: string) => {
       const state = get()
@@ -317,6 +328,7 @@ export const useChatStore = create<ChatStore>()(
 
       const sessionId = get().session!.session_id
       const streamingMessageId = `msg_${Date.now()}_streaming`
+      const selectedAgent = state.selectedAgentId
 
       // Add user message
       const userMessage: ChatMessage = {
@@ -335,6 +347,7 @@ export const useChatStore = create<ChatStore>()(
         role: 'assistant',
         content: '',
         timestamp: new Date().toISOString(),
+        agent_id: selectedAgent || undefined,
       }
       get().addMessage(placeholderMessage)
 
@@ -345,9 +358,9 @@ export const useChatStore = create<ChatStore>()(
         agentTyping: true,
         streaming: {
           isStreaming: true,
-          phase: 'detecting',
-          statusMessage: 'Iniciando...',
-          currentAgentId: null,
+          phase: selectedAgent ? 'agent_selected' : 'detecting',
+          statusMessage: selectedAgent ? 'Conectando ao agente...' : 'Iniciando...',
+          currentAgentId: selectedAgent,
           currentAgentName: null,
           streamingMessageId,
           accumulatedContent: '',
@@ -506,6 +519,7 @@ export const useChatStore = create<ChatStore>()(
           {
             message: content,
             sessionId,
+            agentId: selectedAgent || undefined,
           },
           callbacks
         )
