@@ -78,19 +78,42 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   // Bypass service worker for backend API requests (Railway)
   // This prevents Mixed Content errors and ensures direct network access
   if (url.hostname === 'cidadao-api-production.up.railway.app') {
-    // Let the request go directly to the network, don't cache
-    // Don't call event.respondWith() - just return to let browser handle it
+    // Fix HTTP to HTTPS if needed (Mixed Content prevention)
+    if (url.protocol === 'http:') {
+      url.protocol = 'https:'
+      const httpsRequest = new Request(url.toString(), {
+        method: event.request.method,
+        headers: event.request.headers,
+        body:
+          event.request.method !== 'GET' && event.request.method !== 'HEAD'
+            ? event.request.body
+            : undefined,
+        mode: 'cors',
+        credentials: event.request.credentials,
+      })
+      event.respondWith(fetch(httpsRequest).catch(() => new Response(null, { status: 503 })))
+      return
+    }
+    // HTTPS request - let it pass through directly
     return
   }
 
   // Block any HTTP requests (enforce HTTPS only)
   if (url.protocol === 'http:' && url.hostname !== 'localhost') {
-    // Block HTTP requests in production (except localhost for dev)
+    // Upgrade HTTP to HTTPS automatically
+    url.protocol = 'https:'
+    const httpsRequest = new Request(url.toString(), {
+      method: event.request.method,
+      headers: event.request.headers,
+      body:
+        event.request.method !== 'GET' && event.request.method !== 'HEAD'
+          ? event.request.body
+          : undefined,
+      mode: event.request.mode,
+      credentials: event.request.credentials,
+    })
     event.respondWith(
-      new Response('Mixed Content: This request has been blocked', {
-        status: 400,
-        statusText: 'Bad Request - HTTP not allowed',
-      })
+      fetch(httpsRequest).catch(() => new Response('Failed to upgrade to HTTPS', { status: 400 }))
     )
     return
   }
