@@ -21,6 +21,7 @@ import { ErrorBoundary } from '@/components/error-boundary'
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
 import { ChatEmptyState } from '@/components/chat/empty-state'
+import { StreamingStatus } from '@/components/chat/streaming-status'
 
 // Lazy load heavy components for better initial load performance
 const ChatHistorySidebar = dynamic(
@@ -203,12 +204,14 @@ export default function ChatPage() {
   const isLoading = useChatStore((state) => state.isLoading)
   const error = useChatStore((state) => state.error)
   const sendMessage = useChatStore((state) => state.sendMessage)
+  const sendStreamingMessage = useChatStore((state) => state.sendStreamingMessage)
+  const streaming = useChatStore((state) => state.streaming)
   const clearError = useChatStore((state) => state.clearError)
   const loadSession = useChatStore((state) => state.loadSession)
   const createNewSession = useChatStore((state) => state.createNewSession)
   const initializeChat = useChatStore((state) => state.initializeChat)
 
-  const canSendMessage = !isLoading && error === null
+  const canSendMessage = !isLoading && error === null && !streaming.isStreaming
 
   // Initialize chat ONCE
   useEffect(() => {
@@ -314,14 +317,23 @@ export default function ChatPage() {
     }
 
     try {
-      await sendMessage(message, false)
-      // Success: Complete progress and clear optimistic message
-      clearInterval(progressInterval)
-      setSendingProgress(100)
-      setTimeout(() => {
-        setSendingProgress(0)
+      // Use streaming for Cidadao.AI mode, regular for Maritaca direct
+      if (chatMode === 'cidadao') {
+        // Clear optimistic message as streaming will handle the UI
         setOptimisticMessage(null)
-      }, 300)
+        clearInterval(progressInterval)
+        setSendingProgress(0)
+        await sendStreamingMessage(message)
+      } else {
+        await sendMessage(message, false)
+        // Success: Complete progress and clear optimistic message
+        clearInterval(progressInterval)
+        setSendingProgress(100)
+        setTimeout(() => {
+          setSendingProgress(0)
+          setOptimisticMessage(null)
+        }, 300)
+      }
     } catch (error) {
       // Error: Reset progress and keep optimistic message for retry
       clearInterval(progressInterval)
@@ -889,7 +901,14 @@ export default function ChatPage() {
               </Button>
             </div>
 
-            {isLoading && (
+            {/* Streaming Status Indicator */}
+            {streaming.isStreaming && (
+              <div className="mt-3">
+                <StreamingStatus streaming={streaming} />
+              </div>
+            )}
+
+            {isLoading && !streaming.isStreaming && (
               <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 animate-in fade-in duration-300">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span>Processando sua mensagem...</span>

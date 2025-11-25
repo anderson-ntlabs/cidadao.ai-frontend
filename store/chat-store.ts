@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware'
 import type {
   ChatMessage as ChatChatMessage,
   ChatSession as ChatChatSession,
@@ -7,19 +7,31 @@ import type {
   AgentInfo,
   QuickAction,
   Investigation,
-  ChatResponse,
 } from '@/types/chat'
 import type { ChatSession as SupabaseChatSession } from '@/types/supabase'
 import { chatService, generateSessionId } from '@/lib/api/chat.service'
 import { ChatWebSocket, getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket'
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
+import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
+import type { StreamCallbacks } from '@/lib/chat/types'
 
 const logger = createLogger('ChatStore')
 
 // Use chat types for the store (simpler, no user_id required)
 type ChatMessage = ChatChatMessage
 type ChatSession = ChatChatSession
+
+// Streaming state for UI
+export interface StreamingState {
+  isStreaming: boolean
+  phase: 'idle' | 'detecting' | 'intent' | 'agent_selected' | 'responding' | 'complete' | 'error'
+  statusMessage: string
+  currentAgentId: string | null
+  currentAgentName: string | null
+  streamingMessageId: string | null
+  accumulatedContent: string
+}
 
 interface ChatStore {
   // State
@@ -34,13 +46,17 @@ interface ChatStore {
   error: string | null
   isLoading: boolean
 
+  // Streaming state
+  streaming: StreamingState
+
   // WebSocket instance
   ws: ChatWebSocket | null
 
   // Actions
   initializeChat: (sessionId?: string) => Promise<void>
   sendMessage: (content: string, useWebSocket?: boolean) => Promise<void>
-  sendStreamingMessage: (content: string) => void
+  sendStreamingMessage: (content: string) => Promise<void>
+  resetStreamingState: () => void
   loadChatHistory: (sessionId: string) => Promise<void>
   loadMoreMessages: (cursor: string, direction?: 'next' | 'prev') => Promise<void>
   clearChat: () => Promise<void>
@@ -73,6 +89,20 @@ interface ChatStore {
   updateSession: (updates: Partial<ChatSession>) => void
 }
 
+// Create streaming adapter instance
+const streamingAdapter = new PrimaryAdapter()
+
+// Initial streaming state
+const initialStreamingState: StreamingState = {
+  isStreaming: false,
+  phase: 'idle',
+  statusMessage: '',
+  currentAgentId: null,
+  currentAgentName: null,
+  streamingMessageId: null,
+  accumulatedContent: '',
+}
+
 export const useChatStore = create<ChatStore>()(
   devtools((set, get) => ({
     // Initial state
@@ -86,6 +116,7 @@ export const useChatStore = create<ChatStore>()(
     currentInvestigation: null,
     error: null,
     isLoading: false,
+    streaming: initialStreamingState,
     ws: null,
 
     // Initialize chat
@@ -271,15 +302,21 @@ export const useChatStore = create<ChatStore>()(
       }
     },
 
-    // Send streaming message via SSE
-    sendStreamingMessage: (content: string) => {
+    // Reset streaming state
+    resetStreamingState: () => {
+      set({ streaming: initialStreamingState })
+    },
+
+    // Send streaming message via SSE - Real implementation
+    sendStreamingMessage: async (content: string) => {
       const state = get()
 
       if (!state.session) {
-        get().createNewSession()
+        await get().createNewSession()
       }
 
       const sessionId = get().session!.session_id
+      const streamingMessageId = `msg_${Date.now()}_streaming`
 
       // Add user message
       const userMessage: ChatMessage = {
@@ -289,13 +326,193 @@ export const useChatStore = create<ChatStore>()(
         content,
         timestamp: new Date().toISOString(),
       }
-
       get().addMessage(userMessage)
-      set({ isLoading: true, error: null, agentTyping: true })
 
-      // For now, fallback to regular API call instead of SSE
-      // TODO: Implement SSE with proper authentication
-      get().sendMessage(content, false)
+      // Add placeholder for streaming response
+      const placeholderMessage: ChatMessage = {
+        id: streamingMessageId,
+        session_id: sessionId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date().toISOString(),
+      }
+      get().addMessage(placeholderMessage)
+
+      // Set streaming state
+      set({
+        isLoading: true,
+        error: null,
+        agentTyping: true,
+        streaming: {
+          isStreaming: true,
+          phase: 'detecting',
+          statusMessage: 'Iniciando...',
+          currentAgentId: null,
+          currentAgentName: null,
+          streamingMessageId,
+          accumulatedContent: '',
+        },
+      })
+
+      // Define callbacks for streaming events
+      const callbacks: StreamCallbacks = {
+        onStart: () => {
+          logger.debug('Stream started')
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              phase: 'detecting',
+              statusMessage: 'Conectado...',
+            },
+          }))
+        },
+
+        onDetecting: (message: string) => {
+          logger.debug('Detecting', { message })
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              phase: 'detecting',
+              statusMessage: message,
+            },
+          }))
+        },
+
+        onIntent: (intent: string, confidence: number) => {
+          logger.debug('Intent detected', { intent, confidence })
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              phase: 'intent',
+              statusMessage: `Entendendo: ${intent} (${Math.round(confidence * 100)}%)`,
+            },
+          }))
+        },
+
+        onAgentSelected: (agentId: string, agentName: string) => {
+          logger.debug('Agent selected', { agentId, agentName })
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              phase: 'agent_selected',
+              statusMessage: `${agentName} vai responder...`,
+              currentAgentId: agentId,
+              currentAgentName: agentName,
+            },
+          }))
+
+          // Update placeholder message with agent info
+          get().updateMessage(streamingMessageId, {
+            agent_id: agentId,
+            agent_name: agentName,
+          })
+        },
+
+        onChunk: (chunk: string) => {
+          set((state) => {
+            const newContent = state.streaming.accumulatedContent + chunk
+            return {
+              streaming: {
+                ...state.streaming,
+                phase: 'responding',
+                statusMessage: '',
+                accumulatedContent: newContent,
+              },
+            }
+          })
+
+          // Update message content in real-time
+          const currentState = get()
+          get().updateMessage(streamingMessageId, {
+            content: currentState.streaming.accumulatedContent,
+          })
+        },
+
+        onComplete: (suggestedActions?: string[]) => {
+          logger.debug('Stream complete', { suggestedActions })
+
+          // Update suggested actions if provided
+          if (suggestedActions && suggestedActions.length > 0) {
+            set({
+              suggestedActions: suggestedActions.map((action, idx) => ({
+                id: `action_${idx}`,
+                label:
+                  action === 'start_investigation'
+                    ? 'Iniciar Investigacao'
+                    : action === 'learn_more'
+                      ? 'Saber Mais'
+                      : action,
+                icon: 'MessageSquare',
+                action,
+              })),
+            })
+          }
+
+          set((state) => ({
+            isLoading: false,
+            agentTyping: false,
+            streaming: {
+              ...state.streaming,
+              isStreaming: false,
+              phase: 'complete',
+              statusMessage: '',
+            },
+          }))
+
+          // Save messages to Supabase
+          const finalState = get()
+          chatSessionService
+            .addMessage(sessionId, {
+              role: 'user',
+              content,
+              agent_id: '',
+              agent_name: '',
+            })
+            .catch((err) => logger.warn('Failed to save user message', { error: err }))
+
+          chatSessionService
+            .addMessage(sessionId, {
+              role: 'assistant',
+              content: finalState.streaming.accumulatedContent,
+              agent_id: finalState.streaming.currentAgentId || '',
+              agent_name: finalState.streaming.currentAgentName || '',
+            })
+            .catch((err) => logger.warn('Failed to save assistant message', { error: err }))
+        },
+
+        onError: (errorMessage: string) => {
+          logger.error('Stream error', { errorMessage })
+          set({
+            isLoading: false,
+            agentTyping: false,
+            error: errorMessage,
+            streaming: {
+              ...initialStreamingState,
+              phase: 'error',
+              statusMessage: errorMessage,
+            },
+          })
+
+          // Update placeholder with error message
+          get().updateMessage(streamingMessageId, {
+            content: `Erro: ${errorMessage}. Por favor, tente novamente.`,
+          })
+        },
+      }
+
+      // Execute streaming request
+      try {
+        await streamingAdapter.sendStreaming(
+          {
+            message: content,
+            sessionId,
+          },
+          callbacks
+        )
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+        callbacks.onError?.(errorMsg)
+      }
     },
 
     // Load chat history

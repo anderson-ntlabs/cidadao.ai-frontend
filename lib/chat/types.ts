@@ -59,3 +59,43 @@ export interface ChatServiceConfig {
   maxRetries?: number
   timeout?: number
 }
+
+/**
+ * SSE Streaming Types
+ * Events from /api/v1/chat/stream endpoint
+ */
+export type StreamEventType =
+  | 'start'
+  | 'detecting'
+  | 'intent'
+  | 'agent_selected'
+  | 'chunk'
+  | 'complete'
+  | 'error'
+
+export interface StreamEvent {
+  type: StreamEventType
+  timestamp?: string
+  message?: string
+  intent?: string
+  confidence?: number
+  agent_id?: string
+  agent_name?: string
+  content?: string
+  suggested_actions?: string[]
+  fallback_endpoint?: string
+}
+
+export interface StreamCallbacks {
+  onStart?: () => void
+  onDetecting?: (message: string) => void
+  onIntent?: (intent: string, confidence: number) => void
+  onAgentSelected?: (agentId: string, agentName: string) => void
+  onChunk?: (content: string) => void
+  onComplete?: (suggestedActions?: string[]) => void
+  onError?: (message: string) => void
+}
+
+export interface StreamingAdapter {
+  sendStreaming(request: ChatRequest, callbacks: StreamCallbacks): Promise<ChatResponse>
+}
