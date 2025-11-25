@@ -128,8 +128,19 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
                   case 'chunk':
                     if (event.content) {
+                      // Add space between chunks if needed (backend sends chunks without trailing spaces)
+                      const needsSpace =
+                        accumulatedContent.length > 0 &&
+                        !accumulatedContent.endsWith(' ') &&
+                        !accumulatedContent.endsWith('\n') &&
+                        !event.content.startsWith(' ') &&
+                        !event.content.startsWith('\n')
+
+                      if (needsSpace) {
+                        accumulatedContent += ' '
+                      }
                       accumulatedContent += event.content
-                      callbacks.onChunk?.(event.content)
+                      callbacks.onChunk?.(needsSpace ? ' ' + event.content : event.content)
                     }
                     break
 
