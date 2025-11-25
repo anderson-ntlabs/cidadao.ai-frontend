@@ -77,26 +77,26 @@
     w = new WeakMap(),
     y = new WeakMap(),
     _ = new WeakMap(),
-    x = {
+    b = {
       get(e, t, a) {
         if (e instanceof IDBTransaction) {
           if ('done' === t) return w.get(e)
           if ('store' === t)
             return a.objectStoreNames[1] ? void 0 : a.objectStore(a.objectStoreNames[0])
         }
-        return b(e[t])
+        return x(e[t])
       },
       set: (e, t, a) => ((e[t] = a), !0),
       has: (e, t) => (e instanceof IDBTransaction && ('done' === t || 'store' === t)) || t in e,
     }
-  function b(e) {
+  function x(e) {
     if (e instanceof IDBRequest) {
       let t = new Promise((t, a) => {
         let s = () => {
             ;(e.removeEventListener('success', r), e.removeEventListener('error', n))
           },
           r = () => {
-            ;(t(b(e.result)), s())
+            ;(t(x(e.result)), s())
           },
           n = () => {
             ;(a(e.error), s())
@@ -117,10 +117,10 @@
           ])
         ).includes(e)
           ? function (...t) {
-              return (e.apply(R(this), t), b(this.request))
+              return (e.apply(E(this), t), x(this.request))
             }
           : function (...t) {
-              return b(e.apply(R(this), t))
+              return x(e.apply(E(this), t))
             }
       return (e instanceof IDBTransaction &&
         (function (e) {
@@ -144,19 +144,19 @@
           w.set(e, t)
         })(e),
       p(e, t || (t = [IDBDatabase, IDBObjectStore, IDBIndex, IDBCursor, IDBTransaction])))
-        ? new Proxy(e, x)
+        ? new Proxy(e, b)
         : e
     })(e)
     return (s !== e && (y.set(e, s), _.set(s, e)), s)
   }
-  let R = (e) => _.get(e)
-  function E(e, t, { blocked: a, upgrade: s, blocking: r, terminated: n } = {}) {
+  let E = (e) => _.get(e)
+  function R(e, t, { blocked: a, upgrade: s, blocking: r, terminated: n } = {}) {
     let i = indexedDB.open(e, t),
-      c = b(i)
+      c = x(i)
     return (
       s &&
         i.addEventListener('upgradeneeded', (e) => {
-          s(b(i.result), e.oldVersion, e.newVersion, b(i.transaction), e)
+          s(x(i.result), e.oldVersion, e.newVersion, x(i.transaction), e)
         }),
       a && i.addEventListener('blocked', (e) => a(e.oldVersion, e.newVersion, e)),
       c
@@ -168,16 +168,16 @@
       c
     )
   }
-  let v = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'],
-    q = ['put', 'add', 'delete', 'clear'],
+  let q = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'],
+    v = ['put', 'add', 'delete', 'clear'],
     S = new Map()
   function D(e, t) {
     if (!(e instanceof IDBDatabase && !(t in e) && 'string' == typeof t)) return
     if (S.get(t)) return S.get(t)
     let a = t.replace(/FromIndex$/, ''),
       s = t !== a,
-      r = q.includes(a)
-    if (!(a in (s ? IDBIndex : IDBObjectStore).prototype) || !(r || v.includes(a))) return
+      r = v.includes(a)
+    if (!(a in (s ? IDBIndex : IDBObjectStore).prototype) || !(r || q.includes(a))) return
     let n = async function (e, ...t) {
       let n = this.transaction(e, r ? 'readwrite' : 'readonly'),
         i = n.store
@@ -185,16 +185,16 @@
     }
     return (S.set(t, n), n)
   }
-  x = ((e) => ({
+  b = ((e) => ({
     ...e,
     get: (t, a, s) => D(t, a) || e.get(t, a, s),
     has: (t, a) => !!D(t, a) || e.has(t, a),
-  }))(x)
+  }))(b)
   let N = ['continue', 'continuePrimaryKey', 'advance'],
     P = {},
     T = new WeakMap(),
     C = new WeakMap(),
-    k = {
+    A = {
       get(e, t) {
         if (!N.includes(t)) return e[t]
         let a = P[t]
@@ -208,11 +208,11 @@
         )
       },
     }
-  async function* A(...e) {
+  async function* k(...e) {
     let t = this
     if ((t instanceof IDBCursor || (t = await t.openCursor(...e)), !t)) return
-    let a = new Proxy(t, k)
-    for (C.set(a, t), _.set(a, R(t)); t; )
+    let a = new Proxy(t, A)
+    for (C.set(a, t), _.set(a, E(t)); t; )
       (yield a, (t = await (T.get(a) || t.continue())), T.delete(a))
   }
   function I(e, t) {
@@ -221,11 +221,11 @@
       ('iterate' === t && p(e, [IDBIndex, IDBObjectStore]))
     )
   }
-  x = ((e) => ({
+  b = ((e) => ({
     ...e,
-    get: (t, a, s) => (I(t, a) ? A : e.get(t, a, s)),
+    get: (t, a, s) => (I(t, a) ? k : e.get(t, a, s)),
     has: (t, a) => I(t, a) || e.has(t, a),
-  }))(x)
+  }))(b)
   let L = (e) => (e && 'object' == typeof e ? e : { handle: e })
   class U {
     handler
@@ -284,7 +284,7 @@
   function B(e) {
     return 'string' == typeof e ? new Request(e) : e
   }
-  class K {
+  class W {
     event
     request
     url
@@ -461,7 +461,7 @@
       return (!a && t && 200 !== t.status && (t = void 0), t)
     }
   }
-  class W {
+  class K {
     cacheName
     plugins
     fetchOptions
@@ -480,7 +480,7 @@
       e instanceof FetchEvent && (e = { event: e, request: e.request })
       let t = e.event,
         a = 'string' == typeof e.request ? new Request(e.request) : e.request,
-        s = new K(
+        s = new W(
           this,
           e.url ? { event: t, request: a, url: e.url, params: e.params } : { event: t, request: a }
         ),
@@ -532,7 +532,7 @@
   let j = {
     cacheWillUpdate: async ({ response: e }) => (200 === e.status || 0 === e.status ? e : null),
   }
-  class $ extends W {
+  class $ extends K {
     _networkTimeoutSeconds
     constructor(e = {}) {
       ;(super(e),
@@ -574,7 +574,7 @@
       return (e && clearTimeout(e), (r || !n) && (n = await s.cacheMatch(t)), n)
     }
   }
-  class H extends W {
+  class H extends K {
     _networkTimeoutSeconds
     constructor(e = {}) {
       ;(super(e), (this._networkTimeoutSeconds = e.networkTimeoutSeconds || 0))
@@ -636,7 +636,7 @@
     async getDb() {
       return (
         this._db ||
-          (this._db = await E('serwist-background-sync', 3, { upgrade: this._upgradeDb })),
+          (this._db = await R('serwist-background-sync', 3, { upgrade: this._upgradeDb })),
         this._db
       )
     }
@@ -876,7 +876,7 @@
         : n.body
     return new Response(o, c)
   }
-  class er extends W {
+  class er extends K {
     _fallbackToNetwork
     static defaultPrecacheCacheabilityPlugin = {
       cacheWillUpdate: async ({ response: e }) => (!e || e.status >= 400 ? null : e),
@@ -1212,7 +1212,7 @@
         if (void 0 !== u) {
           let e = new ed({ fallbackUrls: u.entries, serwist: this })
           o.forEach((t) => {
-            t.handler instanceof W &&
+            t.handler instanceof K &&
               !t.handler.plugins.some((e) => 'handlerDidError' in e) &&
               t.handler.plugins.push(e)
           })
@@ -1467,7 +1467,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           (function (e, { blocked: t } = {}) {
             let a = indexedDB.deleteDatabase(e)
             ;(t && a.addEventListener('blocked', (e) => t(e.oldVersion, e)),
-              b(a).then(() => void 0))
+              x(a).then(() => void 0))
           })(this._cacheName))
     }
     async setTimestamp(e, t) {
@@ -1497,7 +1497,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
     async getDb() {
       return (
         this._db ||
-          (this._db = await E('serwist-expiration', 1, {
+          (this._db = await R('serwist-expiration', 1, {
             upgrade: this._upgradeDbAndDeleteOldDbs.bind(this),
           })),
         this._db
@@ -1594,7 +1594,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       this._cacheExpirations = new Map()
     }
   }
-  let ex = async (e, t) => {
+  let eb = async (e, t) => {
     try {
       if (206 === t.status) return t
       let a = e.headers.get('range')
@@ -1640,11 +1640,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       return new Response('', { status: 416, statusText: 'Range Not Satisfiable' })
     }
   }
-  class eb {
+  class ex {
     cachedResponseWillBeUsed = async ({ request: e, cachedResponse: t }) =>
-      t && e.headers.has('range') ? await ex(e, t) : t
+      t && e.headers.has('range') ? await eb(e, t) : t
   }
-  class eR extends W {
+  class eE extends K {
     async _handle(e, t) {
       let a,
         r = await t.cacheMatch(e)
@@ -1658,7 +1658,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       return r
     }
   }
-  class eE extends W {
+  class eR extends K {
     constructor(e = {}) {
       ;(super(e), this.plugins.some((e) => 'cacheWillUpdate' in e) || this.plugins.unshift(j))
     }
@@ -1678,80 +1678,80 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       return n
     }
   }
-  let ev = { rscPrefetch: 'pages-rsc-prefetch', rsc: 'pages-rsc', html: 'pages' },
-    eq = [
+  let eq = { rscPrefetch: 'pages-rsc-prefetch', rsc: 'pages-rsc', html: 'pages' },
+    ev = [
       {
         matcher: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
-        handler: new eR({
+        handler: new eE({
           cacheName: 'google-fonts-webfonts',
           plugins: [new e_({ maxEntries: 4, maxAgeSeconds: 31536e3, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'google-fonts-stylesheets',
           plugins: [new e_({ maxEntries: 4, maxAgeSeconds: 604800, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'static-font-assets',
           plugins: [new e_({ maxEntries: 4, maxAgeSeconds: 604800, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'static-image-assets',
           plugins: [new e_({ maxEntries: 64, maxAgeSeconds: 2592e3, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\/_next\/static.+\.js$/i,
-        handler: new eR({
+        handler: new eE({
           cacheName: 'next-static-js-assets',
           plugins: [new e_({ maxEntries: 64, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\/_next\/image\?url=.+$/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'next-image',
           plugins: [new e_({ maxEntries: 64, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\.(?:mp3|wav|ogg)$/i,
-        handler: new eR({
+        handler: new eE({
           cacheName: 'static-audio-assets',
           plugins: [
             new e_({ maxEntries: 32, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' }),
-            new eb(),
+            new ex(),
           ],
         }),
       },
       {
         matcher: /\.(?:mp4|webm)$/i,
-        handler: new eR({
+        handler: new eE({
           cacheName: 'static-video-assets',
           plugins: [
             new e_({ maxEntries: 32, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' }),
-            new eb(),
+            new ex(),
           ],
         }),
       },
       {
         matcher: /\.(?:js)$/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'static-js-assets',
           plugins: [new e_({ maxEntries: 48, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' })],
         }),
       },
       {
         matcher: /\.(?:css|less)$/i,
-        handler: new eE({
+        handler: new eR({
           cacheName: 'static-style-assets',
           plugins: [new e_({ maxEntries: 32, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' })],
         }),
@@ -1787,7 +1787,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           a &&
           !t.startsWith('/api/'),
         handler: new $({
-          cacheName: ev.rscPrefetch,
+          cacheName: eq.rscPrefetch,
           plugins: [new e_({ maxEntries: 32, maxAgeSeconds: 86400 })],
         }),
       },
@@ -1795,7 +1795,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         matcher: ({ request: e, url: { pathname: t }, sameOrigin: a }) =>
           '1' === e.headers.get('RSC') && a && !t.startsWith('/api/'),
         handler: new $({
-          cacheName: ev.rsc,
+          cacheName: eq.rsc,
           plugins: [new e_({ maxEntries: 32, maxAgeSeconds: 86400 })],
         }),
       },
@@ -1803,7 +1803,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         matcher: ({ request: e, url: { pathname: t }, sameOrigin: a }) =>
           e.headers.get('Content-Type')?.includes('text/html') && a && !t.startsWith('/api/'),
         handler: new $({
-          cacheName: ev.html,
+          cacheName: eq.html,
           plugins: [new e_({ maxEntries: 32, maxAgeSeconds: 86400 })],
         }),
       },
@@ -1826,6 +1826,14 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
     ],
     eS = new ef({
       precacheEntries: [
+        {
+          revision: 'a25fc98704848104ee4b2bf32d633fb6',
+          url: '/_next/static/ALqVCjfO3spr2jcvRuvoJ/_buildManifest.js',
+        },
+        {
+          revision: 'b6652df95db52feb4daf4eca35380933',
+          url: '/_next/static/ALqVCjfO3spr2jcvRuvoJ/_ssgManifest.js',
+        },
         { revision: null, url: '/_next/static/chunks/1091.3e0f6ca343915ff4.js' },
         { revision: null, url: '/_next/static/chunks/1401.03ea562301633450.js' },
         { revision: null, url: '/_next/static/chunks/1555.28f005c9d5b223d2.js' },
@@ -1890,10 +1898,10 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/error-fc840b0bf1c8f498.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/layout-acf6582e93f91a54.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-4762e2d252168585.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-9dfc6c374b864ba8.js' },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/configuracoes/page-5f10adbbc3ce1de8.js',
+          url: '/_next/static/chunks/app/pt/app/configuracoes/page-18778d4f5a7ff9a1.js',
         },
         {
           revision: null,
@@ -1919,7 +1927,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
           revision: null,
           url: '/_next/static/chunks/app/pt/app/investigacoes/page-af5b91e37348db5e.js',
         },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-7e771f286ced5ed7.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-66687af935195e63.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/error-060aa0edae08daac.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/page-1021af18d0fe341f.js' },
         {
@@ -1938,7 +1946,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/chunks/app/pt/system/page-7eb120dfd0e36a97.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/terms/page-8839d1daf44d8438.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/test-voice/page-1ae93ae918942775.js' },
-        { revision: null, url: '/_next/static/chunks/commons-522751dd6377839f.js' },
+        { revision: null, url: '/_next/static/chunks/commons-621ac5ac873001d4.js' },
         { revision: null, url: '/_next/static/chunks/framework-b9fd9bcc3ecde907.js' },
         { revision: null, url: '/_next/static/chunks/main-388de7b2142a1859.js' },
         { revision: null, url: '/_next/static/chunks/main-app-c756c3415517cebc.js' },
@@ -1960,7 +1968,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         },
         { revision: null, url: '/_next/static/chunks/npm.micromark.5483e8fa98861f71.js' },
         { revision: null, url: '/_next/static/chunks/npm.motion-dom-b4aec77698dec672.js' },
-        { revision: null, url: '/_next/static/chunks/npm.next-230d24f40394984d.js' },
+        { revision: null, url: '/_next/static/chunks/npm.next-328c83202e180c01.js' },
         { revision: null, url: '/_next/static/chunks/npm.posthog-js-ffb89532afe4ae86.js' },
         {
           revision: null,
@@ -1985,14 +1993,6 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
         { revision: null, url: '/_next/static/css/59e882a6b4251a5a.css' },
         { revision: null, url: '/_next/static/css/8a38bb2669d7ed47.css' },
         { revision: null, url: '/_next/static/css/b5ccccc69160d62d.css' },
-        {
-          revision: 'a25fc98704848104ee4b2bf32d633fb6',
-          url: '/_next/static/ibK_kbk3v_hOi996XGoeh/_buildManifest.js',
-        },
-        {
-          revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/ibK_kbk3v_hOi996XGoeh/_ssgManifest.js',
-        },
         {
           revision: '9dda5cfc9a46f256d0e131bb535e46f8',
           url: '/_next/static/media/19cfc7226ec3afaa-s.woff2',
@@ -2369,7 +2369,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
       skipWaiting: !0,
       clientsClaim: !0,
       navigationPreload: !0,
-      runtimeCaching: eq.map((e) => ({
+      runtimeCaching: ev.map((e) => ({
         ...e,
         handler: {
           ...e.handler,
@@ -2397,23 +2397,41 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`))
     }),
     self.addEventListener('fetch', (e) => {
       let t = new URL(e.request.url)
-      if ('cidadao-api-production.up.railway.app' !== t.hostname) {
-        if ('http:' === t.protocol && 'localhost' !== t.hostname)
-          return void e.respondWith(
-            new Response('Mixed Content: This request has been blocked', {
-              status: 400,
-              statusText: 'Bad Request - HTTP not allowed',
-            })
-          )
-        if (
-          'us.i.posthog.com' === t.hostname ||
-          'us-assets.i.posthog.com' === t.hostname ||
-          t.hostname.includes('sentry.io')
-        )
-          return void e.respondWith(
-            fetch(e.request).catch(() => new Response(null, { status: 200 }))
-          )
+      if ('cidadao-api-production.up.railway.app' === t.hostname) {
+        if ('http:' === t.protocol) {
+          t.protocol = 'https:'
+          let a = new Request(t.toString(), {
+            method: e.request.method,
+            headers: e.request.headers,
+            body:
+              'GET' !== e.request.method && 'HEAD' !== e.request.method ? e.request.body : void 0,
+            mode: 'cors',
+            credentials: e.request.credentials,
+          })
+          e.respondWith(fetch(a).catch(() => new Response(null, { status: 503 })))
+        }
+        return
       }
+      if ('http:' === t.protocol && 'localhost' !== t.hostname) {
+        t.protocol = 'https:'
+        let a = new Request(t.toString(), {
+          method: e.request.method,
+          headers: e.request.headers,
+          body: 'GET' !== e.request.method && 'HEAD' !== e.request.method ? e.request.body : void 0,
+          mode: e.request.mode,
+          credentials: e.request.credentials,
+        })
+        e.respondWith(
+          fetch(a).catch(() => new Response('Failed to upgrade to HTTPS', { status: 400 }))
+        )
+        return
+      }
+      if (
+        'us.i.posthog.com' === t.hostname ||
+        'us-assets.i.posthog.com' === t.hostname ||
+        t.hostname.includes('sentry.io')
+      )
+        return void e.respondWith(fetch(e.request).catch(() => new Response(null, { status: 200 })))
     }),
     self.addEventListener('message', (e) => {
       e.data && 'SKIP_WAITING' === e.data.type && self.skipWaiting()
