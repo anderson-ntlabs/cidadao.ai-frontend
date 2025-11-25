@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-11-18
+**Last Updated**: 2025-11-22
 
 ---
 
@@ -95,12 +95,14 @@ npm run test:mobile           # Mobile-specific tests
 npx playwright test --headed  # Watch execution
 npx playwright test --debug   # Debug mode
 
-# Manual integration scripts
-# See scripts/README.md for 40+ available scripts organized by category:
-# - scripts/testing/      - Test scripts
-# - scripts/diagnostics/  - Troubleshooting
-# - scripts/monitoring/   - Performance monitoring
-# - scripts/analysis/     - Code analysis
+# Manual integration scripts (60+ available)
+# Organized by category in scripts/:
+# - scripts/testing/         - Test scripts (40+)
+# - scripts/diagnostics/     - Troubleshooting (5+)
+# - scripts/monitoring/      - Performance monitoring (5+)
+# - scripts/analysis/        - Code analysis (5+)
+# - scripts/generation/      - Code generation (5+)
+# - scripts/utilities/       - Various utilities (10+)
 ```
 
 ### Performance & Analysis
@@ -109,6 +111,7 @@ npx playwright test --debug   # Debug mode
 npm run analyze               # Bundle analysis
 npm run lighthouse            # Lighthouse CI
 node scripts/monitoring/monitor-backend.js
+node scripts/analysis/analyze-bundle.js
 ```
 
 ---
@@ -180,27 +183,48 @@ Adapter    Adapter       ↓
 
 ### State Management (Zustand)
 
-- `store/chat-store.ts`: Chat sessions, messages, agents, investigations
-- `store/notification-store.ts`: Toast notifications
-- `store/tooltip-store.ts`: Tooltip state
+Three main stores in `store/`:
 
-Key actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
+- `chat-store.ts`: Chat sessions, messages, agents, investigations
+  - Actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
+  - Persisted to localStorage
+- `notification-store.ts`: Toast notifications (success/error/warning/info)
+- `tooltip-store.ts`: Tooltip visibility state
+
+**Pattern**: Stores use Zustand with immer middleware for immutable updates.
 
 ### Agent System
 
-17 AI agents with Brazilian identities (`data/agents.ts`):
+17 AI agents with Brazilian identities defined in `data/agents.ts`:
 
-**Tier 1 - Operational (10)**: Abaporu (orchestrator), Zumbi (anomaly detection), Anita (pattern analysis), Tiradentes (reports), Senna (router), Nanã (memory), José Bonifácio (legal), Machado de Assis (communication), +2 more
+**Tier 1 - Operational (10)**:
+
+- Abaporu (orchestrator)
+- Zumbi (anomaly detection)
+- Anita (pattern analysis)
+- Tiradentes (reports)
+- Senna (router)
+- Nanã (memory)
+- José Bonifácio (legal)
+- Machado de Assis (communication)
+- +2 more
 
 **Tier 2-3**: Framework ready, implementation pending
+
+Each agent has:
+
+- Unique ID, name, role (PT/EN)
+- Description (PT/EN)
+- Avatar image in `public/agents/`
+- Wikipedia link for cultural context
 
 ### Progressive Web App (Serwist)
 
 **Migration** (Jan 2025): `@ducanh2912/next-pwa` → `@serwist/next` for Next.js 15 compatibility.
 
 - Service Worker: `app/sw.ts`
-- Disabled in dev (`DISABLE_PWA=true`)
-- NetworkFirst caching
+- Disabled in dev (`DISABLE_PWA=true` or `NODE_ENV=development`)
+- NetworkFirst caching strategy
 - Components: `InstallPrompt`, `UpdateNotification`, `OfflineBanner`
 
 ### Performance Optimizations
@@ -210,8 +234,9 @@ Key actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `cre
 - Custom chunk splitting: framework, charts, animations, pdf-export
 - `runtimeChunk: 'single'`
 - Package optimization: lucide-react, recharts, d3, jspdf
+- Optimized node_modules bundling by package name
 
-**Images**: AVIF + WebP, responsive sizes (640px → 3840px), 60s cache TTL
+**Images**: AVIF + WebP formats, responsive sizes (640px → 3840px), 60s cache TTL
 
 **Code Splitting**: Dynamic imports for PDF export, charts, VLibras
 
@@ -228,8 +253,8 @@ Key actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `cre
 
 **Accessibility** (`components/a11y/`):
 
-- `vlibras-lazy.tsx`: LIBRAS widget
-- `accessibility-panel.tsx`: Unified controls
+- `vlibras-lazy.tsx`: LIBRAS widget (lazy loaded)
+- `accessibility-panel.tsx`: Unified controls (FAB button)
 - `announcer.tsx`: Screen reader support
 - `skip-links.tsx`: Keyboard navigation
 
@@ -237,16 +262,18 @@ Key actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `cre
 
 **Unit Tests** (Vitest + jsdom):
 
-- 80+ test files, 60% coverage target
+- 80+ test files, 60% coverage target (thresholds in `config/vitest.config.mjs`)
 - Setup: `vitest.setup.ts`
+- Pattern: `*.test.ts` or `*.test.tsx` co-located with source files
 
 **E2E Tests** (Playwright):
 
-- 9 test files, multi-browser (Chromium, Firefox, WebKit)
-- Mobile: Pixel 5, iPhone 12
-- Config: `config/playwright.config.ts`, `config/playwright.mobile.config.ts`
+- 9 test files in `__tests__/e2e/`
+- Multi-browser: Chromium, Firefox, WebKit
+- Mobile configs: Pixel 5, iPhone 12 (`config/playwright.mobile.config.ts`)
+- Main config: `config/playwright.config.ts`
 
-**Manual Scripts**: 40+ scripts in `/scripts` - see `scripts/README.md`
+**Manual Scripts**: 60+ scripts organized in `/scripts` subdirectories
 
 ---
 
@@ -279,36 +306,57 @@ KV_URL=                               # Vercel KV cache
 ```bash
 node scripts/testing/test-backend.js              # Backend connectivity
 node scripts/testing/test-chat-live.js            # Chat integration
+node scripts/testing/test-chat-full-flow.js       # Full chat flow test
 # Check browser console for CORS errors
-# Verify NEXT_PUBLIC_API_URL
+# Verify NEXT_PUBLIC_API_URL in .env.local
 # Check localStorage 'maritaca_selected_model'
 ```
+
+**Common Issues**:
+
+- CORS errors → Check backend CORS config and API URL
+- Messages not sending → Check `lib/chat/chat.service.ts` logs
+- Agent not responding → Verify agent is registered in backend
 
 ### Debugging Auth
 
 ```bash
 # 1. Verify Supabase credentials in .env.local
-# 2. Check OAuth redirect URLs:
+# 2. Check OAuth redirect URLs in Supabase dashboard:
 #    - http://localhost:3000/auth/callback (dev)
 #    - https://your-domain.vercel.app/auth/callback (prod)
 # 3. Clear cookies + localStorage
-# 4. Verify Route Handler uses createServerClient
+# 4. Verify Route Handler uses createServerClient (see Critical section)
 ```
+
+**Files to check**:
+
+- `app/auth/callback/route.ts` - OAuth callback handler
+- `lib/supabase/middleware.ts` - Session refresh middleware
+- `lib/supabase/server.ts` - Server-side client creation
+- `lib/supabase/client.ts` - Client-side client creation
 
 ### Build Failures
 
 ```bash
 rm -rf .next node_modules package-lock.json
 npm install
-npm run type-check
+npm run type-check                   # Check TypeScript errors
 npm run build 2>&1 | grep -i "circular"  # Check circular deps
 ```
+
+**Common causes**:
+
+- Circular dependencies → Check import chains
+- Missing environment variables → Verify .env.local
+- Type errors → Run `npm run type-check` for details
 
 ### Playwright Issues
 
 ```bash
 npx playwright install                   # Install/update browsers
 npx playwright test --headed             # Debug with UI
+npx playwright test --debug              # Debug mode with inspector
 rm -rf test-results/ playwright-report/  # Clear results
 ```
 
@@ -318,15 +366,18 @@ rm -rf test-results/ playwright-report/  # Clear results
 node scripts/testing/test-vlibras.js
 node scripts/diagnostics/diagnose-vlibras.js
 # VLibras only loads on /pt/* routes
-# Check NEXT_PUBLIC_ENABLE_VLIBRAS=true
+# Check NEXT_PUBLIC_ENABLE_VLIBRAS=true in .env.local
+# Check browser console for script loading errors
 ```
+
+**File**: `components/a11y/vlibras-lazy.tsx`
 
 ### Adding a New Agent
 
-1. Define in `data/agents.ts`
-2. Add avatar to `public/agents/`
-3. Update types in `types/chat.ts`
-4. Implement logic in `cidadao.ai-backend`
+1. Define in `data/agents.ts` with PT/EN translations
+2. Add avatar to `public/agents/` (PNG format recommended)
+3. Update types in `types/chat.ts` if needed
+4. Implement backend logic in `cidadao.ai-backend` repository
 
 ---
 
@@ -334,11 +385,18 @@ node scripts/diagnostics/diagnose-vlibras.js
 
 ### 1. Supabase Client Creation
 
-**Server Components**:
+**Server Components** (`app/` directory):
 
 ```typescript
 import { createClient } from '@/lib/supabase/server'
 const supabase = await createClient() // ✅ OK
+```
+
+**Client Components**:
+
+```typescript
+import { createClient } from '@/lib/supabase/client'
+const supabase = createClient() // ✅ OK (no await)
 ```
 
 **Route Handlers** (see Critical section above): Use `createServerClient()` with explicit cookies.
@@ -349,30 +407,45 @@ const supabase = await createClient() // ✅ OK
 // ChatService automatically detects Maritaca mode
 const maritacaModel = localStorage.getItem('maritaca_selected_model')
 if (maritacaModel) {
-  // Use Fallback Adapter (bypass backend)
+  // Use Fallback Adapter (bypass backend, direct LLM)
 } else {
-  // Use Primary Adapter (backend multi-agent)
+  // Use Primary Adapter (backend multi-agent system)
 }
 ```
 
+User can toggle between modes in chat settings.
+
 ### 3. Internationalization
 
-Routes: `/pt/*` and `/en/*` with `PTLayoutWrapper` handling conditional headers.
+Routes: `/pt/*` (Portuguese) and `/en/*` (English)
+
+**Messages**: `messages/pt.json` and `messages/en.json`
+
+**i18n utility**: `lib/i18n.ts` handles translations
+
+**Layout wrapper**: `components/pt-layout-wrapper.tsx` manages conditional headers based on route
 
 ### 4. Accessibility
 
 **VLibras** (`components/a11y/vlibras-lazy.tsx`):
 
-- Lazy loaded, PT pages only
-- User preference in localStorage
-- Hook: `useVLibras()`
+- Lazy loaded to reduce initial bundle
+- PT pages only (`/pt/*` routes)
+- User preference stored in localStorage
+- Hook: `useVLibras()` in `hooks/use-vlibras.ts`
 
-**Accessibility Panel**:
+**Accessibility Panel** (`components/a11y/accessibility-panel.tsx`):
 
-- FAB button (bottom-right)
-- Shortcuts: Alt+A (panel), Alt+H (contrast), Alt+± (font size)
+- FAB button (bottom-right, fixed position)
+- Keyboard shortcuts: Alt+A (panel), Alt+H (contrast), Alt+± (font size)
+- Features: High contrast, font size, VLibras toggle
 
-**WCAG AAA**: Touch targets ≥44px, contrast >7:1, keyboard navigation, screen reader support
+**WCAG AAA compliance**:
+
+- Touch targets ≥44px (mobile)
+- Contrast ratio >7:1 (high contrast mode)
+- Full keyboard navigation
+- Screen reader support (ARIA labels, announcements)
 
 ### 5. Performance
 
@@ -383,9 +456,15 @@ import { lazyLoad } from '@/lib/utils/code-splitting'
 const PDFExport = lazyLoad(() => import('@/lib/export-service'))
 ```
 
-**Bundle Analysis**: `ANALYZE=true npm run build`
+**Bundle Analysis**:
 
-**Web Vitals**: Tracked via `lib/web-vitals.ts` → Vercel Analytics
+```bash
+ANALYZE=true npm run build
+```
+
+Opens webpack bundle analyzer in browser.
+
+**Web Vitals**: Tracked via `lib/web-vitals.ts` → sent to Vercel Analytics
 
 ---
 
@@ -393,29 +472,44 @@ const PDFExport = lazyLoad(() => import('@/lib/export-service'))
 
 **Authentication**:
 
-- `app/auth/callback/route.ts` - OAuth (uses createServerClient)
-- `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts`
+- `app/auth/callback/route.ts` - OAuth callback (uses createServerClient)
+- `lib/supabase/client.ts` - Client-side Supabase client
+- `lib/supabase/server.ts` - Server-side Supabase client
+- `lib/supabase/middleware.ts` - Session refresh middleware
 
-**Chat**:
+**Chat System**:
 
 - `lib/chat/chat.service.ts` - Main orchestrator
-- `lib/chat/adapters/primary.adapter.ts`, `lib/chat/adapters/fallback.adapter.ts`
-- `store/chat-store.ts` - Zustand state
+- `lib/chat/adapters/primary.adapter.ts` - Backend adapter
+- `lib/chat/adapters/fallback.adapter.ts` - Maritaca LLM adapter
+- `store/chat-store.ts` - Zustand state management
+- `lib/chat/types.ts` - TypeScript interfaces
 
 **Testing**:
 
-- `config/vitest.config.mjs`, `config/playwright.config.ts`, `config/playwright.mobile.config.ts`
-- `vitest.setup.ts` - Test setup
+- `config/vitest.config.mjs` - Unit test configuration
+- `config/playwright.config.ts` - E2E test configuration
+- `config/playwright.mobile.config.ts` - Mobile E2E tests
+- `vitest.setup.ts` - Test environment setup
 
 **Performance**:
 
-- `next.config.mjs` - Next.js + Serwist + bundle analyzer
-- `app/sw.ts` - Service Worker
-- `lib/web-vitals.ts`
+- `next.config.mjs` - Next.js config + Serwist + bundle analyzer
+- `app/sw.ts` - Service Worker for PWA
+- `lib/web-vitals.ts` - Web Vitals tracking
 
-**Layout**:
+**Layout & Routing**:
 
+- `app/layout.tsx` - Root layout
+- `app/pt/layout.tsx` - Portuguese layout
+- `app/en/layout.tsx` - English layout
 - `components/pt-layout-wrapper.tsx` - Conditional header logic
+
+**State Management**:
+
+- `store/chat-store.ts` - Chat state (messages, sessions, agents)
+- `store/notification-store.ts` - Toast notifications
+- `store/tooltip-store.ts` - Tooltip state
 
 ---
 
@@ -425,24 +519,26 @@ const PDFExport = lazyLoad(() => import('@/lib/export-service'))
 
 ### Pre-Production Checklist
 
-1. ✅ `npm run test` passes
-2. ✅ `npm run test:playwright` passes
-3. ✅ `npm run type-check` clean
-4. ✅ `npm run lint` clean
+1. ✅ `npm run test` passes (unit tests)
+2. ✅ `npm run test:playwright` passes (E2E tests)
+3. ✅ `npm run type-check` clean (no TypeScript errors)
+4. ✅ `npm run lint` clean (ESLint passes)
 5. ✅ Coverage >60% (`npm run test:coverage`)
 6. ✅ Lighthouse acceptable (`npm run lighthouse`)
-7. ✅ Bundle size acceptable (`npm run analyze`)
+7. ✅ Bundle size acceptable (`npm run analyze` - should be <400KB)
 8. ✅ Backend integration (`node scripts/testing/test-backend-comprehensive.js`)
 
 ### Production Environment Variables
 
 Configure in Vercel dashboard:
 
-- `NEXT_PUBLIC_API_URL`: Railway backend
-- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_ENABLE_VLIBRAS=true`
-- Remove `DISABLE_PWA` or set to `false`
-- Vercel KV: Auto-injected
+- `NEXT_PUBLIC_API_URL`: Railway backend URL
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase credentials
+- `NEXT_PUBLIC_ENABLE_VLIBRAS=true`: Enable VLibras widget
+- Remove `DISABLE_PWA` or set to `false`: Enable PWA
+- `NEXT_PUBLIC_GA_ID`: Google Analytics (optional)
+- `NEXT_PUBLIC_POSTHOG_KEY`: PostHog analytics (optional)
+- Vercel KV: Auto-injected (no manual config needed)
 
 ---
 
@@ -456,88 +552,104 @@ Configure in Vercel dashboard:
 <optional body>
 ```
 
-Types: feat, fix, docs, refactor, test, chore, perf
+**Types**: feat, fix, docs, refactor, test, chore, perf
 
-Examples:
+**Examples**:
 
 ```
 feat(chat): add SSE streaming support
 fix(auth): correct OAuth redirect handling
 refactor(chat): simplify adapter architecture
+test(chat): increase coverage to 85%
+docs(readme): update installation instructions
 ```
 
 ### Pre-commit Hooks (Husky)
 
-1. ESLint
-2. TypeScript validation
-3. Commitlint (conventional commits)
+Automatically runs on `git commit`:
+
+1. ESLint (`npm run lint`)
+2. TypeScript validation (`npm run type-check`)
+3. Commitlint (validates conventional commit format)
 
 Bypass (not recommended): `git commit --no-verify`
 
 ### Quality Gates
 
+Before pushing to main:
+
 ```bash
 npm run type-check          # Must pass
 npm run lint                # Must pass
-npm run test:coverage       # ≥60%
-npm run test:playwright     # All E2E pass
+npm run test:coverage       # Must be ≥60%
+npm run test:playwright     # All E2E tests must pass
 ```
 
 ---
 
 ## Dependency Management (Renovate)
 
-**Auto-updates**: 80+ deps, PRs auto-created Mon/Thu 5am BRT
+**Auto-updates**: 80+ dependencies, PRs auto-created Mon/Thu 5am BRT
 
-**Automerged**: Patches (1.0.0→1.0.1), devDep minors
-**Manual review**: Majors, Next.js, React, Supabase
+**Automerged**:
 
-**Dashboard**: GitHub Issue "🤖 Renovate Dependency Dashboard" (pin it!)
+- Patches (1.0.0 → 1.0.1)
+- devDependency minors
 
-**Commands** (comment on PR):
+**Manual review required**:
+
+- Major version bumps
+- Next.js, React, Supabase updates
+
+**Dashboard**: GitHub Issue "🤖 Renovate Dependency Dashboard" (should be pinned)
+
+**Commands** (comment on Renovate PR):
 
 ```
-@renovate rebase      # Update with main
-@renovate retry       # Retry failed
-@renovate pause       # Pause PR
+@renovate rebase      # Rebase PR with latest main
+@renovate retry       # Retry failed checks
+@renovate pause       # Pause this PR
 ```
 
-**Config**: `renovate.json` | **Docs**: `docs/10-reference/renovate-guide.md`
+**Config**: `renovate.json` in repository root
+**Docs**: `docs/10-reference/renovate-guide.md`
 
 ---
 
 ## Library Organization
 
-**Chat**: `lib/chat/` - ChatService, adapters, types
-**State**: `store/` - Zustand stores (chat, notifications, tooltips)
+**Chat System**: `lib/chat/` - ChatService, adapters, types
+**State Management**: `store/` - Zustand stores (chat, notifications, tooltips)
 **Caching**: `lib/cache/` - in-memory, IndexedDB, Vercel KV
-**Security**: `lib/security/` - CSP, rate limiting, OWASP
-**Monitoring**: `lib/monitoring/`, `lib/telemetry/`, `lib/logger/`
+**Security**: `lib/security/` - CSP config, rate limiting, OWASP protections
+**Monitoring**: `lib/monitoring/` - Sentry config, metrics service
+**Telemetry**: `lib/telemetry/` - Chat telemetry, cost metrics
 **Services**: `lib/export/`, `lib/analytics/`, `lib/websocket/`
 **Utilities**: `lib/utils/`, `lib/constants/`, `lib/api/`
+**Supabase**: `lib/supabase/` - Client, server, middleware, auth helpers
 
-**Data**: `data/agents.ts` - 17 agent definitions
-**Types**: `types/chat.ts`, global types
+**Data**: `data/agents.ts` - 17 agent definitions with PT/EN translations
+**Types**: `types/` - Global TypeScript interfaces
 
 ---
 
 ## Documentation
 
-Complete docs in `/docs`:
+Complete documentation in `/docs`:
 
-- `01-getting-started/`: Installation, quick start
-- `02-architecture/`: System design
-- `03-features/`: Feature docs
+- `01-getting-started/`: Installation, quick start, environment setup
+- `02-architecture/`: System design, patterns
+- `03-features/`: Feature-specific documentation
 - `04-api/`: API reference
 - `05-guides/`: Development guides
-- `06-development/`: Patterns, conventions
-- `07-design/`: Design system
-- `08-testing/`: Testing strategies
-- `09-deployment/`: Deploy guides
-- `10-reference/`: Migration guides, Renovate
-- `archive/`: Archived docs
+- `06-development/`: Coding patterns, conventions
+- `07-design/`: Design system, components
+- `08-testing/`: Testing strategies, coverage
+- `09-deployment/`: Deployment guides
+- `10-reference/`: Migration guides, Renovate, tools
+- `archive/`: Archived documentation
 
-**Entry**: `/docs/README.md`
+**Entry point**: `/docs/README.md` (comprehensive index)
 
 ---
 
@@ -549,21 +661,72 @@ git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
 cd cidadao.ai-frontend
 npm install
 
-# 2. Configure
+# 2. Configure environment
 cp .env.example .env.local
-# Edit .env.local with Supabase credentials
+# Edit .env.local:
+# - Add Supabase credentials (required for auth)
+# - NEXT_PUBLIC_API_URL defaults to Railway production
 
-# 3. Start
+# 3. Start development server
 npm run dev          # http://localhost:3000
 
-# 4. Test (new terminal)
-npm run test:ui      # Unit tests
-npm run storybook    # Component dev (optional)
+# 4. Run tests (new terminal)
+npm run test:ui      # Unit tests with Vitest UI
+npm run storybook    # Component development (optional)
+
+# 5. Run quality checks before committing
+npm run type-check && npm run lint
+npm run test:coverage
 ```
 
 **Notes**:
 
-- Supabase required for OAuth
-- Backend defaults to Railway production
-- PWA disabled in dev
-- VLibras disabled by default
+- Supabase credentials required for OAuth authentication
+- Backend defaults to Railway production (no local backend needed)
+- PWA automatically disabled in development mode
+- VLibras disabled by default (set `NEXT_PUBLIC_ENABLE_VLIBRAS=true` to enable)
+
+---
+
+## Common Script Categories
+
+The `scripts/` directory contains 60+ utility scripts organized by purpose:
+
+**Testing** (`scripts/testing/`):
+
+- `test-backend-comprehensive.js` - Full backend integration test
+- `test-chat-live.js` - Live chat system test
+- `test-vlibras.js` - VLibras (LIBRAS) integration test
+- `test-maritaca-integration.js` - Maritaca LLM integration test
+- `test-drummond-*.js` - Drummond agent tests (legacy)
+
+**Diagnostics** (`scripts/diagnostics/`):
+
+- `diagnose-vlibras.js` - Troubleshoot VLibras issues
+
+**Monitoring** (`scripts/monitoring/`):
+
+- `monitor-backend.js` - Monitor backend health
+- `monitor-new-endpoints.js` - Check for new API endpoints
+
+**Analysis** (`scripts/analysis/`):
+
+- `analyze-bundle.js` - Analyze bundle size
+- `dependency-analyzer.js` - Analyze dependency tree
+- `analyze-ux-design.js` - UX design analysis
+
+**Generation** (`scripts/generation/`):
+
+- `generate-component.js` - Component scaffolding
+- `generate-api-types.js` - Generate API types
+- `generate-icons.js` - Icon generation
+- `generate-splash.js` - PWA splash screens
+
+**Utilities** (`scripts/utilities/`):
+
+- `check-backend-status.js` - Backend status check
+- `check-wcag-contrast.js` - WCAG contrast checker
+- `security-audit.js` - Security audit
+- `migrate-console-logs.js` - Replace console.log with logger
+
+Run any script: `node scripts/<category>/<script-name>.js`

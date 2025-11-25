@@ -16,6 +16,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { LandingClientWrapper } from '@/components/landing/landing-client-wrapper'
+import { FAQSection } from '@/components/landing/faq-section'
 
 // Export metadata for better SEO
 export { metadata } from './metadata'
@@ -203,55 +204,83 @@ export default function PTPageOptimized(): JSX.Element {
         </div>
       </section>
 
-      {/* DEVELOPER SECTION */}
+      {/* FAQ + SPOTIFY SECTION - Two Column Layout */}
       <section className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Para Desenvolvedores</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
-              Código 100% aberto e documentação completa
-            </p>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Left Column - FAQ */}
+            <div className="w-full">
+              <FAQSection />
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <a
-              href="https://github.com/anderson-ufrj/cidadao.ai-backend"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-6 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              <div className="text-3xl mb-3">🐙</div>
-              <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                GitHub <ExternalLink className="w-4 h-4" />
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Código fonte completo</p>
-            </a>
+            {/* Right Column - Spotify Playlist */}
+            <div className="w-full">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Playlist do Projeto
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed max-w-lg mx-auto">
+                  O idealizador do Cidadao.AI criou uma playlist que e a cara do Brasil. Parte do
+                  desenvolvimento foi regado a muito cafe e boa musica!
+                </p>
+              </div>
 
-            <a
-              href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-6 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              <div className="text-3xl mb-3">📚</div>
-              <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                Documentação <ExternalLink className="w-4 h-4" />
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Guias e tutoriais</p>
-            </a>
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 shadow-xl">
+                <iframe
+                  className="w-full rounded-xl shadow-lg"
+                  src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator&theme=0"
+                  width="100%"
+                  height="352"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  title="Cidadao.AI Playlist - Brazilian Music"
+                />
+              </div>
 
-            <a
-              href="https://cidadao-api-production.up.railway.app/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-6 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              <div className="text-3xl mb-3">⚡</div>
-              <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                API REST <ExternalLink className="w-4 h-4" />
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Documentação da API</p>
-            </a>
+              {/* Developer Links - Below Spotify */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-center mb-4">Para Desenvolvedores</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <a
+                    href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
+                  >
+                    <div className="text-2xl mb-2">🐙</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      GitHub <ExternalLink className="w-3 h-3" />
+                    </h4>
+                  </a>
+
+                  <a
+                    href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
+                  >
+                    <div className="text-2xl mb-2">📚</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      Docs <ExternalLink className="w-3 h-3" />
+                    </h4>
+                  </a>
+
+                  <a
+                    href="https://cidadao-api-production.up.railway.app/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
+                  >
+                    <div className="text-2xl mb-2">⚡</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      API <ExternalLink className="w-3 h-3" />
+                    </h4>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

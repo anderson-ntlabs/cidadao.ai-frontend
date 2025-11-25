@@ -16,7 +16,7 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ContentCard, ExternalLinkCard, LandingModal } from '@/components/landing'
+import { ContentCard, ExternalLinkCard, LandingModal, FAQSectionEN } from '@/components/landing'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { agents } from '@/data/agents'
 
@@ -134,25 +134,40 @@ export default function ENPage(): JSX.Element {
         </div>
       </section>
 
-      {/* Spotify Section - Mobile Optimized */}
-      <section className="py-8 sm:py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl">
-            <div
-              className="relative w-full"
-              style={{ paddingBottom: '56.25%', minHeight: '280px' }}
-            >
-              <iframe
-                className="absolute inset-0 w-full h-full rounded-lg sm:rounded-xl shadow-lg"
-                src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator"
-                width="100%"
-                height="352"
-                frameBorder="0"
-                allowFullScreen
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-                title="Cidadão.AI Transparency Soundtrack"
-              />
+      {/* FAQ + Spotify Section - Two Column Layout */}
+      <section className="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Left Column - FAQ */}
+            <div className="w-full">
+              <FAQSectionEN />
+            </div>
+
+            {/* Right Column - Spotify Playlist */}
+            <div className="w-full">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Project Playlist
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed max-w-lg mx-auto">
+                  The creator of Cidadao.AI made a playlist that captures Brazil. Part of the
+                  development was fueled by lots of coffee and good music!
+                </p>
+              </div>
+
+              <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl">
+                <iframe
+                  className="w-full rounded-lg sm:rounded-xl shadow-lg"
+                  src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator&theme=0"
+                  width="100%"
+                  height="352"
+                  frameBorder="0"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  title="Cidadao.AI Transparency Soundtrack"
+                />
+              </div>
             </div>
           </div>
         </div>
