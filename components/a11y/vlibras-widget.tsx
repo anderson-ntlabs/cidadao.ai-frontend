@@ -152,6 +152,7 @@ export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VL
   return (
     <>
       {/* VLibras Widget Container - Required by the official script */}
+      {/* The script handles its own positioning and styling */}
       <div vw="true" className="enabled">
         <div vw-access-button="true" className="active" />
         <div vw-plugin-wrapper="true">
@@ -165,72 +166,6 @@ export function VLibrasWidget({ locale, forceOnload = true, className = '' }: VL
           Widget VLibras carregado. Traduz o conteudo para LIBRAS (Lingua Brasileira de Sinais).
         </div>
       )}
-
-      {/* Global styles for VLibras widget positioning */}
-      <style jsx global>{`
-        /* VLibras widget base positioning */
-        div[vw] {
-          position: fixed !important;
-          bottom: 1rem !important;
-          right: 1rem !important;
-          z-index: 9999 !important;
-        }
-
-        /* VLibras access button styling */
-        div[vw] [vw-access-button] {
-          width: 60px !important;
-          height: 60px !important;
-          border-radius: 50% !important;
-          background-color: #1351b4 !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-          transition: all 0.3s ease !important;
-          cursor: pointer !important;
-        }
-
-        div[vw] [vw-access-button]:hover {
-          transform: scale(1.1) !important;
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        /* VLibras plugin wrapper */
-        div[vw] [vw-plugin-wrapper] {
-          z-index: 10000 !important;
-        }
-
-        /* Mobile responsive adjustments */
-        @media (max-width: 640px) {
-          div[vw] {
-            bottom: 5rem !important;
-            right: 0.75rem !important;
-          }
-
-          div[vw] [vw-access-button] {
-            width: 50px !important;
-            height: 50px !important;
-          }
-        }
-
-        /* Ensure VLibras works in chat area */
-        .chat-messages div[vw],
-        [data-testid='chat-container'] div[vw] {
-          position: fixed !important;
-        }
-
-        /* Safe area support for mobile devices */
-        @supports (padding: max(0px)) {
-          div[vw] {
-            bottom: max(1rem, env(safe-area-inset-bottom)) !important;
-            right: max(1rem, env(safe-area-inset-right)) !important;
-          }
-        }
-
-        /* Ensure VLibras panel is above modals */
-        .vp-wrapper,
-        .vpw-settings,
-        [class*='vp-'] {
-          z-index: 10001 !important;
-        }
-      `}</style>
     </>
   )
 }
