@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { VoicePlayer } from '@/components/voice'
 import { getAgentVisualConfig } from '@/data/agent-config'
+import { ContractList } from './contract-card'
+import type { ContractData } from '@/lib/chat/types'
 
 // Lazy load ReactMarkdown for better initial performance
 const ReactMarkdown = lazy(() => import('react-markdown'))
@@ -271,6 +273,15 @@ export function MessageBubble({
           </div>
         )}
       </div>
+
+      {/* Contract List - Display contracts from Portal da Transparência */}
+      {metadata?.contracts && metadata.contracts.length > 0 && (
+        <ContractList
+          contracts={metadata.contracts as ContractData[]}
+          downloadAvailable={metadata.downloadAvailable}
+          totalContracts={metadata.totalContracts}
+        />
+      )}
 
       {/* Quick Actions - Desktop: hover, Mobile: always visible toggle */}
       {content && !isLoading && (
