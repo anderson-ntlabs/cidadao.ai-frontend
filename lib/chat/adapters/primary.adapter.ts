@@ -14,6 +14,7 @@ import type {
   StreamingAdapter,
   StreamCallbacks,
   StreamEvent,
+  ContractData,
 } from '../types'
 import { logger } from '@/lib/utils/logger'
 
@@ -45,6 +46,8 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
     let agentId: string | undefined
     let agentName: string | undefined
     let suggestedActions: string[] | undefined
+    let contracts: ContractData[] = []
+    let downloadAvailable = false
 
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/chat/stream`, {
@@ -126,6 +129,44 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
                     callbacks.onThinking?.(event.message || 'Processando...')
                     break
 
+                  case 'searching':
+                    logger.debug('Searching contracts', {
+                      message: event.message,
+                      orgao: event.orgao,
+                      orgaoNome: event.orgao_nome,
+                    })
+                    callbacks.onSearching?.(
+                      event.message || 'Buscando contratos...',
+                      event.orgao,
+                      event.orgao_nome
+                    )
+                    break
+
+                  case 'found':
+                    logger.debug('Contracts found', {
+                      total: event.total,
+                      showing: event.showing,
+                      message: event.message,
+                    })
+                    callbacks.onFound?.(
+                      event.total || 0,
+                      event.showing || 0,
+                      event.message || `Encontrados ${event.total} contratos`
+                    )
+                    break
+
+                  case 'contract':
+                    if (event.data) {
+                      contracts.push(event.data)
+                      logger.debug('Contract received', {
+                        index: event.index,
+                        total: event.total,
+                        numero: event.data.numero,
+                      })
+                      callbacks.onContract?.(event.data, event.index || 0, event.total || 0)
+                    }
+                    break
+
                   case 'chunk':
                     if (event.content) {
                       // Add space between chunks if needed (backend sends chunks without trailing spaces)
@@ -146,8 +187,25 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
                   case 'complete':
                     suggestedActions = event.suggested_actions
-                    logger.debug('Stream complete', { suggestedActions })
-                    callbacks.onComplete?.(suggestedActions)
+                    // Check if this is a contract search completion
+                    if (event.contracts) {
+                      contracts = event.contracts
+                    }
+                    if (event.download_available !== undefined) {
+                      downloadAvailable = event.download_available
+                    }
+                    logger.debug('Stream complete', {
+                      suggestedActions,
+                      contractCount: contracts.length,
+                      downloadAvailable,
+                      totalContracts: event.total_contracts,
+                    })
+                    callbacks.onComplete?.({
+                      suggestedActions,
+                      contracts: contracts.length > 0 ? contracts : undefined,
+                      downloadAvailable,
+                      totalContracts: event.total_contracts,
+                    })
                     break
 
                   case 'error':
@@ -172,6 +230,14 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
           agentId,
           agentName,
           suggestions: suggestedActions,
+          metadata:
+            contracts.length > 0
+              ? {
+                  contracts,
+                  downloadAvailable,
+                  totalContracts: contracts.length,
+                }
+              : undefined,
         },
       }
     } catch (error) {

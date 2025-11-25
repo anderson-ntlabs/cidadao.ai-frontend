@@ -70,9 +70,33 @@ export type StreamEventType =
   | 'intent'
   | 'agent_selected'
   | 'thinking'
+  | 'searching'
+  | 'found'
+  | 'contract'
   | 'chunk'
   | 'complete'
   | 'error'
+
+/**
+ * Contract data returned from Portal da Transparência
+ */
+export interface ContractData {
+  id: number
+  numero: string
+  objeto: string
+  valor: number
+  valor_formatado: string
+  fornecedor: string
+  cnpj_fornecedor: string
+  orgao: string
+  data_assinatura: string
+  vigencia_inicio: string
+  vigencia_fim: string
+  situacao: string
+  modalidade: string
+  processo: string
+  raw?: Record<string, any>
+}
 
 export interface StreamEvent {
   type: StreamEventType
@@ -85,6 +109,16 @@ export interface StreamEvent {
   content?: string
   suggested_actions?: string[]
   fallback_endpoint?: string
+  // Contract search events
+  orgao?: string
+  orgao_nome?: string
+  total?: number
+  showing?: number
+  index?: number
+  data?: ContractData
+  contracts?: ContractData[]
+  download_available?: boolean
+  total_contracts?: number
 }
 
 export interface StreamCallbacks {
@@ -93,8 +127,16 @@ export interface StreamCallbacks {
   onIntent?: (intent: string, confidence: number) => void
   onAgentSelected?: (agentId: string, agentName: string) => void
   onThinking?: (message: string) => void
+  onSearching?: (message: string, orgao?: string, orgaoNome?: string) => void
+  onFound?: (total: number, showing: number, message: string) => void
+  onContract?: (contract: ContractData, index: number, total: number) => void
   onChunk?: (content: string) => void
-  onComplete?: (suggestedActions?: string[]) => void
+  onComplete?: (data: {
+    suggestedActions?: string[]
+    contracts?: ContractData[]
+    downloadAvailable?: boolean
+    totalContracts?: number
+  }) => void
   onError?: (message: string) => void
 }
 

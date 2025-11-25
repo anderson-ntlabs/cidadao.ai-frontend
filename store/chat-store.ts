@@ -14,7 +14,7 @@ import { ChatWebSocket, getChatWebSocket, closeChatWebSocket } from '@/lib/webso
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
 import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
-import type { StreamCallbacks } from '@/lib/chat/types'
+import type { StreamCallbacks, ContractData } from '@/lib/chat/types'
 
 const logger = createLogger('ChatStore')
 
@@ -462,8 +462,13 @@ export const useChatStore = create<ChatStore>()(
           })
         },
 
-        onComplete: (suggestedActions?: string[]) => {
-          logger.debug('Stream complete', { suggestedActions })
+        onComplete: (data) => {
+          const { suggestedActions, contracts, downloadAvailable, totalContracts } = data
+          logger.debug('Stream complete', {
+            suggestedActions,
+            contractCount: contracts?.length,
+            downloadAvailable,
+          })
 
           // Update suggested actions if provided
           if (suggestedActions && suggestedActions.length > 0) {
@@ -480,6 +485,21 @@ export const useChatStore = create<ChatStore>()(
                 action,
               })),
             })
+          }
+
+          // If contracts were returned, update the message with contract data
+          if (contracts && contracts.length > 0) {
+            const currentState = get()
+            const streamingMsgId = currentState.streaming.streamingMessageId
+            if (streamingMsgId) {
+              get().updateMessage(streamingMsgId, {
+                metadata: {
+                  contracts,
+                  downloadAvailable,
+                  totalContracts,
+                },
+              })
+            }
           }
 
           set((state) => ({
