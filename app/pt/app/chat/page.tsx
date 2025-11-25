@@ -103,14 +103,6 @@ const VoiceInputButton = dynamic(
 )
 
 // Lazy load mobile-specific components
-const PullToRefresh = dynamic(
-  () => import('@/components/mobile').then((mod) => ({ default: mod.PullToRefresh })),
-  {
-    loading: () => null,
-    ssr: false,
-  }
-)
-
 const MobileChatContainer = dynamic(
   () =>
     import('@/components/mobile/mobile-chat-container').then((mod) => ({
@@ -189,7 +181,10 @@ export default function ChatPage() {
   const [sendingProgress, setSendingProgress] = useState(0) // 0-100 for progress bar
   const [optimisticMessage, setOptimisticMessage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const userIsScrollingRef = useRef(false)
+  const lastScrollTopRef = useRef(0)
 
   // Mobile keyboard detection (iOS/Android virtual keyboard)
   const { keyboardHeight, isKeyboardVisible } = useMobileKeyboard()
@@ -226,14 +221,54 @@ export default function ChatPage() {
     }
   }, [isInitialized, initializeChat])
 
-  const scrollToBottom = useCallback((instant = false) => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: instant ? 'instant' : 'smooth',
-        block: 'end',
-      })
-    }
+  // Check if user is near bottom of scroll (within threshold)
+  const isNearBottom = useCallback((threshold = 150) => {
+    const container = messagesContainerRef.current
+    if (!container) return true
+
+    const scrollTop = container.scrollTop
+    const scrollHeight = container.scrollHeight
+    const clientHeight = container.clientHeight
+
+    return scrollHeight - scrollTop - clientHeight < threshold
   }, [])
+
+  const scrollToBottom = useCallback(
+    (instant = false, force = false) => {
+      // Don't auto-scroll if user is manually scrolling up (unless forced)
+      if (!force && userIsScrollingRef.current && !isNearBottom()) {
+        return
+      }
+
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: instant ? 'instant' : 'smooth',
+          block: 'end',
+        })
+      }
+    },
+    [isNearBottom]
+  )
+
+  // Handle scroll events to detect user manual scrolling
+  const handleScroll = useCallback(() => {
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    const currentScrollTop = container.scrollTop
+
+    // User is scrolling up (manually)
+    if (currentScrollTop < lastScrollTopRef.current) {
+      userIsScrollingRef.current = true
+    }
+
+    // User scrolled back to bottom - reset flag
+    if (isNearBottom(50)) {
+      userIsScrollingRef.current = false
+    }
+
+    lastScrollTopRef.current = currentScrollTop
+  }, [isNearBottom])
 
   // Scroll when new messages arrive
   useEffect(() => {
@@ -306,6 +341,9 @@ export default function ChatPage() {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
+
+    // Reset scroll flag when user sends a message - they want to see the response
+    userIsScrollingRef.current = false
 
     // Optimistic UI: Show user message immediately
     setOptimisticMessage(message)
@@ -411,18 +449,6 @@ export default function ChatPage() {
         userId: user?.id,
       })
       toast.error('Erro', 'Falha ao carregar conversa')
-    }
-  }
-
-  // Pull-to-refresh handler (load older messages)
-  const handleRefresh = async () => {
-    // Simulate loading older messages
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // In future: load older messages from session history
-    // For now, just show a notification
-    if (messages.length > 0) {
-      toast.success('Atualizado', 'Conversa atualizada com sucesso!')
     }
   }
 
@@ -733,11 +759,10 @@ export default function ChatPage() {
         </div>
 
         {/* Messages Area */}
-        <PullToRefresh
-          onRefresh={handleRefresh}
-          threshold={80}
+        <div
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
           className="flex-1 overflow-y-auto min-h-0"
-          disabled={messages.length === 0}
         >
           <div
             className="max-w-4xl mx-auto px-4 py-6 h-full"
@@ -876,7 +901,7 @@ export default function ChatPage() {
               </div>
             )}
           </div>
-        </PullToRefresh>
+        </div>
 
         {/* Input Area - Fixed Bottom */}
         <div className="flex-shrink-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 shadow-lg">
