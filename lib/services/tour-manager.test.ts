@@ -12,8 +12,8 @@ vi.mock('driver.js', () => ({
     getActiveIndex: vi.fn(() => 0),
     isFirstStep: vi.fn(() => true),
     isLastStep: vi.fn(() => false),
-    hasNextStep: vi.fn(() => false)
-  }))
+    hasNextStep: vi.fn(() => false),
+  })),
 }))
 
 // Mock TourAnalytics
@@ -27,9 +27,9 @@ vi.mock('./tour-analytics', () => ({
       completion_rate: 0,
       average_time_spent: 0,
       most_common_exit_point: null,
-      total_sessions: 0
-    })
-  }))
+      total_sessions: 0,
+    }),
+  })),
 }))
 
 describe('TourManager', () => {
@@ -63,7 +63,7 @@ describe('TourManager', () => {
         id: 'cidadao-onboarding',
         version: '1.0.0',
         mode: 'quick',
-        steps: []
+        steps: [],
       })
     })
 
@@ -71,7 +71,7 @@ describe('TourManager', () => {
       const customConfig: Partial<TourConfig> = {
         id: 'custom-tour',
         version: '2.0.0',
-        mode: 'complete'
+        mode: 'complete',
       }
 
       manager.initialize(customConfig)
@@ -79,11 +79,13 @@ describe('TourManager', () => {
       expect(manager['config']).toMatchObject({
         id: 'custom-tour',
         version: '2.0.0',
-        mode: 'complete'
+        mode: 'complete',
       })
     })
 
-    it('should initialize driver.js with Portuguese config', async () => {
+    it.skip('should initialize driver.js with Portuguese config (driver.js disabled for optimization)', async () => {
+      // driver.js was removed for bundle optimization
+      // To re-enable: npm install driver.js and uncomment imports in tour-manager.ts
       const { driver } = await import('driver.js')
 
       manager.initialize({})
@@ -93,7 +95,7 @@ describe('TourManager', () => {
           progressText: 'Passo {{current}} de {{total}}',
           prevBtnText: '← Voltar',
           nextBtnText: 'Próximo →',
-          doneBtnText: 'Começar!'
+          doneBtnText: 'Começar!',
         })
       )
     })
@@ -299,7 +301,7 @@ describe('TourManager', () => {
         expect.objectContaining({ element: '.chat-input textarea' }),
         expect.objectContaining({ element: '.suggested-questions' }),
         expect.objectContaining({ element: '.chat-history-button' }),
-        expect.objectContaining({ element: '.send-button' })
+        expect.objectContaining({ element: '.send-button' }),
       ])
     })
 
@@ -318,7 +320,7 @@ describe('TourManager', () => {
 
       expect(mobileSteps).toHaveLength(3)
 
-      mobileSteps.forEach(step => {
+      mobileSteps.forEach((step) => {
         expect(step.popover.maxWidth).toBe('90vw')
       })
     })
@@ -326,7 +328,7 @@ describe('TourManager', () => {
     it('should include Portuguese text in all steps', () => {
       const quickSteps = manager['getQuickSteps']()
 
-      quickSteps.forEach(step => {
+      quickSteps.forEach((step) => {
         expect(step.popover.description).toBeTruthy()
         // Check for Portuguese characters/words
         const hasPortuguese =
@@ -346,7 +348,7 @@ describe('TourManager', () => {
       expect(TourManager.TRIGGER_POINTS).toEqual({
         first_message_sent: 3000,
         document_uploaded: 1000,
-        idle_after_login: 10000
+        idle_after_login: 10000,
       })
     })
   })
