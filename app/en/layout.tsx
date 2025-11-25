@@ -84,10 +84,15 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
         {/* Preload critical assets - Above the fold */}
         <link rel="preload" href="/operarios.png" as="image" type="image/avif" />
 
-        {/* Preload key agent avatars for quick display */}
-        <link rel="preload" href="/agents/abaporu.png" as="image" type="image/png" />
-        <link rel="preload" href="/agents/zumbi.png" as="image" type="image/png" />
-        <link rel="preload" href="/agents/anita.png" as="image" type="image/png" />
+        {/* Preload key agent avatars for quick display - using optimized WebP */}
+        <link
+          rel="preload"
+          href="/agents/optimized/abaporu-128.webp"
+          as="image"
+          type="image/webp"
+        />
+        <link rel="preload" href="/agents/optimized/zumbi-128.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/agents/optimized/anita-128.webp" as="image" type="image/webp" />
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>

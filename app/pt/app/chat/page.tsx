@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { agents } from '@/data/agents'
+import { getAgentById, getAgentByIdOrNull } from '@/hooks/use-agent'
 import { useChatStore } from '@/store/chat-store'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { toast } from '@/hooks/use-toast'
@@ -245,7 +246,7 @@ export default function ChatPage() {
       }
       // Announce response received for screen readers (only when complete)
       if (!streaming.isStreaming) {
-        const agentName = agents.find((a) => a.id === lastMessage.agent_id)?.name || 'Agente'
+        const agentName = getAgentById(lastMessage.agent_id).name
         announceSuccess(`${agentName} respondeu`)
       }
     }
@@ -443,7 +444,7 @@ export default function ChatPage() {
 
   // Mobile UI
   if (isMobile) {
-    const currentAgent = agents.find((a) => a.id === currentAgentId) || agents[0]
+    const currentAgent = getAgentById(currentAgentId)
 
     return (
       <MobileChatContainer autoScroll showScrollButton>
@@ -539,9 +540,7 @@ export default function ChatPage() {
             {messages.map((message, index) => {
               const isLatest =
                 index === messages.length - 1 && message.role === 'assistant' && isLoading
-              const messageAgent = message.agent_id
-                ? agents.find((a) => a.id === message.agent_id)
-                : null
+              const messageAgent = getAgentByIdOrNull(message.agent_id)
 
               return (
                 <div
@@ -654,9 +653,7 @@ export default function ChatPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {(() => {
-                  const selectedAgent = selectedAgentId
-                    ? agents.find((a) => a.id === selectedAgentId)
-                    : null
+                  const selectedAgent = getAgentByIdOrNull(selectedAgentId)
                   const displayImage =
                     chatMode === 'maritaca'
                       ? '/agents/abaporu.png'
@@ -818,9 +815,7 @@ export default function ChatPage() {
                 {messages.map((message, index) => {
                   const isLatest =
                     index === messages.length - 1 && message.role === 'assistant' && isLoading
-                  const messageAgent = message.agent_id
-                    ? agents.find((a) => a.id === message.agent_id)
-                    : null
+                  const messageAgent = getAgentByIdOrNull(message.agent_id)
 
                   return (
                     <div

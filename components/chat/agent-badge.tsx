@@ -1,6 +1,6 @@
 'use client'
 
-import { OptimizedImage } from '@/components/ui/optimized-image'
+import { OptimizedAgentImage } from '@/components/ui/optimized-agent-image'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Bot } from 'lucide-react'
@@ -19,10 +19,9 @@ export function AgentBadge({
   agentId,
   agentName,
   agentRole,
-  agentImage,
   showRole = true,
   size = 'md',
-  className
+  className,
 }: AgentBadgeProps) {
   // Don't render if no agent info
   if (!agentName && !agentId) return null
@@ -31,72 +30,61 @@ export function AgentBadge({
     sm: {
       container: 'gap-2 p-2',
       avatar: 'w-6 h-6',
+      imageSize: 64 as const,
       name: 'text-xs',
       role: 'text-[10px]',
-      badge: 'text-[10px] px-1.5 py-0.5'
+      badge: 'text-[10px] px-1.5 py-0.5',
     },
     md: {
       container: 'gap-3 p-3',
       avatar: 'w-8 h-8',
+      imageSize: 64 as const,
       name: 'text-sm',
       role: 'text-xs',
-      badge: 'text-xs px-2 py-1'
+      badge: 'text-xs px-2 py-1',
     },
     lg: {
       container: 'gap-4 p-4',
       avatar: 'w-10 h-10',
+      imageSize: 64 as const,
       name: 'text-base',
       role: 'text-sm',
-      badge: 'text-sm px-3 py-1.5'
-    }
+      badge: 'text-sm px-3 py-1.5',
+    },
   }
 
   const sizes = sizeClasses[size]
 
-  // Construct image path - assumes images are in /agents/ folder
-  const imagePath = agentImage || `/agents/${agentId || 'default'}.png`
-
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800",
+        'inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800',
         sizes.container,
         className
       )}
     >
       {/* Agent Avatar */}
       <div className="flex-shrink-0 relative">
-        {agentImage || agentId ? (
-          <OptimizedImage
-            src={imagePath}
+        {agentId ? (
+          <OptimizedAgentImage
+            agentId={agentId}
             alt={agentName || 'Agent'}
-            width={size === 'sm' ? 24 : size === 'md' ? 32 : 40}
-            height={size === 'sm' ? 24 : size === 'md' ? 32 : 40}
-            className={cn(
-              "rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-700",
-              sizes.avatar
-            )}
-            fallback={
-              <div className={cn(
-                "bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center",
-                sizes.avatar
-              )}>
-                <Bot className={cn(
-                  "text-blue-600 dark:text-blue-300",
-                  size === 'sm' ? 'w-3 h-3' : size === 'md' ? 'w-4 h-4' : 'w-5 h-5'
-                )} />
-              </div>
-            }
+            size={sizes.imageSize}
+            className={cn('ring-2 ring-blue-200 dark:ring-blue-700', sizes.avatar)}
           />
         ) : (
-          <div className={cn(
-            "bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center",
-            sizes.avatar
-          )}>
-            <Bot className={cn(
-              "text-blue-600 dark:text-blue-300",
-              size === 'sm' ? 'w-3 h-3' : size === 'md' ? 'w-4 h-4' : 'w-5 h-5'
-            )} />
+          <div
+            className={cn(
+              'bg-blue-200 dark:bg-blue-800 rounded-full flex items-center justify-center',
+              sizes.avatar
+            )}
+          >
+            <Bot
+              className={cn(
+                'text-blue-600 dark:text-blue-300',
+                size === 'sm' ? 'w-3 h-3' : size === 'md' ? 'w-4 h-4' : 'w-5 h-5'
+              )}
+            />
           </div>
         )}
 
@@ -106,19 +94,11 @@ export function AgentBadge({
 
       {/* Agent Info */}
       <div className="flex-1 min-w-0">
-        <p className={cn(
-          "font-semibold text-blue-900 dark:text-blue-100 truncate",
-          sizes.name
-        )}>
+        <p className={cn('font-semibold text-blue-900 dark:text-blue-100 truncate', sizes.name)}>
           {agentName || 'Assistente IA'}
         </p>
         {showRole && agentRole && (
-          <p className={cn(
-            "text-blue-700 dark:text-blue-300 truncate",
-            sizes.role
-          )}>
-            {agentRole}
-          </p>
+          <p className={cn('text-blue-700 dark:text-blue-300 truncate', sizes.role)}>{agentRole}</p>
         )}
       </div>
 
@@ -127,7 +107,7 @@ export function AgentBadge({
         <Badge
           variant="outline"
           className={cn(
-            "bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-200 font-medium",
+            'bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-200 font-medium',
             sizes.badge
           )}
         >
@@ -142,15 +122,17 @@ export function AgentBadge({
 export function AgentBadgeInline({
   agentName,
   agentRole,
-  className
+  className,
 }: Pick<AgentBadgeProps, 'agentName' | 'agentRole' | 'className'>) {
   if (!agentName) return null
 
   return (
-    <span className={cn(
-      "inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400",
-      className
-    )}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400',
+        className
+      )}
+    >
       <Bot className="w-3 h-3" />
       <span className="font-medium">{agentName}</span>
       {agentRole && (

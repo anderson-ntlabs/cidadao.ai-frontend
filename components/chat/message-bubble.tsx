@@ -11,7 +11,7 @@
 'use client'
 
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
-import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check } from 'lucide-react'
+import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { VoicePlayer } from '@/components/voice'
@@ -52,6 +52,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [showCursor, setShowCursor] = useState(false)
+  const [showMobileActions, setShowMobileActions] = useState(false)
   const prevContentRef = useRef(content)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -271,67 +272,154 @@ export function MessageBubble({
         )}
       </div>
 
-      {/* Quick Actions - Show on hover */}
+      {/* Quick Actions - Desktop: hover, Mobile: always visible toggle */}
       {content && !isLoading && (
-        <div
-          className={cn(
-            'flex items-center gap-1 mt-3 transition-all duration-200',
-            'opacity-0 group-hover:opacity-100'
+        <>
+          {/* Mobile: Compact action bar with expand button */}
+          <div className="md:hidden flex items-center gap-1 mt-3">
+            {/* Always visible core actions */}
+            <VoicePlayer
+              text={content}
+              agentId={agentId}
+              agentName={agentName}
+              size="sm"
+              variant="default"
+            />
+
+            <button
+              onClick={handleCopy}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:bg-gray-100 dark:active:bg-gray-800 rounded-lg transition-all touch-manipulation"
+              title="Copiar"
+              aria-label="Copiar mensagem"
+            >
+              {copied ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
+            </button>
+
+            <button
+              onClick={handleShare}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:bg-gray-100 dark:active:bg-gray-800 rounded-lg transition-all touch-manipulation"
+              title="Compartilhar"
+              aria-label="Compartilhar mensagem"
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
+
+            {/* Expand button for more actions */}
+            <button
+              onClick={() => setShowMobileActions(!showMobileActions)}
+              className={cn(
+                'p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg transition-all touch-manipulation',
+                showMobileActions && 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              )}
+              title="Mais ações"
+              aria-label="Mostrar mais ações"
+              aria-expanded={showMobileActions}
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Mobile: Expanded actions panel */}
+          {showMobileActions && (
+            <div className="md:hidden flex items-center gap-1 mt-2 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg animate-in slide-in-from-top-2 duration-200">
+              <button
+                onClick={handleExport}
+                className="flex-1 flex items-center justify-center gap-2 p-2 text-gray-600 dark:text-gray-300 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-all touch-manipulation"
+                aria-label="Exportar mensagem"
+              >
+                <Download className="w-4 h-4" />
+                <span className="text-xs">Exportar</span>
+              </button>
+
+              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
+
+              <button
+                onClick={() => {
+                  handleFeedback(true)
+                  setShowMobileActions(false)
+                }}
+                className="flex-1 flex items-center justify-center gap-2 p-2 text-gray-600 dark:text-gray-300 active:bg-green-100 dark:active:bg-green-900/30 rounded-lg transition-all touch-manipulation"
+                aria-label="Marcar como útil"
+              >
+                <ThumbsUp className="w-4 h-4" />
+                <span className="text-xs">Útil</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  handleFeedback(false)
+                  setShowMobileActions(false)
+                }}
+                className="flex-1 flex items-center justify-center gap-2 p-2 text-gray-600 dark:text-gray-300 active:bg-red-100 dark:active:bg-red-900/30 rounded-lg transition-all touch-manipulation"
+                aria-label="Marcar como não útil"
+              >
+                <ThumbsDown className="w-4 h-4" />
+                <span className="text-xs">Não útil</span>
+              </button>
+            </div>
           )}
-        >
-          {/* Voice Player */}
-          <VoicePlayer
-            text={content}
-            agentId={agentId}
-            agentName={agentName}
-            size="sm"
-            variant="default"
-          />
 
-          <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
-
-          <button
-            onClick={handleCopy}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
-            title="Copiar"
+          {/* Desktop: Show on hover */}
+          <div
+            className={cn(
+              'hidden md:flex items-center gap-1 mt-3 transition-all duration-200',
+              'opacity-0 group-hover:opacity-100'
+            )}
           >
-            {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-          </button>
+            {/* Voice Player */}
+            <VoicePlayer
+              text={content}
+              agentId={agentId}
+              agentName={agentName}
+              size="sm"
+              variant="default"
+            />
 
-          <button
-            onClick={handleShare}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
-            title="Compartilhar"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
+            <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
 
-          <button
-            onClick={handleExport}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
-            title="Exportar"
-          >
-            <Download className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleCopy}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
+              title="Copiar"
+            >
+              {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+            </button>
 
-          <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+            <button
+              onClick={handleShare}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
+              title="Compartilhar"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
 
-          <button
-            onClick={() => handleFeedback(true)}
-            className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-all"
-            title="Util"
-          >
-            <ThumbsUp className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleExport}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all"
+              title="Exportar"
+            >
+              <Download className="w-4 h-4" />
+            </button>
 
-          <button
-            onClick={() => handleFeedback(false)}
-            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
-            title="Nao util"
-          >
-            <ThumbsDown className="w-4 h-4" />
-          </button>
-        </div>
+            <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+
+            <button
+              onClick={() => handleFeedback(true)}
+              className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-all"
+              title="Útil"
+            >
+              <ThumbsUp className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => handleFeedback(false)}
+              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
+              title="Não útil"
+            >
+              <ThumbsDown className="w-4 h-4" />
+            </button>
+          </div>
+        </>
       )}
 
       {/* Confidence Badge */}
