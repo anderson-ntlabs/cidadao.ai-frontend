@@ -19,6 +19,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
+import { BadgeIndicator } from '@/components/badge'
 
 interface SimplifiedHeaderProps {
   locale: 'pt' | 'en'
@@ -99,6 +100,9 @@ export function SimplifiedHeader({ locale, className }: SimplifiedHeaderProps) {
                 {locale === 'pt' ? '🇧🇷' : '🇺🇸'}
               </span>
             </button>
+
+            {/* Badge Indicator */}
+            <BadgeIndicator locale={locale} size="sm" />
 
             {/* Theme Toggle */}
             <ThemeToggle />
