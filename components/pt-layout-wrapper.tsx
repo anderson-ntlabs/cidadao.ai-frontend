@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { Header } from '@/components/header'
 import { SimplifiedHeader } from '@/components/landing'
-import { Footer } from '@/components/footer'
+import { FooterWithSurvey } from '@/components/footer-with-survey'
 import type { NavigationItem } from '@/components/navigation'
 
 interface PTLayoutWrapperProps {
@@ -68,7 +68,7 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
         {children}
       </main>
       {/* Only show footer on public pages */}
-      {!isAuthenticatedRoute && <Footer locale={locale} />}
+      {!isAuthenticatedRoute && <FooterWithSurvey locale={locale} />}
     </>
   )
 }
