@@ -54,6 +54,7 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { InstallPrompt, UpdateNotification } from '@/components/pwa'
+import { SurveyProvider } from '@/components/survey'
 
 export default function ENLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
@@ -115,7 +116,9 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
                 <div className="relative z-20 min-h-screen flex flex-col">
                   <SkipLinks />
                   <OfflineBanner />
-                  <PTLayoutWrapper locale="en">{children}</PTLayoutWrapper>
+                  <SurveyProvider locale="en" showFab={true} fabDelay={5000}>
+                    <PTLayoutWrapper locale="en">{children}</PTLayoutWrapper>
+                  </SurveyProvider>
                   <CookieConsent locale="en" />
                   <ToastProvider />
 
