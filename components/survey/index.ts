@@ -10,6 +10,7 @@ export { SurveyModal } from './survey-modal'
 export { SurveyProgress } from './survey-progress'
 export { SurveySuccess } from './survey-success'
 export { SurveyFAB } from './survey-fab'
+export { SurveyProvider } from './survey-provider'
 
 // Re-export question components
 export { NPSQuestion, StarRatingQuestion, MultipleChoiceQuestion, TextQuestion } from './questions'
