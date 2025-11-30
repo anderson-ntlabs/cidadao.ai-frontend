@@ -13,22 +13,15 @@ export {
   useKeyboardShortcuts,
   useCommonShortcuts,
   formatShortcut,
-  COMMON_SHORTCUTS
+  COMMON_SHORTCUTS,
 } from './use-keyboard-shortcuts'
 export type { KeyboardShortcut } from './use-keyboard-shortcuts'
 
 // Focus Management
-export {
-  useFocusTrap,
-  useControlledFocusTrap
-} from './use-focus-trap'
+export { useFocusTrap, useControlledFocusTrap } from './use-focus-trap'
 export type { FocusTrapOptions } from './use-focus-trap'
 
-export {
-  useFocusReturn,
-  useControlledFocusReturn,
-  useFocusManagement
-} from './use-focus-return'
+export { useFocusReturn, useControlledFocusReturn, useFocusManagement } from './use-focus-return'
 export type { FocusReturnOptions } from './use-focus-return'
 
 // ===== UI/UX Hooks =====
@@ -52,3 +45,7 @@ export { useExport } from './use-export'
 export { useSanitizer } from './use-sanitizer'
 export { useLogger } from './use-logger'
 export { useRoutePreload } from './use-route-preload'
+
+// ===== Survey & Gamification Hooks =====
+export { useSurvey } from './use-survey'
+export { useBadge } from './use-badge'
