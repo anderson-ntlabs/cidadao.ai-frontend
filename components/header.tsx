@@ -12,6 +12,7 @@ import { ThemeToggle } from './theme-toggle'
 import { LanguageSelector } from './language-selector'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { BadgeIndicator } from '@/components/badge'
 
 interface HeaderV2Props {
   locale: 'pt' | 'en'
@@ -107,6 +108,9 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
           <div className="flex items-center gap-2">
             {/* Language Selector - Only show on public pages (landing, login, about, etc.) */}
             {isPublicPage && <LanguageSelector />}
+
+            {/* Badge Indicator - Show user's earned badges */}
+            <BadgeIndicator locale={locale} size="sm" />
 
             {/* Notifications - Only show if not on landing page */}
             {!isLandingPage && <NotificationDropdown locale={locale} />}
