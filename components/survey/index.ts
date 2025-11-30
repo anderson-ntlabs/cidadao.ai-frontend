@@ -11,6 +11,7 @@ export { SurveyProgress } from './survey-progress'
 export { SurveySuccess } from './survey-success'
 export { SurveyFAB } from './survey-fab'
 export { SurveyProvider } from './survey-provider'
+export { SurveyFooterLink } from './survey-footer-link'
 
 // Re-export question components
 export { NPSQuestion, StarRatingQuestion, MultipleChoiceQuestion, TextQuestion } from './questions'
