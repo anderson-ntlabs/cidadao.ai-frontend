@@ -54,6 +54,64 @@
     "support": {
       "title": "Apoio Institucional"
     },
-    "copyright": "Projeto de código aberto sob licença MIT"
+    "copyright": "Projeto de código aberto sob licença MIT",
+    "survey": "Pesquisa de Experiência"
+  },
+  "survey": {
+    "fab": {
+      "label": "Avalie sua experiência",
+      "tooltip": "Ajude-nos a melhorar! Participe da pesquisa."
+    },
+    "modal": {
+      "title": "Pesquisa de Experiência",
+      "subtitle": "Sua opinião é muito importante para nós!",
+      "description": "Responda algumas perguntas rápidas e ganhe um badge exclusivo.",
+      "progress": "Pergunta {current} de {total}",
+      "back": "Voltar",
+      "next": "Próximo",
+      "skip": "Pular",
+      "submit": "Enviar",
+      "close": "Fechar",
+      "submitting": "Enviando...",
+      "required": "Obrigatório"
+    },
+    "success": {
+      "title": "Obrigado por participar!",
+      "subtitle": "Sua opinião nos ajuda a melhorar a plataforma.",
+      "badge_earned": "Você ganhou um badge!",
+      "badge_description": "O badge Colaborador foi adicionado ao seu perfil."
+    },
+    "nps": {
+      "label_min": "Muito improvável",
+      "label_max": "Muito provável"
+    },
+    "stars": {
+      "label_1": "Muito ruim",
+      "label_2": "Ruim",
+      "label_3": "Regular",
+      "label_4": "Bom",
+      "label_5": "Excelente"
+    }
+  },
+  "badges": {
+    "title": "Conquistas",
+    "empty": "Nenhum badge conquistado ainda.",
+    "earned_on": "Conquistado em",
+    "colaborador": {
+      "name": "Colaborador",
+      "description": "Participou da pesquisa de experiência"
+    },
+    "pioneiro": {
+      "name": "Pioneiro",
+      "description": "Um dos primeiros usuários"
+    },
+    "especialista": {
+      "name": "Especialista",
+      "description": "Domina todas as funcionalidades"
+    },
+    "guardiao": {
+      "name": "Guardião da Transparência",
+      "description": "Defensor da transparência pública"
+    }
   }
 }

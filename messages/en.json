@@ -54,6 +54,64 @@
     "support": {
       "title": "Institutional Support"
     },
-    "copyright": "Open source project under MIT license"
+    "copyright": "Open source project under MIT license",
+    "survey": "Experience Survey"
+  },
+  "survey": {
+    "fab": {
+      "label": "Rate your experience",
+      "tooltip": "Help us improve! Take the survey."
+    },
+    "modal": {
+      "title": "Experience Survey",
+      "subtitle": "Your opinion is very important to us!",
+      "description": "Answer a few quick questions and earn an exclusive badge.",
+      "progress": "Question {current} of {total}",
+      "back": "Back",
+      "next": "Next",
+      "skip": "Skip",
+      "submit": "Submit",
+      "close": "Close",
+      "submitting": "Submitting...",
+      "required": "Required"
+    },
+    "success": {
+      "title": "Thank you for participating!",
+      "subtitle": "Your feedback helps us improve the platform.",
+      "badge_earned": "You earned a badge!",
+      "badge_description": "The Collaborator badge has been added to your profile."
+    },
+    "nps": {
+      "label_min": "Very unlikely",
+      "label_max": "Very likely"
+    },
+    "stars": {
+      "label_1": "Very poor",
+      "label_2": "Poor",
+      "label_3": "Average",
+      "label_4": "Good",
+      "label_5": "Excellent"
+    }
+  },
+  "badges": {
+    "title": "Achievements",
+    "empty": "No badges earned yet.",
+    "earned_on": "Earned on",
+    "colaborador": {
+      "name": "Collaborator",
+      "description": "Participated in the experience survey"
+    },
+    "pioneiro": {
+      "name": "Pioneer",
+      "description": "One of the first users"
+    },
+    "especialista": {
+      "name": "Expert",
+      "description": "Masters all platform features"
+    },
+    "guardiao": {
+      "name": "Transparency Guardian",
+      "description": "Defender of public transparency"
+    }
   }
 }
