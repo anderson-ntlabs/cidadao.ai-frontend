@@ -152,7 +152,7 @@ export function MobileAgentSelector({
         {chatMode === 'maritaca' && (
           <div className="px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border-b border-gray-200 dark:border-gray-700">
             <p className="text-sm text-purple-700 dark:text-purple-300">
-              Modo Maritaca.AI ativo ({maritacaModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'})
+              Modo Maritaca.AI ativo ({maritacaModel === 'sabia-3' ? 'Sabiá-3.1' : 'Sabiazinho-3'})
             </p>
           </div>
         )}

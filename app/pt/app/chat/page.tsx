@@ -527,7 +527,7 @@ export default function ChatPage() {
             name:
               chatMode === 'maritaca'
                 ? selectedModel === 'sabia-3'
-                  ? 'Sabiá-3'
+                  ? 'Sabiá-3.1'
                   : 'Sabiazinho-3'
                 : currentAgent.name,
             avatar:
@@ -760,7 +760,7 @@ export default function ChatPage() {
                   const displayName =
                     chatMode === 'maritaca'
                       ? selectedModel === 'sabia-3'
-                        ? 'Sabiá-3'
+                        ? 'Sabiá-3.1'
                         : 'Sabiazinho-3'
                       : selectedAgent?.name || 'Cidadão.AI'
                   const displaySubtitle =

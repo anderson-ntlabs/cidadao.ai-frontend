@@ -31,7 +31,7 @@ const MODEL_INFO = {
     quality: 'good',
   },
   'sabia-3': {
-    name: 'Sabiá-3',
+    name: 'Sabiá-3.1',
     description: 'Modelo completo com máxima qualidade',
     icon: '🦜',
     contextLength: 32768,
@@ -71,7 +71,7 @@ export function MaritacaModelSelector({
           <span className="text-base">{currentModelInfo.icon}</span>
           <span className="hidden sm:inline">{currentModelInfo.name}</span>
           <span className="sm:hidden">
-            {selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}
+            {selectedModel === 'sabia-3' ? 'Sabiá-3.1' : 'Sabiazinho-3'}
           </span>
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
@@ -122,7 +122,7 @@ export function MaritacaModelSelector({
           </div>
         </DropdownMenuItem>
 
-        {/* Sabiá-3 - Standard */}
+        {/* Sabiá-3.1 - Standard */}
         <DropdownMenuItem
           onClick={() => onModelChange('sabia-3')}
           className={cn(
@@ -138,7 +138,7 @@ export function MaritacaModelSelector({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{sabia3Info.icon}</span>
-                <span className="font-medium text-sm">Sabiá-3</span>
+                <span className="font-medium text-sm">Sabiá-3.1</span>
                 <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium">
                   Avançado
                 </span>

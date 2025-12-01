@@ -300,7 +300,7 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
  */
 export const MARITACA_CONFIG = {
   'sabia-3': {
-    name: 'Sabiá-3',
+    name: 'Sabiá-3.1',
     role: 'Modelo Completo',
     color: '#6366F1',
     accentColor: '#818CF8',
@@ -308,7 +308,7 @@ export const MARITACA_CONFIG = {
     icon: '🦜',
     specialty: 'Modelo avançado para tarefas complexas',
     greeting:
-      'Olá! Sou o Sabiá-3, o modelo mais avançado da Maritaca AI. Fui treinado especificamente para entender português brasileiro com todas as suas nuances. Como posso ajudar?',
+      'Olá! Sou o Sabiá-3.1, o modelo mais avançado da Maritaca AI. Fui treinado especificamente para entender português brasileiro com todas as suas nuances. Como posso ajudar?',
     suggestions: [
       'Conversar sobre qualquer tema',
       'Analisar textos complexos',

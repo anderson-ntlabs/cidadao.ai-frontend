@@ -187,7 +187,7 @@ export function MessageBubble({
                   : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
               )}
             >
-              {metadata.model === 'sabia-3' ? 'Sabia-3' : 'Sabiazinho-3'}
+              {metadata.model === 'sabia-3' ? 'Sabiá-3.1' : 'Sabiazinho-3'}
             </span>
           )}
         </div>
