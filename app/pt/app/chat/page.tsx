@@ -524,12 +524,19 @@ export default function ChatPage() {
         {/* Mobile Header */}
         <MobileChatHeader
           agent={{
-            name: chatMode === 'maritaca' ? 'Maritaca.AI Direto' : currentAgent.name,
-            avatar: chatMode === 'maritaca' ? '/agents/abaporu.png' : currentAgent.image,
-            status:
+            name:
               chatMode === 'maritaca'
-                ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
-                : currentAgent.role.pt,
+                ? selectedModel === 'sabia-3'
+                  ? 'Sabiá-3'
+                  : 'Sabiazinho-3'
+                : currentAgent.name,
+            avatar:
+              chatMode === 'maritaca'
+                ? selectedModel === 'sabia-3'
+                  ? '/sabia3.1.png'
+                  : '/sabiazinho.png'
+                : currentAgent.image,
+            status: chatMode === 'maritaca' ? 'Maritaca.AI - Modelo Direto' : currentAgent.role.pt,
           }}
           user={{
             name: user?.name,
@@ -746,15 +753,19 @@ export default function ChatPage() {
                   const selectedAgent = getAgentByIdOrNull(selectedAgentId)
                   const displayImage =
                     chatMode === 'maritaca'
-                      ? '/agents/abaporu.png'
+                      ? selectedModel === 'sabia-3'
+                        ? '/sabia3.1.png'
+                        : '/sabiazinho.png'
                       : selectedAgent?.image || '/agents/abaporu.png'
                   const displayName =
                     chatMode === 'maritaca'
-                      ? 'Maritaca.AI Direto'
+                      ? selectedModel === 'sabia-3'
+                        ? 'Sabiá-3'
+                        : 'Sabiazinho-3'
                       : selectedAgent?.name || 'Cidadão.AI'
                   const displaySubtitle =
                     chatMode === 'maritaca'
-                      ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
+                      ? 'Maritaca.AI - Modelo Direto'
                       : selectedAgent?.role.pt || 'Sistema Multi-Agente'
 
                   return (
