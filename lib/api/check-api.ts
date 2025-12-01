@@ -19,15 +19,16 @@ export async function checkAPIEndpoints() {
     logger.info(`\nTesting ${baseUrl}...`)
 
     // Test health endpoint first (more reliable)
+    // Use trailing slash to avoid 307 redirect that causes Mixed Content
     try {
-      const healthResponse = await fetch(`${baseUrl}/health`)
-      logger.info(`${baseUrl}/health - Status: ${healthResponse.status}`)
+      const healthResponse = await fetch(`${baseUrl}/health/`)
+      logger.info(`${baseUrl}/health/ - Status: ${healthResponse.status}`)
       if (healthResponse.ok) {
         const healthData = await healthResponse.json()
         logger.info('Health check passed:', healthData)
       }
     } catch (error) {
-      console.error(`${baseUrl}/health - Error:`, error)
+      console.error(`${baseUrl}/health/ - Error:`, error)
     }
 
     // Test root

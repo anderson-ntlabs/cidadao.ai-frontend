@@ -33,7 +33,8 @@ export async function GET(): Promise<NextResponse<SuccessResponse | ErrorRespons
   for (const url of possibleUrls) {
     try {
       // Test health endpoint
-      const healthResponse = await fetch(`${url}/health`, {
+      // Use trailing slash to avoid 307 redirect that causes Mixed Content
+      const healthResponse = await fetch(`${url}/health/`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -42,7 +43,7 @@ export async function GET(): Promise<NextResponse<SuccessResponse | ErrorRespons
 
       results.push({
         url,
-        endpoint: '/health',
+        endpoint: '/health/',
         status: healthResponse.status,
         ok: healthResponse.ok,
       })

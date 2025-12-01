@@ -55,8 +55,9 @@ export function useBackendHealth(options: UseBackendHealthOptions = {}) {
         const timeoutId = setTimeout(() => controller.abort(), timeout)
 
         // Try multiple endpoints in order of importance
+        // Use trailing slash to avoid 307 redirect that causes Mixed Content
         const endpoints = [
-          '/health', // Backend health endpoint (returns 200)
+          '/health/', // Backend health endpoint (returns 200)
           '/', // Root endpoint (returns 200)
           '/api/v1/investigations/', // Investigations endpoint (might return 401)
         ]

@@ -166,12 +166,14 @@ export function useChatModeHistory() {
 
   /**
    * Get messages for a specific mode
+   * Note: Returns a stable reference based on mode to avoid re-renders
    */
   const getMessagesForMode = useCallback(
     (mode: ChatMode): ChatMessage[] => {
       return state[mode]
     },
-    [state]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state.cidadao, state.maritaca] // Only depend on the arrays, not the whole state
   )
 
   /**
@@ -181,7 +183,8 @@ export function useChatModeHistory() {
     (mode: ChatMode): boolean => {
       return state[mode].length > 0
     },
-    [state]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state.cidadao.length, state.maritaca.length] // Only depend on lengths
   )
 
   /**
@@ -194,14 +197,14 @@ export function useChatModeHistory() {
       currentMode: state.currentMode,
       totalMessages: state.cidadao.length + state.maritaca.length,
     }
-  }, [state])
+  }, [state.cidadao.length, state.maritaca.length, state.currentMode])
 
   /**
    * Export history as JSON
    */
   const exportHistory = useCallback(() => {
     return JSON.stringify(state, null, 2)
-  }, [state])
+  }, [state.cidadao, state.maritaca, state.currentMode])
 
   /**
    * Import history from JSON

@@ -357,7 +357,8 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
   async isAvailable(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/health`, {
+      // Use trailing slash to avoid 307 redirect that causes Mixed Content
+      const response = await fetch(`${this.baseUrl}/health/`, {
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       })

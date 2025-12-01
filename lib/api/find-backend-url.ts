@@ -65,8 +65,9 @@ export async function findBackendURL() {
   logger.warn('No backend URL found from list, using Railway as fallback')
   const railwayUrl = 'https://cidadao-api-production.up.railway.app'
 
+  // Use trailing slash to avoid 307 redirect that causes Mixed Content
   try {
-    const healthResponse = await fetch(`${railwayUrl}/health`, {
+    const healthResponse = await fetch(`${railwayUrl}/health/`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
