@@ -55,3 +55,6 @@ export type {
 
 export { BottomNavigation, CompactBottomNavigation } from './bottom-navigation'
 export type { BottomNavigationProps, BottomNavItem } from './bottom-navigation'
+
+export { MobileAgentSelector } from './mobile-agent-selector'
+export type { MobileAgentSelectorProps } from './mobile-agent-selector'

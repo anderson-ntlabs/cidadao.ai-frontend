@@ -151,6 +151,17 @@ const MobileChatSuggestions = dynamic(
   }
 )
 
+const MobileAgentSelector = dynamic(
+  () =>
+    import('@/components/mobile/mobile-agent-selector').then((mod) => ({
+      default: mod.MobileAgentSelector,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
 const SmartSuggestions = dynamic(
   () =>
     import('@/components/chat/smart-suggestions').then((mod) => ({
@@ -174,6 +185,7 @@ export default function ChatPage() {
   const { user } = useAuth()
   const [inputMessage, setInputMessage] = useState('')
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [isAgentSelectorOpen, setIsAgentSelectorOpen] = useState(false)
   const [currentAgentId, setCurrentAgentId] = useState<string>('abaporu')
   const [isInitialized, setIsInitialized] = useState(false)
   const [chatMode, setChatMode] = useState<ChatMode>('cidadao')
@@ -519,8 +531,26 @@ export default function ChatPage() {
                 ? `Modelo ${selectedModel === 'sabia-3' ? 'Sabiá-3' : 'Sabiazinho-3'}`
                 : currentAgent.role.pt,
           }}
+          user={{
+            name: user?.name,
+            avatar: user?.avatar,
+          }}
           onBack={() => (window.location.href = '/pt/app/home')}
+          onAgentClick={() => setIsAgentSelectorOpen(true)}
           onSettings={() => setIsHistoryOpen(true)}
+        />
+
+        {/* Mobile Agent Selector */}
+        <MobileAgentSelector
+          isOpen={isAgentSelectorOpen}
+          onClose={() => setIsAgentSelectorOpen(false)}
+          selectedAgentId={selectedAgentId}
+          onSelectAgent={(agentId) => {
+            setSelectedAgent(agentId)
+            setCurrentAgentId(agentId)
+          }}
+          chatMode={chatMode}
+          maritacaModel={selectedModel}
         />
 
         {/* Chat History Sidebar */}

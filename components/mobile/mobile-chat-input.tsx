@@ -72,6 +72,9 @@ export interface MobileChatInputProps {
   locale?: 'pt' | 'en'
 }
 
+// Bottom navigation height (including safe area)
+const BOTTOM_NAV_HEIGHT = 72
+
 export function MobileChatInput({
   value: controlledValue,
   onChange,
@@ -158,16 +161,19 @@ export function MobileChatInput({
     <div
       className={cn(
         'mobile-chat-input',
-        'fixed bottom-0 left-0 right-0 z-30',
+        'fixed left-0 right-0 z-30',
         'bg-white dark:bg-gray-900',
         'border-t border-gray-200 dark:border-gray-700',
         'px-4 py-3',
-        safeArea.bottom, // Safe area for home indicator
         className
       )}
       style={{
-        // Offset by keyboard height when open
-        transform: keyboardOpen ? `translateY(-${keyboardHeight}px)` : 'translateY(0)',
+        // Offset from bottom navigation
+        bottom: `${BOTTOM_NAV_HEIGHT}px`,
+        // Offset by keyboard height when open (keyboard hides bottom nav)
+        transform: keyboardOpen
+          ? `translateY(${BOTTOM_NAV_HEIGHT - keyboardHeight}px)`
+          : 'translateY(0)',
         transition: 'transform 0.2s ease-out',
       }}
     >

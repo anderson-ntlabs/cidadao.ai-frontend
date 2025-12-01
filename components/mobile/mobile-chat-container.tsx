@@ -132,8 +132,12 @@ export function MobileChatContainer({
         className={cn(
           'message-list flex-1 overflow-y-auto overscroll-none',
           scrollBehavior.momentum,
-          'px-4 py-4'
+          'px-4 pt-4'
         )}
+        style={{
+          // Reserve space for input (70px) + bottom nav (72px) + safe area
+          paddingBottom: '160px',
+        }}
         role="log"
         aria-live="polite"
         aria-label="Chat messages"
@@ -147,18 +151,17 @@ export function MobileChatContainer({
           ref={scrollButtonRef}
           onClick={() => scrollToBottom('smooth')}
           className={cn(
-            'fixed bottom-20 right-4 z-10',
+            'fixed right-4 z-40',
             'w-12 h-12 rounded-full',
-            'bg-blue-500 text-white shadow-lg',
+            'bg-green-500 text-white shadow-lg',
             'flex items-center justify-center',
-            'transition-opacity duration-200',
+            'transition-all duration-200',
             'opacity-0 pointer-events-none', // Hidden by default
-            touchFeedback.button,
-            safeArea.bottom // Adjust for home indicator
+            touchFeedback.button
           )}
           style={{
-            // Additional bottom offset when keyboard is open
-            bottom: keyboardOpen ? `${keyboardHeight + 80}px` : '80px',
+            // Position above input (70px) + bottom nav (72px) + some padding
+            bottom: keyboardOpen ? `${keyboardHeight + 90}px` : '160px',
           }}
           aria-label="Scroll to bottom"
         >
@@ -253,13 +256,19 @@ export function MobileChatMessageList({
 /**
  * Mobile Chat Header
  *
- * Fixed header for mobile chat with agent info and actions
+ * Fixed header for mobile chat with agent info, user profile and actions
+ *
+ * @author Anderson Henrique da Silva
+ * @location Minas Gerais, Brasil
+ * @date 2025-12-01
  *
  * Usage:
  * ```tsx
  * <MobileChatHeader
  *   agent={currentAgent}
+ *   user={currentUser}
  *   onBack={handleBack}
+ *   onAgentClick={handleAgentSelector}
  *   onSettings={handleSettings}
  * />
  * ```
@@ -272,8 +281,17 @@ export interface MobileChatHeaderProps {
     status?: string
   }
 
+  /** Current user */
+  user?: {
+    name?: string
+    avatar?: string
+  }
+
   /** Back button handler */
   onBack?: () => void
+
+  /** Agent click handler (to open selector) */
+  onAgentClick?: () => void
 
   /** Settings/menu button handler */
   onSettings?: () => void
@@ -282,13 +300,20 @@ export interface MobileChatHeaderProps {
   className?: string
 }
 
-export function MobileChatHeader({ agent, onBack, onSettings, className }: MobileChatHeaderProps) {
+export function MobileChatHeader({
+  agent,
+  user,
+  onBack,
+  onAgentClick,
+  onSettings,
+  className,
+}: MobileChatHeaderProps) {
   return (
     <header
       className={cn(
         'mobile-chat-header',
-        'flex items-center gap-3',
-        'px-4 py-3',
+        'flex items-center gap-2',
+        'px-3 py-2',
         'bg-white dark:bg-gray-900',
         'border-b border-gray-200 dark:border-gray-700',
         'sticky top-0 z-20',
@@ -301,14 +326,14 @@ export function MobileChatHeader({ agent, onBack, onSettings, className }: Mobil
         <button
           onClick={onBack}
           className={cn(
-            'p-2 rounded-full',
+            'p-2 rounded-full flex-shrink-0',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
             'transition-colors',
             touchFeedback.icon
           )}
-          aria-label="Go back"
+          aria-label="Voltar"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -319,19 +344,50 @@ export function MobileChatHeader({ agent, onBack, onSettings, className }: Mobil
         </button>
       )}
 
-      {/* Agent Info */}
+      {/* Agent Info - Clickable to open selector */}
       {agent && (
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <button
+          onClick={onAgentClick}
+          className={cn(
+            'flex items-center gap-2 flex-1 min-w-0 p-1.5 rounded-lg',
+            'hover:bg-gray-100 dark:hover:bg-gray-800',
+            'transition-colors text-left',
+            touchFeedback.minimal
+          )}
+          aria-label="Selecionar agente"
+        >
           {agent.avatar && (
-            <img src={agent.avatar} alt={agent.name} className="w-10 h-10 rounded-full" />
+            <img
+              src={agent.avatar}
+              alt={agent.name}
+              className="w-9 h-9 rounded-full flex-shrink-0 ring-2 ring-green-500/20"
+            />
           )}
           <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-gray-900 dark:text-white truncate">{agent.name}</h2>
+            <div className="flex items-center gap-1">
+              <h2 className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                {agent.name}
+              </h2>
+              {/* Chevron indicator */}
+              <svg
+                className="w-4 h-4 text-gray-400 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
             {agent.status && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{agent.status}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{agent.status}</p>
             )}
           </div>
-        </div>
+        </button>
       )}
 
       {/* Settings Button */}
@@ -339,22 +395,39 @@ export function MobileChatHeader({ agent, onBack, onSettings, className }: Mobil
         <button
           onClick={onSettings}
           className={cn(
-            'p-2 rounded-full',
+            'p-2 rounded-full flex-shrink-0',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
             'transition-colors',
             touchFeedback.icon
           )}
-          aria-label="Settings"
+          aria-label="Histórico de conversas"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
         </button>
+      )}
+
+      {/* User Profile Avatar */}
+      {user && (
+        <div className="flex-shrink-0">
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name || 'Usuário'}
+              className="w-8 h-8 rounded-full ring-2 ring-gray-200 dark:ring-gray-700"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center text-white font-semibold text-xs ring-2 ring-gray-200 dark:ring-gray-700">
+              {user.name?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
+        </div>
       )}
     </header>
   )
