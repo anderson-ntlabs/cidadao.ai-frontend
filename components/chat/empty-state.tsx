@@ -78,9 +78,11 @@ export function ChatEmptyState({
   // Determine what to show
   const showPersonalized = isMaritacaMode || selectedAgentId
 
-  // Get display info
+  // Get display info - use model-specific images for Maritaca
   const displayImage = isMaritacaMode
-    ? '/agents/abaporu.png' // Use abaporu for Maritaca (parrot theme)
+    ? maritacaModel === 'sabia-3'
+      ? '/sabia3.1.png'
+      : '/sabiazinho.png'
     : selectedAgent?.image || '/agents/abaporu.png'
 
   const displayName = isMaritacaMode ? maritacaConfig.name : selectedAgent?.name || 'Abaporu'
