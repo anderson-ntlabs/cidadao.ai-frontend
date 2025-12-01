@@ -23,10 +23,11 @@
 
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useHaptic } from '@/hooks/use-haptic'
+import { useNotificationBadge } from '@/hooks/use-notification-badge'
 import { touchFeedback, tapTarget, safeArea } from '@/lib/mobile-touch'
 import { Home, MessageSquare, Search, Bell, User, type LucideIcon } from 'lucide-react'
 
@@ -112,9 +113,20 @@ export function BottomNavigation({
   const pathname = usePathname()
   const router = useRouter()
   const { vibrate } = useHaptic()
+  const { unreadCount } = useNotificationBadge()
 
   // Use provided path or current pathname
   const currentPath = providedPath || pathname
+
+  // Merge notification badge count with items
+  const itemsWithBadge = useMemo(() => {
+    return items.map((item) => {
+      if (item.id === 'notifications') {
+        return { ...item, badge: unreadCount }
+      }
+      return item
+    })
+  }, [items, unreadCount])
 
   const handleNavigate = useCallback(
     (item: BottomNavItem) => {
@@ -147,7 +159,7 @@ export function BottomNavigation({
       aria-label="Main navigation"
     >
       <div className="flex items-center justify-around px-2">
-        {items.map((item) => {
+        {itemsWithBadge.map((item) => {
           const isActive = item.active !== undefined ? item.active : currentPath === item.path
           const Icon = item.icon
           const hasBadge = item.badge !== undefined && item.badge > 0
