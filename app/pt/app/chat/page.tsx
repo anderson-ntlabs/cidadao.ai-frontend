@@ -567,7 +567,7 @@ export default function ChatPage() {
             {optimisticMessage && (
               <div className="flex gap-3 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="max-w-[85%] order-first">
-                  <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
+                  <div className="rounded-2xl px-4 py-3 bg-gradient-green-blue text-white shadow-md opacity-70">
                     <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
                   </div>
                 </div>
@@ -624,7 +624,7 @@ export default function ChatPage() {
                   {/* User Avatar */}
                   {message.role === 'user' && (
                     <div className="flex-shrink-0">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                      <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </div>
                     </div>
@@ -642,7 +642,7 @@ export default function ChatPage() {
           {sendingProgress > 0 && sendingProgress < 100 && (
             <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden z-50">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
+                className="h-full bg-gradient-green-blue transition-all duration-300 ease-out"
                 style={{ width: `${sendingProgress}%` }}
                 role="progressbar"
                 aria-valuenow={sendingProgress}
@@ -818,7 +818,7 @@ export default function ChatPage() {
                 {optimisticMessage && (
                   <div className="flex gap-3 md:gap-4 justify-end animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div className="max-w-[75%] order-first">
-                      <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md opacity-70">
+                      <div className="rounded-2xl px-4 py-3 bg-gradient-green-blue text-white shadow-md opacity-70">
                         <p className="whitespace-pre-wrap text-sm text-white">
                           {optimisticMessage}
                         </p>
@@ -882,7 +882,7 @@ export default function ChatPage() {
                       {/* User Avatar */}
                       {message.role === 'user' && (
                         <div className="flex-shrink-0">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                          <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
                             {user?.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
                         </div>
@@ -902,7 +902,7 @@ export default function ChatPage() {
           {sendingProgress > 0 && sendingProgress < 100 && (
             <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-blue-600 transition-all duration-300 ease-out"
+                className="h-full bg-gradient-green-blue transition-all duration-300 ease-out"
                 style={{ width: `${sendingProgress}%` }}
                 role="progressbar"
                 aria-valuenow={sendingProgress}
