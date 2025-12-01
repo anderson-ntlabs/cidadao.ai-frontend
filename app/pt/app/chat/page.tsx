@@ -547,7 +547,7 @@ export default function ChatPage() {
           onSettings={() => setIsHistoryOpen(true)}
         />
 
-        {/* Mobile Agent Selector */}
+        {/* Mobile Agent Selector with Tabs */}
         <MobileAgentSelector
           isOpen={isAgentSelectorOpen}
           onClose={() => setIsAgentSelectorOpen(false)}
@@ -558,6 +558,8 @@ export default function ChatPage() {
           }}
           chatMode={chatMode}
           maritacaModel={selectedModel}
+          onModeChange={handleModeChange}
+          onMaritacaModelChange={setSelectedModel}
         />
 
         {/* Chat History Sidebar */}
