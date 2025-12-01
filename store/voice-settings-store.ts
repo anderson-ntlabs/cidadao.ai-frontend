@@ -6,8 +6,7 @@
  *
  * Features:
  * - Default voice configuration
- * - Per-agent voice mapping (democratic - user choice)
- * - Rate, pitch, and volume settings
+ * - Per-agent voice + pitch + rate settings (democratic - user choice)
  * - localStorage persistence
  *
  * @author Anderson Henrique da Silva
@@ -26,15 +25,21 @@ export interface VoiceSettings {
   volume: number
 }
 
+export interface AgentVoiceConfig {
+  voiceURI: string | null
+  pitch: number
+  rate: number
+}
+
 export interface AgentVoiceMapping {
-  [agentId: string]: string // agentId -> voiceURI
+  [agentId: string]: AgentVoiceConfig
 }
 
 export interface VoiceSettingsState {
   // Global default settings
   defaultVoice: VoiceSettings
 
-  // Per-agent voice mappings (user can assign any voice to any agent)
+  // Per-agent voice configurations (voice + pitch + rate per agent)
   agentVoices: AgentVoiceMapping
 
   // TTS enabled/disabled
@@ -51,13 +56,18 @@ export interface VoiceSettingsActions {
   setDefaultPitch: (pitch: number) => void
   setDefaultVolume: (volume: number) => void
 
-  // Agent-specific voice
-  setAgentVoice: (agentId: string, voiceURI: string) => void
+  // Agent-specific voice configuration
+  setAgentVoice: (agentId: string, voiceURI: string | null) => void
+  setAgentPitch: (agentId: string, pitch: number) => void
+  setAgentRate: (agentId: string, rate: number) => void
   removeAgentVoice: (agentId: string) => void
   resetAgentVoices: () => void
 
-  // Get voice for agent (with fallback to default)
+  // Get voice config for agent (with fallback to default)
   getVoiceForAgent: (agentId: string) => string | null
+  getPitchForAgent: (agentId: string) => number
+  getRateForAgent: (agentId: string) => number
+  getConfigForAgent: (agentId: string) => AgentVoiceConfig
 
   // TTS toggle
   setTTSEnabled: (enabled: boolean) => void
@@ -96,12 +106,12 @@ export const useVoiceSettingsStore = create<VoiceSettingsState & VoiceSettingsAc
 
       setDefaultRate: (rate) =>
         set((state) => {
-          state.defaultVoice.rate = Math.max(0.1, Math.min(10, rate))
+          state.defaultVoice.rate = Math.max(0.5, Math.min(2, rate))
         }),
 
       setDefaultPitch: (pitch) =>
         set((state) => {
-          state.defaultVoice.pitch = Math.max(0, Math.min(2, pitch))
+          state.defaultVoice.pitch = Math.max(0.5, Math.min(1.5, pitch))
         }),
 
       setDefaultVolume: (volume) =>
@@ -109,10 +119,41 @@ export const useVoiceSettingsStore = create<VoiceSettingsState & VoiceSettingsAc
           state.defaultVoice.volume = Math.max(0, Math.min(1, volume))
         }),
 
-      // Agent-specific voice
+      // Agent-specific voice configuration
       setAgentVoice: (agentId, voiceURI) =>
         set((state) => {
-          state.agentVoices[agentId] = voiceURI
+          if (!state.agentVoices[agentId]) {
+            state.agentVoices[agentId] = {
+              voiceURI: null,
+              pitch: state.defaultVoice.pitch,
+              rate: state.defaultVoice.rate,
+            }
+          }
+          state.agentVoices[agentId].voiceURI = voiceURI
+        }),
+
+      setAgentPitch: (agentId, pitch) =>
+        set((state) => {
+          if (!state.agentVoices[agentId]) {
+            state.agentVoices[agentId] = {
+              voiceURI: null,
+              pitch: state.defaultVoice.pitch,
+              rate: state.defaultVoice.rate,
+            }
+          }
+          state.agentVoices[agentId].pitch = Math.max(0.5, Math.min(1.5, pitch))
+        }),
+
+      setAgentRate: (agentId, rate) =>
+        set((state) => {
+          if (!state.agentVoices[agentId]) {
+            state.agentVoices[agentId] = {
+              voiceURI: null,
+              pitch: state.defaultVoice.pitch,
+              rate: state.defaultVoice.rate,
+            }
+          }
+          state.agentVoices[agentId].rate = Math.max(0.5, Math.min(2, rate))
         }),
 
       removeAgentVoice: (agentId) =>
@@ -128,7 +169,27 @@ export const useVoiceSettingsStore = create<VoiceSettingsState & VoiceSettingsAc
       // Get voice for agent (with fallback to default)
       getVoiceForAgent: (agentId) => {
         const state = get()
-        return state.agentVoices[agentId] || state.defaultVoice.voiceURI
+        return state.agentVoices[agentId]?.voiceURI || state.defaultVoice.voiceURI
+      },
+
+      getPitchForAgent: (agentId) => {
+        const state = get()
+        return state.agentVoices[agentId]?.pitch ?? state.defaultVoice.pitch
+      },
+
+      getRateForAgent: (agentId) => {
+        const state = get()
+        return state.agentVoices[agentId]?.rate ?? state.defaultVoice.rate
+      },
+
+      getConfigForAgent: (agentId) => {
+        const state = get()
+        const agentConfig = state.agentVoices[agentId]
+        return {
+          voiceURI: agentConfig?.voiceURI || state.defaultVoice.voiceURI,
+          pitch: agentConfig?.pitch ?? state.defaultVoice.pitch,
+          rate: agentConfig?.rate ?? state.defaultVoice.rate,
+        }
       },
 
       // TTS toggle

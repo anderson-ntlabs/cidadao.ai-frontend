@@ -6,8 +6,7 @@
  *
  * Features:
  * - Default voice selection
- * - Per-agent voice customization
- * - Rate, pitch, volume sliders
+ * - Per-agent voice + pitch + rate customization
  * - Voice preview/test
  * - TTS enable/disable toggle
  *
@@ -28,6 +27,7 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  Settings2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -49,6 +49,7 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
   const [isTesting, setIsTesting] = useState(false)
   const [testingAgentId, setTestingAgentId] = useState<string | null>(null)
   const [expandedAgents, setExpandedAgents] = useState(false)
+  const [expandedAgentSettings, setExpandedAgentSettings] = useState<string | null>(null)
   const [isSupported, setIsSupported] = useState(true)
 
   const {
@@ -61,10 +62,13 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
     setDefaultPitch,
     setDefaultVolume,
     setAgentVoice,
+    setAgentPitch,
+    setAgentRate,
     removeAgentVoice,
     resetAgentVoices,
     setTTSEnabled,
     setAutoPlayResponses,
+    getConfigForAgent,
     resetToDefaults,
   } = useVoiceSettingsStore()
 
@@ -104,9 +108,9 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
     loadVoices()
   }, [defaultVoice.voiceURI, setDefaultVoice])
 
-  // Test voice
+  // Test voice with agent-specific settings
   const testVoice = useCallback(
-    async (voiceURI: string | null, agentId?: string) => {
+    async (agentId?: string) => {
       if (isTesting) {
         webSpeechTTS.stop()
         setIsTesting(false)
@@ -122,11 +126,20 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
       setTestingAgentId(agentId || null)
 
       try {
-        await webSpeechTTS.speak(testText, voiceURI || undefined, {
-          rate: defaultVoice.rate,
-          pitch: defaultVoice.pitch,
-          volume: defaultVoice.volume,
-        })
+        if (agentId) {
+          const config = getConfigForAgent(agentId)
+          await webSpeechTTS.speak(testText, config.voiceURI || undefined, {
+            rate: config.rate,
+            pitch: config.pitch,
+            volume: defaultVoice.volume,
+          })
+        } else {
+          await webSpeechTTS.speak(testText, defaultVoice.voiceURI || undefined, {
+            rate: defaultVoice.rate,
+            pitch: defaultVoice.pitch,
+            volume: defaultVoice.volume,
+          })
+        }
       } catch (error) {
         console.error('Test voice error:', error)
         toast.error('Erro', 'Falha ao testar voz')
@@ -135,16 +148,13 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
         setTestingAgentId(null)
       }
     },
-    [isTesting, defaultVoice.rate, defaultVoice.pitch, defaultVoice.volume]
+    [isTesting, defaultVoice, getConfigForAgent]
   )
 
-  // Stop test (exported for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _stopTest = useCallback(() => {
-    webSpeechTTS.stop()
-    setIsTesting(false)
-    setTestingAgentId(null)
-  }, [])
+  // Toggle agent settings expansion
+  const toggleAgentSettings = (agentId: string) => {
+    setExpandedAgentSettings((prev) => (prev === agentId ? null : agentId))
+  }
 
   if (!isSupported) {
     return (
@@ -181,6 +191,25 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
 
   return (
     <div className={cn('space-y-6', className)}>
+      {/* Voice Count Info */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <Volume2 className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              Vozes Disponíveis
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+              <strong>{ptVoices.length}</strong> vozes em português brasileiro e{' '}
+              <strong>{availableVoices.length}</strong> vozes no total.
+              {ptVoices.length > 1 && (
+                <> Use vozes diferentes + ajuste de tom para diferenciar os agentes!</>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* TTS Toggle */}
       <GlassCard>
         <GlassCardContent className="p-6">
@@ -293,7 +322,7 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
               </select>
               <Button
                 variant="secondary"
-                onClick={() => testVoice(defaultVoice.voiceURI)}
+                onClick={() => testVoice()}
                 disabled={!ttsEnabled}
                 className="shrink-0"
               >
@@ -304,9 +333,6 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {ptVoices.length} vozes em português disponíveis
-            </p>
           </div>
 
           {/* Rate slider */}
@@ -336,7 +362,9 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
           {/* Pitch slider */}
           <div className="mb-4">
             <div className="flex justify-between mb-1">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tom</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Tom (grave ↔ agudo)
+              </label>
               <span className="text-sm text-gray-500">{defaultVoice.pitch.toFixed(1)}</span>
             </div>
             <input
@@ -390,7 +418,7 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
                 Vozes por Agente
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Personalize a voz de cada agente individualmente
+                Personalize voz, tom e velocidade de cada agente
               </p>
             </div>
             <div className="flex gap-2">
@@ -428,82 +456,198 @@ export function VoiceSettings({ className }: VoiceSettingsProps) {
           </div>
 
           {expandedAgents && (
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-              {agents.map((agent) => (
-                <div
-                  key={agent.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3 rounded-lg',
-                    'bg-gray-50 dark:bg-gray-800/50',
-                    !ttsEnabled && 'opacity-50'
-                  )}
-                >
-                  {/* Agent avatar */}
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <Image
-                      src={agent.image}
-                      alt={agent.name}
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
-                  </div>
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+              {agents.map((agent) => {
+                const agentConfig = agentVoices[agent.id]
+                const hasCustomConfig = !!agentConfig
+                const isExpanded = expandedAgentSettings === agent.id
 
-                  {/* Agent info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {agent.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {agent.role.pt}
-                    </p>
-                  </div>
-
-                  {/* Voice selector */}
-                  <select
-                    value={agentVoices[agent.id] || ''}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setAgentVoice(agent.id, e.target.value)
-                      } else {
-                        removeAgentVoice(agent.id)
-                      }
-                    }}
-                    disabled={!ttsEnabled}
+                return (
+                  <div
+                    key={agent.id}
                     className={cn(
-                      'w-40 px-2 py-1 text-sm rounded-lg border',
-                      'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600',
-                      'text-gray-900 dark:text-white',
-                      'focus:ring-1 focus:ring-green-500',
-                      !ttsEnabled && 'cursor-not-allowed'
+                      'rounded-lg border transition-all',
+                      'bg-gray-50 dark:bg-gray-800/50',
+                      hasCustomConfig
+                        ? 'border-green-300 dark:border-green-700'
+                        : 'border-gray-200 dark:border-gray-700',
+                      !ttsEnabled && 'opacity-50'
                     )}
                   >
-                    <option value="">Usar padrão</option>
-                    {ptVoices.map((voice) => (
-                      <option key={voice.voiceURI} value={voice.voiceURI}>
-                        {voice.name.replace('Microsoft ', '').replace('Google ', '')}
-                      </option>
-                    ))}
-                  </select>
+                    {/* Agent Header */}
+                    <div className="flex items-center gap-3 p-3">
+                      {/* Agent avatar */}
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <Image
+                          src={agent.image}
+                          alt={agent.name}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
+                      </div>
 
-                  {/* Test button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      testVoice(agentVoices[agent.id] || defaultVoice.voiceURI, agent.id)
-                    }
-                    disabled={!ttsEnabled}
-                    className="shrink-0"
-                  >
-                    {isTesting && testingAgentId === agent.id ? (
-                      <Square className="w-4 h-4" />
-                    ) : (
-                      <Play className="w-4 h-4" />
+                      {/* Agent info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {agent.name}
+                          {hasCustomConfig && (
+                            <span className="ml-2 text-xs text-green-600 dark:text-green-400">
+                              (personalizado)
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {agent.role.pt}
+                        </p>
+                      </div>
+
+                      {/* Settings button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleAgentSettings(agent.id)}
+                        disabled={!ttsEnabled}
+                        className={cn('shrink-0', isExpanded && 'bg-gray-200 dark:bg-gray-700')}
+                      >
+                        <Settings2 className="w-4 h-4" />
+                      </Button>
+
+                      {/* Test button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => testVoice(agent.id)}
+                        disabled={!ttsEnabled}
+                        className="shrink-0"
+                      >
+                        {isTesting && testingAgentId === agent.id ? (
+                          <Square className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Expanded Settings */}
+                    {isExpanded && (
+                      <div className="px-3 pb-3 pt-1 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                        {/* Voice selector */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                            Voz
+                          </label>
+                          <select
+                            value={agentConfig?.voiceURI || ''}
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                setAgentVoice(agent.id, e.target.value)
+                              } else {
+                                setAgentVoice(agent.id, null)
+                              }
+                            }}
+                            disabled={!ttsEnabled}
+                            className={cn(
+                              'w-full px-2 py-1.5 text-sm rounded-lg border',
+                              'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600',
+                              'text-gray-900 dark:text-white',
+                              'focus:ring-1 focus:ring-green-500'
+                            )}
+                          >
+                            <option value="">Usar voz padrão</option>
+                            {ptVoices.map((voice) => (
+                              <option key={voice.voiceURI} value={voice.voiceURI}>
+                                {voice.name.replace('Microsoft ', '').replace('Google ', '')}
+                              </option>
+                            ))}
+                            <optgroup label="Outras vozes">
+                              {availableVoices
+                                .filter((v) => !v.lang.startsWith('pt'))
+                                .slice(0, 10)
+                                .map((voice) => (
+                                  <option key={voice.voiceURI} value={voice.voiceURI}>
+                                    {voice.name} ({voice.lang})
+                                  </option>
+                                ))}
+                            </optgroup>
+                          </select>
+                        </div>
+
+                        {/* Pitch slider */}
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                              Tom (grave ↔ agudo)
+                            </label>
+                            <span className="text-xs text-gray-500">
+                              {(agentConfig?.pitch ?? defaultVoice.pitch).toFixed(1)}
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="1.5"
+                            step="0.05"
+                            value={agentConfig?.pitch ?? defaultVoice.pitch}
+                            onChange={(e) => setAgentPitch(agent.id, parseFloat(e.target.value))}
+                            disabled={!ttsEnabled}
+                            className={cn(
+                              'w-full h-1.5 rounded-lg appearance-none cursor-pointer',
+                              'bg-gray-200 dark:bg-gray-600'
+                            )}
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                            <span>Grave</span>
+                            <span>Agudo</span>
+                          </div>
+                        </div>
+
+                        {/* Rate slider */}
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                              Velocidade
+                            </label>
+                            <span className="text-xs text-gray-500">
+                              {(agentConfig?.rate ?? defaultVoice.rate).toFixed(1)}x
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="2"
+                            step="0.1"
+                            value={agentConfig?.rate ?? defaultVoice.rate}
+                            onChange={(e) => setAgentRate(agent.id, parseFloat(e.target.value))}
+                            disabled={!ttsEnabled}
+                            className={cn(
+                              'w-full h-1.5 rounded-lg appearance-none cursor-pointer',
+                              'bg-gray-200 dark:bg-gray-600'
+                            )}
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                            <span>Lento</span>
+                            <span>Rápido</span>
+                          </div>
+                        </div>
+
+                        {/* Reset agent button */}
+                        {hasCustomConfig && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAgentVoice(agent.id)}
+                            className="w-full text-red-500 hover:text-red-600 text-xs"
+                          >
+                            <RotateCcw className="w-3 h-3 mr-1" />
+                            Restaurar para padrão
+                          </Button>
+                        )}
+                      </div>
                     )}
-                  </Button>
-                </div>
-              ))}
+                  </div>
+                )
+              })}
             </div>
           )}
 

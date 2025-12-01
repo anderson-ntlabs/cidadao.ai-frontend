@@ -47,7 +47,7 @@ export function VoicePlayer({
   const [hasError, setHasError] = useState(false)
   const [isSupported, setIsSupported] = useState(true)
 
-  const { defaultVoice, getVoiceForAgent, ttsEnabled } = useVoiceSettingsStore()
+  const { defaultVoice, getConfigForAgent, ttsEnabled } = useVoiceSettingsStore()
 
   // Check if Web Speech API is supported
   useEffect(() => {
@@ -94,16 +94,19 @@ export function VoicePlayer({
       setIsLoading(true)
       setHasError(false)
 
-      // Get voice for this agent (or default)
-      const voiceURI = agentId ? getVoiceForAgent(agentId) : defaultVoice.voiceURI
+      // Get voice config for this agent (or default)
+      const config = agentId ? getConfigForAgent(agentId) : null
+      const voiceURI = config?.voiceURI || defaultVoice.voiceURI
+      const rate = config?.rate ?? defaultVoice.rate
+      const pitch = config?.pitch ?? defaultVoice.pitch
 
       setIsPlaying(true)
       setIsLoading(false)
 
-      // Speak using Web Speech API
+      // Speak using Web Speech API with agent-specific settings
       await webSpeechTTS.speak(text, voiceURI || undefined, {
-        rate: defaultVoice.rate,
-        pitch: defaultVoice.pitch,
+        rate,
+        pitch,
         volume: defaultVoice.volume,
       })
 
@@ -116,7 +119,7 @@ export function VoicePlayer({
     } finally {
       setIsLoading(false)
     }
-  }, [text, isSupported, ttsEnabled, agentId, getVoiceForAgent, defaultVoice])
+  }, [text, isSupported, ttsEnabled, agentId, getConfigForAgent, defaultVoice])
 
   const handleStop = useCallback(() => {
     webSpeechTTS.stop()
