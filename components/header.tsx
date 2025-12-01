@@ -12,7 +12,7 @@ import { ThemeToggle } from './theme-toggle'
 import { LanguageSelector } from './language-selector'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { BadgeIndicator } from '@/components/badge'
+import { AvatarWithBadge } from '@/components/badge'
 
 interface HeaderV2Props {
   locale: 'pt' | 'en'
@@ -109,9 +109,6 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
             {/* Language Selector - Only show on public pages (landing, login, about, etc.) */}
             {isPublicPage && <LanguageSelector />}
 
-            {/* Badge Indicator - Show user's earned badges */}
-            <BadgeIndicator locale={locale} size="sm" />
-
             {/* Notifications - Only show if not on landing page */}
             {!isLandingPage && <NotificationDropdown locale={locale} />}
 
@@ -123,19 +120,13 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
               <div className="hidden lg:flex items-center gap-2">
                 <div className="relative group">
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                    {user?.avatar ? (
-                      <Image
-                        src={user.avatar}
-                        alt={user.name}
-                        width={32}
-                        height={32}
-                        className="rounded-full object-cover shadow-md"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 via-yellow-500 to-blue-600 flex items-center justify-center text-white font-medium shadow-md">
-                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                      </div>
-                    )}
+                    <AvatarWithBadge
+                      src={user?.avatar}
+                      alt={user?.name || 'Usuário'}
+                      fallbackInitial={user?.name?.charAt(0) || 'U'}
+                      size="sm"
+                      locale={locale}
+                    />
                     <span className="max-w-[150px] truncate">{user?.name || 'Usuário'}</span>
                   </Button>
 
@@ -208,19 +199,13 @@ export function HeaderV2({ locale, user, navigationItems, className, onLogout }:
         {!isLandingPage && user && (
           <div className="mt-6 px-6 pb-6">
             <div className="flex items-center gap-3 mb-4">
-              {user?.avatar ? (
-                <Image
-                  src={user.avatar}
-                  alt={user.name}
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover shadow-md"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-brand-green-600 to-brand-blue-600 flex items-center justify-center text-white font-semibold text-lg">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-              )}
+              <AvatarWithBadge
+                src={user?.avatar}
+                alt={user?.name || 'Usuário'}
+                fallbackInitial={user?.name?.charAt(0) || 'U'}
+                size="lg"
+                locale={locale}
+              />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                   {user?.name || 'Usuário'}

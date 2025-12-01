@@ -8,3 +8,4 @@
 
 export { BadgeIndicator } from './badge-indicator'
 export { BadgeShowcase } from './badge-showcase'
+export { AvatarWithBadge } from './avatar-with-badge'

@@ -15,6 +15,7 @@ import {
   MessageSquare,
   FileSearch,
   Clock,
+  Trophy,
 } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,8 @@ import {
 import { toast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import { logger } from '@/lib/utils/logger'
+import { BadgeShowcase } from '@/components/badge'
+import { AvatarWithBadge } from '@/components/badge'
 
 // Lazy load statistics components
 const StatCard = dynamic(
@@ -407,6 +410,19 @@ export default function ProfilePage() {
             />
           </StatsGrid>
         )}
+
+        {/* Badges / Achievements Section */}
+        <GlassCard className="mb-6">
+          <GlassCardHeader>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-500" />
+              Conquistas
+            </h3>
+          </GlassCardHeader>
+          <GlassCardContent>
+            <BadgeShowcase locale="pt" showEmpty={true} compact={false} />
+          </GlassCardContent>
+        </GlassCard>
 
         {/* Profile Information */}
         <div className="space-y-6">
