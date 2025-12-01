@@ -112,7 +112,7 @@ export function SimplifiedHeader({ locale, className }: SimplifiedHeaderProps) {
               <Button
                 variant="primary"
                 size="sm"
-                className="bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-lg transition-all duration-300"
+                className="bg-gradient-green-blue hover:shadow-lg transition-all duration-300"
               >
                 {t.login}
               </Button>

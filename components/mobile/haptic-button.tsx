@@ -137,7 +137,7 @@ export const HapticButton = forwardRef<HTMLButtonElement, HapticButtonProps>(
             'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 focus:ring-gray-500',
 
           variant === 'primary' &&
-            'bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 active:from-green-800 active:to-blue-800 focus:ring-green-500 shadow-lg hover:shadow-xl',
+            'bg-gradient-green-blue text-white hover:bg-gradient-green-blue-dark active:bg-gradient-green-blue-dark focus:ring-green-500 shadow-lg hover:shadow-xl',
 
           variant === 'destructive' &&
             'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500 shadow-md hover:shadow-lg',

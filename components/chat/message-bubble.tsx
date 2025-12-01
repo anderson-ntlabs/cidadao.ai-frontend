@@ -131,7 +131,7 @@ export function MessageBubble({
   if (role === 'user') {
     return (
       <div className="group relative">
-        <div className="rounded-2xl px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-md">
+        <div className="rounded-2xl px-4 py-3 bg-gradient-green-blue text-white shadow-md">
           <p className="whitespace-pre-wrap text-sm">{content}</p>
         </div>
 
