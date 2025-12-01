@@ -7,6 +7,13 @@
  * - Haptic feedback
  * - Safe area inset support
  * - 56px touch target for send button
+ * - Green gradient theme consistency
+ *
+ * Z-Index: z-40 (same level as header)
+ *
+ * @author Anderson Henrique da Silva
+ * @location Minas Gerais, Brasil
+ * @date 2025-12-01
  *
  * Usage:
  * ```tsx
@@ -161,7 +168,7 @@ export function MobileChatInput({
     <div
       className={cn(
         'mobile-chat-input',
-        'fixed left-0 right-0 z-30',
+        'fixed left-0 right-0 z-40', // Standardized z-index
         'bg-white dark:bg-gray-900',
         'border-t border-gray-200 dark:border-gray-700',
         'px-4 py-3',
@@ -239,21 +246,21 @@ export function MobileChatInput({
           )}
         </div>
 
-        {/* Send Button */}
+        {/* Send Button - Green theme for consistency */}
         <button
           onClick={handleSend}
           disabled={!canSend}
           className={cn(
             'flex-shrink-0',
-            'bg-blue-500 text-white',
+            'bg-gradient-to-r from-green-500 to-emerald-600 text-white',
             'rounded-full',
             'flex items-center justify-center',
             'shadow-md',
             'transition-all duration-150',
-            'disabled:opacity-40 disabled:cursor-not-allowed',
+            'disabled:opacity-40 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500',
             touchFeedback.button,
             tapTarget.large, // 56px touch target
-            canSend && 'hover:bg-blue-600 active:scale-95'
+            canSend && 'hover:from-green-600 hover:to-emerald-700 hover:shadow-lg active:scale-95'
           )}
           aria-label={locale === 'pt' ? 'Enviar mensagem' : 'Send message'}
         >

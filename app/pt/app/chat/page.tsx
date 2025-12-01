@@ -542,8 +542,10 @@ export default function ChatPage() {
             name: user?.name,
             avatar: user?.avatar,
           }}
+          chatMode={chatMode}
           onBack={() => (window.location.href = '/pt/app/home')}
           onAgentClick={() => setIsAgentSelectorOpen(true)}
+          onNewChat={() => createNewSession()}
           onSettings={() => setIsHistoryOpen(true)}
         />
 
@@ -610,16 +612,17 @@ export default function ChatPage() {
                     <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
                   </div>
                 </div>
+                {/* User Avatar - 36px standardized */}
                 {user?.avatar ? (
                   <OptimizedImage
                     src={user.avatar}
                     alt={user.name || 'Usuário'}
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 rounded-full object-cover opacity-70"
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full object-cover opacity-70 ring-2 ring-white dark:ring-gray-900"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm opacity-70 ring-2 ring-white dark:ring-gray-900">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
@@ -697,9 +700,9 @@ export default function ChatPage() {
 
         {/* Mobile Input */}
         <div className="relative">
-          {/* Progress Bar - Mobile */}
+          {/* Progress Bar - Mobile (z-45 between input and modals) */}
           {sendingProgress > 0 && sendingProgress < 100 && (
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden z-50">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden z-[45]">
               <div
                 className="h-full bg-gradient-green-blue transition-all duration-300 ease-out"
                 style={{ width: `${sendingProgress}%` }}

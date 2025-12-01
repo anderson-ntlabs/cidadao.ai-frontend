@@ -110,9 +110,9 @@ export function ChatEmptyState({
   // For personalized view
   if (showPersonalized) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-        {/* Avatar with agent-themed glow */}
-        <div className="mb-6 relative">
+      <div className="flex flex-col items-center justify-center min-h-[40vh] md:min-h-[60vh] px-4 py-6 text-center">
+        {/* Avatar with agent-themed glow - smaller on mobile */}
+        <div className="mb-4 md:mb-6 relative">
           <div
             className={cn('absolute inset-0 rounded-full blur-xl opacity-30 animate-pulse')}
             style={{ backgroundColor: displayAccent }}
@@ -122,28 +122,31 @@ export function ChatEmptyState({
             alt={displayName}
             width={120}
             height={120}
-            className="relative mx-auto rounded-full shadow-2xl object-cover ring-4 ring-white/40 dark:ring-gray-700/40 animate-bounce-in"
+            className="relative mx-auto w-20 h-20 md:w-[120px] md:h-[120px] rounded-full shadow-2xl object-cover ring-4 ring-white/40 dark:ring-gray-700/40 animate-bounce-in"
             priority
           />
           <div
-            className="absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-lg"
+            className="absolute -top-1 -right-1 w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-lg text-sm md:text-lg"
             style={{ backgroundColor: displayColor }}
           >
             {displayIcon}
           </div>
         </div>
 
-        {/* Agent Name and Role */}
-        <div className="mb-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: displayColor }}>
+        {/* Agent Name and Role - more compact on mobile */}
+        <div className="mb-3 md:mb-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1"
+            style={{ color: displayColor }}
+          >
             {displayIcon} {displayName}
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">{displayRole}</p>
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">{displayRole}</p>
         </div>
 
-        {/* Personalized Greeting */}
-        <div className="max-w-2xl mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100">
-          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed">
+        {/* Personalized Greeting - hidden on small mobile, shorter on medium */}
+        <div className="max-w-2xl mb-4 md:mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100 hidden sm:block">
+          <p className="text-base md:text-lg lg:text-xl text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 md:line-clamp-none">
             {displayGreeting}
           </p>
         </div>
@@ -227,8 +230,8 @@ export function ChatEmptyState({
           </div>
         </div>
 
-        {/* Tip */}
-        <p className="mt-8 text-xs text-gray-400 dark:text-gray-600 animate-in fade-in duration-500 delay-700">
+        {/* Tip - hidden on very small screens */}
+        <p className="mt-4 md:mt-8 text-xs text-gray-400 dark:text-gray-600 animate-in fade-in duration-500 delay-700 hidden sm:block">
           💬 Digite sua pergunta abaixo para começar a conversa
         </p>
       </div>
@@ -237,7 +240,7 @@ export function ChatEmptyState({
 
   // Default view (Cidadão.AI automatic mode)
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[40vh] md:min-h-[60vh] px-4 py-6 text-center">
       {/* Avatar with subtle animation */}
       <div className="mb-6 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-600 rounded-full blur-xl opacity-20 animate-pulse" />
