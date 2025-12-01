@@ -1,9 +1,9 @@
 /**
  * Agent Selector Component
  *
- * Allows user to select which agent they want to chat with
- * in conversation mode. Includes "Auto" option for automatic
- * agent selection by the backend.
+ * Allows user to select which agent they want to chat with.
+ * Abaporu (orchestrator) is the default and will route messages
+ * to the most appropriate specialist agent.
  *
  * Accessibility features:
  * - Full keyboard navigation (Arrow keys, Enter, Space, Escape, Home, End)
@@ -17,18 +17,18 @@
 
 'use client'
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import { ChevronDown, Sparkles } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { agents } from '@/data/agents'
 import { getAgentByIdOrNull } from '@/hooks/use-agent'
 import Image from 'next/image'
 
 export interface AgentOption {
-  id: string | null
+  id: string
   name: string
   role: string
-  image?: string
+  image: string
 }
 
 interface AgentSelectorProps {
@@ -38,19 +38,16 @@ interface AgentSelectorProps {
   className?: string
 }
 
-// Auto option for automatic agent selection
-const AUTO_OPTION: AgentOption = {
-  id: null,
-  name: 'Automático',
-  role: 'O sistema escolhe o melhor agente',
-  image: undefined,
-}
+// Default agent ID (Abaporu is the orchestrator)
+const DEFAULT_AGENT_ID = 'abaporu'
 
-// All options including auto
-const ALL_OPTIONS = [
-  AUTO_OPTION,
-  ...agents.map((a) => ({ id: a.id, name: a.name, role: a.role.pt, image: a.image })),
-]
+// All agent options - Abaporu first as the default orchestrator
+const ALL_OPTIONS: AgentOption[] = agents.map((a) => ({
+  id: a.id,
+  name: a.name,
+  role: a.role.pt,
+  image: a.image,
+}))
 
 export function AgentSelector({
   selectedAgentId,
@@ -79,17 +76,20 @@ export function AgentSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Effective agent ID (defaults to Abaporu if null)
+  const effectiveAgentId = selectedAgentId || DEFAULT_AGENT_ID
+
   // Reset focused index when dropdown opens/closes
   useEffect(() => {
     if (isOpen) {
       // Focus first item or selected item
-      const selectedIndex = ALL_OPTIONS.findIndex((opt) => opt.id === selectedAgentId)
+      const selectedIndex = ALL_OPTIONS.findIndex((opt) => opt.id === effectiveAgentId)
       setFocusedIndex(selectedIndex >= 0 ? selectedIndex : 0)
     } else {
       setFocusedIndex(-1)
       setTypeaheadQuery('')
     }
-  }, [isOpen, selectedAgentId])
+  }, [isOpen, effectiveAgentId])
 
   // Scroll focused item into view
   useEffect(() => {
@@ -201,11 +201,11 @@ export function AgentSelector({
     [disabled, isOpen, focusedIndex, typeaheadQuery, onSelectAgent]
   )
 
-  // Get current selected agent
-  const selectedAgent = getAgentByIdOrNull(selectedAgentId)
+  // Get current selected agent (defaults to Abaporu)
+  const selectedAgent = getAgentByIdOrNull(effectiveAgentId)
 
-  const displayName = selectedAgent?.name || AUTO_OPTION.name
-  const displayRole = selectedAgent?.role.pt || AUTO_OPTION.role
+  const displayName = selectedAgent?.name || 'Abaporu'
+  const displayRole = selectedAgent?.role.pt || 'Orquestrador Master'
 
   // Generate unique IDs for ARIA
   const listboxId = 'agent-selector-listbox'
@@ -232,20 +232,16 @@ export function AgentSelector({
           isOpen && 'ring-2 ring-green-500/50'
         )}
       >
-        {/* Agent Avatar or Icon */}
-        {selectedAgent ? (
-          <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
-            <Image
-              src={selectedAgent.image}
-              alt={selectedAgent.name}
-              fill
-              className="object-cover"
-              sizes="24px"
-            />
-          </div>
-        ) : (
-          <Sparkles className="w-5 h-5 text-green-500" aria-hidden="true" />
-        )}
+        {/* Agent Avatar */}
+        <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+          <Image
+            src={selectedAgent?.image || '/agents/abaporu.png'}
+            alt={displayName}
+            fill
+            className="object-cover"
+            sizes="24px"
+          />
+        </div>
 
         {/* Agent Name */}
         <div className="text-left">
@@ -278,13 +274,12 @@ export function AgentSelector({
           {/* Agent Options */}
           <div className="py-1">
             {ALL_OPTIONS.map((option, index) => {
-              const isSelected = option.id === selectedAgentId
+              const isSelected = option.id === effectiveAgentId
               const isFocused = index === focusedIndex
-              const isAuto = option.id === null
 
               return (
                 <button
-                  key={option.id ?? 'auto'}
+                  key={option.id}
                   ref={(el) => {
                     optionRefs.current[index] = el
                   }}
@@ -305,22 +300,16 @@ export function AgentSelector({
                     isFocused && 'bg-gray-100 dark:bg-gray-700 ring-2 ring-inset ring-green-500'
                   )}
                 >
-                  {/* Agent Avatar or Auto Icon */}
-                  {isAuto ? (
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex-shrink-0">
-                      <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
-                    </div>
-                  ) : (
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                      <Image
-                        src={option.image!}
-                        alt={option.name}
-                        fill
-                        className="object-cover"
-                        sizes="40px"
-                      />
-                    </div>
-                  )}
+                  {/* Agent Avatar */}
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                    <Image
+                      src={option.image}
+                      alt={option.name}
+                      fill
+                      className="object-cover"
+                      sizes="40px"
+                    />
+                  </div>
 
                   {/* Agent Info */}
                   <div className="flex-1 min-w-0">
