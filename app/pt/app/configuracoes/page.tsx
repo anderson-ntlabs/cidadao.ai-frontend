@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Settings, Type, Eye, Bell, Shield, Palette, Volume2, Save } from 'lucide-react'
+import { Settings, Type, Eye, Bell, Shield, Palette, Volume2, Save, Mic } from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
@@ -67,6 +67,21 @@ const VLibrasToggle = dynamic(
   {
     loading: () => (
       <div className="h-10 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-full" />
+    ),
+    ssr: false,
+  }
+)
+
+// Lazy load voice settings component
+const VoiceSettings = dynamic(
+  () =>
+    import('@/components/settings/voice-settings').then((mod) => ({ default: mod.VoiceSettings })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
     ),
     ssr: false,
   }
@@ -294,6 +309,15 @@ export default function ConfiguracoesPage() {
                 />
               </GlassCardContent>
             </GlassCard>
+          </ActionPanelSection>
+
+          {/* Voice Settings */}
+          <ActionPanelSection
+            title="Voz e Leitura"
+            description="Configure a leitura de respostas dos agentes com Text-to-Speech"
+            icon={Mic}
+          >
+            <VoiceSettings />
           </ActionPanelSection>
 
           {/* Notifications */}

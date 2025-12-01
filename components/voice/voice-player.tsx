@@ -2,19 +2,25 @@
  * Voice Player Component
  *
  * Provides text-to-speech playback for chat messages.
- * Each message can be played using the agent's unique Chirp3-HD voice.
+ * Uses Web Speech API (free) instead of paid backend service.
+ *
+ * Features:
+ * - Per-agent voice customization
+ * - User preference persistence via Zustand store
+ * - No API costs (100% browser-based)
  *
  * @author Anderson Henrique da Silva
  * @location Minas Gerais, Brasil
- * @date 2025-01-30
+ * @date 2025-12-01
  */
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Volume2, VolumeX, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { voiceManager } from '@/lib/services/voice-manager.service'
+import { webSpeechTTS } from '@/lib/speech/web-speech-tts.service'
+import { useVoiceSettingsStore } from '@/store/voice-settings-store'
 import { toast } from '@/hooks/use-toast'
 
 export interface VoicePlayerProps {
@@ -39,68 +45,91 @@ export function VoicePlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [isSupported, setIsSupported] = useState(true)
+
+  const { defaultVoice, getVoiceForAgent, ttsEnabled } = useVoiceSettingsStore()
+
+  // Check if Web Speech API is supported
+  useEffect(() => {
+    setIsSupported(webSpeechTTS.isSupported())
+  }, [])
 
   // Auto-play on mount (if enabled)
   useEffect(() => {
-    if (autoPlay && text && !hasError) {
+    if (autoPlay && text && !hasError && ttsEnabled && isSupported) {
       handlePlay()
     }
     // Only run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handlePlay = async () => {
+  // Update playing state when speech ends
+  useEffect(() => {
+    const checkSpeaking = setInterval(() => {
+      if (isPlaying && !webSpeechTTS.isSpeaking()) {
+        setIsPlaying(false)
+      }
+    }, 100)
+
+    return () => clearInterval(checkSpeaking)
+  }, [isPlaying])
+
+  const handlePlay = useCallback(async () => {
     if (!text || text.trim().length === 0) {
       toast.error('Erro', 'Nenhum texto para reproduzir')
+      return
+    }
+
+    if (!isSupported) {
+      toast.error('Não suportado', 'Seu navegador não suporta Text-to-Speech')
+      return
+    }
+
+    if (!ttsEnabled) {
+      toast.info('TTS Desativado', 'Ative a leitura de respostas nas configurações')
       return
     }
 
     try {
       setIsLoading(true)
       setHasError(false)
-      setProgress(0)
 
-      // Get toast ID for updates
-      const loadingToast = toast.info('Gerando áudio...', `Voz de ${agentName || 'agente'}`)
+      // Get voice for this agent (or default)
+      const voiceURI = agentId ? getVoiceForAgent(agentId) : defaultVoice.voiceURI
 
-      // Synthesize audio
-      const audioBlob = await voiceManager.synthesize(text, agentId)
-
-      setIsLoading(false)
       setIsPlaying(true)
+      setIsLoading(false)
 
-      // Play audio
-      await voiceManager.play(audioBlob)
+      // Speak using Web Speech API
+      await webSpeechTTS.speak(text, voiceURI || undefined, {
+        rate: defaultVoice.rate,
+        pitch: defaultVoice.pitch,
+        volume: defaultVoice.volume,
+      })
 
-      // Success
       setIsPlaying(false)
-      setProgress(100)
-
-      toast.success('Áudio reproduzido', agentName ? `Voz de ${agentName}` : undefined)
     } catch (error) {
       console.error('Voice playback error:', error)
       setHasError(true)
       setIsPlaying(false)
-      setProgress(0)
-      toast.error('Erro de Áudio', 'Não foi possível reproduzir o áudio. Verifique sua conexão.')
+      toast.error('Erro de Áudio', 'Não foi possível reproduzir o áudio.')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [text, isSupported, ttsEnabled, agentId, getVoiceForAgent, defaultVoice])
 
-  const handleStop = () => {
-    voiceManager.stop()
+  const handleStop = useCallback(() => {
+    webSpeechTTS.stop()
     setIsPlaying(false)
-  }
+  }, [])
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     if (isPlaying) {
       handleStop()
     } else {
       handlePlay()
     }
-  }
+  }, [isPlaying, handleStop, handlePlay])
 
   // Size classes
   const sizeClasses = {
@@ -119,16 +148,20 @@ export function VoicePlayer({
   const variantClasses = {
     default:
       'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm',
-    minimal:
-      'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
+    minimal: 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
     badge:
       'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:from-purple-600 hover:to-blue-700 shadow-md',
+  }
+
+  // Don't render if TTS is not supported
+  if (!isSupported) {
+    return null
   }
 
   return (
     <button
       onClick={handleToggle}
-      disabled={isLoading || !text}
+      disabled={isLoading || !text || !ttsEnabled}
       className={cn(
         'rounded-lg transition-all duration-200',
         'flex items-center justify-center',
@@ -139,17 +172,15 @@ export function VoicePlayer({
         className
       )}
       title={
-        isPlaying
-          ? 'Parar áudio'
-          : agentName
-          ? `Ouvir resposta de ${agentName}`
-          : 'Ouvir mensagem'
+        !ttsEnabled
+          ? 'TTS desativado - ative nas configurações'
+          : isPlaying
+            ? 'Parar áudio'
+            : agentName
+              ? `Ouvir resposta de ${agentName}`
+              : 'Ouvir mensagem'
       }
-      aria-label={
-        isPlaying
-          ? 'Parar reprodução de áudio'
-          : 'Reproduzir mensagem em áudio'
-      }
+      aria-label={isPlaying ? 'Parar reprodução de áudio' : 'Reproduzir mensagem em áudio'}
     >
       {isLoading ? (
         <Loader2
@@ -173,8 +204,10 @@ export function VoicePlayer({
             variant === 'badge'
               ? 'text-white'
               : hasError
-              ? 'text-red-600 dark:text-red-400'
-              : 'text-gray-600 dark:text-gray-400'
+                ? 'text-red-600 dark:text-red-400'
+                : !ttsEnabled
+                  ? 'text-gray-400 dark:text-gray-500'
+                  : 'text-gray-600 dark:text-gray-400'
           )}
         />
       )}
