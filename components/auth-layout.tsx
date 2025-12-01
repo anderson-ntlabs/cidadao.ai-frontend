@@ -45,7 +45,7 @@ export function AuthLayoutV2({
     { name: 'Dashboard', href: '/pt/app/dashboard', icon: LayoutDashboard },
     { name: 'Chat com IAs', href: '/pt/app/chat', icon: MessageSquare },
     { name: 'Investigações', href: '/pt/app/investigacoes', icon: FileSearch },
-    { name: 'Mapa de Transparência', href: '/pt/app/mapa', icon: Map },
+    { name: 'Mapa', href: '/pt/app/mapa', icon: Map },
   ]
 
   // Generate breadcrumbs from pathname if not provided
