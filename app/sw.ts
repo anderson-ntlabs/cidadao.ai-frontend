@@ -75,32 +75,12 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
 self.addEventListener('fetch', (event: FetchEvent) => {
   const url = new URL(event.request.url)
 
-  // Bypass service worker for backend API requests (Railway)
-  // This prevents Mixed Content errors and ensures direct network access
+  // Bypass service worker completely for backend API requests (Railway)
+  // Let the browser handle these requests directly without SW interception
+  // This prevents body consumption issues and ensures reliable SSE streaming
   if (url.hostname === 'cidadao-api-production.up.railway.app') {
-    // Always ensure HTTPS for Railway API
-    const secureUrl = new URL(event.request.url)
-    secureUrl.protocol = 'https:'
-
-    // Always respond with a direct fetch using HTTPS
-    event.respondWith(
-      fetch(secureUrl.toString(), {
-        method: event.request.method,
-        headers: event.request.headers,
-        body:
-          event.request.method !== 'GET' && event.request.method !== 'HEAD'
-            ? event.request.body
-            : undefined,
-        mode: 'cors',
-        credentials: event.request.credentials,
-      }).catch(
-        () =>
-          new Response(JSON.stringify({ error: 'Service unavailable' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
-          })
-      )
-    )
+    // Don't call event.respondWith() - this lets the request pass through normally
+    // The browser will handle the request directly, preserving the request body
     return
   }
 
