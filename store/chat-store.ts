@@ -554,20 +554,84 @@ export const useChatStore = create<ChatStore>()(
         },
       }
 
-      // Execute streaming request
-      try {
-        await streamingAdapter.sendStreaming(
-          {
-            message: content,
-            sessionId,
-            agentId: selectedAgent || undefined,
-          },
-          callbacks
-        )
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-        callbacks.onError?.(errorMsg)
+      // Execute streaming request with retry logic for 5xx errors
+      const maxRetries = 3
+      let lastError: string = 'Unknown error'
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const result = await streamingAdapter.sendStreaming(
+            {
+              message: content,
+              sessionId,
+              agentId: selectedAgent || undefined,
+            },
+            callbacks
+          )
+
+          // If request succeeded, we're done
+          if (result.success) {
+            return
+          }
+
+          // Check if it's a retryable error (5xx)
+          const errorCode = result.error?.code || ''
+          const errorMsg = result.error?.message || 'Unknown error'
+          lastError = errorMsg
+
+          // Only retry on server errors (5xx) or network errors
+          const isRetryable =
+            errorMsg.includes('503') ||
+            errorMsg.includes('502') ||
+            errorMsg.includes('500') ||
+            errorCode === 'NETWORK_ERROR' ||
+            errorCode === 'TIMEOUT'
+
+          if (!isRetryable || attempt === maxRetries - 1) {
+            // Don't retry or last attempt failed
+            break
+          }
+
+          // Wait before retry with exponential backoff
+          const delay = Math.pow(2, attempt) * 1000 // 1s, 2s, 4s
+          logger.info(
+            `Retrying streaming request in ${delay}ms (attempt ${attempt + 2}/${maxRetries})`
+          )
+
+          // Update UI to show retry status
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              statusMessage: `Tentando novamente em ${delay / 1000}s...`,
+            },
+          }))
+
+          await new Promise((resolve) => setTimeout(resolve, delay))
+
+          // Reset accumulated content for retry
+          set((state) => ({
+            streaming: {
+              ...state.streaming,
+              accumulatedContent: '',
+              phase: 'detecting',
+              statusMessage: 'Reconectando...',
+            },
+          }))
+        } catch (error) {
+          lastError = error instanceof Error ? error.message : 'Unknown error'
+
+          if (attempt === maxRetries - 1) {
+            break
+          }
+
+          // Wait before retry
+          const delay = Math.pow(2, attempt) * 1000
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
       }
+
+      // All retries failed
+      callbacks.onError?.(lastError)
     },
 
     // Load chat history
