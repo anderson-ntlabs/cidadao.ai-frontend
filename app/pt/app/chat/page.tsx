@@ -571,9 +571,19 @@ export default function ChatPage() {
                     <p className="whitespace-pre-wrap text-sm text-white">{optimisticMessage}</p>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                {user?.avatar ? (
+                  <OptimizedImage
+                    src={user.avatar}
+                    alt={user.name || 'Usuário'}
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-full object-cover opacity-70"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
               </div>
             )}
 
@@ -624,9 +634,19 @@ export default function ChatPage() {
                   {/* User Avatar */}
                   {message.role === 'user' && (
                     <div className="flex-shrink-0">
-                      <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </div>
+                      {user?.avatar ? (
+                        <OptimizedImage
+                          src={user.avatar}
+                          alt={user.name || 'Usuário'}
+                          width={36}
+                          height={36}
+                          className="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-gray-900 shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                          {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -824,9 +844,19 @@ export default function ChatPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
-                      {user?.name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
+                    {user?.avatar ? (
+                      <OptimizedImage
+                        src={user.avatar}
+                        alt={user.name || 'Usuário'}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0 opacity-70"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -882,9 +912,19 @@ export default function ChatPage() {
                       {/* User Avatar */}
                       {message.role === 'user' && (
                         <div className="flex-shrink-0">
-                          <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
-                            {user?.name?.charAt(0).toUpperCase() || 'U'}
-                          </div>
+                          {user?.avatar ? (
+                            <OptimizedImage
+                              src={user.avatar}
+                              alt={user.name || 'Usuário'}
+                              width={36}
+                              height={36}
+                              className="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-gray-900 shadow-lg"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-gradient-green-blue flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg">
+                              {user?.name?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
