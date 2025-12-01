@@ -100,38 +100,41 @@ export function AuthLayoutV2({
       return
     }
 
-    // If authenticated, clear OAuth cookie and we're done
+    // If authenticated, clear OAuth cookies and we're done
     if (isAuthenticated) {
-      document.cookie = 'oauth_in_progress=; path=/; max-age=0'
+      document.cookie = 'oauth_session_ready=; path=/; max-age=0'
       logger.debug('User authenticated, cleared OAuth cookie')
       return
     }
 
-    // Still loading, wait
+    // Still loading, wait for auth check to complete
     if (isLoading) {
       return
     }
 
-    // Not authenticated and not loading - check if OAuth is in progress
-    const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
+    // Check if OAuth just completed - give extra time for session to be ready
+    const isOAuthComplete =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('oauth_complete=') ||
+        document.cookie.includes('oauth_session_ready=true'))
 
-    if (oauthInProgress) {
-      logger.debug('OAuth in progress (cookie detected), waiting for session...')
+    if (isOAuthComplete) {
+      logger.debug('OAuth flow detected, waiting for session to be ready...')
 
-      // Wait a bit more for the useAuth hook to retry and find the session
+      // The useAuth hook will handle retries, but give it time
       const timer = setTimeout(() => {
         // If still not authenticated after waiting, clear cookie and redirect
-        document.cookie = 'oauth_in_progress=; path=/; max-age=0'
-        logger.info('OAuth timeout, redirecting to login')
+        document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+        logger.info('OAuth session timeout, redirecting to login')
         localStorage.setItem('redirectAfterLogin', pathname)
         router.push('/pt/login')
-      }, 3000)
+      }, 6000) // 6 seconds - enough for 5 retries with exponential backoff
 
       return () => clearTimeout(timer)
     }
 
     // Normal redirect to login for unauthenticated users
-    logger.info('Not authenticated and no OAuth in progress, redirecting to login')
+    logger.info('Not authenticated, redirecting to login')
     // Save the URL the user was trying to access for redirect after login
     localStorage.setItem('redirectAfterLogin', pathname)
     // Sistema autenticado está sempre em /pt (sem /en)

@@ -62,23 +62,26 @@ export async function GET(request: Request): Promise<NextResponse> {
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
 
+      // Add a timestamp to help client detect fresh OAuth completion
+      const redirectPath = `${next}${next.includes('?') ? '&' : '?'}oauth_complete=${Date.now()}`
+
       const redirectUrl = isLocalEnv
-        ? `${requestUrl.origin}${next}`
+        ? `${requestUrl.origin}${redirectPath}`
         : forwardedHost
-          ? `https://${forwardedHost}${next}`
-          : `${requestUrl.origin}${next}`
+          ? `https://${forwardedHost}${redirectPath}`
+          : `${requestUrl.origin}${redirectPath}`
 
       logger.info('Redirecting to', { url: redirectUrl })
 
       // Create response with redirect
       const response = NextResponse.redirect(redirectUrl)
 
-      // Set a cookie to indicate OAuth is in progress
-      // This prevents AuthLayout from immediately redirecting to login
-      response.cookies.set('oauth_in_progress', 'true', {
+      // Set a cookie to indicate OAuth just completed successfully
+      // Extended to 30 seconds to handle slow connections
+      response.cookies.set('oauth_session_ready', 'true', {
         path: '/',
-        maxAge: 10, // 10 seconds timeout
-        httpOnly: false, // Allow client-side access
+        maxAge: 30,
+        httpOnly: false,
         sameSite: 'lax',
       })
 

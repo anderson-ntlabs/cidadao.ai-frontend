@@ -68,23 +68,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication status on mount
   useEffect(() => {
-    const checkSession = async (retryCount = 0) => {
+    // Detect if we just came from OAuth callback
+    const isOAuthComplete =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('oauth_complete=') ||
+        document.cookie.includes('oauth_session_ready=true'))
+
+    const checkSession = async (retryCount = 0): Promise<boolean> => {
       try {
         logger.debug(`Checking session... (attempt ${retryCount + 1})`)
+
+        // Use getUser() instead of getSession() for more reliable auth check
+        // getUser() validates the token with the server
         const {
-          data: { session },
+          data: { user: supabaseUser },
           error,
-        } = await supabase.auth.getSession()
+        } = await supabase.auth.getUser()
 
         if (error) {
+          // Token might not be ready yet after OAuth
+          if (isOAuthComplete && retryCount < 5) {
+            logger.debug(`Auth error during OAuth flow, retrying in ${300 * (retryCount + 1)}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, 300 * (retryCount + 1)))
+            return checkSession(retryCount + 1)
+          }
           console.error('[Auth] Session error:', error)
           setUser(null)
           setIsAuthenticated(false)
-          return
+          return false
         }
 
-        if (session?.user) {
-          const user = convertSupabaseUser(session.user)
+        if (supabaseUser) {
+          const user = convertSupabaseUser(supabaseUser)
           logger.info('Session found', {
             userId: user.id,
             email: user.email,
@@ -92,52 +107,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })
           setUser(user)
           setIsAuthenticated(true)
-        } else {
-          // Check if OAuth is in progress - if so, retry after a short delay
-          const oauthInProgress =
-            typeof document !== 'undefined' && document.cookie.includes('oauth_in_progress=true')
 
-          if (oauthInProgress && retryCount < 3) {
-            logger.debug('No session but OAuth in progress, retrying in 500ms...')
-            await new Promise((resolve) => setTimeout(resolve, 500))
+          // Clear OAuth cookie on successful auth
+          if (typeof document !== 'undefined') {
+            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+          }
+
+          // Clean up URL if it has oauth_complete param
+          if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
+            const url = new URL(window.location.href)
+            url.searchParams.delete('oauth_complete')
+            window.history.replaceState({}, '', url.pathname + url.search)
+          }
+
+          return true
+        } else {
+          // Check if OAuth session should be ready - retry with exponential backoff
+          const oauthSessionReady =
+            typeof document !== 'undefined' && document.cookie.includes('oauth_session_ready=true')
+
+          if ((oauthSessionReady || isOAuthComplete) && retryCount < 5) {
+            const delay = 300 * (retryCount + 1) // 300ms, 600ms, 900ms, 1200ms, 1500ms
+            logger.debug(`No session but OAuth completed, retrying in ${delay}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
             return checkSession(retryCount + 1)
           }
 
           logger.debug('No session found')
           setUser(null)
           setIsAuthenticated(false)
+          return false
         }
       } catch (error) {
         console.error('[Auth] Unexpected error:', error)
         setUser(null)
         setIsAuthenticated(false)
-      } finally {
-        if (retryCount === 0 || retryCount >= 3) {
-          logger.debug('Check complete, setting isLoading = false')
-          setIsLoading(false)
-        }
+        return false
       }
     }
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      logger.warn('Check timeout (5s) - forcing loading state to false')
+      logger.warn('Check timeout (8s) - forcing loading state to false')
       setIsLoading(false)
-    }, 5000)
+    }, 8000)
 
     checkSession().finally(() => {
       clearTimeout(timeout)
+      setIsLoading(false)
       logger.debug('Session check finalized')
     })
 
-    // Listen for auth changes
+    // Listen for auth changes - this catches OAuth completion reliably
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      logger.debug('Auth state changed', { event, hasSession: !!session })
+
       if (session?.user) {
         setUser(convertSupabaseUser(session.user))
         setIsAuthenticated(true)
-      } else {
+        setIsLoading(false)
+
+        // Clear OAuth cookie
+        if (typeof document !== 'undefined') {
+          document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+        }
+      } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setIsAuthenticated(false)
       }
