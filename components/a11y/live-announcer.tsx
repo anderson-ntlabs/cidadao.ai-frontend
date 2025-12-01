@@ -16,7 +16,7 @@
 
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react'
 
 export type AnnouncementPriority = 'polite' | 'assertive'
 
@@ -80,7 +80,7 @@ interface LiveAnnouncerProviderProps {
 export function LiveAnnouncerProvider({
   children,
   maxAnnouncements = 5,
-  announcementLifetime = 5000
+  announcementLifetime = 5000,
 }: LiveAnnouncerProviderProps) {
   const [politeAnnouncements, setPoliteAnnouncements] = useState<Announcement[]>([])
   const [assertiveAnnouncements, setAssertiveAnnouncements] = useState<Announcement[]>([])
@@ -89,42 +89,44 @@ export function LiveAnnouncerProvider({
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      timeoutRefs.current.forEach(timeout => clearTimeout(timeout))
+      timeoutRefs.current.forEach((timeout) => clearTimeout(timeout))
       timeoutRefs.current.clear()
     }
   }, [])
 
-  const announce = useCallback((message: string, priority: AnnouncementPriority = 'polite') => {
-    const announcement: Announcement = {
-      id: `announcement-${Date.now()}-${Math.random()}`,
-      message,
-      priority,
-      timestamp: Date.now()
-    }
+  const announce = useCallback(
+    (message: string, priority: AnnouncementPriority = 'polite') => {
+      const announcement: Announcement = {
+        id: `announcement-${Date.now()}-${Math.random()}`,
+        message,
+        priority,
+        timestamp: Date.now(),
+      }
 
-    const setAnnouncements = priority === 'polite'
-      ? setPoliteAnnouncements
-      : setAssertiveAnnouncements
+      const setAnnouncements =
+        priority === 'polite' ? setPoliteAnnouncements : setAssertiveAnnouncements
 
-    setAnnouncements(prev => {
-      // Add new announcement and keep only the last N announcements
-      const updated = [...prev, announcement].slice(-maxAnnouncements)
-      return updated
-    })
+      setAnnouncements((prev) => {
+        // Add new announcement and keep only the last N announcements
+        const updated = [...prev, announcement].slice(-maxAnnouncements)
+        return updated
+      })
 
-    // Auto-cleanup after lifetime expires
-    const timeout = setTimeout(() => {
-      setAnnouncements(prev => prev.filter(a => a.id !== announcement.id))
-      timeoutRefs.current.delete(announcement.id)
-    }, announcementLifetime)
+      // Auto-cleanup after lifetime expires
+      const timeout = setTimeout(() => {
+        setAnnouncements((prev) => prev.filter((a) => a.id !== announcement.id))
+        timeoutRefs.current.delete(announcement.id)
+      }, announcementLifetime)
 
-    timeoutRefs.current.set(announcement.id, timeout)
-  }, [maxAnnouncements, announcementLifetime])
+      timeoutRefs.current.set(announcement.id, timeout)
+    },
+    [maxAnnouncements, announcementLifetime]
+  )
 
   const clear = useCallback(() => {
     setPoliteAnnouncements([])
     setAssertiveAnnouncements([])
-    timeoutRefs.current.forEach(timeout => clearTimeout(timeout))
+    timeoutRefs.current.forEach((timeout) => clearTimeout(timeout))
     timeoutRefs.current.clear()
   }, [])
 
@@ -135,28 +137,16 @@ export function LiveAnnouncerProvider({
       {/* ARIA Live Regions */}
       <div className="sr-only">
         {/* Polite: Waits for user to pause before announcing */}
-        <div
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {politeAnnouncements.map(announcement => (
-            <div key={announcement.id}>
-              {announcement.message}
-            </div>
+        <div role="status" aria-live="polite" aria-atomic="true">
+          {politeAnnouncements.map((announcement) => (
+            <div key={announcement.id}>{announcement.message}</div>
           ))}
         </div>
 
         {/* Assertive: Interrupts screen reader immediately */}
-        <div
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          {assertiveAnnouncements.map(announcement => (
-            <div key={announcement.id}>
-              {announcement.message}
-            </div>
+        <div role="alert" aria-live="assertive" aria-atomic="true">
+          {assertiveAnnouncements.map((announcement) => (
+            <div key={announcement.id}>{announcement.message}</div>
           ))}
         </div>
       </div>
@@ -166,24 +156,27 @@ export function LiveAnnouncerProvider({
 
 /**
  * Convenience hook for common announcement patterns
+ *
+ * Uses useMemo to stabilize function references and prevent
+ * infinite re-render loops when used in useEffect dependencies.
  */
 export function useAnnouncementHelpers() {
   const { announce } = useLiveAnnouncer()
 
-  return {
-    announceLoading: (entity: string) =>
-      announce(`Loading ${entity}...`, 'polite'),
+  return useMemo(
+    () => ({
+      announceLoading: (entity: string) => announce(`Loading ${entity}...`, 'polite'),
 
-    announceSuccess: (action: string) =>
-      announce(`${action} completed successfully`, 'polite'),
+      announceSuccess: (action: string) => announce(`${action} completed successfully`, 'polite'),
 
-    announceError: (error: string) =>
-      announce(`Error: ${error}`, 'assertive'),
+      announceError: (error: string) => announce(`Error: ${error}`, 'assertive'),
 
-    announceNavigation: (destination: string) =>
-      announce(`Navigated to ${destination}`, 'polite'),
+      announceNavigation: (destination: string) =>
+        announce(`Navigated to ${destination}`, 'polite'),
 
-    announceCount: (count: number, entity: string) =>
-      announce(`${count} ${entity}${count !== 1 ? 's' : ''} found`, 'polite'),
-  }
+      announceCount: (count: number, entity: string) =>
+        announce(`${count} ${entity}${count !== 1 ? 's' : ''} found`, 'polite'),
+    }),
+    [announce]
+  )
 }

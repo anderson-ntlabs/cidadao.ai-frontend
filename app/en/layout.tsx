@@ -82,18 +82,13 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
-        {/* Preload critical assets - Above the fold */}
-        <link rel="preload" href="/operarios.png" as="image" type="image/avif" />
+        {/* Prefetch assets for future navigation (non-blocking) */}
+        <link rel="prefetch" href="/operarios.png" as="image" />
 
-        {/* Preload key agent avatars for quick display - using optimized WebP */}
-        <link
-          rel="preload"
-          href="/agents/optimized/abaporu-128.webp"
-          as="image"
-          type="image/webp"
-        />
-        <link rel="preload" href="/agents/optimized/zumbi-128.webp" as="image" type="image/webp" />
-        <link rel="preload" href="/agents/optimized/anita-128.webp" as="image" type="image/webp" />
+        {/* Prefetch agent avatars for quick display in modals/chat */}
+        <link rel="prefetch" href="/agents/optimized/abaporu-128.webp" as="image" />
+        <link rel="prefetch" href="/agents/optimized/zumbi-128.webp" as="image" />
+        <link rel="prefetch" href="/agents/optimized/anita-128.webp" as="image" />
       </head>
       <body className="min-h-screen font-sans">
         <WebVitalsProvider>
