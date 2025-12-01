@@ -68,9 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication status on mount
   useEffect(() => {
-    const checkSession = async () => {
+    const checkSession = async (retryCount = 0) => {
       try {
-        logger.debug('Checking session...')
+        logger.debug(`Checking session... (attempt ${retryCount + 1})`)
         const {
           data: { session },
           error,
@@ -93,6 +93,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
           setIsAuthenticated(true)
         } else {
+          // Check if OAuth is in progress - if so, retry after a short delay
+          const oauthInProgress =
+            typeof document !== 'undefined' && document.cookie.includes('oauth_in_progress=true')
+
+          if (oauthInProgress && retryCount < 3) {
+            logger.debug('No session but OAuth in progress, retrying in 500ms...')
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            return checkSession(retryCount + 1)
+          }
+
           logger.debug('No session found')
           setUser(null)
           setIsAuthenticated(false)
@@ -102,8 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setIsAuthenticated(false)
       } finally {
-        logger.debug('Check complete, setting isLoading = false')
-        setIsLoading(false)
+        if (retryCount === 0 || retryCount >= 3) {
+          logger.debug('Check complete, setting isLoading = false')
+          setIsLoading(false)
+        }
       }
     }
 

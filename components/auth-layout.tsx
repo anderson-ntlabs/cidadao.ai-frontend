@@ -100,39 +100,42 @@ export function AuthLayoutV2({
       return
     }
 
-    if (!isLoading && !isAuthenticated) {
-      // Check if we're waiting for OAuth session to complete via cookie
-      const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
-
-      if (oauthInProgress) {
-        logger.debug('OAuth in progress (cookie detected), giving session time to establish...')
-        // Give the session 3 seconds to establish before redirecting
-        const timer = setTimeout(() => {
-          logger.debug('OAuth timeout reached')
-          // Clear the OAuth cookie
-          document.cookie = 'oauth_in_progress=; path=/; max-age=0'
-          // If still not authenticated, redirect to login
-          if (!isAuthenticated) {
-            logger.info('Still not authenticated after OAuth timeout, redirecting to login')
-            localStorage.setItem('redirectAfterLogin', pathname)
-            router.push('/pt/login')
-          }
-        }, 3000)
-
-        return () => clearTimeout(timer)
-      }
-
-      // Normal redirect to login for unauthenticated users
-      logger.info('Not authenticated and no OAuth in progress, redirecting to login')
-      // Save the URL the user was trying to access for redirect after login
-      localStorage.setItem('redirectAfterLogin', pathname)
-      // Sistema autenticado está sempre em /pt (sem /en)
-      router.push('/pt/login')
-    } else if (isAuthenticated) {
-      // Clear OAuth cookie when successfully authenticated
+    // If authenticated, clear OAuth cookie and we're done
+    if (isAuthenticated) {
       document.cookie = 'oauth_in_progress=; path=/; max-age=0'
       logger.debug('User authenticated, cleared OAuth cookie')
+      return
     }
+
+    // Still loading, wait
+    if (isLoading) {
+      return
+    }
+
+    // Not authenticated and not loading - check if OAuth is in progress
+    const oauthInProgress = document.cookie.includes('oauth_in_progress=true')
+
+    if (oauthInProgress) {
+      logger.debug('OAuth in progress (cookie detected), waiting for session...')
+
+      // Wait a bit more for the useAuth hook to retry and find the session
+      const timer = setTimeout(() => {
+        // If still not authenticated after waiting, clear cookie and redirect
+        document.cookie = 'oauth_in_progress=; path=/; max-age=0'
+        logger.info('OAuth timeout, redirecting to login')
+        localStorage.setItem('redirectAfterLogin', pathname)
+        router.push('/pt/login')
+      }, 3000)
+
+      return () => clearTimeout(timer)
+    }
+
+    // Normal redirect to login for unauthenticated users
+    logger.info('Not authenticated and no OAuth in progress, redirecting to login')
+    // Save the URL the user was trying to access for redirect after login
+    localStorage.setItem('redirectAfterLogin', pathname)
+    // Sistema autenticado está sempre em /pt (sem /en)
+    router.push('/pt/login')
   }, [isLoading, isAuthenticated, router, pathname])
 
   if (isLoading) {
