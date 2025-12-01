@@ -4,10 +4,28 @@ import '@/styles/design-system/tokens/index.css'
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  Search, Filter, TrendingUp, AlertTriangle, FileSearch,
-  Calendar, ChevronRight, Download, Eye, Clock,
-  BarChart3, Shield, Zap, Target, Activity, Users,
-  CheckCircle, XCircle, AlertCircle, RefreshCw, Loader2, Plus
+  Search,
+  Filter,
+  TrendingUp,
+  AlertTriangle,
+  FileSearch,
+  Calendar,
+  ChevronRight,
+  Download,
+  Eye,
+  Clock,
+  BarChart3,
+  Shield,
+  Zap,
+  Target,
+  Activity,
+  Users,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Loader2,
+  Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -21,26 +39,26 @@ import { mockInvestigations } from '@/data/investigations'
 
 // Tipos de investigação
 const investigationTypes = {
-  anomaly: { 
-    label: 'Anomalia', 
-    color: 'text-red-600 bg-red-100 dark:bg-red-900/30', 
-    icon: AlertTriangle 
+  anomaly: {
+    label: 'Anomalia',
+    color: 'text-red-600 bg-red-100 dark:bg-red-900/30',
+    icon: AlertTriangle,
   },
-  pattern: { 
-    label: 'Padrão Suspeito', 
-    color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', 
-    icon: Activity 
+  pattern: {
+    label: 'Padrão Suspeito',
+    color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
+    icon: Activity,
   },
-  fraud: { 
-    label: 'Fraude Potencial', 
-    color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', 
-    icon: Shield 
+  fraud: {
+    label: 'Fraude Potencial',
+    color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
+    icon: Shield,
   },
-  overpricing: { 
-    label: 'Sobrepreço', 
-    color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', 
-    icon: TrendingUp 
-  }
+  overpricing: {
+    label: 'Sobrepreço',
+    color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30',
+    icon: TrendingUp,
+  },
 }
 
 // Status das investigações (mapeamento backend -> frontend)
@@ -48,28 +66,28 @@ const statusConfig = {
   pending: {
     label: 'Pendente',
     color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
-    icon: Clock
+    icon: Clock,
   },
   running: {
     label: 'Em Andamento',
     color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
-    icon: RefreshCw
+    icon: RefreshCw,
   },
   completed: {
     label: 'Concluída',
     color: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-    icon: CheckCircle
+    icon: CheckCircle,
   },
   failed: {
     label: 'Falhou',
     color: 'text-red-600 bg-red-100 dark:bg-red-900/30',
-    icon: XCircle
+    icon: XCircle,
   },
   cancelled: {
     label: 'Cancelada',
     color: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
-    icon: XCircle
-  }
+    icon: XCircle,
+  },
 }
 
 // MOCK DATA REMOVED - Now using real backend data
@@ -87,7 +105,7 @@ export default function InvestigacoesPage() {
     investigations: backendInvestigations,
     isLoading,
     error: backendError,
-    refreshInvestigations
+    refreshInvestigations,
   } = useBackendInvestigations({ autoRefresh: true, refreshInterval: 5000 })
 
   // Fallback to mock data if backend returns empty or has error
@@ -117,9 +135,10 @@ export default function InvestigacoesPage() {
       const invTitle = inv.title || `Investigation ${invId.slice(0, 8)}`
       const invDescription = inv.current_phase || inv.description || ''
 
-      const matchesSearch = invTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           invDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           invId.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch =
+        invTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invId.toLowerCase().includes(searchTerm.toLowerCase())
 
       const matchesType = selectedType === 'all' || inv.type === selectedType
       const matchesStatus = selectedStatus === 'all' || inv.status === selectedStatus
@@ -135,12 +154,18 @@ export default function InvestigacoesPage() {
         case 'progress':
           return (b.progress || 0) - (a.progress || 0)
         case 'anomalies':
-          return (b.anomalies_detected || b.findings || 0) - (a.anomalies_detected || a.findings || 0)
+          return (
+            (b.anomalies_detected || b.findings || 0) - (a.anomalies_detected || a.findings || 0)
+          )
         case 'date':
         default:
           // Backend uses created_at, mock uses dateUpdated
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : (a.dateUpdated?.getTime() || 0)
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : (b.dateUpdated?.getTime() || 0)
+          const dateA = a.created_at
+            ? new Date(a.created_at).getTime()
+            : a.dateUpdated?.getTime() || 0
+          const dateB = b.created_at
+            ? new Date(b.created_at).getTime()
+            : b.dateUpdated?.getTime() || 0
           return dateB - dateA
       }
     })
@@ -149,22 +174,28 @@ export default function InvestigacoesPage() {
   // Estatísticas (works with both backend and mock data)
   const stats = useMemo(() => {
     const total = investigations.length
-    const running = investigations.filter((i: any) => i.status === 'running' || i.status === 'active').length
+    const running = investigations.filter(
+      (i: any) => i.status === 'running' || i.status === 'active'
+    ).length
     const completed = investigations.filter((i: any) => i.status === 'completed').length
-    const failed = investigations.filter((i: any) => i.status === 'failed' || i.status === 'critical').length
+    const failed = investigations.filter(
+      (i: any) => i.status === 'failed' || i.status === 'critical'
+    ).length
 
     // Calculate total anomalies (backend: anomalies_detected, mock: findings)
-    const totalAnomalies = investigations.reduce((sum: number, i: any) =>
-      sum + (i.anomalies_detected || i.findings || 0), 0
+    const totalAnomalies = investigations.reduce(
+      (sum: number, i: any) => sum + (i.anomalies_detected || i.findings || 0),
+      0
     )
 
     // Calculate average progress (backend: progress 0-1, convert to %)
-    const avgProgress = investigations.length > 0
-      ? investigations.reduce((sum: number, i: any) => {
-          const progress = i.progress !== undefined ? i.progress * 100 : 0
-          return sum + progress
-        }, 0) / investigations.length
-      : 0
+    const avgProgress =
+      investigations.length > 0
+        ? investigations.reduce((sum: number, i: any) => {
+            const progress = i.progress !== undefined ? i.progress * 100 : 0
+            return sum + progress
+          }, 0) / investigations.length
+        : 0
 
     return {
       total,
@@ -172,7 +203,7 @@ export default function InvestigacoesPage() {
       completed,
       failed,
       totalAnomalies,
-      avgProgress: Math.round(avgProgress)
+      avgProgress: Math.round(avgProgress),
     }
   }, [investigations])
 
@@ -183,20 +214,20 @@ export default function InvestigacoesPage() {
   return (
     <div className="min-h-screen relative">
       {/* Background Image */}
-      <div 
+      <div
         className="fixed inset-0 z-0"
         style={{
           backgroundImage: `url('/operarios.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
-      
+
       {/* Gradient Overlay */}
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -209,7 +240,7 @@ export default function InvestigacoesPage() {
                 Acompanhe todas as investigações realizadas pelos nossos agentes de IA
               </p>
             </div>
-            
+
             <div className="flex gap-3">
               <Button
                 variant="ghost"
@@ -219,10 +250,7 @@ export default function InvestigacoesPage() {
               >
                 Atualizar
               </Button>
-              <Button
-                variant="secondary"
-                leftIcon={<Download className="w-4 h-4" />}
-              >
+              <Button variant="secondary" leftIcon={<Download className="w-4 h-4" />}>
                 Exportar Relatório
               </Button>
               <Button
@@ -242,10 +270,16 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Investigações</p>
-                  <p className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">{stats.total}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Total de Investigações
+                  </p>
+                  <p className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">
+                    {stats.total}
+                  </p>
                   {useMockFallback && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                      Dados de exemplo
+                    </p>
                   )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -259,10 +293,14 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Em Andamento</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Em Andamento
+                  </p>
                   <p className="text-3xl font-bold mt-2 text-blue-600">{stats.running}</p>
                   {useMockFallback && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                      Dados de exemplo
+                    </p>
                   )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -276,12 +314,16 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Anomalias Detectadas</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Anomalias Detectadas
+                  </p>
                   <p className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">
                     {stats.totalAnomalies}
                   </p>
                   {useMockFallback && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                      Dados de exemplo
+                    </p>
                   )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -295,10 +337,14 @@ export default function InvestigacoesPage() {
             <GlassCardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Progresso Médio</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Progresso Médio
+                  </p>
                   <p className="text-3xl font-bold mt-2 text-purple-600">{stats.avgProgress}%</p>
                   {useMockFallback && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Dados de exemplo</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                      Dados de exemplo
+                    </p>
                   )}
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -337,7 +383,9 @@ export default function InvestigacoesPage() {
                 >
                   <option value="all">Todos os Tipos</option>
                   {Object.entries(investigationTypes).map(([key, type]) => (
-                    <option key={key} value={key}>{type.label}</option>
+                    <option key={key} value={key}>
+                      {type.label}
+                    </option>
                   ))}
                 </select>
 
@@ -348,7 +396,9 @@ export default function InvestigacoesPage() {
                 >
                   <option value="all">Todos os Status</option>
                   {Object.entries(statusConfig).map(([key, status]) => (
-                    <option key={key} value={key}>{status.label}</option>
+                    <option key={key} value={key}>
+                      {status.label}
+                    </option>
                   ))}
                 </select>
 
@@ -371,188 +421,206 @@ export default function InvestigacoesPage() {
           {sortedInvestigations.map((investigation: any) => {
             // Backend data doesn't have 'type', use default icon
             const invType = investigation.type || 'anomaly'
-            const TypeIcon = investigationTypes[invType as keyof typeof investigationTypes]?.icon || AlertTriangle
-            const StatusIcon = statusConfig[investigation.status as keyof typeof statusConfig]?.icon || Clock
+            const TypeIcon =
+              investigationTypes[invType as keyof typeof investigationTypes]?.icon || AlertTriangle
+            const StatusIcon =
+              statusConfig[investigation.status as keyof typeof statusConfig]?.icon || Clock
 
             // Backend uses investigation_id, mock uses id
             const invId = investigation.investigation_id || investigation.id
             const invTitle = investigation.title || `Investigation ${invId?.slice(0, 8) || 'N/A'}`
-            const invDescription = investigation.current_phase || investigation.description || 'No description'
+            const invDescription =
+              investigation.current_phase || investigation.description || 'No description'
 
             return (
               <div
                 key={invId}
-                onClick={() => router.push(`/pt/investigacoes/${invId}`)}
+                onClick={() => router.push(`/pt/app/investigacoes/${invId}`)}
                 className="cursor-pointer"
               >
                 <GlassCard className="hover:shadow-xl transition-all duration-300 group">
                   <GlassCardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                    {/* Main Content */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                              {invTitle}
-                            </h3>
-                            <span className="text-sm font-medium text-gray-500">
-                              {invId?.slice(0, 8)}
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                      {/* Main Content */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                {invTitle}
+                              </h3>
+                              <span className="text-sm font-medium text-gray-500">
+                                {invId?.slice(0, 8)}
+                              </span>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                              {invDescription}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {investigation.type && (
+                            <span
+                              className={cn(
+                                'px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1',
+                                investigationTypes[invType as keyof typeof investigationTypes]
+                                  ?.color || 'text-gray-600 bg-gray-100'
+                              )}
+                            >
+                              <TypeIcon className="w-3 h-3" />
+                              {investigationTypes[invType as keyof typeof investigationTypes]
+                                ?.label || 'Investigation'}
                             </span>
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {invDescription}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Badges */}
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {investigation.type && (
-                          <span className={cn(
-                            "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-                            investigationTypes[invType as keyof typeof investigationTypes]?.color || 'text-gray-600 bg-gray-100'
-                          )}>
-                            <TypeIcon className="w-3 h-3" />
-                            {investigationTypes[invType as keyof typeof investigationTypes]?.label || 'Investigation'}
-                          </span>
-                        )}
-
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-                          statusConfig[investigation.status as keyof typeof statusConfig]?.color || 'text-gray-600 bg-gray-100'
-                        )}>
-                          <StatusIcon className="w-3 h-3" />
-                          {statusConfig[investigation.status as keyof typeof statusConfig]?.label || investigation.status}
-                        </span>
-
-                        {(investigation.riskLevel === 'crítico' || investigation.status === 'failed') && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                            ⚠️ Atenção
-                          </span>
-                        )}
-
-                        {/* Show progress badge for backend investigations */}
-                        {investigation.progress !== undefined && investigation.status === 'running' && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                            {Math.round(investigation.progress * 100)}% concluído
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Meta Info */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        {investigation.value && (
-                          <div>
-                            <p className="text-gray-500 dark:text-gray-400">Valor</p>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              R$ {(investigation.value / 1000000).toFixed(1)}M
-                            </p>
-                          </div>
-                        )}
-                        {investigation.progress !== undefined && (
-                          <div>
-                            <p className="text-gray-500 dark:text-gray-400">Progresso</p>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {Math.round(investigation.progress * 100)}%
-                            </p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-gray-500 dark:text-gray-400">Anomalias</p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {investigation.anomalies_detected || investigation.findings || 0}
-                          </p>
-                        </div>
-                        {investigation.records_processed !== undefined && (
-                          <div>
-                            <p className="text-gray-500 dark:text-gray-400">Registros</p>
-                            <p className="font-semibold text-gray-900 dark:text-white">
-                              {investigation.records_processed}
-                            </p>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-gray-500 dark:text-gray-400">
-                            {investigation.created_at ? 'Criado' : 'Atualizado'}
-                          </p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {investigation.created_at
-                              ? format(parseISO(investigation.created_at), 'dd/MM', { locale: ptBR })
-                              : investigation.dateUpdated
-                              ? format(investigation.dateUpdated, 'dd/MM', { locale: ptBR })
-                              : 'N/A'
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right Side - Department and Actions */}
-                    <div className="flex flex-col items-end gap-4">
-                      {(investigation.department || investigation.location || investigation.current_phase) && (
-                        <div className="text-right">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {investigation.department || investigation.current_phase || 'Em análise'}
-                          </p>
-                          {investigation.location && (
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {investigation.location}
-                            </p>
                           )}
+
+                          <span
+                            className={cn(
+                              'px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1',
+                              statusConfig[investigation.status as keyof typeof statusConfig]
+                                ?.color || 'text-gray-600 bg-gray-100'
+                            )}
+                          >
+                            <StatusIcon className="w-3 h-3" />
+                            {statusConfig[investigation.status as keyof typeof statusConfig]
+                              ?.label || investigation.status}
+                          </span>
+
+                          {(investigation.riskLevel === 'crítico' ||
+                            investigation.status === 'failed') && (
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                              ⚠️ Atenção
+                            </span>
+                          )}
+
+                          {/* Show progress badge for backend investigations */}
+                          {investigation.progress !== undefined &&
+                            investigation.status === 'running' && (
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                {Math.round(investigation.progress * 100)}% concluído
+                              </span>
+                            )}
                         </div>
-                      )}
 
-                      <div className="flex gap-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          leftIcon={<Eye className="w-4 h-4" />}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(`/pt/investigacoes/${invId}`)
-                          }}
-                        >
-                          Detalhes
-                        </Button>
+                        {/* Meta Info */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          {investigation.value && (
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-400">Valor</p>
+                              <p className="font-semibold text-gray-900 dark:text-white">
+                                R$ {(investigation.value / 1000000).toFixed(1)}M
+                              </p>
+                            </div>
+                          )}
+                          {investigation.progress !== undefined && (
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-400">Progresso</p>
+                              <p className="font-semibold text-gray-900 dark:text-white">
+                                {Math.round(investigation.progress * 100)}%
+                              </p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Anomalias</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {investigation.anomalies_detected || investigation.findings || 0}
+                            </p>
+                          </div>
+                          {investigation.records_processed !== undefined && (
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-400">Registros</p>
+                              <p className="font-semibold text-gray-900 dark:text-white">
+                                {investigation.records_processed}
+                              </p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">
+                              {investigation.created_at ? 'Criado' : 'Atualizado'}
+                            </p>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {investigation.created_at
+                                ? format(parseISO(investigation.created_at), 'dd/MM', {
+                                    locale: ptBR,
+                                  })
+                                : investigation.dateUpdated
+                                  ? format(investigation.dateUpdated, 'dd/MM', { locale: ptBR })
+                                  : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
-                        {investigation.status === 'completed' && (
+                      {/* Right Side - Department and Actions */}
+                      <div className="flex flex-col items-end gap-4">
+                        {(investigation.department ||
+                          investigation.location ||
+                          investigation.current_phase) && (
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {investigation.department ||
+                                investigation.current_phase ||
+                                'Em análise'}
+                            </p>
+                            {investigation.location && (
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {investigation.location}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
                           <Button
-                            variant="ghost"
+                            variant="secondary"
                             size="sm"
-                            leftIcon={<Download className="w-4 h-4" />}
+                            leftIcon={<Eye className="w-4 h-4" />}
                             onClick={(e) => {
                               e.stopPropagation()
-                              // Download logic
+                              router.push(`/pt/app/investigacoes/${invId}`)
                             }}
                           >
-                            Exportar
+                            Detalhes
                           </Button>
-                        )}
-                      </div>
 
-                      {/* Agents - only for mock data */}
-                      {investigation.agents && investigation.agents.length > 0 && (
-                        <div className="flex -space-x-2">
-                          {investigation.agents.slice(0, 3).map((agent: string, idx: number) => (
-                            <div
-                              key={idx}
-                              className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md"
-                              title={agent}
+                          {investigation.status === 'completed' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              leftIcon={<Download className="w-4 h-4" />}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                // Download logic
+                              }}
                             >
-                              {agent.charAt(0)}
-                            </div>
-                          ))}
-                          {investigation.agents.length > 3 && (
-                            <div className="w-8 h-8 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md">
-                              +{investigation.agents.length - 3}
-                            </div>
+                              Exportar
+                            </Button>
                           )}
                         </div>
-                      )}
+
+                        {/* Agents - only for mock data */}
+                        {investigation.agents && investigation.agents.length > 0 && (
+                          <div className="flex -space-x-2">
+                            {investigation.agents.slice(0, 3).map((agent: string, idx: number) => (
+                              <div
+                                key={idx}
+                                className="w-8 h-8 bg-gradient-to-br from-green-600 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md"
+                                title={agent}
+                              >
+                                {agent.charAt(0)}
+                              </div>
+                            ))}
+                            {investigation.agents.length > 3 && (
+                              <div className="w-8 h-8 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white/50 dark:ring-gray-800/50 shadow-md">
+                                +{investigation.agents.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </GlassCardContent>
+                  </GlassCardContent>
                 </GlassCard>
               </div>
             )
