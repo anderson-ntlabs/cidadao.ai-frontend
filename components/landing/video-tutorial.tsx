@@ -56,8 +56,7 @@ export function VideoTutorial({
                   src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
                   title={title}
                   frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   onLoad={() => setIsLoaded(true)}
                 />
                 {!isLoaded && (

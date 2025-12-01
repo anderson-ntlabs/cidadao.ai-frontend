@@ -162,7 +162,6 @@ export default function ENPage(): JSX.Element {
                   width="100%"
                   height="352"
                   frameBorder="0"
-                  allowFullScreen
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   loading="lazy"
                   title="Cidadao.AI Transparency Soundtrack"
