@@ -18,6 +18,7 @@ import { useAnnouncementHelpers } from '@/components/a11y'
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { useChatModeHistory, type ChatMode as HistoryChatMode } from '@/hooks/use-chat-mode-history'
 
 // Import MessageBubble directly (not lazy-loaded) to support client-side hooks
 import { MessageBubble } from '@/components/chat/message-bubble'
@@ -195,6 +196,15 @@ export default function ChatPage() {
   // Accessibility announcements
   const { announceLoading, announceSuccess, announceError } = useAnnouncementHelpers()
 
+  // Chat mode history management - preserves history when switching modes
+  const {
+    currentMode: historyMode,
+    saveMessages: saveModeHistory,
+    getMessagesForMode,
+    switchMode: switchHistoryMode,
+    hasModeMessages,
+  } = useChatModeHistory()
+
   // Direct store access - no wrapper hook
   const messages = useChatStore((state) => state.messages)
   const session = useChatStore((state) => state.session)
@@ -302,27 +312,52 @@ export default function ChatPage() {
     }
   }, [error, announceError])
 
-  // Clear messages when switching modes
+  // Handle mode switching with history preservation
   const handleModeChange = async (newMode: ChatMode) => {
+    const currentMode = chatMode as HistoryChatMode
+    const targetMode = newMode as HistoryChatMode
+
+    // Save current messages to mode history before switching
+    if (messages.length > 0) {
+      saveModeHistory(currentMode, messages)
+      logger.debug('Saved messages to mode history', {
+        mode: currentMode,
+        messageCount: messages.length,
+      })
+    }
+
     // Update mode immediately
     setChatMode(newMode)
 
-    // Clear chat history when switching modes
+    // Switch history mode
+    switchHistoryMode(targetMode)
+
+    // Check if target mode has existing messages
+    const existingMessages = getMessagesForMode(targetMode)
+    const hasExistingHistory = existingMessages.length > 0
+
     if (typeof window !== 'undefined') {
-      // Create new session for the new mode (this clears messages)
+      // Create new session for the new mode
       await createNewSession()
 
+      // Notify user about the mode switch
       const modeMessage =
         newMode === 'maritaca'
-          ? 'Modo Maritaca ativado. Conversando diretamente com modelos base.'
-          : 'Modo Cidadão.AI ativado. Sistema multi-agente pronto.'
+          ? hasExistingHistory
+            ? 'Modo Maritaca ativado. Histórico anterior restaurado.'
+            : 'Modo Maritaca ativado. Conversando diretamente com modelos base.'
+          : hasExistingHistory
+            ? 'Modo Cidadão.AI ativado. Histórico anterior restaurado.'
+            : 'Modo Cidadão.AI ativado. Sistema multi-agente pronto.'
 
-      // Show toast notification
+      // Show toast notification with history info
       toast.success(
         newMode === 'maritaca' ? 'Modo Maritaca Ativado' : 'Modo Cidadão.AI Ativado',
-        newMode === 'maritaca'
-          ? 'Conversando diretamente com os modelos base da Maritaca.AI'
-          : 'Sistema multi-agente Cidadão.AI ativado'
+        hasExistingHistory
+          ? `${existingMessages.length} mensagens restauradas do histórico`
+          : newMode === 'maritaca'
+            ? 'Conversando diretamente com os modelos base da Maritaca.AI'
+            : 'Sistema multi-agente Cidadão.AI ativado'
       )
 
       // Screen reader announcement
