@@ -98,7 +98,7 @@ class UserProfileService {
         .upsert({
           id: userId,
           ...updates,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single()
@@ -127,15 +127,15 @@ class UserProfileService {
         .from('user-uploads')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
         })
 
       if (uploadError) throw uploadError
 
       // Get public URL
-      const { data: { publicUrl } } = this.supabase.storage
-        .from('user-uploads')
-        .getPublicUrl(filePath)
+      const {
+        data: { publicUrl },
+      } = this.supabase.storage.from('user-uploads').getPublicUrl(filePath)
 
       // Update profile with new avatar URL
       await this.updateProfile(userId, { avatar_url: publicUrl })
@@ -177,14 +177,17 @@ class UserProfileService {
   /**
    * Update user preferences
    */
-  async updatePreferences(userId: string, preferences: Partial<UserPreferences>): Promise<UserPreferences> {
+  async updatePreferences(
+    userId: string,
+    preferences: Partial<UserPreferences>
+  ): Promise<UserPreferences> {
     try {
       const { data, error } = await this.supabase
         .from('user_preferences')
         .upsert({
           user_id: userId,
           ...preferences,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single()
@@ -210,11 +213,17 @@ class UserProfileService {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
 
-      // Get message count
-      const { count: messageCount } = await this.supabase
-        .from('chat_messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+      // Get message count (table may not exist)
+      let messageCount = 0
+      try {
+        const result = await this.supabase
+          .from('chat_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+        messageCount = result.count || 0
+      } catch {
+        // Table doesn't exist yet - ignore
+      }
 
       // Get investigation count
       const { count: investigationCount } = await this.supabase
@@ -223,7 +232,9 @@ class UserProfileService {
         .eq('user_id', userId)
 
       // Get user creation date
-      const { data: { user } } = await this.supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await this.supabase.auth.getUser()
       const memberSince = user?.created_at || new Date().toISOString()
 
       // Get last activity (most recent message or session)
@@ -240,7 +251,7 @@ class UserProfileService {
         total_messages: messageCount || 0,
         total_investigations: investigationCount || 0,
         member_since: memberSince,
-        last_active: lastSession?.updated_at
+        last_active: lastSession?.updated_at,
       }
     } catch (error) {
       logger.error('Failed to get user stats', { userId, error })
@@ -263,7 +274,7 @@ class UserProfileService {
       await this.updateProfile(userId, {
         full_name: '[Deleted User]',
         bio: undefined,
-        avatar_url: undefined
+        avatar_url: undefined,
       })
 
       logger.warn('User account deleted', { userId })
@@ -292,7 +303,7 @@ class UserProfileService {
           title,
           description,
           metadata,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         })
         .select()
         .single()
@@ -301,7 +312,24 @@ class UserProfileService {
 
       logger.info('Activity logged', { userId, type, title })
       return data
-    } catch (error) {
+    } catch (error: any) {
+      // Table doesn't exist yet - return a mock activity silently
+      if (
+        error?.code === 'PGRST116' ||
+        error?.code === '42P01' ||
+        error?.message?.includes('404')
+      ) {
+        logger.debug('user_activities table not found, returning mock activity')
+        return {
+          id: crypto.randomUUID(),
+          user_id: userId,
+          type,
+          title,
+          description,
+          metadata,
+          created_at: new Date().toISOString(),
+        } as UserActivity
+      }
       logger.error('Failed to log activity', { userId, type, title, error })
       throw error
     }
@@ -343,7 +371,8 @@ class UserProfileService {
 
       if (error) {
         // Table might not exist yet - return empty array
-        if (error.code === 'PGRST116' || error.code === '42P01') {
+        if (error.code === 'PGRST116' || error.code === '42P01' || error.message?.includes('404')) {
+          logger.debug('user_activities table not found, returning empty array')
           return []
         }
         throw error
@@ -370,17 +399,20 @@ class UserProfileService {
     try {
       const activities = await this.getActivities(userId)
 
-      const stats = activities.reduce((acc, activity) => {
-        acc[activity.type] = (acc[activity.type] || 0) + 1
-        return acc
-      }, {} as Record<UserActivity['type'], number>)
+      const stats = activities.reduce(
+        (acc, activity) => {
+          acc[activity.type] = (acc[activity.type] || 0) + 1
+          return acc
+        },
+        {} as Record<UserActivity['type'], number>
+      )
 
       return {
         chat: stats.chat || 0,
         investigation: stats.investigation || 0,
         agent_interaction: stats.agent_interaction || 0,
         export: stats.export || 0,
-        settings_update: stats.settings_update || 0
+        settings_update: stats.settings_update || 0,
       }
     } catch (error) {
       logger.error('Failed to get activity stats', { userId, error })
@@ -389,7 +421,7 @@ class UserProfileService {
         investigation: 0,
         agent_interaction: 0,
         export: 0,
-        settings_update: 0
+        settings_update: 0,
       }
     }
   }
@@ -430,7 +462,7 @@ class UserProfileService {
       high_contrast: false,
       vlibras_enabled: false,
       notifications_enabled: true,
-      email_notifications: false
+      email_notifications: false,
     }
   }
 }

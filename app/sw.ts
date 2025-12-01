@@ -78,10 +78,13 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   // Bypass service worker for backend API requests (Railway)
   // This prevents Mixed Content errors and ensures direct network access
   if (url.hostname === 'cidadao-api-production.up.railway.app') {
-    // Fix HTTP to HTTPS if needed (Mixed Content prevention)
-    if (url.protocol === 'http:') {
-      url.protocol = 'https:'
-      const httpsRequest = new Request(url.toString(), {
+    // Always ensure HTTPS for Railway API
+    const secureUrl = new URL(event.request.url)
+    secureUrl.protocol = 'https:'
+
+    // Always respond with a direct fetch using HTTPS
+    event.respondWith(
+      fetch(secureUrl.toString(), {
         method: event.request.method,
         headers: event.request.headers,
         body:
@@ -90,11 +93,14 @@ self.addEventListener('fetch', (event: FetchEvent) => {
             : undefined,
         mode: 'cors',
         credentials: event.request.credentials,
-      })
-      event.respondWith(fetch(httpsRequest).catch(() => new Response(null, { status: 503 })))
-      return
-    }
-    // HTTPS request - let it pass through directly
+      }).catch(
+        () =>
+          new Response(JSON.stringify({ error: 'Service unavailable' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' },
+          })
+      )
+    )
     return
   }
 
