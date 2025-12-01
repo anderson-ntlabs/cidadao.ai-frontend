@@ -9,6 +9,19 @@ module.exports = {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        // Brazil gradient tokens - standardized across the app
+        'gradient-brazil': 'linear-gradient(90deg, #16a34a 0%, #eab308 50%, #2563eb 100%)',
+        'gradient-brazil-reverse': 'linear-gradient(90deg, #2563eb 0%, #eab308 50%, #16a34a 100%)',
+        'gradient-brazil-vertical':
+          'linear-gradient(180deg, #16a34a 0%, #eab308 50%, #2563eb 100%)',
+        'gradient-brazil-subtle':
+          'linear-gradient(90deg, rgba(22,163,74,0.1) 0%, rgba(234,179,8,0.1) 50%, rgba(37,99,235,0.1) 100%)',
+        'gradient-brazil-dark': 'linear-gradient(90deg, #15803d 0%, #ca8a04 50%, #1d4ed8 100%)',
+        // Simplified two-color gradients (most common usage)
+        'gradient-green-blue': 'linear-gradient(90deg, #16a34a 0%, #2563eb 100%)',
+        'gradient-green-blue-dark': 'linear-gradient(90deg, #15803d 0%, #1d4ed8 100%)',
+      },
       colors: {
         // Existing shadcn/ui colors
         primary: {
