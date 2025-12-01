@@ -39,22 +39,24 @@ const avatarPixels = {
   lg: 48,
 }
 
+// Smaller, more discrete badge sizes
 const badgeSizes = {
-  sm: 'w-4 h-4',
-  md: 'w-5 h-5',
-  lg: 'w-6 h-6',
+  sm: 'w-3 h-3',
+  md: 'w-3.5 h-3.5',
+  lg: 'w-4 h-4',
 }
 
 const badgeIconSizes = {
-  sm: 'w-2.5 h-2.5',
-  md: 'w-3 h-3',
-  lg: 'w-3.5 h-3.5',
+  sm: 'w-2 h-2',
+  md: 'w-2 h-2',
+  lg: 'w-2.5 h-2.5',
 }
 
+// Position badge at bottom-right corner, slightly inside the avatar
 const badgePositions = {
-  sm: '-bottom-0.5 -right-0.5',
-  md: '-bottom-1 -right-1',
-  lg: '-bottom-1 -right-1',
+  sm: 'bottom-0 right-0',
+  md: 'bottom-0 right-0',
+  lg: 'bottom-0 right-0',
 }
 
 export function AvatarWithBadge({
@@ -102,17 +104,17 @@ export function AvatarWithBadge({
         </div>
       )}
 
-      {/* Badge overlay - small in the corner */}
+      {/* Badge overlay - small and discrete in the corner */}
       {shouldShowBadge && (
         <div
           className={cn(
             'absolute flex items-center justify-center rounded-full',
             'bg-gradient-to-br from-amber-400 to-yellow-500',
-            'shadow-sm ring-2 ring-white dark:ring-gray-900',
+            'ring-1 ring-white dark:ring-gray-900',
             'transition-transform duration-200',
             badgeSizes[size],
             badgePositions[size],
-            isHovered && 'scale-110'
+            isHovered && 'scale-125'
           )}
           aria-label={
             locale === 'pt'
