@@ -50,7 +50,10 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
     let downloadAvailable = false
 
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/chat/stream`, {
+      const streamUrl = `${this.baseUrl}/api/v1/chat/stream`
+      logger.info('[PrimaryAdapter] Sending request to:', { url: streamUrl, baseUrl: this.baseUrl })
+
+      const response = await fetch(streamUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +70,14 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
       clearTimeout(timeoutId)
 
+      logger.info('[PrimaryAdapter] Response status:', { status: response.status, ok: response.ok })
+
       if (!response.ok) {
+        logger.error('[PrimaryAdapter] Request failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: streamUrl,
+        })
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
