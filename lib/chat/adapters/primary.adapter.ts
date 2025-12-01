@@ -51,6 +51,8 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
     try {
       const streamUrl = `${this.baseUrl}/api/v1/chat/stream`
+      // Direct console.log for debugging (bypass logger filters)
+      console.log('[PrimaryAdapter] DEBUG - streamUrl:', streamUrl, 'baseUrl:', this.baseUrl)
       logger.info('[PrimaryAdapter] Sending request to:', { url: streamUrl, baseUrl: this.baseUrl })
 
       const response = await fetch(streamUrl, {

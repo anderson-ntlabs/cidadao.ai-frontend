@@ -3,6 +3,11 @@ import { getSecureApiUrl } from '@/lib/utils/ensure-https'
 
 // API configuration - Always use HTTPS
 export const API_BASE_URL = getSecureApiUrl()
+
+// Debug logging for API URL
+if (typeof window !== 'undefined') {
+  console.log('[API Client] API_BASE_URL:', API_BASE_URL)
+}
 const API_TIMEOUT = 30000 // 30 seconds
 
 // Types for API responses
