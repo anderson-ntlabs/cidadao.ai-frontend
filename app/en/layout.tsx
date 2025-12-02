@@ -53,7 +53,6 @@ import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
-import { InstallPrompt, UpdateNotification } from '@/components/pwa'
 import { SurveyProvider } from '@/components/survey'
 
 export default function ENLayout({ children }: { children: React.ReactNode }): JSX.Element {
@@ -116,10 +115,6 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
                   </SurveyProvider>
                   <CookieConsent locale="en" />
                   <ToastProvider />
-
-                  {/* PWA Components */}
-                  <InstallPrompt delay={5000} showOnDesktop={false} />
-                  <UpdateNotification autoUpdate={true} showDetails />
                 </div>
               </AnalyticsProvider>
             </Providers>
