@@ -60,7 +60,7 @@ export default function LoginPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
 
@@ -74,9 +74,7 @@ export default function LoginPage() {
             {view === 'sign_in' ? 'Bem-vindo de volta!' : 'Criar conta'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {view === 'sign_in'
-              ? 'Entre para acessar o sistema'
-              : 'Cadastre-se para começar'}
+            {view === 'sign_in' ? 'Entre para acessar o sistema' : 'Cadastre-se para começar'}
           </p>
         </div>
 
@@ -176,6 +174,41 @@ export default function LoginPage() {
               </>
             )}
           </p>
+        </div>
+
+        {/* Academy Option - IFSULDEMINAS Partnership */}
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <Link
+            href="/pt/academy/login"
+            className="block w-full p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl border-2 border-dashed border-green-300 dark:border-green-700 hover:border-green-500 dark:hover:border-green-500 transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                🎓
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-green-700 dark:group-hover:text-green-400">
+                  Academia Cidadão.AI
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Parceria IFSULDEMINAS - Login com @alunos.ifsuldeminas.edu.br
+                </p>
+              </div>
+              <svg
+                className="w-5 h-5 text-gray-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </div>
+          </Link>
         </div>
 
         {/* Back Link */}
