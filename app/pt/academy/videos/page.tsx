@@ -39,6 +39,22 @@ const categories = [
   { id: 'agents', name: 'Agentes', emoji: '🎭' },
 ]
 
+// Mock thumbnails with cute cat and dog gifs
+const mockThumbnails = [
+  '/academy/videos/cat-typing.gif',
+  '/academy/videos/dog-glasses.gif',
+  '/academy/videos/cat-coffee.gif',
+  '/academy/videos/dog-coding.gif',
+  '/academy/videos/cat-hacker.gif',
+  '/academy/videos/cat-computer.gif',
+  '/academy/videos/dog-work.gif',
+  '/academy/videos/cat-focus.gif',
+  '/academy/videos/dog-smart.gif',
+  '/academy/videos/cat-study.gif',
+  '/academy/videos/dog-typing.gif',
+  '/academy/videos/cat-working.gif',
+]
+
 // Placeholder videos based on the playlist document
 const placeholderVideos: Video[] = [
   {
@@ -46,7 +62,7 @@ const placeholderVideos: Video[] = [
     title: 'Bem-vindo a Academy Cidadao.AI',
     description: 'Introducao ao programa de estagio',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[0],
     duration_seconds: 300,
     category: 'onboarding',
     track: 'all',
@@ -60,7 +76,7 @@ const placeholderVideos: Video[] = [
     title: 'Conhecendo o LabSoft e a Parceria',
     description: 'Historia e objetivos da parceria IFSULDEMINAS',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[1],
     duration_seconds: 420,
     category: 'onboarding',
     track: 'all',
@@ -74,7 +90,7 @@ const placeholderVideos: Video[] = [
     title: 'Como Funciona a Gamificacao',
     description: 'XP, badges, ranking e recompensas',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[2],
     duration_seconds: 360,
     category: 'onboarding',
     track: 'all',
@@ -88,7 +104,7 @@ const placeholderVideos: Video[] = [
     title: 'FastAPI - Fundamentos',
     description: 'Introducao ao framework FastAPI',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[3],
     duration_seconds: 600,
     category: 'backend',
     track: 'backend',
@@ -102,7 +118,7 @@ const placeholderVideos: Video[] = [
     title: 'Arquitetura Multi-Agente',
     description: 'Como funciona o sistema de agentes',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[4],
     duration_seconds: 540,
     category: 'backend',
     track: 'backend',
@@ -116,7 +132,7 @@ const placeholderVideos: Video[] = [
     title: 'Next.js 15 - App Router',
     description: 'Novo sistema de rotas do Next.js',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[5],
     duration_seconds: 480,
     category: 'frontend',
     track: 'frontend',
@@ -130,7 +146,7 @@ const placeholderVideos: Video[] = [
     title: 'Tailwind CSS na Pratica',
     description: 'Estilizacao com Tailwind',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[6],
     duration_seconds: 420,
     category: 'frontend',
     track: 'frontend',
@@ -144,7 +160,7 @@ const placeholderVideos: Video[] = [
     title: 'LangChain Basico',
     description: 'Introducao ao LangChain',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[7],
     duration_seconds: 600,
     category: 'ia',
     track: 'ia',
@@ -158,7 +174,7 @@ const placeholderVideos: Video[] = [
     title: 'Agente Zumbi - Detector de Anomalias',
     description: 'Como funciona o Zumbi dos Palmares',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[8],
     duration_seconds: 480,
     category: 'agents',
     track: 'all',
@@ -172,7 +188,7 @@ const placeholderVideos: Video[] = [
     title: 'Docker para Desenvolvedores',
     description: 'Containerizacao basica',
     url: '',
-    thumbnail_url: '',
+    thumbnail_url: mockThumbnails[9],
     duration_seconds: 540,
     category: 'devops',
     track: 'devops',
@@ -329,9 +345,16 @@ export default function AcademyVideosPage() {
                 className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-all cursor-pointer group"
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-white/90 dark:bg-gray-900/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+                  {video.thumbnail_url ? (
+                    <img
+                      src={video.thumbnail_url}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                    <div className="w-16 h-16 bg-white/90 dark:bg-gray-900/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
