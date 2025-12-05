@@ -60,7 +60,7 @@ export default function LoginPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
 
@@ -74,9 +74,7 @@ export default function LoginPage() {
             {view === 'sign_in' ? 'Bem-vindo de volta!' : 'Criar conta'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {view === 'sign_in'
-              ? 'Entre para acessar o sistema'
-              : 'Cadastre-se para começar'}
+            {view === 'sign_in' ? 'Entre para acessar o sistema' : 'Cadastre-se para começar'}
           </p>
         </div>
 
