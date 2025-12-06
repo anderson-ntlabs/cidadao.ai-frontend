@@ -472,44 +472,45 @@ Continue voando alto! 🛫`
       </header>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-4 py-6">
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center min-h-[400px]">
               <div className="text-center max-w-md">
-                <div
-                  className={cn(
-                    'w-24 h-24 rounded-3xl overflow-hidden flex items-center justify-center bg-gradient-to-br shadow-2xl mx-auto mb-6',
-                    currentMode.color
-                  )}
-                >
+                <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl mx-auto mb-6 ring-4 ring-white dark:ring-gray-800">
                   <Image
                     src={currentMode.avatar}
                     alt={currentMode.name}
-                    width={96}
-                    height={96}
+                    width={80}
+                    height={80}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  Ola! Sou {currentMode.name.split(' ')[0]}
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  {currentMode.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  {currentMode.description}. Como posso ajudar voce hoje?
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                  {currentMode.description}
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {(chatMode === 'mentor'
+                  {(chatMode === 'lina'
                     ? [
-                        'O que e o Cidadao.AI?',
-                        'Como funciona o sistema de agentes?',
-                        'Dicas para o estagio',
+                        'Como melhorar a acessibilidade?',
+                        'Principios de design funcional',
+                        'Dicas de UI para mobile',
                       ]
-                    : ['Me explique sobre React', 'O que e TypeScript?', 'Como funciona uma API?']
+                    : chatMode === 'mentor'
+                      ? [
+                          'O que e o Cidadao.AI?',
+                          'Como funciona o sistema de agentes?',
+                          'Dicas para o estagio',
+                        ]
+                      : ['Me explique sobre React', 'O que e TypeScript?', 'Como funciona uma API?']
                   ).map((suggestion) => (
                     <button
                       key={suggestion}
                       onClick={() => setInput(suggestion)}
-                      className="px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
                     >
                       {suggestion}
                     </button>
@@ -518,104 +519,95 @@ Continue voando alto! 🛫`
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex gap-3 animate-fade-in',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  {message.role === 'assistant' && (
-                    <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
-                      <Image
-                        src={currentMode.avatar}
-                        alt={currentMode.name}
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
+                <div key={message.id} className="animate-fade-in">
+                  {message.role === 'user' ? (
+                    /* User message - right aligned, subtle */
+                    <div className="flex justify-end">
+                      <div className="max-w-[85%] flex items-start gap-3">
+                        <div className="py-2 px-4 rounded-2xl bg-green-600 text-white">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {message.content}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <Card
-                    variant={message.role === 'user' ? 'elevated' : 'outlined'}
-                    padding="md"
-                    className={cn(
-                      'max-w-[70%]',
-                      message.role === 'user'
-                        ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0'
-                        : ''
-                    )}
-                  >
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
-                  </Card>
-                  {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      <Image
-                        src={user.avatar}
-                        alt="Voce"
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
+                  ) : (
+                    /* Assistant message - full width, clean */
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
+                        <Image
+                          src={currentMode.avatar}
+                          alt={currentMode.name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                          {currentMode.name}
+                        </p>
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <p className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap m-0">
+                            {message.content}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
               ))}
 
-              {/* Streaming response */}
+              {/* Streaming response with typing animation */}
               {isStreaming && streamingContent && (
-                <div className="flex gap-3 justify-start animate-fade-in">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="flex gap-3 animate-fade-in">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
                     <Image
                       src={currentMode.avatar}
                       alt={currentMode.name}
-                      width={40}
-                      height={40}
+                      width={32}
+                      height={32}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <Card variant="outlined" padding="md" className="max-w-[70%]">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {streamingContent}
-                      <span className="inline-block w-2 h-4 ml-1 bg-green-500 animate-pulse" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      {currentMode.name}
                     </p>
-                  </Card>
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <p className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap m-0">
+                        {streamingContent}
+                        <span className="inline-block w-0.5 h-4 ml-0.5 bg-green-500 animate-pulse align-middle" />
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              {/* Loading indicator (before streaming starts) */}
+              {/* Typing indicator */}
               {isSending && !streamingContent && (
-                <div className="flex gap-3 justify-start animate-fade-in">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="flex gap-3 animate-fade-in">
+                  <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
                     <Image
                       src={currentMode.avatar}
                       alt={currentMode.name}
-                      width={40}
-                      height={40}
+                      width={32}
+                      height={32}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <Card variant="outlined" padding="md">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0ms' }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '150ms' }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '300ms' }}
-                        />
-                      </div>
-                      <span className="text-sm text-gray-500">Pensando...</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                      {currentMode.name}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:0ms]" />
+                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:150ms]" />
+                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:300ms]" />
                     </div>
-                  </Card>
+                  </div>
                 </div>
               )}
             </div>
