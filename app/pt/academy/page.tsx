@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
-import { LgpdConsentModal } from '@/components/academy/lgpd-consent-modal'
+import { InternshipContractModal } from '@/components/academy/internship-contract-modal'
 
 // Rank configuration
 const ranks = {
@@ -44,14 +44,14 @@ const agentTeachers = [
 
 export default function AcademyDashboardPage() {
   const { user, isLoading, xpTransactions, resetDemo } = useAcademyDemo()
-  const [showLgpdModal, setShowLgpdModal] = useState(false)
+  const [showContractModal, setShowContractModal] = useState(false)
 
-  // Show LGPD modal on first access
+  // Show internship contract modal on first access
   useEffect(() => {
-    if (!isLoading && !user.hasAcceptedLgpd) {
-      setShowLgpdModal(true)
+    if (!isLoading && !user.hasAcceptedInternshipContract) {
+      setShowContractModal(true)
     }
-  }, [isLoading, user.hasAcceptedLgpd])
+  }, [isLoading, user.hasAcceptedInternshipContract])
 
   if (isLoading) {
     return (
@@ -361,8 +361,11 @@ export default function AcademyDashboardPage() {
         </div>
       </main>
 
-      {/* LGPD Consent Modal */}
-      <LgpdConsentModal isOpen={showLgpdModal} onClose={() => setShowLgpdModal(false)} />
+      {/* Internship Contract Modal */}
+      <InternshipContractModal
+        isOpen={showContractModal}
+        onClose={() => setShowContractModal(false)}
+      />
     </div>
   )
 }

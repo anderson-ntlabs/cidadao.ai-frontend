@@ -17,6 +17,7 @@ const STORAGE_XP_KEY = 'academy_demo_xp_transactions'
 const STORAGE_DIARY_KEY = 'academy_demo_diary'
 const STORAGE_SESSIONS_KEY = 'academy_demo_sessions'
 const STORAGE_LGPD_KEY = 'academy_demo_lgpd_consent'
+const STORAGE_CONTRACT_KEY = 'academy_demo_internship_contract'
 
 export interface AcademyDemoUser {
   id: string
@@ -35,6 +36,8 @@ export interface AcademyDemoUser {
   totalSessions: number
   totalTimeMinutes: number
   hasAcceptedLgpd: boolean
+  hasAcceptedInternshipContract: boolean
+  lastIpAddress?: string
   enrolledAt: string
 }
 
@@ -75,7 +78,24 @@ export interface LgpdConsent {
   version: string
 }
 
-// Default demo user - starts without LGPD consent
+// Internship contract record
+export interface InternshipContract {
+  contractId: string
+  acceptedAt: string
+  ipAddress?: string
+  userAgent: string
+  version: string
+  pdfGenerated: boolean
+  consents: {
+    telemetry: boolean
+    dataCollection: boolean
+    reportGeneration: boolean
+    lgpdConsent: boolean
+    internshipTerms: boolean
+  }
+}
+
+// Default demo user - starts without contract acceptance
 const DEFAULT_DEMO_USER: AcademyDemoUser = {
   id: 'demo-user-001',
   name: 'Estudante Demo',
@@ -92,7 +112,8 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   longestStreak: 0,
   totalSessions: 0,
   totalTimeMinutes: 0,
-  hasAcceptedLgpd: false, // Must accept LGPD on first access
+  hasAcceptedLgpd: false,
+  hasAcceptedInternshipContract: false, // Must accept contract on first access
   enrolledAt: new Date().toISOString(),
 }
 
@@ -119,6 +140,7 @@ interface AcademyDemoContextType {
   sessions: StudySession[]
   currentSession: StudySession | null
   lgpdConsent: LgpdConsent | null
+  internshipContract: InternshipContract | null
 
   // Actions
   updateProfile: (updates: Partial<AcademyDemoUser>) => void
@@ -127,6 +149,11 @@ interface AcademyDemoContextType {
   startSession: () => void
   endSession: (xpEarned?: number, agentsUsed?: string[]) => void
   acceptLgpdConsent: (ipAddress?: string, userAgent?: string) => Promise<void>
+  acceptInternshipContract: (
+    ipAddress?: string,
+    userAgent?: string,
+    contractId?: string
+  ) => Promise<void>
   resetDemo: () => void
 }
 
@@ -140,6 +167,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
   const [sessions, setSessions] = useState<StudySession[]>([])
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
   const [lgpdConsent, setLgpdConsent] = useState<LgpdConsent | null>(null)
+  const [internshipContract, setInternshipContract] = useState<InternshipContract | null>(null)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -167,6 +195,11 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       const savedLgpd = localStorage.getItem(STORAGE_LGPD_KEY)
       if (savedLgpd) {
         setLgpdConsent(JSON.parse(savedLgpd))
+      }
+
+      const savedContract = localStorage.getItem(STORAGE_CONTRACT_KEY)
+      if (savedContract) {
+        setInternshipContract(JSON.parse(savedContract))
       }
 
       logger.info('Demo mode loaded from localStorage')
@@ -322,12 +355,49 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     [updateProfile, addXp]
   )
 
+  const acceptInternshipContract = useCallback(
+    async (ipAddress?: string, userAgent?: string, contractId?: string) => {
+      const contract: InternshipContract = {
+        contractId: contractId || `ACAD-${Date.now().toString(36).toUpperCase()}`,
+        acceptedAt: new Date().toISOString(),
+        ipAddress,
+        userAgent: userAgent || navigator.userAgent,
+        version: 'v1.0-2025',
+        pdfGenerated: true,
+        consents: {
+          telemetry: true,
+          dataCollection: true,
+          reportGeneration: true,
+          lgpdConsent: true,
+          internshipTerms: true,
+        },
+      }
+
+      setInternshipContract(contract)
+      localStorage.setItem(STORAGE_CONTRACT_KEY, JSON.stringify(contract))
+
+      // Update user to mark contract as accepted and save IP
+      updateProfile({
+        hasAcceptedLgpd: true,
+        hasAcceptedInternshipContract: true,
+        lastIpAddress: ipAddress,
+      })
+
+      // Award XP for accepting contract (welcome bonus)
+      addXp(100, 'internship_contract', 'Bonus de boas-vindas - Aceite do contrato de estagio')
+
+      logger.info('Internship contract accepted', { contractId: contract.contractId, ipAddress })
+    },
+    [updateProfile, addXp]
+  )
+
   const resetDemo = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem(STORAGE_XP_KEY)
     localStorage.removeItem(STORAGE_DIARY_KEY)
     localStorage.removeItem(STORAGE_SESSIONS_KEY)
     localStorage.removeItem(STORAGE_LGPD_KEY)
+    localStorage.removeItem(STORAGE_CONTRACT_KEY)
 
     setUser(DEFAULT_DEMO_USER)
     setXpTransactions([])
@@ -335,6 +405,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     setSessions([])
     setCurrentSession(null)
     setLgpdConsent(null)
+    setInternshipContract(null)
 
     logger.info('Demo reset to default state')
   }, [])
@@ -350,12 +421,14 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         sessions,
         currentSession,
         lgpdConsent,
+        internshipContract,
         updateProfile,
         addXp,
         addDiaryEntry,
         startSession,
         endSession,
         acceptLgpdConsent,
+        acceptInternshipContract,
         resetDemo,
       }}
     >
