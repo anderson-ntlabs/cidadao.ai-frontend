@@ -106,7 +106,8 @@ export default function AcademyOnboardingPage() {
     user,
     onboarding,
     initOnboarding,
-    selectTrack,
+    toggleTrack,
+    confirmTracks,
     setGitHubUsername,
     verifyGitHubFork,
     completeOnboarding,
@@ -136,10 +137,7 @@ export default function AcademyOnboardingPage() {
   }, [user.hasCompletedOnboarding, router])
 
   const currentStep = onboarding?.currentStep || 1
-
-  const handleTrackSelect = (trackId: 'backend' | 'frontend' | 'ia' | 'devops') => {
-    selectTrack(trackId)
-  }
+  const selectedTracks = onboarding?.selectedTracks || []
 
   const handleGitHubSubmit = async () => {
     if (!githubInput.trim()) return
@@ -373,27 +371,34 @@ export default function AcademyOnboardingPage() {
               </div>
             )}
 
-            {/* Step 2: Track Selection */}
+            {/* Step 2: Track Selection (Multi-select) */}
             {currentStep === 2 && (
               <div className="space-y-8">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Escolha sua trilha de especialização
+                    Escolha suas trilhas de especialização
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Cada trilha oferece um caminho de aprendizado focado com projetos práticos
+                    Você pode escolher várias trilhas! Cada uma oferece projetos práticos
+                    diferentes.
                   </p>
+                  {selectedTracks.length > 0 && (
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                      {selectedTracks.length} trilha{selectedTracks.length > 1 ? 's' : ''}{' '}
+                      selecionada{selectedTracks.length > 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {TRACKS.map((track) => {
                     const Icon = track.icon
-                    const isSelected = onboarding.selectedTrack === track.id
+                    const isSelected = selectedTracks.includes(track.id)
 
                     return (
                       <button
                         key={track.id}
-                        onClick={() => handleTrackSelect(track.id)}
+                        onClick={() => toggleTrack(track.id)}
                         className={cn(
                           'p-5 rounded-2xl border-2 text-left transition-all duration-300',
                           'hover:shadow-lg group',
@@ -454,6 +459,13 @@ export default function AcademyOnboardingPage() {
                   >
                     Voltar
                   </Button>
+                  <Button
+                    onClick={confirmTracks}
+                    disabled={selectedTracks.length === 0}
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Confirmar ({selectedTracks.length}) e Continuar
+                  </Button>
                 </div>
               </div>
             )}
@@ -512,14 +524,14 @@ export default function AcademyOnboardingPage() {
             )}
 
             {/* Step 4: Fork Verification */}
-            {currentStep === 4 && onboarding.selectedTrack && (
+            {currentStep === 4 && selectedTracks.length > 0 && (
               <div className="space-y-8">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     Fork do repositório
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Faça fork do repositório da sua trilha para começar a contribuir
+                    Faça fork do repositório da sua trilha principal para começar a contribuir
                   </p>
                 </div>
 
@@ -530,17 +542,16 @@ export default function AcademyOnboardingPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900 dark:text-white">
-                        {TRACK_REPOS[onboarding.selectedTrack].owner}/
-                        {TRACK_REPOS[onboarding.selectedTrack].repo}
+                        {TRACK_REPOS[selectedTracks[0]].owner}/{TRACK_REPOS[selectedTracks[0]].repo}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Repositório da trilha {onboarding.selectedTrack.toUpperCase()}
+                        Repositório da trilha {selectedTracks[0].toUpperCase()}
                       </p>
                     </div>
                   </div>
 
                   <a
-                    href={`https://github.com/${TRACK_REPOS[onboarding.selectedTrack].owner}/${TRACK_REPOS[onboarding.selectedTrack].repo}/fork`}
+                    href={`https://github.com/${TRACK_REPOS[selectedTracks[0]].owner}/${TRACK_REPOS[selectedTracks[0]].repo}/fork`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
@@ -650,9 +661,11 @@ export default function AcademyOnboardingPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Trilha</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Trilha{selectedTracks.length > 1 ? 's' : ''}
+                      </p>
                       <p className="font-bold text-gray-900 dark:text-white">
-                        {onboarding.selectedTrack?.toUpperCase()}
+                        {selectedTracks.map((t) => t.toUpperCase()).join(', ')}
                       </p>
                     </div>
                     <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">

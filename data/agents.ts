@@ -273,6 +273,16 @@ export function getAgentsByTrack(track: InternTrack): Agent[] {
 }
 
 /**
+ * Get agents available for multiple intern tracks
+ * Returns agents without track restrictions + agents matching ANY of the provided tracks
+ * Useful when a user has selected multiple tracks
+ */
+export function getAgentsByTracks(userTracks: InternTrack[]): Agent[] {
+  if (!userTracks.length) return agents.filter((agent) => !agent.tracks)
+  return agents.filter((agent) => !agent.tracks || agent.tracks.some((t) => userTracks.includes(t)))
+}
+
+/**
  * Get agents that are exclusive to specific tracks (not available to all)
  */
 export function getTrackExclusiveAgents(): Agent[] {

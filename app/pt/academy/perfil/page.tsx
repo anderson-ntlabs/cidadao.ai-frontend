@@ -102,7 +102,7 @@ interface ProfileUser {
   totalTimeMinutes: number
   totalSessions: number
   longestStreak: number
-  mainTrack: string
+  tracks: string[] // User can have multiple tracks
   enrolledAt: string
   hasAcceptedLgpd: boolean
   hasAcceptedInternshipContract?: boolean
@@ -214,7 +214,11 @@ function AcademyProfileContent() {
   }
 
   const rankInfo = ranks[user.currentRank as keyof typeof ranks] || ranks.novato
-  const trackInfo = tracks[user.mainTrack as keyof typeof tracks] || tracks.backend
+  // Get info for all user tracks
+  const userTracksInfo =
+    user.tracks.length > 0
+      ? user.tracks.map((t) => tracks[t as keyof typeof tracks]).filter(Boolean)
+      : [tracks.backend] // Default fallback
   const nextRankXp =
     user.currentRank === 'novato'
       ? 100
@@ -300,10 +304,12 @@ function AcademyProfileContent() {
                       <Trophy className="w-3 h-3" />
                       {rankInfo.name}
                     </Badge>
-                    <Badge variant="outline" size="default">
-                      <span>{trackInfo.emoji}</span>
-                      {trackInfo.name}
-                    </Badge>
+                    {userTracksInfo.map((trackInfo, idx) => (
+                      <Badge key={idx} variant="outline" size="default">
+                        <span>{trackInfo.emoji}</span>
+                        {trackInfo.name}
+                      </Badge>
+                    ))}
                   </div>
 
                   {/* Contact info */}

@@ -21,6 +21,8 @@ const STORAGE_CONTRACT_KEY = 'academy_demo_internship_contract'
 const STORAGE_BADGES_KEY = 'academy_demo_badges'
 const STORAGE_ONBOARDING_KEY = 'academy_demo_onboarding'
 
+export type AcademyTrack = 'backend' | 'frontend' | 'ia' | 'devops'
+
 export interface AcademyDemoUser {
   id: string
   name: string
@@ -29,7 +31,7 @@ export interface AcademyDemoUser {
   totalXp: number
   currentLevel: number
   currentRank: string
-  mainTrack: 'backend' | 'frontend' | 'ia' | 'devops'
+  tracks: AcademyTrack[] // User can have multiple tracks
   currentStreak: number
   longestStreak: number
   totalSessions: number
@@ -55,7 +57,7 @@ export interface GitHubContribution {
 export interface OnboardingData {
   currentStep: number
   completedSteps: number[]
-  selectedTrack: 'backend' | 'frontend' | 'ia' | 'devops' | null
+  selectedTracks: AcademyTrack[] // User can select multiple tracks
   github: GitHubContribution | null
   completedAt?: string
 }
@@ -134,7 +136,7 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   totalXp: 0,
   currentLevel: 1,
   currentRank: 'novato',
-  mainTrack: 'backend',
+  tracks: [], // User selects tracks during onboarding
   currentStreak: 0,
   longestStreak: 0,
   totalSessions: 0,
@@ -198,7 +200,8 @@ interface AcademyDemoContextType {
   // Onboarding actions
   initOnboarding: () => void
   updateOnboarding: (updates: Partial<OnboardingData>) => void
-  selectTrack: (track: 'backend' | 'frontend' | 'ia' | 'devops') => void
+  toggleTrack: (track: AcademyTrack) => void // Toggle track selection (add/remove)
+  confirmTracks: () => void // Confirm track selection and move to next step
   setGitHubUsername: (username: string) => Promise<void>
   verifyGitHubFork: () => Promise<{ success: boolean; message: string }>
   completeOnboarding: () => void
@@ -571,7 +574,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     const initialOnboarding: OnboardingData = {
       currentStep: 1,
       completedSteps: [],
-      selectedTrack: null,
+      selectedTracks: [],
       github: null,
     }
     setOnboarding(initialOnboarding)
@@ -586,27 +589,48 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     })
   }, [])
 
-  // Select track (backend, frontend, ia, devops)
-  const selectTrack = useCallback(
-    (track: 'backend' | 'frontend' | 'ia' | 'devops') => {
-      setOnboarding((prev) => {
-        if (!prev) return null
-        const completedSteps = prev.completedSteps.includes(2)
-          ? prev.completedSteps
-          : [...prev.completedSteps, 2]
-        return {
-          ...prev,
-          selectedTrack: track,
-          currentStep: 3,
-          completedSteps,
-        }
-      })
-      updateProfile({ mainTrack: track })
-      addXp(25, 'onboarding', `Trilha ${track.toUpperCase()} selecionada`)
-      logger.info('Track selected', { track })
-    },
-    [updateProfile, addXp]
-  )
+  // Toggle track selection (add/remove from selectedTracks)
+  const toggleTrack = useCallback((track: AcademyTrack) => {
+    setOnboarding((prev) => {
+      if (!prev) return null
+      const isSelected = prev.selectedTracks.includes(track)
+      const newTracks = isSelected
+        ? prev.selectedTracks.filter((t) => t !== track)
+        : [...prev.selectedTracks, track]
+      return {
+        ...prev,
+        selectedTracks: newTracks,
+      }
+    })
+    logger.info('Track toggled', { track })
+  }, [])
+
+  // Confirm track selection and move to next step
+  const confirmTracks = useCallback(() => {
+    if (!onboarding?.selectedTracks.length) {
+      logger.warn('No tracks selected')
+      return
+    }
+    setOnboarding((prev) => {
+      if (!prev) return null
+      const completedSteps = prev.completedSteps.includes(2)
+        ? prev.completedSteps
+        : [...prev.completedSteps, 2]
+      return {
+        ...prev,
+        currentStep: 3,
+        completedSteps,
+      }
+    })
+    updateProfile({ tracks: onboarding.selectedTracks })
+    const trackNames = onboarding.selectedTracks.map((t) => t.toUpperCase()).join(', ')
+    addXp(
+      25 * onboarding.selectedTracks.length,
+      'onboarding',
+      `Trilhas selecionadas: ${trackNames}`
+    )
+    logger.info('Tracks confirmed', { tracks: onboarding.selectedTracks })
+  }, [onboarding, updateProfile, addXp])
 
   // Set GitHub username and check for fork
   const setGitHubUsername = useCallback(async (username: string) => {
@@ -634,12 +658,14 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
   // Verify GitHub fork - MOCKED for demo mode
   // TODO: Re-enable real verification when organization is created
   const verifyGitHubFork = useCallback(async (): Promise<{ success: boolean; message: string }> => {
-    if (!onboarding?.github?.username || !onboarding?.selectedTrack) {
-      return { success: false, message: 'Usuário GitHub ou trilha não definidos' }
+    if (!onboarding?.github?.username || !onboarding?.selectedTracks.length) {
+      return { success: false, message: 'Usuário GitHub ou trilhas não definidos' }
     }
 
     const { username } = onboarding.github
-    const trackRepo = TRACK_REPOS[onboarding.selectedTrack]
+    // Use first track for fork verification (primary track)
+    const primaryTrack = onboarding.selectedTracks[0]
+    const trackRepo = TRACK_REPOS[primaryTrack]
 
     // MOCK: Simulate successful fork verification
     // This allows users to complete onboarding without requiring actual fork
@@ -739,7 +765,8 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         resetDemo,
         initOnboarding,
         updateOnboarding,
-        selectTrack,
+        toggleTrack,
+        confirmTracks,
         setGitHubUsername,
         verifyGitHubFork,
         completeOnboarding,
