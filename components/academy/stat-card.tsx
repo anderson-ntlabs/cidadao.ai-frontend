@@ -70,7 +70,7 @@ export function StatCard({
       variant="elevated"
       padding="md"
       className={cn(
-        'relative overflow-hidden group h-full',
+        'relative overflow-hidden group h-full min-h-[160px]',
         'hover:shadow-xl transition-all duration-300',
         className
       )}
@@ -78,7 +78,7 @@ export function StatCard({
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gray-100/50 to-transparent dark:from-gray-800/50 rounded-bl-[80px] -z-0" />
 
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full justify-between">
         {/* Header with icon and trend */}
         <div className="flex items-start justify-between mb-4">
           {/* Icon */}

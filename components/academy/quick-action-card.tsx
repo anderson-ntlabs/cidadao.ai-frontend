@@ -49,7 +49,7 @@ export function QuickActionCard({
   const content = (
     <div
       className={cn(
-        'flex items-center gap-4 p-4 rounded-xl',
+        'flex items-center gap-4 p-4 rounded-xl min-h-[72px]',
         'transition-all duration-200 group',
         variantClasses[variant],
         className
@@ -58,7 +58,7 @@ export function QuickActionCard({
       {/* Icon */}
       <div
         className={cn(
-          'w-10 h-10 rounded-xl flex items-center justify-center text-xl',
+          'w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0',
           'transition-transform duration-200 group-hover:scale-110',
           variant === 'default'
             ? 'bg-white dark:bg-gray-700 shadow-sm'

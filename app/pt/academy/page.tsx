@@ -397,12 +397,12 @@ function AcademyDashboardContent() {
 
               {/* Sidebar */}
               <div className="space-y-6">
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center gap-2 mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-center gap-2 mb-4">
                     <Trophy className="w-5 h-5 text-yellow-500" />
                     <h3 className="font-semibold text-gray-900 dark:text-white">Acoes Rapidas</h3>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <QuickActionCard
                       icon="🧭"
                       label="Minhas Trilhas"
