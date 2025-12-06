@@ -32,6 +32,8 @@ import {
   Video,
   Trophy,
   FileText,
+  Calendar,
+  User,
 } from 'lucide-react'
 
 interface AcademyHeaderProps {
@@ -51,10 +53,12 @@ interface AcademyHeaderProps {
 const navItems = {
   '/pt/academy': { label: 'Dashboard', icon: Home },
   '/pt/academy/chat': { label: 'Chat com Agentes', icon: MessageSquare },
+  '/pt/academy/agenda': { label: 'Agenda', icon: Calendar },
   '/pt/academy/diario': { label: 'Diario de Bordo', icon: BookOpen },
   '/pt/academy/videos': { label: 'Videos', icon: Video },
   '/pt/academy/leituras': { label: 'Leituras', icon: FileText },
   '/pt/academy/ranking': { label: 'Ranking', icon: Trophy },
+  '/pt/academy/perfil': { label: 'Meu Perfil', icon: User },
   '/pt/academy/onboarding': { label: 'Onboarding', icon: Sparkles },
 }
 

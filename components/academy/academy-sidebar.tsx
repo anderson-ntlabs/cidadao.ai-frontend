@@ -27,6 +27,7 @@ import {
   Flame,
   Clock,
   Target,
+  Calendar,
 } from 'lucide-react'
 
 interface NavItem {
@@ -48,8 +49,9 @@ interface AcademySidebarProps {
 const navItems: NavItem[] = [
   { href: '/pt/academy', label: 'Dashboard', icon: Home },
   { href: '/pt/academy/chat', label: 'Chat com Mentor', icon: MessageSquare },
-  { href: '/pt/academy/diario', label: 'Diário de Bordo', icon: BookOpen },
-  { href: '/pt/academy/videos', label: 'Vídeos', icon: Video },
+  { href: '/pt/academy/agenda', label: 'Agenda', icon: Calendar },
+  { href: '/pt/academy/diario', label: 'Diario de Bordo', icon: BookOpen },
+  { href: '/pt/academy/videos', label: 'Videos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
   { href: '/pt/academy/ranking', label: 'Ranking', icon: Trophy },
   { href: '/pt/academy/perfil', label: 'Meu Perfil', icon: GraduationCap },
