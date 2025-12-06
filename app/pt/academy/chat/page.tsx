@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { useAcademy } from '@/hooks/use-academy'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -74,7 +74,8 @@ interface Message {
 function ChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isLoading, addXp, startSession, endSession, currentSession } = useAcademyDemo()
+  const { user, isLoading, addXp, startSession, endSession, currentSession, mode, isRealAuth } =
+    useAcademy()
 
   const [chatMode, setChatMode] = useState<ChatMode>('mentor')
   const [messages, setMessages] = useState<Message[]>([])

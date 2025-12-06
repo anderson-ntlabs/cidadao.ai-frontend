@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAcademyDemo, TRACK_REPOS } from '@/hooks/use-academy-demo'
+import { useAcademy, TRACK_REPOS } from '@/hooks/use-academy'
 import {
   Rocket,
   Code,
@@ -116,7 +116,10 @@ function OnboardingContent() {
     verifyGitHubFork,
     completeOnboarding,
     updateOnboarding,
-  } = useAcademyDemo()
+    mode,
+    isDemoMode,
+    isRealAuth,
+  } = useAcademy()
 
   const [githubInput, setGithubInput] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
@@ -227,6 +230,29 @@ function OnboardingContent() {
               — Explore o onboarding sem alterar seus dados
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Auth Mode Indicator (dev/debug) */}
+      {!isPreviewMode && (
+        <div
+          className={`py-1 px-4 text-center text-xs ${
+            isRealAuth
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+          }`}
+        >
+          {isRealAuth ? (
+            <>
+              <span className="font-medium">Modo Autenticado</span>
+              <span className="hidden sm:inline"> — Dados salvos no Supabase</span>
+            </>
+          ) : (
+            <>
+              <span className="font-medium">Modo Demo</span>
+              <span className="hidden sm:inline"> — Dados salvos localmente</span>
+            </>
+          )}
         </div>
       )}
 

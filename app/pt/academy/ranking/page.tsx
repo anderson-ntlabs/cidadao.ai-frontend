@@ -16,7 +16,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { useAcademy } from '@/hooks/use-academy'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -82,7 +82,7 @@ const filterTabs = [
 ]
 
 export default function AcademyRankingPage() {
-  const { user, isLoading: demoLoading } = useAcademyDemo()
+  const { user, isLoading: demoLoading } = useAcademy()
 
   const [filter, setFilter] = useState<SortBy>('xp')
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])

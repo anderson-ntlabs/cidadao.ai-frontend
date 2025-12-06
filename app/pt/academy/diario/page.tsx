@@ -14,7 +14,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { useAcademy } from '@/hooks/use-academy'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -39,7 +39,7 @@ const moods = [
 ] as const
 
 export default function AcademyDiaryPage() {
-  const { user, isLoading, diaryEntries, addDiaryEntry } = useAcademyDemo()
+  const { user, isLoading, diaryEntries, addDiaryEntry } = useAcademy()
 
   const [showForm, setShowForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)

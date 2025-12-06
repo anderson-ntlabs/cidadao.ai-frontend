@@ -14,7 +14,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { useAcademy } from '@/hooks/use-academy'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -284,7 +284,7 @@ interface VideoProgress {
 }
 
 export default function AcademyVideosPage() {
-  const { user, isLoading, addXp } = useAcademyDemo()
+  const { user, isLoading, addXp } = useAcademy()
 
   const [videos] = useState<VideoItem[]>(placeholderVideos)
   const [progress, setProgress] = useState<Record<string, VideoProgress>>({})
