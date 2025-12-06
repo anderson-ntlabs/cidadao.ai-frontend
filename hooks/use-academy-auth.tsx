@@ -63,11 +63,29 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
         email.split('@')[0] ||
         'Estudante'
 
-      // Extract avatar from various sources
-      const avatar =
-        metadata.avatar_url ||
-        metadata.picture ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff`
+      // Extract avatar from various sources (different OAuth providers use different fields)
+      // GitHub: avatar_url, Google: picture, some: avatar
+      // Also check identities array for raw provider data
+      let avatar = metadata.avatar_url || metadata.picture || metadata.avatar || null
+
+      // If no avatar in metadata, try to get from identities (raw OAuth data)
+      if (!avatar && supabaseUser.identities && supabaseUser.identities.length > 0) {
+        const identity = supabaseUser.identities[0]
+        const identityData = identity.identity_data || {}
+        avatar = identityData.avatar_url || identityData.picture || identityData.avatar || null
+      }
+
+      // Fallback to UI Avatars if no OAuth avatar found
+      if (!avatar) {
+        avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=f59e0b&color=fff&size=256`
+      }
+
+      logger.debug('Avatar extraction', {
+        userId: supabaseUser.id,
+        metadataAvatar: metadata.avatar_url || metadata.picture || 'none',
+        identitiesCount: supabaseUser.identities?.length || 0,
+        finalAvatar: avatar?.substring(0, 50) + '...',
+      })
 
       // Extract GitHub username if available
       const githubUsername = metadata.user_name || metadata.preferred_username || null
