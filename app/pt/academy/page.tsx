@@ -37,16 +37,16 @@ const ranks = {
   arquiteto: { name: 'Arquiteto', color: 'yellow', minXp: 5000 },
 }
 
-// Academy AI Agent (single agent for mentorship)
+// Academy AI Agent - Santos Dumont (single agent for mentorship)
 const academyAgent = {
-  id: 'drummond',
-  name: 'Carlos Drummond de Andrade',
+  id: 'santos-dumont',
+  name: 'Alberto Santos-Dumont',
   role: 'Mentor da Academy',
-  emoji: '✍️',
-  avatar: '/agents/drummond.png',
-  specialty: 'Orientacao tecnica, duvidas de programacao e apoio ao aprendizado',
+  emoji: '✈️',
+  avatar: '/agents/santos-dumont.png',
+  specialty: 'Inovacao, engenharia criativa e apoio ao aprendizado',
   description:
-    'Seu mentor pessoal na Academy! Tire duvidas sobre codigo, arquitetura, boas praticas e receba feedback personalizado sobre seus projetos.',
+    'O Pai da Aviacao e seu mentor na Academy! Santos-Dumont incentiva a inovacao, criatividade e persistencia. Tire duvidas tecnicas e receba orientacao para seus projetos.',
 }
 
 export default function AcademyDashboardPage() {
