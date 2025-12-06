@@ -3,6 +3,23 @@
 import { useState, useEffect } from 'react'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { jsPDF } from 'jspdf'
+import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  GraduationCap,
+  Download,
+  Video,
+  BookOpen,
+  FileText,
+  MessageSquare,
+  Clock,
+  Trophy,
+  AlertTriangle,
+  CheckCircle,
+  Sparkles,
+} from 'lucide-react'
 
 interface CertificateModalProps {
   isOpen: boolean
@@ -291,241 +308,219 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
   const canGenerateCertificate = telemetry.videosCompleted >= 3 || telemetry.readingsCompleted >= 2
 
-  if (!isOpen) return null
+  const metrics = [
+    {
+      label: 'Videos Assistidos',
+      value: telemetry.videosCompleted,
+      max: telemetry.totalVideos,
+      icon: Video,
+      color: 'green',
+    },
+    {
+      label: 'Leituras Concluidas',
+      value: telemetry.readingsCompleted,
+      max: telemetry.totalReadings,
+      icon: BookOpen,
+      color: 'blue',
+    },
+    {
+      label: 'Entradas no Diario',
+      value: telemetry.diaryEntries,
+      max: 10,
+      icon: FileText,
+      color: 'purple',
+    },
+    {
+      label: 'Sessoes de Estudo',
+      value: telemetry.totalSessions,
+      max: 20,
+      icon: Clock,
+      color: 'orange',
+    },
+    {
+      label: 'Mensagens com Mentor',
+      value: telemetry.chatMessages,
+      max: 50,
+      icon: MessageSquare,
+      color: 'pink',
+    },
+  ]
+
+  const colorClasses: Record<string, string> = {
+    green: 'bg-green-500',
+    blue: 'bg-blue-500',
+    purple: 'bg-purple-500',
+    orange: 'bg-orange-500',
+    pink: 'bg-pink-500',
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6 text-white">
+    <Modal open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <ModalContent size="lg" showCloseButton={false}>
+        <ModalHeader className="mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-7 h-7"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
-                />
-              </svg>
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Certificado de Conclusão</h2>
-              <p className="text-green-100">Relatório de Telemetria do Estágio</p>
+              <ModalTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Certificado e Relatorio
+              </ModalTitle>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Telemetria do seu estagio
+              </p>
             </div>
           </div>
-        </div>
+        </ModalHeader>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[55vh]">
-          {/* Progress overview */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Progresso Geral
-              </span>
-              <span className="text-sm font-bold text-green-600 dark:text-green-400">
+        <div className="space-y-6 overflow-y-auto max-h-[60vh]">
+          {/* Progress Overview */}
+          <Card variant="filled" padding="md">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                  Progresso Geral
+                </span>
+              </div>
+              <Badge variant={completionPercentage >= 70 ? 'success' : 'warning'} size="lg">
                 {completionPercentage}%
-              </span>
+              </Badge>
             </div>
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full transition-all"
+                className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full transition-all duration-500"
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
-          </div>
+          </Card>
 
-          {/* Telemetry bars */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Métricas Coletadas</h3>
-
-            {/* Videos */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Vídeos Assistidos</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {telemetry.videosCompleted} / {telemetry.totalVideos}
-                </span>
-              </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-500 rounded-full"
-                  style={{
-                    width: `${(telemetry.videosCompleted / telemetry.totalVideos) * 100}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Readings */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Leituras Concluídas</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {telemetry.readingsCompleted} / {telemetry.totalReadings}
-                </span>
-              </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full"
-                  style={{
-                    width: `${(telemetry.readingsCompleted / telemetry.totalReadings) * 100}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Diary entries */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Entradas no Diário</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {telemetry.diaryEntries}
-                </span>
-              </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500 rounded-full"
-                  style={{
-                    width: `${Math.min((telemetry.diaryEntries / 10) * 100, 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Sessions */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Sessões de Estudo</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {telemetry.totalSessions}
-                </span>
-              </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-orange-500 rounded-full"
-                  style={{
-                    width: `${Math.min((telemetry.totalSessions / 20) * 100, 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Chat messages */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Mensagens com Agentes</span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {telemetry.chatMessages}
-                </span>
-              </div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-pink-500 rounded-full"
-                  style={{
-                    width: `${Math.min((telemetry.chatMessages / 50) * 100, 100)}%`,
-                  }}
-                />
-              </div>
+          {/* Metrics Grid */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-yellow-500" />
+              Metricas Coletadas
+            </h3>
+            <div className="space-y-3">
+              {metrics.map((metric) => {
+                const Icon = metric.icon
+                const percentage = Math.min((metric.value / metric.max) * 100, 100)
+                return (
+                  <div key={metric.label}>
+                    <div className="flex items-center justify-between text-sm mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600 dark:text-gray-400">{metric.label}</span>
+                      </div>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {metric.value} / {metric.max}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${colorClasses[metric.color]}`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Stats summary */}
-          <div className="mt-6 grid grid-cols-3 gap-4">
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
+          {/* Stats Summary */}
+          <div className="grid grid-cols-3 gap-3">
+            <Card
+              variant="filled"
+              padding="sm"
+              className="text-center bg-green-50 dark:bg-green-900/20"
+            >
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {user.totalXp}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">XP Total</div>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">XP Total</div>
+            </Card>
+            <Card
+              variant="filled"
+              padding="sm"
+              className="text-center bg-blue-50 dark:bg-blue-900/20"
+            >
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {Math.floor(user.totalTimeMinutes / 60)}h
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Tempo de Estudo</div>
-            </div>
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Tempo de Estudo</div>
+            </Card>
+            <Card
+              variant="filled"
+              padding="sm"
+              className="text-center bg-purple-50 dark:bg-purple-900/20"
+            >
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 Lv.{user.currentLevel}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">{user.currentRank}</div>
-            </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{user.currentRank}</div>
+            </Card>
           </div>
 
-          {/* Requirements */}
+          {/* Requirements Warning */}
           {!canGenerateCertificate && (
-            <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
-              <h4 className="font-bold text-amber-800 dark:text-amber-200 mb-2">
-                Requisitos para Certificado
-              </h4>
-              <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-                <li className={telemetry.videosCompleted >= 3 ? 'line-through opacity-50' : ''}>
-                  - Assistir pelo menos 3 vídeos
-                </li>
-                <li className={telemetry.readingsCompleted >= 2 ? 'line-through opacity-50' : ''}>
-                  - Completar pelo menos 2 leituras
-                </li>
-              </ul>
-            </div>
+            <Card
+              variant="outlined"
+              padding="sm"
+              className="border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                    Requisitos para Certificado
+                  </h4>
+                  <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+                    <li
+                      className={`flex items-center gap-2 ${telemetry.videosCompleted >= 3 ? 'line-through opacity-50' : ''}`}
+                    >
+                      {telemetry.videosCompleted >= 3 ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Video className="w-4 h-4" />
+                      )}
+                      Assistir pelo menos 3 videos
+                    </li>
+                    <li
+                      className={`flex items-center gap-2 ${telemetry.readingsCompleted >= 2 ? 'line-through opacity-50' : ''}`}
+                    >
+                      {telemetry.readingsCompleted >= 2 ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <BookOpen className="w-4 h-4" />
+                      )}
+                      Completar pelo menos 2 leituras
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800/50">
-          <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <button
-              onClick={onClose}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-            >
+          {/* Actions */}
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button variant="ghost" onClick={onClose} className="flex-1 sm:flex-none">
               Fechar
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
               onClick={handleGenerateCertificate}
-              disabled={!canGenerateCertificate || isGenerating}
-              className={`w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-white transition-all ${
-                canGenerateCertificate
-                  ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
+              disabled={!canGenerateCertificate}
+              loading={isGenerating}
+              leftIcon={!isGenerating ? <Download className="w-5 h-5" /> : undefined}
+              className="flex-1"
             >
-              {isGenerating ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    ></path>
-                  </svg>
-                  Gerando...
-                </span>
-              ) : (
-                'Gerar Certificado (PDF)'
-              )}
-            </button>
+              {isGenerating ? 'Gerando...' : 'Baixar Certificado (PDF)'}
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </ModalContent>
+    </Modal>
   )
 }

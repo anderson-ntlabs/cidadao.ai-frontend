@@ -6,7 +6,6 @@ import {
   AcademyHeader,
   AcademySidebar,
   StatCard,
-  AgentCard,
   QuickActionCard,
   ActivityFeed,
   BadgeShowcase,
@@ -38,51 +37,17 @@ const ranks = {
   arquiteto: { name: 'Arquiteto', color: 'yellow', minXp: 5000 },
 }
 
-// Agent teachers available for chat
-const agentTeachers = [
-  {
-    id: 'abaporu',
-    name: 'Abaporu',
-    role: 'Orquestrador',
-    emoji: '🎭',
-    specialty: 'Coordenacao geral e distribuicao de tarefas',
-  },
-  {
-    id: 'zumbi',
-    name: 'Zumbi',
-    role: 'Detector de Anomalias',
-    emoji: '🛡️',
-    specialty: 'Seguranca e deteccao de fraudes',
-  },
-  {
-    id: 'anita',
-    name: 'Anita',
-    role: 'Analista de Dados',
-    emoji: '📊',
-    specialty: 'Analise estatistica e padroes',
-  },
-  {
-    id: 'tiradentes',
-    name: 'Tiradentes',
-    role: 'Reporter',
-    emoji: '📜',
-    specialty: 'Documentacao e relatorios',
-  },
-  {
-    id: 'drummond',
-    name: 'Drummond',
-    role: 'Comunicador',
-    emoji: '✍️',
-    specialty: 'Comunicacao clara e objetiva',
-  },
-  {
-    id: 'machado',
-    name: 'Machado',
-    role: 'Escritor',
-    emoji: '📚',
-    specialty: 'Textos, narrativas e resumos',
-  },
-]
+// Academy AI Agent (single agent for mentorship)
+const academyAgent = {
+  id: 'drummond',
+  name: 'Carlos Drummond de Andrade',
+  role: 'Mentor da Academy',
+  emoji: '✍️',
+  avatar: '/agents/drummond.png',
+  specialty: 'Orientacao tecnica, duvidas de programacao e apoio ao aprendizado',
+  description:
+    'Seu mentor pessoal na Academy! Tire duvidas sobre codigo, arquitetura, boas praticas e receba feedback personalizado sobre seus projetos.',
+}
 
 export default function AcademyDashboardPage() {
   const { user, isLoading, xpTransactions, badges, checkAndAwardBadges, resetDemo } =
@@ -193,48 +158,71 @@ export default function AcademyDashboardPage() {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Agent Teachers - 2 columns */}
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Mentor Agent - Featured Card - 2 columns */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Section Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-white" />
+                {/* Mentor Section */}
+                <Card
+                  variant="elevated"
+                  padding="lg"
+                  className="bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-green-900/20 dark:via-gray-900 dark:to-blue-900/20 border-green-200/50 dark:border-green-700/30"
+                >
+                  <div className="flex flex-col sm:flex-row items-start gap-6">
+                    {/* Agent Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 flex items-center justify-center shadow-xl">
+                        <span className="text-6xl sm:text-7xl">{academyAgent.emoji}</span>
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-gray-900 flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                        Agentes Professores
+
+                    {/* Agent Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles className="w-5 h-5 text-yellow-500" />
+                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                          Mentor IA
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        {academyAgent.name}
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Escolha um agente para iniciar uma conversa
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {academyAgent.description}
                       </p>
+
+                      {/* Capabilities */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {[
+                          'Duvidas de Codigo',
+                          'Revisao de PRs',
+                          'Arquitetura',
+                          'Boas Praticas',
+                        ].map((cap) => (
+                          <span
+                            key={cap}
+                            className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          >
+                            {cap}
+                          </span>
+                        ))}
+                      </div>
+
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        rightIcon={<ArrowRight className="w-5 h-5" />}
+                        onClick={() =>
+                          (window.location.href = `/pt/academy/chat?agent=${academyAgent.id}`)
+                        }
+                      >
+                        Iniciar Conversa
+                      </Button>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                    className="text-green-600 dark:text-green-400"
-                  >
-                    Ver todos
-                  </Button>
-                </div>
-
-                {/* Agent Grid */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {agentTeachers.map((agent) => (
-                    <AgentCard
-                      key={agent.id}
-                      id={agent.id}
-                      name={agent.name}
-                      role={agent.role}
-                      emoji={agent.emoji}
-                      specialty={agent.specialty}
-                      status="online"
-                    />
-                  ))}
-                </div>
+                </Card>
 
                 {/* Activity Feed - Mobile/Tablet */}
                 <div className="lg:hidden">

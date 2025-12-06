@@ -45,6 +45,12 @@ const TRACKS = [
     id: 'backend' as const,
     name: 'Backend',
     description: 'APIs, microservices e arquitetura de sistemas',
+    details: [
+      'FastAPI e Python',
+      'Design de APIs REST',
+      'Bancos de dados',
+      'Autenticacao e seguranca',
+    ],
     icon: Server,
     color: 'from-blue-500 to-cyan-500',
     bgColor: 'bg-blue-500/10 dark:bg-blue-500/20',
@@ -55,6 +61,7 @@ const TRACKS = [
     id: 'frontend' as const,
     name: 'Frontend',
     description: 'Interfaces, UX/UI e aplicacoes web',
+    details: ['Next.js e React', 'TypeScript', 'Design System', 'Acessibilidade (a11y)'],
     icon: Palette,
     color: 'from-purple-500 to-pink-500',
     bgColor: 'bg-purple-500/10 dark:bg-purple-500/20',
@@ -65,6 +72,7 @@ const TRACKS = [
     id: 'ia' as const,
     name: 'IA/ML',
     description: 'Inteligencia artificial e machine learning',
+    details: ['Agentes de IA', 'LLMs e prompts', 'RAG e vetores', 'Avaliacao de modelos'],
     icon: Brain,
     color: 'from-green-500 to-emerald-500',
     bgColor: 'bg-green-500/10 dark:bg-green-500/20',
@@ -75,6 +83,7 @@ const TRACKS = [
     id: 'devops' as const,
     name: 'DevOps',
     description: 'Infraestrutura, CI/CD e cloud',
+    details: ['Docker e containers', 'GitHub Actions', 'Monitoramento', 'Deploy e scaling'],
     icon: Code,
     color: 'from-orange-500 to-amber-500',
     bgColor: 'bg-orange-500/10 dark:bg-orange-500/20',
@@ -256,54 +265,111 @@ export default function AcademyOnboardingPage() {
           <CardContent>
             {/* Step 1: Welcome */}
             {currentStep === 1 && (
-              <div className="text-center space-y-8 py-4">
-                <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 shadow-2xl shadow-green-500/25">
-                  <Rocket className="w-12 h-12 text-white" />
-                </div>
-
-                <div>
+              <div className="space-y-8 py-4">
+                {/* Hero */}
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 shadow-2xl shadow-green-500/25 mb-6">
+                    <Rocket className="w-12 h-12 text-white" />
+                  </div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                    Bem-vindo a Academy!
+                    Bem-vindo a Academy Cidadao.AI!
                   </h1>
-                  <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    Voce esta prestes a embarcar em uma jornada de aprendizado e contribuicao.
+                  <p className="text-lg text-gray-600 dark:text-gray-400 max-w-lg mx-auto">
+                    Prepare-se para uma experiencia imersiva de aprendizado com IA e transparencia
+                    publica.
                   </p>
                 </div>
 
-                <Card variant="filled" padding="md" className="text-left max-w-lg mx-auto">
+                {/* What is Academy */}
+                <Card
+                  variant="elevated"
+                  padding="md"
+                  className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
+                >
+                  <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-yellow-500" />O que e a Academy?
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    A Academy e o programa de capacitacao do projeto Cidadao.AI. Aqui voce vai
+                    aprender na pratica, contribuindo com codigo real para uma plataforma de
+                    transparencia publica com Inteligencia Artificial.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { icon: '🎯', text: 'Aprendizado pratico' },
+                      { icon: '🤖', text: 'Mentor IA 24/7' },
+                      { icon: '📊', text: 'Metricas de progresso' },
+                      { icon: '🏆', text: 'Certificado oficial' },
+                    ].map((item) => (
+                      <div
+                        key={item.text}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50"
+                      >
+                        <span className="text-xl">{item.icon}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Onboarding Steps */}
+                <Card variant="filled" padding="md">
                   <h2 className="font-semibold text-green-700 dark:text-green-400 mb-4 flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />O que voce vai fazer:
+                    <CheckCircle2 className="w-5 h-5" />
+                    Proximos passos do onboarding:
                   </h2>
                   <ul className="space-y-4">
                     {[
-                      'Escolher sua trilha de desenvolvimento (Backend, Frontend, IA ou DevOps)',
-                      'Configurar seu GitHub para contribuir com o projeto',
-                      'Fazer fork do repositorio da sua trilha para comecar',
+                      {
+                        title: 'Escolher sua trilha',
+                        desc: 'Backend, Frontend, IA/ML ou DevOps',
+                      },
+                      {
+                        title: 'Conectar GitHub',
+                        desc: 'Para rastrear suas contribuicoes',
+                      },
+                      {
+                        title: 'Fazer fork do repositorio',
+                        desc: 'Seu espaco para desenvolver',
+                      },
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-green-700 dark:text-green-400">
+                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
                             {i + 1}
                           </span>
                         </div>
-                        <span className="text-gray-700 dark:text-gray-300 text-sm">{item}</span>
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
+                            {item.title}
+                          </span>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
+                        </div>
                       </li>
                     ))}
                   </ul>
                 </Card>
 
-                <Button
-                  onClick={() =>
-                    updateOnboarding({
-                      currentStep: 2,
-                      completedSteps: [...onboarding.completedSteps, 1],
-                    })
-                  }
-                  size="lg"
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                >
-                  Comecar Jornada
-                </Button>
+                {/* CTA */}
+                <div className="text-center">
+                  <Button
+                    onClick={() =>
+                      updateOnboarding({
+                        currentStep: 2,
+                        completedSteps: [...onboarding.completedSteps, 1],
+                      })
+                    }
+                    size="lg"
+                    rightIcon={<ArrowRight className="w-5 h-5" />}
+                  >
+                    Comecar Jornada
+                  </Button>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                    Tempo estimado: 3-5 minutos
+                  </p>
+                </div>
               </div>
             )}
 
@@ -312,10 +378,10 @@ export default function AcademyOnboardingPage() {
               <div className="space-y-8">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Escolha sua trilha
+                    Escolha sua trilha de especializacao
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Selecione a area em que voce quer se especializar
+                    Cada trilha oferece um caminho de aprendizado focado com projetos praticos
                   </p>
                 </div>
 
@@ -329,14 +395,14 @@ export default function AcademyOnboardingPage() {
                         key={track.id}
                         onClick={() => handleTrackSelect(track.id)}
                         className={cn(
-                          'p-6 rounded-2xl border-2 text-left transition-all duration-300',
+                          'p-5 rounded-2xl border-2 text-left transition-all duration-300',
                           'hover:shadow-lg group',
                           isSelected
                             ? `${track.borderColor} ${track.bgColor} ring-4 ${track.ringColor}`
                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         )}
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-4 mb-4">
                           <div
                             className={cn(
                               'w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg',
@@ -357,6 +423,23 @@ export default function AcademyOnboardingPage() {
                               {track.description}
                             </p>
                           </div>
+                        </div>
+
+                        {/* Track details */}
+                        <div className="flex flex-wrap gap-2">
+                          {track.details.map((detail) => (
+                            <span
+                              key={detail}
+                              className={cn(
+                                'px-2 py-1 rounded-md text-xs font-medium',
+                                isSelected
+                                  ? 'bg-white/60 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                              )}
+                            >
+                              {detail}
+                            </span>
+                          ))}
                         </div>
                       </button>
                     )
