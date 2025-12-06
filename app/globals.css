@@ -43,6 +43,36 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 142 76% 36%;
     --radius: 0.5rem;
+
+    /* ===========================================
+       TARSILA DO AMARAL PALETTE (Light Mode)
+       Inspired by Brazilian Modernism
+       Design: Bo Bardi + Dumont + Anderson
+       =========================================== */
+
+    /* Primary Tarsila Colors */
+    --tarsila-amarelo: 43 89% 49%; /* #F2B705 - Golden Yellow (Abaporu sun) */
+    --tarsila-ocre: 33 58% 58%; /* #D4A055 - Ochre/Earth */
+    --tarsila-terra: 27 56% 36%; /* #8B5A2B - Earth Brown */
+    --tarsila-verde: 142 26% 39%; /* #4A7C59 - Forest Green */
+    --tarsila-azul: 210 58% 60%; /* #5B9BD5 - Sky Blue */
+    --tarsila-laranja: 24 100% 40%; /* #CC5500 - Burnt Orange */
+    --tarsila-rosa: 15 69% 87%; /* #F5D0C5 - Pale Pink */
+    --tarsila-creme: 42 100% 96%; /* #FFF8E7 - Cream (warm white) */
+
+    /* Academy-specific (Light - Tarsila Theme) */
+    --academy-bg: 42 100% 98%; /* Warm cream background */
+    --academy-bg-secondary: 42 60% 95%; /* Slightly darker cream */
+    --academy-card: 0 0% 100%; /* Pure white cards */
+    --academy-card-hover: 42 80% 97%; /* Warm hover */
+    --academy-border: 33 30% 85%; /* Warm border */
+    --academy-text: 27 40% 20%; /* Warm dark text */
+    --academy-text-muted: 27 20% 45%; /* Muted warm text */
+    --academy-accent: 43 89% 49%; /* Tarsila Yellow */
+    --academy-accent-hover: 43 89% 44%; /* Darker yellow */
+    --academy-success: 142 26% 39%; /* Tarsila Green */
+    --academy-gradient-start: 43 89% 49%; /* Yellow */
+    --academy-gradient-end: 24 100% 40%; /* Orange */
   }
 
   .dark {
@@ -65,6 +95,36 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 142 76% 36%;
+
+    /* ===========================================
+       ELEGANT GRAY PALETTE (Dark Mode)
+       Sophisticated, modern, comfortable
+       Design: Bo Bardi + Dumont + Anderson
+       =========================================== */
+
+    /* Tarsila Colors (adjusted for dark mode) */
+    --tarsila-amarelo: 43 89% 55%; /* Brighter yellow for dark */
+    --tarsila-ocre: 33 58% 65%; /* Lighter ochre */
+    --tarsila-terra: 27 56% 50%; /* Lighter brown */
+    --tarsila-verde: 142 40% 50%; /* Brighter green */
+    --tarsila-azul: 210 58% 65%; /* Brighter blue */
+    --tarsila-laranja: 24 100% 55%; /* Brighter orange */
+    --tarsila-rosa: 15 40% 70%; /* Muted pink */
+    --tarsila-creme: 42 20% 90%; /* Off-white */
+
+    /* Academy-specific (Dark - Elegant Gray Theme) */
+    --academy-bg: 0 0% 9%; /* #171717 - Deep charcoal */
+    --academy-bg-secondary: 0 0% 12%; /* #1F1F1F - Slightly lighter */
+    --academy-card: 0 0% 14%; /* #242424 - Card background */
+    --academy-card-hover: 0 0% 18%; /* #2E2E2E - Hover state */
+    --academy-border: 0 0% 20%; /* #333333 - Subtle borders */
+    --academy-text: 0 0% 95%; /* #F2F2F2 - Crisp white text */
+    --academy-text-muted: 0 0% 65%; /* #A6A6A6 - Muted text */
+    --academy-accent: 43 89% 55%; /* Tarsila Yellow (bright) */
+    --academy-accent-hover: 43 89% 60%; /* Even brighter */
+    --academy-success: 142 50% 50%; /* Vibrant green */
+    --academy-gradient-start: 43 89% 55%; /* Yellow */
+    --academy-gradient-end: 24 100% 55%; /* Orange */
   }
 }
 
@@ -185,5 +245,146 @@
   /* Active state for mobile */
   .tap-highlight {
     -webkit-tap-highlight-color: rgba(142, 76, 36, 0.1);
+  }
+
+  /* ===========================================
+     ACADEMY DESIGN SYSTEM
+     Bo Bardi + Dumont + Anderson
+     =========================================== */
+
+  /* Academy Background Classes */
+  .academy-bg {
+    background-color: hsl(var(--academy-bg));
+  }
+
+  .academy-bg-secondary {
+    background-color: hsl(var(--academy-bg-secondary));
+  }
+
+  .academy-card {
+    background-color: hsl(var(--academy-card));
+    border: 1px solid hsl(var(--academy-border));
+  }
+
+  .academy-card:hover {
+    background-color: hsl(var(--academy-card-hover));
+  }
+
+  .academy-text {
+    color: hsl(var(--academy-text));
+  }
+
+  .academy-text-muted {
+    color: hsl(var(--academy-text-muted));
+  }
+
+  /* Academy Gradients */
+  .academy-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--academy-gradient-start)) 0%,
+      hsl(var(--academy-gradient-end)) 100%
+    );
+  }
+
+  .academy-gradient-text {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--academy-gradient-start)) 0%,
+      hsl(var(--academy-gradient-end)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Tarsila Color Utilities */
+  .text-tarsila-amarelo {
+    color: hsl(var(--tarsila-amarelo));
+  }
+
+  .text-tarsila-ocre {
+    color: hsl(var(--tarsila-ocre));
+  }
+
+  .text-tarsila-verde {
+    color: hsl(var(--tarsila-verde));
+  }
+
+  .text-tarsila-azul {
+    color: hsl(var(--tarsila-azul));
+  }
+
+  .text-tarsila-laranja {
+    color: hsl(var(--tarsila-laranja));
+  }
+
+  .bg-tarsila-amarelo {
+    background-color: hsl(var(--tarsila-amarelo));
+  }
+
+  .bg-tarsila-ocre {
+    background-color: hsl(var(--tarsila-ocre));
+  }
+
+  .bg-tarsila-verde {
+    background-color: hsl(var(--tarsila-verde));
+  }
+
+  .bg-tarsila-creme {
+    background-color: hsl(var(--tarsila-creme));
+  }
+
+  /* Academy Background Image Support */
+  .academy-bg-image {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  .academy-bg-overlay {
+    position: relative;
+  }
+
+  .academy-bg-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--academy-bg) / 0.85) 0%,
+      hsl(var(--academy-bg) / 0.95) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Elegant Card Shadows */
+  .academy-shadow-sm {
+    box-shadow: 0 1px 2px hsl(var(--academy-border) / 0.5);
+  }
+
+  .academy-shadow {
+    box-shadow:
+      0 4px 6px -1px hsl(var(--academy-border) / 0.3),
+      0 2px 4px -2px hsl(var(--academy-border) / 0.2);
+  }
+
+  .academy-shadow-lg {
+    box-shadow:
+      0 10px 15px -3px hsl(var(--academy-border) / 0.3),
+      0 4px 6px -4px hsl(var(--academy-border) / 0.2);
+  }
+
+  /* Designer Signature Styles */
+  .designer-signature {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  .designer-signature:hover {
+    opacity: 1;
   }
 }

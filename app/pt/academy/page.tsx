@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { useAcademyAuth } from '@/hooks/use-academy-auth'
+import { useAcademyBackground } from '@/hooks/use-academy-background'
 import {
   AcademyHeader,
   AcademySidebar,
@@ -14,6 +15,7 @@ import {
   InternshipContractModal,
   CertificateModal,
   LgpdConsentModal,
+  BackgroundSelector,
 } from '@/components/academy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +29,7 @@ import {
   GraduationCap,
   Sparkles,
   ArrowRight,
+  Palette,
 } from 'lucide-react'
 
 /**
@@ -35,6 +38,10 @@ import {
  * Supports both real authentication and demo mode.
  * - Real auth: Users logged in via GitHub/Google
  * - Demo mode: URL param ?demo=true
+ *
+ * Visual Design: Bo Bardi + Santos-Dumont + Anderson
+ * Light Mode: Tarsila do Amaral color palette
+ * Dark Mode: Elegant gray theme
  *
  * Author: Anderson Henrique da Silva
  * Updated: 2025-12-06
@@ -64,12 +71,12 @@ const academyAgent = {
 // Loading fallback component
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center academy-bg">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+        <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
+        <p className="academy-text-muted">Carregando dashboard...</p>
       </div>
     </div>
   )
@@ -81,9 +88,40 @@ function AcademyDashboardContent() {
   const searchParams = useSearchParams()
   const isDemoMode = searchParams.get('demo') === 'true'
 
+  // Detect dark mode from CSS media query
+  const [isDark, setIsDark] = useState(false)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    setIsDark(mediaQuery.matches || document.documentElement.classList.contains('dark'))
+
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches)
+    mediaQuery.addEventListener('change', handler)
+
+    // Also observe class changes on html element
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    return () => {
+      mediaQuery.removeEventListener('change', handler)
+      observer.disconnect()
+    }
+  }, [])
+
   // Auth hooks
   const realAuth = useAcademyAuth()
   const demoAuth = useAcademyDemo()
+
+  // Background customization
+  const {
+    preference,
+    getBackgroundStyles,
+    getCurrentBackground,
+    isLoaded: bgLoaded,
+  } = useAcademyBackground()
+  const currentBg = getCurrentBackground(isDark)
+  const bgStyles = getBackgroundStyles(isDark)
 
   // Determine which auth to use
   const isRealAuth = !isDemoMode && realAuth.isAuthenticated
@@ -120,6 +158,7 @@ function AcademyDashboardContent() {
   const [showContractModal, setShowContractModal] = useState(false)
   const [showCertificateModal, setShowCertificateModal] = useState(false)
   const [showLgpdModal, setShowLgpdModal] = useState(false)
+  const [showBackgroundSelector, setShowBackgroundSelector] = useState(false)
 
   // Redirect unauthenticated users to login (if not in demo mode)
   // But wait longer if coming from OAuth callback
@@ -179,12 +218,12 @@ function AcademyDashboardContent() {
   // If not demo and not authenticated, show loading (redirect will happen)
   if (!isDemoMode && !realAuth.isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center academy-bg">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
+          <p className="academy-text-muted">Redirecionando para login...</p>
         </div>
       </div>
     )
@@ -202,12 +241,28 @@ function AcademyDashboardContent() {
     }
   }
 
+  // Build background with optional overlay for images
+  const hasImageBg = currentBg?.type === 'image'
+  const overlayStyle =
+    hasImageBg && preference.useOverlay
+      ? {
+          backgroundColor: isDark
+            ? `rgba(23, 23, 23, ${preference.overlayOpacity})`
+            : `rgba(255, 248, 231, ${preference.overlayOpacity})`,
+        }
+      : {}
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative" style={bgStyles}>
+      {/* Background overlay for image backgrounds */}
+      {hasImageBg && preference.useOverlay && (
+        <div className="fixed inset-0 pointer-events-none z-0" style={overlayStyle} />
+      )}
+
       {/* Header */}
       <AcademyHeader user={user} onLogout={handleLogout} isDemoMode={isDemoMode} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative z-10">
         {/* Sidebar */}
         <AcademySidebar user={user} />
 
@@ -216,13 +271,13 @@ function AcademyDashboardContent() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Demo Mode Banner */}
             {isDemoMode && (
-              <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl">
+              <div className="mb-6 p-4 bg-tarsila-amarelo/10 dark:bg-yellow-900/20 border border-tarsila-ocre/30 dark:border-yellow-700/30 rounded-xl backdrop-blur-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🎮</span>
-                  <span className="font-medium text-amber-800 dark:text-amber-200">
+                  <span className="font-medium text-tarsila-terra dark:text-yellow-200">
                     Modo Demonstracao
                   </span>
-                  <span className="text-sm text-amber-600 dark:text-amber-400">
+                  <span className="text-sm text-tarsila-ocre dark:text-yellow-400/80">
                     - Os dados sao salvos apenas localmente
                   </span>
                 </div>
@@ -231,13 +286,25 @@ function AcademyDashboardContent() {
 
             {/* Welcome Section */}
             <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Ola, {user.name.split(' ')[0]}!
-                </h2>
-                <span className="text-2xl animate-bounce">👋</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl sm:text-3xl font-bold academy-text">
+                    Ola, {user.name.split(' ')[0]}!
+                  </h2>
+                  <span className="text-2xl animate-bounce">👋</span>
+                </div>
+                {/* Customize Background Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowBackgroundSelector(true)}
+                  className="hidden sm:flex items-center gap-2 text-tarsila-ocre hover:text-tarsila-amarelo dark:text-gray-400 dark:hover:text-yellow-400"
+                >
+                  <Palette className="w-4 h-4" />
+                  <span className="text-sm">Personalizar</span>
+                </Button>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="academy-text-muted">
                 Pronto para mais uma sessao de aprendizado? Seu progresso esta incrivel!
               </p>
             </div>
@@ -292,19 +359,19 @@ function AcademyDashboardContent() {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Mentor Agent - Featured Card - 2 columns */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Mentor Section */}
+                {/* Mentor Section - Elegant Tarsila-inspired design */}
                 <Card
                   variant="elevated"
                   padding="lg"
-                  className="bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-green-900/20 dark:via-gray-900 dark:to-blue-900/20 border-green-200/50 dark:border-green-700/30"
+                  className="bg-gradient-to-br from-tarsila-creme via-white to-tarsila-rosa/30 dark:from-gray-800/90 dark:via-gray-900/90 dark:to-gray-800/90 border-tarsila-ocre/20 dark:border-gray-700/50 backdrop-blur-sm academy-shadow-lg"
                 >
                   <div className="flex flex-col sm:flex-row items-start gap-6">
                     {/* Agent Avatar */}
                     <div className="relative flex-shrink-0">
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 flex items-center justify-center shadow-xl">
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl academy-gradient flex items-center justify-center shadow-xl">
                         <span className="text-6xl sm:text-7xl">{academyAgent.emoji}</span>
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-gray-900 flex items-center justify-center">
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-tarsila-verde dark:bg-green-500 rounded-full border-4 border-white dark:border-gray-900 flex items-center justify-center">
                         <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
                       </div>
                     </div>
@@ -312,17 +379,13 @@ function AcademyDashboardContent() {
                     {/* Agent Info */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <Sparkles className="w-5 h-5 text-yellow-500" />
-                        <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                        <Sparkles className="w-5 h-5 text-tarsila-amarelo" />
+                        <span className="text-sm font-medium text-tarsila-laranja dark:text-yellow-400">
                           Mentor IA
                         </span>
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                        {academyAgent.name}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        {academyAgent.description}
-                      </p>
+                      <h3 className="text-2xl font-bold academy-text mb-2">{academyAgent.name}</h3>
+                      <p className="academy-text-muted mb-4">{academyAgent.description}</p>
 
                       {/* Capabilities */}
                       <div className="flex flex-wrap gap-2 mb-6">
@@ -334,7 +397,7 @@ function AcademyDashboardContent() {
                         ].map((cap) => (
                           <span
                             key={cap}
-                            className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            className="px-3 py-1 rounded-full text-xs font-medium bg-tarsila-verde/10 text-tarsila-verde dark:bg-green-900/30 dark:text-green-400 border border-tarsila-verde/20 dark:border-green-700/30"
                           >
                             {cap}
                           </span>
@@ -348,6 +411,7 @@ function AcademyDashboardContent() {
                         onClick={() =>
                           (window.location.href = `/pt/academy/chat?agent=${academyAgent.id}${isDemoMode ? '&demo=true' : ''}`)
                         }
+                        className="academy-gradient hover:opacity-90 border-0"
                       >
                         Iniciar Conversa
                       </Button>
@@ -364,10 +428,10 @@ function AcademyDashboardContent() {
               {/* Sidebar Content - 1 column */}
               <div className="space-y-6">
                 {/* Quick Actions */}
-                <Card variant="elevated" padding="md">
+                <Card variant="elevated" padding="md" className="academy-card backdrop-blur-sm">
                   <CardHeader className="mb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <CardTitle className="flex items-center gap-2 text-lg academy-text">
+                      <Trophy className="w-5 h-5 text-tarsila-amarelo dark:text-yellow-400" />
                       Acoes Rapidas
                     </CardTitle>
                   </CardHeader>
@@ -415,6 +479,30 @@ function AcademyDashboardContent() {
                 <BadgeShowcase badges={badges} />
               </div>
             </div>
+
+            {/* Designer Signature Footer */}
+            <footer className="mt-12 pt-6 border-t border-tarsila-ocre/20 dark:border-gray-700/30">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-sm academy-text-muted">
+                  <span className="designer-signature">
+                    Design: Lina Bo Bardi + Santos-Dumont + Anderson
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs academy-text-muted">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-tarsila-amarelo" />
+                    Paleta Tarsila do Amaral
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-500" />
+                    Cinza Elegante
+                  </span>
+                </div>
+              </div>
+              <p className="text-center text-xs academy-text-muted mt-4 opacity-60">
+                Academy Cidadao.AI - Formando a proxima geracao de desenvolvedores brasileiros
+              </p>
+            </footer>
           </div>
         </main>
       </div>
@@ -432,6 +520,10 @@ function AcademyDashboardContent() {
         isOpen={showLgpdModal}
         onClose={() => setShowLgpdModal(false)}
         useRealAuth={isRealAuth}
+      />
+      <BackgroundSelector
+        isOpen={showBackgroundSelector}
+        onClose={() => setShowBackgroundSelector(false)}
       />
     </div>
   )
