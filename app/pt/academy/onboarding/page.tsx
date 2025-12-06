@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAcademyAuth } from '@/hooks/use-academy-auth'
 import { LgpdConsentModal } from '@/components/academy/lgpd-consent-modal'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from '@/hooks/use-toast'
 
 type Track = 'backend' | 'frontend' | 'ia' | 'devops'
 
@@ -50,6 +51,7 @@ export default function AcademyOnboardingPage() {
     githubUsername: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -81,26 +83,70 @@ export default function AcademyOnboardingPage() {
     if (!user) return
 
     setIsSubmitting(true)
+    setSubmitError(null)
+
     try {
-      const { error } = await supabase
+      // First, check if profile exists
+      const { data: existingProfile, error: checkError } = await supabase
         .from('academy_profiles')
-        .update({
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 = no rows returned (profile doesn't exist)
+        throw new Error(`Erro ao verificar perfil: ${checkError.message}`)
+      }
+
+      let saveError = null
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('academy_profiles')
+          .update({
+            matricula: formData.matricula,
+            curso: formData.curso,
+            periodo: formData.periodo,
+            main_track: formData.mainTrack,
+            github_username: formData.githubUsername || null,
+            program_status: 'in_progress',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+
+        saveError = error
+      } else {
+        // Insert new profile
+        const { error } = await supabase.from('academy_profiles').insert({
+          user_id: user.id,
+          full_name: user.name,
+          email: user.email,
+          avatar_url: user.avatar,
           matricula: formData.matricula,
           curso: formData.curso,
           periodo: formData.periodo,
           main_track: formData.mainTrack,
           github_username: formData.githubUsername || null,
           program_status: 'in_progress',
-          updated_at: new Date().toISOString(),
+          program_start_date: new Date().toISOString().split('T')[0],
         })
-        .eq('user_id', user.id)
 
-      if (error) throw error
+        saveError = error
+      }
+
+      if (saveError) {
+        throw new Error(`Erro ao salvar perfil: ${saveError.message}`)
+      }
 
       await refreshProfile()
+      toast.success('Perfil salvo!', 'Bem-vindo(a) a Academy!')
       router.push('/pt/academy')
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
       console.error('Failed to update profile:', error)
+      setSubmitError(errorMessage)
+      toast.error('Erro ao salvar', errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -264,6 +310,33 @@ export default function AcademyOnboardingPage() {
                   />
                 </div>
               </div>
+
+              {/* Error Message */}
+              {submitError && (
+                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                        Erro ao salvar perfil
+                      </p>
+                      <p className="text-sm text-red-600 dark:text-red-300 mt-1">{submitError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Submit */}
               <button

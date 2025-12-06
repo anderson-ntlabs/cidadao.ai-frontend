@@ -85,7 +85,7 @@ export const productionCSP: CSPDirectives = {
   // Styles: Allow self and inline styles (Next.js requirement)
   'style-src': ["'self'", "'unsafe-inline'"],
 
-  // Images: Allow self, data URIs, Vercel, VLibras, and external CDNs
+  // Images: Allow self, data URIs, Vercel, VLibras, Google avatars, and external CDNs
   'img-src': [
     "'self'",
     'data:',
@@ -96,6 +96,9 @@ export const productionCSP: CSPDirectives = {
     'https://vlibras.gov.br', // VLibras avatars and images
     'https://*.vlibras.gov.br', // VLibras CDN
     'https://cdn.jsdelivr.net', // VLibras assets from jsdelivr CDN
+    'https://lh3.googleusercontent.com', // Google user avatars (OAuth)
+    'https://*.googleusercontent.com', // Google content domains
+    'https://ui-avatars.com', // Fallback avatar service
   ],
 
   // Fonts: Allow self, data URIs, and VLibras CDN fonts
