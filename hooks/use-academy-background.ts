@@ -5,10 +5,8 @@ import { useState, useEffect, useCallback } from 'react'
 /**
  * Academy Background Customization Hook
  *
- * Allows users to customize their dashboard background with:
- * - Solid colors (Tarsila palette)
- * - TCC slide backgrounds
- * - Custom uploaded images
+ * Simple background customization for Academy dashboard.
+ * Supports solid colors, gradients, and TCC slide images.
  *
  * Design: Bo Bardi + Dumont + Anderson
  * Author: Anderson Henrique da Silva
@@ -20,153 +18,158 @@ export interface BackgroundOption {
   name: string
   type: 'solid' | 'gradient' | 'image'
   value: string
-  preview?: string
+  thumbnail?: string
   artist?: string
 }
 
-// Available background options
+// Available background options with URL-safe paths
 export const BACKGROUND_OPTIONS: BackgroundOption[] = [
-  // Solid Colors - Tarsila Palette
+  // === SOLID COLORS ===
+  {
+    id: 'default',
+    name: 'Padrao',
+    type: 'solid',
+    value: '#FFFBF5', // Warm cream
+    artist: 'Sistema',
+  },
   {
     id: 'tarsila-creme',
     name: 'Creme Tarsila',
     type: 'solid',
-    value: 'hsl(42 100% 98%)',
+    value: '#FFF8E7',
     artist: 'Tarsila do Amaral',
   },
   {
-    id: 'tarsila-amarelo-suave',
+    id: 'tarsila-amarelo',
     name: 'Amarelo Suave',
     type: 'solid',
-    value: 'hsl(43 80% 95%)',
+    value: '#FFFAEB',
     artist: 'Tarsila do Amaral',
   },
   {
-    id: 'elegant-gray',
-    name: 'Cinza Elegante',
+    id: 'elegant-charcoal',
+    name: 'Carvao Elegante',
     type: 'solid',
-    value: 'hsl(0 0% 9%)',
+    value: '#171717',
     artist: 'Bo Bardi',
   },
   {
-    id: 'charcoal',
-    name: 'Carvao',
+    id: 'deep-gray',
+    name: 'Cinza Profundo',
     type: 'solid',
-    value: 'hsl(0 0% 12%)',
+    value: '#1F1F1F',
     artist: 'Bo Bardi',
   },
 
-  // Gradients
+  // === GRADIENTS ===
   {
-    id: 'tarsila-sunset',
-    name: 'Por do Sol Tarsila',
+    id: 'sunset',
+    name: 'Por do Sol',
     type: 'gradient',
-    value: 'linear-gradient(135deg, hsl(43 89% 95%) 0%, hsl(24 80% 90%) 100%)',
+    value: 'linear-gradient(135deg, #FFF8E7 0%, #FFE4C4 100%)',
     artist: 'Tarsila do Amaral',
   },
   {
-    id: 'tarsila-terra',
+    id: 'terra',
     name: 'Terra Brasileira',
     type: 'gradient',
-    value: 'linear-gradient(180deg, hsl(42 100% 98%) 0%, hsl(33 58% 90%) 100%)',
+    value: 'linear-gradient(180deg, #FFFBF5 0%, #F5DEB3 100%)',
     artist: 'Tarsila do Amaral',
   },
   {
-    id: 'gray-depth',
-    name: 'Profundidade',
+    id: 'night',
+    name: 'Noite Elegante',
     type: 'gradient',
-    value: 'linear-gradient(180deg, hsl(0 0% 9%) 0%, hsl(0 0% 14%) 100%)',
+    value: 'linear-gradient(180deg, #171717 0%, #2D2D2D 100%)',
     artist: 'Bo Bardi',
   },
 
-  // TCC Slide Backgrounds
+  // === TCC SLIDE IMAGES ===
   {
-    id: 'tcc-tarsila',
+    id: 'tarsila-modernismo',
     name: 'Modernismo Brasileiro',
     type: 'image',
-    value: '/academy/Tarsila do Amaral_ Modernismo Brasileiro.svg',
-    preview: '/academy/Tarsila do Amaral_ Modernismo Brasileiro.svg',
+    value: '/academy/tarsila-modernismo.svg',
+    thumbnail: '/academy/tarsila-modernismo.svg',
     artist: 'Tarsila do Amaral',
   },
   {
-    id: 'tcc-cidadao-1',
-    name: 'Cidadao.AI Democratizando',
+    id: 'cidadao-democratizando',
+    name: 'Cidadao.AI Principal',
     type: 'image',
-    value: '/academy/Cidadão.AI_ democratizando transparência.svg',
-    preview: '/academy/Cidadão.AI_ democratizando transparência.svg',
+    value: '/academy/cidadao-democratizando.svg',
+    thumbnail: '/academy/cidadao-democratizando.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-2',
-    name: 'Cidadao.AI Slide 1',
+    id: 'cidadao-slide-01',
+    name: 'Slide 1',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI.svg',
-    preview: '/academy/Cópia de Cidadão.AI.svg',
+    value: '/academy/cidadao-slide-01.svg',
+    thumbnail: '/academy/cidadao-slide-01.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-3',
-    name: 'Cidadao.AI Slide 2',
+    id: 'cidadao-slide-02',
+    name: 'Slide 2',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI (1).svg',
-    preview: '/academy/Cópia de Cidadão.AI (1).svg',
+    value: '/academy/cidadao-slide-02.svg',
+    thumbnail: '/academy/cidadao-slide-02.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-4',
-    name: 'Cidadao.AI Slide 3',
+    id: 'cidadao-slide-03',
+    name: 'Slide 3',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI (2).svg',
-    preview: '/academy/Cópia de Cidadão.AI (2).svg',
+    value: '/academy/cidadao-slide-03.svg',
+    thumbnail: '/academy/cidadao-slide-03.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-5',
-    name: 'Cidadao.AI Slide 4',
+    id: 'cidadao-slide-04',
+    name: 'Slide 4',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI (3).svg',
-    preview: '/academy/Cópia de Cidadão.AI (3).svg',
+    value: '/academy/cidadao-slide-04.svg',
+    thumbnail: '/academy/cidadao-slide-04.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-6',
-    name: 'Cidadao.AI Slide 5',
+    id: 'cidadao-slide-05',
+    name: 'Slide 5',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI (4).svg',
-    preview: '/academy/Cópia de Cidadão.AI (4).svg',
+    value: '/academy/cidadao-slide-05.svg',
+    thumbnail: '/academy/cidadao-slide-05.svg',
     artist: 'Anderson Silva',
   },
   {
-    id: 'tcc-cidadao-7',
-    name: 'Cidadao.AI Slide 6',
+    id: 'cidadao-slide-06',
+    name: 'Slide 6',
     type: 'image',
-    value: '/academy/Cópia de Cidadão.AI (5).svg',
-    preview: '/academy/Cópia de Cidadão.AI (5).svg',
+    value: '/academy/cidadao-slide-06.svg',
+    thumbnail: '/academy/cidadao-slide-06.svg',
     artist: 'Anderson Silva',
   },
 ]
 
-const STORAGE_KEY = 'academy_background_preference'
+const STORAGE_KEY = 'academy_background'
 
-interface BackgroundPreference {
-  lightBackground: string
-  darkBackground: string
-  useOverlay: boolean
+interface BackgroundState {
+  selectedId: string
+  overlayEnabled: boolean
   overlayOpacity: number
 }
 
-const DEFAULT_PREFERENCE: BackgroundPreference = {
-  lightBackground: 'tarsila-creme',
-  darkBackground: 'elegant-gray',
-  useOverlay: true,
-  overlayOpacity: 0.85,
+const DEFAULT_STATE: BackgroundState = {
+  selectedId: 'default',
+  overlayEnabled: true,
+  overlayOpacity: 0.9,
 }
 
 export function useAcademyBackground() {
-  const [preference, setPreference] = useState<BackgroundPreference>(DEFAULT_PREFERENCE)
+  const [state, setState] = useState<BackgroundState>(DEFAULT_STATE)
   const [isLoaded, setIsLoaded] = useState(false)
 
-  // Load preference from localStorage
+  // Load from localStorage on mount
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -174,7 +177,7 @@ export function useAcademyBackground() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
-        setPreference({ ...DEFAULT_PREFERENCE, ...parsed })
+        setState({ ...DEFAULT_STATE, ...parsed })
       }
     } catch (e) {
       console.error('Failed to load background preference:', e)
@@ -182,10 +185,10 @@ export function useAcademyBackground() {
     setIsLoaded(true)
   }, [])
 
-  // Save preference to localStorage
-  const savePreference = useCallback((newPreference: Partial<BackgroundPreference>) => {
-    setPreference((prev) => {
-      const updated = { ...prev, ...newPreference }
+  // Save to localStorage
+  const saveState = useCallback((newState: Partial<BackgroundState>) => {
+    setState((prev) => {
+      const updated = { ...prev, ...newState }
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
       } catch (e) {
@@ -195,87 +198,98 @@ export function useAcademyBackground() {
     })
   }, [])
 
-  // Get the current background option based on theme
-  const getCurrentBackground = useCallback(
-    (isDark: boolean): BackgroundOption | undefined => {
-      const bgId = isDark ? preference.darkBackground : preference.lightBackground
-      return BACKGROUND_OPTIONS.find((bg) => bg.id === bgId)
-    },
-    [preference]
-  )
+  // Get current background option
+  const currentBackground =
+    BACKGROUND_OPTIONS.find((bg) => bg.id === state.selectedId) || BACKGROUND_OPTIONS[0]
 
-  // Get CSS styles for the background
-  const getBackgroundStyles = useCallback(
-    (isDark: boolean): React.CSSProperties => {
-      const bg = getCurrentBackground(isDark)
-      if (!bg) return {}
-
-      const styles: React.CSSProperties = {}
-
-      switch (bg.type) {
-        case 'solid':
-          styles.backgroundColor = bg.value
-          break
-        case 'gradient':
-          styles.background = bg.value
-          break
-        case 'image':
-          styles.backgroundImage = `url(${bg.value})`
-          styles.backgroundSize = 'cover'
-          styles.backgroundPosition = 'center'
-          styles.backgroundAttachment = 'fixed'
-          break
+  // Set background by ID
+  const setBackground = useCallback(
+    (id: string) => {
+      const exists = BACKGROUND_OPTIONS.find((bg) => bg.id === id)
+      if (exists) {
+        saveState({ selectedId: id })
       }
-
-      return styles
     },
-    [getCurrentBackground]
+    [saveState]
   )
 
-  // Set light mode background
-  const setLightBackground = useCallback(
-    (bgId: string) => {
-      savePreference({ lightBackground: bgId })
-    },
-    [savePreference]
-  )
+  // Get CSS styles for current background
+  const getBackgroundStyle = useCallback((): React.CSSProperties => {
+    const bg = currentBackground
+    if (!bg) return {}
 
-  // Set dark mode background
-  const setDarkBackground = useCallback(
-    (bgId: string) => {
-      savePreference({ darkBackground: bgId })
+    switch (bg.type) {
+      case 'solid':
+        return { backgroundColor: bg.value }
+      case 'gradient':
+        return { background: bg.value }
+      case 'image':
+        return {
+          backgroundImage: `url(${bg.value})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }
+      default:
+        return {}
+    }
+  }, [currentBackground])
+
+  // Get overlay style for image backgrounds
+  const getOverlayStyle = useCallback(
+    (isDark: boolean): React.CSSProperties | null => {
+      if (currentBackground?.type !== 'image' || !state.overlayEnabled) {
+        return null
+      }
+      return {
+        backgroundColor: isDark
+          ? `rgba(23, 23, 23, ${state.overlayOpacity})`
+          : `rgba(255, 251, 245, ${state.overlayOpacity})`,
+      }
     },
-    [savePreference]
+    [currentBackground, state.overlayEnabled, state.overlayOpacity]
   )
 
   // Toggle overlay
   const toggleOverlay = useCallback(() => {
-    savePreference({ useOverlay: !preference.useOverlay })
-  }, [preference.useOverlay, savePreference])
+    saveState({ overlayEnabled: !state.overlayEnabled })
+  }, [state.overlayEnabled, saveState])
 
   // Set overlay opacity
   const setOverlayOpacity = useCallback(
     (opacity: number) => {
-      savePreference({ overlayOpacity: Math.max(0, Math.min(1, opacity)) })
+      saveState({ overlayOpacity: Math.max(0.5, Math.min(0.98, opacity)) })
     },
-    [savePreference]
+    [saveState]
   )
 
   // Reset to defaults
-  const resetToDefaults = useCallback(() => {
-    savePreference(DEFAULT_PREFERENCE)
-  }, [savePreference])
+  const reset = useCallback(() => {
+    saveState(DEFAULT_STATE)
+  }, [saveState])
 
   return {
-    preference,
+    // State
+    currentBackground,
     isLoaded,
-    getCurrentBackground,
-    getBackgroundStyles,
-    setLightBackground,
-    setDarkBackground,
+    overlayEnabled: state.overlayEnabled,
+    overlayOpacity: state.overlayOpacity,
+
+    // Actions
+    setBackground,
     toggleOverlay,
     setOverlayOpacity,
-    resetToDefaults,
-    backgroundOptions: BACKGROUND_OPTIONS,
+    reset,
+
+    // Style helpers
+    getBackgroundStyle,
+    getOverlayStyle,
+
+    // Data
+    options: BACKGROUND_OPTIONS,
+    solidOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'solid'),
+    gradientOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'gradient'),
+    imageOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'image'),
   }
 }

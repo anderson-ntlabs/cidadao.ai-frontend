@@ -1,20 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, Palette, Image, Sun, Moon, RotateCcw } from 'lucide-react'
+import Image from 'next/image'
+import { Check, Palette, ImageIcon, Sun, Moon, RotateCcw, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  useAcademyBackground,
-  BACKGROUND_OPTIONS,
-  type BackgroundOption,
-} from '@/hooks/use-academy-background'
+import { useAcademyBackground, type BackgroundOption } from '@/hooks/use-academy-background'
 
 /**
- * Background Selector Component
+ * Background Selector Modal
  *
- * Allows users to customize their Academy dashboard background
- * with Tarsila-inspired colors and TCC slide images.
+ * Allows users to customize their Academy dashboard background.
  *
  * Design: Bo Bardi + Dumont + Anderson
  * Author: Anderson Henrique da Silva
@@ -27,99 +23,113 @@ interface BackgroundSelectorProps {
 }
 
 export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps) {
-  // Detect dark mode
+  const [activeTab, setActiveTab] = useState<'colors' | 'images'>('colors')
   const [isDark, setIsDark] = useState(false)
+
+  // Detect dark mode
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    setIsDark(mediaQuery.matches || document.documentElement.classList.contains('dark'))
+    if (typeof window === 'undefined') return
 
-    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches)
-    mediaQuery.addEventListener('change', handler)
+    const checkDark = () => {
+      setIsDark(
+        document.documentElement.classList.contains('dark') ||
+          window.matchMedia('(prefers-color-scheme: dark)').matches
+      )
+    }
 
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'))
-    })
+    checkDark()
+
+    const observer = new MutationObserver(checkDark)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', checkDark)
+
     return () => {
-      mediaQuery.removeEventListener('change', handler)
       observer.disconnect()
+      mediaQuery.removeEventListener('change', checkDark)
     }
   }, [])
 
-  const [activeTab, setActiveTab] = useState<'colors' | 'images'>('colors')
-
   const {
-    preference,
-    setLightBackground,
-    setDarkBackground,
+    currentBackground,
+    setBackground,
     toggleOverlay,
     setOverlayOpacity,
-    resetToDefaults,
+    overlayEnabled,
+    overlayOpacity,
+    reset,
+    solidOptions,
+    gradientOptions,
+    imageOptions,
   } = useAcademyBackground()
-
-  const currentBgId = isDark ? preference.darkBackground : preference.lightBackground
-  const setBackground = isDark ? setDarkBackground : setLightBackground
-
-  const colorOptions = BACKGROUND_OPTIONS.filter(
-    (bg) => bg.type === 'solid' || bg.type === 'gradient'
-  )
-  const imageOptions = BACKGROUND_OPTIONS.filter((bg) => bg.type === 'image')
 
   if (!isOpen) return null
 
-  const renderBackgroundOption = (bg: BackgroundOption) => {
-    const isSelected = currentBgId === bg.id
-    const previewStyle: React.CSSProperties =
-      bg.type === 'image'
-        ? {
-            backgroundImage: `url(${bg.value})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }
-        : bg.type === 'gradient'
-          ? { background: bg.value }
-          : { backgroundColor: bg.value }
+  const colorOptions = [...solidOptions, ...gradientOptions]
+
+  const renderColorOption = (bg: BackgroundOption) => {
+    const isSelected = currentBackground?.id === bg.id
 
     return (
       <button
         key={bg.id}
         onClick={() => setBackground(bg.id)}
         className={cn(
-          'relative group rounded-xl overflow-hidden transition-all duration-200',
-          'hover:ring-2 hover:ring-offset-2 hover:ring-offset-background',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2',
-          bg.type === 'image' ? 'aspect-video' : 'aspect-square',
-          isSelected
-            ? 'ring-2 ring-offset-2 ring-tarsila-amarelo dark:ring-yellow-400'
-            : 'hover:ring-gray-300 dark:hover:ring-gray-600'
+          'relative w-16 h-16 rounded-xl overflow-hidden transition-all duration-200',
+          'hover:scale-105 hover:shadow-lg',
+          'focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2',
+          isSelected && 'ring-2 ring-yellow-500 ring-offset-2'
         )}
+        title={bg.name}
       >
-        <div className="absolute inset-0" style={previewStyle} />
         <div
-          className={cn(
-            'absolute inset-0 bg-gradient-to-t from-black/60 to-transparent',
-            'opacity-0 group-hover:opacity-100 transition-opacity'
-          )}
+          className="absolute inset-0"
+          style={bg.type === 'gradient' ? { background: bg.value } : { backgroundColor: bg.value }}
         />
-        <div className="absolute bottom-0 left-0 right-0 p-2">
-          <p
-            className={cn(
-              'text-xs font-medium truncate transition-colors',
-              'text-transparent group-hover:text-white'
-            )}
-          >
-            {bg.name}
-          </p>
-          {bg.artist && (
-            <p className="text-[10px] text-transparent group-hover:text-white/70 truncate">
-              {bg.artist}
-            </p>
-          )}
+        {isSelected && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <Check className="w-6 h-6 text-white" />
+          </div>
+        )}
+      </button>
+    )
+  }
+
+  const renderImageOption = (bg: BackgroundOption) => {
+    const isSelected = currentBackground?.id === bg.id
+
+    return (
+      <button
+        key={bg.id}
+        onClick={() => setBackground(bg.id)}
+        className={cn(
+          'relative aspect-video rounded-xl overflow-hidden transition-all duration-200',
+          'hover:scale-[1.02] hover:shadow-lg',
+          'focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2',
+          isSelected && 'ring-2 ring-yellow-500 ring-offset-2'
+        )}
+        title={bg.name}
+      >
+        {/* SVG Background Preview */}
+        <div
+          className="absolute inset-0 bg-gray-200 dark:bg-gray-700"
+          style={{
+            backgroundImage: `url(${bg.value})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        {/* Hover overlay with name */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-2 left-2 right-2">
+            <p className="text-white text-xs font-medium truncate">{bg.name}</p>
+            <p className="text-white/70 text-[10px]">{bg.artist}</p>
+          </div>
         </div>
         {isSelected && (
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-tarsila-amarelo dark:bg-yellow-400 flex items-center justify-center">
-            <Check className="w-4 h-4 text-white dark:text-gray-900" />
+          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" />
           </div>
         )}
       </button>
@@ -129,17 +139,10 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div
-        className={cn(
-          'relative w-full max-w-2xl max-h-[85vh] overflow-hidden',
-          'rounded-2xl shadow-2xl',
-          'bg-white dark:bg-gray-900',
-          'border border-gray-200 dark:border-gray-800'
-        )}
-      >
+      <div className="relative w-full max-w-lg max-h-[80vh] overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-3">
@@ -147,32 +150,20 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
               <Palette className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 Personalizar Fundo
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Escolha um fundo para o modo {isDark ? 'escuro' : 'claro'}
+                Escolha seu estilo preferido
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs">
-              {isDark ? (
-                <>
-                  <Moon className="w-3 h-3" />
-                  <span>Escuro</span>
-                </>
-              ) : (
-                <>
-                  <Sun className="w-3 h-3" />
-                  <span>Claro</span>
-                </>
-              )}
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              Fechar
-            </Button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
         </div>
 
         {/* Tabs */}
@@ -180,91 +171,79 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
           <button
             onClick={() => setActiveTab('colors')}
             className={cn(
-              'flex-1 py-3 text-sm font-medium transition-colors',
+              'flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors',
               activeTab === 'colors'
-                ? 'text-tarsila-amarelo dark:text-yellow-400 border-b-2 border-tarsila-amarelo dark:border-yellow-400'
+                ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-500'
                 : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             )}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Palette className="w-4 h-4" />
-              Cores e Gradientes
-            </div>
+            <Palette className="w-4 h-4" />
+            Cores
           </button>
           <button
             onClick={() => setActiveTab('images')}
             className={cn(
-              'flex-1 py-3 text-sm font-medium transition-colors',
+              'flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors',
               activeTab === 'images'
-                ? 'text-tarsila-amarelo dark:text-yellow-400 border-b-2 border-tarsila-amarelo dark:border-yellow-400'
+                ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-500'
                 : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
             )}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Image className="w-4 h-4" />
-              Imagens do TCC
-            </div>
+            <ImageIcon className="w-4 h-4" />
+            Imagens TCC
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-4 overflow-y-auto max-h-[50vh]">
+        <div className="p-4 overflow-y-auto max-h-[45vh]">
           {activeTab === 'colors' ? (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Paleta Tarsila do Amaral
+                <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">
+                  Cores Solidas e Gradientes
                 </h3>
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                  {colorOptions.map(renderBackgroundOption)}
-                </div>
+                <div className="flex flex-wrap gap-3">{colorOptions.map(renderColorOption)}</div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">
                   Slides do TCC - Cidadao.AI
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {imageOptions.map(renderBackgroundOption)}
-                </div>
+                <div className="grid grid-cols-2 gap-3">{imageOptions.map(renderImageOption)}</div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Overlay Settings */}
-        {BACKGROUND_OPTIONS.find((bg) => bg.id === currentBgId)?.type === 'image' && (
+        {/* Overlay Settings (for images) */}
+        {currentBackground?.type === 'image' && (
           <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={preference.useOverlay}
-                    onChange={toggleOverlay}
-                    className="w-4 h-4 rounded border-gray-300 text-tarsila-amarelo focus:ring-tarsila-amarelo"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Usar overlay para legibilidade
-                  </span>
-                </label>
-              </div>
-              {preference.useOverlay && (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={overlayEnabled}
+                  onChange={toggleOverlay}
+                  className="w-4 h-4 rounded text-yellow-500 focus:ring-yellow-500"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Overlay</span>
+              </label>
+              {overlayEnabled && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Opacidade:</span>
                   <input
                     type="range"
                     min="0.5"
-                    max="0.95"
-                    step="0.05"
-                    value={preference.overlayOpacity}
+                    max="0.98"
+                    step="0.02"
+                    value={overlayOpacity}
                     onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
-                    className="w-20 h-1 rounded-full bg-gray-300 dark:bg-gray-600"
+                    className="w-20"
                   />
                   <span className="text-xs text-gray-500 w-8">
-                    {Math.round(preference.overlayOpacity * 100)}%
+                    {Math.round(overlayOpacity * 100)}%
                   </span>
                 </div>
               )}
@@ -273,14 +252,12 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-          <Button variant="ghost" size="sm" onClick={resetToDefaults}>
+        <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-800">
+          <Button variant="ghost" size="sm" onClick={reset}>
             <RotateCcw className="w-4 h-4 mr-2" />
-            Restaurar padrao
+            Restaurar
           </Button>
-          <div className="text-xs text-gray-400 dark:text-gray-500 designer-signature">
-            Design: Bo Bardi + Dumont + Anderson
-          </div>
+          <span className="text-xs text-gray-400 italic">Bo Bardi + Dumont + Anderson</span>
         </div>
       </div>
     </div>
