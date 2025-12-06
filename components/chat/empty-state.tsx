@@ -78,11 +78,9 @@ export function ChatEmptyState({
   // Determine what to show
   const showPersonalized = isMaritacaMode || selectedAgentId
 
-  // Get display info - use model-specific images for Maritaca
+  // Get display info - use Maritaca logo for Maritaca mode
   const displayImage = isMaritacaMode
-    ? maritacaModel === 'sabia-3'
-      ? '/sabia3.1.png'
-      : '/sabiazinho.png'
+    ? '/logos/maritaca.png'
     : selectedAgent?.image || '/agents/abaporu.png'
 
   const displayName = isMaritacaMode ? maritacaConfig.name : selectedAgent?.name || 'Abaporu'

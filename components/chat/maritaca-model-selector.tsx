@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -68,7 +69,13 @@ export function MaritacaModelSelector({
             className
           )}
         >
-          <span className="text-base">{currentModelInfo.icon}</span>
+          <Image
+            src="/logos/maritaca.png"
+            alt="Maritaca"
+            width={18}
+            height={18}
+            className="rounded-sm"
+          />
           <span className="hidden sm:inline">{currentModelInfo.name}</span>
           <span className="sm:hidden">
             {selectedModel === 'sabia-3' ? 'Sabiá-3.1' : 'Sabiazinho-3'}
@@ -78,7 +85,14 @@ export function MaritacaModelSelector({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+        <DropdownMenuLabel className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-normal">
+          <Image
+            src="/logos/maritaca.png"
+            alt="Maritaca"
+            width={16}
+            height={16}
+            className="rounded-sm"
+          />
           Selecione o modelo Maritaca.AI
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

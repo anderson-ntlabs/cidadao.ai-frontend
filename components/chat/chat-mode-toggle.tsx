@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -46,11 +47,17 @@ export function ChatModeToggle({ mode, onModeChange, className }: ChatModeToggle
         className={cn(
           'gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
           mode === 'maritaca'
-            ? 'bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400'
+            ? 'bg-white dark:bg-gray-700 shadow-sm text-green-600 dark:text-green-400'
             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
         )}
       >
-        <span className="text-base">🦜</span>
+        <Image
+          src="/logos/maritaca.png"
+          alt="Maritaca"
+          width={20}
+          height={20}
+          className="rounded-sm"
+        />
         <span className="hidden sm:inline">Maritaca Direto</span>
         <span className="sm:hidden">Maritaca</span>
       </Button>
@@ -68,8 +75,8 @@ export function ChatModeDescription({ mode }: { mode: ChatMode }) {
         <span className="text-sm">🏛️</span>
         <p>
           <span className="font-medium text-gray-900 dark:text-gray-100">Cidadão.AI</span> usa o
-          modelo Sabiá aprimorado com sistema multi-agente. O Cidadão fala através da Maritaca,
-          mas com inteligência aumentada por especialistas brasileiros.
+          modelo Sabiá aprimorado com sistema multi-agente. O Cidadão fala através da Maritaca, mas
+          com inteligência aumentada por especialistas brasileiros.
         </p>
       </div>
     )
@@ -77,7 +84,13 @@ export function ChatModeDescription({ mode }: { mode: ChatMode }) {
 
   return (
     <div className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
-      <span className="text-sm">🦜</span>
+      <Image
+        src="/logos/maritaca.png"
+        alt="Maritaca"
+        width={16}
+        height={16}
+        className="rounded-sm mt-0.5"
+      />
       <p>
         <span className="font-medium text-gray-900 dark:text-gray-100">Maritaca Direto</span> acessa
         os modelos base da Maritaca.AI sem camadas adicionais. Ideal para testar os modelos
