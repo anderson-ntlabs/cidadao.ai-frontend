@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { InternshipContractModal } from '@/components/academy/internship-contract-modal'
+import { CertificateModal } from '@/components/academy/certificate-modal'
 
 // Rank configuration
 const ranks = {
@@ -45,6 +46,7 @@ const agentTeachers = [
 export default function AcademyDashboardPage() {
   const { user, isLoading, xpTransactions, resetDemo } = useAcademyDemo()
   const [showContractModal, setShowContractModal] = useState(false)
+  const [showCertificateModal, setShowCertificateModal] = useState(false)
 
   // Show internship contract modal on first access
   useEffect(() => {
@@ -330,6 +332,15 @@ export default function AcademyDashboardPage() {
                     Ver ranking
                   </span>
                 </Link>
+                <button
+                  onClick={() => setShowCertificateModal(true)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30 transition-colors group border border-green-200 dark:border-green-700"
+                >
+                  <span className="text-xl">🎓</span>
+                  <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
+                    Certificado e Relatorio
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -365,6 +376,12 @@ export default function AcademyDashboardPage() {
       <InternshipContractModal
         isOpen={showContractModal}
         onClose={() => setShowContractModal(false)}
+      />
+
+      {/* Certificate Modal */}
+      <CertificateModal
+        isOpen={showCertificateModal}
+        onClose={() => setShowCertificateModal(false)}
       />
     </div>
   )
