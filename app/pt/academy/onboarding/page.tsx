@@ -104,6 +104,7 @@ function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isPreviewMode = searchParams.get('preview') === 'true'
+  const [isHydrated, setIsHydrated] = useState(false)
 
   const {
     user,
@@ -121,7 +122,15 @@ function OnboardingContent() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [verifyError, setVerifyError] = useState<string | null>(null)
 
+  // Mark as hydrated after first client render
   useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    // Wait for hydration to check preview mode
+    if (!isHydrated) return
+
     // In preview mode, always init onboarding for demonstration
     if (isPreviewMode && !onboarding) {
       initOnboarding()
@@ -136,23 +145,28 @@ function OnboardingContent() {
     onboarding,
     initOnboarding,
     isPreviewMode,
+    isHydrated,
   ])
 
   useEffect(() => {
+    // Wait for hydration before redirecting
+    if (!isHydrated) return
     // Skip redirects in preview mode
     if (isPreviewMode) return
     if (!user.hasAcceptedInternshipContract) {
       router.replace('/pt/academy/contract')
     }
-  }, [user.hasAcceptedInternshipContract, router, isPreviewMode])
+  }, [user.hasAcceptedInternshipContract, router, isPreviewMode, isHydrated])
 
   useEffect(() => {
+    // Wait for hydration before redirecting
+    if (!isHydrated) return
     // Skip redirects in preview mode
     if (isPreviewMode) return
     if (user.hasCompletedOnboarding) {
       router.replace('/pt/academy')
     }
-  }, [user.hasCompletedOnboarding, router, isPreviewMode])
+  }, [user.hasCompletedOnboarding, router, isPreviewMode, isHydrated])
 
   const currentStep = onboarding?.currentStep || 1
   const selectedTracks = onboarding?.selectedTracks || []
