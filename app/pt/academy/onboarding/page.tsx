@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAcademyDemo, TRACK_REPOS } from '@/hooks/use-academy-demo'
 import {
   Rocket,
@@ -100,8 +100,11 @@ const STEPS = [
   { label: 'Pronto!', icon: PartyPopper },
 ]
 
-export default function AcademyOnboardingPage() {
+function OnboardingContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isPreviewMode = searchParams.get('preview') === 'true'
+
   const {
     user,
     onboarding,
@@ -119,22 +122,37 @@ export default function AcademyOnboardingPage() {
   const [verifyError, setVerifyError] = useState<string | null>(null)
 
   useEffect(() => {
+    // In preview mode, always init onboarding for demonstration
+    if (isPreviewMode && !onboarding) {
+      initOnboarding()
+      return
+    }
     if (user.hasAcceptedInternshipContract && !onboarding && !user.hasCompletedOnboarding) {
       initOnboarding()
     }
-  }, [user.hasAcceptedInternshipContract, user.hasCompletedOnboarding, onboarding, initOnboarding])
+  }, [
+    user.hasAcceptedInternshipContract,
+    user.hasCompletedOnboarding,
+    onboarding,
+    initOnboarding,
+    isPreviewMode,
+  ])
 
   useEffect(() => {
+    // Skip redirects in preview mode
+    if (isPreviewMode) return
     if (!user.hasAcceptedInternshipContract) {
       router.replace('/pt/academy/contract')
     }
-  }, [user.hasAcceptedInternshipContract, router])
+  }, [user.hasAcceptedInternshipContract, router, isPreviewMode])
 
   useEffect(() => {
+    // Skip redirects in preview mode
+    if (isPreviewMode) return
     if (user.hasCompletedOnboarding) {
       router.replace('/pt/academy')
     }
-  }, [user.hasCompletedOnboarding, router])
+  }, [user.hasCompletedOnboarding, router, isPreviewMode])
 
   const currentStep = onboarding?.currentStep || 1
   const selectedTracks = onboarding?.selectedTracks || []
@@ -155,6 +173,11 @@ export default function AcademyOnboardingPage() {
   }
 
   const handleComplete = () => {
+    if (isPreviewMode) {
+      // In preview mode, just go back to dashboard without saving
+      router.push('/pt/academy')
+      return
+    }
     completeOnboarding()
     router.push('/pt/academy')
   }
@@ -180,6 +203,19 @@ export default function AcademyOnboardingPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Preview Mode Banner */}
+      {isPreviewMode && (
+        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white py-2 px-4">
+          <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-sm">
+            <span className="animate-pulse">👁️</span>
+            <span className="font-medium">Modo Preview</span>
+            <span className="hidden sm:inline text-white/80">
+              — Explore o onboarding sem alterar seus dados
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -194,7 +230,7 @@ export default function AcademyOnboardingPage() {
           </div>
           <Badge variant="warning" size="lg">
             <Sparkles className="w-3 h-3 mr-1" />
-            +275 XP ao concluir
+            {isPreviewMode ? 'Preview' : '+275 XP ao concluir'}
           </Badge>
         </div>
       </header>
@@ -712,5 +748,27 @@ export default function AcademyOnboardingPage() {
         </Card>
       </main>
     </div>
+  )
+}
+
+// Loading fallback for Suspense
+function OnboardingLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <GraduationCap className="w-8 h-8 text-white" />
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">Carregando onboarding...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function AcademyOnboardingPage() {
+  return (
+    <Suspense fallback={<OnboardingLoading />}>
+      <OnboardingContent />
+    </Suspense>
   )
 }
