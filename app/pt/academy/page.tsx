@@ -122,10 +122,33 @@ function AcademyDashboardContent() {
   const [showLgpdModal, setShowLgpdModal] = useState(false)
 
   // Redirect unauthenticated users to login (if not in demo mode)
+  // But wait longer if coming from OAuth callback
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
-      router.replace('/pt/academy/login')
+    if (isDemoMode) return
+    if (realAuth.isLoading) return
+    if (realAuth.isAuthenticated) return
+
+    // Check if we're coming from OAuth - give more time for session to establish
+    const isOAuthComplete =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('oauth_complete=') ||
+        document.cookie.includes('oauth_session_ready=true'))
+
+    if (isOAuthComplete) {
+      // Wait additional time before redirecting - the auth hook is still trying
+      const timer = setTimeout(() => {
+        // Re-check authentication status
+        if (!realAuth.isAuthenticated) {
+          console.log('[Academy] OAuth timeout - redirecting to login')
+          router.replace('/pt/academy/login')
+        }
+      }, 5000) // 5 second grace period for OAuth
+
+      return () => clearTimeout(timer)
     }
+
+    // Not from OAuth - redirect immediately
+    router.replace('/pt/academy/login')
   }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
 
   // Show LGPD consent modal for authenticated users who haven't accepted

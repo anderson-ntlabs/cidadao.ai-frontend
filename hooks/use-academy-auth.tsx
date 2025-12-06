@@ -168,6 +168,50 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
       try {
         logger.debug(`Academy: Starting session check... (attempt ${retryCount + 1})`)
 
+        // If coming from OAuth, add a small delay to let cookies propagate
+        if (isOAuthComplete && retryCount === 0) {
+          logger.debug('Academy: OAuth detected, waiting 500ms for cookies to propagate...')
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        }
+
+        // If coming from OAuth, try to refresh session first to ensure cookies are synced
+        if (isOAuthComplete && retryCount <= 1) {
+          logger.debug('Academy: OAuth detected, attempting session refresh...')
+          try {
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+            if (refreshData?.session?.user) {
+              logger.debug('Academy: Session refreshed successfully from OAuth')
+              const academyUser = await convertToAcademyUser(refreshData.session.user)
+              if (academyUser) {
+                setUser(academyUser)
+                setIsAuthenticated(true)
+                setIsLoading(false)
+
+                // Clear OAuth indicators
+                if (typeof document !== 'undefined') {
+                  document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+                }
+                if (
+                  typeof window !== 'undefined' &&
+                  window.location.search.includes('oauth_complete=')
+                ) {
+                  const url = new URL(window.location.href)
+                  url.searchParams.delete('oauth_complete')
+                  window.history.replaceState({}, '', url.pathname + url.search)
+                }
+                return true
+              }
+            }
+            if (refreshError) {
+              logger.debug('Academy: Session refresh failed, trying getUser...', {
+                error: refreshError.message,
+              })
+            }
+          } catch (refreshErr) {
+            logger.debug('Academy: Session refresh threw error, continuing with getUser...')
+          }
+        }
+
         const {
           data: { user: supabaseUser },
           error,
@@ -259,7 +303,7 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
 
     checkSession()
 
-    // Listen for auth changes
+    // Listen for auth changes - this is crucial for OAuth completion
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -268,12 +312,22 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
       if (!isMounted) return
 
       if (session?.user) {
-        logger.debug('Academy: Session user detected, converting...')
+        logger.debug('Academy: Session user detected via auth change, converting...')
         const academyUser = await convertToAcademyUser(session.user)
         if (isMounted && academyUser) {
           setUser(academyUser)
           setIsAuthenticated(true)
           setIsLoading(false)
+
+          // Clear OAuth indicators on successful auth via listener
+          if (typeof document !== 'undefined') {
+            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+          }
+          if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
+            const url = new URL(window.location.href)
+            url.searchParams.delete('oauth_complete')
+            window.history.replaceState({}, '', url.pathname + url.search)
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
