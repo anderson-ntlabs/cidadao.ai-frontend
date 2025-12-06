@@ -124,7 +124,7 @@ export default function AcademyOnboardingPage() {
 
       {/* Profile Completion Form */}
       {step === 2 && (
-        <div className="w-full max-w-xl">
+        <div className="w-full max-w-2xl">
           {/* Progress indicator */}
           <div className="flex items-center justify-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-bold">
@@ -169,54 +169,52 @@ export default function AcademyOnboardingPage() {
               }}
               className="space-y-6"
             >
-              {/* Matricula */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Matricula IFSULDEMINAS
-                </label>
-                <input
-                  type="text"
-                  value={formData.matricula}
-                  onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
-                  placeholder="Ex: 2024001234"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  required
-                />
+              {/* Row 1: Matricula + Periodo */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Matricula */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Matricula IFSULDEMINAS
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.matricula}
+                    onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
+                    placeholder="Ex: 2024001234"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Periodo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Periodo atual
+                  </label>
+                  <select
+                    value={formData.periodo}
+                    onChange={(e) =>
+                      setFormData({ ...formData, periodo: parseInt(e.target.value) })
+                    }
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((p) => (
+                      <option key={p} value={p}>
+                        {p}o periodo
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Curso */}
+              {/* Curso - Apenas Ciência da Computação (Campus Muzambinho) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Curso
                 </label>
-                <select
-                  value={formData.curso}
-                  onChange={(e) => setFormData({ ...formData, curso: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="Ciencia da Computacao">Ciencia da Computacao</option>
-                  <option value="Engenharia de Software">Engenharia de Software</option>
-                  <option value="Sistemas de Informacao">Sistemas de Informacao</option>
-                  <option value="Outro">Outro</option>
-                </select>
-              </div>
-
-              {/* Periodo */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Periodo atual
-                </label>
-                <select
-                  value={formData.periodo}
-                  onChange={(e) => setFormData({ ...formData, periodo: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((p) => (
-                    <option key={p} value={p}>
-                      {p}o periodo
-                    </option>
-                  ))}
-                </select>
+                <div className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                  Ciencia da Computacao - Campus Muzambinho
+                </div>
               </div>
 
               {/* Track Selection */}
