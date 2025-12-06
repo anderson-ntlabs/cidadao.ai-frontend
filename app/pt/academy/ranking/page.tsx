@@ -5,21 +5,42 @@
  * - XP ranking
  * - Time ranking
  * - Streak ranking
+ * - Supabase integration with demo fallback
  *
  * Author: Anderson Henrique da Silva
  * Refactored: 2025-12-06 - Design System integration
+ * Updated: 2025-12-06 - Supabase integration
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Trophy, Zap, Clock, Flame, Crown, Medal, Star, Sparkles } from 'lucide-react'
+import {
+  ArrowLeft,
+  Trophy,
+  Zap,
+  Clock,
+  Flame,
+  Crown,
+  Medal,
+  Star,
+  Sparkles,
+  RefreshCw,
+  Database,
+  Users,
+} from 'lucide-react'
+import {
+  fetchLeaderboard,
+  mockLeaderboard,
+  type LeaderboardEntry,
+  type SortBy,
+} from '@/lib/academy/leaderboard'
 
 const ranks = {
   novato: {
@@ -54,110 +75,6 @@ const ranks = {
   },
 }
 
-interface LeaderboardEntry {
-  id: string
-  user_id: string
-  full_name: string
-  avatar_url: string
-  total_xp: number
-  current_level: number
-  current_rank: string
-  current_streak: number
-  total_time_minutes: number
-}
-
-// Mock leaderboard data for demo mode
-const mockLeaderboard: LeaderboardEntry[] = [
-  {
-    id: '1',
-    user_id: 'user-1',
-    full_name: 'Ana Carolina Silva',
-    avatar_url: 'https://ui-avatars.com/api/?name=Ana+Silva&background=16a34a&color=fff',
-    total_xp: 2450,
-    current_level: 25,
-    current_rank: 'mentor',
-    current_streak: 15,
-    total_time_minutes: 1200,
-  },
-  {
-    id: '2',
-    user_id: 'user-2',
-    full_name: 'Pedro Henrique Costa',
-    avatar_url: 'https://ui-avatars.com/api/?name=Pedro+Costa&background=2563eb&color=fff',
-    total_xp: 1890,
-    current_level: 19,
-    current_rank: 'contribuidor',
-    current_streak: 12,
-    total_time_minutes: 980,
-  },
-  {
-    id: '3',
-    user_id: 'user-3',
-    full_name: 'Mariana Oliveira',
-    avatar_url: 'https://ui-avatars.com/api/?name=Mariana+Oliveira&background=7c3aed&color=fff',
-    total_xp: 1560,
-    current_level: 16,
-    current_rank: 'contribuidor',
-    current_streak: 8,
-    total_time_minutes: 750,
-  },
-  {
-    id: '4',
-    user_id: 'user-4',
-    full_name: 'Lucas Santos',
-    avatar_url: 'https://ui-avatars.com/api/?name=Lucas+Santos&background=dc2626&color=fff',
-    total_xp: 1120,
-    current_level: 12,
-    current_rank: 'contribuidor',
-    current_streak: 5,
-    total_time_minutes: 620,
-  },
-  {
-    id: '5',
-    user_id: 'user-5',
-    full_name: 'Julia Ferreira',
-    avatar_url: 'https://ui-avatars.com/api/?name=Julia+Ferreira&background=ea580c&color=fff',
-    total_xp: 890,
-    current_level: 9,
-    current_rank: 'contribuidor',
-    current_streak: 3,
-    total_time_minutes: 480,
-  },
-  {
-    id: '6',
-    user_id: 'user-6',
-    full_name: 'Gabriel Rodrigues',
-    avatar_url: 'https://ui-avatars.com/api/?name=Gabriel+Rodrigues&background=0891b2&color=fff',
-    total_xp: 650,
-    current_level: 7,
-    current_rank: 'contribuidor',
-    current_streak: 4,
-    total_time_minutes: 320,
-  },
-  {
-    id: '7',
-    user_id: 'user-7',
-    full_name: 'Beatriz Lima',
-    avatar_url: 'https://ui-avatars.com/api/?name=Beatriz+Lima&background=db2777&color=fff',
-    total_xp: 420,
-    current_level: 5,
-    current_rank: 'aprendiz',
-    current_streak: 2,
-    total_time_minutes: 210,
-  },
-  {
-    id: '8',
-    user_id: 'user-8',
-    full_name: 'Rafael Almeida',
-    avatar_url: 'https://ui-avatars.com/api/?name=Rafael+Almeida&background=4f46e5&color=fff',
-    total_xp: 280,
-    current_level: 3,
-    current_rank: 'aprendiz',
-    current_streak: 1,
-    total_time_minutes: 140,
-  },
-]
-
 const filterTabs = [
   { id: 'xp', icon: Zap, label: 'Por XP' },
   { id: 'time', icon: Clock, label: 'Por tempo' },
@@ -165,40 +82,83 @@ const filterTabs = [
 ]
 
 export default function AcademyRankingPage() {
-  const { user, isLoading } = useAcademyDemo()
+  const { user, isLoading: demoLoading } = useAcademyDemo()
 
-  const [filter, setFilter] = useState<'xp' | 'time' | 'streak'>('xp')
+  const [filter, setFilter] = useState<SortBy>('xp')
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
+  const [isUsingSupabase, setIsUsingSupabase] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  // Combine demo user with mock leaderboard
-  const leaderboard = [...mockLeaderboard]
+  // Fetch leaderboard data
+  const loadLeaderboard = useCallback(async () => {
+    setIsLoadingData(true)
 
-  // Add current demo user to leaderboard
-  const demoUserEntry: LeaderboardEntry = {
-    id: 'demo-user',
-    user_id: user.id,
-    full_name: user.name,
-    avatar_url: user.avatar,
-    total_xp: user.totalXp,
-    current_level: user.currentLevel,
-    current_rank: user.currentRank,
-    current_streak: user.currentStreak,
-    total_time_minutes: user.totalTimeMinutes,
+    // Try Supabase first
+    const { data, error } = await fetchLeaderboard(filter, 50)
+
+    if (data && data.length > 0 && !error) {
+      setLeaderboardData(data)
+      setIsUsingSupabase(true)
+    } else {
+      // Fallback to mock data
+      setLeaderboardData(mockLeaderboard)
+      setIsUsingSupabase(false)
+    }
+
+    setIsLoadingData(false)
+  }, [filter])
+
+  // Load on mount and when filter changes
+  useEffect(() => {
+    loadLeaderboard()
+  }, [loadLeaderboard])
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await loadLeaderboard()
+    setIsRefreshing(false)
   }
 
-  // Check if demo user is already in the list (by similar XP)
-  const existingIndex = leaderboard.findIndex(
-    (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
-  )
+  // Add current demo user to leaderboard (if using mock data or user not in DB)
+  const getLeaderboardWithUser = useCallback(() => {
+    const leaderboard = [...leaderboardData]
 
-  if (existingIndex === -1) {
-    leaderboard.push(demoUserEntry)
-  } else {
-    // Replace a similar entry with demo user
-    leaderboard[existingIndex] = demoUserEntry
-  }
+    // Only add demo user if not already in the list
+    const userInList = leaderboard.some((e) => e.user_id === user.id)
+
+    if (!userInList) {
+      const demoUserEntry: LeaderboardEntry = {
+        id: 'demo-user',
+        user_id: user.id,
+        full_name: user.name,
+        avatar_url: user.avatar,
+        total_xp: user.totalXp,
+        current_level: user.currentLevel,
+        current_rank: user.currentRank,
+        current_streak: user.currentStreak,
+        total_time_minutes: user.totalTimeMinutes,
+      }
+
+      // Check if demo user is already in the list (by similar XP)
+      const existingIndex = leaderboard.findIndex(
+        (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
+      )
+
+      if (existingIndex === -1) {
+        leaderboard.push(demoUserEntry)
+      } else {
+        // Replace a similar entry with demo user
+        leaderboard[existingIndex] = demoUserEntry
+      }
+    }
+
+    return leaderboard
+  }, [leaderboardData, user])
 
   // Sort based on filter
-  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+  const sortedLeaderboard = [...getLeaderboardWithUser()].sort((a, b) => {
     if (filter === 'xp') return b.total_xp - a.total_xp
     if (filter === 'time') return b.total_time_minutes - a.total_time_minutes
     return b.current_streak - a.current_streak
@@ -206,6 +166,8 @@ export default function AcademyRankingPage() {
 
   // Find user rank
   const userRank = sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1
+
+  const isLoading = demoLoading || isLoadingData
 
   if (isLoading) {
     return (
@@ -234,22 +196,50 @@ export default function AcademyRankingPage() {
       {/* Header */}
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/pt/academy"
-              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Ranking da Academy
-                </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/pt/academy"
+                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                    Ranking da Academy
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Veja quem está liderando
+                  </p>
+                  {isUsingSupabase ? (
+                    <Badge variant="success" size="sm" className="flex items-center gap-1">
+                      <Database className="w-3 h-3" />
+                      Ao vivo
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" size="sm" className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      Demo
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Veja quem está liderando</p>
             </div>
+
+            <Button
+              onClick={handleRefresh}
+              variant="ghost"
+              size="sm"
+              disabled={isRefreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+              <span className="hidden sm:inline">Atualizar</span>
+            </Button>
           </div>
         </div>
       </header>
