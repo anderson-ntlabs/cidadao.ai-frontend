@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Send, Sparkles, MessageSquare, Zap, Plane } from 'lucide-react'
+import { ArrowLeft, Send, Sparkles, MessageSquare } from 'lucide-react'
 import { trackMentorChat, trackStudySession } from '@/lib/analytics/academy-tracker'
 
 /**
@@ -27,16 +27,16 @@ import { trackMentorChat, trackStudySession } from '@/lib/analytics/academy-trac
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
-type ChatMode = 'mentor' | 'maritaca'
+type ChatMode = 'mentor' | 'lina' | 'maritaca'
 
 const chatModes = {
   mentor: {
     id: 'santos-dumont',
     name: 'Santos-Dumont',
-    role: 'Mentor da Academy',
+    role: 'Mentor de Engenharia',
     emoji: '✈️',
     avatar: '/agents/santos-dumont.png',
-    description: 'Tire duvidas sobre o projeto Cidadao.AI e receba orientacao para seu aprendizado',
+    description: 'Inovacao, engenharia criativa e arquitetura do Cidadao.AI',
     color: 'from-green-500 to-emerald-600',
     systemPrompt: `Voce e Santos-Dumont, mentor da Academy Cidadao.AI.
 Voce e apaixonado por inovacao, engenharia criativa e educacao.
@@ -50,13 +50,33 @@ Ajude os estudantes com duvidas sobre:
 Seja didatico, incentivador e use analogias com aviacao quando apropriado.
 Responda sempre em portugues brasileiro.`,
   },
+  lina: {
+    id: 'bobardi',
+    name: 'Lina Bo Bardi',
+    role: 'Mentora de UI/UX',
+    emoji: '🏛️',
+    avatar: '/agents/Lina_Bo_Bardi.jpg',
+    description: 'Design funcional, acessibilidade e interfaces elegantes',
+    color: 'from-amber-500 to-orange-600',
+    systemPrompt: `Voce e Lina Bo Bardi, arquiteta modernista e mentora de UI/UX da Academy Cidadao.AI.
+Voce criou o MASP e e apaixonada por design funcional e acessivel.
+Ajude os estudantes com duvidas sobre:
+- Design de interfaces e experiencia do usuario
+- Acessibilidade e design inclusivo
+- Principios de design: simplicidade, funcionalidade e beleza
+- CSS, Tailwind, componentes React
+- Boas praticas de frontend
+
+Use analogias com arquitetura quando apropriado. Valorize a funcao sobre a forma excessiva.
+Responda sempre em portugues brasileiro com carinho e sabedoria.`,
+  },
   maritaca: {
     id: 'maritaca',
     name: 'Maritaca AI',
     role: 'Assistente IA',
     emoji: '🦜',
     avatar: '/sabiazinho.png',
-    description: 'LLM brasileiro - tire dúvidas sobre qualquer tema de programação',
+    description: 'LLM brasileiro - duvidas gerais de programacao',
     color: 'from-blue-500 to-cyan-500',
     systemPrompt: `Você é um assistente educacional da Academy Cidadão.AI, uma plataforma aberta de aprendizado.
 Ajude os estudantes a aprender sobre desenvolvimento de software, inteligência artificial, e tecnologia em geral.
@@ -91,6 +111,8 @@ function ChatContent() {
     const agentParam = searchParams.get('agent')
     if (agentParam === 'santos-dumont') {
       setChatMode('mentor')
+    } else if (agentParam === 'bobardi' || agentParam === 'lina') {
+      setChatMode('lina')
     } else if (agentParam === 'maritaca') {
       setChatMode('maritaca')
     }
@@ -185,7 +207,9 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
 Tente novamente em alguns instantes.`
         }
       } else {
-        // Santos Dumont - Backend agent with SSE streaming
+        // Mentor agents (Santos Dumont or Lina Bo Bardi) - Backend agent with SSE streaming
+        const backendAgentId = chatMode === 'lina' ? 'bobardi' : 'santos_dumont'
+
         try {
           setIsStreaming(true)
           setStreamingContent('')
@@ -195,7 +219,7 @@ Tente novamente em alguns instantes.`
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               message: userMessage.content,
-              agent_id: 'santos_dumont',
+              agent_id: backendAgentId,
             }),
           })
 
@@ -359,11 +383,12 @@ Continue voando alto! 🛫`
           </div>
 
           {/* Mode Toggle */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Santos-Dumont */}
             <button
               onClick={() => handleModeChange('mentor')}
               className={cn(
-                'flex items-center gap-4 p-4 rounded-2xl transition-all duration-200',
+                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
                 'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
                 'border-2',
                 chatMode === 'mentor'
@@ -371,35 +396,59 @@ Continue voando alto! 🛫`
                   : 'border-gray-200 dark:border-gray-600 hover:border-green-400'
               )}
             >
-              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md">
                 <Image
                   src={chatModes.mentor.avatar}
                   alt={chatModes.mentor.name}
-                  width={56}
-                  height={56}
+                  width={48}
+                  height={48}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
-                    Santos-Dumont
-                  </p>
-                  <Plane className="w-4 h-4 text-green-500 flex-shrink-0" />
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Mentor • Duvidas do projeto
-                </p>
+              <div className="text-center">
+                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Santos-Dumont</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">Engenharia</p>
               </div>
               {chatMode === 'mentor' && (
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               )}
             </button>
 
+            {/* Lina Bo Bardi */}
+            <button
+              onClick={() => handleModeChange('lina')}
+              className={cn(
+                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
+                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
+                'border-2',
+                chatMode === 'lina'
+                  ? 'border-amber-500 ring-2 ring-amber-500/20'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-amber-400'
+              )}
+            >
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md">
+                <Image
+                  src={chatModes.lina.avatar}
+                  alt={chatModes.lina.name}
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Lina Bo Bardi</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">UI/UX</p>
+              </div>
+              {chatMode === 'lina' && (
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+              )}
+            </button>
+
+            {/* Maritaca AI */}
             <button
               onClick={() => handleModeChange('maritaca')}
               className={cn(
-                'flex items-center gap-4 p-4 rounded-2xl transition-all duration-200',
+                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
                 'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
                 'border-2',
                 chatMode === 'maritaca'
@@ -407,20 +456,15 @@ Continue voando alto! 🛫`
                   : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'
               )}
             >
-              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md flex-shrink-0 bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                <span className="text-3xl">🦜</span>
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                <span className="text-2xl">🦜</span>
               </div>
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate">Maritaca AI</p>
-                  <Badge variant="info" size="sm" className="flex-shrink-0">
-                    <Zap className="w-3 h-3" />
-                  </Badge>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">LLM • Qualquer tema</p>
+              <div className="text-center">
+                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Maritaca AI</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">LLM Geral</p>
               </div>
               {chatMode === 'maritaca' && (
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse flex-shrink-0" />
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
               )}
             </button>
           </div>
