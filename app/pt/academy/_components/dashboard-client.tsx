@@ -39,6 +39,32 @@ import { cn } from '@/lib/utils'
  * Created: 2025-12-06
  */
 
+// Avatar component with error fallback
+function Avatar({
+  src,
+  alt,
+  className,
+  fallbackName,
+}: {
+  src?: string
+  alt: string
+  className?: string
+  fallbackName: string
+}) {
+  const [error, setError] = useState(false)
+  const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName)}&background=f59e0b&color=fff&size=256`
+
+  return (
+    <img
+      src={error || !src ? fallbackUrl : src}
+      alt={alt}
+      className={className}
+      onError={() => setError(true)}
+      referrerPolicy="no-referrer"
+    />
+  )
+}
+
 interface DashboardUser {
   id: string
   name: string
@@ -201,10 +227,11 @@ export function DashboardClient({
               >
                 <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-red-500" />
               </button>
-              <img
+              <Avatar
                 src={user.avatar}
                 alt={user.name}
-                className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-md"
+                fallbackName={user.name}
+                className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-md object-cover"
               />
             </div>
           </div>
@@ -243,10 +270,11 @@ export function DashboardClient({
               <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
                 {/* Avatar */}
                 <div className="relative">
-                  <img
+                  <Avatar
                     src={user.avatar}
                     alt={user.name}
-                    className="w-32 h-32 rounded-2xl border-4 border-white dark:border-gray-900 shadow-xl object-cover"
+                    fallbackName={user.name}
+                    className="w-32 h-32 rounded-2xl border-4 border-white dark:border-gray-900 shadow-xl object-cover bg-gray-100 dark:bg-gray-800"
                   />
                   <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg">
                     {rankInfo.emoji}
