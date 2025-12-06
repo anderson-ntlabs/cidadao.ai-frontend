@@ -85,7 +85,7 @@ export const productionCSP: CSPDirectives = {
   // Styles: Allow self and inline styles (Next.js requirement)
   'style-src': ["'self'", "'unsafe-inline'"],
 
-  // Images: Allow self, data URIs, Vercel, VLibras, Google avatars, and external CDNs
+  // Images: Allow self, data URIs, Vercel, VLibras, Google avatars, YouTube, and external CDNs
   'img-src': [
     "'self'",
     'data:',
@@ -99,6 +99,8 @@ export const productionCSP: CSPDirectives = {
     'https://lh3.googleusercontent.com', // Google user avatars (OAuth)
     'https://*.googleusercontent.com', // Google content domains
     'https://ui-avatars.com', // Fallback avatar service
+    'https://img.youtube.com', // YouTube thumbnails
+    'https://i.ytimg.com', // YouTube thumbnails (alternative CDN)
   ],
 
   // Fonts: Allow self, data URIs, and VLibras CDN fonts
@@ -146,13 +148,16 @@ export const productionCSP: CSPDirectives = {
   // Forms: Allow self only
   'form-action': ["'self'"],
 
-  // Frame sources: Allow Spotify embeds, VLibras, and Vercel Live
+  // Frame sources: Allow Spotify embeds, VLibras, YouTube, and Vercel Live
   'frame-src': [
     "'self'",
     'https://open.spotify.com',
     'https://vlibras.gov.br', // VLibras widget iframe
     'https://*.vlibras.gov.br', // VLibras subdomains
     'https://vercel.live', // Vercel Live preview toolbar
+    'https://www.youtube.com', // YouTube video embeds
+    'https://youtube.com', // YouTube video embeds (alternative)
+    'https://www.youtube-nocookie.com', // YouTube privacy-enhanced embeds
   ],
 
   // Frame ancestors: Prevent clickjacking
@@ -204,7 +209,12 @@ export const developmentCSP: CSPDirectives = {
   'object-src': ["'none'"],
   'base-uri': ["'self'"],
   'form-action': ["'self'"],
-  'frame-src': ["'self'", 'https://open.spotify.com'],
+  'frame-src': [
+    "'self'",
+    'https://open.spotify.com',
+    'https://www.youtube.com',
+    'https://www.youtube-nocookie.com',
+  ],
   'frame-ancestors': ["'none'"],
   'worker-src': ["'self'", 'blob:', 'https:'], // Permissive for development
 }
