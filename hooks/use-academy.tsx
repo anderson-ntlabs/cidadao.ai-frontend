@@ -16,6 +16,7 @@ import {
   InternshipContract,
   TRACK_REPOS,
 } from './use-academy-demo'
+import { createClient } from '@/lib/supabase/client'
 import { createLogger } from '@/lib/logger'
 
 const logger = createLogger('AcademyUnified')
@@ -82,7 +83,7 @@ interface UnifiedAcademyContextType {
 
   // Common actions
   updateProfile: (updates: Partial<UnifiedAcademyUser>) => void
-  addXp: (amount: number, sourceType: string, description: string) => void
+  addXp: (amount: number, sourceType: string, description: string) => void | Promise<void>
   addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => void
   startSession: () => void
   endSession: (xpEarned?: number, agentsUsed?: string[]) => void
@@ -213,6 +214,52 @@ export function UnifiedAcademyProvider({ children }: { children: React.ReactNode
     }
   }, [isRealAuth, realAuth, demoAuth])
 
+  // Unified addXp that syncs to Supabase for real auth
+  const addXp = useCallback(
+    async (amount: number, sourceType: string, description: string) => {
+      // Always update local state for immediate UI feedback
+      demoAuth.addXp(amount, sourceType, description)
+
+      // For real auth, also update Supabase
+      if (isRealAuth && realAuth.user) {
+        try {
+          const supabase = createClient()
+          const newXp = (realAuth.user.totalXp || 0) + amount
+
+          // Calculate new level (every 100 XP = 1 level)
+          const newLevel = Math.floor(newXp / 100) + 1
+
+          // Calculate new rank based on XP
+          let newRank = 'novato'
+          if (newXp >= 5000) newRank = 'arquiteto'
+          else if (newXp >= 2000) newRank = 'mentor'
+          else if (newXp >= 500) newRank = 'contribuidor'
+          else if (newXp >= 100) newRank = 'aprendiz'
+
+          const { error } = await supabase
+            .from('academy_profiles')
+            .update({
+              total_xp: newXp,
+              current_level: newLevel,
+              current_rank: newRank,
+            })
+            .eq('user_id', realAuth.user.id)
+
+          if (error) {
+            logger.error('Failed to update XP in Supabase', { error })
+          } else {
+            logger.info('XP updated in Supabase', { amount, newXp, sourceType })
+            // Refresh profile to sync state
+            realAuth.refreshProfile()
+          }
+        } catch (error) {
+          logger.error('Error updating XP', { error })
+        }
+      }
+    },
+    [isRealAuth, realAuth, demoAuth]
+  )
+
   // Context value
   const contextValue = useMemo(
     (): UnifiedAcademyContextType => ({
@@ -236,7 +283,7 @@ export function UnifiedAcademyProvider({ children }: { children: React.ReactNode
 
       // Actions
       updateProfile,
-      addXp: demoAuth.addXp, // Demo only for now
+      addXp, // Unified - syncs to Supabase for real auth
       addDiaryEntry: demoAuth.addDiaryEntry, // Demo only for now
       startSession: demoAuth.startSession, // Demo only for now
       endSession: demoAuth.endSession, // Demo only for now
@@ -263,6 +310,7 @@ export function UnifiedAcademyProvider({ children }: { children: React.ReactNode
       isLoading,
       demoAuth,
       updateProfile,
+      addXp,
       acceptLgpdConsent,
       logout,
     ]
