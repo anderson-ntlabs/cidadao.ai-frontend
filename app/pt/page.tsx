@@ -220,8 +220,8 @@ export default function PTPageOptimized(): JSX.Element {
                   Playlist do Projeto
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed max-w-lg mx-auto">
-                  O idealizador do Cidadao.AI criou uma playlist que e a cara do Brasil. Parte do
-                  desenvolvimento foi regado a muito cafe e boa musica!
+                  O idealizador do Cidadão.AI criou uma playlist que é a cara do Brasil. Parte do
+                  desenvolvimento foi regado a muito café e boa música!
                 </p>
               </div>
 

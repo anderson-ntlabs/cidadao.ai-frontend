@@ -248,7 +248,7 @@ export default function AcademyRankingPage() {
                   Ranking da Academy
                 </h1>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Veja quem esta liderando</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Veja quem está liderando</p>
             </div>
           </div>
         </div>
@@ -272,7 +272,7 @@ export default function AcademyRankingPage() {
                   <Crown className="w-8 h-8" />
                 </div>
                 <div>
-                  <p className="text-green-100 text-sm mb-1">Sua posicao</p>
+                  <p className="text-green-100 text-sm mb-1">Sua posição</p>
                   <p className="text-5xl font-bold">#{userRank}</p>
                 </div>
               </div>
@@ -376,7 +376,7 @@ export default function AcademyRankingPage() {
                       </p>
                       {isCurrentUser && (
                         <Badge variant="success" size="sm">
-                          Voce
+                          Você
                         </Badge>
                       )}
                     </div>
@@ -435,7 +435,7 @@ export default function AcademyRankingPage() {
 
         {/* Footer note */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-          O ranking e atualizado em tempo real. Continue estudando para subir!
+          O ranking é atualizado em tempo real. Continue estudando para subir!
         </p>
       </main>
     </div>

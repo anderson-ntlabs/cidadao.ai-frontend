@@ -32,10 +32,10 @@ import {
 } from 'lucide-react'
 
 const moods = [
-  { id: 'great', emoji: '😄', label: 'Otimo!', color: 'green' },
+  { id: 'great', emoji: '😄', label: 'Ótimo!', color: 'green' },
   { id: 'good', emoji: '🙂', label: 'Bem', color: 'blue' },
   { id: 'neutral', emoji: '😐', label: 'Normal', color: 'yellow' },
-  { id: 'struggling', emoji: '😓', label: 'Dificil', color: 'orange' },
+  { id: 'struggling', emoji: '😓', label: 'Difícil', color: 'orange' },
 ] as const
 
 export default function AcademyDiaryPage() {
@@ -84,7 +84,7 @@ export default function AcademyDiaryPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando diario...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando diário...</p>
         </div>
       </div>
     )
@@ -346,7 +346,7 @@ export default function AcademyDiaryPage() {
                       <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-700/30">
                         <h4 className="flex items-center gap-2 text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
                           <Target className="w-4 h-4" />
-                          Proximos passos
+                          Próximos passos
                         </h4>
                         <p className="text-gray-700 dark:text-gray-300">{entry.nextSteps}</p>
                       </div>

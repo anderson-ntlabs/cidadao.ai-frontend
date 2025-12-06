@@ -506,8 +506,8 @@ export default function AcademyVideosPage() {
                       {selectedVideo.difficulty === 'beginner'
                         ? 'Iniciante'
                         : selectedVideo.difficulty === 'intermediate'
-                          ? 'Intermediario'
-                          : 'Avancado'}
+                          ? 'Intermediário'
+                          : 'Avançado'}
                     </Badge>
                     <Badge variant="outline" size="sm">
                       <Clock className="w-3 h-3" />
