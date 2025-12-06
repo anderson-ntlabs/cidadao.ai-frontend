@@ -3,14 +3,40 @@
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import {
+  ArrowLeft,
+  Send,
+  Sparkles,
+  MessageSquare,
+  Bot,
+  Zap,
+  GraduationCap,
+  Search,
+} from 'lucide-react'
 
-// Maritaca AI - LLM brasileiro direto
+/**
+ * Academy Chat Page
+ *
+ * Multi-agent chat interface with:
+ * - Maritaca AI (direct LLM)
+ * - 16 specialized agents
+ * - Session tracking
+ * - XP rewards
+ *
+ * Author: Anderson Henrique da Silva
+ * Updated: 2025-12-06
+ */
+
 const MARITACA_API_KEY = process.env.NEXT_PUBLIC_MARITACA_API_KEY
 
-// All available agent teachers
 const allAgents = [
-  // Maritaca AI - Modo direto
   {
     id: 'maritaca',
     name: 'Maritaca AI',
@@ -18,14 +44,15 @@ const allAgents = [
     emoji: '🦜',
     description: 'LLM brasileiro - tire duvidas sobre qualquer tema',
     isMaritaca: true,
+    color: 'from-green-500 to-emerald-500',
   },
-  // Agentes do sistema
   {
     id: 'abaporu',
     name: 'Abaporu',
     role: 'Orquestrador',
     emoji: '🎭',
     description: 'Coordenacao geral do sistema multi-agente',
+    color: 'from-purple-500 to-violet-500',
   },
   {
     id: 'zumbi',
@@ -33,6 +60,7 @@ const allAgents = [
     role: 'Detector de Anomalias',
     emoji: '🛡️',
     description: 'Seguranca, deteccao de fraudes e irregularidades',
+    color: 'from-red-500 to-rose-500',
   },
   {
     id: 'anita',
@@ -40,6 +68,7 @@ const allAgents = [
     role: 'Analista de Padroes',
     emoji: '📊',
     description: 'Analise estatistica e identificacao de padroes',
+    color: 'from-blue-500 to-cyan-500',
   },
   {
     id: 'tiradentes',
@@ -47,6 +76,7 @@ const allAgents = [
     role: 'Reporter',
     emoji: '📜',
     description: 'Geracao de relatorios e documentacao',
+    color: 'from-amber-500 to-yellow-500',
   },
   {
     id: 'drummond',
@@ -54,6 +84,7 @@ const allAgents = [
     role: 'Comunicador',
     emoji: '✍️',
     description: 'Comunicacao clara e acessivel',
+    color: 'from-indigo-500 to-blue-500',
   },
   {
     id: 'machado',
@@ -61,6 +92,7 @@ const allAgents = [
     role: 'Escritor',
     emoji: '📚',
     description: 'Narrativas e textos elaborados',
+    color: 'from-orange-500 to-amber-500',
   },
   {
     id: 'senna',
@@ -68,6 +100,7 @@ const allAgents = [
     role: 'Router',
     emoji: '🏎️',
     description: 'Roteamento inteligente de requisicoes',
+    color: 'from-green-500 to-lime-500',
   },
   {
     id: 'nana',
@@ -75,6 +108,7 @@ const allAgents = [
     role: 'Memoria',
     emoji: '🌊',
     description: 'Gerenciamento de contexto e memoria',
+    color: 'from-cyan-500 to-teal-500',
   },
   {
     id: 'bonifacio',
@@ -82,6 +116,7 @@ const allAgents = [
     role: 'Jurista',
     emoji: '⚖️',
     description: 'Analise legal e normativa',
+    color: 'from-gray-500 to-slate-500',
   },
   {
     id: 'dandara',
@@ -89,6 +124,7 @@ const allAgents = [
     role: 'Defensora',
     emoji: '⚔️',
     description: 'Defesa de direitos e transparencia',
+    color: 'from-pink-500 to-rose-500',
   },
   {
     id: 'ceuci',
@@ -96,6 +132,7 @@ const allAgents = [
     role: 'Guardia',
     emoji: '🌿',
     description: 'Protecao de dados e privacidade',
+    color: 'from-emerald-500 to-green-500',
   },
   {
     id: 'lampiao',
@@ -103,6 +140,7 @@ const allAgents = [
     role: 'Investigador',
     emoji: '🔍',
     description: 'Investigacao profunda de casos',
+    color: 'from-yellow-500 to-orange-500',
   },
   {
     id: 'oxossi',
@@ -110,6 +148,7 @@ const allAgents = [
     role: 'Cacador',
     emoji: '🏹',
     description: 'Busca e recuperacao de informacoes',
+    color: 'from-lime-500 to-green-500',
   },
   {
     id: 'obaluaie',
@@ -117,6 +156,7 @@ const allAgents = [
     role: 'Curador',
     emoji: '🌾',
     description: 'Validacao e qualidade de dados',
+    color: 'from-amber-400 to-yellow-400',
   },
   {
     id: 'niemeyer',
@@ -124,6 +164,7 @@ const allAgents = [
     role: 'Arquiteto',
     emoji: '🏛️',
     description: 'Design de solucoes e arquitetura',
+    color: 'from-slate-500 to-gray-500',
   },
   {
     id: 'quiteria',
@@ -131,6 +172,7 @@ const allAgents = [
     role: 'Estrategista',
     emoji: '🎖️',
     description: 'Estrategia e planejamento',
+    color: 'from-violet-500 to-purple-500',
   },
 ]
 
@@ -152,9 +194,9 @@ function ChatContent() {
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [messageCount, setMessageCount] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Get agent from URL params
   useEffect(() => {
     const agentParam = searchParams.get('agent')
     if (agentParam && allAgents.find((a) => a.id === agentParam)) {
@@ -162,12 +204,10 @@ function ChatContent() {
     }
   }, [searchParams])
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Start session when agent is selected
   useEffect(() => {
     if (selectedAgent && !currentSession) {
       startSession()
@@ -196,7 +236,6 @@ function ChatContent() {
       let responseContent = ''
 
       if (isMaritaca && MARITACA_API_KEY) {
-        // Maritaca AI - Direct LLM call
         const maritacaResponse = await fetch('https://chat.maritaca.ai/api/chat/completions', {
           method: 'POST',
           headers: {
@@ -230,27 +269,21 @@ Responda sempre em portugues brasileiro.`,
             'Desculpe, houve um erro ao conectar com a Maritaca AI. Tente novamente.'
         }
       } else if (isMaritaca && !MARITACA_API_KEY) {
-        // Demo mode without API key
         responseContent = `Ola! Sou a Maritaca AI em modo demo.
 
 Para habilitar respostas reais, configure a variavel NEXT_PUBLIC_MARITACA_API_KEY.
 
 Enquanto isso, posso simular uma resposta educacional sobre o que voce perguntou: "${userMessage.content}"
 
-A Academy Cidadao.AI e um programa de estagio em parceria com IFSULDEMINAS, focado em desenvolvimento de software e inteligencia artificial. Como posso ajudar voce a aprender mais?`
+A Academy Cidadao.AI e um programa de estagio em parceria com IFSULDEMINAS, focado em desenvolvimento de software e inteligencia artificial.`
       } else {
-        // Backend agents - try to connect or use demo response
         try {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'}/api/agents/${selectedAgent}/chat`,
             {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                message: userMessage.content,
-              }),
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: userMessage.content }),
             }
           )
 
@@ -262,7 +295,6 @@ A Academy Cidadao.AI e um programa de estagio em parceria com IFSULDEMINAS, foca
             throw new Error('Backend not available')
           }
         } catch {
-          // Demo mode for backend agents
           responseContent = `Ola! Sou ${currentAgentData?.name}, ${currentAgentData?.role} do Cidadao.AI.
 
 No momento estou em modo demonstracao. Minha especialidade e: ${currentAgentData?.description}.
@@ -282,7 +314,6 @@ Continue explorando a Academy para aprender mais sobre o projeto!`
       }
       setMessages((prev) => [...prev, assistantMessage])
 
-      // Award XP for conversation (every 5 messages)
       if ((messageCount + 1) % 5 === 0) {
         addXp(5, 'conversation', `Conversa com ${currentAgentData?.name}`)
       }
@@ -311,10 +342,21 @@ Continue explorando a Academy para aprender mais sobre o projeto!`
     router.push(`/pt/academy/chat?agent=${agentId}`)
   }
 
+  const filteredAgents = allAgents.filter(
+    (agent) =>
+      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.role.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <MessageSquare className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Carregando chat...</p>
+        </div>
       </div>
     )
   }
@@ -322,66 +364,81 @@ Continue explorando a Academy para aprender mais sobre o projeto!`
   const currentAgent = allAgents.find((a) => a.id === selectedAgent)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
-      {/* Sidebar - Agent list */}
-      <aside className="w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <aside className="w-80 flex-shrink-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-800/50 flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
           <Link
             href="/pt/academy"
-            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors mb-4"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-              />
-            </svg>
-            Voltar ao dashboard
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Voltar ao Dashboard</span>
           </Link>
-          <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-            Agentes Professores
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Escolha um agente para conversar
-          </p>
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 dark:text-gray-100">Chat</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {allAgents.length} agentes disponiveis
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          {/* Maritaca AI - Destacado */}
-          {allAgents
+
+        {/* Search */}
+        <div className="p-3 border-b border-gray-200/50 dark:border-gray-800/50">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar agente..."
+              className="pl-9"
+              inputSize="sm"
+            />
+          </div>
+        </div>
+
+        {/* Agent List */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {/* Maritaca AI - Featured */}
+          {filteredAgents
             .filter((a) => a.isMaritaca)
             .map((agent) => (
               <button
                 key={agent.id}
                 onClick={() => handleSelectAgent(agent.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
+                className={cn(
+                  'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all',
+                  'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
+                  'border-2 hover:shadow-md',
                   selectedAgent === agent.id
-                    ? 'bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 border-2 border-green-500'
-                    : 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-2 border-dashed border-green-300 dark:border-green-700 hover:border-green-500'
-                }`}
+                    ? 'border-green-500 shadow-lg shadow-green-500/10'
+                    : 'border-green-200/50 dark:border-green-700/30 hover:border-green-400'
+                )}
               >
-                <span className="text-2xl">{agent.emoji}</span>
+                <div
+                  className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br shadow-md',
+                    agent.color
+                  )}
+                >
+                  {agent.emoji}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p
-                      className={`font-medium truncate ${
-                        selectedAgent === agent.id
-                          ? 'text-green-700 dark:text-green-400'
-                          : 'text-gray-900 dark:text-gray-100'
-                      }`}
-                    >
+                    <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
                       {agent.name}
                     </p>
-                    <span className="text-xs px-1.5 py-0.5 bg-green-600 text-white rounded-full">
+                    <Badge variant="success" size="sm">
+                      <Zap className="w-3 h-3 mr-0.5" />
                       LLM
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {agent.description}
@@ -391,33 +448,46 @@ Continue explorando a Academy para aprender mais sobre o projeto!`
             ))}
 
           {/* Separator */}
-          <div className="flex items-center gap-2 py-2">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-            <span className="text-xs text-gray-400 dark:text-gray-500">Agentes Especialistas</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+          <div className="flex items-center gap-2 py-3">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-xs font-medium text-gray-400 dark:text-gray-500 px-2">
+              Agentes Especialistas
+            </span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
           </div>
 
           {/* Backend agents */}
-          {allAgents
+          {filteredAgents
             .filter((a) => !a.isMaritaca)
             .map((agent) => (
               <button
                 key={agent.id}
                 onClick={() => handleSelectAgent(agent.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
+                className={cn(
+                  'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all',
+                  'hover:shadow-md group',
                   selectedAgent === agent.id
-                    ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500'
-                    : 'bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
+                    ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500'
+                    : 'bg-gray-50/50 dark:bg-gray-800/50 border-2 border-transparent hover:bg-gray-100/50 dark:hover:bg-gray-700/50'
+                )}
               >
-                <span className="text-2xl">{agent.emoji}</span>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-gradient-to-br shadow-sm',
+                    'group-hover:scale-105 transition-transform',
+                    agent.color
+                  )}
+                >
+                  {agent.emoji}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p
-                    className={`font-medium truncate ${
+                    className={cn(
+                      'font-medium truncate',
                       selectedAgent === agent.id
                         ? 'text-green-700 dark:text-green-400'
                         : 'text-gray-900 dark:text-gray-100'
-                    }`}
+                    )}
                   >
                     {agent.name}
                   </p>
@@ -428,148 +498,210 @@ Continue explorando a Academy para aprender mais sobre o projeto!`
         </div>
       </aside>
 
-      {/* Main chat area */}
-      <main className="flex-1 flex flex-col">
+      {/* Main Chat Area */}
+      <main className="flex-1 flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         {selectedAgent && currentAgent ? (
           <>
-            {/* Chat header */}
-            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
+            {/* Chat Header */}
+            <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 px-6 py-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 flex items-center justify-center text-2xl">
+                <div
+                  className={cn(
+                    'w-14 h-14 rounded-2xl flex items-center justify-center text-3xl bg-gradient-to-br shadow-lg',
+                    currentAgent.color
+                  )}
+                >
                   {currentAgent.emoji}
                 </div>
-                <div>
-                  <h1 className="font-bold text-gray-900 dark:text-gray-100">
-                    {currentAgent.name}
-                  </h1>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                      {currentAgent.name}
+                    </h1>
+                    {currentAgent.isMaritaca && (
+                      <Badge variant="success" size="sm">
+                        <Zap className="w-3 h-3 mr-0.5" />
+                        LLM
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {currentAgent.description}
                   </p>
                 </div>
                 {currentSession && (
-                  <div className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span className="text-sm text-green-700 dark:text-green-400">Sessao ativa</span>
-                  </div>
+                  <Badge variant="success" className="animate-pulse">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                    Sessao ativa
+                  </Badge>
                 )}
               </div>
             </header>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {messages.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">{currentAgent.emoji}</div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Ola! Sou {currentAgent.name}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    {currentAgent.description}. Como posso ajudar voce hoje?
-                  </p>
-                </div>
-              )}
-
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[70%] rounded-2xl p-4 ${
-                      message.role === 'user'
-                        ? 'bg-green-600 text-white'
-                        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100'
-                    }`}
-                  >
-                    {message.role === 'assistant' && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">{currentAgent.emoji}</span>
-                        <span className="font-medium text-sm text-gray-600 dark:text-gray-400">
-                          {currentAgent.name}
-                        </span>
-                      </div>
-                    )}
-                    <p className="whitespace-pre-wrap">{message.content}</p>
-                  </div>
-                </div>
-              ))}
-
-              {isSending && (
-                <div className="flex justify-start">
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{currentAgent.emoji}</span>
-                      <div className="flex gap-1">
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0ms' }}
-                        ></span>
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '150ms' }}
-                        ></span>
-                        <span
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '300ms' }}
-                        ></span>
-                      </div>
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center max-w-md">
+                    <div
+                      className={cn(
+                        'w-24 h-24 rounded-3xl flex items-center justify-center text-5xl bg-gradient-to-br shadow-2xl mx-auto mb-6',
+                        currentAgent.color
+                      )}
+                    >
+                      {currentAgent.emoji}
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                      Ola! Sou {currentAgent.name}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      {currentAgent.description}. Como posso ajudar voce hoje?
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {[
+                        'O que voce pode fazer?',
+                        'Me explique sobre o projeto',
+                        'Quero aprender algo novo',
+                      ].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          onClick={() => setInput(suggestion)}
+                          className="px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
               )}
 
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      'flex gap-3 animate-fade-in',
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    )}
+                  >
+                    {message.role === 'assistant' && (
+                      <div
+                        className={cn(
+                          'w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-gradient-to-br flex-shrink-0',
+                          currentAgent.color
+                        )}
+                      >
+                        {currentAgent.emoji}
+                      </div>
+                    )}
+                    <Card
+                      variant={message.role === 'user' ? 'elevated' : 'outlined'}
+                      padding="md"
+                      className={cn(
+                        'max-w-[70%]',
+                        message.role === 'user'
+                          ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0'
+                          : ''
+                      )}
+                    >
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {message.content}
+                      </p>
+                    </Card>
+                    {message.role === 'user' && (
+                      <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <Image
+                          src={user.avatar}
+                          alt="You"
+                          width={40}
+                          height={40}
+                          className="rounded-xl"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isSending && (
+                  <div className="flex gap-3 justify-start animate-fade-in">
+                    <div
+                      className={cn(
+                        'w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-gradient-to-br',
+                        currentAgent.color
+                      )}
+                    >
+                      {currentAgent.emoji}
+                    </div>
+                    <Card variant="outlined" padding="md">
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <span
+                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: '0ms' }}
+                          />
+                          <span
+                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: '150ms' }}
+                          />
+                          <span
+                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: '300ms' }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-500">Pensando...</span>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+              </div>
+
               <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
-            <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
-              <div className="flex gap-3">
-                <input
-                  type="text"
+            <div className="sticky bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 p-4">
+              <div className="max-w-4xl mx-auto flex gap-3">
+                <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                   placeholder={`Converse com ${currentAgent.name}...`}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  inputSize="lg"
                   disabled={isSending}
+                  className="flex-1"
                 />
-                <button
+                <Button
                   onClick={handleSendMessage}
                   disabled={!input.trim() || isSending}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                    input.trim() && !isSending
-                      ? 'bg-green-600 hover:bg-green-700 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                  }`}
+                  size="lg"
+                  className="px-6"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                    />
-                  </svg>
-                </button>
+                  <Send className="w-5 h-5" />
+                </Button>
               </div>
+              <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">
+                <Sparkles className="w-3 h-3 inline mr-1" />
+                +5 XP a cada 5 mensagens
+              </p>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">👈</div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <div className="text-center max-w-md">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mx-auto mb-6">
+                <Bot className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Escolha um agente
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Selecione um agente professor na barra lateral para comecar a conversar
               </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <GraduationCap className="w-4 h-4" />
+                <span>Dica: Comece pela Maritaca AI para duvidas gerais</span>
+              </div>
             </div>
           </div>
         )}
@@ -582,8 +714,13 @@ export default function AcademyChatPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <MessageSquare className="w-8 h-8 text-white" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">Carregando chat...</p>
+          </div>
         </div>
       }
     >

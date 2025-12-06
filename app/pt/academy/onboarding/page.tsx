@@ -18,9 +18,12 @@ import {
   AlertCircle,
   PartyPopper,
   Sparkles,
+  GraduationCap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 /**
@@ -32,6 +35,9 @@ import { cn } from '@/lib/utils'
  * 3. GitHub Setup - Enter GitHub username
  * 4. Fork Verification - Verify repository fork
  * 5. Complete - Welcome to the team!
+ *
+ * Author: Anderson Henrique da Silva
+ * Updated: 2025-12-06
  */
 
 const TRACKS = [
@@ -41,26 +47,29 @@ const TRACKS = [
     description: 'APIs, microservices e arquitetura de sistemas',
     icon: Server,
     color: 'from-blue-500 to-cyan-500',
-    bgColor: 'bg-blue-500/10',
+    bgColor: 'bg-blue-500/10 dark:bg-blue-500/20',
     borderColor: 'border-blue-500',
+    ringColor: 'ring-blue-500/50',
   },
   {
     id: 'frontend' as const,
     name: 'Frontend',
-    description: 'Interfaces, UX/UI e aplicações web',
+    description: 'Interfaces, UX/UI e aplicacoes web',
     icon: Palette,
     color: 'from-purple-500 to-pink-500',
-    bgColor: 'bg-purple-500/10',
+    bgColor: 'bg-purple-500/10 dark:bg-purple-500/20',
     borderColor: 'border-purple-500',
+    ringColor: 'ring-purple-500/50',
   },
   {
     id: 'ia' as const,
     name: 'IA/ML',
-    description: 'Inteligência artificial e machine learning',
+    description: 'Inteligencia artificial e machine learning',
     icon: Brain,
     color: 'from-green-500 to-emerald-500',
-    bgColor: 'bg-green-500/10',
+    bgColor: 'bg-green-500/10 dark:bg-green-500/20',
     borderColor: 'border-green-500',
+    ringColor: 'ring-green-500/50',
   },
   {
     id: 'devops' as const,
@@ -68,9 +77,18 @@ const TRACKS = [
     description: 'Infraestrutura, CI/CD e cloud',
     icon: Code,
     color: 'from-orange-500 to-amber-500',
-    bgColor: 'bg-orange-500/10',
+    bgColor: 'bg-orange-500/10 dark:bg-orange-500/20',
     borderColor: 'border-orange-500',
+    ringColor: 'ring-orange-500/50',
   },
+]
+
+const STEPS = [
+  { label: 'Boas-vindas', icon: Rocket },
+  { label: 'Trilha', icon: Code },
+  { label: 'GitHub', icon: Github },
+  { label: 'Fork', icon: ExternalLink },
+  { label: 'Pronto!', icon: PartyPopper },
 ]
 
 export default function AcademyOnboardingPage() {
@@ -90,21 +108,18 @@ export default function AcademyOnboardingPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [verifyError, setVerifyError] = useState<string | null>(null)
 
-  // Initialize onboarding if not started and contract is accepted
   useEffect(() => {
     if (user.hasAcceptedInternshipContract && !onboarding && !user.hasCompletedOnboarding) {
       initOnboarding()
     }
   }, [user.hasAcceptedInternshipContract, user.hasCompletedOnboarding, onboarding, initOnboarding])
 
-  // Redirect if contract not accepted
   useEffect(() => {
     if (!user.hasAcceptedInternshipContract) {
       router.replace('/pt/academy/contract')
     }
   }, [user.hasAcceptedInternshipContract, router])
 
-  // Redirect if onboarding already completed
   useEffect(() => {
     if (user.hasCompletedOnboarding) {
       router.replace('/pt/academy')
@@ -125,11 +140,8 @@ export default function AcademyOnboardingPage() {
   const handleVerifyFork = async () => {
     setIsVerifying(true)
     setVerifyError(null)
-
     const result = await verifyGitHubFork()
-
     setIsVerifying(false)
-
     if (!result.success) {
       setVerifyError(result.message)
     }
@@ -146,418 +158,463 @@ export default function AcademyOnboardingPage() {
     }
   }
 
-  // Loading state
   if (!onboarding) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Preparando onboarding...</p>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Preparando onboarding...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-gray-900 dark:text-gray-100">Onboarding</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Academy Cidadao.AI</p>
+            </div>
+          </div>
+          <Badge variant="warning" size="lg">
+            <Sparkles className="w-3 h-3 mr-1" />
+            +275 XP ao concluir
+          </Badge>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Progress Steps */}
         <div className="mb-12">
-          <div className="flex items-center justify-between">
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} className="flex items-center">
+          <div className="flex items-center justify-between relative">
+            {/* Progress line background */}
+            <div className="absolute top-5 left-8 right-8 h-0.5 bg-gray-200 dark:bg-gray-700" />
+            {/* Progress line filled */}
+            <div
+              className="absolute top-5 left-8 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-500"
+              style={{ width: `calc(${((currentStep - 1) / 4) * 100}% - 32px)` }}
+            />
+
+            {STEPS.map((step, index) => {
+              const stepNum = index + 1
+              const isCompleted = onboarding.completedSteps.includes(stepNum)
+              const isCurrent = currentStep === stepNum
+              const Icon = step.icon
+
+              return (
                 <button
-                  onClick={() => goToStep(step)}
-                  disabled={!onboarding.completedSteps.includes(step) && step > currentStep}
-                  className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all',
-                    currentStep === step
-                      ? 'bg-green-600 text-white scale-110 shadow-lg'
-                      : onboarding.completedSteps.includes(step)
-                        ? 'bg-green-500 text-white cursor-pointer hover:scale-105'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                  )}
+                  key={stepNum}
+                  onClick={() => goToStep(stepNum)}
+                  disabled={!isCompleted && stepNum > currentStep}
+                  className="relative z-10 flex flex-col items-center group"
                 >
-                  {onboarding.completedSteps.includes(step) ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    step
-                  )}
-                </button>
-                {step < 5 && (
                   <div
                     className={cn(
-                      'w-full h-1 mx-2 rounded',
-                      onboarding.completedSteps.includes(step)
-                        ? 'bg-green-500'
-                        : 'bg-gray-200 dark:bg-gray-700'
+                      'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300',
+                      isCurrent
+                        ? 'bg-gradient-to-br from-green-500 to-blue-600 text-white scale-110 shadow-lg ring-4 ring-green-500/20'
+                        : isCompleted
+                          ? 'bg-green-500 text-white cursor-pointer group-hover:scale-105'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
                     )}
-                    style={{ minWidth: '60px' }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>Boas-vindas</span>
-            <span>Trilha</span>
-            <span>GitHub</span>
-            <span>Fork</span>
-            <span>Pronto!</span>
+                  >
+                    {isCompleted && !isCurrent ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <Icon className="w-5 h-5" />
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      'text-xs mt-2 font-medium transition-colors',
+                      isCurrent
+                        ? 'text-green-600 dark:text-green-400'
+                        : isCompleted
+                          ? 'text-gray-700 dark:text-gray-300'
+                          : 'text-gray-400 dark:text-gray-500'
+                    )}
+                  >
+                    {step.label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
         {/* Step Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          {/* Step 1: Welcome */}
-          {currentStep === 1 && (
-            <div className="text-center space-y-6">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shadow-lg">
-                <Rocket className="h-10 w-10 text-white" />
-              </div>
+        <Card variant="elevated" padding="lg" className="animate-fade-in">
+          <CardContent>
+            {/* Step 1: Welcome */}
+            {currentStep === 1 && (
+              <div className="text-center space-y-8 py-4">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 shadow-2xl shadow-green-500/25">
+                  <Rocket className="w-12 h-12 text-white" />
+                </div>
 
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Bem-vindo à Academy!
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Você está prestes a embarcar em uma jornada de aprendizado e contribuição.
-                </p>
-              </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                    Bem-vindo a Academy!
+                  </h1>
+                  <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                    Voce esta prestes a embarcar em uma jornada de aprendizado e contribuicao.
+                  </p>
+                </div>
 
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 text-left space-y-4">
-                <h2 className="font-semibold text-green-800 dark:text-green-300">
-                  O que você vai fazer:
-                </h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">
-                      Escolher sua trilha de desenvolvimento (Backend, Frontend, IA ou DevOps)
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">
-                      Configurar seu GitHub para contribuir com o projeto
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700 dark:text-gray-300">
-                      Fazer fork do repositório da sua trilha para começar a contribuir
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <Button
-                onClick={() =>
-                  updateOnboarding({
-                    currentStep: 2,
-                    completedSteps: [...onboarding.completedSteps, 1],
-                  })
-                }
-                size="lg"
-                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-              >
-                Começar
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-          )}
-
-          {/* Step 2: Track Selection */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Escolha sua trilha
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Selecione a área em que você quer se especializar
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {TRACKS.map((track) => {
-                  const Icon = track.icon
-                  const isSelected = onboarding.selectedTrack === track.id
-
-                  return (
-                    <button
-                      key={track.id}
-                      onClick={() => handleTrackSelect(track.id)}
-                      className={cn(
-                        'p-6 rounded-xl border-2 text-left transition-all',
-                        isSelected
-                          ? `${track.borderColor} ${track.bgColor}`
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      )}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={cn(
-                            'w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br',
-                            track.color
-                          )}
-                        >
-                          <Icon className="h-6 w-6 text-white" />
+                <Card variant="filled" padding="md" className="text-left max-w-lg mx-auto">
+                  <h2 className="font-semibold text-green-700 dark:text-green-400 mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" />O que voce vai fazer:
+                  </h2>
+                  <ul className="space-y-4">
+                    {[
+                      'Escolher sua trilha de desenvolvimento (Backend, Frontend, IA ou DevOps)',
+                      'Configurar seu GitHub para contribuir com o projeto',
+                      'Fazer fork do repositorio da sua trilha para comecar',
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-green-700 dark:text-green-400">
+                            {i + 1}
+                          </span>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            {track.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {track.description}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
+                        <span className="text-gray-700 dark:text-gray-300 text-sm">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
 
-              <div className="flex justify-between pt-4">
-                <Button variant="secondary" onClick={() => goToStep(1)}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
+                <Button
+                  onClick={() =>
+                    updateOnboarding({
+                      currentStep: 2,
+                      completedSteps: [...onboarding.completedSteps, 1],
+                    })
+                  }
+                  size="lg"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                >
+                  Comecar Jornada
                 </Button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 3: GitHub Username */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 dark:bg-white mb-4">
-                  <Github className="h-8 w-8 text-white dark:text-gray-900" />
+            {/* Step 2: Track Selection */}
+            {currentStep === 2 && (
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Escolha sua trilha
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Selecione a area em que voce quer se especializar
+                  </p>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Configure seu GitHub
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Informe seu username do GitHub para rastrear suas contribuições
-                </p>
-              </div>
 
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
-                  <Input
-                    value={githubInput}
-                    onChange={(e) => setGithubInput(e.target.value)}
-                    placeholder="seu-username"
-                    className="pl-8"
-                    onKeyDown={(e) => e.key === 'Enter' && handleGitHubSubmit()}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {TRACKS.map((track) => {
+                    const Icon = track.icon
+                    const isSelected = onboarding.selectedTrack === track.id
+
+                    return (
+                      <button
+                        key={track.id}
+                        onClick={() => handleTrackSelect(track.id)}
+                        className={cn(
+                          'p-6 rounded-2xl border-2 text-left transition-all duration-300',
+                          'hover:shadow-lg group',
+                          isSelected
+                            ? `${track.borderColor} ${track.bgColor} ring-4 ${track.ringColor}`
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        )}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={cn(
+                              'w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg',
+                              'group-hover:scale-110 transition-transform',
+                              track.color
+                            )}
+                          >
+                            <Icon className="w-7 h-7 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-gray-900 dark:text-white">
+                                {track.name}
+                              </h3>
+                              {isSelected && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {track.description}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => goToStep(1)}
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  >
+                    Voltar
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: GitHub Username */}
+            {currentStep === 3 && (
+              <div className="space-y-8">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gray-900 dark:bg-white shadow-xl mb-4">
+                    <Github className="w-10 h-10 text-white dark:text-gray-900" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Configure seu GitHub
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Informe seu username do GitHub para rastrear suas contribuicoes
+                  </p>
+                </div>
+
+                <div className="max-w-md mx-auto space-y-4">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                      @
+                    </span>
+                    <Input
+                      value={githubInput}
+                      onChange={(e) => setGithubInput(e.target.value)}
+                      placeholder="seu-username"
+                      className="pl-10"
+                      inputSize="lg"
+                      onKeyDown={(e) => e.key === 'Enter' && handleGitHubSubmit()}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleGitHubSubmit}
+                    disabled={!githubInput.trim()}
+                    className="w-full"
+                    size="lg"
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Continuar
+                  </Button>
+                </div>
+
+                <div className="flex justify-center pt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => goToStep(2)}
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  >
+                    Voltar
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Fork Verification */}
+            {currentStep === 4 && onboarding.selectedTrack && (
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Fork do repositorio
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Faca fork do repositorio da sua trilha para comecar a contribuir
+                  </p>
+                </div>
+
+                <Card variant="filled" padding="md" className="max-w-lg mx-auto">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-gray-900 dark:bg-white flex items-center justify-center">
+                      <Github className="w-6 h-6 text-white dark:text-gray-900" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 dark:text-white">
+                        {TRACK_REPOS[onboarding.selectedTrack].owner}/
+                        {TRACK_REPOS[onboarding.selectedTrack].repo}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Repositorio da trilha {onboarding.selectedTrack.toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`https://github.com/${TRACK_REPOS[onboarding.selectedTrack].owner}/${TRACK_REPOS[onboarding.selectedTrack].repo}/fork`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Abrir pagina de fork no GitHub
+                  </a>
+                </Card>
+
+                {verifyError && (
+                  <Card
+                    variant="outlined"
+                    padding="sm"
+                    className="max-w-lg mx-auto border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20"
+                  >
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-red-700 dark:text-red-300">{verifyError}</p>
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                          Certifique-se de fazer o fork e tente novamente.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {onboarding.github?.hasForked && (
+                  <Card
+                    variant="outlined"
+                    padding="sm"
+                    className="max-w-lg mx-auto border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
+                  >
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                          Fork verificado com sucesso!
+                        </p>
+                        <a
+                          href={onboarding.github.forkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-green-600 dark:text-green-400 hover:underline"
+                        >
+                          Ver seu fork
+                        </a>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                <div className="flex justify-between pt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => goToStep(3)}
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  >
+                    Voltar
+                  </Button>
+
+                  {!onboarding.github?.hasForked ? (
+                    <Button
+                      onClick={handleVerifyFork}
+                      loading={isVerifying}
+                      rightIcon={!isVerifying ? <CheckCircle2 className="w-4 h-4" /> : undefined}
+                    >
+                      {isVerifying ? 'Verificando...' : 'Verificar Fork'}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => updateOnboarding({ currentStep: 5 })}
+                      rightIcon={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Continuar
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Complete */}
+            {currentStep === 5 && (
+              <div className="text-center space-y-8 py-4">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-2xl shadow-orange-500/25 animate-bounce">
+                  <PartyPopper className="w-12 h-12 text-white" />
+                </div>
+
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                    Parabens, {user.name.split(' ')[0]}!
+                  </h1>
+                  <p className="text-lg text-gray-600 dark:text-gray-400">
+                    Voce completou o onboarding e esta pronto para comecar!
+                  </p>
+                </div>
+
+                <Card
+                  variant="filled"
+                  padding="md"
+                  className="max-w-md mx-auto bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
+                >
+                  <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-300 mb-4">
+                    <Sparkles className="w-5 h-5" />
+                    <span className="font-bold text-lg">+275 XP conquistados!</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Trilha</p>
+                      <p className="font-bold text-gray-900 dark:text-white">
+                        {onboarding.selectedTrack?.toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">GitHub</p>
+                      <p className="font-bold text-gray-900 dark:text-white">
+                        @{onboarding.github?.username}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                <div className="max-w-md mx-auto text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-center">
+                    Proximos passos:
+                  </h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Explore o dashboard e familiarize-se com a plataforma',
+                      'Converse com os agentes IA para tirar duvidas tecnicas',
+                      'Faca seu primeiro commit no repositorio!',
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
+                            {i + 1}
+                          </span>
+                        </div>
+                        <span className="text-gray-600 dark:text-gray-400">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 <Button
-                  onClick={handleGitHubSubmit}
-                  disabled={!githubInput.trim()}
-                  className="w-full bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black"
+                  onClick={handleComplete}
+                  size="lg"
+                  rightIcon={<ArrowRight className="w-5 h-5" />}
                 >
-                  Continuar
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  Ir para o Dashboard
                 </Button>
               </div>
-
-              <div className="flex justify-between pt-4">
-                <Button variant="secondary" onClick={() => goToStep(2)}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Fork Verification */}
-          {currentStep === 4 && onboarding.selectedTrack && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Fork do repositório
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Faça fork do repositório da sua trilha para começar a contribuir
-                </p>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Github className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {TRACK_REPOS[onboarding.selectedTrack].owner}/
-                      {TRACK_REPOS[onboarding.selectedTrack].repo}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Repositório da trilha {onboarding.selectedTrack.toUpperCase()}
-                    </p>
-                  </div>
-                </div>
-
-                <a
-                  href={`https://github.com/${TRACK_REPOS[onboarding.selectedTrack].owner}/${TRACK_REPOS[onboarding.selectedTrack].repo}/fork`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Abrir página de fork no GitHub
-                </a>
-              </div>
-
-              {verifyError && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-red-700 dark:text-red-300">{verifyError}</p>
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      Certifique-se de fazer o fork e tente novamente.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {onboarding.github?.hasForked && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      Fork verificado com sucesso!
-                    </p>
-                    <a
-                      href={onboarding.github.forkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-green-600 dark:text-green-400 hover:underline"
-                    >
-                      Ver seu fork
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-4">
-                <Button variant="secondary" onClick={() => goToStep(3)}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
-                </Button>
-
-                {!onboarding.github?.hasForked ? (
-                  <Button
-                    onClick={handleVerifyFork}
-                    disabled={isVerifying}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                  >
-                    {isVerifying ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verificando...
-                      </>
-                    ) : (
-                      <>
-                        Verificar Fork
-                        <CheckCircle2 className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => updateOnboarding({ currentStep: 5 })}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                  >
-                    Continuar
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Complete */}
-          {currentStep === 5 && (
-            <div className="text-center space-y-6">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
-                <PartyPopper className="h-10 w-10 text-white" />
-              </div>
-
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Parabéns, {user.name.split(' ')[0]}!
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Você completou o onboarding e está pronto para começar!
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6 space-y-4">
-                <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-300">
-                  <Sparkles className="h-5 w-5" />
-                  <span className="font-semibold">Você ganhou +275 XP no onboarding!</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3">
-                    <p className="text-gray-500 dark:text-gray-400">Trilha</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {onboarding.selectedTrack?.toUpperCase()}
-                    </p>
-                  </div>
-                  <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3">
-                    <p className="text-gray-500 dark:text-gray-400">GitHub</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      @{onboarding.github?.username}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900 dark:text-white">Próximos passos:</h3>
-                <ul className="text-left space-y-2 max-w-md mx-auto">
-                  <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-xs font-medium flex-shrink-0">
-                      1
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Explore o dashboard e familiarize-se com a plataforma
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-xs font-medium flex-shrink-0">
-                      2
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Converse com os agentes IA para tirar dúvidas técnicas
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-xs font-medium flex-shrink-0">
-                      3
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Faça seu primeiro commit no repositório!
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <Button
-                onClick={handleComplete}
-                size="lg"
-                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-              >
-                Ir para o Dashboard
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
+          </CardContent>
+        </Card>
+      </main>
     </div>
   )
 }
