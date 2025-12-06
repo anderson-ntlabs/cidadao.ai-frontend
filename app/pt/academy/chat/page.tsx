@@ -23,7 +23,6 @@ import { ArrowLeft, Send, Sparkles, MessageSquare, Zap, Plane } from 'lucide-rea
  * Updated: 2025-12-06
  */
 
-const MARITACA_API_KEY = process.env.NEXT_PUBLIC_MARITACA_API_KEY
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
 
@@ -136,21 +135,15 @@ function ChatContent() {
       let responseContent = ''
 
       if (chatMode === 'maritaca') {
-        // Direct Maritaca API call
-        if (MARITACA_API_KEY) {
-          const maritacaResponse = await fetch('https://chat.maritaca.ai/api/chat/completions', {
+        // Use backend Maritaca endpoint (no API key exposure)
+        try {
+          const maritacaResponse = await fetch(`${BACKEND_URL}/api/v1/chat/direct/maritaca`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Key ${MARITACA_API_KEY}`,
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              message: userMessage.content,
+              system_prompt: currentMode.systemPrompt,
               model: 'sabia-3',
-              messages: [
-                { role: 'system', content: currentMode.systemPrompt },
-                ...messages.map((m) => ({ role: m.role, content: m.content })),
-                { role: 'user', content: userMessage.content },
-              ],
               max_tokens: 1024,
               temperature: 0.7,
             }),
@@ -159,21 +152,25 @@ function ChatContent() {
           if (maritacaResponse.ok) {
             const data = await maritacaResponse.json()
             responseContent =
-              data.choices?.[0]?.message?.content ||
-              'Desculpe, não consegui processar sua mensagem.'
+              data.response ||
+              data.content ||
+              data.message ||
+              'Desculpe, nao consegui processar sua mensagem.'
           } else {
-            responseContent =
-              'Desculpe, houve um erro ao conectar com a Maritaca AI. Tente novamente.'
+            const errorData = await maritacaResponse.json().catch(() => ({}))
+            console.error('Maritaca backend error:', errorData)
+            throw new Error('Backend Maritaca not available')
           }
-        } else {
-          // Demo mode
-          responseContent = `Ola! Sou a Maritaca AI em modo demo.
+        } catch (error) {
+          console.error('Maritaca via backend failed:', error)
+          // Fallback demo mode
+          responseContent = `Ola! Sou a Maritaca AI.
 
-Para habilitar respostas reais, configure a variavel NEXT_PUBLIC_MARITACA_API_KEY.
+O servico esta temporariamente indisponivel. Aqui vai uma dica sobre "${userMessage.content}":
 
-Enquanto isso, aqui vai uma dica sobre "${userMessage.content}":
+A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de software e inteligencia artificial. Continue praticando e explorando!
 
-A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de software e inteligencia artificial. Continue praticando e explorando!`
+Tente novamente em alguns instantes.`
         }
       } else {
         // Santos Dumont - Backend agent with SSE streaming
@@ -241,21 +238,15 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
           setIsStreaming(false)
           setStreamingContent('')
 
-          // Fallback to Maritaca with Santos Dumont persona
-          if (MARITACA_API_KEY) {
-            const maritacaResponse = await fetch('https://chat.maritaca.ai/api/chat/completions', {
+          // Fallback to Maritaca via backend with Santos Dumont persona
+          try {
+            const maritacaResponse = await fetch(`${BACKEND_URL}/api/v1/chat/direct/maritaca`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Key ${MARITACA_API_KEY}`,
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                message: userMessage.content,
+                system_prompt: currentMode.systemPrompt,
                 model: 'sabia-3',
-                messages: [
-                  { role: 'system', content: currentMode.systemPrompt },
-                  ...messages.map((m) => ({ role: m.role, content: m.content })),
-                  { role: 'user', content: userMessage.content },
-                ],
                 max_tokens: 1024,
                 temperature: 0.7,
               }),
@@ -264,12 +255,14 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
             if (maritacaResponse.ok) {
               const data = await maritacaResponse.json()
               responseContent =
-                data.choices?.[0]?.message?.content ||
+                data.response ||
+                data.content ||
+                data.message ||
                 'Desculpe, não consegui processar sua mensagem.'
             } else {
               throw new Error('Maritaca fallback failed')
             }
-          } else {
+          } catch {
             // Demo mode fallback
             responseContent = `Ola, jovem inventor! Sou Santos-Dumont, seu mentor na Academy! ✈️
 
