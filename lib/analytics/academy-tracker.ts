@@ -13,7 +13,40 @@
  * Created: 2025-12-06
  */
 
-import { trackEvent } from './posthog-config'
+import { trackEvent, hasUserConsent } from './posthog-config'
+import { logger } from '@/lib/logger'
+
+/**
+ * Wrapper for trackEvent with development logging
+ * Helps verify telemetry is working correctly
+ */
+function trackAcademyEvent(eventName: string, properties: Record<string, any>) {
+  // Log in development for debugging
+  if (process.env.NODE_ENV === 'development') {
+    const hasConsent = hasUserConsent()
+    logger.debug(`[Academy Telemetry] ${eventName}`, {
+      context: 'AcademyTracker',
+      eventName,
+      properties,
+      hasConsent,
+      willSend: hasConsent,
+    })
+
+    // Log to console for easy browser verification
+    console.log(
+      `%c[Academy Telemetry] ${eventName}`,
+      'background: #10b981; color: white; padding: 2px 6px; border-radius: 3px;',
+      {
+        ...properties,
+        _consent: hasConsent ? '✅ ACCEPTED' : '❌ REJECTED',
+        _willSend: hasConsent,
+      }
+    )
+  }
+
+  // Send to PostHog (respects consent internally)
+  trackEvent(eventName, properties)
+}
 
 // Event types for structured tracking
 export type AgendaEventType = 'study' | 'reading' | 'video' | 'chat' | 'deadline'
@@ -49,7 +82,7 @@ interface MilestoneData {
  * Track agenda page view
  */
 export function trackAgendaView() {
-  trackEvent('academy_agenda_viewed', {
+  trackAcademyEvent('academy_agenda_viewed', {
     component: 'agenda',
     action: 'view',
   })
@@ -59,7 +92,7 @@ export function trackAgendaView() {
  * Track agenda event creation
  */
 export function trackAgendaEventCreated(data: AgendaTrackingData) {
-  trackEvent('academy_agenda_event_created', {
+  trackAcademyEvent('academy_agenda_event_created', {
     component: 'agenda',
     action: 'create',
     event_type: data.eventType,
@@ -72,7 +105,7 @@ export function trackAgendaEventCreated(data: AgendaTrackingData) {
  * Track agenda event completion
  */
 export function trackAgendaEventCompleted(data: AgendaTrackingData) {
-  trackEvent('academy_agenda_event_completed', {
+  trackAcademyEvent('academy_agenda_event_completed', {
     component: 'agenda',
     action: 'complete',
     event_type: data.eventType,
@@ -86,7 +119,7 @@ export function trackAgendaEventCompleted(data: AgendaTrackingData) {
  * Track agenda event deletion
  */
 export function trackAgendaEventDeleted(data: AgendaTrackingData) {
-  trackEvent('academy_agenda_event_deleted', {
+  trackAcademyEvent('academy_agenda_event_deleted', {
     component: 'agenda',
     action: 'delete',
     event_type: data.eventType,
@@ -98,7 +131,7 @@ export function trackAgendaEventDeleted(data: AgendaTrackingData) {
  * Track calendar view change
  */
 export function trackAgendaViewChange(viewType: 'month' | 'week' | 'list') {
-  trackEvent('academy_agenda_view_changed', {
+  trackAcademyEvent('academy_agenda_view_changed', {
     component: 'agenda',
     action: 'view_change',
     view_type: viewType,
@@ -109,7 +142,7 @@ export function trackAgendaViewChange(viewType: 'month' | 'week' | 'list') {
  * Track Google Calendar export
  */
 export function trackGoogleCalendarExport(eventCount: number) {
-  trackEvent('academy_agenda_google_export', {
+  trackAcademyEvent('academy_agenda_google_export', {
     component: 'agenda',
     action: 'export',
     event_count: eventCount,
@@ -120,7 +153,7 @@ export function trackGoogleCalendarExport(eventCount: number) {
  * Track study session
  */
 export function trackStudySession(data: StudySessionData) {
-  trackEvent('academy_study_session', {
+  trackAcademyEvent('academy_study_session', {
     component: 'study',
     action: 'session_completed',
     duration_minutes: data.duration,
@@ -133,7 +166,7 @@ export function trackStudySession(data: StudySessionData) {
  * Track content consumption
  */
 export function trackContentProgress(data: ContentData) {
-  trackEvent('academy_content_progress', {
+  trackAcademyEvent('academy_content_progress', {
     component: 'content',
     action: data.progress === 100 ? 'completed' : 'progress',
     content_type: data.contentType,
@@ -147,7 +180,7 @@ export function trackContentProgress(data: ContentData) {
  * Track video completion
  */
 export function trackVideoCompleted(videoId: string, videoTitle: string, durationSeconds: number) {
-  trackEvent('academy_video_completed', {
+  trackAcademyEvent('academy_video_completed', {
     component: 'videos',
     action: 'complete',
     video_id: videoId,
@@ -160,7 +193,7 @@ export function trackVideoCompleted(videoId: string, videoTitle: string, duratio
  * Track reading completion
  */
 export function trackReadingCompleted(readingId: string, readingTitle: string) {
-  trackEvent('academy_reading_completed', {
+  trackAcademyEvent('academy_reading_completed', {
     component: 'readings',
     action: 'complete',
     reading_id: readingId,
@@ -172,7 +205,7 @@ export function trackReadingCompleted(readingId: string, readingTitle: string) {
  * Track diary entry creation
  */
 export function trackDiaryEntryCreated(mood: string, wordCount: number) {
-  trackEvent('academy_diary_entry_created', {
+  trackAcademyEvent('academy_diary_entry_created', {
     component: 'diary',
     action: 'create',
     mood: mood,
@@ -184,7 +217,7 @@ export function trackDiaryEntryCreated(mood: string, wordCount: number) {
  * Track milestone achievement
  */
 export function trackMilestone(data: MilestoneData) {
-  trackEvent('academy_milestone_achieved', {
+  trackAcademyEvent('academy_milestone_achieved', {
     component: 'gamification',
     action: 'milestone',
     milestone_type: data.milestoneType,
@@ -210,7 +243,7 @@ export function trackLevelUp(previousLevel: number, newLevel: number, totalXp: n
  * Track badge earned
  */
 export function trackBadgeEarned(badgeId: string, badgeName: string) {
-  trackEvent('academy_badge_earned', {
+  trackAcademyEvent('academy_badge_earned', {
     component: 'gamification',
     action: 'badge',
     badge_id: badgeId,
@@ -243,7 +276,7 @@ export function trackStreakMilestone(streakDays: number) {
  * Track certificate download
  */
 export function trackCertificateDownload(totalHours: number, level: number) {
-  trackEvent('academy_certificate_downloaded', {
+  trackAcademyEvent('academy_certificate_downloaded', {
     component: 'certificate',
     action: 'download',
     total_hours: totalHours,
@@ -255,7 +288,7 @@ export function trackCertificateDownload(totalHours: number, level: number) {
  * Track report download
  */
 export function trackReportDownload(totalHours: number, totalXp: number) {
-  trackEvent('academy_report_downloaded', {
+  trackAcademyEvent('academy_report_downloaded', {
     component: 'certificate',
     action: 'download_report',
     total_hours: totalHours,
@@ -267,7 +300,7 @@ export function trackReportDownload(totalHours: number, totalXp: number) {
  * Track chat interaction with mentor
  */
 export function trackMentorChat(agentId: string, messageCount: number) {
-  trackEvent('academy_mentor_chat', {
+  trackAcademyEvent('academy_mentor_chat', {
     component: 'chat',
     action: 'message',
     agent_id: agentId,
@@ -279,7 +312,7 @@ export function trackMentorChat(agentId: string, messageCount: number) {
  * Track track enrollment
  */
 export function trackTrackEnrollment(trackId: string, trackName: string) {
-  trackEvent('academy_track_enrolled', {
+  trackAcademyEvent('academy_track_enrolled', {
     component: 'tracks',
     action: 'enroll',
     track_id: trackId,
@@ -291,7 +324,7 @@ export function trackTrackEnrollment(trackId: string, trackName: string) {
  * Track track completion
  */
 export function trackTrackCompleted(trackId: string, trackName: string, totalXp: number) {
-  trackEvent('academy_track_completed', {
+  trackAcademyEvent('academy_track_completed', {
     component: 'tracks',
     action: 'complete',
     track_id: trackId,
