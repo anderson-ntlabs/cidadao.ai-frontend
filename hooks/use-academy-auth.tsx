@@ -150,6 +150,12 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     let isMounted = true
 
+    // Detect if we just came from OAuth callback
+    const isOAuthComplete =
+      typeof window !== 'undefined' &&
+      (window.location.search.includes('oauth_complete=') ||
+        document.cookie.includes('oauth_session_ready=true'))
+
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       if (isMounted && isLoading) {
@@ -158,38 +164,56 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
       }
     }, 10000)
 
-    const checkSession = async () => {
+    const checkSession = async (retryCount = 0): Promise<boolean> => {
       try {
-        logger.debug('Academy: Starting session check...')
+        logger.debug(`Academy: Starting session check... (attempt ${retryCount + 1})`)
 
         const {
           data: { user: supabaseUser },
           error,
         } = await supabase.auth.getUser()
 
-        if (!isMounted) return
+        if (!isMounted) return false
 
         if (error) {
+          // Token might not be ready yet after OAuth - retry with backoff
+          if (isOAuthComplete && retryCount < 5) {
+            const delay = 300 * (retryCount + 1)
+            logger.debug(`Academy: Auth error during OAuth flow, retrying in ${delay}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
+            return checkSession(retryCount + 1)
+          }
           logger.warn('Academy: getUser error', { message: error.message })
           setUser(null)
           setIsAuthenticated(false)
           setIsLoading(false)
-          return
+          return false
         }
 
         if (!supabaseUser) {
+          // Check if OAuth session should be ready - retry with exponential backoff
+          const oauthSessionReady =
+            typeof document !== 'undefined' && document.cookie.includes('oauth_session_ready=true')
+
+          if ((oauthSessionReady || isOAuthComplete) && retryCount < 5) {
+            const delay = 300 * (retryCount + 1) // 300ms, 600ms, 900ms, 1200ms, 1500ms
+            logger.debug(`Academy: No session but OAuth completed, retrying in ${delay}ms...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
+            return checkSession(retryCount + 1)
+          }
+
           logger.debug('Academy: No user found')
           setUser(null)
           setIsAuthenticated(false)
           setIsLoading(false)
-          return
+          return false
         }
 
         logger.debug('Academy: User found, converting...', { userId: supabaseUser.id })
 
         const academyUser = await convertToAcademyUser(supabaseUser)
 
-        if (!isMounted) return
+        if (!isMounted) return false
 
         if (academyUser) {
           setUser(academyUser)
@@ -199,10 +223,25 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
             email: academyUser.email,
             name: academyUser.name,
           })
+
+          // Clear OAuth cookie on successful auth
+          if (typeof document !== 'undefined') {
+            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+          }
+
+          // Clean up URL if it has oauth_complete param
+          if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
+            const url = new URL(window.location.href)
+            url.searchParams.delete('oauth_complete')
+            window.history.replaceState({}, '', url.pathname + url.search)
+          }
+
+          return true
         } else {
           logger.warn('Academy: Failed to convert user')
           setUser(null)
           setIsAuthenticated(false)
+          return false
         }
       } catch (error) {
         logger.error('Academy session check failed', { error })
@@ -210,6 +249,7 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
           setUser(null)
           setIsAuthenticated(false)
         }
+        return false
       } finally {
         if (isMounted) {
           setIsLoading(false)
