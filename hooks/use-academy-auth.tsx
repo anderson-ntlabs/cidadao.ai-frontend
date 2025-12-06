@@ -72,19 +72,39 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
       // Extract GitHub username if available
       const githubUsername = metadata.user_name || metadata.preferred_username || null
 
-      // Try to get existing profile from Supabase
-      const { data: profile } = await supabase
-        .from('academy_profiles')
-        .select('*')
-        .eq('user_id', supabaseUser.id)
-        .single()
+      // Try to get existing profile from Supabase (with error handling)
+      let profile = null
+      let hasConsent = false
 
-      // Check LGPD consent
-      const { data: consent } = await supabase
-        .from('academy_consent')
-        .select('id')
-        .eq('user_id', supabaseUser.id)
-        .single()
+      try {
+        const { data, error } = await supabase
+          .from('academy_profiles')
+          .select('*')
+          .eq('user_id', supabaseUser.id)
+          .single()
+
+        if (!error && data) {
+          profile = data
+        }
+      } catch (e) {
+        // Table might not exist yet - that's OK for new installations
+        logger.debug('academy_profiles table not available', { error: e })
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('academy_consent')
+          .select('id')
+          .eq('user_id', supabaseUser.id)
+          .single()
+
+        if (!error && data) {
+          hasConsent = true
+        }
+      } catch (e) {
+        // Table might not exist yet - that's OK for new installations
+        logger.debug('academy_consent table not available', { error: e })
+      }
 
       if (profile) {
         return {
@@ -102,7 +122,7 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
           currentStreak: profile.current_streak || 0,
           totalTimeMinutes: profile.total_time_minutes || 0,
           totalSessions: profile.total_sessions || 0,
-          hasAcceptedLgpd: !!consent,
+          hasAcceptedLgpd: hasConsent,
           enrolledAt: profile.enrolled_at,
         }
       }
@@ -120,7 +140,7 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
         currentStreak: 0,
         totalTimeMinutes: 0,
         totalSessions: 0,
-        hasAcceptedLgpd: !!consent,
+        hasAcceptedLgpd: hasConsent,
       }
     },
     [supabase]
@@ -128,35 +148,72 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
 
   // Check session on mount
   useEffect(() => {
+    let isMounted = true
+
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (isMounted && isLoading) {
+        logger.warn('Academy auth check timeout (10s) - forcing loading state to false')
+        setIsLoading(false)
+      }
+    }, 10000)
+
     const checkSession = async () => {
       try {
+        logger.debug('Academy: Starting session check...')
+
         const {
           data: { user: supabaseUser },
           error,
         } = await supabase.auth.getUser()
 
-        if (error || !supabaseUser) {
+        if (!isMounted) return
+
+        if (error) {
+          logger.warn('Academy: getUser error', { message: error.message })
           setUser(null)
           setIsAuthenticated(false)
           setIsLoading(false)
           return
         }
 
+        if (!supabaseUser) {
+          logger.debug('Academy: No user found')
+          setUser(null)
+          setIsAuthenticated(false)
+          setIsLoading(false)
+          return
+        }
+
+        logger.debug('Academy: User found, converting...', { userId: supabaseUser.id })
+
         const academyUser = await convertToAcademyUser(supabaseUser)
+
+        if (!isMounted) return
+
         if (academyUser) {
           setUser(academyUser)
           setIsAuthenticated(true)
           logger.info('Academy user authenticated', {
             userId: academyUser.id,
             email: academyUser.email,
+            name: academyUser.name,
           })
+        } else {
+          logger.warn('Academy: Failed to convert user')
+          setUser(null)
+          setIsAuthenticated(false)
         }
       } catch (error) {
-        logger.error('Session check failed', { error })
-        setUser(null)
-        setIsAuthenticated(false)
+        logger.error('Academy session check failed', { error })
+        if (isMounted) {
+          setUser(null)
+          setIsAuthenticated(false)
+        }
       } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
     }
 
@@ -166,21 +223,30 @@ export function AcademyAuthProvider({ children }: { children: React.ReactNode })
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      logger.debug('Auth state changed', { event, hasSession: !!session })
+      logger.debug('Academy auth state changed', { event, hasSession: !!session })
+
+      if (!isMounted) return
 
       if (session?.user) {
+        logger.debug('Academy: Session user detected, converting...')
         const academyUser = await convertToAcademyUser(session.user)
-        if (academyUser) {
+        if (isMounted && academyUser) {
           setUser(academyUser)
           setIsAuthenticated(true)
+          setIsLoading(false)
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setIsAuthenticated(false)
+        setIsLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [supabase, convertToAcademyUser])
 
   const loginWithProvider = useCallback(
