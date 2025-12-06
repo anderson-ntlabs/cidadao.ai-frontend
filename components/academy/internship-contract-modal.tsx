@@ -11,7 +11,7 @@ interface InternshipContractModalProps {
   redirectToOnboarding?: boolean
 }
 
-const CONTRACT_VERSION = 'v1.0-2025'
+const CONTRACT_VERSION = 'v2.0-2025'
 
 export function InternshipContractModal({
   isOpen,
@@ -26,7 +26,7 @@ export function InternshipContractModal({
     dataCollection: false,
     reportGeneration: false,
     lgpdConsent: false,
-    internshipTerms: false,
+    termsAccept: false,
   })
 
   const allChecked = Object.values(checkboxes).every(Boolean)
@@ -65,11 +65,11 @@ export function InternshipContractModal({
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(18)
     doc.setFont('helvetica', 'bold')
-    doc.text('TERMO DE ACEITE - ESTAGIO ACADEMIA CIDADAO.AI', pageWidth / 2, 20, {
+    doc.text('TERMOS DE USO - ACADEMY CIDADAO.AI', pageWidth / 2, 20, {
       align: 'center',
     })
     doc.setFontSize(12)
-    doc.text('Parceria: Neural Thinker AI Engineering + IFSULDEMINAS/LabSoft', pageWidth / 2, 32, {
+    doc.text('Plataforma Educacional de IA para Transparência Pública', pageWidth / 2, 32, {
       align: 'center',
     })
 
@@ -78,109 +78,88 @@ export function InternshipContractModal({
 
     // Contract ID
     const contractId = `ACAD-${Date.now().toString(36).toUpperCase()}`
-    addWrappedText(`Contrato No: ${contractId}`, 10, true)
+    addWrappedText(`Termo No: ${contractId}`, 10, true)
     addWrappedText(`Data de Aceite: ${currentDate}`, 10)
-    addWrappedText(`Versao do Termo: ${CONTRACT_VERSION}`, 10)
+    addWrappedText(`Versão do Termo: ${CONTRACT_VERSION}`, 10)
     yPos += 5
 
-    // Parties
-    addWrappedText('1. PARTES ENVOLVIDAS', 14, true)
-    addWrappedText(`ESTAGIARIO(A): ${user.name}`, 11)
-    addWrappedText(`Email Institucional: ${user.email}`, 11)
-    addWrappedText(`Matricula: ${user.matricula}`, 11)
-    addWrappedText(`Curso: ${user.curso} - ${user.periodo}o Periodo`, 11)
-    yPos += 3
-
-    addWrappedText(
-      'INSTITUICAO DE ENSINO: Instituto Federal do Sul de Minas Gerais (IFSULDEMINAS)',
-      11
-    )
-    addWrappedText('LABORATORIO: LabSoft - Laboratorio de Desenvolvimento de Software', 11)
-    addWrappedText('EMPRESA PARCEIRA: Neural Thinker AI Engineering', 11)
+    // User Info
+    addWrappedText('1. IDENTIFICAÇÃO DO USUÁRIO', 14, true)
+    addWrappedText(`Nome: ${user.name}`, 11)
+    addWrappedText(`Email: ${user.email}`, 11)
     yPos += 5
 
     // Object
-    addWrappedText('2. OBJETO DO ESTAGIO', 14, true)
+    addWrappedText('2. OBJETO', 14, true)
     addWrappedText(
-      'O presente termo estabelece as condicoes para participacao no programa de estagio da Academia Cidadao.AI, ' +
-        'plataforma educacional voltada ao aprendizado de Inteligencia Artificial aplicada a transparencia publica.',
+      'O presente termo estabelece as condições para utilização da Academy Cidadão.AI, ' +
+        'plataforma educacional aberta voltada ao aprendizado de Inteligência Artificial ' +
+        'aplicada à transparência pública.',
       11
     )
     yPos += 5
 
     // Data Collection
     addWrappedText('3. COLETA E TRATAMENTO DE DADOS', 14, true)
-    addWrappedText('3.1. Dados Pessoais Coletados:', 12, true)
-    addWrappedText('- Nome completo e email institucional', 11)
-    addWrappedText('- Matricula e dados academicos', 11)
-    addWrappedText('- Endereco IP e informacoes do navegador', 11)
-    addWrappedText('- Tempo de sessao e metricas de interacao', 11)
-    addWrappedText('- Progresso de aprendizado e avaliacoes', 11)
+    addWrappedText('3.1. Dados Coletados:', 12, true)
+    addWrappedText('- Nome e email', 11)
+    addWrappedText('- Endereço IP e informações do navegador', 11)
+    addWrappedText('- Tempo de sessão e métricas de interação', 11)
+    addWrappedText('- Progresso de aprendizado e avaliações', 11)
     addWrappedText('- Conversas com agentes de IA (para fins educacionais)', 11)
     yPos += 3
 
     addWrappedText('3.2. Finalidades do Tratamento:', 12, true)
-    addWrappedText('- Geracao automatica de relatorio de estagio com carga horaria', 11)
-    addWrappedText('- Emissao de certificado de conclusao', 11)
-    addWrappedText('- Pesquisa academica sobre educacao em IA (dados anonimizados)', 11)
-    addWrappedText('- Melhoria continua da plataforma educacional', 11)
+    addWrappedText('- Emissão de certificado de conclusão', 11)
+    addWrappedText('- Pesquisa acadêmica sobre educação em IA (dados anonimizados)', 11)
+    addWrappedText('- Melhoria contínua da plataforma educacional', 11)
+    addWrappedText('- Geração de relatório de progresso e métricas de engajamento', 11)
     yPos += 5
 
     // Legal Basis
-    addWrappedText('4. FUNDAMENTACAO LEGAL', 14, true)
+    addWrappedText('4. FUNDAMENTAÇÃO LEGAL', 14, true)
     addWrappedText(
-      'O tratamento de dados pessoais neste programa fundamenta-se nas seguintes bases legais da ' +
-        'Lei Geral de Protecao de Dados (Lei no 13.709/2018 - LGPD):',
+      'O tratamento de dados pessoais nesta plataforma fundamenta-se nas seguintes bases legais da ' +
+        'Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD):',
       11
     )
     yPos += 3
-    addWrappedText('Art. 7o, I - Consentimento do titular (presente termo)', 11)
-    addWrappedText('Art. 7o, II - Cumprimento de obrigacao legal (estagio curricular)', 11)
-    addWrappedText('Art. 7o, IV - Realizacao de estudos por orgao de pesquisa', 11)
-    addWrappedText('Art. 7o, IX - Interesses legitimos do controlador (educacao)', 11)
-    yPos += 3
-    addWrappedText(
-      'Complementarmente, aplica-se a Lei de Estagio (Lei no 11.788/2008) que regulamenta ' +
-        'a realizacao de estagios curriculares e extracurriculares.',
-      11
-    )
+    addWrappedText('Art. 7º, I - Consentimento do titular (presente termo)', 11)
+    addWrappedText('Art. 7º, IV - Realização de estudos por órgão de pesquisa', 11)
+    addWrappedText('Art. 7º, IX - Interesses legítimos do controlador (educação)', 11)
     yPos += 5
 
     // Telemetry
-    addWrappedText('5. TELEMETRIA E GERACAO DE RELATORIO', 14, true)
-    addWrappedText('O(A) estagiario(a) declara estar CIENTE e CONCORDAR que:', 11, true)
+    addWrappedText('5. TELEMETRIA E MÉTRICAS', 14, true)
+    addWrappedText('O(A) usuário(a) declara estar CIENTE e CONCORDAR que:', 11, true)
     addWrappedText(
-      '5.1. O relatorio de estagio sera gerado AUTOMATICAMENTE com base nos dados de telemetria ' +
-        'coletados durante as sessoes de estudo na plataforma.',
+      '5.1. O progresso será acompanhado através de dados de telemetria ' +
+        'coletados durante as sessões de estudo na plataforma.',
       11
     )
     addWrappedText(
-      '5.2. As metricas de tempo de estudo, interacoes com agentes de IA, e progresso nas atividades ' +
-        'serao utilizadas para compor a carga horaria do estagio.',
+      '5.2. As métricas de tempo de estudo, interações com agentes de IA, e progresso nas atividades ' +
+        'serão utilizadas para gerar relatórios de aprendizado.',
       11
     )
     addWrappedText(
-      '5.3. O sistema de gamificacao (XP, niveis, badges) serve como indicador de engajamento ' +
-        'e sera documentado no relatorio final.',
+      '5.3. O sistema de gamificação (XP, níveis, badges) serve como indicador de engajamento.',
       11
     )
     yPos += 5
 
     // Rights
     addWrappedText('6. DIREITOS DO TITULAR DOS DADOS', 14, true)
-    addWrappedText(
-      'Conforme a LGPD (Art. 18), o(a) estagiario(a) possui os seguintes direitos:',
-      11
-    )
-    addWrappedText('- Confirmacao e acesso aos dados coletados', 11)
-    addWrappedText('- Correcao de dados incompletos ou desatualizados', 11)
-    addWrappedText('- Anonimizacao, bloqueio ou eliminacao de dados desnecessarios', 11)
+    addWrappedText('Conforme a LGPD (Art. 18), o(a) usuário(a) possui os seguintes direitos:', 11)
+    addWrappedText('- Confirmação e acesso aos dados coletados', 11)
+    addWrappedText('- Correção de dados incompletos ou desatualizados', 11)
+    addWrappedText('- Anonimização, bloqueio ou eliminação de dados desnecessários', 11)
     addWrappedText('- Portabilidade dos dados', 11)
-    addWrappedText('- Revogacao do consentimento a qualquer momento', 11)
+    addWrappedText('- Revogação do consentimento a qualquer momento', 11)
     yPos += 3
     addWrappedText(
-      'Para exercer estes direitos, o titular deve contatar a coordenacao do LabSoft ' +
-        'atraves do email: labsoft@ifsuldeminas.edu.br',
+      'Para exercer estes direitos, o titular pode contatar através do ' +
+        'email: contato@cidadao.ai',
       11
     )
     yPos += 5
@@ -190,24 +169,17 @@ export function InternshipContractModal({
     yPos = 20
 
     // Declaration
-    addWrappedText('7. DECLARACAO DE ACEITE', 14, true)
-    addWrappedText(
-      `Eu, ${user.name}, portador(a) da matricula ${user.matricula}, ` +
-        `estudante do curso de ${user.curso}, DECLARO que:`,
-      11
-    )
+    addWrappedText('7. DECLARAÇÃO DE ACEITE', 14, true)
+    addWrappedText(`Eu, ${user.name}, DECLARO que:`, 11)
     yPos += 3
-    addWrappedText('[X] Li e compreendi integralmente este Termo de Aceite', 11)
+    addWrappedText('[X] Li e compreendi integralmente estes Termos de Uso', 11)
     addWrappedText(
       '[X] Autorizo a coleta e tratamento dos meus dados pessoais para as finalidades descritas',
       11
     )
-    addWrappedText(
-      '[X] Concordo com a geracao automatica do relatorio de estagio por telemetria',
-      11
-    )
+    addWrappedText('[X] Concordo com a geração de relatórios baseados em telemetria', 11)
     addWrappedText('[X] Estou ciente dos meus direitos como titular de dados pessoais', 11)
-    addWrappedText('[X] Aceito participar do programa de estagio da Academia Cidadao.AI', 11)
+    addWrappedText('[X] Aceito participar da plataforma Academy Cidadão.AI', 11)
     yPos += 10
 
     // Signature area
@@ -215,11 +187,7 @@ export function InternshipContractModal({
     doc.line(margin, yPos + 20, margin + 80, yPos + 20)
     doc.setFontSize(10)
     doc.text(user.name, margin, yPos + 28)
-    doc.text('Estagiario(a)', margin, yPos + 35)
-
-    doc.line(pageWidth - margin - 80, yPos + 20, pageWidth - margin, yPos + 20)
-    doc.text('Coordenacao LabSoft', pageWidth - margin - 80, yPos + 28)
-    doc.text('IFSULDEMINAS', pageWidth - margin - 80, yPos + 35)
+    doc.text('Usuário(a)', margin, yPos + 35)
 
     yPos += 50
 
@@ -228,7 +196,7 @@ export function InternshipContractModal({
     addWrappedText(`Data/Hora do Aceite: ${new Date().toLocaleString('pt-BR')}`, 11)
     addWrappedText(`IP do Dispositivo: ${user.lastIpAddress || 'Coletado no aceite'}`, 11)
     addWrappedText(`User Agent: ${navigator.userAgent.substring(0, 80)}...`, 10)
-    addWrappedText(`Hash do Contrato: ${contractId}-${Date.now().toString(16)}`, 10)
+    addWrappedText(`Hash do Termo: ${contractId}-${Date.now().toString(16)}`, 10)
     yPos += 10
 
     // Footer
@@ -237,17 +205,16 @@ export function InternshipContractModal({
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(9)
     doc.text(
-      'Academia Cidadao.AI - Transparencia Publica com Inteligencia Artificial',
+      'Academy Cidadão.AI - Transparência Pública com Inteligência Artificial',
       pageWidth / 2,
       285,
-      { align: 'center' }
+      {
+        align: 'center',
+      }
     )
-    doc.text(
-      'Neural Thinker AI Engineering + IFSULDEMINAS/LabSoft | ' + CONTRACT_VERSION,
-      pageWidth / 2,
-      292,
-      { align: 'center' }
-    )
+    doc.text('Plataforma Educacional Aberta | ' + CONTRACT_VERSION, pageWidth / 2, 292, {
+      align: 'center',
+    })
 
     return { pdf: doc, contractId }
   }
@@ -269,7 +236,7 @@ export function InternshipContractModal({
 
       // Generate and download PDF
       const { pdf, contractId } = generateContractPDF()
-      pdf.save(`contrato-estagio-${user.matricula}-${contractId}.pdf`)
+      pdf.save(`termos-uso-academy-${contractId}.pdf`)
 
       // Save acceptance
       await acceptInternshipContract(ipAddress, navigator.userAgent, contractId)
@@ -281,7 +248,7 @@ export function InternshipContractModal({
         onClose?.()
       }
     } catch (error) {
-      console.error('Failed to accept contract:', error)
+      console.error('Failed to accept terms:', error)
     } finally {
       setIsAccepting(false)
     }
@@ -312,8 +279,8 @@ export function InternshipContractModal({
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Termo de Aceite - Estágio</h2>
-              <p className="text-green-100">Academia Cidadão.AI + IFSULDEMINAS/LabSoft</p>
+              <h2 className="text-2xl font-bold">Termos de Uso</h2>
+              <p className="text-green-100">Academy Cidadão.AI - Plataforma Educacional</p>
             </div>
           </div>
         </div>
@@ -326,10 +293,9 @@ export function InternshipContractModal({
             </p>
 
             <p>
-              Para iniciar sua participação no programa de estágio da{' '}
-              <strong>Academia Cidadão.AI</strong>, é necessário aceitar os termos abaixo. Este
-              documento estabelece as condições para coleta de dados e geração automática do seu
-              relatório de estágio.
+              Bem-vindo à <strong>Academy Cidadão.AI</strong>! Para iniciar sua jornada de
+              aprendizado, é necessário aceitar os termos abaixo. Este documento estabelece as
+              condições para coleta de dados e uso da plataforma.
             </p>
 
             {/* Legal basis */}
@@ -342,7 +308,7 @@ export function InternshipContractModal({
                   <strong>Lei 13.709/2018 (LGPD)</strong> - Lei Geral de Proteção de Dados
                 </li>
                 <li>
-                  <strong>Lei 11.788/2008</strong> - Lei de Estágio
+                  <strong>Art. 7º, I da LGPD</strong> - Consentimento do titular
                 </li>
                 <li>
                   <strong>Art. 7º, IV da LGPD</strong> - Pesquisa por órgão de pesquisa
@@ -350,15 +316,28 @@ export function InternshipContractModal({
               </ul>
             </div>
 
+            {/* What is Academy */}
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+              <h3 className="font-bold text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
+                <span>🎓</span> O que é a Academy Cidadão.AI?
+              </h3>
+              <p className="text-sm text-green-700 dark:text-green-300">
+                Uma <strong>plataforma educacional aberta e gratuita</strong> para aprender sobre
+                Inteligência Artificial aplicada à transparência pública. Aprenda com mentores IA,
+                ganhe XP, conquiste badges e obtenha seu certificado!
+              </p>
+            </div>
+
             {/* Telemetry explanation */}
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
               <h3 className="font-bold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
-                <span>📊</span> Geração Automática de Relatório
+                <span>📊</span> Métricas e Progresso
               </h3>
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                Seu <strong>relatório de estágio será gerado automaticamente</strong> com base nos
-                dados de telemetria coletados: tempo de estudo, interações com agentes de IA,
-                progresso nas atividades e métricas de engajamento (XP, badges).
+                Seu progresso será acompanhado através de <strong>dados de telemetria</strong>:
+                tempo de estudo, interações com o mentor IA, vídeos assistidos e métricas de
+                engajamento (XP, badges). Isso permite gerar seu certificado e relatório de
+                aprendizado.
               </p>
             </div>
 
@@ -366,7 +345,7 @@ export function InternshipContractModal({
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Dados coletados:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Nome, email institucional e matrícula</li>
+                <li>Nome e email</li>
                 <li>Tempo de sessão e métricas de interação</li>
                 <li>Progresso de aprendizado (vídeos, leituras, conversas)</li>
                 <li>Diário de aprendizado (reflexões voluntárias)</li>
@@ -380,10 +359,10 @@ export function InternshipContractModal({
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Finalidades:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>
-                  <strong>Relatório de estágio</strong> com carga horária documentada
+                  <strong>Certificado de conclusão</strong> com métricas de desempenho
                 </li>
                 <li>
-                  <strong>Certificado de conclusão</strong> com métricas de desempenho
+                  <strong>Relatório de progresso</strong> com suas conquistas
                 </li>
                 <li>
                   <strong>Pesquisa acadêmica</strong> sobre educação em IA (dados anonimizados)
@@ -399,7 +378,7 @@ export function InternshipContractModal({
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300">
                 Você pode solicitar <strong>acesso, correção, anonimização ou exclusão</strong> de
-                seus dados a qualquer momento. Contato: <strong>labsoft@ifsuldeminas.edu.br</strong>
+                seus dados a qualquer momento. Contato: <strong>contato@cidadao.ai</strong>
               </p>
             </div>
           </div>
@@ -415,7 +394,7 @@ export function InternshipContractModal({
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                 <strong>Autorizo a coleta de telemetria</strong> (tempo de estudo, interações,
-                progresso) para documentação da carga horária de estágio.
+                progresso) para acompanhamento do meu aprendizado.
               </span>
             </label>
 
@@ -442,8 +421,8 @@ export function InternshipContractModal({
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Concordo com a geração automática do relatório de estágio</strong> baseado
-                nos dados de telemetria e métricas de engajamento coletados.
+                <strong>Concordo com a geração de relatórios</strong> baseados nos dados de
+                telemetria e métricas de engajamento coletados.
               </span>
             </label>
 
@@ -463,15 +442,13 @@ export function InternshipContractModal({
             <label className="flex items-start gap-3 cursor-pointer group">
               <input
                 type="checkbox"
-                checked={checkboxes.internshipTerms}
-                onChange={(e) =>
-                  setCheckboxes({ ...checkboxes, internshipTerms: e.target.checked })
-                }
+                checked={checkboxes.termsAccept}
+                onChange={(e) => setCheckboxes({ ...checkboxes, termsAccept: e.target.checked })}
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Aceito participar do programa de estágio</strong> da Academia Cidadão.AI em
-                parceria com IFSULDEMINAS/LabSoft e Neural Thinker AI Engineering.
+                <strong>Aceito participar da plataforma Academy Cidadão.AI</strong> e concordo com
+                estes Termos de Uso.
               </span>
             </label>
           </div>
@@ -485,7 +462,7 @@ export function InternshipContractModal({
                 Versão do termo: {CONTRACT_VERSION} | Data: {currentDate}
               </p>
               <p className="text-green-600 dark:text-green-400 font-medium mt-1">
-                Um PDF do contrato será baixado automaticamente.
+                Um PDF dos termos será baixado automaticamente.
               </p>
             </div>
             <button
@@ -519,10 +496,10 @@ export function InternshipContractModal({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     ></path>
                   </svg>
-                  Gerando contrato...
+                  Gerando termos...
                 </span>
               ) : (
-                'Aceitar e Baixar Contrato (PDF)'
+                'Aceitar e Baixar Termos (PDF)'
               )}
             </button>
           </div>

@@ -60,8 +60,8 @@ interface ReadingProgress {
 const placeholderReadings: Reading[] = [
   {
     id: '1',
-    title: 'Introducao ao FastAPI',
-    description: 'Documentacao oficial do FastAPI para iniciantes',
+    title: 'Introdução ao FastAPI',
+    description: 'Documentação oficial do FastAPI para iniciantes',
     url: 'https://fastapi.tiangolo.com/tutorial/',
     article_type: 'tutorial',
     track: 'backend',
@@ -84,8 +84,8 @@ const placeholderReadings: Reading[] = [
   },
   {
     id: '3',
-    title: 'Introducao ao LangChain',
-    description: 'Construindo aplicacoes com LLMs',
+    title: 'Introdução ao LangChain',
+    description: 'Construindo aplicações com LLMs',
     url: 'https://python.langchain.com/docs/get_started/introduction',
     article_type: 'tutorial',
     track: 'ia',
@@ -97,7 +97,7 @@ const placeholderReadings: Reading[] = [
   {
     id: '4',
     title: 'Docker para Iniciantes',
-    description: 'Conceitos basicos de containerizacao',
+    description: 'Conceitos básicos de containerização',
     url: 'https://docs.docker.com/get-started/',
     article_type: 'tutorial',
     track: 'devops',
@@ -132,8 +132,8 @@ const placeholderReadings: Reading[] = [
   },
   {
     id: '7',
-    title: 'Pydantic V2: Validacao de Dados',
-    description: 'Validacao de dados com Pydantic no FastAPI',
+    title: 'Pydantic V2: Validação de Dados',
+    description: 'Validação de dados com Pydantic no FastAPI',
     url: 'https://docs.pydantic.dev/latest/',
     article_type: 'tutorial',
     track: 'backend',
@@ -145,7 +145,7 @@ const placeholderReadings: Reading[] = [
   {
     id: '8',
     title: 'Tailwind CSS: Utility-First',
-    description: 'Dominando Tailwind CSS na pratica',
+    description: 'Dominando Tailwind CSS na prática',
     url: 'https://tailwindcss.com/docs/utility-first',
     article_type: 'tutorial',
     track: 'frontend',
@@ -232,7 +232,7 @@ export default function AcademyReadingsPage() {
       saveProgress(newProgress)
 
       const xpAmount = reading.is_required ? 20 : 10
-      addXp(xpAmount, 'article', `Leitura concluida: ${reading.title}`)
+      addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
 
       toast.success('Leitura confirmada!', `+${xpAmount} XP`)
       setConfirmingId(null)
@@ -278,11 +278,11 @@ export default function AcademyReadingsPage() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Leituras Obrigatorias
+                  Leituras Obrigatórias
                 </h1>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {completedCount} de {readings.length} concluidas
+                {completedCount} de {readings.length} concluídas
               </p>
             </div>
           </div>
@@ -347,10 +347,10 @@ export default function AcademyReadingsPage() {
                   <span className="text-5xl">📚</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  Nenhuma leitura disponivel
+                  Nenhuma leitura disponível
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  As leituras serao adicionadas em breve
+                  As leituras serão adicionadas em breve
                 </p>
               </div>
             </Card>
@@ -389,7 +389,7 @@ export default function AcademyReadingsPage() {
                         {reading.is_required && (
                           <Badge variant="warning" size="sm">
                             <Star className="w-3 h-3" />
-                            Obrigatorio
+                            Obrigatório
                           </Badge>
                         )}
                       </div>
@@ -418,8 +418,8 @@ export default function AcademyReadingsPage() {
                             {reading.difficulty === 'beginner'
                               ? 'Iniciante'
                               : reading.difficulty === 'intermediate'
-                                ? 'Intermediario'
-                                : 'Avancado'}
+                                ? 'Intermediário'
+                                : 'Avançado'}
                           </Badge>
                         )}
                         <span

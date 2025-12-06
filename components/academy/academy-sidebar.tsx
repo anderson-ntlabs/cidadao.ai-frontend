@@ -48,8 +48,8 @@ interface AcademySidebarProps {
 const navItems: NavItem[] = [
   { href: '/pt/academy', label: 'Dashboard', icon: Home },
   { href: '/pt/academy/chat', label: 'Chat com Mentor', icon: MessageSquare },
-  { href: '/pt/academy/diario', label: 'Diario de Bordo', icon: BookOpen },
-  { href: '/pt/academy/videos', label: 'Videos', icon: Video },
+  { href: '/pt/academy/diario', label: 'Diário de Bordo', icon: BookOpen },
+  { href: '/pt/academy/videos', label: 'Vídeos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
   { href: '/pt/academy/ranking', label: 'Ranking', icon: Trophy },
 ]
@@ -82,7 +82,7 @@ export function AcademySidebar({ user, className }: AcademySidebarProps) {
           </div>
           <div>
             <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">Academy</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Cidadao.AI</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Cidadão.AI</p>
           </div>
         </Link>
       </div>
@@ -109,7 +109,7 @@ export function AcademySidebar({ user, className }: AcademySidebarProps) {
             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
               {user.totalSessions}
             </span>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400">sessoes</span>
+            <span className="text-[10px] text-gray-500 dark:text-gray-400">sessões</span>
           </div>
         </div>
       </div>
@@ -168,7 +168,7 @@ export function AcademySidebar({ user, className }: AcademySidebarProps) {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Certificado</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Disponivel ao concluir</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Disponível ao concluir</p>
             </div>
           </div>
           <Link

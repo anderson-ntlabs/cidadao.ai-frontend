@@ -26,9 +26,6 @@ export interface AcademyDemoUser {
   name: string
   email: string
   avatar: string
-  matricula: string
-  curso: string
-  periodo: number
   totalXp: number
   currentLevel: number
   currentRank: string
@@ -100,7 +97,7 @@ export interface LgpdConsent {
   version: string
 }
 
-// Internship contract record
+// Terms of Use record (renamed from internship contract for democratization)
 export interface InternshipContract {
   contractId: string
   acceptedAt: string
@@ -113,7 +110,7 @@ export interface InternshipContract {
     dataCollection: boolean
     reportGeneration: boolean
     lgpdConsent: boolean
-    internshipTerms: boolean
+    termsAccept: boolean
   }
 }
 
@@ -128,15 +125,12 @@ export interface AcademyBadge {
   criteria: string
 }
 
-// Default demo user - starts without contract acceptance
+// Default demo user - starts without terms acceptance
 const DEFAULT_DEMO_USER: AcademyDemoUser = {
   id: 'demo-user-001',
   name: 'Estudante Demo',
-  email: 'demo@alunos.ifsuldeminas.edu.br',
+  email: 'demo@cidadao.ai',
   avatar: 'https://ui-avatars.com/api/?name=Estudante+Demo&background=16a34a&color=fff&size=128',
-  matricula: '2024001234',
-  curso: 'Ciência da Computação',
-  periodo: 5,
   totalXp: 0,
   currentLevel: 1,
   currentRank: 'novato',
@@ -146,8 +140,8 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   totalSessions: 0,
   totalTimeMinutes: 0,
   hasAcceptedLgpd: false,
-  hasAcceptedInternshipContract: false, // Must accept contract on first access
-  hasCompletedOnboarding: false, // Must complete onboarding after contract
+  hasAcceptedInternshipContract: false, // Must accept terms on first access
+  hasCompletedOnboarding: false, // Must complete onboarding after terms acceptance
   enrolledAt: new Date().toISOString(),
 }
 
@@ -441,31 +435,31 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         acceptedAt: new Date().toISOString(),
         ipAddress,
         userAgent: userAgent || navigator.userAgent,
-        version: 'v1.0-2025',
+        version: 'v2.0-2025',
         pdfGenerated: true,
         consents: {
           telemetry: true,
           dataCollection: true,
           reportGeneration: true,
           lgpdConsent: true,
-          internshipTerms: true,
+          termsAccept: true,
         },
       }
 
       setInternshipContract(contract)
       localStorage.setItem(STORAGE_CONTRACT_KEY, JSON.stringify(contract))
 
-      // Update user to mark contract as accepted and save IP
+      // Update user to mark terms as accepted and save IP
       updateProfile({
         hasAcceptedLgpd: true,
         hasAcceptedInternshipContract: true,
         lastIpAddress: ipAddress,
       })
 
-      // Award XP for accepting contract (welcome bonus)
-      addXp(100, 'internship_contract', 'Bônus de boas-vindas - Aceite do contrato de estágio')
+      // Award XP for accepting terms (welcome bonus)
+      addXp(100, 'terms_accept', 'Bônus de boas-vindas - Aceite dos Termos de Uso')
 
-      logger.info('Internship contract accepted', { contractId: contract.contractId, ipAddress })
+      logger.info('Terms of Use accepted', { contractId: contract.contractId, ipAddress })
     },
     [updateProfile, addXp]
   )
@@ -506,7 +500,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       logger.info('Japaguri badge awarded', { criteria: japaguriBadge.criteria })
     }
 
-    // Pioneiro badge - for early adopters (first contract acceptance)
+    // Pioneiro badge - for early adopters (first terms acceptance)
     const hasPioneiro = badges.some((b) => b.type === 'pioneiro')
     if (!hasPioneiro && user.hasAcceptedInternshipContract) {
       const pioneiroBadge: AcademyBadge = {
@@ -516,7 +510,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         description: 'Um dos primeiros a embarcar na jornada da Academy!',
         emoji: '🚀',
         earnedAt: new Date().toISOString(),
-        criteria: 'Aceitou o contrato de estágio',
+        criteria: 'Aceitou os Termos de Uso',
       }
       newBadges.push(pioneiroBadge)
       badgesAwarded = true

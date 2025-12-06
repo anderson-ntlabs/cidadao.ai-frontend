@@ -49,7 +49,7 @@ const TRACKS = [
       'FastAPI e Python',
       'Design de APIs REST',
       'Bancos de dados',
-      'Autenticacao e seguranca',
+      'Autenticação e segurança',
     ],
     icon: Server,
     color: 'from-blue-500 to-cyan-500',
@@ -60,7 +60,7 @@ const TRACKS = [
   {
     id: 'frontend' as const,
     name: 'Frontend',
-    description: 'Interfaces, UX/UI e aplicacoes web',
+    description: 'Interfaces, UX/UI e aplicações web',
     details: ['Next.js e React', 'TypeScript', 'Design System', 'Acessibilidade (a11y)'],
     icon: Palette,
     color: 'from-purple-500 to-pink-500',
@@ -71,8 +71,8 @@ const TRACKS = [
   {
     id: 'ia' as const,
     name: 'IA/ML',
-    description: 'Inteligencia artificial e machine learning',
-    details: ['Agentes de IA', 'LLMs e prompts', 'RAG e vetores', 'Avaliacao de modelos'],
+    description: 'Inteligência artificial e machine learning',
+    details: ['Agentes de IA', 'LLMs e prompts', 'RAG e vetores', 'Avaliação de modelos'],
     icon: Brain,
     color: 'from-green-500 to-emerald-500',
     bgColor: 'bg-green-500/10 dark:bg-green-500/20',
@@ -191,7 +191,7 @@ export default function AcademyOnboardingPage() {
             </div>
             <div>
               <h1 className="font-bold text-gray-900 dark:text-gray-100">Onboarding</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Academy Cidadao.AI</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Academy Cidadão.AI</p>
             </div>
           </div>
           <Badge variant="warning" size="lg">
@@ -272,11 +272,11 @@ export default function AcademyOnboardingPage() {
                     <Rocket className="w-12 h-12 text-white" />
                   </div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                    Bem-vindo a Academy Cidadao.AI!
+                    Bem-vindo à Academy Cidadão.AI!
                   </h1>
                   <p className="text-lg text-gray-600 dark:text-gray-400 max-w-lg mx-auto">
-                    Prepare-se para uma experiencia imersiva de aprendizado com IA e transparencia
-                    publica.
+                    Prepare-se para uma experiência imersiva de aprendizado com IA e transparência
+                    pública.
                   </p>
                 </div>
 
@@ -287,18 +287,18 @@ export default function AcademyOnboardingPage() {
                   className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
                 >
                   <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />O que e a Academy?
+                    <Sparkles className="w-5 h-5 text-yellow-500" />O que é a Academy?
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    A Academy e o programa de capacitacao do projeto Cidadao.AI. Aqui voce vai
-                    aprender na pratica, contribuindo com codigo real para uma plataforma de
-                    transparencia publica com Inteligencia Artificial.
+                    A Academy é o programa de capacitação do projeto Cidadão.AI. Aqui você vai
+                    aprender na prática, contribuindo com código real para uma plataforma de
+                    transparência pública com Inteligência Artificial.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { icon: '🎯', text: 'Aprendizado pratico' },
+                      { icon: '🎯', text: 'Aprendizado prático' },
                       { icon: '🤖', text: 'Mentor IA 24/7' },
-                      { icon: '📊', text: 'Metricas de progresso' },
+                      { icon: '📊', text: 'Métricas de progresso' },
                       { icon: '🏆', text: 'Certificado oficial' },
                     ].map((item) => (
                       <div
@@ -318,7 +318,7 @@ export default function AcademyOnboardingPage() {
                 <Card variant="filled" padding="md">
                   <h2 className="font-semibold text-green-700 dark:text-green-400 mb-4 flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5" />
-                    Proximos passos do onboarding:
+                    Próximos passos do onboarding:
                   </h2>
                   <ul className="space-y-4">
                     {[
@@ -328,11 +328,11 @@ export default function AcademyOnboardingPage() {
                       },
                       {
                         title: 'Conectar GitHub',
-                        desc: 'Para rastrear suas contribuicoes',
+                        desc: 'Para rastrear suas contribuições',
                       },
                       {
-                        title: 'Fazer fork do repositorio',
-                        desc: 'Seu espaco para desenvolver',
+                        title: 'Fazer fork do repositório',
+                        desc: 'Seu espaço para desenvolver',
                       },
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
@@ -364,7 +364,7 @@ export default function AcademyOnboardingPage() {
                     size="lg"
                     rightIcon={<ArrowRight className="w-5 h-5" />}
                   >
-                    Comecar Jornada
+                    Começar Jornada
                   </Button>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
                     Tempo estimado: 3-5 minutos
@@ -378,10 +378,10 @@ export default function AcademyOnboardingPage() {
               <div className="space-y-8">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Escolha sua trilha de especializacao
+                    Escolha sua trilha de especialização
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Cada trilha oferece um caminho de aprendizado focado com projetos praticos
+                    Cada trilha oferece um caminho de aprendizado focado com projetos práticos
                   </p>
                 </div>
 
@@ -469,7 +469,7 @@ export default function AcademyOnboardingPage() {
                     Configure seu GitHub
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Informe seu username do GitHub para rastrear suas contribuicoes
+                    Informe seu username do GitHub para rastrear suas contribuições
                   </p>
                 </div>
 
@@ -516,10 +516,10 @@ export default function AcademyOnboardingPage() {
               <div className="space-y-8">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Fork do repositorio
+                    Fork do repositório
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Faca fork do repositorio da sua trilha para comecar a contribuir
+                    Faça fork do repositório da sua trilha para começar a contribuir
                   </p>
                 </div>
 
@@ -534,7 +534,7 @@ export default function AcademyOnboardingPage() {
                         {TRACK_REPOS[onboarding.selectedTrack].repo}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Repositorio da trilha {onboarding.selectedTrack.toUpperCase()}
+                        Repositório da trilha {onboarding.selectedTrack.toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -546,7 +546,7 @@ export default function AcademyOnboardingPage() {
                     className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Abrir pagina de fork no GitHub
+                    Abrir página de fork no GitHub
                   </a>
                 </Card>
 
@@ -631,10 +631,10 @@ export default function AcademyOnboardingPage() {
 
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                    Parabens, {user.name.split(' ')[0]}!
+                    Parabéns, {user.name.split(' ')[0]}!
                   </h1>
                   <p className="text-lg text-gray-600 dark:text-gray-400">
-                    Voce completou o onboarding e esta pronto para comecar!
+                    Você completou o onboarding e está pronto para começar!
                   </p>
                 </div>
 
@@ -666,13 +666,13 @@ export default function AcademyOnboardingPage() {
 
                 <div className="max-w-md mx-auto text-left">
                   <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-center">
-                    Proximos passos:
+                    Próximos passos:
                   </h3>
                   <ul className="space-y-3">
                     {[
                       'Explore o dashboard e familiarize-se com a plataforma',
-                      'Converse com os agentes IA para tirar duvidas tecnicas',
-                      'Faca seu primeiro commit no repositorio!',
+                      'Converse com o mentor IA para tirar dúvidas técnicas',
+                      'Faça seu primeiro commit no repositório!',
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">

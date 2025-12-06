@@ -118,12 +118,12 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(24)
     doc.setFont('helvetica', 'bold')
-    doc.text('CERTIFICADO DE CONCLUSAO', pageWidth / 2, 27, { align: 'center' })
+    doc.text('CERTIFICADO DE CONCLUSÃO', pageWidth / 2, 27, { align: 'center' })
 
     // Subtitle
     doc.setTextColor(22, 163, 74)
     doc.setFontSize(14)
-    doc.text('Academia Cidadao.AI - Programa de Estagio em IA', pageWidth / 2, 48, {
+    doc.text('Academia Cidadão.AI - Capacitação em Inteligência Artificial', pageWidth / 2, 48, {
       align: 'center',
     })
 
@@ -141,23 +141,18 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     doc.setTextColor(22, 101, 52) // green-800
     doc.text(user.name.toUpperCase(), pageWidth / 2, 80, { align: 'center' })
 
-    // Course info
+    // User email
     doc.setFontSize(11)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(75, 85, 99) // gray-600
-    doc.text(
-      `Matricula: ${user.matricula} | ${user.curso} - ${user.periodo}o Periodo`,
-      pageWidth / 2,
-      90,
-      { align: 'center' }
-    )
+    doc.text(user.email, pageWidth / 2, 90, { align: 'center' })
 
     // Completion text
     doc.setFontSize(12)
     doc.setTextColor(55, 65, 81)
     const hours = Math.floor(user.totalTimeMinutes / 60)
     const minutes = user.totalTimeMinutes % 60
-    const completionText = `concluiu com exito o programa de estagio com carga horaria de ${hours}h${minutes > 0 ? ` ${minutes}min` : ''}, alcancando o nivel ${user.currentLevel} (${user.currentRank.toUpperCase()}) com ${user.totalXp} pontos de experiencia.`
+    const completionText = `concluiu com êxito o programa de capacitação com carga horária de ${hours}h${minutes > 0 ? ` ${minutes}min` : ''}, alcançando o nível ${user.currentLevel} (${user.currentRank.toUpperCase()}) com ${user.totalXp} pontos de experiência.`
     const lines = doc.splitTextToSize(completionText, pageWidth - 80)
     doc.text(lines, pageWidth / 2, 102, { align: 'center' })
 
@@ -165,7 +160,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(22, 163, 74)
-    doc.text('RELATORIO DE TELEMETRIA', pageWidth / 2, 125, { align: 'center' })
+    doc.text('RELATÓRIO DE TELEMETRIA', pageWidth / 2, 125, { align: 'center' })
 
     // Draw bar chart
     const chartX = 40
@@ -177,31 +172,31 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
     const metrics = [
       {
-        label: 'Videos Assistidos',
+        label: 'Vídeos Assistidos',
         value: telemetry.videosCompleted,
         max: telemetry.totalVideos,
         color: [34, 197, 94], // green-500
       },
       {
-        label: 'Leituras Concluidas',
+        label: 'Leituras Concluídas',
         value: telemetry.readingsCompleted,
         max: telemetry.totalReadings,
         color: [59, 130, 246], // blue-500
       },
       {
-        label: 'Entradas no Diario',
+        label: 'Entradas no Diário',
         value: telemetry.diaryEntries,
         max: Math.max(telemetry.diaryEntries, 10),
         color: [168, 85, 247], // purple-500
       },
       {
-        label: 'Sessoes de Estudo',
+        label: 'Sessões de Estudo',
         value: telemetry.totalSessions,
         max: Math.max(telemetry.totalSessions, 20),
         color: [249, 115, 22], // orange-500
       },
       {
-        label: 'Mensagens com Agentes',
+        label: 'Mensagens com Mentor',
         value: telemetry.chatMessages,
         max: Math.max(telemetry.chatMessages, 50),
         color: [236, 72, 153], // pink-500
@@ -262,26 +257,21 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     doc.line(pageWidth / 2 - 60, signatureY, pageWidth / 2 + 60, signatureY)
     doc.setFontSize(9)
     doc.setTextColor(75, 85, 99)
-    doc.text('Coordenacao LabSoft - IFSULDEMINAS', pageWidth / 2, signatureY + 8, {
+    doc.text('Coordenação Cidadão.AI Academy', pageWidth / 2, signatureY + 8, {
       align: 'center',
     })
 
     // Certificate ID
-    const certId = `CERT-${user.matricula}-${Date.now().toString(36).toUpperCase()}`
+    const certId = `CERT-${user.id.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`
     doc.setFontSize(8)
     doc.setTextColor(156, 163, 175)
     doc.text(`ID: ${certId}`, pageWidth - margin - 20, footerY, { align: 'right' })
 
     // Partners logos text
     doc.setFontSize(8)
-    doc.text(
-      'Neural Thinker AI Engineering + IFSULDEMINAS/LabSoft',
-      pageWidth / 2,
-      pageHeight - 18,
-      {
-        align: 'center',
-      }
-    )
+    doc.text('Neural Thinker AI Engineering - Cidadão.AI Academy', pageWidth / 2, pageHeight - 18, {
+      align: 'center',
+    })
 
     return { pdf: doc, certId }
   }
@@ -290,7 +280,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     setIsGenerating(true)
     try {
       const { pdf, certId } = generateCertificatePDF()
-      pdf.save(`certificado-academy-${user.matricula}-${certId}.pdf`)
+      pdf.save(`certificado-academy-${certId}.pdf`)
     } catch (error) {
       console.error('Failed to generate certificate:', error)
     } finally {
@@ -308,30 +298,30 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
   const canGenerateCertificate = telemetry.videosCompleted >= 3 || telemetry.readingsCompleted >= 2
 
-  const metrics = [
+  const uiMetrics = [
     {
-      label: 'Videos Assistidos',
+      label: 'Vídeos Assistidos',
       value: telemetry.videosCompleted,
       max: telemetry.totalVideos,
       icon: Video,
       color: 'green',
     },
     {
-      label: 'Leituras Concluidas',
+      label: 'Leituras Concluídas',
       value: telemetry.readingsCompleted,
       max: telemetry.totalReadings,
       icon: BookOpen,
       color: 'blue',
     },
     {
-      label: 'Entradas no Diario',
+      label: 'Entradas no Diário',
       value: telemetry.diaryEntries,
       max: 10,
       icon: FileText,
       color: 'purple',
     },
     {
-      label: 'Sessoes de Estudo',
+      label: 'Sessões de Estudo',
       value: telemetry.totalSessions,
       max: 20,
       icon: Clock,
@@ -364,10 +354,10 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
             </div>
             <div>
               <ModalTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Certificado e Relatorio
+                Certificado e Relatório
               </ModalTitle>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Telemetria do seu estagio
+                Telemetria da sua jornada
               </p>
             </div>
           </div>
@@ -399,10 +389,10 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-yellow-500" />
-              Metricas Coletadas
+              Métricas Coletadas
             </h3>
             <div className="space-y-3">
-              {metrics.map((metric) => {
+              {uiMetrics.map((metric) => {
                 const Icon = metric.icon
                 const percentage = Math.min((metric.value / metric.max) * 100, 100)
                 return (
@@ -484,7 +474,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
                       ) : (
                         <Video className="w-4 h-4" />
                       )}
-                      Assistir pelo menos 3 videos
+                      Assistir pelo menos 3 vídeos
                     </li>
                     <li
                       className={`flex items-center gap-2 ${telemetry.readingsCompleted >= 2 ? 'line-through opacity-50' : ''}`}

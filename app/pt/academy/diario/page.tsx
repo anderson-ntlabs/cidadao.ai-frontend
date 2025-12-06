@@ -67,7 +67,7 @@ export default function AcademyDiaryPage() {
         entryDate: new Date().toISOString().split('T')[0],
       })
 
-      toast.success('Diario salvo!', '+10 XP por registrar seu aprendizado')
+      toast.success('Diário salvo!', '+10 XP por registrar seu aprendizado')
 
       setFormData({ mood: '', whatLearned: '', whatStruggled: '', nextSteps: '', content: '' })
       setShowForm(false)
@@ -107,11 +107,11 @@ export default function AcademyDiaryPage() {
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
                   <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                    Diario de Aprendizado
+                    Diário de Aprendizado
                   </h1>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Registre suas reflexoes diarias
+                  Registre suas reflexões diárias
                 </p>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function AcademyDiaryPage() {
             <CardHeader className="mb-6">
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-yellow-500" />
-                Como foi sua sessao de hoje?
+                Como foi sua sessão de hoje?
               </CardTitle>
             </CardHeader>
 
@@ -168,7 +168,7 @@ export default function AcademyDiaryPage() {
               {/* Mood selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Como voce esta se sentindo?
+                  Como você está se sentindo?
                 </label>
                 <div className="grid grid-cols-4 gap-3">
                   {moods.map((mood) => (
@@ -196,12 +196,12 @@ export default function AcademyDiaryPage() {
               {/* What I learned */}
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <Lightbulb className="w-4 h-4 text-green-500" />O que voce aprendeu hoje? *
+                  <Lightbulb className="w-4 h-4 text-green-500" />O que você aprendeu hoje? *
                 </label>
                 <textarea
                   value={formData.whatLearned}
                   onChange={(e) => setFormData({ ...formData, whatLearned: e.target.value })}
-                  placeholder="Descreva os principais conceitos ou habilidades que voce desenvolveu..."
+                  placeholder="Descreva os principais conceitos ou habilidades que você desenvolveu..."
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none h-24 transition-all"
                   required
                 />
@@ -211,12 +211,12 @@ export default function AcademyDiaryPage() {
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <AlertCircle className="w-4 h-4 text-orange-500" />
-                  Onde voce teve dificuldade?
+                  Onde você teve dificuldade?
                 </label>
                 <textarea
                   value={formData.whatStruggled}
                   onChange={(e) => setFormData({ ...formData, whatStruggled: e.target.value })}
-                  placeholder="Descreva os desafios que enfrentou e as duvidas que surgiram..."
+                  placeholder="Descreva os desafios que enfrentou e as dúvidas que surgiram..."
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none h-24 transition-all"
                 />
               </div>
@@ -225,12 +225,12 @@ export default function AcademyDiaryPage() {
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <Target className="w-4 h-4 text-blue-500" />
-                  Quais sao seus proximos passos?
+                  Quais são seus próximos passos?
                 </label>
                 <textarea
                   value={formData.nextSteps}
                   onChange={(e) => setFormData({ ...formData, nextSteps: e.target.value })}
-                  placeholder="O que voce planeja estudar ou fazer na proxima sessao..."
+                  placeholder="O que você planeja estudar ou fazer na próxima sessão..."
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none h-24 transition-all"
                 />
               </div>
@@ -275,7 +275,7 @@ export default function AcademyDiaryPage() {
                   Nenhuma entrada ainda
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Comece a registrar seu aprendizado diario para ganhar XP e acompanhar seu
+                  Comece a registrar seu aprendizado diário para ganhar XP e acompanhar seu
                   progresso!
                 </p>
                 <Button onClick={() => setShowForm(true)} variant="primary" size="lg">

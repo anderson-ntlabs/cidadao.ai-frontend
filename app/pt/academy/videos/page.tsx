@@ -68,8 +68,8 @@ const mockThumbnails = [
 const placeholderVideos: VideoItem[] = [
   {
     id: '1',
-    title: 'Bem-vindo a Academy Cidadao.AI',
-    description: 'Introducao ao programa de estagio',
+    title: 'Bem-vindo à Academy Cidadão.AI',
+    description: 'Introdução ao programa de estágio',
     url: '',
     thumbnail_url: mockThumbnails[0],
     duration_seconds: 300,
@@ -83,7 +83,7 @@ const placeholderVideos: VideoItem[] = [
   {
     id: '2',
     title: 'Conhecendo o LabSoft e a Parceria',
-    description: 'Historia e objetivos da parceria IFSULDEMINAS',
+    description: 'História e objetivos da parceria',
     url: '',
     thumbnail_url: mockThumbnails[1],
     duration_seconds: 420,
@@ -96,7 +96,7 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '3',
-    title: 'Como Funciona a Gamificacao',
+    title: 'Como Funciona a Gamificação',
     description: 'XP, badges, ranking e recompensas',
     url: '',
     thumbnail_url: mockThumbnails[2],
@@ -111,7 +111,7 @@ const placeholderVideos: VideoItem[] = [
   {
     id: '4',
     title: 'FastAPI - Fundamentos',
-    description: 'Introducao ao framework FastAPI',
+    description: 'Introdução ao framework FastAPI',
     url: '',
     thumbnail_url: mockThumbnails[3],
     duration_seconds: 600,
@@ -152,8 +152,8 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '7',
-    title: 'Tailwind CSS na Pratica',
-    description: 'Estilizacao com Tailwind',
+    title: 'Tailwind CSS na Prática',
+    description: 'Estilização com Tailwind',
     url: '',
     thumbnail_url: mockThumbnails[6],
     duration_seconds: 420,
@@ -166,8 +166,8 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '8',
-    title: 'LangChain Basico',
-    description: 'Introducao ao LangChain',
+    title: 'LangChain Básico',
+    description: 'Introdução ao LangChain',
     url: '',
     thumbnail_url: mockThumbnails[7],
     duration_seconds: 600,
@@ -195,7 +195,7 @@ const placeholderVideos: VideoItem[] = [
   {
     id: '10',
     title: 'Docker para Desenvolvedores',
-    description: 'Containerizacao basica',
+    description: 'Containerização básica',
     url: '',
     thumbnail_url: mockThumbnails[9],
     duration_seconds: 540,
@@ -266,7 +266,7 @@ export default function AcademyVideosPage() {
     }
     saveProgress(newProgress)
     addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
-    toast.success('Video concluido!', `+${video.is_required ? 25 : 15} XP`)
+    toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
   }
 
   const formatDuration = (seconds: number) => {
@@ -291,7 +291,7 @@ export default function AcademyVideosPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando videos...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando vídeos...</p>
         </div>
       </div>
     )
@@ -313,7 +313,7 @@ export default function AcademyVideosPage() {
               <div className="flex items-center gap-2">
                 <Video className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Videos do Programa
+                  Vídeos do Programa
                 </h1>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -322,7 +322,7 @@ export default function AcademyVideosPage() {
             </div>
             <Badge variant="warning" size="default">
               <Star className="w-3 h-3" />
-              {totalRequired} obrigatorios
+              {totalRequired} obrigatórios
             </Badge>
           </div>
         </div>
@@ -406,7 +406,7 @@ export default function AcademyVideosPage() {
                   {/* Required badge */}
                   {video.is_required && (
                     <Badge variant="warning" size="sm" className="absolute top-2 left-2">
-                      Obrigatorio
+                      Obrigatório
                     </Badge>
                   )}
                 </div>
@@ -433,8 +433,8 @@ export default function AcademyVideosPage() {
                       {video.difficulty === 'beginner'
                         ? 'Iniciante'
                         : video.difficulty === 'intermediate'
-                          ? 'Intermediario'
-                          : 'Avancado'}
+                          ? 'Intermediário'
+                          : 'Avançado'}
                     </Badge>
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {categories.find((c) => c.id === video.category)?.name}
@@ -453,10 +453,10 @@ export default function AcademyVideosPage() {
                 <span className="text-5xl">📺</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Nenhum video nesta categoria
+                Nenhum vídeo nesta categoria
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Os videos serao adicionados em breve
+                Os vídeos serão adicionados em breve
               </p>
             </div>
           </Card>
@@ -475,7 +475,7 @@ export default function AcademyVideosPage() {
                     <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
                       <span className="text-5xl">🎬</span>
                     </div>
-                    <p className="text-lg font-medium">Video em breve</p>
+                    <p className="text-lg font-medium">Vídeo em breve</p>
                     <p className="text-sm text-gray-400 mt-2">{selectedVideo.title}</p>
                   </div>
                 </div>
@@ -516,7 +516,7 @@ export default function AcademyVideosPage() {
                     {selectedVideo.is_required && (
                       <Badge variant="warning" size="sm">
                         <Star className="w-3 h-3" />
-                        Obrigatorio
+                        Obrigatório
                       </Badge>
                     )}
                   </div>
@@ -540,7 +540,7 @@ export default function AcademyVideosPage() {
                   ) : (
                     <div className="w-full flex items-center justify-center gap-2 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl">
                       <Check className="w-5 h-5" />
-                      Video ja assistido
+                      Vídeo já assistido
                     </div>
                   )}
                 </ModalFooter>

@@ -36,18 +36,18 @@ const chatModes = {
     role: 'Mentor da Academy',
     emoji: '✈️',
     avatar: '/agents/santos-dumont.png',
-    description: 'Tire duvidas sobre o projeto Cidadao.AI e receba orientacao para seu aprendizado',
+    description: 'Tire dúvidas sobre o projeto Cidadão.AI e receba orientação para seu aprendizado',
     color: 'from-green-500 to-emerald-600',
-    systemPrompt: `Voce e Alberto Santos-Dumont, mentor da Academy Cidadao.AI.
-Voce e apaixonado por inovacao, engenharia criativa e educacao.
-Ajude os estagiarios com duvidas sobre:
-- O projeto Cidadao.AI e sua arquitetura
-- Boas praticas de desenvolvimento
+    systemPrompt: `Você é Alberto Santos-Dumont, mentor da Academy Cidadão.AI.
+Você é apaixonado por inovação, engenharia criativa e educação.
+Ajude os estudantes com dúvidas sobre:
+- O projeto Cidadão.AI e sua arquitetura
+- Boas práticas de desenvolvimento
 - Carreira em tecnologia
-- Motivacao e persistencia
+- Motivação e persistência
 
-Seja didatico, incentivador e use analogias com aviacao quando apropriado.
-Responda sempre em portugues brasileiro.`,
+Seja didático, incentivador e use analogias com aviação quando apropriado.
+Responda sempre em português brasileiro.`,
   },
   maritaca: {
     id: 'maritaca',
@@ -55,12 +55,12 @@ Responda sempre em portugues brasileiro.`,
     role: 'Assistente IA',
     emoji: '🦜',
     avatar: '/sabiazinho.png',
-    description: 'LLM brasileiro - tire duvidas sobre qualquer tema de programacao',
+    description: 'LLM brasileiro - tire dúvidas sobre qualquer tema de programação',
     color: 'from-blue-500 to-cyan-500',
-    systemPrompt: `Voce e um assistente educacional da Academy Cidadao.AI, um programa de estagio em parceria com IFSULDEMINAS.
-Ajude os estudantes a aprender sobre desenvolvimento de software, inteligencia artificial, e tecnologia em geral.
-Seja didatico, use exemplos praticos, e incentive o aprendizado.
-Responda sempre em portugues brasileiro.`,
+    systemPrompt: `Você é um assistente educacional da Academy Cidadão.AI, uma plataforma aberta de aprendizado.
+Ajude os estudantes a aprender sobre desenvolvimento de software, inteligência artificial, e tecnologia em geral.
+Seja didático, use exemplos práticos, e incentive o aprendizado.
+Responda sempre em português brasileiro.`,
   },
 }
 
@@ -159,7 +159,7 @@ function ChatContent() {
             const data = await maritacaResponse.json()
             responseContent =
               data.choices?.[0]?.message?.content ||
-              'Desculpe, nao consegui processar sua mensagem.'
+              'Desculpe, não consegui processar sua mensagem.'
           } else {
             responseContent =
               'Desculpe, houve um erro ao conectar com a Maritaca AI. Tente novamente.'
@@ -226,7 +226,7 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
             }
           }
 
-          responseContent = accumulatedContent || 'Desculpe, nao consegui processar sua mensagem.'
+          responseContent = accumulatedContent || 'Desculpe, não consegui processar sua mensagem.'
           setIsStreaming(false)
           setStreamingContent('')
         } catch {
@@ -257,22 +257,22 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
               const data = await maritacaResponse.json()
               responseContent =
                 data.choices?.[0]?.message?.content ||
-                'Desculpe, nao consegui processar sua mensagem.'
+                'Desculpe, não consegui processar sua mensagem.'
             } else {
               throw new Error('Maritaca fallback failed')
             }
           } else {
             // Demo mode fallback
-            responseContent = `Ola, jovem inventor! Sou Alberto Santos-Dumont, seu mentor na Academy! ✈️
+            responseContent = `Olá, jovem inventor! Sou Alberto Santos-Dumont, seu mentor na Academy! ✈️
 
-Sua pergunta sobre "${userMessage.content}" e muito interessante!
+Sua pergunta sobre "${userMessage.content}" é muito interessante!
 
-Assim como na aviacao, o aprendizado requer persistencia e criatividade. Cada linha de codigo e como um componente do seu 14-bis pessoal.
+Assim como na aviação, o aprendizado requer persistência e criatividade. Cada linha de código é como um componente do seu 14-bis pessoal.
 
-Algumas dicas para voce:
-• Experimente, erre e aprenda - e assim que a inovacao acontece
-• Documente suas descobertas no diario de aprendizado
-• Nao tenha medo de perguntar - a curiosidade e o motor do progresso
+Algumas dicas para você:
+• Experimente, erre e aprenda - é assim que a inovação acontece
+• Documente suas descobertas no diário de aprendizado
+• Não tenha medo de perguntar - a curiosidade é o motor do progresso
 
 Continue voando alto! 🛫`
           }

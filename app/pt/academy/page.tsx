@@ -44,9 +44,9 @@ const academyAgent = {
   role: 'Mentor da Academy',
   emoji: '✈️',
   avatar: '/agents/santos-dumont.png',
-  specialty: 'Inovacao, engenharia criativa e apoio ao aprendizado',
+  specialty: 'Inovação, engenharia criativa e apoio ao aprendizado',
   description:
-    'O Pai da Aviacao e seu mentor na Academy! Santos-Dumont incentiva a inovacao, criatividade e persistencia. Tire duvidas tecnicas e receba orientacao para seus projetos.',
+    'O Pai da Aviação é seu mentor na Academy! Santos-Dumont incentiva a inovação, criatividade e persistência. Tire dúvidas técnicas e receba orientação para seus projetos.',
 }
 
 export default function AcademyDashboardPage() {
@@ -102,12 +102,12 @@ export default function AcademyDashboardPage() {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Ola, {user.name.split(' ')[0]}!
+                  Olá, {user.name.split(' ')[0]}!
                 </h2>
                 <span className="text-2xl animate-bounce">👋</span>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
-                Pronto para mais uma sessao de aprendizado? Seu progresso esta incrivel!
+                Pronto para mais uma sessão de aprendizado? Seu progresso está incrível!
               </p>
             </div>
 
@@ -196,10 +196,10 @@ export default function AcademyDashboardPage() {
                       {/* Capabilities */}
                       <div className="flex flex-wrap gap-2 mb-6">
                         {[
-                          'Duvidas de Codigo',
-                          'Revisao de PRs',
+                          'Dúvidas de Código',
+                          'Revisão de PRs',
                           'Arquitetura',
-                          'Boas Praticas',
+                          'Boas Práticas',
                         ].map((cap) => (
                           <span
                             key={cap}
@@ -237,37 +237,37 @@ export default function AcademyDashboardPage() {
                   <CardHeader className="mb-4">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Award className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      Acoes Rapidas
+                      Ações Rápidas
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <QuickActionCard
                       icon="📝"
-                      label="Escrever no diario"
+                      label="Escrever no diário"
                       description="Registre seu aprendizado"
                       href="/pt/academy/diario"
                     />
                     <QuickActionCard
                       icon={Video}
-                      label="Assistir videos"
+                      label="Assistir vídeos"
                       description="Continue seu progresso"
                       href="/pt/academy/videos"
                     />
                     <QuickActionCard
                       icon={FileText}
-                      label="Leituras obrigatorias"
+                      label="Leituras obrigatórias"
                       description="Material essencial"
                       href="/pt/academy/leituras"
                     />
                     <QuickActionCard
                       icon={Trophy}
                       label="Ver ranking"
-                      description="Sua posicao atual"
+                      description="Sua posição atual"
                       href="/pt/academy/ranking"
                     />
                     <QuickActionCard
                       icon={GraduationCap}
-                      label="Certificado e Relatorio"
+                      label="Certificado e Relatório"
                       description="Baixe seu certificado"
                       onClick={() => setShowCertificateModal(true)}
                       variant="gradient"
