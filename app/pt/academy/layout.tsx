@@ -1,7 +1,13 @@
 'use client'
 
-import { AcademyAuthProvider } from '@/hooks/use-academy-auth'
+import { AcademyDemoProvider } from '@/hooks/use-academy-demo'
 
+/**
+ * Academy Layout - Demo Mode
+ *
+ * MVP: Using demo mode without real authentication
+ * All data persisted in localStorage
+ */
 export default function AcademyLayout({ children }: { children: React.ReactNode }) {
-  return <AcademyAuthProvider>{children}</AcademyAuthProvider>
+  return <AcademyDemoProvider>{children}</AcademyDemoProvider>
 }

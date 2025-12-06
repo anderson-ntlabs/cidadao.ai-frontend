@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 
 const ranks = {
   novato: {
@@ -46,50 +44,142 @@ interface LeaderboardEntry {
   total_time_minutes: number
 }
 
-export default function AcademyRankingPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAcademyAuth()
-  const supabase = createClient()
+// Mock leaderboard data for demo mode
+const mockLeaderboard: LeaderboardEntry[] = [
+  {
+    id: '1',
+    user_id: 'user-1',
+    full_name: 'Ana Carolina Silva',
+    avatar_url: 'https://ui-avatars.com/api/?name=Ana+Silva&background=16a34a&color=fff',
+    total_xp: 2450,
+    current_level: 25,
+    current_rank: 'mentor',
+    current_streak: 15,
+    total_time_minutes: 1200,
+  },
+  {
+    id: '2',
+    user_id: 'user-2',
+    full_name: 'Pedro Henrique Costa',
+    avatar_url: 'https://ui-avatars.com/api/?name=Pedro+Costa&background=2563eb&color=fff',
+    total_xp: 1890,
+    current_level: 19,
+    current_rank: 'contribuidor',
+    current_streak: 12,
+    total_time_minutes: 980,
+  },
+  {
+    id: '3',
+    user_id: 'user-3',
+    full_name: 'Mariana Oliveira',
+    avatar_url: 'https://ui-avatars.com/api/?name=Mariana+Oliveira&background=7c3aed&color=fff',
+    total_xp: 1560,
+    current_level: 16,
+    current_rank: 'contribuidor',
+    current_streak: 8,
+    total_time_minutes: 750,
+  },
+  {
+    id: '4',
+    user_id: 'user-4',
+    full_name: 'Lucas Santos',
+    avatar_url: 'https://ui-avatars.com/api/?name=Lucas+Santos&background=dc2626&color=fff',
+    total_xp: 1120,
+    current_level: 12,
+    current_rank: 'contribuidor',
+    current_streak: 5,
+    total_time_minutes: 620,
+  },
+  {
+    id: '5',
+    user_id: 'user-5',
+    full_name: 'Julia Ferreira',
+    avatar_url: 'https://ui-avatars.com/api/?name=Julia+Ferreira&background=ea580c&color=fff',
+    total_xp: 890,
+    current_level: 9,
+    current_rank: 'contribuidor',
+    current_streak: 3,
+    total_time_minutes: 480,
+  },
+  {
+    id: '6',
+    user_id: 'user-6',
+    full_name: 'Gabriel Rodrigues',
+    avatar_url: 'https://ui-avatars.com/api/?name=Gabriel+Rodrigues&background=0891b2&color=fff',
+    total_xp: 650,
+    current_level: 7,
+    current_rank: 'contribuidor',
+    current_streak: 4,
+    total_time_minutes: 320,
+  },
+  {
+    id: '7',
+    user_id: 'user-7',
+    full_name: 'Beatriz Lima',
+    avatar_url: 'https://ui-avatars.com/api/?name=Beatriz+Lima&background=db2777&color=fff',
+    total_xp: 420,
+    current_level: 5,
+    current_rank: 'aprendiz',
+    current_streak: 2,
+    total_time_minutes: 210,
+  },
+  {
+    id: '8',
+    user_id: 'user-8',
+    full_name: 'Rafael Almeida',
+    avatar_url: 'https://ui-avatars.com/api/?name=Rafael+Almeida&background=4f46e5&color=fff',
+    total_xp: 280,
+    current_level: 3,
+    current_rank: 'aprendiz',
+    current_streak: 1,
+    total_time_minutes: 140,
+  },
+]
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [userRank, setUserRank] = useState<number | null>(null)
+export default function AcademyRankingPage() {
+  const { user, isLoading } = useAcademyDemo()
+
   const [filter, setFilter] = useState<'xp' | 'time' | 'streak'>('xp')
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
+  // Combine demo user with mock leaderboard
+  const leaderboard = [...mockLeaderboard]
 
-  useEffect(() => {
-    if (user) {
-      loadLeaderboard()
-    }
-  }, [user, filter])
-
-  const loadLeaderboard = async () => {
-    const orderBy =
-      filter === 'xp' ? 'total_xp' : filter === 'time' ? 'total_time_minutes' : 'current_streak'
-
-    const { data } = await supabase
-      .from('academy_profiles')
-      .select(
-        'id, user_id, full_name, avatar_url, total_xp, current_level, current_rank, current_streak, total_time_minutes'
-      )
-      .eq('is_active', true)
-      .order(orderBy, { ascending: false })
-      .limit(50)
-
-    if (data) {
-      setLeaderboard(data)
-      if (user) {
-        const position = data.findIndex((e) => e.user_id === user.id)
-        setUserRank(position >= 0 ? position + 1 : null)
-      }
-    }
+  // Add current demo user to leaderboard
+  const demoUserEntry: LeaderboardEntry = {
+    id: 'demo-user',
+    user_id: user.id,
+    full_name: user.name,
+    avatar_url: user.avatar,
+    total_xp: user.totalXp,
+    current_level: user.currentLevel,
+    current_rank: user.currentRank,
+    current_streak: user.currentStreak,
+    total_time_minutes: user.totalTimeMinutes,
   }
 
-  if (isLoading || !user) {
+  // Check if demo user is already in the list (by similar XP)
+  const existingIndex = leaderboard.findIndex(
+    (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
+  )
+
+  if (existingIndex === -1) {
+    leaderboard.push(demoUserEntry)
+  } else {
+    // Replace a similar entry with demo user
+    leaderboard[existingIndex] = demoUserEntry
+  }
+
+  // Sort based on filter
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+    if (filter === 'xp') return b.total_xp - a.total_xp
+    if (filter === 'time') return b.total_time_minutes - a.total_time_minutes
+    return b.current_streak - a.current_streak
+  })
+
+  // Find user rank
+  const userRank = sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -139,7 +229,7 @@ export default function AcademyRankingPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {userRank && (
+        {userRank > 0 && (
           <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-6 mb-8 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -175,73 +265,61 @@ export default function AcademyRankingPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {leaderboard.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🏆</div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Ranking em construcao
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Ainda nao ha participantes suficientes
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {leaderboard.map((entry, index) => {
-                const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
-                const isCurrentUser = entry.user_id === user.id
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {sortedLeaderboard.map((entry, index) => {
+              const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
+              const isCurrentUser = entry.user_id === user.id
 
-                return (
+              return (
+                <div
+                  key={entry.id}
+                  className={`flex items-center gap-4 p-4 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}
+                >
                   <div
-                    key={entry.id}
-                    className={`flex items-center gap-4 p-4 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      index < 3
+                        ? 'text-2xl'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    }`}
                   >
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                        index < 3
-                          ? 'text-2xl'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                      }`}
+                    {getMedalEmoji(index + 1)}
+                  </div>
+
+                  <img
+                    src={
+                      entry.avatar_url ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
+                    }
+                    alt={entry.full_name}
+                    className={`w-12 h-12 rounded-full ${isCurrentUser ? 'ring-2 ring-green-500' : ''}`}
+                  />
+
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`font-medium truncate ${isCurrentUser ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'}`}
                     >
-                      {getMedalEmoji(index + 1)}
-                    </div>
-
-                    <img
-                      src={
-                        entry.avatar_url ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
-                      }
-                      alt={entry.full_name}
-                      className={`w-12 h-12 rounded-full ${isCurrentUser ? 'ring-2 ring-green-500' : ''}`}
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`font-medium truncate ${isCurrentUser ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'}`}
+                      {entry.full_name} {isCurrentUser && <span className="text-sm">(Voce)</span>}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-sm px-2 py-0.5 rounded-full ${rankInfo.bg} ${rankInfo.text}`}
                       >
-                        {entry.full_name} {isCurrentUser && <span className="text-sm">(Voce)</span>}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-sm px-2 py-0.5 rounded-full ${rankInfo.bg} ${rankInfo.text}`}
-                        >
-                          Lv.{entry.current_level} {rankInfo.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900 dark:text-gray-100">
-                        {filter === 'xp' && `${entry.total_xp} XP`}
-                        {filter === 'time' && `${Math.floor(entry.total_time_minutes / 60)}h`}
-                        {filter === 'streak' && `${entry.current_streak} dias`}
-                      </p>
+                        Lv.{entry.current_level} {rankInfo.name}
+                      </span>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          )}
+
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900 dark:text-gray-100">
+                      {filter === 'xp' && `${entry.total_xp} XP`}
+                      {filter === 'time' && `${Math.floor(entry.total_time_minutes / 60)}h`}
+                      {filter === 'streak' && `${entry.current_streak} dias`}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </main>
     </div>

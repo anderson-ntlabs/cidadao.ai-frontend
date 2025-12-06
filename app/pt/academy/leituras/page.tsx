@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { toast } from '@/hooks/use-toast'
 
 interface Reading {
@@ -20,114 +18,154 @@ interface Reading {
   is_required: boolean
 }
 
+// Demo mode: reading progress stored in localStorage
+const READING_PROGRESS_KEY = 'academy_demo_reading_progress'
+
 interface ReadingProgress {
   reading_id: string
   status: string
   confirmed_read: boolean
   completed_at: string | null
-  notes: string | null
-  rating: number | null
 }
 
-export default function AcademyReadingsPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAcademyAuth()
-  const supabase = createClient()
+// Placeholder readings
+const placeholderReadings: Reading[] = [
+  {
+    id: '1',
+    title: 'Introducao ao FastAPI',
+    description: 'Documentacao oficial do FastAPI para iniciantes',
+    url: 'https://fastapi.tiangolo.com/tutorial/',
+    article_type: 'tutorial',
+    track: 'backend',
+    difficulty: 'beginner',
+    estimated_time_minutes: 30,
+    week_number: 1,
+    is_required: true,
+  },
+  {
+    id: '2',
+    title: 'React Hooks: useState e useEffect',
+    description: 'Entendendo os hooks fundamentais do React',
+    url: 'https://react.dev/learn/state-a-components-memory',
+    article_type: 'tutorial',
+    track: 'frontend',
+    difficulty: 'beginner',
+    estimated_time_minutes: 25,
+    week_number: 1,
+    is_required: true,
+  },
+  {
+    id: '3',
+    title: 'Introducao ao LangChain',
+    description: 'Construindo aplicacoes com LLMs',
+    url: 'https://python.langchain.com/docs/get_started/introduction',
+    article_type: 'tutorial',
+    track: 'ia',
+    difficulty: 'intermediate',
+    estimated_time_minutes: 45,
+    week_number: 2,
+    is_required: false,
+  },
+  {
+    id: '4',
+    title: 'Docker para Iniciantes',
+    description: 'Conceitos basicos de containerizacao',
+    url: 'https://docs.docker.com/get-started/',
+    article_type: 'tutorial',
+    track: 'devops',
+    difficulty: 'beginner',
+    estimated_time_minutes: 40,
+    week_number: 2,
+    is_required: true,
+  },
+  {
+    id: '5',
+    title: 'Arquitetura Multi-Agente',
+    description: 'Paper sobre sistemas multi-agente com LLMs',
+    url: 'https://arxiv.org/abs/2308.08155',
+    article_type: 'paper',
+    track: 'ia',
+    difficulty: 'advanced',
+    estimated_time_minutes: 60,
+    week_number: 3,
+    is_required: false,
+  },
+  {
+    id: '6',
+    title: 'Next.js App Router',
+    description: 'Guia completo do novo sistema de rotas',
+    url: 'https://nextjs.org/docs/app',
+    article_type: 'tutorial',
+    track: 'frontend',
+    difficulty: 'intermediate',
+    estimated_time_minutes: 35,
+    week_number: 2,
+    is_required: true,
+  },
+  {
+    id: '7',
+    title: 'Pydantic V2: Validacao de Dados',
+    description: 'Validacao de dados com Pydantic no FastAPI',
+    url: 'https://docs.pydantic.dev/latest/',
+    article_type: 'tutorial',
+    track: 'backend',
+    difficulty: 'intermediate',
+    estimated_time_minutes: 30,
+    week_number: 3,
+    is_required: false,
+  },
+  {
+    id: '8',
+    title: 'Tailwind CSS: Utility-First',
+    description: 'Dominando Tailwind CSS na pratica',
+    url: 'https://tailwindcss.com/docs/utility-first',
+    article_type: 'tutorial',
+    track: 'frontend',
+    difficulty: 'beginner',
+    estimated_time_minutes: 20,
+    week_number: 1,
+    is_required: true,
+  },
+]
 
-  const [readings, setReadings] = useState<Reading[]>([])
-  const [progress, setProgress] = useState<Record<string, ReadingProgress>>({})
+export default function AcademyReadingsPage() {
+  const { isLoading, addXp } = useAcademyDemo()
+
+  const [readings] = useState<Reading[]>(placeholderReadings)
+  const [progress, setProgress] = useState<Record<string, ReadingProgress>>(() => {
+    if (typeof window === 'undefined') return {}
+    const saved = localStorage.getItem(READING_PROGRESS_KEY)
+    return saved ? JSON.parse(saved) : {}
+  })
   const [selectedTrack, setSelectedTrack] = useState<string>('all')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
-
-  useEffect(() => {
-    if (user) {
-      loadReadings()
-      loadProgress()
-    }
-  }, [user])
-
-  const loadReadings = async () => {
-    const { data } = await supabase
-      .from('academy_required_readings')
-      .select('*')
-      .eq('is_active', true)
-      .order('week_number')
-
-    if (data) {
-      setReadings(data)
-    }
+  const saveProgress = (newProgress: Record<string, ReadingProgress>) => {
+    setProgress(newProgress)
+    localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(newProgress))
   }
 
-  const loadProgress = async () => {
-    if (!user) return
-
-    const { data } = await supabase
-      .from('academy_reading_progress')
-      .select('*')
-      .eq('user_id', user.id)
-
-    if (data) {
-      const progressMap: Record<string, ReadingProgress> = {}
-      data.forEach((p) => {
-        progressMap[p.reading_id] = p
-      })
-      setProgress(progressMap)
-    }
-  }
-
-  const handleConfirmRead = async (reading: Reading) => {
-    if (!user) return
-
+  const handleConfirmRead = (reading: Reading) => {
     setConfirmingId(reading.id)
-    try {
-      const existingProgress = progress[reading.id]
 
-      if (existingProgress) {
-        await supabase
-          .from('academy_reading_progress')
-          .update({
-            status: 'completed',
-            confirmed_read: true,
-            completed_at: new Date().toISOString(),
-          })
-          .eq('user_id', user.id)
-          .eq('reading_id', reading.id)
-      } else {
-        await supabase.from('academy_reading_progress').insert({
-          user_id: user.id,
+    setTimeout(() => {
+      const newProgress = {
+        ...progress,
+        [reading.id]: {
           reading_id: reading.id,
           status: 'completed',
           confirmed_read: true,
-          started_at: new Date().toISOString(),
           completed_at: new Date().toISOString(),
-          confirmation_date: new Date().toISOString(),
-        })
+        },
       }
+      saveProgress(newProgress)
 
-      // Award XP
-      await supabase.from('academy_xp_transactions').insert({
-        user_id: user.id,
-        amount: reading.is_required ? 20 : 10,
-        balance_after: user.totalXp + (reading.is_required ? 20 : 10),
-        source_type: 'article',
-        source_id: reading.id,
-        description: `Leitura concluida: ${reading.title}`,
-      })
+      const xpAmount = reading.is_required ? 20 : 10
+      addXp(xpAmount, 'article', `Leitura concluida: ${reading.title}`)
 
-      toast.success('Leitura confirmada!', `+${reading.is_required ? 20 : 10} XP`)
-      loadProgress()
-    } catch (error) {
-      console.error('Error confirming read:', error)
-      toast.error('Erro ao confirmar', 'Tente novamente')
-    } finally {
+      toast.success('Leitura confirmada!', `+${xpAmount} XP`)
       setConfirmingId(null)
-    }
+    }, 500)
   }
 
   const tracks = [
@@ -146,7 +184,7 @@ export default function AcademyReadingsPage() {
   const completedCount = Object.values(progress).filter((p) => p.confirmed_read).length
   const requiredCount = readings.filter((r) => r.is_required).length
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -291,10 +329,10 @@ export default function AcademyReadingsPage() {
                       </p>
                       <div className="flex flex-wrap items-center gap-3 text-sm">
                         <span className="text-gray-500 dark:text-gray-400">
-                          ⏱️ ~{reading.estimated_time_minutes} min
+                          ~{reading.estimated_time_minutes} min
                         </span>
                         <span className="text-gray-500 dark:text-gray-400">
-                          📅 Semana {reading.week_number}
+                          Semana {reading.week_number}
                         </span>
                         {reading.track !== 'all' && (
                           <span

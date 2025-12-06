@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { toast } from '@/hooks/use-toast'
 
 const moods = [
@@ -12,95 +10,41 @@ const moods = [
   { id: 'good', emoji: '🙂', label: 'Bem' },
   { id: 'neutral', emoji: '😐', label: 'Normal' },
   { id: 'struggling', emoji: '😓', label: 'Dificil' },
-]
-
-interface DiaryEntry {
-  id: string
-  content: string
-  mood: string
-  what_learned: string
-  what_struggled: string
-  next_steps: string
-  entry_date: string
-  created_at: string
-}
+] as const
 
 export default function AcademyDiaryPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAcademyAuth()
-  const supabase = createClient()
+  const { user, isLoading, diaryEntries, addDiaryEntry } = useAcademyDemo()
 
-  const [entries, setEntries] = useState<DiaryEntry[]>([])
   const [showForm, setShowForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    mood: '',
+    mood: '' as 'great' | 'good' | 'neutral' | 'struggling' | '',
     whatLearned: '',
     whatStruggled: '',
     nextSteps: '',
     content: '',
   })
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
-
-  useEffect(() => {
-    if (user) {
-      loadEntries()
-    }
-  }, [user])
-
-  const loadEntries = async () => {
-    if (!user) return
-
-    const { data } = await supabase
-      .from('academy_diary_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('entry_date', { ascending: false })
-      .limit(30)
-
-    if (data) {
-      setEntries(data)
-    }
-  }
-
   const handleSubmit = async () => {
-    if (!user || !formData.mood || !formData.whatLearned) return
+    if (!formData.mood || !formData.whatLearned) return
 
     setIsSubmitting(true)
     try {
-      const { error } = await supabase.from('academy_diary_entries').insert({
-        user_id: user.id,
+      addDiaryEntry({
         content:
           formData.content ||
           `${formData.whatLearned}\n\n${formData.whatStruggled || ''}\n\n${formData.nextSteps || ''}`,
-        mood: formData.mood,
-        what_learned: formData.whatLearned,
-        what_struggled: formData.whatStruggled,
-        next_steps: formData.nextSteps,
-        entry_date: new Date().toISOString().split('T')[0],
-      })
-
-      if (error) throw error
-
-      // Award XP for diary entry
-      await supabase.from('academy_xp_transactions').insert({
-        user_id: user.id,
-        amount: 10,
-        balance_after: user.totalXp + 10,
-        source_type: 'diary',
-        description: 'Entrada no diario de aprendizado',
+        mood: formData.mood as 'great' | 'good' | 'neutral' | 'struggling',
+        whatLearned: formData.whatLearned,
+        whatStruggled: formData.whatStruggled,
+        nextSteps: formData.nextSteps,
+        entryDate: new Date().toISOString().split('T')[0],
       })
 
       toast.success('Diario salvo!', '+10 XP por registrar seu aprendizado')
 
       setFormData({ mood: '', whatLearned: '', whatStruggled: '', nextSteps: '', content: '' })
       setShowForm(false)
-      loadEntries()
     } catch (error) {
       console.error('Failed to save diary entry:', error)
       toast.error('Erro ao salvar', 'Tente novamente')
@@ -109,7 +53,7 @@ export default function AcademyDiaryPage() {
     }
   }
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -268,7 +212,7 @@ export default function AcademyDiaryPage() {
 
         {/* Entries list */}
         <div className="space-y-4">
-          {entries.length === 0 ? (
+          {diaryEntries.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📝</div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -285,7 +229,7 @@ export default function AcademyDiaryPage() {
               </button>
             </div>
           ) : (
-            entries.map((entry) => {
+            diaryEntries.map((entry) => {
               const mood = moods.find((m) => m.id === entry.mood)
               return (
                 <div
@@ -297,14 +241,14 @@ export default function AcademyDiaryPage() {
                       <span className="text-2xl">{mood?.emoji || '😐'}</span>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {new Date(entry.entry_date).toLocaleDateString('pt-BR', {
+                          {new Date(entry.entryDate).toLocaleDateString('pt-BR', {
                             weekday: 'long',
                             day: 'numeric',
                             month: 'long',
                           })}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(entry.created_at).toLocaleTimeString('pt-BR', {
+                          {new Date(entry.createdAt).toLocaleTimeString('pt-BR', {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
@@ -313,30 +257,30 @@ export default function AcademyDiaryPage() {
                     </div>
                   </div>
 
-                  {entry.what_learned && (
+                  {entry.whatLearned && (
                     <div className="mb-4">
                       <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">
                         O que aprendi
                       </h4>
-                      <p className="text-gray-700 dark:text-gray-300">{entry.what_learned}</p>
+                      <p className="text-gray-700 dark:text-gray-300">{entry.whatLearned}</p>
                     </div>
                   )}
 
-                  {entry.what_struggled && (
+                  {entry.whatStruggled && (
                     <div className="mb-4">
                       <h4 className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-1">
                         Dificuldades
                       </h4>
-                      <p className="text-gray-700 dark:text-gray-300">{entry.what_struggled}</p>
+                      <p className="text-gray-700 dark:text-gray-300">{entry.whatStruggled}</p>
                     </div>
                   )}
 
-                  {entry.next_steps && (
+                  {entry.nextSteps && (
                     <div>
                       <h4 className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
                         Proximos passos
                       </h4>
-                      <p className="text-gray-700 dark:text-gray-300">{entry.next_steps}</p>
+                      <p className="text-gray-700 dark:text-gray-300">{entry.nextSteps}</p>
                     </div>
                   )}
                 </div>

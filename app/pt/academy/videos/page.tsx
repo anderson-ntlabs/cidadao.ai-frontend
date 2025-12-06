@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { toast } from '@/hooks/use-toast'
 
 interface Video {
   id: string
@@ -19,14 +18,6 @@ interface Video {
   order_index: number
   agent_name: string
   is_required: boolean
-}
-
-interface VideoProgress {
-  video_id: string
-  watched_seconds: number
-  progress_percentage: number
-  status: string
-  completed_at: string | null
 }
 
 const categories = [
@@ -199,56 +190,48 @@ const placeholderVideos: Video[] = [
   },
 ]
 
-export default function AcademyVideosPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAcademyAuth()
-  const supabase = createClient()
+// Demo mode: video progress stored in localStorage
+const VIDEO_PROGRESS_KEY = 'academy_demo_video_progress'
 
-  const [videos, setVideos] = useState<Video[]>(placeholderVideos)
-  const [progress, setProgress] = useState<Record<string, VideoProgress>>({})
+interface VideoProgress {
+  video_id: string
+  watched_seconds: number
+  progress_percentage: number
+  status: string
+  completed_at: string | null
+}
+
+export default function AcademyVideosPage() {
+  const { user, isLoading, addXp } = useAcademyDemo()
+
+  const [videos] = useState<Video[]>(placeholderVideos)
+  const [progress, setProgress] = useState<Record<string, VideoProgress>>(() => {
+    if (typeof window === 'undefined') return {}
+    const saved = localStorage.getItem(VIDEO_PROGRESS_KEY)
+    return saved ? JSON.parse(saved) : {}
+  })
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
-
-  useEffect(() => {
-    if (user) {
-      loadVideos()
-      loadProgress()
-    }
-  }, [user])
-
-  const loadVideos = async () => {
-    const { data } = await supabase
-      .from('academy_videos')
-      .select('*')
-      .eq('is_active', true)
-      .order('order_index')
-
-    if (data && data.length > 0) {
-      setVideos(data)
-    }
+  const saveProgress = (newProgress: Record<string, VideoProgress>) => {
+    setProgress(newProgress)
+    localStorage.setItem(VIDEO_PROGRESS_KEY, JSON.stringify(newProgress))
   }
 
-  const loadProgress = async () => {
-    if (!user) return
-
-    const { data } = await supabase
-      .from('academy_video_progress')
-      .select('*')
-      .eq('user_id', user.id)
-
-    if (data) {
-      const progressMap: Record<string, VideoProgress> = {}
-      data.forEach((p) => {
-        progressMap[p.video_id] = p
-      })
-      setProgress(progressMap)
+  const markAsWatched = (video: Video) => {
+    const newProgress = {
+      ...progress,
+      [video.id]: {
+        video_id: video.id,
+        watched_seconds: video.duration_seconds,
+        progress_percentage: 100,
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      },
     }
+    saveProgress(newProgress)
+    addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
+    toast.success('Video concluido!', `+${video.is_required ? 25 : 15} XP`)
   }
 
   const formatDuration = (seconds: number) => {
@@ -263,7 +246,7 @@ export default function AcademyVideosPage() {
   const completedCount = Object.values(progress).filter((p) => p.status === 'completed').length
   const totalRequired = videos.filter((v) => v.is_required).length
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -493,6 +476,33 @@ export default function AcademyVideosPage() {
                   </svg>
                 </button>
               </div>
+              {/* Demo mode: mark as watched button */}
+              {!progress[selectedVideo.id]?.status && (
+                <button
+                  onClick={() => {
+                    markAsWatched(selectedVideo)
+                    setSelectedVideo(null)
+                  }}
+                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors"
+                >
+                  Marcar como assistido (+{selectedVideo.is_required ? 25 : 15} XP)
+                </button>
+              )}
+              {progress[selectedVideo.id]?.status === 'completed' && (
+                <div className="flex items-center justify-center gap-2 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                  Video ja assistido
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,10 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 
 // Rank configuration
 const ranks = {
@@ -43,76 +40,10 @@ const agentTeachers = [
   },
 ]
 
-interface DashboardStats {
-  totalSessions: number
-  totalTimeMinutes: number
-  currentStreak: number
-  longestStreak: number
-  todayMinutes: number
-  weeklyMinutes: number
-}
-
 export default function AcademyDashboardPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading, logout } = useAcademyAuth()
-  const supabase = createClient()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentActivities, setRecentActivities] = useState<any[]>([])
+  const { user, isLoading, xpTransactions, resetDemo } = useAcademyDemo()
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
-
-  useEffect(() => {
-    if (!user) return
-
-    // Check if user needs to complete onboarding
-    if (!user.hasAcceptedLgpd || !user.matricula) {
-      router.replace('/pt/academy/onboarding')
-      return
-    }
-
-    // Load stats
-    const loadStats = async () => {
-      const { data: profile } = await supabase
-        .from('academy_profiles')
-        .select('total_sessions, total_time_minutes, current_streak, longest_streak')
-        .eq('user_id', user.id)
-        .single()
-
-      if (profile) {
-        setStats({
-          totalSessions: profile.total_sessions || 0,
-          totalTimeMinutes: profile.total_time_minutes || 0,
-          currentStreak: profile.current_streak || 0,
-          longestStreak: profile.longest_streak || 0,
-          todayMinutes: 0, // TODO: Calculate from sessions
-          weeklyMinutes: 0, // TODO: Calculate from sessions
-        })
-      }
-    }
-
-    // Load recent XP transactions
-    const loadActivities = async () => {
-      const { data: transactions } = await supabase
-        .from('academy_xp_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (transactions) {
-        setRecentActivities(transactions)
-      }
-    }
-
-    loadStats()
-    loadActivities()
-  }, [user, supabase, router])
-
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="text-center">
@@ -130,6 +61,9 @@ export default function AcademyDashboardPage() {
     ? ((user.totalXp - rankInfo.minXp) / (nextRank.minXp - rankInfo.minXp)) * 100
     : 100
 
+  // Get last 5 XP transactions
+  const recentActivities = xpTransactions.slice(0, 5)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
@@ -142,7 +76,7 @@ export default function AcademyDashboardPage() {
               </div>
               <div>
                 <h1 className="font-bold text-gray-900 dark:text-gray-100">Academy</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Cidadao.AI</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Cidadao.AI - Demo</p>
               </div>
             </div>
 
@@ -170,9 +104,9 @@ export default function AcademyDashboardPage() {
               </div>
 
               <button
-                onClick={logout}
+                onClick={resetDemo}
                 className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                title="Sair"
+                title="Resetar Demo"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +119,7 @@ export default function AcademyDashboardPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
                   />
                 </svg>
               </button>
@@ -193,6 +127,12 @@ export default function AcademyDashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Demo banner */}
+      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 px-4 text-center text-sm">
+        <span className="font-medium">🎮 Modo Demo</span> - Explore a Academy sem precisar fazer
+        login. Dados salvos no navegador.
+      </div>
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -247,7 +187,7 @@ export default function AcademyDashboardPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {stats?.currentStreak || 0}
+                  {user.currentStreak}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Dias seguidos</p>
               </div>
@@ -261,7 +201,7 @@ export default function AcademyDashboardPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {Math.floor((stats?.totalTimeMinutes || 0) / 60)}h
+                  {Math.floor(user.totalTimeMinutes / 60)}h
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total de estudo</p>
               </div>
@@ -275,7 +215,7 @@ export default function AcademyDashboardPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {stats?.totalSessions || 0}
+                  {user.totalSessions}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Sessoes</p>
               </div>

@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
-import { createClient } from '@/lib/supabase/client'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 
 // Maritaca AI - LLM brasileiro direto
 const MARITACA_API_KEY = process.env.NEXT_PUBLIC_MARITACA_API_KEY
@@ -146,15 +145,13 @@ interface Message {
 function ChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated, isLoading } = useAcademyAuth()
-  const supabase = createClient()
+  const { user, isLoading, addXp, startSession, endSession, currentSession } = useAcademyDemo()
 
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null)
+  const [messageCount, setMessageCount] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Get agent from URL params
@@ -165,13 +162,6 @@ function ChatContent() {
     }
   }, [searchParams])
 
-  // Auth check
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/pt/academy/login')
-    }
-  }, [isAuthenticated, isLoading, router])
-
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -179,57 +169,10 @@ function ChatContent() {
 
   // Start session when agent is selected
   useEffect(() => {
-    if (selectedAgent && user && !sessionId) {
+    if (selectedAgent && !currentSession) {
       startSession()
     }
-  }, [selectedAgent, user])
-
-  const startSession = async () => {
-    if (!user) return
-
-    const { data, error } = await supabase
-      .from('academy_sessions')
-      .insert({
-        user_id: user.id,
-        started_at: new Date().toISOString(),
-        status: 'active',
-      })
-      .select()
-      .single()
-
-    if (data) {
-      setSessionId(data.id)
-      setSessionStartTime(new Date())
-    }
-  }
-
-  const endSession = async () => {
-    if (!sessionId || !user || !sessionStartTime) return
-
-    const durationMinutes = Math.floor((new Date().getTime() - sessionStartTime.getTime()) / 60000)
-
-    await supabase
-      .from('academy_sessions')
-      .update({
-        ended_at: new Date().toISOString(),
-        duration_minutes: durationMinutes,
-        status: 'completed',
-        conversations: JSON.stringify([
-          { agent_name: selectedAgent, messages_count: messages.length },
-        ]),
-      })
-      .eq('id', sessionId)
-
-    // Update profile total time
-    try {
-      await supabase.rpc('increment_profile_time', {
-        p_user_id: user.id,
-        p_minutes: durationMinutes,
-      })
-    } catch {
-      // Function might not exist yet
-    }
-  }
+  }, [selectedAgent, currentSession, startSession])
 
   const handleSendMessage = async () => {
     if (!input.trim() || !selectedAgent || isSending) return
@@ -244,6 +187,7 @@ function ChatContent() {
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setIsSending(true)
+    setMessageCount((prev) => prev + 1)
 
     const currentAgentData = allAgents.find((a) => a.id === selectedAgent)
     const isMaritaca = currentAgentData?.isMaritaca
@@ -251,7 +195,7 @@ function ChatContent() {
     try {
       let responseContent = ''
 
-      if (isMaritaca) {
+      if (isMaritaca && MARITACA_API_KEY) {
         // Maritaca AI - Direct LLM call
         const maritacaResponse = await fetch('https://chat.maritaca.ai/api/chat/completions', {
           method: 'POST',
@@ -285,28 +229,47 @@ Responda sempre em portugues brasileiro.`,
           responseContent =
             'Desculpe, houve um erro ao conectar com a Maritaca AI. Tente novamente.'
         }
-      } else {
-        // Backend agents
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'}/api/agents/${selectedAgent}/chat`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: userMessage.content,
-              session_id: sessionId,
-            }),
-          }
-        )
+      } else if (isMaritaca && !MARITACA_API_KEY) {
+        // Demo mode without API key
+        responseContent = `Ola! Sou a Maritaca AI em modo demo.
 
-        if (response.ok) {
-          const data = await response.json()
-          responseContent =
-            data.response || data.message || 'Desculpe, nao consegui processar sua mensagem.'
-        } else {
-          responseContent = `Ola! Sou ${currentAgentData?.name}. No momento estou em modo de demonstracao. Em breve poderei ajuda-lo com ${currentAgentData?.description.toLowerCase()}.`
+Para habilitar respostas reais, configure a variavel NEXT_PUBLIC_MARITACA_API_KEY.
+
+Enquanto isso, posso simular uma resposta educacional sobre o que voce perguntou: "${userMessage.content}"
+
+A Academy Cidadao.AI e um programa de estagio em parceria com IFSULDEMINAS, focado em desenvolvimento de software e inteligencia artificial. Como posso ajudar voce a aprender mais?`
+      } else {
+        // Backend agents - try to connect or use demo response
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'}/api/agents/${selectedAgent}/chat`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                message: userMessage.content,
+              }),
+            }
+          )
+
+          if (response.ok) {
+            const data = await response.json()
+            responseContent =
+              data.response || data.message || 'Desculpe, nao consegui processar sua mensagem.'
+          } else {
+            throw new Error('Backend not available')
+          }
+        } catch {
+          // Demo mode for backend agents
+          responseContent = `Ola! Sou ${currentAgentData?.name}, ${currentAgentData?.role} do Cidadao.AI.
+
+No momento estou em modo demonstracao. Minha especialidade e: ${currentAgentData?.description}.
+
+Quando o sistema completo estiver disponivel, poderei ajuda-lo com tarefas reais relacionadas a ${currentAgentData?.description.toLowerCase()}.
+
+Continue explorando a Academy para aprender mais sobre o projeto!`
         }
       }
 
@@ -319,16 +282,9 @@ Responda sempre em portugues brasileiro.`,
       }
       setMessages((prev) => [...prev, assistantMessage])
 
-      // Award XP for conversation
-      if (user && messages.length % 5 === 0) {
-        await supabase.from('academy_xp_transactions').insert({
-          user_id: user.id,
-          amount: 5,
-          balance_after: user.totalXp + 5,
-          source_type: 'conversation',
-          source_id: sessionId,
-          description: `Conversa com ${currentAgentData?.name}`,
-        })
+      // Award XP for conversation (every 5 messages)
+      if ((messageCount + 1) % 5 === 0) {
+        addXp(5, 'conversation', `Conversa com ${currentAgentData?.name}`)
       }
     } catch (error) {
       console.error('Chat error:', error)
@@ -346,16 +302,16 @@ Responda sempre em portugues brasileiro.`,
   }
 
   const handleSelectAgent = (agentId: string) => {
-    if (sessionId) {
-      endSession()
+    if (currentSession) {
+      endSession(messageCount, [selectedAgent || ''])
     }
     setSelectedAgent(agentId)
     setMessages([])
-    setSessionId(null)
+    setMessageCount(0)
     router.push(`/pt/academy/chat?agent=${agentId}`)
   }
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
@@ -490,7 +446,7 @@ Responda sempre em portugues brasileiro.`,
                     {currentAgent.description}
                   </p>
                 </div>
-                {sessionStartTime && (
+                {currentSession && (
                   <div className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                     <span className="text-sm text-green-700 dark:text-green-400">Sessao ativa</span>
