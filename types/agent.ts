@@ -1,3 +1,5 @@
+export type InternTrack = 'ui-ux' | 'frontend' | 'backend' | 'data' | 'design' | 'devops' | 'mobile'
+
 export interface Agent {
   id: string
   name: string
@@ -11,6 +13,8 @@ export interface Agent {
   }
   image: string
   wikipedia?: string
+  /** Tracks where this agent is available (undefined = available to all) */
+  tracks?: InternTrack[]
 }
 
 export interface ProjectLink {
