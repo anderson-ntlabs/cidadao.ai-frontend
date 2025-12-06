@@ -250,7 +250,7 @@ export const agents: Agent[] = [
       pt: 'Arquiteta modernista criadora do MASP, ensina design funcional, acessibilidade e a beleza das formas simples. Especialista em interfaces que unem estética e propósito.',
       en: 'Modernist architect creator of MASP, teaches functional design, accessibility and the beauty of simple forms. Specialist in interfaces that unite aesthetics and purpose.',
     },
-    image: '/agents/bobardi.png',
+    image: '/agents/Lina_Bo_Bardi.jpg',
     wikipedia: 'https://pt.wikipedia.org/wiki/Lina_Bo_Bardi',
     tracks: ['ui-ux', 'frontend', 'design'],
   },
