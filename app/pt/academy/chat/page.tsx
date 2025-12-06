@@ -210,7 +210,14 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
                   try {
                     const data = JSON.parse(line.slice(6))
                     if (data.type === 'chunk' && data.content) {
-                      accumulatedContent += data.content
+                      // Add space between chunks if needed (backend sends chunks without trailing spaces)
+                      const needsSpace =
+                        accumulatedContent.length > 0 &&
+                        !accumulatedContent.endsWith(' ') &&
+                        !accumulatedContent.endsWith('\n') &&
+                        !data.content.startsWith(' ') &&
+                        !data.content.startsWith('\n')
+                      accumulatedContent += (needsSpace ? ' ' : '') + data.content
                       setStreamingContent(accumulatedContent)
                     } else if (data.type === 'complete') {
                       // Stream complete
