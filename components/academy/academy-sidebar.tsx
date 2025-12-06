@@ -28,6 +28,7 @@ import {
   Target,
   Calendar,
   Compass,
+  ClipboardList,
 } from 'lucide-react'
 
 interface NavItem {
@@ -51,6 +52,7 @@ const navItems: NavItem[] = [
   { href: '/pt/academy/trilhas', label: 'Trilhas', icon: Compass },
   { href: '/pt/academy/chat', label: 'Chat com Mentor', icon: MessageSquare },
   { href: '/pt/academy/agenda', label: 'Agenda', icon: Calendar },
+  { href: '/pt/academy/boletim', label: 'Boletim', icon: ClipboardList },
   { href: '/pt/academy/videos', label: 'Videos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
   { href: '/pt/academy/ranking', label: 'Ranking', icon: Trophy },
