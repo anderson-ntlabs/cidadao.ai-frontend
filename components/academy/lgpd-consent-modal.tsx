@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAcademyAuth } from '@/hooks/use-academy-auth'
+import { useAcademyDemo } from '@/hooks/use-academy-demo'
 
 interface LgpdConsentModalProps {
   isOpen: boolean
@@ -9,7 +9,7 @@ interface LgpdConsentModalProps {
 }
 
 export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
-  const { user, acceptLgpdConsent } = useAcademyAuth()
+  const { user, acceptLgpdConsent } = useAcademyDemo()
   const [isAccepting, setIsAccepting] = useState(false)
   const [checkboxes, setCheckboxes] = useState({
     tracking: false,
@@ -25,14 +25,15 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
 
     setIsAccepting(true)
     try {
-      // Get IP address (optional - can be captured server-side)
+      // Get IP address (optional - demo mode simulation)
       let ipAddress: string | undefined
       try {
         const response = await fetch('https://api.ipify.org?format=json')
         const data = await response.json()
         ipAddress = data.ip
       } catch {
-        // IP capture failed - not critical
+        // IP capture failed - not critical for demo
+        ipAddress = '127.0.0.1' // Demo fallback
       }
 
       await acceptLgpdConsent(ipAddress, navigator.userAgent)
@@ -87,6 +88,18 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
               seu consentimento para o tratamento de dados pessoais, conforme a Lei Geral de
               Protecao de Dados (Lei 13.709/2018 - LGPD).
             </p>
+
+            {/* Demo mode banner */}
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🎮</span>
+                <h3 className="font-bold text-amber-800 dark:text-amber-200">Modo Demo</h3>
+              </div>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Voce esta no modo demonstracao. Os dados sao salvos apenas localmente no seu
+                navegador e nao sao enviados para servidores externos.
+              </p>
+            </div>
 
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
               <h3 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2">
@@ -188,9 +201,12 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Versao do termo: v1.0 | Data: {new Date().toLocaleDateString('pt-BR')}
-            </p>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              <p>Versao do termo: v1.0-demo | Data: {new Date().toLocaleDateString('pt-BR')}</p>
+              <p className="text-green-600 dark:text-green-400 font-medium mt-1">
+                +50 XP de bonus de boas-vindas!
+              </p>
+            </div>
             <button
               onClick={handleAccept}
               disabled={!allChecked || isAccepting}
@@ -225,7 +241,7 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                   Salvando...
                 </span>
               ) : (
-                'Aceitar e Comecar'
+                'Aceitar e Comecar (+50 XP)'
               )}
             </button>
           </div>

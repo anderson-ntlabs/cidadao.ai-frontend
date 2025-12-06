@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { LgpdConsentModal } from '@/components/academy/lgpd-consent-modal'
 
 // Rank configuration
 const ranks = {
@@ -42,6 +44,14 @@ const agentTeachers = [
 
 export default function AcademyDashboardPage() {
   const { user, isLoading, xpTransactions, resetDemo } = useAcademyDemo()
+  const [showLgpdModal, setShowLgpdModal] = useState(false)
+
+  // Show LGPD modal on first access
+  useEffect(() => {
+    if (!isLoading && !user.hasAcceptedLgpd) {
+      setShowLgpdModal(true)
+    }
+  }, [isLoading, user.hasAcceptedLgpd])
 
   if (isLoading) {
     return (
@@ -350,6 +360,9 @@ export default function AcademyDashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* LGPD Consent Modal */}
+      <LgpdConsentModal isOpen={showLgpdModal} onClose={() => setShowLgpdModal(false)} />
     </div>
   )
 }

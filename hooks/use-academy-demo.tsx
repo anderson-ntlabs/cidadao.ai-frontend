@@ -16,6 +16,7 @@ const STORAGE_KEY = 'academy_demo_user'
 const STORAGE_XP_KEY = 'academy_demo_xp_transactions'
 const STORAGE_DIARY_KEY = 'academy_demo_diary'
 const STORAGE_SESSIONS_KEY = 'academy_demo_sessions'
+const STORAGE_LGPD_KEY = 'academy_demo_lgpd_consent'
 
 export interface AcademyDemoUser {
   id: string
@@ -66,7 +67,15 @@ export interface StudySession {
   agentsUsed: string[]
 }
 
-// Default demo user
+// LGPD consent record
+export interface LgpdConsent {
+  acceptedAt: string
+  ipAddress?: string
+  userAgent: string
+  version: string
+}
+
+// Default demo user - starts without LGPD consent
 const DEFAULT_DEMO_USER: AcademyDemoUser = {
   id: 'demo-user-001',
   name: 'Estudante Demo',
@@ -75,16 +84,16 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   matricula: '2024001234',
   curso: 'Ciencia da Computacao',
   periodo: 5,
-  totalXp: 150,
-  currentLevel: 2,
-  currentRank: 'aprendiz',
+  totalXp: 0,
+  currentLevel: 1,
+  currentRank: 'novato',
   mainTrack: 'backend',
-  currentStreak: 3,
-  longestStreak: 7,
-  totalSessions: 12,
-  totalTimeMinutes: 480,
-  hasAcceptedLgpd: true,
-  enrolledAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+  currentStreak: 0,
+  longestStreak: 0,
+  totalSessions: 0,
+  totalTimeMinutes: 0,
+  hasAcceptedLgpd: false, // Must accept LGPD on first access
+  enrolledAt: new Date().toISOString(),
 }
 
 // Calculate rank from XP
@@ -109,6 +118,7 @@ interface AcademyDemoContextType {
   diaryEntries: DiaryEntry[]
   sessions: StudySession[]
   currentSession: StudySession | null
+  lgpdConsent: LgpdConsent | null
 
   // Actions
   updateProfile: (updates: Partial<AcademyDemoUser>) => void
@@ -116,6 +126,7 @@ interface AcademyDemoContextType {
   addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => void
   startSession: () => void
   endSession: (xpEarned?: number, agentsUsed?: string[]) => void
+  acceptLgpdConsent: (ipAddress?: string, userAgent?: string) => Promise<void>
   resetDemo: () => void
 }
 
@@ -128,6 +139,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
   const [sessions, setSessions] = useState<StudySession[]>([])
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
+  const [lgpdConsent, setLgpdConsent] = useState<LgpdConsent | null>(null)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -150,6 +162,11 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       const savedSessions = localStorage.getItem(STORAGE_SESSIONS_KEY)
       if (savedSessions) {
         setSessions(JSON.parse(savedSessions))
+      }
+
+      const savedLgpd = localStorage.getItem(STORAGE_LGPD_KEY)
+      if (savedLgpd) {
+        setLgpdConsent(JSON.parse(savedLgpd))
       }
 
       logger.info('Demo mode loaded from localStorage')
@@ -282,17 +299,42 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     [currentSession, user.totalSessions, user.totalTimeMinutes, updateProfile]
   )
 
+  const acceptLgpdConsent = useCallback(
+    async (ipAddress?: string, userAgent?: string) => {
+      const consent: LgpdConsent = {
+        acceptedAt: new Date().toISOString(),
+        ipAddress,
+        userAgent: userAgent || navigator.userAgent,
+        version: 'v1.0-demo',
+      }
+
+      setLgpdConsent(consent)
+      localStorage.setItem(STORAGE_LGPD_KEY, JSON.stringify(consent))
+
+      // Update user to mark LGPD as accepted
+      updateProfile({ hasAcceptedLgpd: true })
+
+      // Award XP for accepting (first-time bonus)
+      addXp(50, 'lgpd_consent', 'Bonus de boas-vindas - Aceite do termo LGPD')
+
+      logger.info('LGPD consent accepted', { ipAddress })
+    },
+    [updateProfile, addXp]
+  )
+
   const resetDemo = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem(STORAGE_XP_KEY)
     localStorage.removeItem(STORAGE_DIARY_KEY)
     localStorage.removeItem(STORAGE_SESSIONS_KEY)
+    localStorage.removeItem(STORAGE_LGPD_KEY)
 
     setUser(DEFAULT_DEMO_USER)
     setXpTransactions([])
     setDiaryEntries([])
     setSessions([])
     setCurrentSession(null)
+    setLgpdConsent(null)
 
     logger.info('Demo reset to default state')
   }, [])
@@ -307,11 +349,13 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         diaryEntries,
         sessions,
         currentSession,
+        lgpdConsent,
         updateProfile,
         addXp,
         addDiaryEntry,
         startSession,
         endSession,
+        acceptLgpdConsent,
         resetDemo,
       }}
     >
