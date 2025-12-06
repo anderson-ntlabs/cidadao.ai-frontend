@@ -47,7 +47,7 @@ interface AcademySidebarProps {
 
 const navItems: NavItem[] = [
   { href: '/pt/academy', label: 'Dashboard', icon: Home },
-  { href: '/pt/academy/chat', label: 'Chat com Agentes', icon: MessageSquare },
+  { href: '/pt/academy/chat', label: 'Chat com Mentor', icon: MessageSquare },
   { href: '/pt/academy/diario', label: 'Diario de Bordo', icon: BookOpen },
   { href: '/pt/academy/videos', label: 'Videos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
