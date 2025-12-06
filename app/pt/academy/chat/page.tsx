@@ -80,6 +80,8 @@ function ChatContent() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamingContent, setStreamingContent] = useState('')
   const [messageCount, setMessageCount] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -173,22 +175,64 @@ Enquanto isso, aqui vai uma dica sobre "${userMessage.content}":
 A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de software e inteligencia artificial. Continue praticando e explorando!`
         }
       } else {
-        // Santos Dumont - Backend agent
+        // Santos Dumont - Backend agent with SSE streaming
         try {
-          const response = await fetch(`${BACKEND_URL}/api/agents/santos_dumont/chat`, {
+          setIsStreaming(true)
+          setStreamingContent('')
+
+          const response = await fetch(`${BACKEND_URL}/api/v1/chat/stream`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userMessage.content }),
+            body: JSON.stringify({
+              message: userMessage.content,
+              agent_id: 'santos_dumont',
+            }),
           })
 
-          if (response.ok) {
-            const data = await response.json()
-            responseContent =
-              data.response || data.message || 'Desculpe, nao consegui processar sua mensagem.'
-          } else {
+          if (!response.ok) {
             throw new Error('Backend not available')
           }
+
+          const reader = response.body?.getReader()
+          const decoder = new TextDecoder()
+          let accumulatedContent = ''
+
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+
+              const chunk = decoder.decode(value, { stream: true })
+              const lines = chunk.split('\n')
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.slice(6))
+                    if (data.type === 'chunk' && data.content) {
+                      accumulatedContent += data.content
+                      setStreamingContent(accumulatedContent)
+                    } else if (data.type === 'complete') {
+                      // Stream complete
+                      break
+                    } else if (data.type === 'error') {
+                      throw new Error(data.message || 'Erro no streaming')
+                    }
+                  } catch {
+                    // Skip invalid JSON lines
+                  }
+                }
+              }
+            }
+          }
+
+          responseContent = accumulatedContent || 'Desculpe, nao consegui processar sua mensagem.'
+          setIsStreaming(false)
+          setStreamingContent('')
         } catch {
+          setIsStreaming(false)
+          setStreamingContent('')
+
           // Fallback to Maritaca with Santos Dumont persona
           if (MARITACA_API_KEY) {
             const maritacaResponse = await fetch('https://chat.maritaca.ai/api/chat/completions', {
@@ -459,7 +503,29 @@ Continue voando alto! 🛫`
                 </div>
               ))}
 
-              {isSending && (
+              {/* Streaming response */}
+              {isStreaming && streamingContent && (
+                <div className="flex gap-3 justify-start animate-fade-in">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+                    <Image
+                      src={currentMode.avatar}
+                      alt={currentMode.name}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <Card variant="outlined" padding="md" className="max-w-[70%]">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {streamingContent}
+                      <span className="inline-block w-2 h-4 ml-1 bg-green-500 animate-pulse" />
+                    </p>
+                  </Card>
+                </div>
+              )}
+
+              {/* Loading indicator (before streaming starts) */}
+              {isSending && !streamingContent && (
                 <div className="flex gap-3 justify-start animate-fade-in">
                   <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
                     <Image
