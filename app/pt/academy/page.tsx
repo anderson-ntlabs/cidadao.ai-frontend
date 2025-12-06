@@ -146,21 +146,48 @@ function AcademyDashboardContent() {
   const [showLgpdModal, setShowLgpdModal] = useState(false)
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false)
 
-  // Auth redirect
+  // Track if we're in OAuth flow to prevent premature redirects
+  const [isOAuthFlow, setIsOAuthFlow] = useState(false)
+  const [authCheckComplete, setAuthCheckComplete] = useState(false)
+
+  // Detect OAuth flow on mount
   useEffect(() => {
-    if (isDemoMode || realAuth.isLoading || realAuth.isAuthenticated) return
-    const isOAuth =
-      typeof window !== 'undefined' &&
-      (window.location.search.includes('oauth_complete=') ||
-        document.cookie.includes('oauth_session_ready=true'))
-    if (isOAuth) {
+    if (typeof window === 'undefined') return
+    const hasOAuthParam = window.location.search.includes('oauth_complete=')
+    const hasOAuthCookie = document.cookie.includes('oauth_session_ready=true')
+    if (hasOAuthParam || hasOAuthCookie) {
+      setIsOAuthFlow(true)
+      // Give auth hook time to process the OAuth session
       const timer = setTimeout(() => {
-        if (!realAuth.isAuthenticated) router.replace('/pt/academy/login')
-      }, 5000)
+        setAuthCheckComplete(true)
+      }, 3000) // Wait 3s for auth to settle
       return () => clearTimeout(timer)
+    } else {
+      setAuthCheckComplete(true)
     }
+  }, [])
+
+  // Auth redirect - only after auth check is complete
+  useEffect(() => {
+    // Skip if demo mode or still loading
+    if (isDemoMode || realAuth.isLoading) return
+
+    // Skip if authenticated
+    if (realAuth.isAuthenticated) return
+
+    // If in OAuth flow, wait for auth check to complete
+    if (isOAuthFlow && !authCheckComplete) return
+
+    // Not authenticated - redirect to login
     router.replace('/pt/academy/login')
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [
+    isDemoMode,
+    realAuth.isLoading,
+    realAuth.isAuthenticated,
+    isOAuthFlow,
+    authCheckComplete,
+    router,
+  ])
 
   // LGPD modal
   useEffect(() => {
@@ -181,7 +208,10 @@ function AcademyDashboardContent() {
     if (!isLoading) checkAndAwardBadges()
   }, [isLoading, user, checkAndAwardBadges])
 
-  if (isLoading) return <LoadingFallback />
+  // Show loading if auth is loading OR if we're waiting for OAuth to complete
+  if (isLoading || (isOAuthFlow && !authCheckComplete && !realAuth.isAuthenticated)) {
+    return <LoadingFallback />
+  }
 
   if (!isDemoMode && !realAuth.isAuthenticated) {
     return (
