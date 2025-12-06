@@ -343,68 +343,69 @@ Continue voando alto! 🛫`
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => handleModeChange('mentor')}
               className={cn(
-                'flex-1 flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
+                'flex items-center gap-4 p-4 rounded-2xl transition-all duration-200',
+                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
+                'border-2',
                 chatMode === 'mentor'
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-lg shadow-green-500/10'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-green-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-green-500 ring-2 ring-green-500/20'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-green-400'
               )}
             >
-              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md flex-shrink-0">
                 <Image
                   src={chatModes.mentor.avatar}
                   alt={chatModes.mentor.name}
-                  width={48}
-                  height={48}
+                  width={56}
+                  height={56}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex-1 text-left">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-gray-900 dark:text-gray-100">
-                    {chatModes.mentor.name}
+              <div className="flex-1 text-left min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate">
+                    Santos-Dumont
                   </p>
-                  <Plane className="w-4 h-4 text-green-600" />
+                  <Plane className="w-4 h-4 text-green-500 flex-shrink-0" />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Duvidas sobre o projeto</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Mentor • Duvidas do projeto
+                </p>
               </div>
+              {chatMode === 'mentor' && (
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
+              )}
             </button>
 
             <button
               onClick={() => handleModeChange('maritaca')}
               className={cn(
-                'flex-1 flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
+                'flex items-center gap-4 p-4 rounded-2xl transition-all duration-200',
+                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
+                'border-2',
                 chatMode === 'maritaca'
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg shadow-blue-500/10'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ? 'border-blue-500 ring-2 ring-blue-500/20'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'
               )}
             >
-              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 flex items-center justify-center">
-                <Image
-                  src={chatModes.maritaca.avatar}
-                  alt={chatModes.maritaca.name}
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md flex-shrink-0 bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                <span className="text-3xl">🦜</span>
               </div>
-              <div className="flex-1 text-left">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-gray-900 dark:text-gray-100">
-                    {chatModes.maritaca.name}
-                  </p>
-                  <Badge variant="info" size="sm">
-                    <Zap className="w-3 h-3 mr-0.5" />
-                    LLM
+              <div className="flex-1 text-left min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate">Maritaca AI</p>
+                  <Badge variant="info" size="sm" className="flex-shrink-0">
+                    <Zap className="w-3 h-3" />
                   </Badge>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Qualquer tema de programacao
-                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">LLM • Qualquer tema</p>
               </div>
+              {chatMode === 'maritaca' && (
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse flex-shrink-0" />
+              )}
             </button>
           </div>
         </div>
