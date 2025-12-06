@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { useAcademyAuth } from '@/hooks/use-academy-auth'
@@ -61,7 +61,22 @@ const academyAgent = {
     'O Pai da Aviacao e seu mentor na Academy! Santos-Dumont incentiva a inovacao, criatividade e persistencia. Tire duvidas tecnicas e receba orientacao para seus projetos.',
 }
 
-export default function AcademyDashboardPage() {
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <GraduationCap className="w-8 h-8 text-white" />
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
+      </div>
+    </div>
+  )
+}
+
+// Inner component that uses useSearchParams
+function AcademyDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isDemoMode = searchParams.get('demo') === 'true'
@@ -135,16 +150,7 @@ export default function AcademyDashboardPage() {
   }, [isLoading, user, checkAndAwardBadges])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
-        </div>
-      </div>
-    )
+    return <LoadingFallback />
   }
 
   // If not demo and not authenticated, show loading (redirect will happen)
@@ -405,5 +411,14 @@ export default function AcademyDashboardPage() {
         useRealAuth={isRealAuth}
       />
     </div>
+  )
+}
+
+// Main export with Suspense boundary for useSearchParams
+export default function AcademyDashboardPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AcademyDashboardContent />
+    </Suspense>
   )
 }
