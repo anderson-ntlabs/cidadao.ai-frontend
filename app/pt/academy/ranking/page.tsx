@@ -1,34 +1,56 @@
+/**
+ * Academy Ranking Page
+ *
+ * Leaderboard with:
+ * - XP ranking
+ * - Time ranking
+ * - Streak ranking
+ *
+ * Author: Anderson Henrique da Silva
+ * Refactored: 2025-12-06 - Design System integration
+ */
+
 'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ArrowLeft, Trophy, Zap, Clock, Flame, Crown, Medal, Star, Sparkles } from 'lucide-react'
 
 const ranks = {
   novato: {
     name: 'Novato',
     bg: 'bg-gray-100 dark:bg-gray-800',
     text: 'text-gray-600 dark:text-gray-400',
+    gradient: 'from-gray-400 to-gray-500',
   },
   aprendiz: {
     name: 'Aprendiz',
     bg: 'bg-green-100 dark:bg-green-900/30',
     text: 'text-green-600 dark:text-green-400',
+    gradient: 'from-green-400 to-emerald-500',
   },
   contribuidor: {
     name: 'Contribuidor',
     bg: 'bg-blue-100 dark:bg-blue-900/30',
     text: 'text-blue-600 dark:text-blue-400',
+    gradient: 'from-blue-400 to-indigo-500',
   },
   mentor: {
     name: 'Mentor',
     bg: 'bg-purple-100 dark:bg-purple-900/30',
     text: 'text-purple-600 dark:text-purple-400',
+    gradient: 'from-purple-400 to-violet-500',
   },
   arquiteto: {
     name: 'Arquiteto',
     bg: 'bg-yellow-100 dark:bg-yellow-900/30',
     text: 'text-yellow-600 dark:text-yellow-400',
+    gradient: 'from-yellow-400 to-amber-500',
   },
 }
 
@@ -136,6 +158,12 @@ const mockLeaderboard: LeaderboardEntry[] = [
   },
 ]
 
+const filterTabs = [
+  { id: 'xp', icon: Zap, label: 'Por XP' },
+  { id: 'time', icon: Clock, label: 'Por tempo' },
+  { id: 'streak', icon: Flame, label: 'Por streak' },
+]
+
 export default function AcademyRankingPage() {
   const { user, isLoading } = useAcademyDemo()
 
@@ -181,47 +209,45 @@ export default function AcademyRankingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando ranking...</p>
+        </div>
       </div>
     )
   }
 
-  const getMedalEmoji = (position: number) => {
-    if (position === 1) return '🥇'
-    if (position === 2) return '🥈'
-    if (position === 3) return '🥉'
-    return `${position}`
+  const getMedalIcon = (position: number) => {
+    if (position === 1) return <span className="text-3xl">🥇</span>
+    if (position === 2) return <span className="text-3xl">🥈</span>
+    if (position === 3) return <span className="text-3xl">🥉</span>
+    return (
+      <span className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-400">
+        {position}
+      </span>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/pt/academy"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-                />
-              </svg>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                Ranking da Academy
-              </h1>
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                  Ranking da Academy
+                </h1>
+              </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Veja quem esta liderando</p>
             </div>
           </div>
@@ -229,98 +255,188 @@ export default function AcademyRankingPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* User position card */}
         {userRank > 0 && (
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-6 mb-8 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm mb-1">Sua posicao</p>
-                <p className="text-4xl font-bold">#{userRank}</p>
+          <Card
+            variant="filled"
+            padding="md"
+            className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 border-0 overflow-hidden relative"
+          >
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+            <div className="relative flex items-center justify-between text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                  <Crown className="w-8 h-8" />
+                </div>
+                <div>
+                  <p className="text-green-100 text-sm mb-1">Sua posicao</p>
+                  <p className="text-5xl font-bold">#{userRank}</p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-green-100 text-sm mb-1">Seus pontos</p>
-                <p className="text-2xl font-bold">{user.totalXp} XP</p>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-yellow-300" />
+                  <p className="text-3xl font-bold">{user.totalXp} XP</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
-        <div className="flex gap-2 mb-6 bg-white dark:bg-gray-800 p-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
-          {[
-            { id: 'xp', icon: '⚡', label: 'Por XP' },
-            { id: 'time', icon: '⏱️', label: 'Por tempo' },
-            { id: 'streak', icon: '🔥', label: 'Por streak' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilter(tab.id as 'xp' | 'time' | 'streak')}
-              className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-colors ${
-                filter === tab.id
-                  ? 'bg-green-600 text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              {tab.icon} {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Filter tabs */}
+        <Card variant="outlined" padding="sm" className="mb-6">
+          <div className="flex gap-1">
+            {filterTabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <Button
+                  key={tab.id}
+                  onClick={() => setFilter(tab.id as 'xp' | 'time' | 'streak')}
+                  variant={filter === tab.id ? 'primary' : 'ghost'}
+                  size="md"
+                  className="flex-1"
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </Button>
+              )
+            })}
+          </div>
+        </Card>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Leaderboard */}
+        <Card variant="elevated" padding="none" className="overflow-hidden">
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {sortedLeaderboard.map((entry, index) => {
               const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
               const isCurrentUser = entry.user_id === user.id
+              const position = index + 1
 
               return (
                 <div
                   key={entry.id}
-                  className={`flex items-center gap-4 p-4 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}
+                  className={cn(
+                    'flex items-center gap-4 p-4 transition-colors',
+                    isCurrentUser && 'bg-green-50 dark:bg-green-900/20',
+                    position <= 3 &&
+                      !isCurrentUser &&
+                      'bg-gradient-to-r from-yellow-50/50 to-transparent dark:from-yellow-900/10',
+                    'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  )}
                 >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                      index < 3
-                        ? 'text-2xl'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                    }`}
-                  >
-                    {getMedalEmoji(index + 1)}
+                  {/* Position */}
+                  <div className="flex-shrink-0 w-12 flex items-center justify-center">
+                    {getMedalIcon(position)}
                   </div>
 
-                  <img
-                    src={
-                      entry.avatar_url ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
-                    }
-                    alt={entry.full_name}
-                    className={`w-12 h-12 rounded-full ${isCurrentUser ? 'ring-2 ring-green-500' : ''}`}
-                  />
+                  {/* Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={
+                        entry.avatar_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
+                      }
+                      alt={entry.full_name}
+                      className={cn(
+                        'w-12 h-12 rounded-xl object-cover',
+                        isCurrentUser &&
+                          'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-900'
+                      )}
+                    />
+                    {position <= 3 && (
+                      <div
+                        className={cn(
+                          'absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs',
+                          position === 1 && 'bg-yellow-400 text-yellow-900',
+                          position === 2 && 'bg-gray-300 text-gray-700',
+                          position === 3 && 'bg-amber-600 text-white'
+                        )}
+                      >
+                        <Star className="w-3 h-3" />
+                      </div>
+                    )}
+                  </div>
 
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p
-                      className={`font-medium truncate ${isCurrentUser ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'}`}
-                    >
-                      {entry.full_name} {isCurrentUser && <span className="text-sm">(Voce)</span>}
-                    </p>
                     <div className="flex items-center gap-2">
+                      <p
+                        className={cn(
+                          'font-medium truncate',
+                          isCurrentUser
+                            ? 'text-green-700 dark:text-green-400'
+                            : 'text-gray-900 dark:text-gray-100'
+                        )}
+                      >
+                        {entry.full_name}
+                      </p>
+                      {isCurrentUser && (
+                        <Badge variant="success" size="sm">
+                          Voce
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
                       <span
-                        className={`text-sm px-2 py-0.5 rounded-full ${rankInfo.bg} ${rankInfo.text}`}
+                        className={cn(
+                          'text-xs px-2 py-0.5 rounded-full font-medium',
+                          rankInfo.bg,
+                          rankInfo.text
+                        )}
                       >
                         Lv.{entry.current_level} {rankInfo.name}
                       </span>
+                      {entry.current_streak > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
+                          <Flame className="w-3 h-3" />
+                          {entry.current_streak}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  {/* Score */}
+                  <div className="text-right flex-shrink-0">
                     <p className="font-bold text-gray-900 dark:text-gray-100">
-                      {filter === 'xp' && `${entry.total_xp} XP`}
-                      {filter === 'time' && `${Math.floor(entry.total_time_minutes / 60)}h`}
-                      {filter === 'streak' && `${entry.current_streak} dias`}
+                      {filter === 'xp' && (
+                        <span className="flex items-center gap-1">
+                          <Zap className="w-4 h-4 text-yellow-500" />
+                          {entry.total_xp}
+                        </span>
+                      )}
+                      {filter === 'time' && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4 text-blue-500" />
+                          {Math.floor(entry.total_time_minutes / 60)}h
+                        </span>
+                      )}
+                      {filter === 'streak' && (
+                        <span className="flex items-center gap-1">
+                          <Flame className="w-4 h-4 text-orange-500" />
+                          {entry.current_streak} dias
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {filter === 'xp' && 'XP'}
+                      {filter === 'time' && 'Total'}
+                      {filter === 'streak' && 'Streak'}
                     </p>
                   </div>
                 </div>
               )
             })}
           </div>
-        </div>
+        </Card>
+
+        {/* Footer note */}
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+          O ranking e atualizado em tempo real. Continue estudando para subir!
+        </p>
       </main>
     </div>
   )

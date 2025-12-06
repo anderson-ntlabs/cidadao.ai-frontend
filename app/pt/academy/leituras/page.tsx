@@ -1,9 +1,37 @@
+/**
+ * Academy Readings Page
+ *
+ * Required readings library with:
+ * - Track filtering
+ * - Progress tracking
+ * - XP rewards
+ *
+ * Author: Anderson Henrique da Silva
+ * Refactored: 2025-12-06 - Design System integration
+ */
+
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { toast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Clock,
+  Sparkles,
+  Star,
+  ExternalLink,
+  FileText,
+  GraduationCap,
+  Calendar,
+} from 'lucide-react'
 
 interface Reading {
   id: string
@@ -128,17 +156,60 @@ const placeholderReadings: Reading[] = [
   },
 ]
 
+const tracks = [
+  { id: 'all', name: 'Todas', icon: BookOpen },
+  { id: 'backend', name: 'Backend', icon: FileText },
+  { id: 'frontend', name: 'Frontend', icon: FileText },
+  { id: 'ia', name: 'IA/ML', icon: FileText },
+  { id: 'devops', name: 'DevOps', icon: FileText },
+]
+
+const trackColors: Record<string, { bg: string; text: string; border: string }> = {
+  backend: {
+    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-700 dark:text-purple-400',
+    border: 'border-purple-200 dark:border-purple-700/30',
+  },
+  frontend: {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-700 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-700/30',
+  },
+  ia: {
+    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-orange-700 dark:text-orange-400',
+    border: 'border-orange-200 dark:border-orange-700/30',
+  },
+  devops: {
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-400',
+    border: 'border-green-200 dark:border-green-700/30',
+  },
+}
+
+const articleTypeIcons: Record<string, string> = {
+  tutorial: '📖',
+  paper: '📄',
+  documentation: '📑',
+}
+
 export default function AcademyReadingsPage() {
   const { isLoading, addXp } = useAcademyDemo()
 
   const [readings] = useState<Reading[]>(placeholderReadings)
-  const [progress, setProgress] = useState<Record<string, ReadingProgress>>(() => {
-    if (typeof window === 'undefined') return {}
-    const saved = localStorage.getItem(READING_PROGRESS_KEY)
-    return saved ? JSON.parse(saved) : {}
-  })
+  const [progress, setProgress] = useState<Record<string, ReadingProgress>>({})
   const [selectedTrack, setSelectedTrack] = useState<string>('all')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(READING_PROGRESS_KEY)
+      if (saved) {
+        setProgress(JSON.parse(saved))
+      }
+    }
+  }, [])
 
   const saveProgress = (newProgress: Record<string, ReadingProgress>) => {
     setProgress(newProgress)
@@ -168,14 +239,6 @@ export default function AcademyReadingsPage() {
     }, 500)
   }
 
-  const tracks = [
-    { id: 'all', name: 'Todas' },
-    { id: 'backend', name: 'Backend' },
-    { id: 'frontend', name: 'Frontend' },
-    { id: 'ia', name: 'IA/ML' },
-    { id: 'devops', name: 'DevOps' },
-  ]
-
   const filteredReadings =
     selectedTrack === 'all'
       ? readings
@@ -183,43 +246,41 @@ export default function AcademyReadingsPage() {
 
   const completedCount = Object.values(progress).filter((p) => p.confirmed_read).length
   const requiredCount = readings.filter((r) => r.is_required).length
+  const requiredCompleted = Object.values(progress).filter((p) => {
+    const reading = readings.find((r) => r.id === p.reading_id)
+    return p.confirmed_read && reading?.is_required
+  }).length
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando leituras...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/pt/academy"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-                />
-              </svg>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex-1">
-              <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                Leituras Obrigatorias
-              </h1>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                  Leituras Obrigatorias
+                </h1>
+              </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {completedCount} de {readings.length} concluidas
               </p>
@@ -230,163 +291,187 @@ export default function AcademyReadingsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Progress card */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-6 mb-8 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm mb-1">Progresso de leitura</p>
-              <p className="text-3xl font-bold">
-                {Math.round((completedCount / Math.max(readings.length, 1)) * 100)}%
-              </p>
+        <Card
+          variant="filled"
+          padding="md"
+          className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 border-0"
+        >
+          <div className="flex items-center justify-between text-white">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+                <GraduationCap className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-green-100 text-sm mb-1">Progresso de leitura</p>
+                <p className="text-4xl font-bold">
+                  {Math.round((completedCount / Math.max(readings.length, 1)) * 100)}%
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <p className="text-green-100 text-sm mb-1">Obrigatorias</p>
-              <p className="text-xl font-bold">
-                {
-                  Object.values(progress).filter((p) => {
-                    const reading = readings.find((r) => r.id === p.reading_id)
-                    return p.confirmed_read && reading?.is_required
-                  }).length
-                }{' '}
-                / {requiredCount}
+              <p className="text-2xl font-bold">
+                {requiredCompleted} / {requiredCount}
               </p>
+              <div className="w-24 h-2 bg-white/20 rounded-full mt-2 overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all"
+                  style={{ width: `${(requiredCompleted / Math.max(requiredCount, 1)) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Track filter */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           {tracks.map((track) => (
-            <button
+            <Button
               key={track.id}
               onClick={() => setSelectedTrack(track.id)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap transition-colors ${
-                selectedTrack === track.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
+              variant={selectedTrack === track.id ? 'primary' : 'secondary'}
+              size="md"
+              className="whitespace-nowrap"
             >
               {track.name}
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Readings list */}
         <div className="space-y-4">
           {filteredReadings.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📚</div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Nenhuma leitura disponivel
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                As leituras serao adicionadas em breve
-              </p>
-            </div>
+            <Card variant="outlined" padding="lg" className="text-center">
+              <div className="py-8">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mx-auto mb-4">
+                  <span className="text-5xl">📚</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  Nenhuma leitura disponivel
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  As leituras serao adicionadas em breve
+                </p>
+              </div>
+            </Card>
           ) : (
-            filteredReadings.map((reading) => {
+            filteredReadings.map((reading, index) => {
               const readingProgress = progress[reading.id]
               const isConfirmed = readingProgress?.confirmed_read
+              const colors = trackColors[reading.track] || trackColors.backend
 
               return (
-                <div
+                <Card
                   key={reading.id}
-                  className={`bg-white dark:bg-gray-800 rounded-2xl border p-6 transition-all ${
-                    isConfirmed
-                      ? 'border-green-500 dark:border-green-500'
-                      : 'border-gray-200 dark:border-gray-700'
-                  }`}
+                  variant="elevated"
+                  padding="md"
+                  className={cn(
+                    'group hover:shadow-lg transition-all animate-fade-in',
+                    isConfirmed && 'ring-2 ring-green-500/50'
+                  )}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start gap-4">
                     <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                        isConfirmed
-                          ? 'bg-green-100 dark:bg-green-900/30'
-                          : 'bg-gray-100 dark:bg-gray-700'
-                      }`}
+                      className={cn(
+                        'w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 transition-transform group-hover:scale-110',
+                        isConfirmed ? 'bg-green-100 dark:bg-green-900/30' : colors.bg
+                      )}
                     >
-                      {isConfirmed
-                        ? '✅'
-                        : reading.article_type === 'paper'
-                          ? '📄'
-                          : reading.article_type === 'tutorial'
-                            ? '📖'
-                            : '📑'}
+                      {isConfirmed ? '✅' : articleTypeIcons[reading.article_type] || '📖'}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                           {reading.title}
                         </h3>
                         {reading.is_required && (
-                          <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">
+                          <Badge variant="warning" size="sm">
+                            <Star className="w-3 h-3" />
                             Obrigatorio
-                          </span>
+                          </Badge>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                         {reading.description}
                       </p>
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">
-                          ~{reading.estimated_time_minutes} min
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" size="sm">
+                          <Clock className="w-3 h-3" />~{reading.estimated_time_minutes} min
+                        </Badge>
+                        <Badge variant="outline" size="sm">
+                          <Calendar className="w-3 h-3" />
                           Semana {reading.week_number}
-                        </span>
+                        </Badge>
                         {reading.track !== 'all' && (
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs ${
-                              reading.track === 'backend'
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                : reading.track === 'frontend'
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                  : reading.track === 'ia'
-                                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                                    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            }`}
+                          <Badge
+                            variant={
+                              reading.difficulty === 'beginner'
+                                ? 'success'
+                                : reading.difficulty === 'intermediate'
+                                  ? 'warning'
+                                  : 'destructive'
+                            }
+                            size="sm"
                           >
-                            {reading.track}
-                          </span>
+                            {reading.difficulty === 'beginner'
+                              ? 'Iniciante'
+                              : reading.difficulty === 'intermediate'
+                                ? 'Intermediario'
+                                : 'Avancado'}
+                          </Badge>
                         )}
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-xs font-medium',
+                            colors.bg,
+                            colors.text
+                          )}
+                        >
+                          {reading.track}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <a
-                        href={reading.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium inline-flex items-center gap-2"
-                      >
-                        Abrir
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-4 h-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                          />
-                        </svg>
-                      </a>
+                    <div className="flex flex-col gap-2 flex-shrink-0">
+                      <Button asChild variant="secondary" size="sm">
+                        <a href={reading.url} target="_blank" rel="noopener noreferrer">
+                          Abrir
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </Button>
                       {!isConfirmed && (
-                        <button
+                        <Button
                           onClick={() => handleConfirmRead(reading)}
                           disabled={confirmingId === reading.id}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors text-sm font-medium disabled:opacity-50"
+                          variant="primary"
+                          size="sm"
                         >
-                          {confirmingId === reading.id ? 'Confirmando...' : 'Li este artigo'}
-                        </button>
+                          {confirmingId === reading.id ? (
+                            <>
+                              <div className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                              ...
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-3 h-3" />
+                              Li este artigo
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {isConfirmed && (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <Sparkles className="w-3 h-3 text-green-600 dark:text-green-400" />
+                          <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                            +{reading.is_required ? 20 : 10} XP
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
-                </div>
+                </Card>
               )
             })
           )}

@@ -1,11 +1,29 @@
+/**
+ * Academy Videos Page
+ *
+ * Video learning library with:
+ * - Category filtering
+ * - Progress tracking
+ * - XP rewards
+ *
+ * Author: Anderson Henrique da Silva
+ * Refactored: 2025-12-06 - Design System integration
+ */
+
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { toast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
+import { ArrowLeft, Play, Video, Check, Clock, Sparkles, Star, X, ExternalLink } from 'lucide-react'
 
-interface Video {
+interface VideoItem {
   id: string
   title: string
   description: string
@@ -47,7 +65,7 @@ const mockThumbnails = [
 ]
 
 // Placeholder videos based on the playlist document
-const placeholderVideos: Video[] = [
+const placeholderVideos: VideoItem[] = [
   {
     id: '1',
     title: 'Bem-vindo a Academy Cidadao.AI',
@@ -204,21 +222,38 @@ interface VideoProgress {
 export default function AcademyVideosPage() {
   const { user, isLoading, addXp } = useAcademyDemo()
 
-  const [videos] = useState<Video[]>(placeholderVideos)
-  const [progress, setProgress] = useState<Record<string, VideoProgress>>(() => {
-    if (typeof window === 'undefined') return {}
-    const saved = localStorage.getItem(VIDEO_PROGRESS_KEY)
-    return saved ? JSON.parse(saved) : {}
-  })
+  const [videos] = useState<VideoItem[]>(placeholderVideos)
+  const [progress, setProgress] = useState<Record<string, VideoProgress>>({})
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(VIDEO_PROGRESS_KEY)
+      if (saved) {
+        setProgress(JSON.parse(saved))
+      }
+    }
+  }, [])
+
+  // Handle modal close events
+  useEffect(() => {
+    const handleModalClose = () => {
+      setIsModalOpen(false)
+      setSelectedVideo(null)
+    }
+    window.addEventListener('modal-close', handleModalClose)
+    return () => window.removeEventListener('modal-close', handleModalClose)
+  }, [])
 
   const saveProgress = (newProgress: Record<string, VideoProgress>) => {
     setProgress(newProgress)
     localStorage.setItem(VIDEO_PROGRESS_KEY, JSON.stringify(newProgress))
   }
 
-  const markAsWatched = (video: Video) => {
+  const markAsWatched = (video: VideoItem) => {
     const newProgress = {
       ...progress,
       [video.id]: {
@@ -240,6 +275,11 @@ export default function AcademyVideosPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const handleVideoClick = (video: VideoItem) => {
+    setSelectedVideo(video)
+    setIsModalOpen(true)
+  }
+
   const filteredVideos =
     selectedCategory === 'all' ? videos : videos.filter((v) => v.category === selectedCategory)
 
@@ -248,265 +288,267 @@ export default function AcademyVideosPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando videos...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/pt/academy"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-                />
-              </svg>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex-1">
-              <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                Videos do Programa
-              </h1>
+              <div className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                  Videos do Programa
+                </h1>
+              </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {completedCount} de {videos.length} assistidos
               </p>
             </div>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <span className="text-sm text-green-700 dark:text-green-400">
-                {totalRequired} obrigatorios
-              </span>
-            </div>
+            <Badge variant="warning" size="default">
+              <Star className="w-3 h-3" />
+              {totalRequired} obrigatorios
+            </Badge>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Category filter */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
-            <button
+            <Button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-colors ${
-                selectedCategory === cat.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
+              variant={selectedCategory === cat.id ? 'primary' : 'secondary'}
+              size="md"
+              className="whitespace-nowrap"
             >
               <span>{cat.emoji}</span>
               <span>{cat.name}</span>
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Video grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVideos.map((video) => {
+          {filteredVideos.map((video, index) => {
             const videoProgress = progress[video.id]
             const isCompleted = videoProgress?.status === 'completed'
             const progressPercent = videoProgress?.progress_percentage || 0
 
             return (
-              <div
+              <Card
                 key={video.id}
-                onClick={() => setSelectedVideo(video)}
-                className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-all cursor-pointer group"
+                variant="elevated"
+                padding="none"
+                interactive
+                onClick={() => handleVideoClick(video)}
+                className={cn(
+                  'group overflow-hidden animate-fade-in',
+                  isCompleted && 'ring-2 ring-green-500/50'
+                )}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
-                  {video.thumbnail_url ? (
+                  {video.thumbnail_url && (
                     <img
                       src={video.thumbnail_url}
                       alt={video.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                  ) : null}
+                  )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
                     <div className="w-16 h-16 bg-white/90 dark:bg-gray-900/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-8 h-8 text-green-600"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                        />
-                      </svg>
+                      <Play className="w-8 h-8 text-green-600 ml-1" />
                     </div>
                   </div>
-                  {/* Duration */}
-                  <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 text-white text-xs rounded">
+
+                  {/* Duration badge */}
+                  <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 text-white text-xs rounded-lg flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
                     {formatDuration(video.duration_seconds)}
                   </div>
+
                   {/* Progress bar */}
                   {progressPercent > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-300 dark:bg-gray-600">
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-300/50 dark:bg-gray-600/50">
                       <div
-                        className="h-full bg-green-500"
+                        className="h-full bg-green-500 transition-all"
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
                   )}
+
                   {/* Completed badge */}
                   {isCompleted && (
-                    <div className="absolute top-2 right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="w-5 h-5 text-white"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m4.5 12.75 6 6 9-13.5"
-                        />
-                      </svg>
+                    <div className="absolute top-2 right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Check className="w-5 h-5 text-white" />
                     </div>
                   )}
+
                   {/* Required badge */}
                   {video.is_required && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-yellow-500 text-white text-xs font-medium rounded">
+                    <Badge variant="warning" size="sm" className="absolute top-2 left-2">
                       Obrigatorio
-                    </div>
+                    </Badge>
                   )}
                 </div>
 
                 {/* Info */}
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                     {video.title}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">
                     {video.description}
                   </p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge
+                      variant={
                         video.difficulty === 'beginner'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          ? 'success'
                           : video.difficulty === 'intermediate'
-                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                      }`}
+                            ? 'warning'
+                            : 'destructive'
+                      }
+                      size="sm"
                     >
                       {video.difficulty === 'beginner'
                         ? 'Iniciante'
                         : video.difficulty === 'intermediate'
                           ? 'Intermediario'
                           : 'Avancado'}
-                    </span>
+                    </Badge>
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {categories.find((c) => c.id === video.category)?.name}
                     </span>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
 
         {filteredVideos.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📺</div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Nenhum video nesta categoria
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">Os videos serao adicionados em breve</p>
-          </div>
+          <Card variant="outlined" padding="lg" className="text-center">
+            <div className="py-8">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mx-auto mb-4">
+                <span className="text-5xl">📺</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Nenhum video nesta categoria
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Os videos serao adicionados em breve
+              </p>
+            </div>
+          </Card>
         )}
       </main>
 
-      {/* Video modal placeholder */}
-      {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-4xl w-full overflow-hidden">
-            <div className="relative aspect-video bg-gray-900 flex items-center justify-center">
-              <div className="text-center text-white">
-                <div className="text-6xl mb-4">🎬</div>
-                <p className="text-lg">Video em breve</p>
-                <p className="text-sm text-gray-400 mt-2">{selectedVideo.title}</p>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {selectedVideo.title}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {selectedVideo.description}
-                  </p>
+      {/* Video modal */}
+      <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <ModalContent size="xl" className="bg-white dark:bg-gray-900">
+          {selectedVideo && (
+            <>
+              {/* Video player placeholder */}
+              <div className="relative aspect-video bg-gray-900 rounded-t-lg -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-5xl">🎬</span>
+                    </div>
+                    <p className="text-lg font-medium">Video em breve</p>
+                    <p className="text-sm text-gray-400 mt-2">{selectedVideo.title}</p>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setSelectedVideo(null)}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                  </svg>
-                </button>
               </div>
-              {/* Demo mode: mark as watched button */}
-              {!progress[selectedVideo.id]?.status && (
-                <button
-                  onClick={() => {
-                    markAsWatched(selectedVideo)
-                    setSelectedVideo(null)
-                  }}
-                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors"
-                >
-                  Marcar como assistido (+{selectedVideo.is_required ? 25 : 15} XP)
-                </button>
-              )}
-              {progress[selectedVideo.id]?.status === 'completed' && (
-                <div className="flex items-center justify-center gap-2 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                  Video ja assistido
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+
+              <div className="pt-6">
+                <ModalHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 pr-8">
+                      <ModalTitle className="text-xl">{selectedVideo.title}</ModalTitle>
+                      <p className="text-gray-600 dark:text-gray-400 mt-2">
+                        {selectedVideo.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4">
+                    <Badge
+                      variant={
+                        selectedVideo.difficulty === 'beginner'
+                          ? 'success'
+                          : selectedVideo.difficulty === 'intermediate'
+                            ? 'warning'
+                            : 'destructive'
+                      }
+                      size="sm"
+                    >
+                      {selectedVideo.difficulty === 'beginner'
+                        ? 'Iniciante'
+                        : selectedVideo.difficulty === 'intermediate'
+                          ? 'Intermediario'
+                          : 'Avancado'}
+                    </Badge>
+                    <Badge variant="outline" size="sm">
+                      <Clock className="w-3 h-3" />
+                      {formatDuration(selectedVideo.duration_seconds)}
+                    </Badge>
+                    {selectedVideo.is_required && (
+                      <Badge variant="warning" size="sm">
+                        <Star className="w-3 h-3" />
+                        Obrigatorio
+                      </Badge>
+                    )}
+                  </div>
+                </ModalHeader>
+
+                <ModalFooter className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  {!progress[selectedVideo.id]?.status ? (
+                    <Button
+                      onClick={() => {
+                        markAsWatched(selectedVideo)
+                        setIsModalOpen(false)
+                        setSelectedVideo(null)
+                      }}
+                      variant="primary"
+                      size="lg"
+                      className="w-full"
+                    >
+                      <Check className="w-5 h-5" />
+                      Marcar como assistido (+{selectedVideo.is_required ? 25 : 15} XP)
+                    </Button>
+                  ) : (
+                    <div className="w-full flex items-center justify-center gap-2 py-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl">
+                      <Check className="w-5 h-5" />
+                      Video ja assistido
+                    </div>
+                  )}
+                </ModalFooter>
+              </div>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   )
 }
