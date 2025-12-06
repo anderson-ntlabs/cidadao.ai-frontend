@@ -102,7 +102,7 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   email: 'demo@alunos.ifsuldeminas.edu.br',
   avatar: 'https://ui-avatars.com/api/?name=Estudante+Demo&background=16a34a&color=fff&size=128',
   matricula: '2024001234',
-  curso: 'Ciencia da Computacao',
+  curso: 'Ciência da Computação',
   periodo: 5,
   totalXp: 0,
   currentLevel: 1,

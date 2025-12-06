@@ -22,18 +22,18 @@ const agentTeachers = [
     name: 'Abaporu',
     role: 'Orquestrador',
     emoji: '🎭',
-    specialty: 'Coordenacao geral',
+    specialty: 'Coordenação geral',
   },
-  { id: 'zumbi', name: 'Zumbi', role: 'Detector', emoji: '🛡️', specialty: 'Seguranca e anomalias' },
-  { id: 'anita', name: 'Anita', role: 'Analista', emoji: '📊', specialty: 'Analise de dados' },
+  { id: 'zumbi', name: 'Zumbi', role: 'Detector', emoji: '🛡️', specialty: 'Segurança e anomalias' },
+  { id: 'anita', name: 'Anita', role: 'Analista', emoji: '📊', specialty: 'Análise de dados' },
   {
     id: 'tiradentes',
     name: 'Tiradentes',
     role: 'Reporter',
     emoji: '📜',
-    specialty: 'Documentacao',
+    specialty: 'Documentação',
   },
-  { id: 'drummond', name: 'Drummond', role: 'Comunicador', emoji: '✍️', specialty: 'Comunicacao' },
+  { id: 'drummond', name: 'Drummond', role: 'Comunicador', emoji: '✍️', specialty: 'Comunicação' },
   {
     id: 'machado',
     name: 'Machado',
@@ -151,10 +151,10 @@ export default function AcademyDashboardPage() {
         {/* Welcome section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Ola, {user.name.split(' ')[0]}! 👋
+            Olá, {user.name.split(' ')[0]}! 👋
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Pronto para mais uma sessao de aprendizado?
+            Pronto para mais uma sessão de aprendizado?
           </p>
         </div>
 
@@ -229,7 +229,7 @@ export default function AcademyDashboardPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {user.totalSessions}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Sessoes</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Sessões</p>
               </div>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function AcademyDashboardPage() {
           <div className="space-y-6">
             {/* Quick actions */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
-              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Acoes rapidas</h3>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4">Ações rápidas</h3>
               <div className="space-y-2">
                 <Link
                   href="/pt/academy/diario"
@@ -302,7 +302,7 @@ export default function AcademyDashboardPage() {
                 >
                   <span className="text-xl">📝</span>
                   <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
-                    Escrever no diario
+                    Escrever no diário
                   </span>
                 </Link>
                 <Link
@@ -311,7 +311,7 @@ export default function AcademyDashboardPage() {
                 >
                   <span className="text-xl">🎬</span>
                   <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
-                    Assistir videos
+                    Assistir vídeos
                   </span>
                 </Link>
                 <Link
@@ -320,7 +320,7 @@ export default function AcademyDashboardPage() {
                 >
                   <span className="text-xl">📚</span>
                   <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
-                    Leituras obrigatorias
+                    Leituras obrigatórias
                   </span>
                 </Link>
                 <Link
@@ -338,7 +338,7 @@ export default function AcademyDashboardPage() {
                 >
                   <span className="text-xl">🎓</span>
                   <span className="font-medium text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400">
-                    Certificado e Relatorio
+                    Certificado e Relatório
                   </span>
                 </button>
               </div>

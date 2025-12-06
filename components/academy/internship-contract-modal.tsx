@@ -299,8 +299,8 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Termo de Aceite - Estagio</h2>
-              <p className="text-green-100">Academia Cidadao.AI + IFSULDEMINAS/LabSoft</p>
+              <h2 className="text-2xl font-bold">Termo de Aceite - Estágio</h2>
+              <p className="text-green-100">Academia Cidadão.AI + IFSULDEMINAS/LabSoft</p>
             </div>
           </div>
         </div>
@@ -309,30 +309,30 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
         <div className="p-6 overflow-y-auto max-h-[50vh]">
           <div className="space-y-4 text-gray-700 dark:text-gray-300">
             <p className="font-medium text-lg">
-              Ola, <span className="text-green-600 dark:text-green-400">{user.name}</span>!
+              Olá, <span className="text-green-600 dark:text-green-400">{user.name}</span>!
             </p>
 
             <p>
-              Para iniciar sua participacao no programa de estagio da{' '}
-              <strong>Academia Cidadao.AI</strong>, e necessario aceitar os termos abaixo. Este
-              documento estabelece as condicoes para coleta de dados e geracao automatica do seu
-              relatorio de estagio.
+              Para iniciar sua participação no programa de estágio da{' '}
+              <strong>Academia Cidadão.AI</strong>, é necessário aceitar os termos abaixo. Este
+              documento estabelece as condições para coleta de dados e geração automática do seu
+              relatório de estágio.
             </p>
 
             {/* Legal basis */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
               <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
-                <span>⚖️</span> Fundamentacao Legal
+                <span>⚖️</span> Fundamentação Legal
               </h3>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                 <li>
-                  <strong>Lei 13.709/2018 (LGPD)</strong> - Lei Geral de Protecao de Dados
+                  <strong>Lei 13.709/2018 (LGPD)</strong> - Lei Geral de Proteção de Dados
                 </li>
                 <li>
-                  <strong>Lei 11.788/2008</strong> - Lei de Estagio
+                  <strong>Lei 11.788/2008</strong> - Lei de Estágio
                 </li>
                 <li>
-                  <strong>Art. 7o, IV da LGPD</strong> - Pesquisa por orgao de pesquisa
+                  <strong>Art. 7º, IV da LGPD</strong> - Pesquisa por órgão de pesquisa
                 </li>
               </ul>
             </div>
@@ -340,12 +340,12 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
             {/* Telemetry explanation */}
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
               <h3 className="font-bold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
-                <span>📊</span> Geracao Automatica de Relatorio
+                <span>📊</span> Geração Automática de Relatório
               </h3>
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                Seu <strong>relatorio de estagio sera gerado automaticamente</strong> com base nos
-                dados de telemetria coletados: tempo de estudo, interacoes com agentes de IA,
-                progresso nas atividades e metricas de engajamento (XP, badges).
+                Seu <strong>relatório de estágio será gerado automaticamente</strong> com base nos
+                dados de telemetria coletados: tempo de estudo, interações com agentes de IA,
+                progresso nas atividades e métricas de engajamento (XP, badges).
               </p>
             </div>
 
@@ -353,12 +353,12 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Dados coletados:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Nome, email institucional e matricula</li>
-                <li>Tempo de sessao e metricas de interacao</li>
-                <li>Progresso de aprendizado (videos, leituras, conversas)</li>
-                <li>Diario de aprendizado (reflexoes voluntarias)</li>
-                <li>Sistema de gamificacao (XP, niveis, badges)</li>
-                <li>IP e informacoes do navegador (para seguranca)</li>
+                <li>Nome, email institucional e matrícula</li>
+                <li>Tempo de sessão e métricas de interação</li>
+                <li>Progresso de aprendizado (vídeos, leituras, conversas)</li>
+                <li>Diário de aprendizado (reflexões voluntárias)</li>
+                <li>Sistema de gamificação (XP, níveis, badges)</li>
+                <li>IP e informações do navegador (para segurança)</li>
               </ul>
             </div>
 
@@ -367,15 +367,15 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Finalidades:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>
-                  <strong>Relatorio de estagio</strong> com carga horaria documentada
+                  <strong>Relatório de estágio</strong> com carga horária documentada
                 </li>
                 <li>
-                  <strong>Certificado de conclusao</strong> com metricas de desempenho
+                  <strong>Certificado de conclusão</strong> com métricas de desempenho
                 </li>
                 <li>
-                  <strong>Pesquisa academica</strong> sobre educacao em IA (dados anonimizados)
+                  <strong>Pesquisa acadêmica</strong> sobre educação em IA (dados anonimizados)
                 </li>
-                <li>Melhoria continua da plataforma educacional</li>
+                <li>Melhoria contínua da plataforma educacional</li>
               </ul>
             </div>
 
@@ -385,7 +385,7 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
                 Seus direitos (Art. 18 da LGPD):
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300">
-                Voce pode solicitar <strong>acesso, correcao, anonimizacao ou exclusao</strong> de
+                Você pode solicitar <strong>acesso, correção, anonimização ou exclusão</strong> de
                 seus dados a qualquer momento. Contato: <strong>labsoft@ifsuldeminas.edu.br</strong>
               </p>
             </div>
@@ -401,8 +401,8 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Autorizo a coleta de telemetria</strong> (tempo de estudo, interacoes,
-                progresso) para documentacao da carga horaria de estagio.
+                <strong>Autorizo a coleta de telemetria</strong> (tempo de estudo, interações,
+                progresso) para documentação da carga horária de estágio.
               </span>
             </label>
 
@@ -429,8 +429,8 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Concordo com a geracao automatica do relatorio de estagio</strong> baseado
-                nos dados de telemetria e metricas de engajamento coletados.
+                <strong>Concordo com a geração automática do relatório de estágio</strong> baseado
+                nos dados de telemetria e métricas de engajamento coletados.
               </span>
             </label>
 
@@ -443,7 +443,7 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                 <strong>Estou ciente dos meus direitos</strong> como titular de dados pessoais
-                conforme Art. 18 da LGPD e sei como exerce-los.
+                conforme Art. 18 da LGPD e sei como exercê-los.
               </span>
             </label>
 
@@ -457,7 +457,7 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Aceito participar do programa de estagio</strong> da Academia Cidadao.AI em
+                <strong>Aceito participar do programa de estágio</strong> da Academia Cidadão.AI em
                 parceria com IFSULDEMINAS/LabSoft e Neural Thinker AI Engineering.
               </span>
             </label>
@@ -469,10 +469,10 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="text-xs text-gray-500 dark:text-gray-400">
               <p>
-                Versao do termo: {CONTRACT_VERSION} | Data: {currentDate}
+                Versão do termo: {CONTRACT_VERSION} | Data: {currentDate}
               </p>
               <p className="text-green-600 dark:text-green-400 font-medium mt-1">
-                Um PDF do contrato sera baixado automaticamente.
+                Um PDF do contrato será baixado automaticamente.
               </p>
             </div>
             <button

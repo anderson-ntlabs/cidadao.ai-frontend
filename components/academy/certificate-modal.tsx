@@ -316,8 +316,8 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Certificado de Conclusao</h2>
-              <p className="text-green-100">Relatorio de Telemetria do Estagio</p>
+              <h2 className="text-2xl font-bold">Certificado de Conclusão</h2>
+              <p className="text-green-100">Relatório de Telemetria do Estágio</p>
             </div>
           </div>
         </div>
@@ -344,12 +344,12 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
           {/* Telemetry bars */}
           <div className="space-y-4">
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">Metricas Coletadas</h3>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100">Métricas Coletadas</h3>
 
             {/* Videos */}
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Videos Assistidos</span>
+                <span className="text-gray-600 dark:text-gray-400">Vídeos Assistidos</span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {telemetry.videosCompleted} / {telemetry.totalVideos}
                 </span>
@@ -367,7 +367,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
             {/* Readings */}
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Leituras Concluidas</span>
+                <span className="text-gray-600 dark:text-gray-400">Leituras Concluídas</span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {telemetry.readingsCompleted} / {telemetry.totalReadings}
                 </span>
@@ -385,7 +385,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
             {/* Diary entries */}
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Entradas no Diario</span>
+                <span className="text-gray-600 dark:text-gray-400">Entradas no Diário</span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {telemetry.diaryEntries}
                 </span>
@@ -403,7 +403,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
             {/* Sessions */}
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600 dark:text-gray-400">Sessoes de Estudo</span>
+                <span className="text-gray-600 dark:text-gray-400">Sessões de Estudo</span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {telemetry.totalSessions}
                 </span>
@@ -467,7 +467,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
               </h4>
               <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
                 <li className={telemetry.videosCompleted >= 3 ? 'line-through opacity-50' : ''}>
-                  - Assistir pelo menos 3 videos
+                  - Assistir pelo menos 3 vídeos
                 </li>
                 <li className={telemetry.readingsCompleted >= 2 ? 'line-through opacity-50' : ''}>
                   - Completar pelo menos 2 leituras
