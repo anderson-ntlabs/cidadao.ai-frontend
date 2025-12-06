@@ -21,6 +21,7 @@ import {
   Sparkles,
   ScrollText,
 } from 'lucide-react'
+import { trackCertificateDownload, trackReportDownload } from '@/lib/analytics/academy-tracker'
 
 interface CertificateModalProps {
   isOpen: boolean
@@ -515,6 +516,10 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     try {
       const { pdf, certId } = generateCertificatePDF()
       pdf.save(`certificado-academy-${certId}.pdf`)
+
+      // Track certificate download
+      const totalHours = Math.floor(user.totalTimeMinutes / 60)
+      trackCertificateDownload(totalHours, user.currentLevel)
     } catch (error) {
       console.error('Failed to generate certificate:', error)
     } finally {
@@ -527,6 +532,10 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     try {
       const { pdf, reportId } = generateReportPDF()
       pdf.save(`relatorio-estagio-${reportId}.pdf`)
+
+      // Track report download
+      const totalHours = Math.floor(user.totalTimeMinutes / 60)
+      trackReportDownload(totalHours, user.totalXp)
     } catch (error) {
       console.error('Failed to generate report:', error)
     } finally {

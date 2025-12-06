@@ -12,12 +12,21 @@
 
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { useAcademyAuth } from '@/hooks/use-academy-auth'
 import { AcademyHeader, AcademySidebar } from '@/components/academy'
+import {
+  trackAgendaView,
+  trackAgendaEventCreated,
+  trackAgendaEventCompleted,
+  trackAgendaEventDeleted,
+  trackGoogleCalendarExport,
+  trackAgendaViewChange,
+  type AgendaEventType,
+} from '@/lib/analytics/academy-tracker'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -154,6 +163,15 @@ function AcademyAgendaContent() {
     xpReward: 10,
   })
 
+  // Track page view on mount
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (!hasTrackedView.current) {
+      trackAgendaView()
+      hasTrackedView.current = true
+    }
+  }, [])
+
   // Load plugins on client side
   useEffect(() => {
     const loadPlugins = async () => {
@@ -266,6 +284,18 @@ function AcademyAgendaContent() {
       xpReward: newEvent.xpReward,
     }
 
+    // Calculate duration in minutes
+    const startParts = newEvent.startTime.split(':').map(Number)
+    const endParts = newEvent.endTime.split(':').map(Number)
+    const durationMinutes = endParts[0] * 60 + endParts[1] - (startParts[0] * 60 + startParts[1])
+
+    // Track event creation
+    trackAgendaEventCreated({
+      eventType: newEvent.type as AgendaEventType,
+      eventTitle: newEvent.title,
+      duration: durationMinutes > 0 ? durationMinutes : undefined,
+    })
+
     saveEvents([...events, event])
     setShowCreateModal(false)
     setNewEvent({
@@ -280,6 +310,13 @@ function AcademyAgendaContent() {
 
   // Delete event
   const handleDeleteEvent = (eventId: string) => {
+    const event = events.find((e) => e.id === eventId)
+    if (event) {
+      trackAgendaEventDeleted({
+        eventType: event.type as AgendaEventType,
+        eventTitle: event.title,
+      })
+    }
     saveEvents(events.filter((e) => e.id !== eventId))
     setShowEventModal(false)
     setSelectedEvent(null)
@@ -287,14 +324,32 @@ function AcademyAgendaContent() {
 
   // Mark event as completed
   const handleCompleteEvent = (eventId: string) => {
+    const event = events.find((e) => e.id === eventId)
     const updated = events.map((e) => (e.id === eventId ? { ...e, completed: true } : e))
     saveEvents(updated)
     setShowEventModal(false)
     setSelectedEvent(null)
-    // Award XP (in real implementation, call API)
-    const event = events.find((e) => e.id === eventId)
-    if (event?.xpReward) {
-      demoAuth.addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
+
+    // Award XP and track completion
+    if (event) {
+      // Calculate duration if available
+      let durationMinutes: number | undefined
+      if (event.start && event.end) {
+        const startTime = new Date(event.start).getTime()
+        const endTime = new Date(event.end).getTime()
+        durationMinutes = Math.round((endTime - startTime) / 60000)
+      }
+
+      trackAgendaEventCompleted({
+        eventType: event.type as AgendaEventType,
+        eventTitle: event.title,
+        duration: durationMinutes,
+        xpEarned: event.xpReward,
+      })
+
+      if (event.xpReward) {
+        demoAuth.addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
+      }
     }
   }
 
@@ -551,7 +606,10 @@ function AcademyAgendaContent() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => window.open(generateGoogleCalendarLink(selectedEvent), '_blank')}
+                  onClick={() => {
+                    trackGoogleCalendarExport(1)
+                    window.open(generateGoogleCalendarLink(selectedEvent), '_blank')
+                  }}
                 >
                   <ExternalLink className="w-4 h-4" />
                   Google Calendar
