@@ -68,7 +68,7 @@ export function StatCard({
   return (
     <Card
       variant="elevated"
-      padding="md"
+      padding="lg"
       className={cn(
         'relative overflow-hidden group',
         'hover:shadow-xl transition-all duration-300',
@@ -78,44 +78,46 @@ export function StatCard({
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-gray-100/50 to-transparent dark:from-gray-800/50 rounded-bl-[100px] -z-0" />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div
-              className={cn(
-                'w-14 h-14 rounded-2xl flex items-center justify-center',
-                'bg-gradient-to-br shadow-lg',
-                'group-hover:scale-110 transition-transform duration-300',
-                iconColorClasses[iconColor]
-              )}
-            >
-              <Icon className="w-7 h-7 text-white" />
-            </div>
-
-            <div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-            </div>
+      <div className="relative z-10 flex flex-col items-center text-center">
+        {/* Trend badge - top right */}
+        {trend && (
+          <div
+            className={cn(
+              'absolute top-0 right-0 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
+              trend.isPositive
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            )}
+          >
+            <span>{trend.isPositive ? '↑' : '↓'}</span>
+            <span>{Math.abs(trend.value)}%</span>
           </div>
+        )}
 
-          {trend && (
-            <div
-              className={cn(
-                'flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
-                trend.isPositive
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-              )}
-            >
-              <span>{trend.isPositive ? '↑' : '↓'}</span>
-              <span>{Math.abs(trend.value)}%</span>
-            </div>
+        {/* Icon */}
+        <div
+          className={cn(
+            'w-14 h-14 rounded-2xl flex items-center justify-center mb-3',
+            'bg-gradient-to-br shadow-lg',
+            'group-hover:scale-110 transition-transform duration-300',
+            iconColorClasses[iconColor]
           )}
+        >
+          <Icon className="w-7 h-7 text-white" />
         </div>
+
+        {/* Value and Label */}
+        <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+
+        {/* Sublabel */}
+        {sublabel && !progress && (
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{sublabel}</p>
+        )}
 
         {/* Progress bar */}
         {progress && (
-          <div className="mt-4">
+          <div className="mt-4 w-full">
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
               <span>{progress.current.toLocaleString()}</span>
               <span>{progress.max.toLocaleString()}</span>
@@ -130,15 +132,9 @@ export function StatCard({
               />
             </div>
             {progress.label && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 text-center">
-                {progress.label}
-              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">{progress.label}</p>
             )}
           </div>
-        )}
-
-        {sublabel && !progress && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{sublabel}</p>
         )}
       </div>
 
