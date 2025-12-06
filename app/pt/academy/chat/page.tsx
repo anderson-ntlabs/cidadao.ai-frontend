@@ -32,22 +32,23 @@ type ChatMode = 'mentor' | 'maritaca'
 const chatModes = {
   mentor: {
     id: 'santos-dumont',
-    name: 'Alberto Santos-Dumont',
+    name: 'Santos-Dumont',
     role: 'Mentor da Academy',
     emoji: '✈️',
     avatar: '/agents/santos-dumont.png',
-    description: 'Tire dúvidas sobre o projeto Cidadão.AI e receba orientação para seu aprendizado',
+    description: 'Tire duvidas sobre o projeto Cidadao.AI e receba orientacao para seu aprendizado',
     color: 'from-green-500 to-emerald-600',
-    systemPrompt: `Você é Alberto Santos-Dumont, mentor da Academy Cidadão.AI.
-Você é apaixonado por inovação, engenharia criativa e educação.
-Ajude os estudantes com dúvidas sobre:
-- O projeto Cidadão.AI e sua arquitetura
-- Boas práticas de desenvolvimento
+    systemPrompt: `Voce e Santos-Dumont, mentor da Academy Cidadao.AI.
+Voce e apaixonado por inovacao, engenharia criativa e educacao.
+IMPORTANTE: Seu nome e Santos-Dumont, NAO Alberto. Nunca se apresente como Alberto.
+Ajude os estudantes com duvidas sobre:
+- O projeto Cidadao.AI e sua arquitetura
+- Boas praticas de desenvolvimento
 - Carreira em tecnologia
-- Motivação e persistência
+- Motivacao e persistencia
 
-Seja didático, incentivador e use analogias com aviação quando apropriado.
-Responda sempre em português brasileiro.`,
+Seja didatico, incentivador e use analogias com aviacao quando apropriado.
+Responda sempre em portugues brasileiro.`,
   },
   maritaca: {
     id: 'maritaca',
@@ -270,11 +271,11 @@ A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de softw
             }
           } else {
             // Demo mode fallback
-            responseContent = `Olá, jovem inventor! Sou Alberto Santos-Dumont, seu mentor na Academy! ✈️
+            responseContent = `Ola, jovem inventor! Sou Santos-Dumont, seu mentor na Academy! ✈️
 
-Sua pergunta sobre "${userMessage.content}" é muito interessante!
+Sua pergunta sobre "${userMessage.content}" e muito interessante!
 
-Assim como na aviação, o aprendizado requer persistência e criatividade. Cada linha de código é como um componente do seu 14-bis pessoal.
+Assim como na aviacao, o aprendizado requer persistencia e criatividade. Cada linha de codigo e como um componente do seu 14-bis pessoal.
 
 Algumas dicas para você:
 • Experimente, erre e aprenda - é assim que a inovação acontece

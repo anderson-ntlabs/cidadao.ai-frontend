@@ -165,6 +165,7 @@ export function AcademyHeader({
                   alt={user.name}
                   width={40}
                   height={40}
+                  unoptimized={user.avatar.includes('ui-avatars.com')}
                   className="rounded-full ring-2 ring-green-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900"
                 />
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md">
