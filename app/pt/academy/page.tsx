@@ -182,7 +182,7 @@ function AcademyDashboardContent() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <AcademyHeader user={user} onReset={handleLogout} />
+      <AcademyHeader user={user} onLogout={handleLogout} isDemoMode={isDemoMode} />
 
       <div className="flex flex-1">
         {/* Sidebar */}

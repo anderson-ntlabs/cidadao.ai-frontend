@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import {
   GraduationCap,
   RotateCcw,
+  LogOut,
   ChevronRight,
   Sparkles,
   Home,
@@ -41,7 +42,8 @@ interface AcademyHeaderProps {
     currentLevel: number
     currentRank: string
   }
-  onReset?: () => void
+  onLogout?: () => void
+  isDemoMode?: boolean
   className?: string
 }
 
@@ -65,7 +67,12 @@ const rankColors: Record<string, string> = {
   arquiteto: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 }
 
-export function AcademyHeader({ user, onReset, className }: AcademyHeaderProps) {
+export function AcademyHeader({
+  user,
+  onLogout,
+  isDemoMode = false,
+  className,
+}: AcademyHeaderProps) {
   const pathname = usePathname()
 
   // Generate breadcrumb from current path
@@ -165,32 +172,34 @@ export function AcademyHeader({ user, onReset, className }: AcademyHeaderProps) 
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* Reset Button */}
-            {onReset && (
+            {/* Logout/Reset Button */}
+            {onLogout && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onReset}
+                onClick={onLogout}
                 className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                title="Resetar Demo"
+                title={isDemoMode ? 'Resetar Demo' : 'Sair'}
               >
-                <RotateCcw className="w-4 h-4" />
+                {isDemoMode ? <RotateCcw className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Demo Banner */}
-      <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
-          <span className="animate-pulse">🎮</span>
-          <span className="font-medium">Modo Demo</span>
-          <span className="hidden sm:inline text-white/80">
-            — Explore a Academy sem precisar fazer login
-          </span>
+      {/* Demo Banner - only show in demo mode */}
+      {isDemoMode && (
+        <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white py-1.5 px-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
+            <span className="animate-pulse">🎮</span>
+            <span className="font-medium">Modo Demo</span>
+            <span className="hidden sm:inline text-white/80">
+              — Explore a Academy sem precisar fazer login
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   )
 }

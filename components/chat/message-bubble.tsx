@@ -28,6 +28,8 @@ export interface MessageBubbleProps {
   agentName?: string
   agentRole?: string
   agentId?: string
+  userAvatar?: string
+  userName?: string
   isLatest?: boolean
   isLoading?: boolean
   isStreaming?: boolean
@@ -46,6 +48,8 @@ export function MessageBubble({
   agentName,
   agentRole,
   agentId,
+  userAvatar,
+  userName,
   isLatest = false,
   isLoading = false,
   isStreaming = false,
@@ -127,34 +131,52 @@ export function MessageBubble({
     )
   }
 
-  // User message - with bubble
+  // User message - with bubble and avatar
   if (role === 'user') {
     return (
-      <div className="group relative">
-        <div className="rounded-2xl px-4 py-3 bg-gradient-green-blue text-white shadow-md">
-          <p className="whitespace-pre-wrap text-sm">{content}</p>
+      <div className="group relative flex items-start gap-3 justify-end">
+        {/* Message Bubble */}
+        <div className="flex flex-col items-end max-w-[80%]">
+          {/* User name */}
+          {userName && (
+            <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 mr-1">
+              {userName.split(' ')[0]}
+            </span>
+          )}
+          <div className="rounded-2xl px-4 py-3 bg-gradient-green-blue text-white shadow-md">
+            <p className="whitespace-pre-wrap text-sm">{content}</p>
+          </div>
+
+          {/* Quick Actions */}
+          <div
+            className={cn(
+              'flex items-center gap-1 mt-1 transition-all duration-200',
+              'opacity-0 translate-y-1 pointer-events-none',
+              'group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
+            )}
+          >
+            <button
+              onClick={handleCopy}
+              className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm"
+              title="Copiar"
+            >
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-green-600" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div
-          className={cn(
-            'absolute -bottom-6 right-0 flex items-center gap-1 transition-all duration-200',
-            'opacity-0 translate-y-1 pointer-events-none',
-            'group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'
-          )}
-        >
-          <button
-            onClick={handleCopy}
-            className="p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-all shadow-sm"
-            title="Copiar"
-          >
-            {copied ? (
-              <Check className="w-3.5 h-3.5 text-green-600" />
-            ) : (
-              <Copy className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
-            )}
-          </button>
-        </div>
+        {/* User Avatar */}
+        {userAvatar && (
+          <img
+            src={userAvatar}
+            alt={userName || 'Você'}
+            className="w-8 h-8 rounded-full ring-2 ring-green-500/50 flex-shrink-0"
+          />
+        )}
       </div>
     )
   }
