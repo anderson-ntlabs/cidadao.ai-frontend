@@ -350,10 +350,10 @@ function AcademyDashboardContent() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <QuickActionCard
-                      icon="📝"
-                      label="Escrever no diario"
-                      description="Registre seu aprendizado"
-                      href={`/pt/academy/diario${isDemoMode ? '?demo=true' : ''}`}
+                      icon="🧭"
+                      label="Minhas Trilhas"
+                      description="Gerencie suas trilhas"
+                      href={`/pt/academy/trilhas${isDemoMode ? '?demo=true' : ''}`}
                     />
                     <QuickActionCard
                       icon={Video}

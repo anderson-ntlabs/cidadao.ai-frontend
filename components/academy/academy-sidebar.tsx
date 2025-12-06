@@ -19,7 +19,6 @@ import { cn } from '@/lib/utils'
 import {
   Home,
   MessageSquare,
-  BookOpen,
   Video,
   Trophy,
   FileText,
@@ -28,6 +27,7 @@ import {
   Clock,
   Target,
   Calendar,
+  Compass,
 } from 'lucide-react'
 
 interface NavItem {
@@ -48,9 +48,9 @@ interface AcademySidebarProps {
 
 const navItems: NavItem[] = [
   { href: '/pt/academy', label: 'Dashboard', icon: Home },
+  { href: '/pt/academy/trilhas', label: 'Trilhas', icon: Compass },
   { href: '/pt/academy/chat', label: 'Chat com Mentor', icon: MessageSquare },
   { href: '/pt/academy/agenda', label: 'Agenda', icon: Calendar },
-  { href: '/pt/academy/diario', label: 'Diario de Bordo', icon: BookOpen },
   { href: '/pt/academy/videos', label: 'Videos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
   { href: '/pt/academy/ranking', label: 'Ranking', icon: Trophy },
