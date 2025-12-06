@@ -32,6 +32,7 @@ import {
   GraduationCap,
   Calendar,
 } from 'lucide-react'
+import { trackReadingCompleted } from '@/lib/analytics/academy-tracker'
 
 interface Reading {
   id: string
@@ -233,6 +234,9 @@ export default function AcademyReadingsPage() {
 
       const xpAmount = reading.is_required ? 20 : 10
       addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
+
+      // Track reading completion in PostHog
+      trackReadingCompleted(reading.id, reading.title)
 
       toast.success('Leitura confirmada!', `+${xpAmount} XP`)
       setConfirmingId(null)

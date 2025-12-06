@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
 import { ArrowLeft, Play, Video, Check, Clock, Sparkles, Star, X, ExternalLink } from 'lucide-react'
+import { trackVideoCompleted } from '@/lib/analytics/academy-tracker'
 
 interface VideoItem {
   id: string
@@ -331,6 +332,9 @@ export default function AcademyVideosPage() {
     saveProgress(newProgress)
     addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
     toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+
+    // Track video completion in PostHog
+    trackVideoCompleted(video.id, video.title, video.duration_seconds)
   }
 
   const formatDuration = (seconds: number) => {

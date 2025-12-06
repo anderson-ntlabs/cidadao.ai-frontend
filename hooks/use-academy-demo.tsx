@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react'
 import { createLogger } from '@/lib/logger'
+import { trackBadgeEarned } from '@/lib/analytics/academy-tracker'
 
 const logger = createLogger('AcademyDemo')
 
@@ -520,6 +521,9 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       // Award bonus XP for earning badge
       addXp(50, 'badge', 'Badge Japaguri conquistado!')
 
+      // Track badge in PostHog
+      trackBadgeEarned('japaguri', 'Japaguri')
+
       logger.info('Japaguri badge awarded', { criteria: japaguriBadge.criteria })
     }
 
@@ -538,6 +542,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       newBadges.push(pioneiroBadge)
       badgesAwarded = true
       addXp(25, 'badge', 'Badge Pioneiro conquistado!')
+      trackBadgeEarned('pioneiro', 'Pioneiro')
       logger.info('Pioneiro badge awarded')
     }
 
@@ -557,6 +562,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       newBadges.push(exploradorBadge)
       badgesAwarded = true
       addXp(30, 'badge', 'Badge Explorador conquistado!')
+      trackBadgeEarned('explorador', 'Explorador')
       logger.info('Explorador badge awarded')
     }
 
@@ -581,6 +587,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       newBadges.push(dedicadoBadge)
       badgesAwarded = true
       addXp(75, 'badge', 'Badge Dedicado conquistado!')
+      trackBadgeEarned('dedicado', 'Dedicado')
       logger.info('Dedicado badge awarded', { criteria: dedicadoBadge.criteria })
     }
 

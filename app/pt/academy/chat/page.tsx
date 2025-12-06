@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, Send, Sparkles, MessageSquare, Zap, Plane } from 'lucide-react'
+import { trackMentorChat, trackStudySession } from '@/lib/analytics/academy-tracker'
 
 /**
  * Academy Chat Page - Simplified
@@ -108,6 +109,16 @@ function ChatContent() {
   const handleModeChange = (mode: ChatMode) => {
     if (currentSession && messageCount > 0) {
       endSession(messageCount, [chatModes[chatMode].id])
+
+      // Track study session completion in PostHog
+      const sessionDuration = Math.floor(
+        (Date.now() - new Date(currentSession.startedAt).getTime()) / 60000
+      )
+      trackStudySession({
+        duration: sessionDuration,
+        activities: ['chat', chatModes[chatMode].id],
+        xpEarned: Math.floor(messageCount / 5) * 5,
+      })
     }
     setChatMode(mode)
     setMessages([])
@@ -293,6 +304,9 @@ Continue voando alto! 🛫`
       if ((messageCount + 1) % 5 === 0) {
         addXp(5, 'conversation', `Conversa com ${currentMode.name}`)
       }
+
+      // Track chat interaction in PostHog
+      trackMentorChat(currentMode.id, messageCount + 1)
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage: Message = {

@@ -274,3 +274,28 @@ export function trackMentorChat(agentId: string, messageCount: number) {
     message_count: messageCount,
   })
 }
+
+/**
+ * Track track enrollment
+ */
+export function trackTrackEnrollment(trackId: string, trackName: string) {
+  trackEvent('academy_track_enrolled', {
+    component: 'tracks',
+    action: 'enroll',
+    track_id: trackId,
+    track_name: trackName,
+  })
+}
+
+/**
+ * Track track completion
+ */
+export function trackTrackCompleted(trackId: string, trackName: string, totalXp: number) {
+  trackEvent('academy_track_completed', {
+    component: 'tracks',
+    action: 'complete',
+    track_id: trackId,
+    track_name: trackName,
+    total_xp: totalXp,
+  })
+}

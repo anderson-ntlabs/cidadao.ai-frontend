@@ -23,6 +23,7 @@ import {
   GraduationCap,
   Plus,
 } from 'lucide-react'
+import { trackTrackEnrollment } from '@/lib/analytics/academy-tracker'
 
 /**
  * Academy Trilhas (Tracks) Page
@@ -127,6 +128,12 @@ export default function AcademyTrilhasPage() {
   })
 
   const handleStartTrack = (trackId: AcademyTrack) => {
+    // Track enrollment in PostHog
+    const trackInfo = TRACKS_INFO.find((t) => t.id === trackId)
+    if (trackInfo) {
+      trackTrackEnrollment(trackId, trackInfo.name)
+    }
+
     // Navigate to onboarding for this specific track
     router.push(`/pt/academy/onboarding?track=${trackId}`)
   }
