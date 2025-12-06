@@ -48,31 +48,19 @@ const categories = [
   { id: 'agents', name: 'Agentes', emoji: '🎭' },
 ]
 
-// Mock thumbnails with cute cat and dog gifs
-const mockThumbnails = [
-  '/academy/videos/cat-typing.gif',
-  '/academy/videos/dog-glasses.gif',
-  '/academy/videos/cat-coffee.gif',
-  '/academy/videos/dog-coding.gif',
-  '/academy/videos/cat-hacker.gif',
-  '/academy/videos/cat-computer.gif',
-  '/academy/videos/dog-work.gif',
-  '/academy/videos/cat-focus.gif',
-  '/academy/videos/dog-smart.gif',
-  '/academy/videos/cat-study.gif',
-  '/academy/videos/dog-typing.gif',
-  '/academy/videos/cat-working.gif',
-]
+// YouTube thumbnail helper
+const ytThumb = (videoId: string) => `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
 
-// Placeholder videos based on the playlist document
+// Real YouTube videos - curated educational content
 const placeholderVideos: VideoItem[] = [
+  // Onboarding - Required videos
   {
     id: '1',
-    title: 'Bem-vindo à Academy Cidadão.AI',
-    description: 'Introdução ao programa de estágio',
-    url: '',
-    thumbnail_url: mockThumbnails[0],
-    duration_seconds: 300,
+    title: 'O que é Inteligência Artificial?',
+    description: 'Introdução aos conceitos fundamentais de IA - curso completo para iniciantes',
+    url: 'https://www.youtube.com/watch?v=Lj2YjLW0OGI',
+    thumbnail_url: ytThumb('Lj2YjLW0OGI'),
+    duration_seconds: 1080,
     category: 'onboarding',
     track: 'all',
     difficulty: 'beginner',
@@ -82,11 +70,11 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '2',
-    title: 'Conhecendo o LabSoft e a Parceria',
-    description: 'História e objetivos da parceria',
-    url: '',
-    thumbnail_url: mockThumbnails[1],
-    duration_seconds: 420,
+    title: 'Git e GitHub para Iniciantes',
+    description: 'Aprenda controle de versão do zero - essencial para contribuir no projeto',
+    url: 'https://www.youtube.com/watch?v=UBAX-13g8OM',
+    thumbnail_url: ytThumb('UBAX-13g8OM'),
+    duration_seconds: 2700,
     category: 'onboarding',
     track: 'all',
     difficulty: 'beginner',
@@ -96,11 +84,11 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '3',
-    title: 'Como Funciona a Gamificação',
-    description: 'XP, badges, ranking e recompensas',
-    url: '',
-    thumbnail_url: mockThumbnails[2],
-    duration_seconds: 360,
+    title: 'Python para Iniciantes',
+    description: 'Curso completo de Python - a linguagem base do nosso backend',
+    url: 'https://www.youtube.com/watch?v=_uQrJ0TkZlc',
+    thumbnail_url: ytThumb('_uQrJ0TkZlc'),
+    duration_seconds: 21600,
     category: 'onboarding',
     track: 'all',
     difficulty: 'beginner',
@@ -108,13 +96,14 @@ const placeholderVideos: VideoItem[] = [
     agent_name: '',
     is_required: true,
   },
+  // Backend
   {
     id: '4',
-    title: 'FastAPI - Fundamentos',
-    description: 'Introdução ao framework FastAPI',
-    url: '',
-    thumbnail_url: mockThumbnails[3],
-    duration_seconds: 600,
+    title: 'FastAPI - Curso Completo',
+    description: 'Aprenda FastAPI do zero ao deploy - o framework do Cidadão.AI',
+    url: 'https://www.youtube.com/watch?v=0sOvCWFmrtA',
+    thumbnail_url: ytThumb('0sOvCWFmrtA'),
+    duration_seconds: 18000,
     category: 'backend',
     track: 'backend',
     difficulty: 'beginner',
@@ -124,11 +113,11 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '5',
-    title: 'Arquitetura Multi-Agente',
-    description: 'Como funciona o sistema de agentes',
-    url: '',
-    thumbnail_url: mockThumbnails[4],
-    duration_seconds: 540,
+    title: 'REST API Design - Melhores Práticas',
+    description: 'Como projetar APIs profissionais e escaláveis',
+    url: 'https://www.youtube.com/watch?v=7YcW25PHnAA',
+    thumbnail_url: ytThumb('7YcW25PHnAA'),
+    duration_seconds: 1200,
     category: 'backend',
     track: 'backend',
     difficulty: 'intermediate',
@@ -136,13 +125,14 @@ const placeholderVideos: VideoItem[] = [
     agent_name: '',
     is_required: false,
   },
+  // Frontend
   {
     id: '6',
-    title: 'Next.js 15 - App Router',
-    description: 'Novo sistema de rotas do Next.js',
-    url: '',
-    thumbnail_url: mockThumbnails[5],
-    duration_seconds: 480,
+    title: 'Next.js 14 - Curso Completo',
+    description: 'App Router, Server Components e tudo sobre o Next.js moderno',
+    url: 'https://www.youtube.com/watch?v=Zq5fmkzDdkk',
+    thumbnail_url: ytThumb('Zq5fmkzDdkk'),
+    duration_seconds: 28800,
     category: 'frontend',
     track: 'frontend',
     difficulty: 'beginner',
@@ -152,11 +142,11 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '7',
-    title: 'Tailwind CSS na Prática',
-    description: 'Estilização com Tailwind',
-    url: '',
-    thumbnail_url: mockThumbnails[6],
-    duration_seconds: 420,
+    title: 'Tailwind CSS - Do Zero ao Avançado',
+    description: 'Domine o framework CSS mais popular da atualidade',
+    url: 'https://www.youtube.com/watch?v=ft30zcMlFao',
+    thumbnail_url: ytThumb('ft30zcMlFao'),
+    duration_seconds: 12600,
     category: 'frontend',
     track: 'frontend',
     difficulty: 'beginner',
@@ -166,11 +156,26 @@ const placeholderVideos: VideoItem[] = [
   },
   {
     id: '8',
-    title: 'LangChain Básico',
-    description: 'Introdução ao LangChain',
-    url: '',
-    thumbnail_url: mockThumbnails[7],
-    duration_seconds: 600,
+    title: 'TypeScript para Iniciantes',
+    description: 'Aprenda TypeScript e escreva código mais seguro',
+    url: 'https://www.youtube.com/watch?v=BwuLxPH8IDs',
+    thumbnail_url: ytThumb('BwuLxPH8IDs'),
+    duration_seconds: 3600,
+    category: 'frontend',
+    track: 'frontend',
+    difficulty: 'beginner',
+    order_index: 3,
+    agent_name: '',
+    is_required: false,
+  },
+  // IA/ML
+  {
+    id: '9',
+    title: 'LangChain - Criando Agentes de IA',
+    description: 'Como criar agentes inteligentes com LangChain e Python',
+    url: 'https://www.youtube.com/watch?v=aywZrzNaKjs',
+    thumbnail_url: ytThumb('aywZrzNaKjs'),
+    duration_seconds: 7200,
     category: 'ia',
     track: 'ia',
     difficulty: 'intermediate',
@@ -179,31 +184,89 @@ const placeholderVideos: VideoItem[] = [
     is_required: false,
   },
   {
-    id: '9',
-    title: 'Agente Zumbi - Detector de Anomalias',
-    description: 'Como funciona o Zumbi dos Palmares',
-    url: '',
-    thumbnail_url: mockThumbnails[8],
-    duration_seconds: 480,
-    category: 'agents',
-    track: 'all',
+    id: '10',
+    title: 'Prompt Engineering - Guia Completo',
+    description: 'Técnicas avançadas para trabalhar com LLMs',
+    url: 'https://www.youtube.com/watch?v=_ZvnD96BrwY',
+    thumbnail_url: ytThumb('_ZvnD96BrwY'),
+    duration_seconds: 5400,
+    category: 'ia',
+    track: 'ia',
     difficulty: 'intermediate',
-    order_index: 1,
-    agent_name: 'zumbi',
+    order_index: 2,
+    agent_name: '',
     is_required: false,
   },
   {
-    id: '10',
-    title: 'Docker para Desenvolvedores',
-    description: 'Containerização básica',
-    url: '',
-    thumbnail_url: mockThumbnails[9],
-    duration_seconds: 540,
+    id: '11',
+    title: 'RAG - Retrieval Augmented Generation',
+    description: 'Como criar sistemas de IA com memória e documentos',
+    url: 'https://www.youtube.com/watch?v=T-D1OfcDW1M',
+    thumbnail_url: ytThumb('T-D1OfcDW1M'),
+    duration_seconds: 3600,
+    category: 'ia',
+    track: 'ia',
+    difficulty: 'advanced',
+    order_index: 3,
+    agent_name: '',
+    is_required: false,
+  },
+  // DevOps
+  {
+    id: '12',
+    title: 'Docker - Curso Completo',
+    description: 'Containerização do zero ao deploy em produção',
+    url: 'https://www.youtube.com/watch?v=pTFZFxd4hOI',
+    thumbnail_url: ytThumb('pTFZFxd4hOI'),
+    duration_seconds: 10800,
     category: 'devops',
     track: 'devops',
     difficulty: 'beginner',
     order_index: 1,
     agent_name: '',
+    is_required: false,
+  },
+  {
+    id: '13',
+    title: 'GitHub Actions - CI/CD',
+    description: 'Automatize deploys e testes com GitHub Actions',
+    url: 'https://www.youtube.com/watch?v=R8_veQiYBjI',
+    thumbnail_url: ytThumb('R8_veQiYBjI'),
+    duration_seconds: 7200,
+    category: 'devops',
+    track: 'devops',
+    difficulty: 'intermediate',
+    order_index: 2,
+    agent_name: '',
+    is_required: false,
+  },
+  // Agents
+  {
+    id: '14',
+    title: 'Multi-Agent Systems com CrewAI',
+    description: 'Como criar sistemas de múltiplos agentes de IA',
+    url: 'https://www.youtube.com/watch?v=tnejrr-0a94',
+    thumbnail_url: ytThumb('tnejrr-0a94'),
+    duration_seconds: 5400,
+    category: 'agents',
+    track: 'all',
+    difficulty: 'advanced',
+    order_index: 1,
+    agent_name: 'abaporu',
+    is_required: false,
+  },
+  {
+    id: '15',
+    title: 'Detecção de Anomalias com Machine Learning',
+    description: 'Técnicas para identificar padrões suspeitos em dados',
+    url: 'https://www.youtube.com/watch?v=5p8B2Ikcw-k',
+    thumbnail_url: ytThumb('5p8B2Ikcw-k'),
+    duration_seconds: 4800,
+    category: 'agents',
+    track: 'ia',
+    difficulty: 'advanced',
+    order_index: 2,
+    agent_name: 'zumbi',
     is_required: false,
   },
 ]
@@ -468,17 +531,27 @@ export default function AcademyVideosPage() {
         <ModalContent size="xl" className="bg-white dark:bg-gray-900">
           {selectedVideo && (
             <>
-              {/* Video player placeholder */}
+              {/* YouTube Video Player */}
               <div className="relative aspect-video bg-gray-900 rounded-t-lg -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-                      <span className="text-5xl">🎬</span>
+                {selectedVideo.url ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${selectedVideo.url.split('v=')[1]?.split('&')[0]}?rel=0&modestbranding=1`}
+                    title={selectedVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+                        <span className="text-5xl">🎬</span>
+                      </div>
+                      <p className="text-lg font-medium">Vídeo em breve</p>
+                      <p className="text-sm text-gray-400 mt-2">{selectedVideo.title}</p>
                     </div>
-                    <p className="text-lg font-medium">Vídeo em breve</p>
-                    <p className="text-sm text-gray-400 mt-2">{selectedVideo.title}</p>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="pt-6">

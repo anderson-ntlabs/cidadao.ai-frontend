@@ -37,31 +37,37 @@ const availableBadges: Omit<BadgeItem, 'earnedAt'>[] = [
     id: 'japaguri',
     name: 'Japaguri',
     emoji: '🍜',
-    criteria: '3+ dias seguidos, 5+ sessoes ou 3+ diarios',
+    criteria: '3+ dias seguidos, 5+ sessões ou 3+ diários',
   },
   {
-    id: 'first-chat',
-    name: 'Primeira Conversa',
-    emoji: '💬',
-    criteria: 'Enviar primeira mensagem para um agente',
+    id: 'pioneiro',
+    name: 'Pioneiro',
+    emoji: '🚀',
+    criteria: 'Aceitar os Termos de Uso',
   },
   {
-    id: 'video-master',
-    name: 'Cinefilo',
-    emoji: '🎬',
-    criteria: 'Assistir 10 videos',
+    id: 'explorador',
+    name: 'Explorador',
+    emoji: '🧭',
+    criteria: 'Interagir com 3+ agentes diferentes',
   },
   {
-    id: 'reader',
-    name: 'Leitor Voraz',
-    emoji: '📚',
-    criteria: 'Completar todas as leituras obrigatorias',
-  },
-  {
-    id: 'dedicated',
+    id: 'dedicado',
     name: 'Dedicado',
     emoji: '⭐',
-    criteria: '7 dias de streak',
+    criteria: '7 dias de streak ou 10+ sessões',
+  },
+  {
+    id: 'cinefilo',
+    name: 'Cinéfilo',
+    emoji: '🎬',
+    criteria: 'Assistir 10 vídeos',
+  },
+  {
+    id: 'leitor',
+    name: 'Leitor Voraz',
+    emoji: '📚',
+    criteria: 'Completar todas as leituras obrigatórias',
   },
 ]
 
@@ -118,10 +124,10 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
               <span className="text-4xl">🍜</span>
             </div>
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Seja assiduo para ganhar o badge Japaguri!
+              Seja assíduo para ganhar o badge Japaguri!
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              3+ dias seguidos, 5+ sessoes ou 3+ diarios
+              3+ dias seguidos, 5+ sessões ou 3+ diários
             </p>
           </div>
         )}
@@ -130,7 +136,7 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
         {showLocked && lockedBadges.length > 0 && badges.length > 0 && (
           <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
             <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-              Proximos badges
+              Próximos badges
             </p>
             <div className="grid grid-cols-4 gap-2">
               {lockedBadges.slice(0, 4).map((badge) => (

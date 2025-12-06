@@ -537,6 +537,30 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       logger.info('Explorador badge awarded')
     }
 
+    // Dedicado badge - for dedicated students with long streaks or many sessions
+    // Criteria: 7+ streak days OR 10+ sessions
+    const hasDedicado = badges.some((b) => b.type === 'dedicado')
+    const qualifiesForDedicado = user.currentStreak >= 7 || sessions.length >= 10
+
+    if (!hasDedicado && qualifiesForDedicado) {
+      const dedicadoBadge: AcademyBadge = {
+        id: `badge_dedicado_${Date.now()}`,
+        type: 'dedicado',
+        name: 'Dedicado',
+        description: 'Comprometimento exemplar! Sua dedicação aos estudos é inspiradora.',
+        emoji: '⭐',
+        earnedAt: new Date().toISOString(),
+        criteria:
+          user.currentStreak >= 7
+            ? `${user.currentStreak} dias seguidos de estudo`
+            : `${sessions.length} sessões de estudo completadas`,
+      }
+      newBadges.push(dedicadoBadge)
+      badgesAwarded = true
+      addXp(75, 'badge', 'Badge Dedicado conquistado!')
+      logger.info('Dedicado badge awarded', { criteria: dedicadoBadge.criteria })
+    }
+
     if (badgesAwarded) {
       setBadges(newBadges)
     }

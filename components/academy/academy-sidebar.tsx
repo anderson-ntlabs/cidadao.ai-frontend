@@ -52,6 +52,7 @@ const navItems: NavItem[] = [
   { href: '/pt/academy/videos', label: 'Vídeos', icon: Video },
   { href: '/pt/academy/leituras', label: 'Leituras', icon: FileText },
   { href: '/pt/academy/ranking', label: 'Ranking', icon: Trophy },
+  { href: '/pt/academy/perfil', label: 'Meu Perfil', icon: GraduationCap },
 ]
 
 export function AcademySidebar({ user, className }: AcademySidebarProps) {
