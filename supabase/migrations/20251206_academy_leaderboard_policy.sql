@@ -50,7 +50,7 @@ RETURNS TABLE (
     current_rank TEXT,
     current_streak INTEGER,
     total_time_minutes INTEGER,
-    position BIGINT
+    rank_position BIGINT
 ) AS $$
 BEGIN
     IF sort_by = 'xp' THEN
@@ -65,7 +65,7 @@ BEGIN
             p.current_rank,
             p.current_streak,
             p.total_time_minutes,
-            ROW_NUMBER() OVER (ORDER BY p.total_xp DESC) AS position
+            ROW_NUMBER() OVER (ORDER BY p.total_xp DESC) AS rank_position
         FROM academy_profiles p
         WHERE p.is_active = TRUE
         ORDER BY p.total_xp DESC
@@ -82,7 +82,7 @@ BEGIN
             p.current_rank,
             p.current_streak,
             p.total_time_minutes,
-            ROW_NUMBER() OVER (ORDER BY p.total_time_minutes DESC) AS position
+            ROW_NUMBER() OVER (ORDER BY p.total_time_minutes DESC) AS rank_position
         FROM academy_profiles p
         WHERE p.is_active = TRUE
         ORDER BY p.total_time_minutes DESC
@@ -99,7 +99,7 @@ BEGIN
             p.current_rank,
             p.current_streak,
             p.total_time_minutes,
-            ROW_NUMBER() OVER (ORDER BY p.current_streak DESC) AS position
+            ROW_NUMBER() OVER (ORDER BY p.current_streak DESC) AS rank_position
         FROM academy_profiles p
         WHERE p.is_active = TRUE
         ORDER BY p.current_streak DESC
@@ -123,25 +123,25 @@ DECLARE
     user_rank INTEGER;
 BEGIN
     IF sort_by = 'xp' THEN
-        SELECT position INTO user_rank
+        SELECT rp INTO user_rank
         FROM (
-            SELECT user_id, ROW_NUMBER() OVER (ORDER BY total_xp DESC) AS position
+            SELECT user_id, ROW_NUMBER() OVER (ORDER BY total_xp DESC) AS rp
             FROM academy_profiles
             WHERE is_active = TRUE
         ) ranked
         WHERE ranked.user_id = p_user_id;
     ELSIF sort_by = 'time' THEN
-        SELECT position INTO user_rank
+        SELECT rp INTO user_rank
         FROM (
-            SELECT user_id, ROW_NUMBER() OVER (ORDER BY total_time_minutes DESC) AS position
+            SELECT user_id, ROW_NUMBER() OVER (ORDER BY total_time_minutes DESC) AS rp
             FROM academy_profiles
             WHERE is_active = TRUE
         ) ranked
         WHERE ranked.user_id = p_user_id;
     ELSE -- streak
-        SELECT position INTO user_rank
+        SELECT rp INTO user_rank
         FROM (
-            SELECT user_id, ROW_NUMBER() OVER (ORDER BY current_streak DESC) AS position
+            SELECT user_id, ROW_NUMBER() OVER (ORDER BY current_streak DESC) AS rp
             FROM academy_profiles
             WHERE is_active = TRUE
         ) ranked

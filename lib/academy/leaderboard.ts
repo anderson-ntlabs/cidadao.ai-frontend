@@ -19,7 +19,7 @@ export interface LeaderboardEntry {
   current_rank: string
   current_streak: number
   total_time_minutes: number
-  position?: number
+  rank_position?: number
 }
 
 export type SortBy = 'xp' | 'time' | 'streak'
@@ -58,10 +58,10 @@ export async function fetchLeaderboard(
         return { data: null, error: new Error(fallbackError.message) }
       }
 
-      // Add position manually
+      // Add rank_position manually
       const withPosition = (fallbackData || []).map((entry, index) => ({
         ...entry,
-        position: index + 1,
+        rank_position: index + 1,
       }))
 
       return { data: withPosition as LeaderboardEntry[], error: null }
@@ -118,7 +118,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'mentor',
     current_streak: 15,
     total_time_minutes: 1200,
-    position: 1,
+    rank_position: 1,
   },
   {
     id: '2',
@@ -130,7 +130,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'contribuidor',
     current_streak: 12,
     total_time_minutes: 980,
-    position: 2,
+    rank_position: 2,
   },
   {
     id: '3',
@@ -142,7 +142,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'contribuidor',
     current_streak: 8,
     total_time_minutes: 750,
-    position: 3,
+    rank_position: 3,
   },
   {
     id: '4',
@@ -154,7 +154,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'contribuidor',
     current_streak: 5,
     total_time_minutes: 620,
-    position: 4,
+    rank_position: 4,
   },
   {
     id: '5',
@@ -166,7 +166,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'contribuidor',
     current_streak: 3,
     total_time_minutes: 480,
-    position: 5,
+    rank_position: 5,
   },
   {
     id: '6',
@@ -178,7 +178,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'contribuidor',
     current_streak: 4,
     total_time_minutes: 320,
-    position: 6,
+    rank_position: 6,
   },
   {
     id: '7',
@@ -190,7 +190,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'aprendiz',
     current_streak: 2,
     total_time_minutes: 210,
-    position: 7,
+    rank_position: 7,
   },
   {
     id: '8',
@@ -202,6 +202,6 @@ export const mockLeaderboard: LeaderboardEntry[] = [
     current_rank: 'aprendiz',
     current_streak: 1,
     total_time_minutes: 140,
-    position: 8,
+    rank_position: 8,
   },
 ]
