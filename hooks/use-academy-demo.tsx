@@ -613,7 +613,8 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     logger.info('GitHub username set', { username })
   }, [])
 
-  // Verify GitHub fork using public API
+  // Verify GitHub fork - MOCKED for demo mode
+  // TODO: Re-enable real verification when organization is created
   const verifyGitHubFork = useCallback(async (): Promise<{ success: boolean; message: string }> => {
     if (!onboarding?.github?.username || !onboarding?.selectedTrack) {
       return { success: false, message: 'Usuário GitHub ou trilha não definidos' }
@@ -622,79 +623,35 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     const { username } = onboarding.github
     const trackRepo = TRACK_REPOS[onboarding.selectedTrack]
 
-    try {
-      // Check if user has forked the repo
-      const reposResponse = await fetch(
-        `https://api.github.com/users/${username}/repos?per_page=100`
-      )
-      if (!reposResponse.ok) {
-        if (reposResponse.status === 404) {
-          return { success: false, message: `Usuário "${username}" não encontrado no GitHub` }
-        }
-        throw new Error('Failed to fetch repos')
+    // MOCK: Simulate successful fork verification
+    // This allows users to complete onboarding without requiring actual fork
+    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
+
+    // Update GitHub contribution data with mocked values
+    setOnboarding((prev) => {
+      if (!prev) return null
+      const completedSteps = prev.completedSteps.includes(4)
+        ? prev.completedSteps
+        : [...prev.completedSteps, 4]
+      return {
+        ...prev,
+        github: {
+          username,
+          hasForked: true,
+          forkUrl: `https://github.com/${username}/${trackRepo.repo}`,
+          commitCount: 0,
+          lastCommitDate: undefined,
+          lastChecked: new Date().toISOString(),
+        },
+        currentStep: 5,
+        completedSteps,
       }
+    })
 
-      const repos = await reposResponse.json()
-      const fork = repos.find(
-        (repo: { fork: boolean; name: string; html_url: string }) =>
-          repo.fork && repo.name.toLowerCase() === trackRepo.repo.toLowerCase()
-      )
+    addXp(50, 'onboarding', 'Fork do repositório verificado!')
+    logger.info('GitHub fork verified (MOCKED)', { username, repo: trackRepo.repo })
 
-      if (!fork) {
-        return {
-          success: false,
-          message: `Fork do repositório ${trackRepo.repo} não encontrado. Por favor, faça o fork do repositório primeiro.`,
-        }
-      }
-
-      // Get commit count for this fork
-      let commitCount = 0
-      let lastCommitDate: string | undefined
-
-      try {
-        const commitsResponse = await fetch(
-          `https://api.github.com/repos/${username}/${trackRepo.repo}/commits?per_page=10`
-        )
-        if (commitsResponse.ok) {
-          const commits = await commitsResponse.json()
-          commitCount = commits.length
-          if (commits.length > 0) {
-            lastCommitDate = commits[0].commit.author.date
-          }
-        }
-      } catch {
-        // Ignore commit count errors
-      }
-
-      // Update GitHub contribution data
-      setOnboarding((prev) => {
-        if (!prev) return null
-        const completedSteps = prev.completedSteps.includes(4)
-          ? prev.completedSteps
-          : [...prev.completedSteps, 4]
-        return {
-          ...prev,
-          github: {
-            username,
-            hasForked: true,
-            forkUrl: fork.html_url,
-            commitCount,
-            lastCommitDate,
-            lastChecked: new Date().toISOString(),
-          },
-          currentStep: 5,
-          completedSteps,
-        }
-      })
-
-      addXp(50, 'onboarding', 'Fork do repositório verificado!')
-      logger.info('GitHub fork verified', { username, repo: trackRepo.repo, commitCount })
-
-      return { success: true, message: 'Fork verificado com sucesso!' }
-    } catch (error) {
-      logger.error('Failed to verify GitHub fork', { error })
-      return { success: false, message: 'Erro ao verificar fork. Tente novamente.' }
-    }
+    return { success: true, message: 'Fork verificado com sucesso!' }
   }, [onboarding, addXp])
 
   // Complete onboarding
