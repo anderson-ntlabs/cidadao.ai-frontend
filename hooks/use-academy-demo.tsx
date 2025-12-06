@@ -19,6 +19,7 @@ const STORAGE_SESSIONS_KEY = 'academy_demo_sessions'
 const STORAGE_LGPD_KEY = 'academy_demo_lgpd_consent'
 const STORAGE_CONTRACT_KEY = 'academy_demo_internship_contract'
 const STORAGE_BADGES_KEY = 'academy_demo_badges'
+const STORAGE_ONBOARDING_KEY = 'academy_demo_onboarding'
 
 export interface AcademyDemoUser {
   id: string
@@ -38,8 +39,28 @@ export interface AcademyDemoUser {
   totalTimeMinutes: number
   hasAcceptedLgpd: boolean
   hasAcceptedInternshipContract: boolean
+  hasCompletedOnboarding: boolean
   lastIpAddress?: string
   enrolledAt: string
+}
+
+// GitHub contribution tracking
+export interface GitHubContribution {
+  username: string
+  hasForked: boolean
+  forkUrl?: string
+  commitCount: number
+  lastCommitDate?: string
+  lastChecked: string
+}
+
+// Onboarding progress
+export interface OnboardingData {
+  currentStep: number
+  completedSteps: number[]
+  selectedTrack: 'backend' | 'frontend' | 'ia' | 'devops' | null
+  github: GitHubContribution | null
+  completedAt?: string
 }
 
 export interface XpTransaction {
@@ -126,6 +147,7 @@ const DEFAULT_DEMO_USER: AcademyDemoUser = {
   totalTimeMinutes: 0,
   hasAcceptedLgpd: false,
   hasAcceptedInternshipContract: false, // Must accept contract on first access
+  hasCompletedOnboarding: false, // Must complete onboarding after contract
   enrolledAt: new Date().toISOString(),
 }
 
@@ -143,6 +165,14 @@ function calculateLevel(xp: number): number {
   return Math.max(1, Math.floor(xp / 100) + 1)
 }
 
+// GitHub repos by track for fork verification
+export const TRACK_REPOS: Record<string, { owner: string; repo: string }> = {
+  backend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-backend' },
+  frontend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-frontend' },
+  ia: { owner: 'anderson-ufrj', repo: 'cidadao.ai-ml' },
+  devops: { owner: 'anderson-ufrj', repo: 'cidadao.ai-infra' },
+}
+
 interface AcademyDemoContextType {
   user: AcademyDemoUser
   isAuthenticated: boolean
@@ -154,6 +184,7 @@ interface AcademyDemoContextType {
   lgpdConsent: LgpdConsent | null
   internshipContract: InternshipContract | null
   badges: AcademyBadge[]
+  onboarding: OnboardingData | null
 
   // Actions
   updateProfile: (updates: Partial<AcademyDemoUser>) => void
@@ -169,6 +200,14 @@ interface AcademyDemoContextType {
   ) => Promise<void>
   checkAndAwardBadges: () => void
   resetDemo: () => void
+
+  // Onboarding actions
+  initOnboarding: () => void
+  updateOnboarding: (updates: Partial<OnboardingData>) => void
+  selectTrack: (track: 'backend' | 'frontend' | 'ia' | 'devops') => void
+  setGitHubUsername: (username: string) => Promise<void>
+  verifyGitHubFork: () => Promise<{ success: boolean; message: string }>
+  completeOnboarding: () => void
 }
 
 const AcademyDemoContext = createContext<AcademyDemoContextType | undefined>(undefined)
@@ -183,6 +222,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
   const [lgpdConsent, setLgpdConsent] = useState<LgpdConsent | null>(null)
   const [internshipContract, setInternshipContract] = useState<InternshipContract | null>(null)
   const [badges, setBadges] = useState<AcademyBadge[]>([])
+  const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -220,6 +260,11 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       const savedBadges = localStorage.getItem(STORAGE_BADGES_KEY)
       if (savedBadges) {
         setBadges(JSON.parse(savedBadges))
+      }
+
+      const savedOnboarding = localStorage.getItem(STORAGE_ONBOARDING_KEY)
+      if (savedOnboarding) {
+        setOnboarding(JSON.parse(savedOnboarding))
       }
 
       logger.info('Demo mode loaded from localStorage')
@@ -264,6 +309,13 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       localStorage.setItem(STORAGE_BADGES_KEY, JSON.stringify(badges))
     }
   }, [badges, isLoading])
+
+  // Save onboarding
+  useEffect(() => {
+    if (!isLoading && onboarding) {
+      localStorage.setItem(STORAGE_ONBOARDING_KEY, JSON.stringify(onboarding))
+    }
+  }, [onboarding, isLoading])
 
   const updateProfile = useCallback((updates: Partial<AcademyDemoUser>) => {
     setUser((prev) => {
@@ -496,6 +548,174 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     }
   }, [badges, user, sessions, diaryEntries, addXp])
 
+  // Initialize onboarding for new users (after contract acceptance)
+  const initOnboarding = useCallback(() => {
+    const initialOnboarding: OnboardingData = {
+      currentStep: 1,
+      completedSteps: [],
+      selectedTrack: null,
+      github: null,
+    }
+    setOnboarding(initialOnboarding)
+    logger.info('Onboarding initialized')
+  }, [])
+
+  // Update onboarding progress
+  const updateOnboarding = useCallback((updates: Partial<OnboardingData>) => {
+    setOnboarding((prev) => {
+      if (!prev) return null
+      return { ...prev, ...updates }
+    })
+  }, [])
+
+  // Select track (backend, frontend, ia, devops)
+  const selectTrack = useCallback(
+    (track: 'backend' | 'frontend' | 'ia' | 'devops') => {
+      setOnboarding((prev) => {
+        if (!prev) return null
+        const completedSteps = prev.completedSteps.includes(2)
+          ? prev.completedSteps
+          : [...prev.completedSteps, 2]
+        return {
+          ...prev,
+          selectedTrack: track,
+          currentStep: 3,
+          completedSteps,
+        }
+      })
+      updateProfile({ mainTrack: track })
+      addXp(25, 'onboarding', `Trilha ${track.toUpperCase()} selecionada`)
+      logger.info('Track selected', { track })
+    },
+    [updateProfile, addXp]
+  )
+
+  // Set GitHub username and check for fork
+  const setGitHubUsername = useCallback(async (username: string) => {
+    const github: GitHubContribution = {
+      username,
+      hasForked: false,
+      commitCount: 0,
+      lastChecked: new Date().toISOString(),
+    }
+    setOnboarding((prev) => {
+      if (!prev) return null
+      const completedSteps = prev.completedSteps.includes(3)
+        ? prev.completedSteps
+        : [...prev.completedSteps, 3]
+      return {
+        ...prev,
+        github,
+        currentStep: 4,
+        completedSteps,
+      }
+    })
+    logger.info('GitHub username set', { username })
+  }, [])
+
+  // Verify GitHub fork using public API
+  const verifyGitHubFork = useCallback(async (): Promise<{ success: boolean; message: string }> => {
+    if (!onboarding?.github?.username || !onboarding?.selectedTrack) {
+      return { success: false, message: 'Usuário GitHub ou trilha não definidos' }
+    }
+
+    const { username } = onboarding.github
+    const trackRepo = TRACK_REPOS[onboarding.selectedTrack]
+
+    try {
+      // Check if user has forked the repo
+      const reposResponse = await fetch(
+        `https://api.github.com/users/${username}/repos?per_page=100`
+      )
+      if (!reposResponse.ok) {
+        if (reposResponse.status === 404) {
+          return { success: false, message: `Usuário "${username}" não encontrado no GitHub` }
+        }
+        throw new Error('Failed to fetch repos')
+      }
+
+      const repos = await reposResponse.json()
+      const fork = repos.find(
+        (repo: { fork: boolean; name: string; html_url: string }) =>
+          repo.fork && repo.name.toLowerCase() === trackRepo.repo.toLowerCase()
+      )
+
+      if (!fork) {
+        return {
+          success: false,
+          message: `Fork do repositório ${trackRepo.repo} não encontrado. Por favor, faça o fork do repositório primeiro.`,
+        }
+      }
+
+      // Get commit count for this fork
+      let commitCount = 0
+      let lastCommitDate: string | undefined
+
+      try {
+        const commitsResponse = await fetch(
+          `https://api.github.com/repos/${username}/${trackRepo.repo}/commits?per_page=10`
+        )
+        if (commitsResponse.ok) {
+          const commits = await commitsResponse.json()
+          commitCount = commits.length
+          if (commits.length > 0) {
+            lastCommitDate = commits[0].commit.author.date
+          }
+        }
+      } catch {
+        // Ignore commit count errors
+      }
+
+      // Update GitHub contribution data
+      setOnboarding((prev) => {
+        if (!prev) return null
+        const completedSteps = prev.completedSteps.includes(4)
+          ? prev.completedSteps
+          : [...prev.completedSteps, 4]
+        return {
+          ...prev,
+          github: {
+            username,
+            hasForked: true,
+            forkUrl: fork.html_url,
+            commitCount,
+            lastCommitDate,
+            lastChecked: new Date().toISOString(),
+          },
+          currentStep: 5,
+          completedSteps,
+        }
+      })
+
+      addXp(50, 'onboarding', 'Fork do repositório verificado!')
+      logger.info('GitHub fork verified', { username, repo: trackRepo.repo, commitCount })
+
+      return { success: true, message: 'Fork verificado com sucesso!' }
+    } catch (error) {
+      logger.error('Failed to verify GitHub fork', { error })
+      return { success: false, message: 'Erro ao verificar fork. Tente novamente.' }
+    }
+  }, [onboarding, addXp])
+
+  // Complete onboarding
+  const completeOnboarding = useCallback(() => {
+    setOnboarding((prev) => {
+      if (!prev) return null
+      const completedSteps = prev.completedSteps.includes(5)
+        ? prev.completedSteps
+        : [...prev.completedSteps, 5]
+      return {
+        ...prev,
+        currentStep: 5,
+        completedSteps,
+        completedAt: new Date().toISOString(),
+      }
+    })
+    updateProfile({ hasCompletedOnboarding: true })
+    addXp(100, 'onboarding', 'Onboarding concluído! Bem-vindo à Academy!')
+    logger.info('Onboarding completed')
+  }, [updateProfile, addXp])
+
   const resetDemo = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem(STORAGE_XP_KEY)
@@ -504,8 +724,9 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     localStorage.removeItem(STORAGE_LGPD_KEY)
     localStorage.removeItem(STORAGE_CONTRACT_KEY)
     localStorage.removeItem(STORAGE_BADGES_KEY)
+    localStorage.removeItem(STORAGE_ONBOARDING_KEY)
 
-    setUser(DEFAULT_DEMO_USER)
+    setUser({ ...DEFAULT_DEMO_USER, hasCompletedOnboarding: false })
     setXpTransactions([])
     setDiaryEntries([])
     setSessions([])
@@ -513,6 +734,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     setLgpdConsent(null)
     setInternshipContract(null)
     setBadges([])
+    setOnboarding(null)
 
     logger.info('Demo reset to default state')
   }, [])
@@ -530,6 +752,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         lgpdConsent,
         internshipContract,
         badges,
+        onboarding,
         updateProfile,
         addXp,
         addDiaryEntry,
@@ -539,6 +762,12 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         acceptInternshipContract,
         checkAndAwardBadges,
         resetDemo,
+        initOnboarding,
+        updateOnboarding,
+        selectTrack,
+        setGitHubUsername,
+        verifyGitHubFork,
+        completeOnboarding,
       }}
     >
       {children}

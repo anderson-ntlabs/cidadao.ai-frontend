@@ -1,17 +1,24 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { jsPDF } from 'jspdf'
 
 interface InternshipContractModalProps {
   isOpen: boolean
   onClose?: () => void
+  redirectToOnboarding?: boolean
 }
 
 const CONTRACT_VERSION = 'v1.0-2025'
 
-export function InternshipContractModal({ isOpen, onClose }: InternshipContractModalProps) {
+export function InternshipContractModal({
+  isOpen,
+  onClose,
+  redirectToOnboarding = true,
+}: InternshipContractModalProps) {
+  const router = useRouter()
   const { user, acceptInternshipContract } = useAcademyDemo()
   const [isAccepting, setIsAccepting] = useState(false)
   const [checkboxes, setCheckboxes] = useState({
@@ -266,7 +273,13 @@ export function InternshipContractModal({ isOpen, onClose }: InternshipContractM
 
       // Save acceptance
       await acceptInternshipContract(ipAddress, navigator.userAgent, contractId)
-      onClose?.()
+
+      // Redirect to onboarding or close modal
+      if (redirectToOnboarding) {
+        router.push('/pt/academy/onboarding')
+      } else {
+        onClose?.()
+      }
     } catch (error) {
       console.error('Failed to accept contract:', error)
     } finally {
