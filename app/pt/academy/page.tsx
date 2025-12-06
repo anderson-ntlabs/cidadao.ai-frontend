@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
 import { InternshipContractModal } from '@/components/academy/internship-contract-modal'
 import { CertificateModal } from '@/components/academy/certificate-modal'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 // Rank configuration
 const ranks = {
@@ -122,6 +123,8 @@ export default function AcademyDashboardPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{rankInfo.name}</p>
                 </div>
               </div>
+
+              <ThemeToggle />
 
               <button
                 onClick={resetDemo}
