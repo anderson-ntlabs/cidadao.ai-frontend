@@ -18,6 +18,7 @@ const STORAGE_DIARY_KEY = 'academy_demo_diary'
 const STORAGE_SESSIONS_KEY = 'academy_demo_sessions'
 const STORAGE_LGPD_KEY = 'academy_demo_lgpd_consent'
 const STORAGE_CONTRACT_KEY = 'academy_demo_internship_contract'
+const STORAGE_BADGES_KEY = 'academy_demo_badges'
 
 export interface AcademyDemoUser {
   id: string
@@ -95,6 +96,17 @@ export interface InternshipContract {
   }
 }
 
+// Academy badge for demo mode
+export interface AcademyBadge {
+  id: string
+  type: 'japaguri' | 'pioneiro' | 'dedicado' | 'explorador'
+  name: string
+  description: string
+  emoji: string
+  earnedAt: string
+  criteria: string
+}
+
 // Default demo user - starts without contract acceptance
 const DEFAULT_DEMO_USER: AcademyDemoUser = {
   id: 'demo-user-001',
@@ -141,6 +153,7 @@ interface AcademyDemoContextType {
   currentSession: StudySession | null
   lgpdConsent: LgpdConsent | null
   internshipContract: InternshipContract | null
+  badges: AcademyBadge[]
 
   // Actions
   updateProfile: (updates: Partial<AcademyDemoUser>) => void
@@ -154,6 +167,7 @@ interface AcademyDemoContextType {
     userAgent?: string,
     contractId?: string
   ) => Promise<void>
+  checkAndAwardBadges: () => void
   resetDemo: () => void
 }
 
@@ -168,6 +182,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
   const [lgpdConsent, setLgpdConsent] = useState<LgpdConsent | null>(null)
   const [internshipContract, setInternshipContract] = useState<InternshipContract | null>(null)
+  const [badges, setBadges] = useState<AcademyBadge[]>([])
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -200,6 +215,11 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       const savedContract = localStorage.getItem(STORAGE_CONTRACT_KEY)
       if (savedContract) {
         setInternshipContract(JSON.parse(savedContract))
+      }
+
+      const savedBadges = localStorage.getItem(STORAGE_BADGES_KEY)
+      if (savedBadges) {
+        setBadges(JSON.parse(savedBadges))
       }
 
       logger.info('Demo mode loaded from localStorage')
@@ -237,6 +257,13 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       localStorage.setItem(STORAGE_SESSIONS_KEY, JSON.stringify(sessions))
     }
   }, [sessions, isLoading])
+
+  // Save badges
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem(STORAGE_BADGES_KEY, JSON.stringify(badges))
+    }
+  }, [badges, isLoading])
 
   const updateProfile = useCallback((updates: Partial<AcademyDemoUser>) => {
     setUser((prev) => {
@@ -282,7 +309,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       setDiaryEntries((prev) => [newEntry, ...prev])
 
       // Award XP for diary entry
-      addXp(10, 'diary', 'Entrada no diario de aprendizado')
+      addXp(10, 'diary', 'Entrada no diário de aprendizado')
 
       logger.info('Diary entry added', { entryId: newEntry.id })
     },
@@ -384,12 +411,90 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
       })
 
       // Award XP for accepting contract (welcome bonus)
-      addXp(100, 'internship_contract', 'Bonus de boas-vindas - Aceite do contrato de estagio')
+      addXp(100, 'internship_contract', 'Bônus de boas-vindas - Aceite do contrato de estágio')
 
       logger.info('Internship contract accepted', { contractId: contract.contractId, ipAddress })
     },
     [updateProfile, addXp]
   )
+
+  // Check and award badges based on user activity
+  const checkAndAwardBadges = useCallback(() => {
+    const newBadges: AcademyBadge[] = [...badges]
+    let badgesAwarded = false
+
+    // Japaguri badge - for assiduous students
+    // Criteria: 3+ streak days OR 5+ sessions OR 3+ diary entries
+    const hasJapaguri = badges.some((b) => b.type === 'japaguri')
+    const qualifiesForJapaguri =
+      user.currentStreak >= 3 || sessions.length >= 5 || diaryEntries.length >= 3
+
+    if (!hasJapaguri && qualifiesForJapaguri) {
+      const japaguriBadge: AcademyBadge = {
+        id: `badge_japaguri_${Date.now()}`,
+        type: 'japaguri',
+        name: 'Japaguri',
+        description:
+          'Estudante assíduo que mistura dedicação com consistência, como o prato coreano que combina dois sabores!',
+        emoji: '🍜',
+        earnedAt: new Date().toISOString(),
+        criteria:
+          user.currentStreak >= 3
+            ? `${user.currentStreak} dias seguidos de estudo`
+            : sessions.length >= 5
+              ? `${sessions.length} sessões de estudo`
+              : `${diaryEntries.length} entradas no diário`,
+      }
+      newBadges.push(japaguriBadge)
+      badgesAwarded = true
+
+      // Award bonus XP for earning badge
+      addXp(50, 'badge', 'Badge Japaguri conquistado!')
+
+      logger.info('Japaguri badge awarded', { criteria: japaguriBadge.criteria })
+    }
+
+    // Pioneiro badge - for early adopters (first contract acceptance)
+    const hasPioneiro = badges.some((b) => b.type === 'pioneiro')
+    if (!hasPioneiro && user.hasAcceptedInternshipContract) {
+      const pioneiroBadge: AcademyBadge = {
+        id: `badge_pioneiro_${Date.now()}`,
+        type: 'pioneiro',
+        name: 'Pioneiro',
+        description: 'Um dos primeiros a embarcar na jornada da Academy!',
+        emoji: '🚀',
+        earnedAt: new Date().toISOString(),
+        criteria: 'Aceitou o contrato de estágio',
+      }
+      newBadges.push(pioneiroBadge)
+      badgesAwarded = true
+      addXp(25, 'badge', 'Badge Pioneiro conquistado!')
+      logger.info('Pioneiro badge awarded')
+    }
+
+    // Explorador badge - for users who tried different agents
+    const hasExplorador = badges.some((b) => b.type === 'explorador')
+    const uniqueAgentsUsed = new Set(sessions.flatMap((s) => s.agentsUsed || [])).size
+    if (!hasExplorador && uniqueAgentsUsed >= 3) {
+      const exploradorBadge: AcademyBadge = {
+        id: `badge_explorador_${Date.now()}`,
+        type: 'explorador',
+        name: 'Explorador',
+        description: 'Curiosidade é a chave! Conversou com vários agentes diferentes.',
+        emoji: '🧭',
+        earnedAt: new Date().toISOString(),
+        criteria: `Interagiu com ${uniqueAgentsUsed} agentes diferentes`,
+      }
+      newBadges.push(exploradorBadge)
+      badgesAwarded = true
+      addXp(30, 'badge', 'Badge Explorador conquistado!')
+      logger.info('Explorador badge awarded')
+    }
+
+    if (badgesAwarded) {
+      setBadges(newBadges)
+    }
+  }, [badges, user, sessions, diaryEntries, addXp])
 
   const resetDemo = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY)
@@ -398,6 +503,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     localStorage.removeItem(STORAGE_SESSIONS_KEY)
     localStorage.removeItem(STORAGE_LGPD_KEY)
     localStorage.removeItem(STORAGE_CONTRACT_KEY)
+    localStorage.removeItem(STORAGE_BADGES_KEY)
 
     setUser(DEFAULT_DEMO_USER)
     setXpTransactions([])
@@ -406,6 +512,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     setCurrentSession(null)
     setLgpdConsent(null)
     setInternshipContract(null)
+    setBadges([])
 
     logger.info('Demo reset to default state')
   }, [])
@@ -422,6 +529,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         currentSession,
         lgpdConsent,
         internshipContract,
+        badges,
         updateProfile,
         addXp,
         addDiaryEntry,
@@ -429,6 +537,7 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
         endSession,
         acceptLgpdConsent,
         acceptInternshipContract,
+        checkAndAwardBadges,
         resetDemo,
       }}
     >

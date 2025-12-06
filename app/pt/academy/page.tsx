@@ -44,7 +44,8 @@ const agentTeachers = [
 ]
 
 export default function AcademyDashboardPage() {
-  const { user, isLoading, xpTransactions, resetDemo } = useAcademyDemo()
+  const { user, isLoading, xpTransactions, badges, checkAndAwardBadges, resetDemo } =
+    useAcademyDemo()
   const [showContractModal, setShowContractModal] = useState(false)
   const [showCertificateModal, setShowCertificateModal] = useState(false)
 
@@ -54,6 +55,13 @@ export default function AcademyDashboardPage() {
       setShowContractModal(true)
     }
   }, [isLoading, user.hasAcceptedInternshipContract])
+
+  // Check for badge eligibility whenever user data changes
+  useEffect(() => {
+    if (!isLoading) {
+      checkAndAwardBadges()
+    }
+  }, [isLoading, user, checkAndAwardBadges])
 
   if (isLoading) {
     return (
@@ -366,6 +374,44 @@ export default function AcademyDashboardPage() {
                   <br />
                   Comece conversando com um agente!
                 </p>
+              )}
+            </div>
+
+            {/* Badges */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                🏅 Badges Conquistados
+                {badges.length > 0 && (
+                  <span className="text-sm font-normal text-gray-500">({badges.length})</span>
+                )}
+              </h3>
+              {badges.length > 0 ? (
+                <div className="space-y-3">
+                  {badges.map((badge) => (
+                    <div
+                      key={badge.id}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-700"
+                    >
+                      <span className="text-2xl">{badge.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-900 dark:text-gray-100">{badge.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          {badge.criteria}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <span className="text-3xl block mb-2">🍜</span>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Seja assíduo para ganhar o badge <strong>Japaguri</strong>!
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    3+ dias seguidos, 5+ sessões ou 3+ diários
+                  </p>
+                </div>
               )}
             </div>
           </div>

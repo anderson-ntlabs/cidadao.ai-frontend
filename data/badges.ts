@@ -60,6 +60,20 @@ export const BADGES: Record<BadgeType, BadgeInfo> = {
     gradient: 'from-green-400 to-emerald-600',
     rarity: 'legendary',
   },
+
+  japaguri: {
+    type: 'japaguri',
+    name_pt: 'Japaguri',
+    name_en: 'Japaguri',
+    description_pt:
+      'Estudante assíduo que mistura dedicação com consistência, como o prato coreano que combina dois sabores!',
+    description_en:
+      'Dedicated student who mixes dedication with consistency, like the Korean dish that combines two flavors!',
+    icon: 'Flame',
+    color: 'orange',
+    gradient: 'from-orange-400 to-red-500',
+    rarity: 'uncommon',
+  },
 }
 
 /**

@@ -10,7 +10,7 @@
 // Badge Types
 // ===========================================
 
-export type BadgeType = 'colaborador' | 'pioneiro' | 'especialista' | 'guardiao'
+export type BadgeType = 'colaborador' | 'pioneiro' | 'especialista' | 'guardiao' | 'japaguri'
 
 export type BadgeSourceType = 'survey' | 'achievement' | 'admin' | 'system'
 

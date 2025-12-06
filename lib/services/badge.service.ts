@@ -163,6 +163,7 @@ class BadgeService {
         pioneiro: 0,
         especialista: 0,
         guardiao: 0,
+        japaguri: 0,
       }
 
       for (const badgeType of Object.keys(stats) as BadgeType[]) {
@@ -177,6 +178,7 @@ class BadgeService {
         pioneiro: 0,
         especialista: 0,
         guardiao: 0,
+        japaguri: 0,
       }
     }
   }
