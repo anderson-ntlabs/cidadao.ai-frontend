@@ -214,10 +214,11 @@ function AcademyProfileContent() {
   }
 
   const rankInfo = ranks[user.currentRank as keyof typeof ranks] || ranks.novato
-  // Get info for all user tracks
+  // Get info for all user tracks (with fallback for legacy mainTrack data)
+  const userTracks = user.tracks || []
   const userTracksInfo =
-    user.tracks.length > 0
-      ? user.tracks.map((t) => tracks[t as keyof typeof tracks]).filter(Boolean)
+    userTracks.length > 0
+      ? userTracks.map((t) => tracks[t as keyof typeof tracks]).filter(Boolean)
       : [tracks.backend] // Default fallback
   const nextRankXp =
     user.currentRank === 'novato'

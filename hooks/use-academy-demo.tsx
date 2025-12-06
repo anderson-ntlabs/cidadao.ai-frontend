@@ -226,7 +226,17 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
     try {
       const savedUser = localStorage.getItem(STORAGE_KEY)
       if (savedUser) {
-        setUser(JSON.parse(savedUser))
+        const parsed = JSON.parse(savedUser)
+        // Migrate legacy mainTrack to tracks array
+        if (parsed.mainTrack && !parsed.tracks) {
+          parsed.tracks = [parsed.mainTrack]
+          delete parsed.mainTrack
+        }
+        // Ensure tracks is always an array
+        if (!parsed.tracks) {
+          parsed.tracks = []
+        }
+        setUser(parsed)
       }
 
       const savedXp = localStorage.getItem(STORAGE_XP_KEY)
@@ -261,7 +271,17 @@ export function AcademyDemoProvider({ children }: { children: React.ReactNode })
 
       const savedOnboarding = localStorage.getItem(STORAGE_ONBOARDING_KEY)
       if (savedOnboarding) {
-        setOnboarding(JSON.parse(savedOnboarding))
+        const parsedOnboarding = JSON.parse(savedOnboarding)
+        // Migrate legacy selectedTrack to selectedTracks array
+        if (parsedOnboarding.selectedTrack && !parsedOnboarding.selectedTracks) {
+          parsedOnboarding.selectedTracks = [parsedOnboarding.selectedTrack]
+          delete parsedOnboarding.selectedTrack
+        }
+        // Ensure selectedTracks is always an array
+        if (!parsedOnboarding.selectedTracks) {
+          parsedOnboarding.selectedTracks = []
+        }
+        setOnboarding(parsedOnboarding)
       }
 
       logger.info('Demo mode loaded from localStorage')
