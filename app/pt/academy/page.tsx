@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAcademyDemo } from '@/hooks/use-academy-demo'
+import { useAcademyAuth } from '@/hooks/use-academy-auth'
 import {
   AcademyHeader,
   AcademySidebar,
@@ -11,6 +13,7 @@ import {
   BadgeShowcase,
   InternshipContractModal,
   CertificateModal,
+  LgpdConsentModal,
 } from '@/components/academy'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,14 +22,23 @@ import {
   Flame,
   Clock,
   MessageSquare,
-  BookOpen,
   Video,
   FileText,
-  Award,
   GraduationCap,
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
+
+/**
+ * Academy Dashboard Page
+ *
+ * Supports both real authentication and demo mode.
+ * - Real auth: Users logged in via GitHub/Google
+ * - Demo mode: URL param ?demo=true
+ *
+ * Author: Anderson Henrique da Silva
+ * Updated: 2025-12-06
+ */
 
 // Rank configuration
 const ranks = {
@@ -44,23 +56,76 @@ const academyAgent = {
   role: 'Mentor da Academy',
   emoji: '✈️',
   avatar: '/agents/santos-dumont.png',
-  specialty: 'Inovação, engenharia criativa e apoio ao aprendizado',
+  specialty: 'Inovacao, engenharia criativa e apoio ao aprendizado',
   description:
-    'O Pai da Aviação é seu mentor na Academy! Santos-Dumont incentiva a inovação, criatividade e persistência. Tire dúvidas técnicas e receba orientação para seus projetos.',
+    'O Pai da Aviacao e seu mentor na Academy! Santos-Dumont incentiva a inovacao, criatividade e persistencia. Tire duvidas tecnicas e receba orientacao para seus projetos.',
 }
 
 export default function AcademyDashboardPage() {
-  const { user, isLoading, xpTransactions, badges, checkAndAwardBadges, resetDemo } =
-    useAcademyDemo()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const isDemoMode = searchParams.get('demo') === 'true'
+
+  // Auth hooks
+  const realAuth = useAcademyAuth()
+  const demoAuth = useAcademyDemo()
+
+  // Determine which auth to use
+  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
+  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
+
+  // Get user data based on auth mode
+  const user = useMemo(() => {
+    if (isDemoMode) {
+      return demoAuth.user
+    }
+    if (realAuth.isAuthenticated && realAuth.user) {
+      // Map real auth user to demo user format for compatibility
+      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(realAuth.user.name)}&background=16a34a&color=fff`
+      return {
+        ...demoAuth.user, // Keep demo defaults for missing fields
+        id: realAuth.user.id,
+        name: realAuth.user.name,
+        email: realAuth.user.email,
+        avatar: realAuth.user.avatar || defaultAvatar,
+        totalXp: realAuth.user.totalXp,
+        currentLevel: realAuth.user.currentLevel,
+        currentRank: realAuth.user.currentRank,
+        currentStreak: realAuth.user.currentStreak,
+        totalTimeMinutes: realAuth.user.totalTimeMinutes,
+        totalSessions: realAuth.user.totalSessions,
+        hasAcceptedLgpd: realAuth.user.hasAcceptedLgpd,
+      }
+    }
+    return demoAuth.user
+  }, [isDemoMode, realAuth.isAuthenticated, realAuth.user, demoAuth.user])
+
+  const { xpTransactions, badges, checkAndAwardBadges, resetDemo } = demoAuth
+
   const [showContractModal, setShowContractModal] = useState(false)
   const [showCertificateModal, setShowCertificateModal] = useState(false)
+  const [showLgpdModal, setShowLgpdModal] = useState(false)
 
-  // Show internship contract modal on first access
+  // Redirect unauthenticated users to login (if not in demo mode)
   useEffect(() => {
-    if (!isLoading && !user.hasAcceptedInternshipContract) {
+    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+      router.replace('/pt/academy/login')
+    }
+  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+
+  // Show LGPD consent modal for authenticated users who haven't accepted
+  useEffect(() => {
+    if (isRealAuth && realAuth.user && !realAuth.user.hasAcceptedLgpd) {
+      setShowLgpdModal(true)
+    }
+  }, [isRealAuth, realAuth.user])
+
+  // Show internship contract modal for demo mode on first access
+  useEffect(() => {
+    if (isDemoMode && !demoAuth.isLoading && !demoAuth.user.hasAcceptedInternshipContract) {
       setShowContractModal(true)
     }
-  }, [isLoading, user.hasAcceptedInternshipContract])
+  }, [isDemoMode, demoAuth.isLoading, demoAuth.user.hasAcceptedInternshipContract])
 
   // Check for badge eligibility whenever user data changes
   useEffect(() => {
@@ -82,14 +147,36 @@ export default function AcademyDashboardPage() {
     )
   }
 
+  // If not demo and not authenticated, show loading (redirect will happen)
+  if (!isDemoMode && !realAuth.isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
+  }
+
   const rankInfo = ranks[user.currentRank as keyof typeof ranks] || ranks.novato
   const nextRank = Object.values(ranks).find((r) => r.minXp > user.totalXp)
   const xpForNextRank = nextRank ? nextRank.minXp - user.totalXp : 0
 
+  const handleLogout = async () => {
+    if (isRealAuth) {
+      await realAuth.logout()
+    } else {
+      resetDemo()
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <AcademyHeader user={user} onReset={resetDemo} />
+      <AcademyHeader user={user} onReset={handleLogout} />
 
       <div className="flex flex-1">
         {/* Sidebar */}
@@ -98,16 +185,31 @@ export default function AcademyDashboardPage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Demo Mode Banner */}
+            {isDemoMode && (
+              <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎮</span>
+                  <span className="font-medium text-amber-800 dark:text-amber-200">
+                    Modo Demonstracao
+                  </span>
+                  <span className="text-sm text-amber-600 dark:text-amber-400">
+                    - Os dados sao salvos apenas localmente
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Welcome Section */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Olá, {user.name.split(' ')[0]}!
+                  Ola, {user.name.split(' ')[0]}!
                 </h2>
                 <span className="text-2xl animate-bounce">👋</span>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
-                Pronto para mais uma sessão de aprendizado? Seu progresso está incrível!
+                Pronto para mais uma sessao de aprendizado? Seu progresso esta incrivel!
               </p>
             </div>
 
@@ -196,10 +298,10 @@ export default function AcademyDashboardPage() {
                       {/* Capabilities */}
                       <div className="flex flex-wrap gap-2 mb-6">
                         {[
-                          'Dúvidas de Código',
-                          'Revisão de PRs',
+                          'Duvidas de Codigo',
+                          'Revisao de PRs',
                           'Arquitetura',
-                          'Boas Práticas',
+                          'Boas Praticas',
                         ].map((cap) => (
                           <span
                             key={cap}
@@ -215,7 +317,7 @@ export default function AcademyDashboardPage() {
                         size="lg"
                         rightIcon={<ArrowRight className="w-5 h-5" />}
                         onClick={() =>
-                          (window.location.href = `/pt/academy/chat?agent=${academyAgent.id}`)
+                          (window.location.href = `/pt/academy/chat?agent=${academyAgent.id}${isDemoMode ? '&demo=true' : ''}`)
                         }
                       >
                         Iniciar Conversa
@@ -236,38 +338,38 @@ export default function AcademyDashboardPage() {
                 <Card variant="elevated" padding="md">
                   <CardHeader className="mb-4">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Award className="w-5 h-5 text-green-600 dark:text-green-400" />
-                      Ações Rápidas
+                      <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      Acoes Rapidas
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <QuickActionCard
                       icon="📝"
-                      label="Escrever no diário"
+                      label="Escrever no diario"
                       description="Registre seu aprendizado"
-                      href="/pt/academy/diario"
+                      href={`/pt/academy/diario${isDemoMode ? '?demo=true' : ''}`}
                     />
                     <QuickActionCard
                       icon={Video}
-                      label="Assistir vídeos"
+                      label="Assistir videos"
                       description="Continue seu progresso"
-                      href="/pt/academy/videos"
+                      href={`/pt/academy/videos${isDemoMode ? '?demo=true' : ''}`}
                     />
                     <QuickActionCard
                       icon={FileText}
-                      label="Leituras obrigatórias"
+                      label="Leituras obrigatorias"
                       description="Material essencial"
-                      href="/pt/academy/leituras"
+                      href={`/pt/academy/leituras${isDemoMode ? '?demo=true' : ''}`}
                     />
                     <QuickActionCard
                       icon={Trophy}
                       label="Ver ranking"
-                      description="Sua posição atual"
-                      href="/pt/academy/ranking"
+                      description="Sua posicao atual"
+                      href={`/pt/academy/ranking${isDemoMode ? '?demo=true' : ''}`}
                     />
                     <QuickActionCard
                       icon={GraduationCap}
-                      label="Certificado e Relatório"
+                      label="Certificado e Relatorio"
                       description="Baixe seu certificado"
                       onClick={() => setShowCertificateModal(true)}
                       variant="gradient"
@@ -296,6 +398,11 @@ export default function AcademyDashboardPage() {
       <CertificateModal
         isOpen={showCertificateModal}
         onClose={() => setShowCertificateModal(false)}
+      />
+      <LgpdConsentModal
+        isOpen={showLgpdModal}
+        onClose={() => setShowLgpdModal(false)}
+        useRealAuth={isRealAuth}
       />
     </div>
   )
