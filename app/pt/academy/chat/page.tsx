@@ -168,152 +168,88 @@ function ChatContent() {
     try {
       let responseContent = ''
 
-      if (chatMode === 'maritaca') {
-        // Use backend Maritaca endpoint (no API key exposure)
-        try {
-          const maritacaResponse = await fetch(`${BACKEND_URL}/api/v1/chat/direct/maritaca`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: userMessage.content,
-              system_prompt: currentMode.systemPrompt,
-              model: 'sabia-3',
-              max_tokens: 1024,
-              temperature: 0.7,
-            }),
-          })
+      // All modes use streaming endpoint with appropriate agent
+      // - mentor: santos_dumont (engineering mentor)
+      // - lina: bobardi (UI/UX mentor)
+      // - maritaca: abaporu (general purpose agent)
+      const backendAgentId =
+        chatMode === 'lina' ? 'bobardi' : chatMode === 'maritaca' ? 'abaporu' : 'santos_dumont'
 
-          if (maritacaResponse.ok) {
-            const data = await maritacaResponse.json()
-            responseContent =
-              data.response ||
-              data.content ||
-              data.message ||
-              'Desculpe, nao consegui processar sua mensagem.'
-          } else {
-            const errorData = await maritacaResponse.json().catch(() => ({}))
-            console.error('Maritaca backend error:', errorData)
-            throw new Error('Backend Maritaca not available')
-          }
-        } catch (error) {
-          console.error('Maritaca via backend failed:', error)
-          // Fallback demo mode
-          responseContent = `Ola! Sou a Maritaca AI.
+      try {
+        setIsStreaming(true)
+        setStreamingContent('')
 
-O servico esta temporariamente indisponivel. Aqui vai uma dica sobre "${userMessage.content}":
+        const response = await fetch(`${BACKEND_URL}/api/v1/chat/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: userMessage.content,
+            agent_id: backendAgentId,
+          }),
+        })
 
-A Academy Cidadao.AI e um programa de estagio focado em desenvolvimento de software e inteligencia artificial. Continue praticando e explorando!
-
-Tente novamente em alguns instantes.`
+        if (!response.ok) {
+          throw new Error('Backend not available')
         }
-      } else {
-        // Mentor agents (Santos Dumont or Lina Bo Bardi) - Backend agent with SSE streaming
-        const backendAgentId = chatMode === 'lina' ? 'bobardi' : 'santos_dumont'
 
-        try {
-          setIsStreaming(true)
-          setStreamingContent('')
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let accumulatedContent = ''
 
-          const response = await fetch(`${BACKEND_URL}/api/v1/chat/stream`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message: userMessage.content,
-              agent_id: backendAgentId,
-            }),
-          })
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
 
-          if (!response.ok) {
-            throw new Error('Backend not available')
-          }
+            const chunk = decoder.decode(value, { stream: true })
+            const lines = chunk.split('\n')
 
-          const reader = response.body?.getReader()
-          const decoder = new TextDecoder()
-          let accumulatedContent = ''
-
-          if (reader) {
-            while (true) {
-              const { done, value } = await reader.read()
-              if (done) break
-
-              const chunk = decoder.decode(value, { stream: true })
-              const lines = chunk.split('\n')
-
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  try {
-                    const data = JSON.parse(line.slice(6))
-                    if (data.type === 'chunk' && data.content) {
-                      // Add space between chunks if needed (backend sends chunks without trailing spaces)
-                      const needsSpace =
-                        accumulatedContent.length > 0 &&
-                        !accumulatedContent.endsWith(' ') &&
-                        !accumulatedContent.endsWith('\n') &&
-                        !data.content.startsWith(' ') &&
-                        !data.content.startsWith('\n')
-                      accumulatedContent += (needsSpace ? ' ' : '') + data.content
-                      setStreamingContent(accumulatedContent)
-                    } else if (data.type === 'complete') {
-                      // Stream complete
-                      break
-                    } else if (data.type === 'error') {
-                      throw new Error(data.message || 'Erro no streaming')
-                    }
-                  } catch {
-                    // Skip invalid JSON lines
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6))
+                  if (data.type === 'chunk' && data.content) {
+                    // Add space between chunks if needed
+                    const needsSpace =
+                      accumulatedContent.length > 0 &&
+                      !accumulatedContent.endsWith(' ') &&
+                      !accumulatedContent.endsWith('\n') &&
+                      !data.content.startsWith(' ') &&
+                      !data.content.startsWith('\n')
+                    accumulatedContent += (needsSpace ? ' ' : '') + data.content
+                    setStreamingContent(accumulatedContent)
+                  } else if (data.type === 'complete') {
+                    break
+                  } else if (data.type === 'error') {
+                    throw new Error(data.message || 'Erro no streaming')
                   }
+                } catch {
+                  // Skip invalid JSON lines
                 }
               }
             }
           }
-
-          responseContent = accumulatedContent || 'Desculpe, não consegui processar sua mensagem.'
-          setIsStreaming(false)
-          setStreamingContent('')
-        } catch {
-          setIsStreaming(false)
-          setStreamingContent('')
-
-          // Fallback to Maritaca via backend with Santos Dumont persona
-          try {
-            const maritacaResponse = await fetch(`${BACKEND_URL}/api/v1/chat/direct/maritaca`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                message: userMessage.content,
-                system_prompt: currentMode.systemPrompt,
-                model: 'sabia-3',
-                max_tokens: 1024,
-                temperature: 0.7,
-              }),
-            })
-
-            if (maritacaResponse.ok) {
-              const data = await maritacaResponse.json()
-              responseContent =
-                data.response ||
-                data.content ||
-                data.message ||
-                'Desculpe, não consegui processar sua mensagem.'
-            } else {
-              throw new Error('Maritaca fallback failed')
-            }
-          } catch {
-            // Demo mode fallback
-            responseContent = `Ola, jovem inventor! Sou Santos-Dumont, seu mentor na Academy! ✈️
-
-Sua pergunta sobre "${userMessage.content}" e muito interessante!
-
-Assim como na aviacao, o aprendizado requer persistencia e criatividade. Cada linha de codigo e como um componente do seu 14-bis pessoal.
-
-Algumas dicas para você:
-• Experimente, erre e aprenda - é assim que a inovação acontece
-• Documente suas descobertas no diário de aprendizado
-• Não tenha medo de perguntar - a curiosidade é o motor do progresso
-
-Continue voando alto! 🛫`
-          }
         }
+
+        responseContent = accumulatedContent || 'Desculpe, nao consegui processar sua mensagem.'
+        setIsStreaming(false)
+        setStreamingContent('')
+      } catch {
+        setIsStreaming(false)
+        setStreamingContent('')
+
+        // Offline fallback with generic helpful response
+        responseContent = `Ola! Sou ${currentMode.name}, seu mentor na Academy! ${currentMode.emoji}
+
+Parece que estou com dificuldade de conexao no momento.
+
+Enquanto isso, aqui vao algumas dicas gerais:
+• A Academy Cidadao.AI e um programa focado em desenvolvimento de software e IA
+• Explore as trilhas de aprendizado disponiveis
+• Use o diario de bordo para registrar seu progresso
+• Cada conversa e sessao de estudo gera XP!
+
+Tente novamente em alguns instantes. Continue aprendendo! 🚀`
       }
 
       const assistantMessage: Message = {
