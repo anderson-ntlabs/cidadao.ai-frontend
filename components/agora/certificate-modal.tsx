@@ -20,8 +20,19 @@ import {
   CheckCircle,
   Sparkles,
   ScrollText,
+  ShieldAlert,
+  Lock,
+  Unlock,
 } from 'lucide-react'
 import { trackCertificateDownload, trackReportDownload } from '@/lib/analytics/agora-tracker'
+import {
+  validateCertificateRequirements,
+  verifyTelemetryConsistency,
+  determineCertificateType,
+  formatCertificateType,
+  type TelemetryData,
+  type CertificateRequirement,
+} from '@/lib/agora/certificate-requirements'
 
 interface CertificateModalProps {
   isOpen: boolean
@@ -31,32 +42,39 @@ interface CertificateModalProps {
 const VIDEO_PROGRESS_KEY = 'agora_demo_video_progress'
 const READING_PROGRESS_KEY = 'agora_demo_reading_progress'
 
-interface TelemetryData {
-  videosCompleted: number
-  totalVideos: number
-  readingsCompleted: number
-  totalReadings: number
-  totalXp: number
-  totalTimeMinutes: number
-  totalSessions: number
-  diaryEntries: number
-  chatMessages: number
-}
+// Video durations in seconds (from videos page)
+const REQUIRED_VIDEO_DURATIONS = [720, 2100, 7200] // 3 required videos
+const TOTAL_VIDEO_DURATIONS = [
+  720, 2100, 7200, 2400, 3000, 1800, 2400, 4500, 3000, 2400, 2400, 7200, 1200, 3600, 2700,
+]
 
 export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
   const { user, xpTransactions, diaryEntries, sessions } = useAgoraDemo()
   const [isGenerating, setIsGenerating] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryData>({
     videosCompleted: 0,
-    totalVideos: 10,
+    totalVideos: 15,
+    requiredVideosCompleted: 0,
+    totalRequiredVideos: 3,
+    totalVideoWatchTimeSeconds: 0,
+    requiredVideoWatchTimeSeconds: REQUIRED_VIDEO_DURATIONS.reduce((a, b) => a + b, 0),
     readingsCompleted: 0,
     totalReadings: 8,
+    requiredReadingsCompleted: 0,
+    totalRequiredReadings: 2,
     totalXp: 0,
     totalTimeMinutes: 0,
     totalSessions: 0,
     diaryEntries: 0,
     chatMessages: 0,
+    currentStreak: 0,
   })
+  const [validation, setValidation] = useState<ReturnType<
+    typeof validateCertificateRequirements
+  > | null>(null)
+  const [consistency, setConsistency] = useState<ReturnType<
+    typeof verifyTelemetryConsistency
+  > | null>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -64,34 +82,76 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       const videoProgress = localStorage.getItem(VIDEO_PROGRESS_KEY)
       const readingProgress = localStorage.getItem(READING_PROGRESS_KEY)
 
-      const videosCompleted = videoProgress
-        ? (Object.values(JSON.parse(videoProgress)) as Array<{ status?: string }>).filter(
-            (v) => v.status === 'completed'
-          ).length
-        : 0
+      // Parse video progress with watch time
+      let videosCompleted = 0
+      let requiredVideosCompleted = 0
+      let totalVideoWatchTimeSeconds = 0
 
-      const readingsCompleted = readingProgress
-        ? (Object.values(JSON.parse(readingProgress)) as Array<{ status?: string }>).filter(
-            (r) => r.status === 'completed'
-          ).length
-        : 0
+      if (videoProgress) {
+        const parsed = JSON.parse(videoProgress) as Record<
+          string,
+          { status?: string; watched_seconds?: number; video_id?: string }
+        >
+        Object.entries(parsed).forEach(([id, v]) => {
+          if (v.status === 'completed') {
+            videosCompleted++
+            // Check if required video (IDs 1, 2, 3 are required)
+            if (['1', '2', '3'].includes(id)) {
+              requiredVideosCompleted++
+            }
+          }
+          totalVideoWatchTimeSeconds += v.watched_seconds || 0
+        })
+      }
+
+      // Parse reading progress
+      let readingsCompleted = 0
+      let requiredReadingsCompleted = 0
+
+      if (readingProgress) {
+        const parsed = JSON.parse(readingProgress) as Record<
+          string,
+          { status?: string; reading_id?: string }
+        >
+        Object.entries(parsed).forEach(([id, r]) => {
+          if (r.status === 'completed') {
+            readingsCompleted++
+            // Check if required reading (IDs 1, 2 are required)
+            if (['1', '2'].includes(id)) {
+              requiredReadingsCompleted++
+            }
+          }
+        })
+      }
 
       // Count chat messages from XP transactions
-      const chatMessages = xpTransactions.filter(
+      const chatXpTransactions = xpTransactions.filter(
         (t) => t.sourceType === 'chat' || t.sourceType === 'agent_chat'
-      ).length
+      )
+      const chatMessages = chatXpTransactions.length * 5 // Each transaction = 5 messages
 
-      setTelemetry({
+      const newTelemetry: TelemetryData = {
         videosCompleted,
-        totalVideos: 10,
+        totalVideos: 15,
+        requiredVideosCompleted,
+        totalRequiredVideos: 3,
+        totalVideoWatchTimeSeconds,
+        requiredVideoWatchTimeSeconds: REQUIRED_VIDEO_DURATIONS.reduce((a, b) => a + b, 0),
         readingsCompleted,
         totalReadings: 8,
+        requiredReadingsCompleted,
+        totalRequiredReadings: 2,
         totalXp: user.totalXp,
         totalTimeMinutes: user.totalTimeMinutes,
         totalSessions: sessions.length,
         diaryEntries: diaryEntries.length,
-        chatMessages: chatMessages * 5, // Approximate messages (XP given every 5 messages)
-      })
+        chatMessages,
+        currentStreak: user.currentStreak,
+      }
+
+      setTelemetry(newTelemetry)
+      setValidation(validateCertificateRequirements(newTelemetry))
+      setConsistency(verifyTelemetryConsistency(newTelemetry))
     }
   }, [isOpen, user, xpTransactions, diaryEntries, sessions])
 
@@ -543,51 +603,70 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     }
   }
 
-  // Calculate completion percentage
-  const completionPercentage = Math.round(
-    (telemetry.videosCompleted / telemetry.totalVideos) * 40 +
-      (telemetry.readingsCompleted / telemetry.totalReadings) * 30 +
-      (telemetry.diaryEntries > 0 ? 15 : 0) +
-      (telemetry.totalSessions > 0 ? 15 : 0)
-  )
+  // Use validation from requirements system
+  const canGenerateCertificate = validation?.canGenerate ?? false
+  const completionPercentage = validation?.progressPercentage ?? 0
+  const hasConsistencyWarnings = consistency?.warnings && consistency.warnings.length > 0
 
-  const canGenerateCertificate = telemetry.videosCompleted >= 3 || telemetry.readingsCompleted >= 2
+  // Get certificate type if eligible
+  let certificateType: ReturnType<typeof formatCertificateType> | null = null
+  if (canGenerateCertificate) {
+    try {
+      const type = determineCertificateType(telemetry)
+      certificateType = formatCertificateType(type)
+    } catch {
+      // Not eligible
+    }
+  }
 
   const uiMetrics = [
     {
-      label: 'Vídeos Assistidos',
-      value: telemetry.videosCompleted,
-      max: telemetry.totalVideos,
+      label: 'Vídeos Obrigatórios',
+      value: telemetry.requiredVideosCompleted,
+      max: telemetry.totalRequiredVideos,
       icon: Video,
       color: 'green',
+      required: true,
     },
     {
-      label: 'Leituras Concluídas',
-      value: telemetry.readingsCompleted,
-      max: telemetry.totalReadings,
+      label: 'Tempo de Vídeo (min)',
+      value: Math.floor(telemetry.totalVideoWatchTimeSeconds / 60),
+      max: 120,
+      icon: Clock,
+      color: 'green',
+      required: true,
+    },
+    {
+      label: 'Leituras Obrigatórias',
+      value: telemetry.requiredReadingsCompleted,
+      max: telemetry.totalRequiredReadings,
       icon: BookOpen,
       color: 'blue',
+      required: true,
     },
     {
       label: 'Entradas no Diário',
       value: telemetry.diaryEntries,
-      max: 10,
+      max: 3,
       icon: FileText,
       color: 'purple',
-    },
-    {
-      label: 'Sessões de Estudo',
-      value: telemetry.totalSessions,
-      max: 20,
-      icon: Clock,
-      color: 'orange',
+      required: true,
     },
     {
       label: 'Mensagens com Mentor',
       value: telemetry.chatMessages,
-      max: 50,
+      max: 10,
       icon: MessageSquare,
       color: 'pink',
+      required: true,
+    },
+    {
+      label: 'Tempo Total (min)',
+      value: telemetry.totalTimeMinutes,
+      max: 180,
+      icon: Clock,
+      color: 'orange',
+      required: true,
     },
   ]
 
@@ -597,6 +676,21 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     purple: 'bg-purple-500',
     orange: 'bg-orange-500',
     pink: 'bg-pink-500',
+  }
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'video':
+        return Video
+      case 'reading':
+        return BookOpen
+      case 'engagement':
+        return MessageSquare
+      case 'time':
+        return Clock
+      default:
+        return CheckCircle
+    }
   }
 
   return (
@@ -707,41 +801,113 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
             </Card>
           </div>
 
-          {/* Requirements Warning */}
-          {!canGenerateCertificate && (
+          {/* Requirements Checklist */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+              {canGenerateCertificate ? (
+                <Unlock className="w-4 h-4 text-green-500" />
+              ) : (
+                <Lock className="w-4 h-4 text-amber-500" />
+              )}
+              Requisitos para Certificado
+              <Badge variant={canGenerateCertificate ? 'success' : 'warning'} size="sm">
+                {validation?.completedRequirements ?? 0}/{validation?.totalRequirements ?? 0}
+              </Badge>
+            </h3>
+
+            <div className="space-y-2">
+              {validation?.requirements.map((req) => {
+                const Icon = getCategoryIcon(req.category)
+                return (
+                  <div
+                    key={req.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${
+                      req.met
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        req.met
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                      }`}
+                    >
+                      {req.met ? <CheckCircle className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-sm font-medium ${
+                          req.met
+                            ? 'text-green-700 dark:text-green-300'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        {req.label}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {req.description}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`text-sm font-bold ${
+                          req.met
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-gray-600 dark:text-gray-400'
+                        }`}
+                      >
+                        {req.currentValue}
+                      </p>
+                      <p className="text-xs text-gray-400">/ {req.required}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Consistency Warnings */}
+          {hasConsistencyWarnings && (
             <Card
               variant="outlined"
               padding="sm"
-              className="border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20"
+              className="border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20"
             >
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <ShieldAlert className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
-                    Requisitos para Certificado
+                  <h4 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                    Avisos de Consistência
                   </h4>
-                  <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-                    <li
-                      className={`flex items-center gap-2 ${telemetry.videosCompleted >= 3 ? 'line-through opacity-50' : ''}`}
-                    >
-                      {telemetry.videosCompleted >= 3 ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <Video className="w-4 h-4" />
-                      )}
-                      Assistir pelo menos 3 vídeos
-                    </li>
-                    <li
-                      className={`flex items-center gap-2 ${telemetry.readingsCompleted >= 2 ? 'line-through opacity-50' : ''}`}
-                    >
-                      {telemetry.readingsCompleted >= 2 ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <BookOpen className="w-4 h-4" />
-                      )}
-                      Completar pelo menos 2 leituras
-                    </li>
+                  <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                    {consistency?.warnings.map((warning, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <AlertTriangle className="w-3 h-3" />
+                        {warning}
+                      </li>
+                    ))}
                   </ul>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Certificate Type Badge */}
+          {canGenerateCertificate && certificateType && (
+            <Card
+              variant="filled"
+              padding="sm"
+              className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-200 dark:border-green-700"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{certificateType.emoji}</span>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Tipo de Certificado</p>
+                  <p className="text-lg font-bold text-green-700 dark:text-green-300">
+                    {certificateType.label}
+                  </p>
                 </div>
               </div>
             </Card>
