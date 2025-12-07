@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
@@ -366,9 +366,23 @@ export default function AcademyVideosPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url('/operarios.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.03,
+        }}
+      />
+      {/* Gradient Overlay */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
+
       {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
+      <header className="relative z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
@@ -396,7 +410,7 @@ export default function AcademyVideosPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         {/* Category filter */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
@@ -421,16 +435,13 @@ export default function AcademyVideosPage() {
             const progressPercent = videoProgress?.progress_percentage || 0
 
             return (
-              <Card
+              <GlassCard
                 key={video.id}
-                variant="elevated"
-                padding="none"
-                interactive
-                onClick={() => handleVideoClick(video)}
                 className={cn(
-                  'group overflow-hidden animate-fade-in',
+                  'group overflow-hidden animate-fade-in cursor-pointer hover:shadow-lg transition-all duration-300',
                   isCompleted && 'ring-2 ring-green-500/50'
                 )}
+                onClick={() => handleVideoClick(video)}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Thumbnail */}
@@ -480,7 +491,7 @@ export default function AcademyVideosPage() {
                 </div>
 
                 {/* Info */}
-                <CardContent className="p-4">
+                <GlassCardContent className="p-4">
                   <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                     {video.title}
                   </h3>
@@ -508,15 +519,15 @@ export default function AcademyVideosPage() {
                       {categories.find((c) => c.id === video.category)?.name}
                     </span>
                   </div>
-                </CardContent>
-              </Card>
+                </GlassCardContent>
+              </GlassCard>
             )
           })}
         </div>
 
         {filteredVideos.length === 0 && (
-          <Card variant="outlined" padding="lg" className="text-center">
-            <div className="py-8">
+          <GlassCard className="text-center">
+            <GlassCardContent className="py-12">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mx-auto mb-4">
                 <span className="text-5xl">📺</span>
               </div>
@@ -526,8 +537,8 @@ export default function AcademyVideosPage() {
               <p className="text-gray-600 dark:text-gray-400">
                 Os vídeos serão adicionados em breve
               </p>
-            </div>
-          </Card>
+            </GlassCardContent>
+          </GlassCard>
         )}
       </main>
 

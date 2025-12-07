@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -192,9 +192,23 @@ export default function AcademyRankingPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: `url('/operarios.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.03,
+        }}
+      />
+      {/* Gradient Overlay */}
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
+
       {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
+      <header className="relative z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -244,184 +258,186 @@ export default function AcademyRankingPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="relative z-10 max-w-4xl mx-auto px-4 py-8">
         {/* User position card */}
         {userRank > 0 && (
-          <Card
-            variant="filled"
-            padding="md"
-            className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 border-0 overflow-hidden relative"
-          >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+          <GlassCard className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 border-0 overflow-hidden relative">
+            <GlassCardContent className="p-6">
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
-            <div className="relative flex items-center justify-between text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
-                  <Crown className="w-8 h-8" />
+              <div className="relative flex items-center justify-between text-white">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <Crown className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <p className="text-green-100 text-sm mb-1">Sua posição</p>
+                    <p className="text-5xl font-bold">#{userRank}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-green-100 text-sm mb-1">Sua posição</p>
-                  <p className="text-5xl font-bold">#{userRank}</p>
+                <div className="text-right">
+                  <p className="text-green-100 text-sm mb-1">Seus pontos</p>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-yellow-300" />
+                    <p className="text-3xl font-bold">{user.totalXp} XP</p>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-green-100 text-sm mb-1">Seus pontos</p>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-yellow-300" />
-                  <p className="text-3xl font-bold">{user.totalXp} XP</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+            </GlassCardContent>
+          </GlassCard>
         )}
 
         {/* Filter tabs */}
-        <Card variant="outlined" padding="sm" className="mb-6">
-          <div className="flex gap-1">
-            {filterTabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <Button
-                  key={tab.id}
-                  onClick={() => setFilter(tab.id as 'xp' | 'time' | 'streak')}
-                  variant={filter === tab.id ? 'primary' : 'ghost'}
-                  size="md"
-                  className="flex-1"
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </Button>
-              )
-            })}
-          </div>
-        </Card>
+        <GlassCard className="mb-6">
+          <GlassCardContent className="p-2">
+            <div className="flex gap-1">
+              {filterTabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <Button
+                    key={tab.id}
+                    onClick={() => setFilter(tab.id as 'xp' | 'time' | 'streak')}
+                    variant={filter === tab.id ? 'primary' : 'ghost'}
+                    size="md"
+                    className="flex-1"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                  </Button>
+                )
+              })}
+            </div>
+          </GlassCardContent>
+        </GlassCard>
 
         {/* Leaderboard */}
-        <Card variant="elevated" padding="none" className="overflow-hidden">
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {sortedLeaderboard.map((entry, index) => {
-              const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
-              const isCurrentUser = entry.user_id === user.id
-              const position = index + 1
+        <GlassCard className="overflow-hidden">
+          <GlassCardContent className="p-0">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {sortedLeaderboard.map((entry, index) => {
+                const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
+                const isCurrentUser = entry.user_id === user.id
+                const position = index + 1
 
-              return (
-                <div
-                  key={entry.id}
-                  className={cn(
-                    'flex items-center gap-4 p-4 transition-colors',
-                    isCurrentUser && 'bg-green-50 dark:bg-green-900/20',
-                    position <= 3 &&
-                      !isCurrentUser &&
-                      'bg-gradient-to-r from-yellow-50/50 to-transparent dark:from-yellow-900/10',
-                    'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                  )}
-                >
-                  {/* Position */}
-                  <div className="flex-shrink-0 w-12 flex items-center justify-center">
-                    {getMedalIcon(position)}
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="relative flex-shrink-0">
-                    <img
-                      src={
-                        entry.avatar_url ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
-                      }
-                      alt={entry.full_name}
-                      className={cn(
-                        'w-12 h-12 rounded-xl object-cover',
-                        isCurrentUser &&
-                          'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-900'
-                      )}
-                    />
-                    {position <= 3 && (
-                      <div
-                        className={cn(
-                          'absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs',
-                          position === 1 && 'bg-yellow-400 text-yellow-900',
-                          position === 2 && 'bg-gray-300 text-gray-700',
-                          position === 3 && 'bg-amber-600 text-white'
-                        )}
-                      >
-                        <Star className="w-3 h-3" />
-                      </div>
+                return (
+                  <div
+                    key={entry.id}
+                    className={cn(
+                      'flex items-center gap-4 p-4 transition-colors',
+                      isCurrentUser && 'bg-green-50 dark:bg-green-900/20',
+                      position <= 3 &&
+                        !isCurrentUser &&
+                        'bg-gradient-to-r from-yellow-50/50 to-transparent dark:from-yellow-900/10',
+                      'hover:bg-gray-50 dark:hover:bg-gray-800/50'
                     )}
-                  </div>
+                  >
+                    {/* Position */}
+                    <div className="flex-shrink-0 w-12 flex items-center justify-center">
+                      {getMedalIcon(position)}
+                    </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p
+                    {/* Avatar */}
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={
+                          entry.avatar_url ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
+                        }
+                        alt={entry.full_name}
                         className={cn(
-                          'font-medium truncate',
-                          isCurrentUser
-                            ? 'text-green-700 dark:text-green-400'
-                            : 'text-gray-900 dark:text-gray-100'
+                          'w-12 h-12 rounded-xl object-cover',
+                          isCurrentUser &&
+                            'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-900'
                         )}
-                      >
-                        {entry.full_name}
+                      />
+                      {position <= 3 && (
+                        <div
+                          className={cn(
+                            'absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs',
+                            position === 1 && 'bg-yellow-400 text-yellow-900',
+                            position === 2 && 'bg-gray-300 text-gray-700',
+                            position === 3 && 'bg-amber-600 text-white'
+                          )}
+                        >
+                          <Star className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p
+                          className={cn(
+                            'font-medium truncate',
+                            isCurrentUser
+                              ? 'text-green-700 dark:text-green-400'
+                              : 'text-gray-900 dark:text-gray-100'
+                          )}
+                        >
+                          {entry.full_name}
+                        </p>
+                        {isCurrentUser && (
+                          <Badge variant="success" size="sm">
+                            Você
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={cn(
+                            'text-xs px-2 py-0.5 rounded-full font-medium',
+                            rankInfo.bg,
+                            rankInfo.text
+                          )}
+                        >
+                          Lv.{entry.current_level} {rankInfo.name}
+                        </span>
+                        {entry.current_streak > 0 && (
+                          <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
+                            <Flame className="w-3 h-3" />
+                            {entry.current_streak}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Score */}
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-gray-900 dark:text-gray-100">
+                        {filter === 'xp' && (
+                          <span className="flex items-center gap-1">
+                            <Zap className="w-4 h-4 text-yellow-500" />
+                            {entry.total_xp}
+                          </span>
+                        )}
+                        {filter === 'time' && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-blue-500" />
+                            {Math.floor(entry.total_time_minutes / 60)}h
+                          </span>
+                        )}
+                        {filter === 'streak' && (
+                          <span className="flex items-center gap-1">
+                            <Flame className="w-4 h-4 text-orange-500" />
+                            {entry.current_streak} dias
+                          </span>
+                        )}
                       </p>
-                      {isCurrentUser && (
-                        <Badge variant="success" size="sm">
-                          Você
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={cn(
-                          'text-xs px-2 py-0.5 rounded-full font-medium',
-                          rankInfo.bg,
-                          rankInfo.text
-                        )}
-                      >
-                        Lv.{entry.current_level} {rankInfo.name}
-                      </span>
-                      {entry.current_streak > 0 && (
-                        <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
-                          <Flame className="w-3 h-3" />
-                          {entry.current_streak}
-                        </span>
-                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {filter === 'xp' && 'XP'}
+                        {filter === 'time' && 'Total'}
+                        {filter === 'streak' && 'Streak'}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Score */}
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-gray-900 dark:text-gray-100">
-                      {filter === 'xp' && (
-                        <span className="flex items-center gap-1">
-                          <Zap className="w-4 h-4 text-yellow-500" />
-                          {entry.total_xp}
-                        </span>
-                      )}
-                      {filter === 'time' && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-blue-500" />
-                          {Math.floor(entry.total_time_minutes / 60)}h
-                        </span>
-                      )}
-                      {filter === 'streak' && (
-                        <span className="flex items-center gap-1">
-                          <Flame className="w-4 h-4 text-orange-500" />
-                          {entry.current_streak} dias
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {filter === 'xp' && 'XP'}
-                      {filter === 'time' && 'Total'}
-                      {filter === 'streak' && 'Streak'}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
+                )
+              })}
+            </div>
+          </GlassCardContent>
+        </GlassCard>
 
         {/* Footer note */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
