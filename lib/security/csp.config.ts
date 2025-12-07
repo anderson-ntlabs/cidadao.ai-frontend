@@ -117,7 +117,6 @@ export const productionCSP: CSPDirectives = {
   'connect-src': [
     "'self'",
     'https://cidadao-api-production.up.railway.app',
-    'https://cidadao-api-production.up.railway.app',
     'https://pbsiyuattnwgohvkkkks.supabase.co',
     'https://vercel.live',
     'https://*.vercel-insights.com',
@@ -129,6 +128,7 @@ export const productionCSP: CSPDirectives = {
     'https://us.i.posthog.com', // PostHog events
     'https://us-assets.i.posthog.com', // PostHog assets
     'https://app.posthog.com', // PostHog app
+    'https://api.ipify.org', // IP lookup service (for analytics/geolocation)
   ],
 
   // Media: Allow self-hosted, blob URLs (for TTS audio), and VLibras media (videos, audio for LIBRAS)

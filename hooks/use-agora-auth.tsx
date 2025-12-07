@@ -415,16 +415,22 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // Insert consent record
-        const { error: consentError } = await supabase.from('agora_consent').insert({
-          user_id: user.id,
-          consent_version: 'v1.0',
-          ip_address: ipAddress,
-          user_agent: userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : null),
-          tracking_consent: true,
-          data_processing_consent: true,
-          certificate_consent: true,
-        })
+        // Upsert consent record (update if exists, insert if not)
+        const { error: consentError } = await supabase.from('agora_consent').upsert(
+          {
+            user_id: user.id,
+            consent_version: 'v1.0',
+            ip_address: ipAddress,
+            user_agent:
+              userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : null),
+            tracking_consent: true,
+            data_processing_consent: true,
+            certificate_consent: true,
+          },
+          {
+            onConflict: 'user_id',
+          }
+        )
 
         if (consentError) throw consentError
 
