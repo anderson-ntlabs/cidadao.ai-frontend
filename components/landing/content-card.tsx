@@ -1,22 +1,25 @@
 /**
  * ContentCard Component
  *
- * Clickable card for landing page that opens modals with full content.
+ * Clickable card for landing page that opens modals or navigates to links.
  * Features glass morphism design, hover effects, and smooth animations.
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-11-06
+ * Updated: 2025-12-07 - Added href support for navigation
  */
 
 'use client'
 
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 interface ContentCardProps {
   icon: string // Emoji or icon
   title: string
   description: string
-  onClick: () => void
+  onClick?: () => void
+  href?: string // Optional link instead of onClick
   gradient?: string // Tailwind gradient classes
   className?: string
 }
@@ -26,32 +29,31 @@ export function ContentCard({
   title,
   description,
   onClick,
+  href,
   gradient = 'from-green-500 to-blue-600',
   className,
 }: ContentCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        // Base styles - Mobile optimized padding
-        'group relative w-full',
-        'bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm',
-        'rounded-xl sm:rounded-2xl p-6 sm:p-8',
-        'border border-gray-200/50 dark:border-gray-700/50',
-        'shadow-lg hover:shadow-xl',
-        // Transitions
-        'transition-all duration-300',
-        'hover:scale-105 active:scale-95',
-        'hover:-translate-y-1',
-        // Focus - Touch friendly
-        'focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-        // Touch target
-        'min-h-[44px]',
-        'touch-manipulation',
-        className
-      )}
-      aria-label={`Abrir ${title}`}
-    >
+  const cardClasses = cn(
+    // Base styles - Mobile optimized padding
+    'group relative w-full',
+    'bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm',
+    'rounded-xl sm:rounded-2xl p-6 sm:p-8',
+    'border border-gray-200/50 dark:border-gray-700/50',
+    'shadow-lg hover:shadow-xl',
+    // Transitions
+    'transition-all duration-300',
+    'hover:scale-105 active:scale-95',
+    'hover:-translate-y-1',
+    // Focus - Touch friendly
+    'focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
+    // Touch target
+    'min-h-[44px]',
+    'touch-manipulation',
+    className
+  )
+
+  const cardContent = (
+    <>
       {/* Gradient overlay on hover */}
       <div
         className={cn(
@@ -96,9 +98,24 @@ export function ContentCard({
 
         {/* Click indicator - Hidden on mobile */}
         <div className="hidden sm:block mt-2 text-xs text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-          Clique para saber mais →
+          {href ? 'Click to access →' : 'Click to learn more →'}
         </div>
       </div>
+    </>
+  )
+
+  // Render as Link if href is provided, otherwise as button
+  if (href) {
+    return (
+      <Link href={href} className={cn(cardClasses, 'block')} aria-label={`Go to ${title}`}>
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return (
+    <button onClick={onClick} className={cardClasses} aria-label={`Open ${title}`}>
+      {cardContent}
     </button>
   )
 }

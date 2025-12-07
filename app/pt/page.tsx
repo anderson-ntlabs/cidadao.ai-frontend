@@ -122,7 +122,7 @@ export default function PTPageOptimized(): JSX.Element {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Static Cards */}
             <Link
               href="/pt/about"
@@ -154,6 +154,17 @@ export default function PTPageOptimized(): JSX.Element {
               <h3 className="text-xl font-bold mb-2">Nosso Manifesto</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Visão de democracia transparente e participativa através da tecnologia
+              </p>
+            </Link>
+
+            <Link
+              href="/pt/agora/login"
+              className="block p-6 bg-gradient-to-br from-purple-500/10 to-indigo-600/10 rounded-xl border border-purple-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-4xl mb-4">🏛️</div>
+              <h3 className="text-xl font-bold mb-2">Ágora</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Plataforma de capacitação em IA e transparência pública com gamificação
               </p>
             </Link>
           </div>
@@ -325,8 +336,8 @@ export default function PTPageOptimized(): JSX.Element {
                 href="/pt/agora/login"
                 className="hover:text-green-600 transition-colors flex items-center gap-1"
               >
-                <span>🎓</span>
-                <span>Academy</span>
+                <span>🏛️</span>
+                <span>Ágora</span>
               </Link>
             </div>
           </div>

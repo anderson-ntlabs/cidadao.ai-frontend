@@ -108,7 +108,7 @@ export default function ENPage(): JSX.Element {
       {/* Content Cards Grid - Mobile Optimized */}
       <section className="py-8 sm:py-12 bg-gradient-to-b from-transparent via-gray-50/50 dark:via-gray-900/20 to-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <ContentCard
               icon="🎓"
               title="About the Project"
@@ -129,6 +129,13 @@ export default function ENPage(): JSX.Element {
               description="Our Mission - Digital democracy and technological citizenship"
               onClick={() => setManifestoModalOpen(true)}
               gradient="from-yellow-500 to-orange-600"
+            />
+            <ContentCard
+              icon="🏛️"
+              title="Ágora"
+              description="Learning platform for AI and public transparency with gamification"
+              href="/pt/agora/login"
+              gradient="from-purple-500 to-indigo-600"
             />
           </div>
         </div>
