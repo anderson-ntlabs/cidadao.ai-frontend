@@ -1,148 +1,474 @@
 'use client'
 
+/**
+ * Agora Trilhas (Learning Tracks) Page
+ *
+ * Redesigned with improved UX:
+ * - Hero section with current track progress
+ * - Interactive track cards with expansion
+ * - Visual journey representation
+ * - Mentor connection per track
+ * - Mobile-first responsive design
+ *
+ * @author Anderson Henrique da Silva
+ * @date 2025-12-07
+ */
+
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useAgora, AgoraTrack } from '@/hooks/use-agora'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { useAgora } from '@/hooks/use-agora'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import {
   Server,
   Palette,
   Brain,
   Code,
+  ArrowLeft,
+  ArrowRight,
   CheckCircle2,
-  Play,
+  Circle,
   Clock,
   Trophy,
-  ArrowRight,
-  ArrowLeft,
   Sparkles,
   GraduationCap,
-  Plus,
+  BookOpen,
+  Video,
+  MessageSquare,
+  Star,
+  ChevronDown,
+  ChevronUp,
+  Play,
+  Lock,
+  Zap,
   Target,
+  Users,
 } from 'lucide-react'
-import { trackTrackEnrollment } from '@/lib/analytics/agora-tracker'
 
-/**
- * Academy Trilhas (Tracks) Page
- *
- * Shows all available tracks and user's progress:
- * - Tracks already enrolled
- * - Available tracks to start
- * - Progress per track
- * - Certificates earned
- *
- * Users can enroll in multiple tracks and earn multiple certificates.
- *
- * Author: Anderson Henrique da Silva
- * Date: 2025-12-06
- */
-
-const TRACKS_INFO = [
+// Track definitions with modules
+const TRACKS = [
   {
     id: 'backend' as const,
     name: 'Backend',
-    description: 'APIs, microservices e arquitetura de sistemas',
-    details: [
-      'FastAPI e Python',
-      'Design de APIs REST',
-      'Bancos de dados',
-      'Autenticacao e seguranca',
-    ],
+    subtitle: 'APIs & Arquitetura',
+    description: 'Aprenda a construir APIs robustas, microservicos e arquiteturas escalaveis',
     icon: Server,
-    color: 'from-blue-500 to-cyan-500',
-    bgColor: 'bg-blue-500/10 dark:bg-blue-500/20',
-    borderColor: 'border-blue-500',
+    color: 'blue',
+    gradient: 'from-blue-500 to-cyan-500',
+    bgLight: 'bg-blue-50',
+    bgDark: 'dark:bg-blue-950/30',
+    borderColor: 'border-blue-200 dark:border-blue-800',
+    textColor: 'text-blue-600 dark:text-blue-400',
+    mentor: {
+      id: 'santos-dumont',
+      name: 'Santos-Dumont',
+      role: 'Mentor de Engenharia',
+      image: '/agents/santos-dumont.png',
+    },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    modules: [
+      { id: 1, name: 'Fundamentos de APIs', type: 'video', duration: '45min' },
+      { id: 2, name: 'FastAPI na pratica', type: 'reading', duration: '30min' },
+      { id: 3, name: 'Design de REST APIs', type: 'chat', duration: '20min' },
+      { id: 4, name: 'Bancos de dados', type: 'video', duration: '60min' },
+      { id: 5, name: 'Autenticacao JWT', type: 'reading', duration: '25min' },
+      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
+    ],
   },
   {
     id: 'frontend' as const,
     name: 'Frontend',
-    description: 'Interfaces, UX/UI e aplicacoes web',
-    details: ['Next.js e React', 'TypeScript', 'Design System', 'Acessibilidade (a11y)'],
+    subtitle: 'UI/UX & React',
+    description: 'Crie interfaces incriveis com React, Next.js e design system profissional',
     icon: Palette,
-    color: 'from-purple-500 to-pink-500',
-    bgColor: 'bg-purple-500/10 dark:bg-purple-500/20',
-    borderColor: 'border-purple-500',
+    color: 'purple',
+    gradient: 'from-purple-500 to-pink-500',
+    bgLight: 'bg-purple-50',
+    bgDark: 'dark:bg-purple-950/30',
+    borderColor: 'border-purple-200 dark:border-purple-800',
+    textColor: 'text-purple-600 dark:text-purple-400',
+    mentor: {
+      id: 'bobardi',
+      name: 'Lina Bo Bardi',
+      role: 'Mentora de Design',
+      image: '/agents/bobardi.png',
+    },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    modules: [
+      { id: 1, name: 'React fundamentals', type: 'video', duration: '50min' },
+      { id: 2, name: 'Next.js App Router', type: 'reading', duration: '40min' },
+      { id: 3, name: 'TypeScript essencial', type: 'video', duration: '45min' },
+      { id: 4, name: 'Design System', type: 'chat', duration: '25min' },
+      { id: 5, name: 'Acessibilidade (a11y)', type: 'reading', duration: '30min' },
+      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
+    ],
   },
   {
     id: 'ia' as const,
     name: 'IA/ML',
-    description: 'Inteligencia artificial e machine learning',
-    details: ['Agentes de IA', 'LLMs e prompts', 'RAG e vetores', 'Avaliacao de modelos'],
+    subtitle: 'Agentes & LLMs',
+    description: 'Domine inteligencia artificial, agentes autonomos e Large Language Models',
     icon: Brain,
-    color: 'from-green-500 to-emerald-500',
-    bgColor: 'bg-green-500/10 dark:bg-green-500/20',
-    borderColor: 'border-green-500',
+    color: 'green',
+    gradient: 'from-green-500 to-emerald-500',
+    bgLight: 'bg-green-50',
+    bgDark: 'dark:bg-green-950/30',
+    borderColor: 'border-green-200 dark:border-green-800',
+    textColor: 'text-green-600 dark:text-green-400',
+    mentor: {
+      id: 'santos-dumont',
+      name: 'Santos-Dumont',
+      role: 'Mentor de Engenharia',
+      image: '/agents/santos-dumont.png',
+    },
     duration: '6-8 semanas',
     xpTotal: 2500,
+    modules: [
+      { id: 1, name: 'Introducao a IA', type: 'video', duration: '40min' },
+      { id: 2, name: 'LLMs e Prompts', type: 'reading', duration: '35min' },
+      { id: 3, name: 'Agentes de IA', type: 'chat', duration: '30min' },
+      { id: 4, name: 'RAG e Vetores', type: 'video', duration: '55min' },
+      { id: 5, name: 'Fine-tuning basico', type: 'reading', duration: '40min' },
+      { id: 6, name: 'Avaliacao de modelos', type: 'video', duration: '35min' },
+      { id: 7, name: 'Projeto final', type: 'project', duration: '3h' },
+    ],
   },
   {
     id: 'devops' as const,
     name: 'DevOps',
-    description: 'Infraestrutura, CI/CD e cloud',
-    details: ['Docker e containers', 'GitHub Actions', 'Monitoramento', 'Deploy e scaling'],
+    subtitle: 'Cloud & CI/CD',
+    description: 'Aprenda infraestrutura, containers, deploy automatizado e monitoramento',
     icon: Code,
-    color: 'from-orange-500 to-amber-500',
-    bgColor: 'bg-orange-500/10 dark:bg-orange-500/20',
-    borderColor: 'border-orange-500',
+    color: 'orange',
+    gradient: 'from-orange-500 to-amber-500',
+    bgLight: 'bg-orange-50',
+    bgDark: 'dark:bg-orange-950/30',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    textColor: 'text-orange-600 dark:text-orange-400',
+    mentor: {
+      id: 'santos-dumont',
+      name: 'Santos-Dumont',
+      role: 'Mentor de Engenharia',
+      image: '/agents/santos-dumont.png',
+    },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    modules: [
+      { id: 1, name: 'Docker essencial', type: 'video', duration: '50min' },
+      { id: 2, name: 'GitHub Actions', type: 'reading', duration: '35min' },
+      { id: 3, name: 'Deploy na cloud', type: 'video', duration: '45min' },
+      { id: 4, name: 'Monitoramento', type: 'chat', duration: '25min' },
+      { id: 5, name: 'Scaling e performance', type: 'reading', duration: '30min' },
+      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
+    ],
   },
 ]
 
-// Track progress mock data (will be replaced with real data from Supabase)
-interface TrackProgress {
-  trackId: AgoraTrack
-  status: 'not_started' | 'in_progress' | 'completed'
-  startedAt?: string
-  completedAt?: string
-  xpEarned: number
-  certificateId?: string
+const MODULE_ICONS = {
+  video: Video,
+  reading: BookOpen,
+  chat: MessageSquare,
+  project: Target,
 }
 
-export default function AcademyTrilhasPage() {
+function ModuleIcon({ type }: { type: string }) {
+  const Icon = MODULE_ICONS[type as keyof typeof MODULE_ICONS] || Circle
+  return <Icon className="w-4 h-4" />
+}
+
+function TrackCard({
+  track,
+  isEnrolled,
+  isExpanded,
+  onToggle,
+  onStart,
+  progress,
+}: {
+  track: (typeof TRACKS)[0]
+  isEnrolled: boolean
+  isExpanded: boolean
+  onToggle: () => void
+  onStart: () => void
+  progress: number
+}) {
+  const Icon = track.icon
+  const completedModules = Math.floor((progress / 100) * track.modules.length)
+
+  return (
+    <Card
+      variant="elevated"
+      className={cn(
+        'transition-all duration-300 overflow-hidden',
+        isExpanded && 'ring-2 ring-offset-2',
+        isExpanded && track.color === 'blue' && 'ring-blue-500',
+        isExpanded && track.color === 'purple' && 'ring-purple-500',
+        isExpanded && track.color === 'green' && 'ring-green-500',
+        isExpanded && track.color === 'orange' && 'ring-orange-500'
+      )}
+    >
+      {/* Card Header - Always visible */}
+      <button
+        onClick={onToggle}
+        className="w-full p-4 sm:p-6 text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+      >
+        <div className="flex items-start gap-4">
+          {/* Icon */}
+          <div
+            className={cn(
+              'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg flex-shrink-0',
+              track.gradient
+            )}
+          >
+            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                {track.name}
+              </h3>
+              {isEnrolled && (
+                <Badge variant="success" size="sm">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Ativa
+                </Badge>
+              )}
+            </div>
+            <p className={cn('text-sm font-medium', track.textColor)}>{track.subtitle}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+              {track.description}
+            </p>
+
+            {/* Quick stats */}
+            <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                {track.duration}
+              </span>
+              <span className="flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" />
+                {track.xpTotal} XP
+              </span>
+              <span className="flex items-center gap-1">
+                <BookOpen className="w-3.5 h-3.5" />
+                {track.modules.length} modulos
+              </span>
+            </div>
+
+            {/* Progress bar for enrolled tracks */}
+            {isEnrolled && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-gray-600 dark:text-gray-400">Progresso</span>
+                  <span className={cn('font-medium', track.textColor)}>{progress}%</span>
+                </div>
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full bg-gradient-to-r transition-all duration-500',
+                      track.gradient
+                    )}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Expand indicator */}
+          <div className="flex-shrink-0 self-center">
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+        </div>
+      </button>
+
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className={cn('border-t', track.borderColor)}>
+          {/* Mentor Section */}
+          <div className={cn('p-4 sm:p-6', track.bgLight, track.bgDark)}>
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-lg ring-2 ring-white dark:ring-gray-800">
+                <Image
+                  src={track.mentor.image}
+                  alt={track.mentor.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Seu mentor
+                </p>
+                <p className="font-bold text-gray-900 dark:text-white">{track.mentor.name}</p>
+                <p className={cn('text-sm', track.textColor)}>{track.mentor.role}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Modules List */}
+          <div className="p-4 sm:p-6">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Modulos do curso
+            </h4>
+            <div className="space-y-2">
+              {track.modules.map((module, index) => {
+                const isCompleted = index < completedModules
+                const isCurrent = index === completedModules && isEnrolled
+                const isLocked = index > completedModules && isEnrolled
+
+                return (
+                  <div
+                    key={module.id}
+                    className={cn(
+                      'flex items-center gap-3 p-3 rounded-xl transition-colors',
+                      isCompleted && 'bg-green-50 dark:bg-green-900/20',
+                      isCurrent && cn(track.bgLight, track.bgDark, 'ring-2', track.borderColor),
+                      !isCompleted && !isCurrent && 'bg-gray-50 dark:bg-gray-800/50'
+                    )}
+                  >
+                    {/* Status indicator */}
+                    <div
+                      className={cn(
+                        'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
+                        isCompleted && 'bg-green-500 text-white',
+                        isCurrent && cn('bg-gradient-to-br', track.gradient, 'text-white'),
+                        !isCompleted && !isCurrent && 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                      )}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : isLocked ? (
+                        <Lock className="w-4 h-4" />
+                      ) : (
+                        <span className="text-sm font-bold">{index + 1}</span>
+                      )}
+                    </div>
+
+                    {/* Module info */}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={cn(
+                          'font-medium',
+                          isCompleted
+                            ? 'text-green-700 dark:text-green-400'
+                            : 'text-gray-900 dark:text-white'
+                        )}
+                      >
+                        {module.name}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <ModuleIcon type={module.type} />
+                        <span className="capitalize">{module.type}</span>
+                        <span>•</span>
+                        <span>{module.duration}</span>
+                      </div>
+                    </div>
+
+                    {/* Action */}
+                    {isCurrent && (
+                      <Button size="sm" variant="primary" className="flex-shrink-0">
+                        <Play className="w-3 h-3 mr-1" />
+                        Iniciar
+                      </Button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Action Footer */}
+          <div
+            className={cn(
+              'p-4 sm:p-6 border-t',
+              track.borderColor,
+              'bg-gray-50 dark:bg-gray-800/50'
+            )}
+          >
+            {isEnrolled ? (
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {completedModules}/{track.modules.length}
+                  </span>{' '}
+                  modulos concluidos
+                </div>
+                <Link href="/pt/agora/chat">
+                  <Button variant="primary" rightIcon={<MessageSquare className="w-4 h-4" />}>
+                    Continuar com {track.mentor.name.split(' ')[0]}
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Ganhe ate <strong className={track.textColor}>{track.xpTotal} XP</strong> e
+                    certificado
+                  </span>
+                </div>
+                <Button
+                  onClick={onStart}
+                  variant="primary"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Iniciar trilha
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+export default function AgoraTrilhasPage() {
   const router = useRouter()
-  const { user, isLoading, logout, isDemoMode } = useAgora()
+  const { user, isLoading, isDemoMode } = useAgora()
+  const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
 
   // Get user's enrolled tracks
-  const enrolledTracks = user.tracks || []
+  const enrolledTracks = user?.tracks || []
 
-  // Mock progress data (in production, this comes from Supabase)
-  const [trackProgress] = useState<Record<string, TrackProgress>>(() => {
-    const progress: Record<string, TrackProgress> = {}
-    enrolledTracks.forEach((trackId) => {
-      progress[trackId] = {
-        trackId,
-        status: 'in_progress',
-        startedAt: user.enrolledAt,
-        xpEarned: Math.floor(user.totalXp / enrolledTracks.length),
-      }
-    })
-    return progress
-  })
+  // Calculate progress (mock - in production comes from Supabase)
+  const getTrackProgress = (trackId: string) => {
+    if (!enrolledTracks.includes(trackId as any)) return 0
+    // Mock progress based on XP
+    const track = TRACKS.find((t) => t.id === trackId)
+    if (!track) return 0
+    const xpPerTrack = Math.floor((user?.totalXp || 0) / Math.max(enrolledTracks.length, 1))
+    return Math.min(100, Math.floor((xpPerTrack / track.xpTotal) * 100))
+  }
 
-  const handleStartTrack = (trackId: AgoraTrack) => {
-    // Track enrollment in PostHog
-    const trackInfo = TRACKS_INFO.find((t) => t.id === trackId)
-    if (trackInfo) {
-      trackTrackEnrollment(trackId, trackInfo.name)
-    }
-
-    // Navigate to onboarding for this specific track
+  const handleStartTrack = (trackId: string) => {
     router.push(`/pt/agora/onboarding?track=${trackId}`)
   }
 
-  const getTrackStatus = (trackId: AgoraTrack) => {
-    if (!enrolledTracks.includes(trackId)) return 'not_started'
-    return trackProgress[trackId]?.status || 'not_started'
+  const handleToggleTrack = (trackId: string) => {
+    setExpandedTrack(expandedTrack === trackId ? null : trackId)
   }
+
+  // Auto-expand first enrolled track or first track
+  useState(() => {
+    if (enrolledTracks.length > 0) {
+      setExpandedTrack(enrolledTracks[0])
+    }
+  })
 
   if (isLoading) {
     return (
@@ -158,10 +484,10 @@ export default function AcademyTrilhasPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-24">
       {/* Header */}
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
               href={`/pt/agora${isDemoMode ? '?demo=true' : ''}`}
@@ -170,202 +496,98 @@ export default function AcademyTrilhasPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Trilhas de Especializacao
-                </h1>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {enrolledTracks.length} trilha{enrolledTracks.length !== 1 ? 's' : ''} ativa
-                {enrolledTracks.length !== 1 ? 's' : ''}
-              </p>
+              <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                Trilhas de Aprendizado
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Escolha sua especializacao</p>
             </div>
             <Badge variant="success" size="default">
               <Sparkles className="w-3 h-3" />
-              {user.totalXp} XP
+              {user?.totalXp || 0} XP
             </Badge>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Description */}
-        <div className="mb-8">
-          <p className="text-gray-600 dark:text-gray-400">
-            Escolha suas trilhas de aprendizado. Voce pode fazer varias trilhas e ganhar multiplos
-            certificados!
-          </p>
-        </div>
-
-        {/* Enrolled Tracks Summary */}
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Stats Summary */}
         {enrolledTracks.length > 0 && (
-          <Card variant="elevated" padding="lg" className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-500" />
-                Suas Trilhas Ativas ({enrolledTracks.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {enrolledTracks.map((trackId) => {
-                  const track = TRACKS_INFO.find((t) => t.id === trackId)
-                  if (!track) return null
-                  const Icon = track.icon
-                  const progress = trackProgress[trackId]
-
-                  return (
-                    <div
-                      key={trackId}
-                      className={cn('p-4 rounded-xl border-2', track.borderColor, track.bgColor)}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className={cn(
-                            'w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br',
-                            track.color
-                          )}
-                        >
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 dark:text-white">{track.name}</h3>
-                          <Badge
-                            variant={progress?.status === 'completed' ? 'success' : 'warning'}
-                            size="sm"
-                          >
-                            {progress?.status === 'completed' ? 'Concluida' : 'Em andamento'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {progress?.xpEarned || 0} XP
-                        </span>
-                        <span className="text-gray-500">/ {track.xpTotal} XP</span>
-                      </div>
-                      {/* Progress bar */}
-                      <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className={cn('h-full bg-gradient-to-r', track.color)}
-                          style={{
-                            width: `${Math.min(100, ((progress?.xpEarned || 0) / track.xpTotal) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
+          <Card
+            variant="filled"
+            padding="md"
+            className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Trilhas ativas</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {enrolledTracks.length}
+                  </p>
+                </div>
               </div>
-            </CardContent>
+              <div className="flex gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {user?.totalXp || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">XP total</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {user?.currentLevel || 1}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Nivel</p>
+                </div>
+              </div>
+            </div>
           </Card>
         )}
 
-        {/* All Tracks */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {TRACKS_INFO.map((track) => {
-            const Icon = track.icon
-            const status = getTrackStatus(track.id)
-            const isEnrolled = status !== 'not_started'
+        {/* Empty State */}
+        {enrolledTracks.length === 0 && (
+          <Card variant="outlined" padding="lg" className="mb-6 border-dashed">
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                <Target className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-2">
+                Escolha sua primeira trilha
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                Cada trilha te guia do basico ao avancado com mentores IA, videos, leituras e
+                projetos praticos. Voce pode fazer varias trilhas!
+              </p>
+            </div>
+          </Card>
+        )}
 
-            return (
-              <Card
-                key={track.id}
-                variant="elevated"
-                padding="lg"
-                className={cn(
-                  'transition-all duration-300 hover:shadow-xl',
-                  isEnrolled && 'ring-2 ring-green-500/50'
-                )}
-              >
-                <div className="flex items-start gap-4 mb-4">
-                  <div
-                    className={cn(
-                      'w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg',
-                      track.color
-                    )}
-                  >
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {track.name}
-                      </h2>
-                      {isEnrolled && <CheckCircle2 className="w-5 h-5 text-green-500" />}
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-400">{track.description}</p>
-                  </div>
-                </div>
-
-                {/* Track details */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {track.details.map((detail) => (
-                    <span
-                      key={detail}
-                      className="px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                    >
-                      {detail}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Track meta */}
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{track.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Trophy className="w-4 h-4" />
-                    <span>{track.xpTotal} XP</span>
-                  </div>
-                </div>
-
-                {/* Action button */}
-                {isEnrolled ? (
-                  <Link href={`/pt/agora/chat${isDemoMode ? '?demo=true' : ''}`}>
-                    <Button
-                      variant="secondary"
-                      className="w-full"
-                      rightIcon={<Play className="w-4 h-4" />}
-                    >
-                      Continuar Estudando
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button
-                    onClick={() => handleStartTrack(track.id)}
-                    className="w-full"
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Iniciar Trilha
-                  </Button>
-                )}
-              </Card>
-            )
-          })}
+        {/* Track Cards */}
+        <div className="space-y-4">
+          {TRACKS.map((track) => (
+            <TrackCard
+              key={track.id}
+              track={track}
+              isEnrolled={enrolledTracks.includes(track.id as any)}
+              isExpanded={expandedTrack === track.id}
+              onToggle={() => handleToggleTrack(track.id)}
+              onStart={() => handleStartTrack(track.id)}
+              progress={getTrackProgress(track.id)}
+            />
+          ))}
         </div>
 
-        {/* Info card */}
-        <Card
-          variant="filled"
-          padding="md"
-          className="mt-8 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">
-                Multiplos Certificados
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Ao concluir cada trilha, voce recebe um certificado especifico. Complete todas as
-                trilhas para se tornar um <strong>Arquiteto Full Stack</strong> do Cidadao.AI!
+        {/* Info Footer */}
+        <Card variant="filled" padding="md" className="mt-6 bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex items-start gap-3">
+            <Users className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              <p>
+                <strong className="text-gray-900 dark:text-white">Multiplas trilhas:</strong> Voce
+                pode se inscrever em quantas trilhas quiser e ganhar certificados em cada uma!
               </p>
             </div>
           </div>
