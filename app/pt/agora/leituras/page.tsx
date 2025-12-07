@@ -33,6 +33,7 @@ import {
   Calendar,
 } from 'lucide-react'
 import { trackReadingCompleted } from '@/lib/analytics/agora-tracker'
+import { updateReadingProgress, getReadingProgress } from '../actions'
 
 interface Reading {
   id: string
@@ -53,8 +54,10 @@ const READING_PROGRESS_KEY = 'agora_demo_reading_progress'
 interface ReadingProgress {
   reading_id: string
   status: string
-  confirmed_read: boolean
   completed_at: string | null
+  notes?: string | null
+  rating?: number | null
+  confirmed_read?: boolean // For backwards compatibility with localStorage
 }
 
 // Placeholder readings
@@ -195,52 +198,75 @@ const articleTypeIcons: Record<string, string> = {
 }
 
 export default function AcademyReadingsPage() {
-  const { isLoading, addXp } = useAgora()
+  const { user, isLoading, addXp } = useAgora()
 
   const [readings] = useState<Reading[]>(placeholderReadings)
   const [progress, setProgress] = useState<Record<string, ReadingProgress>>({})
   const [selectedTrack, setSelectedTrack] = useState<string>('all')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
-  // Load progress from localStorage on mount
+  // Load progress from Supabase (if authenticated) or localStorage (demo mode)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(READING_PROGRESS_KEY)
-      if (saved) {
-        setProgress(JSON.parse(saved))
+    async function loadProgress() {
+      if (user) {
+        // Load from Supabase for authenticated users
+        const result = await getReadingProgress()
+        if (result.success && result.data && Object.keys(result.data).length > 0) {
+          setProgress(result.data)
+          // Also save to localStorage as backup
+          localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(result.data))
+        }
+      } else if (typeof window !== 'undefined') {
+        // Demo mode: load from localStorage
+        const saved = localStorage.getItem(READING_PROGRESS_KEY)
+        if (saved) {
+          setProgress(JSON.parse(saved))
+        }
       }
     }
-  }, [])
+    loadProgress()
+  }, [user])
 
   const saveProgress = (newProgress: Record<string, ReadingProgress>) => {
     setProgress(newProgress)
     localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(newProgress))
   }
 
-  const handleConfirmRead = (reading: Reading) => {
+  const handleConfirmRead = async (reading: Reading) => {
     setConfirmingId(reading.id)
 
-    setTimeout(() => {
-      const newProgress = {
-        ...progress,
-        [reading.id]: {
-          reading_id: reading.id,
-          status: 'completed',
-          confirmed_read: true,
-          completed_at: new Date().toISOString(),
-        },
+    const newProgress = {
+      ...progress,
+      [reading.id]: {
+        reading_id: reading.id,
+        status: 'completed',
+        confirmed_read: true,
+        completed_at: new Date().toISOString(),
+      },
+    }
+    saveProgress(newProgress)
+
+    const xpAmount = reading.is_required ? 20 : 15
+
+    if (user) {
+      // Sync with Supabase for authenticated users (XP auto-awarded by server action)
+      const result = await updateReadingProgress(reading.id, true)
+      if (result.success) {
+        toast.success('Leitura confirmada!', `+${result.xpAwarded || xpAmount} XP`)
+      } else {
+        // Fallback to demo mode XP if server action fails
+        addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
+        toast.success('Leitura confirmada!', `+${xpAmount} XP`)
       }
-      saveProgress(newProgress)
-
-      const xpAmount = reading.is_required ? 20 : 10
+    } else {
+      // Demo mode: use local XP
       addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
-
-      // Track reading completion in PostHog
-      trackReadingCompleted(reading.id, reading.title)
-
       toast.success('Leitura confirmada!', `+${xpAmount} XP`)
-      setConfirmingId(null)
-    }, 500)
+    }
+
+    // Track reading completion in PostHog
+    trackReadingCompleted(reading.id, reading.title)
+    setConfirmingId(null)
   }
 
   const filteredReadings =
@@ -248,11 +274,13 @@ export default function AcademyReadingsPage() {
       ? readings
       : readings.filter((r) => r.track === selectedTrack || r.track === 'all')
 
-  const completedCount = Object.values(progress).filter((p) => p.confirmed_read).length
+  const completedCount = Object.values(progress).filter(
+    (p) => p.confirmed_read || p.status === 'completed'
+  ).length
   const requiredCount = readings.filter((r) => r.is_required).length
   const requiredCompleted = Object.values(progress).filter((p) => {
     const reading = readings.find((r) => r.id === p.reading_id)
-    return p.confirmed_read && reading?.is_required
+    return (p.confirmed_read || p.status === 'completed') && reading?.is_required
   }).length
 
   if (isLoading) {
@@ -361,7 +389,8 @@ export default function AcademyReadingsPage() {
           ) : (
             filteredReadings.map((reading, index) => {
               const readingProgress = progress[reading.id]
-              const isConfirmed = readingProgress?.confirmed_read
+              const isConfirmed =
+                readingProgress?.confirmed_read || readingProgress?.status === 'completed'
               const colors = trackColors[reading.track] || trackColors.backend
 
               return (

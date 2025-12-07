@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
 import { ArrowLeft, Play, Video, Check, Clock, Sparkles, Star, X, ExternalLink } from 'lucide-react'
 import { trackVideoCompleted } from '@/lib/analytics/agora-tracker'
+import { updateVideoProgress, getVideoProgress } from '../actions'
 
 interface VideoItem {
   id: string
@@ -293,15 +294,27 @@ export default function AcademyVideosPage() {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Load progress from localStorage on mount
+  // Load progress from Supabase (if authenticated) or localStorage (demo mode)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(VIDEO_PROGRESS_KEY)
-      if (saved) {
-        setProgress(JSON.parse(saved))
+    async function loadProgress() {
+      if (user) {
+        // Load from Supabase for authenticated users
+        const result = await getVideoProgress()
+        if (result.success && result.data && Object.keys(result.data).length > 0) {
+          setProgress(result.data)
+          // Also save to localStorage as backup
+          localStorage.setItem(VIDEO_PROGRESS_KEY, JSON.stringify(result.data))
+        }
+      } else if (typeof window !== 'undefined') {
+        // Demo mode: load from localStorage
+        const saved = localStorage.getItem(VIDEO_PROGRESS_KEY)
+        if (saved) {
+          setProgress(JSON.parse(saved))
+        }
       }
     }
-  }, [])
+    loadProgress()
+  }, [user])
 
   // Handle modal close events
   useEffect(() => {
@@ -318,7 +331,7 @@ export default function AcademyVideosPage() {
     localStorage.setItem(VIDEO_PROGRESS_KEY, JSON.stringify(newProgress))
   }
 
-  const markAsWatched = (video: VideoItem) => {
+  const markAsWatched = async (video: VideoItem) => {
     const newProgress = {
       ...progress,
       [video.id]: {
@@ -330,8 +343,27 @@ export default function AcademyVideosPage() {
       },
     }
     saveProgress(newProgress)
-    addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
-    toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+
+    if (user) {
+      // Sync with Supabase for authenticated users (XP auto-awarded by server action)
+      const result = await updateVideoProgress(
+        video.id,
+        video.duration_seconds,
+        video.duration_seconds,
+        true
+      )
+      if (result.success) {
+        toast.success('Vídeo concluído!', `+${result.xpAwarded || 25} XP`)
+      } else {
+        // Fallback to demo mode XP if server action fails
+        addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
+        toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+      }
+    } else {
+      // Demo mode: use local XP
+      addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
+      toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+    }
 
     // Track video completion in PostHog
     trackVideoCompleted(video.id, video.title, video.duration_seconds)

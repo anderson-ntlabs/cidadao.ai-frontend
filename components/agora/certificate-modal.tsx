@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { jsPDF } from 'jspdf'
+import { getTelemetryData, saveCertificate } from '@/app/pt/agora/actions'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -49,7 +50,7 @@ const TOTAL_VIDEO_DURATIONS = [
 ]
 
 export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
-  const { user, xpTransactions, diaryEntries, sessions } = useAgoraDemo()
+  const { user, xpTransactions, diaryEntries, sessions, isAuthenticated } = useAgora()
   const [isGenerating, setIsGenerating] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryData>({
     videosCompleted: 0,
@@ -78,82 +79,97 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      // Load progress from localStorage
-      const videoProgress = localStorage.getItem(VIDEO_PROGRESS_KEY)
-      const readingProgress = localStorage.getItem(READING_PROGRESS_KEY)
-
-      // Parse video progress with watch time
-      let videosCompleted = 0
-      let requiredVideosCompleted = 0
-      let totalVideoWatchTimeSeconds = 0
-
-      if (videoProgress) {
-        const parsed = JSON.parse(videoProgress) as Record<
-          string,
-          { status?: string; watched_seconds?: number; video_id?: string }
-        >
-        Object.entries(parsed).forEach(([id, v]) => {
-          if (v.status === 'completed') {
-            videosCompleted++
-            // Check if required video (IDs 1, 2, 3 are required)
-            if (['1', '2', '3'].includes(id)) {
-              requiredVideosCompleted++
-            }
-          }
-          totalVideoWatchTimeSeconds += v.watched_seconds || 0
-        })
-      }
-
-      // Parse reading progress
-      let readingsCompleted = 0
-      let requiredReadingsCompleted = 0
-
-      if (readingProgress) {
-        const parsed = JSON.parse(readingProgress) as Record<
-          string,
-          { status?: string; reading_id?: string }
-        >
-        Object.entries(parsed).forEach(([id, r]) => {
-          if (r.status === 'completed') {
-            readingsCompleted++
-            // Check if required reading (IDs 1, 2 are required)
-            if (['1', '2'].includes(id)) {
-              requiredReadingsCompleted++
-            }
-          }
-        })
-      }
-
-      // Count chat messages from XP transactions
-      const chatXpTransactions = xpTransactions.filter(
-        (t) => t.sourceType === 'chat' || t.sourceType === 'agent_chat'
-      )
-      const chatMessages = chatXpTransactions.length * 5 // Each transaction = 5 messages
-
-      const newTelemetry: TelemetryData = {
-        videosCompleted,
-        totalVideos: 15,
-        requiredVideosCompleted,
-        totalRequiredVideos: 3,
-        totalVideoWatchTimeSeconds,
-        requiredVideoWatchTimeSeconds: REQUIRED_VIDEO_DURATIONS.reduce((a, b) => a + b, 0),
-        readingsCompleted,
-        totalReadings: 8,
-        requiredReadingsCompleted,
-        totalRequiredReadings: 2,
-        totalXp: user.totalXp,
-        totalTimeMinutes: user.totalTimeMinutes,
-        totalSessions: sessions.length,
-        diaryEntries: diaryEntries.length,
-        chatMessages,
-        currentStreak: user.currentStreak,
-      }
-
-      setTelemetry(newTelemetry)
-      setValidation(validateCertificateRequirements(newTelemetry))
-      setConsistency(verifyTelemetryConsistency(newTelemetry))
+      loadTelemetryData()
     }
-  }, [isOpen, user, xpTransactions, diaryEntries, sessions])
+  }, [isOpen, user, xpTransactions, diaryEntries, sessions, isAuthenticated])
+
+  const loadTelemetryData = async () => {
+    // If authenticated, load from Supabase
+    if (isAuthenticated) {
+      const result = await getTelemetryData()
+      if (result.success && result.data) {
+        setTelemetry(result.data as TelemetryData)
+        setValidation(validateCertificateRequirements(result.data as TelemetryData))
+        setConsistency(verifyTelemetryConsistency(result.data as TelemetryData))
+        return
+      }
+    }
+
+    // Fallback to localStorage (demo mode)
+    const videoProgress = localStorage.getItem(VIDEO_PROGRESS_KEY)
+    const readingProgress = localStorage.getItem(READING_PROGRESS_KEY)
+
+    // Parse video progress with watch time
+    let videosCompleted = 0
+    let requiredVideosCompleted = 0
+    let totalVideoWatchTimeSeconds = 0
+
+    if (videoProgress) {
+      const parsed = JSON.parse(videoProgress) as Record<
+        string,
+        { status?: string; watched_seconds?: number; video_id?: string }
+      >
+      Object.entries(parsed).forEach(([id, v]) => {
+        if (v.status === 'completed') {
+          videosCompleted++
+          // Check if required video (IDs 1, 2, 3 are required)
+          if (['1', '2', '3'].includes(id)) {
+            requiredVideosCompleted++
+          }
+        }
+        totalVideoWatchTimeSeconds += v.watched_seconds || 0
+      })
+    }
+
+    // Parse reading progress
+    let readingsCompleted = 0
+    let requiredReadingsCompleted = 0
+
+    if (readingProgress) {
+      const parsed = JSON.parse(readingProgress) as Record<
+        string,
+        { status?: string; reading_id?: string }
+      >
+      Object.entries(parsed).forEach(([id, r]) => {
+        if (r.status === 'completed') {
+          readingsCompleted++
+          // Check if required reading (IDs 1, 2 are required)
+          if (['1', '2'].includes(id)) {
+            requiredReadingsCompleted++
+          }
+        }
+      })
+    }
+
+    // Count chat messages from XP transactions
+    const chatXpTransactions = xpTransactions.filter(
+      (t) => t.sourceType === 'chat' || t.sourceType === 'agent_chat'
+    )
+    const chatMessages = chatXpTransactions.length * 5 // Each transaction = 5 messages
+
+    const newTelemetry: TelemetryData = {
+      videosCompleted,
+      totalVideos: 15,
+      requiredVideosCompleted,
+      totalRequiredVideos: 3,
+      totalVideoWatchTimeSeconds,
+      requiredVideoWatchTimeSeconds: REQUIRED_VIDEO_DURATIONS.reduce((a, b) => a + b, 0),
+      readingsCompleted,
+      totalReadings: 8,
+      requiredReadingsCompleted,
+      totalRequiredReadings: 2,
+      totalXp: user.totalXp,
+      totalTimeMinutes: user.totalTimeMinutes,
+      totalSessions: sessions.length,
+      diaryEntries: diaryEntries.length,
+      chatMessages,
+      currentStreak: user.currentStreak,
+    }
+
+    setTelemetry(newTelemetry)
+    setValidation(validateCertificateRequirements(newTelemetry))
+    setConsistency(verifyTelemetryConsistency(newTelemetry))
+  }
 
   // Generate simplified certificate (only total hours)
   const generateCertificatePDF = () => {
@@ -580,6 +596,23 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       // Track certificate download
       const totalHours = Math.floor(user.totalTimeMinutes / 60)
       trackCertificateDownload(totalHours, user.currentLevel)
+
+      // Save certificate to Supabase if authenticated
+      if (isAuthenticated && certificateType) {
+        const certType = determineCertificateType(telemetry)
+        await saveCertificate({
+          certificateNumber: certId,
+          certificateType: certType,
+          totalHours: totalHours + (user.totalTimeMinutes % 60) / 60,
+          totalXp: user.totalXp,
+          finalRank: user.currentRank,
+          finalLevel: user.currentLevel,
+          missionsCompleted: telemetry.videosCompleted + telemetry.readingsCompleted,
+          articlesRead: telemetry.readingsCompleted,
+          conversationsCount: telemetry.chatMessages,
+          verificationHash: `${user.id}-${Date.now()}-${certId}`.slice(0, 64),
+        })
+      }
     } catch (error) {
       console.error('Failed to generate certificate:', error)
     } finally {
