@@ -21,7 +21,7 @@ import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar } from '@/components/ui/avatar'
+import { AvatarWithBadge } from '@/components/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,16 +100,6 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
   const breadcrumb = getBreadcrumb()
   const rankColor = rankColors[user.currentRank] || rankColors.novato
 
-  // Get initials for avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
   // Handle logout
   const handleLogout = () => {
     setIsMenuOpen(false)
@@ -187,12 +177,12 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   variant="ghost"
                   className="flex items-center gap-2 pl-2 pr-3 h-10 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  <Avatar
+                  <AvatarWithBadge
                     src={user.avatar}
                     alt={user.name}
-                    fallback={getInitials(user.name)}
+                    fallbackInitial={user.name.charAt(0)}
                     size="sm"
-                    className="ring-2 ring-green-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900"
+                    showBadge={false}
                   />
                   <div className="hidden sm:flex flex-col items-start">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight">
