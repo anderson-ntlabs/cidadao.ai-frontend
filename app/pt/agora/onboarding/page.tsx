@@ -2,9 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { useAgora, TRACK_REPOS } from '@/hooks/use-agora'
 import {
-  Rocket,
   Code,
   Palette,
   Brain,
@@ -14,30 +14,36 @@ import {
   ArrowRight,
   ArrowLeft,
   ExternalLink,
-  Loader2,
   AlertCircle,
   PartyPopper,
   Sparkles,
   GraduationCap,
+  Presentation,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { PresentationCarousel, Slide } from '@/components/ui/presentation-carousel'
 
 /**
  * Academy Onboarding Page
  *
  * Multi-step wizard for new interns:
- * 1. Welcome - Introduction to Academy
- * 2. Track Selection - Choose development track
+ * 1. Presentation - Cidadão.AI presentation carousel (unlocks track selection)
+ * 2. Track Selection - Choose development track(s)
  * 3. GitHub Setup - Enter GitHub username
  * 4. Fork Verification - Verify repository fork
  * 5. Complete - Welcome to the team!
  *
+ * Features:
+ * - Presentation must be completed (reach last slide) to unlock tracks
+ * - Santos-Dumont agent provides narration on each slide
+ * - Multi-track selection supported
+ *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-06
+ * Updated: 2025-12-07
  */
 
 const TRACKS = [
@@ -93,11 +99,336 @@ const TRACKS = [
 ]
 
 const STEPS = [
-  { label: 'Boas-vindas', icon: Rocket },
+  { label: 'Apresentação', icon: Presentation },
   { label: 'Trilha', icon: Code },
   { label: 'GitHub', icon: Github },
   { label: 'Fork', icon: ExternalLink },
   { label: 'Pronto!', icon: PartyPopper },
+]
+
+// Full Cidadão.AI presentation with 40 slides
+// Slides available at public/agora/slide-XX.png
+const PRESENTATION_SLIDES: Slide[] = [
+  {
+    id: 1,
+    src: '/agora/slide-01.png',
+    alt: 'Slide 1 - Capa',
+    title: 'Cidadão.AI',
+    narration:
+      'Olá! Sou Santos-Dumont, seu guia nesta jornada. Bem-vindo ao Cidadão.AI - uma iniciativa inovadora que combina inteligência artificial e transparência pública no Brasil!',
+  },
+  {
+    id: 2,
+    src: '/agora/slide-02.png',
+    alt: 'Slide 2 - Introdução',
+    title: 'Introdução ao Projeto',
+    narration:
+      'O Cidadão.AI nasceu da necessidade de democratizar o acesso às informações públicas. Vamos usar a tecnologia para empoderar o cidadão brasileiro!',
+  },
+  {
+    id: 3,
+    src: '/agora/slide-03.png',
+    alt: 'Slide 3 - Problema',
+    title: 'O Problema',
+    narration:
+      'Dados públicos existem, mas estão dispersos, complexos e de difícil acesso. O cidadão comum não consegue entender o que acontece com seu dinheiro.',
+  },
+  {
+    id: 4,
+    src: '/agora/slide-04.png',
+    alt: 'Slide 4 - Solução',
+    title: 'Nossa Solução',
+    narration:
+      'Criamos uma plataforma que usa IA para analisar, simplificar e alertar sobre irregularidades nos gastos públicos. Transparência ao alcance de todos!',
+  },
+  {
+    id: 5,
+    src: '/agora/slide-05.png',
+    alt: 'Slide 5 - Visão Geral',
+    title: 'Visão Geral',
+    narration:
+      'Nossa plataforma conecta cidadãos, dados públicos e inteligência artificial em um ecossistema colaborativo de fiscalização.',
+  },
+  {
+    id: 6,
+    src: '/agora/slide-06.png',
+    alt: 'Slide 6 - Arquitetura',
+    title: 'Arquitetura do Sistema',
+    narration:
+      'Utilizamos uma arquitetura moderna: Next.js no frontend, FastAPI no backend, e múltiplos agentes de IA especializados trabalhando em conjunto.',
+  },
+  {
+    id: 7,
+    src: '/agora/slide-07.png',
+    alt: 'Slide 7 - Agentes de IA',
+    title: 'Nossos Agentes',
+    narration:
+      'Temos 17 agentes de IA, cada um representando um herói brasileiro! Eu, Santos-Dumont, cuido da inovação. Zumbi detecta anomalias, Anita analisa padrões...',
+  },
+  {
+    id: 8,
+    src: '/agora/slide-08.png',
+    alt: 'Slide 8 - Abaporu',
+    title: 'Agente Abaporu',
+    narration:
+      'O Abaporu é nosso orquestrador principal, inspirado na obra de Tarsila do Amaral. Ele coordena todos os outros agentes!',
+  },
+  {
+    id: 9,
+    src: '/agora/slide-09.png',
+    alt: 'Slide 9 - Zumbi',
+    title: 'Agente Zumbi',
+    narration:
+      'Zumbi dos Palmares é especialista em detectar anomalias e irregularidades. Sua luta por liberdade inspira nossa busca por transparência!',
+  },
+  {
+    id: 10,
+    src: '/agora/slide-10.png',
+    alt: 'Slide 10 - Anita',
+    title: 'Agente Anita',
+    narration:
+      'Anita Garibaldi analisa padrões nos dados. Sua coragem e determinação guiam nossas análises mais complexas!',
+  },
+  {
+    id: 11,
+    src: '/agora/slide-11.png',
+    alt: 'Slide 11 - Tiradentes',
+    title: 'Agente Tiradentes',
+    narration:
+      'Tiradentes é responsável pelos relatórios. O mártir da Inconfidência inspira nossa transparência absoluta!',
+  },
+  {
+    id: 12,
+    src: '/agora/slide-12.png',
+    alt: 'Slide 12 - Mais Agentes',
+    title: 'Mais Agentes',
+    narration:
+      'Temos ainda Senna (velocidade), Machado de Assis (comunicação), José Bonifácio (aspectos legais), e muitos outros!',
+  },
+  {
+    id: 13,
+    src: '/agora/slide-13.png',
+    alt: 'Slide 13 - Tecnologias',
+    title: 'Tecnologias Utilizadas',
+    narration:
+      'Next.js 15, TypeScript, FastAPI, Python, Supabase, Tailwind CSS... Usamos o que há de mais moderno no mercado!',
+  },
+  {
+    id: 14,
+    src: '/agora/slide-14.png',
+    alt: 'Slide 14 - Frontend',
+    title: 'Frontend Moderno',
+    narration:
+      'Interface responsiva, acessível (WCAG AAA) e com suporte a VLibras para libras. Tecnologia inclusiva para todos!',
+  },
+  {
+    id: 15,
+    src: '/agora/slide-15.png',
+    alt: 'Slide 15 - Backend',
+    title: 'Backend Robusto',
+    narration:
+      'API REST com FastAPI, documentação automática, e processamento paralelo de dados. Eficiência e escalabilidade!',
+  },
+  {
+    id: 16,
+    src: '/agora/slide-16.png',
+    alt: 'Slide 16 - IA/ML',
+    title: 'Inteligência Artificial',
+    narration:
+      'Usamos modelos de linguagem brasileiros como Maritaca AI, otimizados para entender o contexto nacional!',
+  },
+  {
+    id: 17,
+    src: '/agora/slide-17.png',
+    alt: 'Slide 17 - Dados',
+    title: 'Fontes de Dados',
+    narration:
+      'Portal da Transparência, TCU, CGU, IBGE... Integramos múltiplas fontes para uma visão completa!',
+  },
+  {
+    id: 18,
+    src: '/agora/slide-18.png',
+    alt: 'Slide 18 - Academy',
+    title: 'Academy Cidadão.AI',
+    narration:
+      'A Academy é nosso programa de capacitação. Aprenda na prática contribuindo com código real para um projeto de impacto social!',
+  },
+  {
+    id: 19,
+    src: '/agora/slide-19.png',
+    alt: 'Slide 19 - Trilhas',
+    title: 'Trilhas de Aprendizado',
+    narration:
+      'Oferecemos 4 trilhas: Backend, Frontend, IA/ML e DevOps. Cada uma com vídeos, exercícios e projetos práticos!',
+  },
+  {
+    id: 20,
+    src: '/agora/slide-20.png',
+    alt: 'Slide 20 - Backend Track',
+    title: 'Trilha Backend',
+    narration:
+      'Na trilha Backend você aprende Python, FastAPI, bancos de dados, autenticação e muito mais!',
+  },
+  {
+    id: 21,
+    src: '/agora/slide-21.png',
+    alt: 'Slide 21 - Frontend Track',
+    title: 'Trilha Frontend',
+    narration:
+      'A trilha Frontend ensina React, Next.js, TypeScript, design system e acessibilidade!',
+  },
+  {
+    id: 22,
+    src: '/agora/slide-22.png',
+    alt: 'Slide 22 - IA Track',
+    title: 'Trilha IA/ML',
+    narration:
+      'Na trilha de IA você aprende sobre agentes, LLMs, RAG, embeddings e avaliação de modelos!',
+  },
+  {
+    id: 23,
+    src: '/agora/slide-23.png',
+    alt: 'Slide 23 - DevOps Track',
+    title: 'Trilha DevOps',
+    narration:
+      'DevOps ensina Docker, CI/CD, monitoramento, cloud e práticas modernas de infraestrutura!',
+  },
+  {
+    id: 24,
+    src: '/agora/slide-24.png',
+    alt: 'Slide 24 - Gamificação',
+    title: 'Sistema de Gamificação',
+    narration:
+      'Ganhe XP por cada ação! Vídeos, anotações, conversas com agentes, commits... Quanto mais participa, mais evolui!',
+  },
+  {
+    id: 25,
+    src: '/agora/slide-25.png',
+    alt: 'Slide 25 - Certificado',
+    title: 'Certificação',
+    narration:
+      'Complete as trilhas e receba um certificado oficial de 50 horas! Conteúdo equivalente a 2 períodos de computação!',
+  },
+  {
+    id: 26,
+    src: '/agora/slide-26.png',
+    alt: 'Slide 26 - GitHub',
+    title: 'Open Source',
+    narration:
+      'Todo código é open source no GitHub! Suas contribuições ficam registradas no seu perfil profissional!',
+  },
+  {
+    id: 27,
+    src: '/agora/slide-27.png',
+    alt: 'Slide 27 - Comunidade',
+    title: 'Comunidade',
+    narration:
+      'Faça parte de uma comunidade de desenvolvedores comprometidos com o impacto social!',
+  },
+  {
+    id: 28,
+    src: '/agora/slide-28.png',
+    alt: 'Slide 28 - Mentoria',
+    title: 'Mentoria IA 24/7',
+    narration:
+      'Tem dúvidas? Converse comigo a qualquer hora! Estou sempre disponível para ajudar no seu aprendizado!',
+  },
+  {
+    id: 29,
+    src: '/agora/slide-29.png',
+    alt: 'Slide 29 - Diário',
+    title: 'Diário de Bordo',
+    narration:
+      'Registre suas anotações no diário de bordo. Quanto mais escreve, mais XP ganha! Mínimo de 20 palavras.',
+  },
+  {
+    id: 30,
+    src: '/agora/slide-30.png',
+    alt: 'Slide 30 - Progresso',
+    title: 'Acompanhamento',
+    narration:
+      'Acompanhe seu progresso em tempo real! Dashboard completo com métricas, badges e conquistas!',
+  },
+  {
+    id: 31,
+    src: '/agora/slide-31.png',
+    alt: 'Slide 31 - Impacto',
+    title: 'Impacto Social',
+    narration:
+      'Ao participar do Cidadão.AI, você contribui diretamente para uma sociedade mais transparente e justa!',
+  },
+  {
+    id: 32,
+    src: '/agora/slide-32.png',
+    alt: 'Slide 32 - Futuro',
+    title: 'Visão de Futuro',
+    narration:
+      'Queremos ser referência em transparência pública na América Latina! Com sua ajuda, chegaremos lá!',
+  },
+  {
+    id: 33,
+    src: '/agora/slide-33.png',
+    alt: 'Slide 33 - Parcerias',
+    title: 'Parcerias',
+    narration:
+      'Buscamos parcerias com universidades, órgãos públicos e organizações da sociedade civil!',
+  },
+  {
+    id: 34,
+    src: '/agora/slide-34.png',
+    alt: 'Slide 34 - Roadmap',
+    title: 'Roadmap',
+    narration:
+      'Temos um roadmap ambicioso: mais agentes, mais integrações, aplicativo móvel e muito mais!',
+  },
+  {
+    id: 35,
+    src: '/agora/slide-35.png',
+    alt: 'Slide 35 - Como Participar',
+    title: 'Como Participar',
+    narration:
+      'Completar esta apresentação é o primeiro passo! Em seguida, escolha sua trilha e comece a aprender!',
+  },
+  {
+    id: 36,
+    src: '/agora/slide-36.png',
+    alt: 'Slide 36 - Próximos Passos',
+    title: 'Próximos Passos',
+    narration:
+      'Após a apresentação: 1) Escolha suas trilhas, 2) Configure seu GitHub, 3) Faça fork do repositório!',
+  },
+  {
+    id: 37,
+    src: '/agora/slide-37.png',
+    alt: 'Slide 37 - Contato',
+    title: 'Contato',
+    narration:
+      'Dúvidas? Sugestões? Entre em contato pelo GitHub ou converse com nossos agentes de IA!',
+  },
+  {
+    id: 38,
+    src: '/agora/slide-38.png',
+    alt: 'Slide 38 - Agradecimentos',
+    title: 'Agradecimentos',
+    narration:
+      'Obrigado por fazer parte desta jornada! Juntos, vamos transformar a relação do cidadão com o governo!',
+  },
+  {
+    id: 39,
+    src: '/agora/slide-39.png',
+    alt: 'Slide 39 - Citação',
+    title: 'Inspiração',
+    narration:
+      'Como disse Santos-Dumont: "Eu inventei o avião para unir os povos". Nós criamos o Cidadão.AI para unir o povo às suas informações!',
+  },
+  {
+    id: 40,
+    src: '/agora/slide-40.png',
+    alt: 'Slide 40 - Vamos Começar',
+    title: 'Vamos Começar!',
+    narration:
+      'Parabéns por completar a apresentação! Agora você está pronto para escolher sua trilha de especialização. Estou ansioso para acompanhar sua jornada! Vamos lá?',
+  },
 ]
 
 function OnboardingContent() {
@@ -124,6 +455,8 @@ function OnboardingContent() {
   const [githubInput, setGithubInput] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
   const [verifyError, setVerifyError] = useState<string | null>(null)
+  const [presentationCompleted, setPresentationCompleted] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   // Mark as hydrated after first client render
   useEffect(() => {
@@ -203,6 +536,24 @@ function OnboardingContent() {
     if (onboarding?.completedSteps.includes(step) || step <= currentStep) {
       updateOnboarding({ currentStep: step })
     }
+  }
+
+  // Handle presentation slide changes
+  const handleSlideChange = (index: number) => {
+    setCurrentSlide(index)
+    // Mark as completed when user reaches the last slide
+    if (index === PRESENTATION_SLIDES.length - 1) {
+      setPresentationCompleted(true)
+    }
+  }
+
+  // Complete presentation and go to track selection
+  const handlePresentationComplete = () => {
+    if (!onboarding) return
+    updateOnboarding({
+      currentStep: 2,
+      completedSteps: [...onboarding.completedSteps, 1],
+    })
   }
 
   if (!onboarding) {
@@ -337,112 +688,97 @@ function OnboardingContent() {
         {/* Step Content */}
         <Card variant="elevated" padding="lg" className="animate-fade-in">
           <CardContent>
-            {/* Step 1: Welcome */}
+            {/* Step 1: Presentation */}
             {currentStep === 1 && (
-              <div className="space-y-8 py-4">
-                {/* Hero */}
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-green-400 to-emerald-600 shadow-2xl shadow-green-500/25 mb-6">
-                    <Rocket className="w-12 h-12 text-white" />
-                  </div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                    Bem-vindo à Academy Cidadão.AI!
+              <div className="space-y-6 py-4">
+                {/* Header */}
+                <div className="text-center mb-4">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Conheça o Cidadão.AI
                   </h1>
-                  <p className="text-lg text-gray-600 dark:text-gray-400 max-w-lg mx-auto">
-                    Prepare-se para uma experiência imersiva de aprendizado com IA e transparência
-                    pública.
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Assista a apresentação para entender o projeto e desbloquear as trilhas de
+                    aprendizado
                   </p>
                 </div>
 
-                {/* What is Academy */}
-                <Card
-                  variant="elevated"
-                  padding="md"
-                  className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
-                >
-                  <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-yellow-500" />O que é a Academy?
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    A Academy é o programa de capacitação do projeto Cidadão.AI. Aqui você vai
-                    aprender na prática, contribuindo com código real para uma plataforma de
-                    transparência pública com Inteligência Artificial.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { icon: '🎯', text: 'Aprendizado prático' },
-                      { icon: '🤖', text: 'Mentor IA 24/7' },
-                      { icon: '📊', text: 'Métricas de progresso' },
-                      { icon: '🏆', text: 'Certificado oficial' },
-                    ].map((item) => (
-                      <div
-                        key={item.text}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50"
-                      >
-                        <span className="text-xl">{item.icon}</span>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {item.text}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
+                {/* Presentation Carousel */}
+                <PresentationCarousel
+                  slides={PRESENTATION_SLIDES}
+                  autoplay={false}
+                  showNarration={true}
+                  agentName="Santos-Dumont"
+                  agentImage="/agents/santos-dumont.png"
+                  onSlideChange={handleSlideChange}
+                  className="max-w-3xl mx-auto"
+                />
 
-                {/* Onboarding Steps */}
-                <Card variant="filled" padding="md">
-                  <h2 className="font-semibold text-green-700 dark:text-green-400 mb-4 flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Próximos passos do onboarding:
-                  </h2>
-                  <ul className="space-y-4">
-                    {[
-                      {
-                        title: 'Escolher sua trilha',
-                        desc: 'Backend, Frontend, IA/ML ou DevOps',
-                      },
-                      {
-                        title: 'Conectar GitHub',
-                        desc: 'Para rastrear suas contribuições',
-                      },
-                      {
-                        title: 'Fazer fork do repositório',
-                        desc: 'Seu espaço para desenvolver',
-                      },
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
-                            {i + 1}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">
-                            {item.title}
-                          </span>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+                {/* Progress indicator */}
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800">
+                    {presentationCompleted ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                          Apresentação concluída!
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Presentation className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          Slide {currentSlide + 1} de {PRESENTATION_SLIDES.length}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Agent tip */}
+                {!presentationCompleted && (
+                  <Card
+                    variant="filled"
+                    padding="sm"
+                    className="max-w-lg mx-auto bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                          src="/agents/santos-dumont.png"
+                          alt="Santos-Dumont"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wide">
+                          Dica do Santos-Dumont:
+                        </p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          Navegue pelos slides usando as setas ou clicando nos pontos. Chegue até o
+                          último slide para desbloquear as trilhas!
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
 
                 {/* CTA */}
-                <div className="text-center">
+                <div className="text-center pt-4">
                   <Button
-                    onClick={() =>
-                      updateOnboarding({
-                        currentStep: 2,
-                        completedSteps: [...onboarding.completedSteps, 1],
-                      })
-                    }
+                    onClick={handlePresentationComplete}
+                    disabled={!presentationCompleted}
                     size="lg"
                     rightIcon={<ArrowRight className="w-5 h-5" />}
+                    className={cn(!presentationCompleted && 'opacity-50 cursor-not-allowed')}
                   >
-                    Começar Jornada
+                    {presentationCompleted ? 'Escolher Minha Trilha' : 'Complete a Apresentação'}
                   </Button>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                    Tempo estimado: 3-5 minutos
-                  </p>
+                  {!presentationCompleted && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                      Vá até o último slide para continuar
+                    </p>
+                  )}
                 </div>
               </div>
             )}
