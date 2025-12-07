@@ -469,6 +469,7 @@ export function DashboardClient({
                     desc: 'Progresso e conquistas',
                     href: '/pt/agora/trilhas',
                     color: 'green',
+                    external: false,
                   },
                   {
                     icon: Video,
@@ -477,6 +478,7 @@ export function DashboardClient({
                     desc: 'Continue assistindo',
                     href: '/pt/agora/videos',
                     color: 'blue',
+                    external: false,
                   },
                   {
                     icon: BookOpen,
@@ -485,6 +487,7 @@ export function DashboardClient({
                     desc: 'Material essencial',
                     href: '/pt/agora/leituras',
                     color: 'purple',
+                    external: false,
                   },
                   {
                     icon: Trophy,
@@ -493,31 +496,69 @@ export function DashboardClient({
                     desc: 'Sua posição',
                     href: '/pt/agora/ranking',
                     color: 'yellow',
+                    external: false,
                   },
-                ].map((action) => (
-                  <Link
-                    key={action.label}
-                    href={`${action.href}${isDemoMode ? '?demo=true' : ''}`}
-                    className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-lg transition-all group"
-                  >
-                    <div
-                      className={cn(
-                        'w-12 h-12 rounded-xl flex items-center justify-center text-2xl',
-                        action.color === 'green' && 'bg-green-100 dark:bg-green-900/30',
-                        action.color === 'blue' && 'bg-blue-100 dark:bg-blue-900/30',
-                        action.color === 'purple' && 'bg-purple-100 dark:bg-purple-900/30',
-                        action.color === 'yellow' && 'bg-yellow-100 dark:bg-yellow-900/30'
-                      )}
+                  {
+                    icon: MessageSquare,
+                    emoji: '💬',
+                    label: 'Comunidade',
+                    desc: 'Discord da Academia',
+                    href: 'https://discord.gg/TCdNN6gZ',
+                    color: 'indigo',
+                    external: true,
+                  },
+                ].map((action) =>
+                  action.external ? (
+                    <a
+                      key={action.label}
+                      href={action.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-lg transition-all group"
                     >
-                      {action.emoji}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 dark:text-white">{action.label}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                ))}
+                      <div
+                        className={cn(
+                          'w-12 h-12 rounded-xl flex items-center justify-center text-2xl',
+                          action.color === 'indigo' && 'bg-indigo-100 dark:bg-indigo-900/30'
+                        )}
+                      >
+                        {action.emoji}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {action.label}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                      </div>
+                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </a>
+                  ) : (
+                    <Link
+                      key={action.label}
+                      href={`${action.href}${isDemoMode ? '?demo=true' : ''}`}
+                      className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-lg transition-all group"
+                    >
+                      <div
+                        className={cn(
+                          'w-12 h-12 rounded-xl flex items-center justify-center text-2xl',
+                          action.color === 'green' && 'bg-green-100 dark:bg-green-900/30',
+                          action.color === 'blue' && 'bg-blue-100 dark:bg-blue-900/30',
+                          action.color === 'purple' && 'bg-purple-100 dark:bg-purple-900/30',
+                          action.color === 'yellow' && 'bg-yellow-100 dark:bg-yellow-900/30'
+                        )}
+                      >
+                        {action.emoji}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {action.label}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all" />
+                    </Link>
+                  )
+                )}
               </div>
 
               {/* Certificate CTA */}
