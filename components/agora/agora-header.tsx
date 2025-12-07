@@ -4,21 +4,32 @@
  * Professional header following the design system with:
  * - Logo and branding
  * - User XP and avatar display
+ * - Dropdown menu for user actions
  * - Navigation breadcrumbs
  * - Theme toggle and actions
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
+ * Updated: 2025-12-07 - Added dropdown menu, fixed avatar and logout
  */
 
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Avatar } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import {
   GraduationCap,
@@ -34,12 +45,14 @@ import {
   FileText,
   Calendar,
   User,
+  Settings,
+  ChevronDown,
 } from 'lucide-react'
 
 interface AgoraHeaderProps {
   user: {
     name: string
-    avatar: string
+    avatar?: string
     totalXp: number
     currentLevel: number
     currentRank: string
@@ -60,6 +73,7 @@ const navItems = {
   '/pt/agora/ranking': { label: 'Ranking', icon: Trophy },
   '/pt/agora/perfil': { label: 'Meu Perfil', icon: User },
   '/pt/agora/onboarding': { label: 'Onboarding', icon: Sparkles },
+  '/pt/agora/boletim': { label: 'Boletim', icon: FileText },
 }
 
 // Rank colors mapping
@@ -73,6 +87,7 @@ const rankColors: Record<string, string> = {
 
 export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: AgoraHeaderProps) {
   const pathname = usePathname()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // Generate breadcrumb from current path
   const getBreadcrumb = () => {
@@ -84,6 +99,24 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
 
   const breadcrumb = getBreadcrumb()
   const rankColor = rankColors[user.currentRank] || rankColors.novato
+
+  // Get initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsMenuOpen(false)
+    if (onLogout) {
+      onLogout()
+    }
+  }
 
   return (
     <header
@@ -144,46 +177,111 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
               </span>
             </div>
 
-            {/* User Avatar + Info */}
-            <div className="flex items-center gap-3 pl-3 border-l border-gray-200 dark:border-gray-700">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {user.name.split(' ')[0]}
-                </span>
-                <Badge variant="outline" size="sm" className={cn('capitalize', rankColor)}>
-                  Lv.{user.currentLevel} {user.currentRank}
-                </Badge>
-              </div>
-              <div className="relative">
-                <Image
-                  src={user.avatar}
-                  alt={user.name}
-                  width={40}
-                  height={40}
-                  unoptimized={user.avatar.includes('ui-avatars.com')}
-                  className="rounded-full ring-2 ring-green-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900"
-                />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md">
-                  {user.currentLevel}
-                </div>
-              </div>
-            </div>
-
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* Logout/Reset Button */}
-            {onLogout && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onLogout}
-                className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                title={isDemoMode ? 'Resetar Demo' : 'Sair'}
-              >
-                {isDemoMode ? <RotateCcw className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
-              </Button>
-            )}
+            {/* User Menu Dropdown */}
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 pl-2 pr-3 h-10 hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <Avatar
+                    src={user.avatar}
+                    alt={user.name}
+                    fallback={getInitials(user.name)}
+                    size="sm"
+                    className="ring-2 ring-green-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900"
+                  />
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight">
+                      {user.name.split(' ')[0]}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                      Lv.{user.currentLevel}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-56">
+                {/* User Info Header */}
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" size="sm" className={cn('capitalize', rankColor)}>
+                        {user.currentRank}
+                      </Badge>
+                      <span className="text-xs text-gray-500">Lv.{user.currentLevel}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                {/* XP Display (mobile) */}
+                <div className="sm:hidden px-2 py-1.5">
+                  <div className="flex items-center gap-2 px-2 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                    <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                    <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                      {user.totalXp.toLocaleString()} XP
+                    </span>
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator className="sm:hidden" />
+
+                {/* Menu Items */}
+                <DropdownMenuItem asChild>
+                  <Link href="/pt/agora/perfil" className="flex items-center gap-2 cursor-pointer">
+                    <User className="w-4 h-4" />
+                    <span>Meu Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/pt/agora/boletim" className="flex items-center gap-2 cursor-pointer">
+                    <FileText className="w-4 h-4" />
+                    <span>Boletim</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/pt/agora/ranking" className="flex items-center gap-2 cursor-pointer">
+                    <Trophy className="w-4 h-4" />
+                    <span>Ranking</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Logout/Reset */}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className={cn(
+                    'flex items-center gap-2 cursor-pointer',
+                    isDemoMode
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-red-600 dark:text-red-400'
+                  )}
+                >
+                  {isDemoMode ? (
+                    <>
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Resetar Demo</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4" />
+                      <span>Sair</span>
+                    </>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

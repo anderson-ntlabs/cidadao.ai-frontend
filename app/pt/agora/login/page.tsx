@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAgoraAuth } from '@/hooks/use-agora-auth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -36,7 +37,8 @@ export default function AgoraLoginPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading, loginWithProvider } = useAgoraAuth()
   const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
+  const [backgroundImage, setBackgroundImage] = useState<string>('')
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   // Select random background on mount (client-side only to avoid hydration mismatch)
   useEffect(() => {
@@ -87,21 +89,26 @@ export default function AgoraLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Background pattern - random SVG selection */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      {/* Background image using Next/Image for better loading */}
       {backgroundImage && (
-        <div
-          className="fixed inset-0 -z-10 opacity-[0.15] dark:opacity-[0.20] transition-opacity duration-500"
-          style={{
-            backgroundImage: `url('${backgroundImage}')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
+        <div className="fixed inset-0 -z-10">
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            className={cn(
+              'object-cover transition-opacity duration-1000',
+              imageLoaded ? 'opacity-20 dark:opacity-25' : 'opacity-0'
+            )}
+            onLoad={() => setImageLoaded(true)}
+            priority
+            unoptimized
+          />
+        </div>
       )}
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500 via-green-600 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-2xl">
@@ -116,7 +123,11 @@ export default function AgoraLoginPage() {
         </div>
 
         {/* Login Card */}
-        <Card variant="elevated" padding="lg" className="mb-6">
+        <Card
+          variant="elevated"
+          padding="lg"
+          className="mb-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm"
+        >
           <div className="space-y-4">
             {/* GitHub Login */}
             <Button
@@ -190,7 +201,7 @@ export default function AgoraLoginPage() {
           ].map((feature) => (
             <div
               key={feature.label}
-              className="flex flex-col items-center p-3 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
+              className="flex flex-col items-center p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50"
             >
               <span className="text-2xl mb-1">{feature.icon}</span>
               <span className="text-xs text-gray-600 dark:text-gray-400">{feature.label}</span>
