@@ -50,18 +50,34 @@ function AcademyDashboardContent() {
     const hasOAuthCookie = document.cookie.includes('oauth_session_ready=true')
     if (hasOAuthParam || hasOAuthCookie) {
       setIsOAuthFlow(true)
-      const timer = setTimeout(() => setAuthCheckComplete(true), 3000)
+      // Increased timeout to 8 seconds to allow auth hook retries to complete
+      // Auth hook has up to 5 retries with 300-1500ms delays = ~4.5s + 500ms initial = ~5s
+      const timer = setTimeout(() => setAuthCheckComplete(true), 8000)
       return () => clearTimeout(timer)
     } else {
       setAuthCheckComplete(true)
     }
   }, [])
 
-  // Auth redirect
+  // Auth redirect - only redirect after OAuth timeout or if not in OAuth flow
   useEffect(() => {
-    if (isDemoMode || realAuth.isLoading) return
+    // Never redirect in demo mode
+    if (isDemoMode) return
+
+    // Don't redirect while auth is loading
+    if (realAuth.isLoading) return
+
+    // Authenticated - no redirect needed
     if (realAuth.isAuthenticated) return
+
+    // In OAuth flow - wait for timeout before redirecting
+    // This gives the auth hook time to complete all retries
     if (isOAuthFlow && !authCheckComplete) return
+
+    // Not authenticated and either:
+    // - Not in OAuth flow, or
+    // - OAuth flow timeout passed
+    // Redirect to login
     router.replace('/pt/agora/login')
   }, [
     isDemoMode,
