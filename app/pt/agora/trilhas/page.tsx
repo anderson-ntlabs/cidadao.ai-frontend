@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
 import {
   Server,
@@ -201,8 +201,7 @@ function TrackCard({
   const completedModules = Math.floor((progress / 100) * track.modules.length)
 
   return (
-    <Card
-      variant="elevated"
+    <GlassCard
       className={cn(
         'transition-all duration-300 overflow-hidden',
         isExpanded && 'ring-2 ring-offset-2',
@@ -433,7 +432,7 @@ function TrackCard({
           </div>
         </div>
       )}
-    </Card>
+    </GlassCard>
   )
 }
 
@@ -512,57 +511,57 @@ export default function AgoraTrilhasPage() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Stats Summary */}
         {enrolledTracks.length > 0 && (
-          <Card
-            variant="filled"
-            padding="md"
-            className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
-                  <Trophy className="w-6 h-6 text-white" />
+          <GlassCard className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+            <GlassCardContent className="p-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Trilhas ativas</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {enrolledTracks.length}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Trilhas ativas</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {enrolledTracks.length}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {user?.totalXp || 0}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">XP total</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {user?.currentLevel || 1}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Nivel</p>
+                <div className="flex gap-6">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {user?.totalXp || 0}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">XP total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {user?.currentLevel || 1}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Nivel</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </GlassCardContent>
+          </GlassCard>
         )}
 
         {/* Empty State */}
         {enrolledTracks.length === 0 && (
-          <Card variant="outlined" padding="lg" className="mb-6 border-dashed">
-            <div className="text-center py-4">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                <Target className="w-8 h-8 text-gray-400" />
+          <GlassCard className="mb-6 border-dashed border-2">
+            <GlassCardContent className="p-6">
+              <div className="text-center py-4">
+                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-2">
+                  Escolha sua primeira trilha
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                  Cada trilha te guia do basico ao avancado com mentores IA, videos, leituras e
+                  projetos praticos. Voce pode fazer varias trilhas!
+                </p>
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-2">
-                Escolha sua primeira trilha
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                Cada trilha te guia do basico ao avancado com mentores IA, videos, leituras e
-                projetos praticos. Voce pode fazer varias trilhas!
-              </p>
-            </div>
-          </Card>
+            </GlassCardContent>
+          </GlassCard>
         )}
 
         {/* Track Cards */}
@@ -581,17 +580,19 @@ export default function AgoraTrilhasPage() {
         </div>
 
         {/* Info Footer */}
-        <Card variant="filled" padding="md" className="mt-6 bg-gray-50 dark:bg-gray-800/50">
-          <div className="flex items-start gap-3">
-            <Users className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              <p>
-                <strong className="text-gray-900 dark:text-white">Multiplas trilhas:</strong> Voce
-                pode se inscrever em quantas trilhas quiser e ganhar certificados em cada uma!
-              </p>
+        <GlassCard className="mt-6 bg-gray-50/80 dark:bg-gray-800/50">
+          <GlassCardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Users className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <p>
+                  <strong className="text-gray-900 dark:text-white">Multiplas trilhas:</strong> Voce
+                  pode se inscrever em quantas trilhas quiser e ganhar certificados em cada uma!
+                </p>
+              </div>
             </div>
-          </div>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
       </main>
     </div>
   )

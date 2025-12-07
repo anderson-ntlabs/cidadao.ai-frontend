@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAgoraAuth } from '@/hooks/use-agora-auth'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
 import { Github, Mail, GraduationCap, Sparkles, ArrowRight, Loader2 } from 'lucide-react'
 
@@ -123,12 +123,8 @@ export default function AgoraLoginPage() {
         </div>
 
         {/* Login Card */}
-        <Card
-          variant="elevated"
-          padding="lg"
-          className="mb-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm"
-        >
-          <div className="space-y-4">
+        <GlassCard className="mb-6">
+          <GlassCardContent className="p-6 space-y-4">
             {/* GitHub Login */}
             <Button
               onClick={() => handleLogin('github')}
@@ -163,34 +159,34 @@ export default function AgoraLoginPage() {
               )}
               Entrar com Google
             </Button>
-          </div>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+            {/* Divider */}
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white/80 dark:bg-gray-800/80 text-gray-500">
+                  ou continue como visitante
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">
-                ou continue como visitante
-              </span>
-            </div>
-          </div>
 
-          {/* Demo Mode */}
-          <Link
-            href="/pt/agora?demo=true"
-            className={cn(
-              'flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl',
-              'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
-              'text-gray-700 dark:text-gray-300 font-medium transition-colors'
-            )}
-          >
-            <Sparkles className="w-4 h-4" />
-            Explorar em modo demo
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </Card>
+            {/* Demo Mode */}
+            <Link
+              href="/pt/agora?demo=true"
+              className={cn(
+                'flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl',
+                'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
+                'text-gray-700 dark:text-gray-300 font-medium transition-colors'
+              )}
+            >
+              <Sparkles className="w-4 h-4" />
+              Explorar em modo demo
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </GlassCardContent>
+        </GlassCard>
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mb-6">

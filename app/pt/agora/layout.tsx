@@ -3,7 +3,6 @@
 import '@/styles/design-system/tokens/index.css'
 
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { AgoraDemoProvider } from '@/hooks/use-agora-demo'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
@@ -11,15 +10,6 @@ import { UnifiedAgoraProvider } from '@/hooks/use-agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
-
-// Lazy load accessibility panel
-const AccessibilityPanel = dynamic(
-  () =>
-    import('@/components/a11y/accessibility-panel').then((mod) => ({
-      default: mod.AccessibilityPanel,
-    })),
-  { loading: () => null, ssr: false }
-)
 
 /**
  * Agora Layout
@@ -29,14 +19,14 @@ const AccessibilityPanel = dynamic(
  * - AgoraDemoProvider: Provides demo mode functionality
  * - UnifiedAgoraProvider: Auto-selects between real/demo based on auth state
  * - BottomNavigation: Mobile navigation (same as main app)
- * - AccessibilityPanel: FAB for quick access to a11y features
  *
+ * Accessibility options are now integrated into AgoraHeader dropdown menu.
  * VLibras is available globally from /pt/layout.tsx
  *
  * Use `useAgora()` hook in pages for automatic mode selection.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-07 - Added AccessibilityPanel for a11y
+ * Updated: 2025-12-07 - Removed AccessibilityPanel FAB (moved to header menu)
  */
 
 // Ágora navigation items for mobile bottom nav
@@ -100,9 +90,6 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation - same as main app */}
       {isMobile && !isLoginPage && <BottomNavigation items={agoraNavItems} />}
-
-      {/* Accessibility Panel - FAB for quick access to a11y features */}
-      {!isLoginPage && <AccessibilityPanel locale="pt" />}
     </div>
   )
 }

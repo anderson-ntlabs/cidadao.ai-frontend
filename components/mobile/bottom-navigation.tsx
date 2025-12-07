@@ -152,13 +152,14 @@ export function BottomNavigation({
         'bg-white dark:bg-gray-900',
         'border-t border-gray-200 dark:border-gray-800',
         'shadow-lg',
+        'w-full max-w-full overflow-hidden', // Prevent horizontal overflow
         safeArea.bottom, // Safe area for home indicator
         className
       )}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around px-2">
+      <div className="flex items-center justify-around px-1 sm:px-2 max-w-full overflow-hidden">
         {itemsWithBadge.map((item) => {
           const isActive = item.active !== undefined ? item.active : currentPath === item.path
           const Icon = item.icon
@@ -169,12 +170,12 @@ export function BottomNavigation({
               key={item.id}
               onClick={() => handleNavigate(item)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1',
-                'relative',
-                'py-2 px-3',
+                'flex flex-col items-center justify-center gap-0.5',
+                'relative flex-1', // Allow buttons to shrink
+                'py-2 px-1 sm:px-3',
                 'transition-all duration-200',
                 touchFeedback.minimal,
-                tapTarget.large, // 56px minimum
+                'min-h-[56px]', // Keep minimum height for touch target
                 isActive
                   ? 'text-green-600 dark:text-green-400'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -216,7 +217,8 @@ export function BottomNavigation({
               {showLabels && (
                 <span
                   className={cn(
-                    'text-xs font-medium transition-all duration-200',
+                    'text-[10px] sm:text-xs font-medium transition-all duration-200',
+                    'truncate max-w-full',
                     isActive && 'font-semibold'
                   )}
                 >
@@ -229,7 +231,7 @@ export function BottomNavigation({
                 <div
                   className={cn(
                     'absolute bottom-0 left-1/2 -translate-x-1/2',
-                    'w-12 h-1',
+                    'w-8 sm:w-12 h-1',
                     'bg-green-600 dark:bg-green-400',
                     'rounded-t-full',
                     'animate-in slide-in-from-bottom duration-200'

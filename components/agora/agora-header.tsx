@@ -50,6 +50,7 @@ import {
   Bell,
   HelpCircle,
   Activity,
+  Accessibility,
 } from 'lucide-react'
 
 interface AgoraHeaderProps {
@@ -78,6 +79,7 @@ const navItems = {
   '/pt/agora/onboarding': { label: 'Onboarding', icon: Sparkles },
   '/pt/agora/boletim': { label: 'Boletim', icon: FileText },
   '/pt/agora/configuracoes': { label: 'Configuracoes', icon: Settings },
+  '/pt/agora/acessibilidade': { label: 'Acessibilidade', icon: Accessibility },
   '/pt/agora/ajuda': { label: 'Central de Ajuda', icon: HelpCircle },
   '/pt/agora/notificacoes': { label: 'Notificacoes', icon: Bell },
   '/pt/agora/atividades': { label: 'Atividades', icon: Activity },
@@ -260,6 +262,16 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   >
                     <Settings className="w-4 h-4" />
                     <span>Configuracoes</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/pt/agora/acessibilidade"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Accessibility className="w-4 h-4" />
+                    <span>Acessibilidade</span>
                   </Link>
                 </DropdownMenuItem>
 
