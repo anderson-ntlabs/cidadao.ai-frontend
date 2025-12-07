@@ -378,10 +378,12 @@ function TrackCard({
 
                     {/* Action */}
                     {isCurrent && (
-                      <Button size="sm" variant="primary" className="flex-shrink-0">
-                        <Play className="w-3 h-3 mr-1" />
-                        Iniciar
-                      </Button>
+                      <Link href={`/pt/agora/trilhas/${track.id}/${module.id}`}>
+                        <Button size="sm" variant="primary" className="flex-shrink-0">
+                          <Play className="w-3 h-3 mr-1" />
+                          Iniciar
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 )
@@ -405,9 +407,9 @@ function TrackCard({
                   </span>{' '}
                   modulos concluidos
                 </div>
-                <Link href="/pt/agora/chat">
-                  <Button variant="primary" rightIcon={<MessageSquare className="w-4 h-4" />}>
-                    Continuar com {track.mentor.name.split(' ')[0]}
+                <Link href={`/pt/agora/trilhas/${track.id}/${completedModules + 1}`}>
+                  <Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                    Continuar trilha
                   </Button>
                 </Link>
               </div>
@@ -455,7 +457,8 @@ export default function AgoraTrilhasPage() {
   }
 
   const handleStartTrack = (trackId: string) => {
-    router.push(`/pt/agora/onboarding?track=${trackId}`)
+    // Go directly to first module of the track
+    router.push(`/pt/agora/trilhas/${trackId}/1`)
   }
 
   const handleToggleTrack = (trackId: string) => {
