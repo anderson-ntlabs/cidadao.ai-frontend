@@ -1,639 +1,460 @@
 'use client'
 
-import { useEffect, useState, useRef, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+/**
+ * Agora Academy Chat Page
+ *
+ * Educational chat interface using the same components as main app.
+ * Features Santos-Dumont (Engineering) and Lina Bo Bardi (UI/UX) mentors.
+ *
+ * @author Anderson Henrique da Silva
+ * @date 2025-12-07
+ */
+
+import { useEffect, useRef, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { useAgora } from '@/hooks/use-agora'
-import { Card } from '@/components/ui/card'
+import { useAgoraChatStore } from '@/store/agora-chat-store'
+import { getEducationalAgents, isEducationalAgent } from '@/data/agents'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Send, Sparkles, MessageSquare, Settings } from 'lucide-react'
+import { ArrowLeft, Send, Sparkles, MessageSquare, Plus, GraduationCap } from 'lucide-react'
 import { trackMentorChat, trackStudySession } from '@/lib/analytics/agora-tracker'
 
-// Lazy load voice components (same as main app)
-const VoiceRecorder = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
+// Import shared chat components
+import { MessageBubble } from '@/components/chat/message-bubble'
+import { StreamingStatus } from '@/components/chat/streaming-status'
+
+// Lazy load heavy components
+const AgoraAgentSelector = dynamic(
+  () =>
+    import('@/components/agora/agora-agent-selector').then((mod) => ({
+      default: mod.AgoraAgentSelector,
+    })),
   {
-    loading: () => null,
+    loading: () => <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
     ssr: false,
   }
+)
+
+const VoiceRecorder = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
+  { loading: () => null, ssr: false }
 )
 
 const VoiceInputButton = dynamic(
   () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
-  {
-    loading: () => null,
-    ssr: false,
-  }
+  { loading: () => null, ssr: false }
 )
 
-/**
- * Academy Chat Page - Simplified
- *
- * Two-mode chat interface:
- * - Santos Dumont: Academy mentor for project questions
- * - Maritaca Direct: LLM for general questions
- *
- * Author: Anderson Henrique da Silva
- * Updated: 2025-12-06
- */
+// Empty state for chat
+function ChatEmptyState({
+  agentId,
+  agentName,
+  onSuggestionClick,
+}: {
+  agentId: string
+  agentName: string
+  onSuggestionClick: (suggestion: string) => void
+}) {
+  const agents = getEducationalAgents()
+  const agent = agents.find((a) => a.id === agentId)
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+  const suggestions =
+    agentId === 'santos-dumont'
+      ? [
+          'O que é o Cidadão.AI?',
+          'Como funciona o sistema de agentes?',
+          'Dicas para meu primeiro projeto',
+          'Arquitetura de software escalável',
+        ]
+      : [
+          'Como melhorar a acessibilidade?',
+          'Princípios de design funcional',
+          'Dicas de UI para mobile',
+          'Design centrado no usuário',
+        ]
 
-type ChatMode = 'mentor' | 'lina' | 'maritaca'
+  return (
+    <div className="flex-1 flex items-center justify-center p-6">
+      <div className="text-center max-w-md">
+        {/* Agent Avatar */}
+        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl overflow-hidden shadow-xl ring-4 ring-white dark:ring-gray-800">
+          {agent && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
+          )}
+        </div>
 
-const chatModes = {
-  mentor: {
-    id: 'santos-dumont',
-    name: 'Santos-Dumont',
-    role: 'Mentor de Engenharia',
-    emoji: '✈️',
-    avatar: '/agents/santos-dumont.png',
-    description: 'Inovacao, engenharia criativa e arquitetura do Cidadao.AI',
-    color: 'from-green-500 to-emerald-600',
-    systemPrompt: `Voce e Santos-Dumont, mentor da Academy Cidadao.AI.
-Voce e apaixonado por inovacao, engenharia criativa e educacao.
-IMPORTANTE: Seu nome e Santos-Dumont, NAO Alberto. Nunca se apresente como Alberto.
-Ajude os estudantes com duvidas sobre:
-- O projeto Cidadao.AI e sua arquitetura
-- Boas praticas de desenvolvimento
-- Carreira em tecnologia
-- Motivacao e persistencia
+        {/* Welcome Message */}
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          Olá! Sou {agentName}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          {agent?.description.pt || 'Seu mentor na Academy Cidadão.AI'}
+        </p>
 
-Seja didatico, incentivador e use analogias com aviacao quando apropriado.
-Responda sempre em portugues brasileiro.`,
-  },
-  lina: {
-    id: 'bobardi',
-    name: 'Lina Bo Bardi',
-    role: 'Mentora de UI/UX',
-    emoji: '🏛️',
-    avatar: '/agents/Lina_Bo_Bardi.jpg',
-    description: 'Design funcional, acessibilidade e interfaces elegantes',
-    color: 'from-amber-500 to-orange-600',
-    systemPrompt: `Voce e Lina Bo Bardi, arquiteta modernista e mentora de UI/UX da Academy Cidadao.AI.
-Voce criou o MASP e e apaixonada por design funcional e acessivel.
-Ajude os estudantes com duvidas sobre:
-- Design de interfaces e experiencia do usuario
-- Acessibilidade e design inclusivo
-- Principios de design: simplicidade, funcionalidade e beleza
-- CSS, Tailwind, componentes React
-- Boas praticas de frontend
+        {/* Suggestions */}
+        <div className="space-y-3">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Experimente perguntar:</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => onSuggestionClick(suggestion)}
+                className="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700 transition-colors shadow-sm"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
 
-Use analogias com arquitetura quando apropriado. Valorize a funcao sobre a forma excessiva.
-Responda sempre em portugues brasileiro com carinho e sabedoria.`,
-  },
-  maritaca: {
-    id: 'maritaca',
-    name: 'Maritaca AI',
-    role: 'Assistente IA',
-    emoji: '🦜',
-    avatar: '/sabiazinho.png',
-    description: 'LLM brasileiro - duvidas gerais de programacao',
-    color: 'from-blue-500 to-cyan-500',
-    systemPrompt: `Você é um assistente educacional da Academy Cidadão.AI, uma plataforma aberta de aprendizado.
-Ajude os estudantes a aprender sobre desenvolvimento de software, inteligência artificial, e tecnologia em geral.
-Seja didático, use exemplos práticos, e incentive o aprendizado.
-Responda sempre em português brasileiro.`,
-  },
-}
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
+        {/* XP Info */}
+        <div className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm">
+          <Sparkles className="w-4 h-4" />
+          <span>+5 XP a cada 5 mensagens</span>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function ChatContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isLoading, addXp, startSession, endSession, currentSession, mode, isRealAuth } =
-    useAgora()
+  const { user, addXp, startSession, endSession, currentSession, mode } = useAgora()
 
-  const [chatMode, setChatMode] = useState<ChatMode>('mentor')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [streamingContent, setStreamingContent] = useState('')
-  const [messageCount, setMessageCount] = useState(0)
+  // Chat store
+  const {
+    messages,
+    selectedAgentId,
+    isLoading,
+    error,
+    streaming,
+    initializeChat,
+    sendMessage,
+    selectAgent,
+    clearChat,
+    clearError,
+    setXpCallback,
+  } = useAgoraChatStore()
+
+  // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const inputRef = useRef<string>('')
 
+  // Get agent info
+  const agents = getEducationalAgents()
+  const currentAgent = agents.find((a) => a.id === selectedAgentId) || agents[0]
+
+  // Initialize chat and XP callback
+  useEffect(() => {
+    initializeChat()
+    setXpCallback((amount, type, description) => {
+      addXp(amount, type, description)
+    })
+  }, [initializeChat, setXpCallback, addXp])
+
+  // Handle agent from URL params
   useEffect(() => {
     const agentParam = searchParams.get('agent')
-    if (agentParam === 'santos-dumont') {
-      setChatMode('mentor')
-    } else if (agentParam === 'bobardi' || agentParam === 'lina') {
-      setChatMode('lina')
-    } else if (agentParam === 'maritaca') {
-      setChatMode('maritaca')
+    if (agentParam && isEducationalAgent(agentParam)) {
+      selectAgent(agentParam)
     }
-  }, [searchParams])
+  }, [searchParams, selectAgent])
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
+  // Start session on mount
   useEffect(() => {
     if (!currentSession) {
       startSession()
     }
   }, [currentSession, startSession])
 
-  const handleModeChange = (mode: ChatMode) => {
-    if (currentSession && messageCount > 0) {
-      endSession(messageCount, [chatModes[chatMode].id])
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, streaming.accumulatedContent])
 
-      // Track study session completion in PostHog
+  // Handle send message
+  const handleSend = useCallback(async () => {
+    const message = inputRef.current.trim()
+    if (!message || isLoading) return
+
+    inputRef.current = ''
+    if (textareaRef.current) {
+      textareaRef.current.value = ''
+      textareaRef.current.style.height = 'auto'
+    }
+
+    await sendMessage(message)
+
+    // Track in analytics
+    trackMentorChat(selectedAgentId, messages.length + 1)
+  }, [isLoading, sendMessage, selectedAgentId, messages.length])
+
+  // Handle key down
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  // Handle textarea input
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    inputRef.current = e.target.value
+    // Auto-resize
+    e.target.style.height = 'auto'
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`
+  }
+
+  // Handle new chat
+  const handleNewChat = () => {
+    if (currentSession && messages.length > 0) {
       const sessionDuration = Math.floor(
         (Date.now() - new Date(currentSession.startedAt).getTime()) / 60000
       )
+      endSession(messages.length, [selectedAgentId])
       trackStudySession({
         duration: sessionDuration,
-        activities: ['chat', chatModes[chatMode].id],
-        xpEarned: Math.floor(messageCount / 5) * 5,
+        activities: ['chat', selectedAgentId],
+        xpEarned: Math.floor(messages.filter((m) => m.role === 'user').length / 5) * 5,
       })
     }
-    setChatMode(mode)
-    setMessages([])
-    setMessageCount(0)
-    router.push(`/pt/agora/chat?agent=${chatModes[mode].id}`)
+    clearChat()
+    startSession()
   }
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isSending) return
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput('')
-    setIsSending(true)
-    setMessageCount((prev) => prev + 1)
-
-    const currentMode = chatModes[chatMode]
-
-    try {
-      let responseContent = ''
-
-      // All modes use streaming endpoint with appropriate agent
-      // - mentor: santos_dumont (engineering mentor)
-      // - lina: bobardi (UI/UX mentor)
-      // - maritaca: abaporu (general purpose agent)
-      const backendAgentId =
-        chatMode === 'lina' ? 'bobardi' : chatMode === 'maritaca' ? 'abaporu' : 'santos_dumont'
-
-      try {
-        setIsStreaming(true)
-        setStreamingContent('')
-
-        const response = await fetch(`${BACKEND_URL}/api/v1/chat/stream`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: userMessage.content,
-            agent_id: backendAgentId,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Backend not available')
-        }
-
-        const reader = response.body?.getReader()
-        const decoder = new TextDecoder()
-        let accumulatedContent = ''
-
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            const chunk = decoder.decode(value, { stream: true })
-            const lines = chunk.split('\n')
-
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6))
-                  if (data.type === 'chunk' && data.content) {
-                    // Add space between chunks if needed
-                    const needsSpace =
-                      accumulatedContent.length > 0 &&
-                      !accumulatedContent.endsWith(' ') &&
-                      !accumulatedContent.endsWith('\n') &&
-                      !data.content.startsWith(' ') &&
-                      !data.content.startsWith('\n')
-                    accumulatedContent += (needsSpace ? ' ' : '') + data.content
-                    setStreamingContent(accumulatedContent)
-                  } else if (data.type === 'complete') {
-                    break
-                  } else if (data.type === 'error') {
-                    throw new Error(data.message || 'Erro no streaming')
-                  }
-                } catch {
-                  // Skip invalid JSON lines
-                }
-              }
-            }
-          }
-        }
-
-        responseContent = accumulatedContent || 'Desculpe, nao consegui processar sua mensagem.'
-        setIsStreaming(false)
-        setStreamingContent('')
-      } catch {
-        setIsStreaming(false)
-        setStreamingContent('')
-
-        // Offline fallback with generic helpful response
-        responseContent = `Ola! Sou ${currentMode.name}, seu mentor na Academy! ${currentMode.emoji}
-
-Parece que estou com dificuldade de conexao no momento.
-
-Enquanto isso, aqui vao algumas dicas gerais:
-• A Academy Cidadao.AI e um programa focado em desenvolvimento de software e IA
-• Explore as trilhas de aprendizado disponiveis
-• Use o diario de bordo para registrar seu progresso
-• Cada conversa e sessao de estudo gera XP!
-
-Tente novamente em alguns instantes. Continue aprendendo! 🚀`
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: responseContent,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-
-      // Award XP every 5 messages
-      if ((messageCount + 1) % 5 === 0) {
-        addXp(5, 'conversation', `Conversa com ${currentMode.name}`)
-      }
-
-      // Track chat interaction in PostHog
-      trackMentorChat(currentMode.id, messageCount + 1)
-    } catch (error) {
-      console.error('Chat error:', error)
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Desculpe, houve um erro ao processar sua mensagem. Tente novamente.',
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsSending(false)
-    }
+  // Handle agent change
+  const handleAgentChange = (agentId: string) => {
+    selectAgent(agentId)
+    handleNewChat()
   }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <MessageSquare className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando chat...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const currentMode = chatModes[chatMode]
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-4xl mx-auto px-4 py-4">
+          {/* Top Bar */}
           <div className="flex items-center justify-between mb-4">
             <Link
               href="/pt/agora"
               className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Voltar ao Dashboard</span>
+              <span className="text-sm font-medium">Dashboard</span>
             </Link>
 
             <div className="flex items-center gap-2">
               {currentSession && (
-                <Badge variant="success" className="animate-pulse">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                  Sessao ativa
-                </Badge>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Sessão ativa
+                </span>
               )}
-              <Link
-                href="/pt/agora/configuracoes"
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title="Configuracoes"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNewChat}
+                leftIcon={<Plus className="w-4 h-4" />}
               >
-                <Settings className="w-5 h-5" />
-              </Link>
+                Nova
+              </Button>
             </div>
           </div>
 
-          {/* Mode Toggle */}
-          <div className="grid grid-cols-3 gap-3">
-            {/* Santos-Dumont */}
-            <button
-              onClick={() => handleModeChange('mentor')}
-              className={cn(
-                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
-                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
-                'border-2',
-                chatMode === 'mentor'
-                  ? 'border-green-500 ring-2 ring-green-500/20'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-green-400'
-              )}
-            >
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md">
-                <Image
-                  src={chatModes.mentor.avatar}
-                  alt={chatModes.mentor.name}
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Santos-Dumont</p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">Engenharia</p>
-              </div>
-              {chatMode === 'mentor' && (
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              )}
-            </button>
-
-            {/* Lina Bo Bardi */}
-            <button
-              onClick={() => handleModeChange('lina')}
-              className={cn(
-                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
-                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
-                'border-2',
-                chatMode === 'lina'
-                  ? 'border-amber-500 ring-2 ring-amber-500/20'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-amber-400'
-              )}
-            >
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md">
-                <Image
-                  src={chatModes.lina.avatar}
-                  alt={chatModes.lina.name}
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Lina Bo Bardi</p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">UI/UX</p>
-              </div>
-              {chatMode === 'lina' && (
-                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-              )}
-            </button>
-
-            {/* Maritaca AI */}
-            <button
-              onClick={() => handleModeChange('maritaca')}
-              className={cn(
-                'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200',
-                'bg-white dark:bg-gray-800 shadow-md hover:shadow-lg',
-                'border-2',
-                chatMode === 'maritaca'
-                  ? 'border-blue-500 ring-2 ring-blue-500/20'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'
-              )}
-            >
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                <span className="text-2xl">🦜</span>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-sm text-gray-900 dark:text-gray-100">Maritaca AI</p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">LLM Geral</p>
-              </div>
-              {chatMode === 'maritaca' && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-              )}
-            </button>
-          </div>
+          {/* Agent Selector */}
+          <AgoraAgentSelector
+            selectedAgentId={selectedAgentId}
+            onSelectAgent={handleAgentChange}
+            disabled={isLoading || streaming.isStreaming}
+          />
         </div>
       </header>
 
       {/* Messages Area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center min-h-[400px]">
-              <div className="text-center max-w-md">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl mx-auto mb-6 ring-4 ring-white dark:ring-gray-800">
-                  <Image
-                    src={currentMode.avatar}
-                    alt={currentMode.name}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  {currentMode.name}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                  {currentMode.description}
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {(chatMode === 'lina'
-                    ? [
-                        'Como melhorar a acessibilidade?',
-                        'Principios de design funcional',
-                        'Dicas de UI para mobile',
-                      ]
-                    : chatMode === 'mentor'
-                      ? [
-                          'O que e o Cidadao.AI?',
-                          'Como funciona o sistema de agentes?',
-                          'Dicas para o estagio',
-                        ]
-                      : ['Me explique sobre React', 'O que e TypeScript?', 'Como funciona uma API?']
-                  ).map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => setInput(suggestion)}
-                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {messages.map((message) => (
-                <div key={message.id} className="animate-fade-in">
-                  {message.role === 'user' ? (
-                    /* User message - right aligned, subtle */
-                    <div className="flex justify-end">
-                      <div className="max-w-[85%] flex items-start gap-3">
-                        <div className="py-2 px-4 rounded-2xl bg-green-600 text-white">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                            {message.content}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Assistant message - full width, clean */
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
-                        <Image
-                          src={currentMode.avatar}
-                          alt={currentMode.name}
-                          width={32}
-                          height={32}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                          {currentMode.name}
-                        </p>
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <p className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap m-0">
-                            {message.content}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Streaming response with typing animation */}
-              {isStreaming && streamingContent && (
-                <div className="flex gap-3 animate-fade-in">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
-                    <Image
-                      src={currentMode.avatar}
-                      alt={currentMode.name}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      {currentMode.name}
-                    </p>
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <p className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap m-0">
-                        {streamingContent}
-                        <span className="inline-block w-0.5 h-4 ml-0.5 bg-green-500 animate-pulse align-middle" />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Typing indicator */}
-              {isSending && !streamingContent && (
-                <div className="flex gap-3 animate-fade-in">
-                  <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800">
-                    <Image
-                      src={currentMode.avatar}
-                      alt={currentMode.name}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                      {currentMode.name}
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:0ms]" />
-                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:150ms]" />
-                      <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:300ms]" />
-                    </div>
-                  </div>
-                </div>
-              )}
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              <button
+                onClick={clearError}
+                className="mt-2 text-xs text-red-600 dark:text-red-500 underline"
+              >
+                Fechar
+              </button>
             </div>
           )}
 
-          <div ref={messagesEndRef} />
+          {/* Empty State or Messages */}
+          {messages.length === 0 ? (
+            <ChatEmptyState
+              agentId={selectedAgentId}
+              agentName={currentAgent.name}
+              onSuggestionClick={(suggestion) => {
+                inputRef.current = suggestion
+                if (textareaRef.current) {
+                  textareaRef.current.value = suggestion
+                  textareaRef.current.focus()
+                }
+              }}
+            />
+          ) : (
+            <div className="space-y-6">
+              {messages.map((message, index) => {
+                const isLatest =
+                  index === messages.length - 1 &&
+                  message.role === 'assistant' &&
+                  streaming.isStreaming
+                const agent = agents.find((a) => a.id === message.agentId)
+
+                return (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      'flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300',
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    )}
+                  >
+                    {/* Agent Avatar */}
+                    {message.role === 'assistant' && (
+                      <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800 shadow-md">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={agent?.image || currentAgent.image}
+                          alt={agent?.name || currentAgent.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    {/* Message Bubble */}
+                    <div
+                      className={cn('max-w-[85%]', message.role === 'user' ? 'order-first' : '')}
+                    >
+                      <MessageBubble
+                        content={message.content}
+                        role={message.role}
+                        agentName={agent?.name || currentAgent.name}
+                        agentRole={agent?.role.pt || currentAgent.role.pt}
+                        agentId={message.agentId}
+                        isLatest={isLatest}
+                        isLoading={isLoading}
+                        isStreaming={isLatest && streaming.isStreaming}
+                      />
+                    </div>
+
+                    {/* User Avatar */}
+                    {message.role === 'user' && (
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-gray-900 shadow-lg flex-shrink-0">
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+              <div ref={messagesEndRef} className="h-4" />
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Input with Voice Features (same as main app) */}
-      <footer className="sticky bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 p-4">
-        <div className="max-w-4xl mx-auto flex gap-2 sm:gap-3 items-end">
-          {/* Voice Recorder (Audio Recording) */}
-          <VoiceRecorder
-            onTranscript={(transcript) => {
-              setInput(transcript)
-            }}
-            disabled={isSending}
-            size="md"
-            variant="default"
-          />
+      {/* Input Area */}
+      <footer className="sticky bottom-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          {/* Streaming Status */}
+          {streaming.isStreaming && (
+            <div className="mb-3">
+              <StreamingStatus
+                streaming={{
+                  isStreaming: streaming.isStreaming,
+                  phase: streaming.phase as any,
+                  statusMessage: streaming.statusMessage,
+                  currentAgentId: streaming.currentAgentId,
+                  currentAgentName: streaming.currentAgentName,
+                  streamingMessageId: null,
+                  accumulatedContent: streaming.accumulatedContent,
+                }}
+              />
+            </div>
+          )}
 
-          {/* Voice Input (Speech-to-Text) */}
-          <VoiceInputButton
-            onTranscript={(transcript) => {
-              setInput((prev) => prev + ' ' + transcript)
-            }}
-            disabled={isSending}
-            size="md"
-            variant="secondary"
-            lang="pt-BR"
-            showTooltip={true}
-            tooltipContent="Clique e fale (Speech-to-Text)"
-          />
+          {/* Input Row */}
+          <div className="flex gap-2 sm:gap-3 items-end">
+            {/* Voice Recorder */}
+            <VoiceRecorder
+              onTranscript={(transcript) => {
+                inputRef.current = transcript
+                if (textareaRef.current) {
+                  textareaRef.current.value = transcript
+                  textareaRef.current.focus()
+                }
+              }}
+              disabled={isLoading || streaming.isStreaming}
+              size="md"
+              variant="default"
+            />
 
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-            placeholder={`Converse com ${currentMode.name.split(' ')[0]}...`}
-            inputSize="lg"
-            disabled={isSending}
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!input.trim() || isSending}
-            size="lg"
-            className="px-6"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
+            {/* Voice Input Button */}
+            <VoiceInputButton
+              onTranscript={(transcript) => {
+                inputRef.current = inputRef.current + ' ' + transcript
+                if (textareaRef.current) {
+                  textareaRef.current.value = inputRef.current
+                  textareaRef.current.focus()
+                }
+              }}
+              disabled={isLoading || streaming.isStreaming}
+              size="md"
+              variant="secondary"
+              lang="pt-BR"
+              showTooltip={true}
+              tooltipContent="Clique e fale"
+            />
+
+            {/* Textarea */}
+            <textarea
+              ref={textareaRef}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              placeholder={`Converse com ${currentAgent.name.split(' ')[0]}...`}
+              className="flex-1 resize-none rounded-2xl px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 dark:focus:border-green-500 transition-all text-base min-h-[52px] shadow-sm hover:shadow-md"
+              rows={1}
+              disabled={isLoading || streaming.isStreaming}
+            />
+
+            {/* Send Button */}
+            <Button
+              onClick={handleSend}
+              disabled={isLoading || streaming.isStreaming}
+              loading={isLoading && !streaming.isStreaming}
+              className="px-5 py-3 h-auto rounded-2xl shadow-md hover:shadow-lg"
+              leftIcon={<Send className="w-5 h-5" />}
+            >
+              <span className="hidden sm:inline">Enviar</span>
+            </Button>
+          </div>
+
+          {/* XP Info */}
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3 flex items-center justify-center gap-1">
+            <GraduationCap className="w-3 h-3" />
+            Academy Cidadão.AI
+            <span className="mx-1">•</span>
+            <Sparkles className="w-3 h-3" />
+            +5 XP a cada 5 mensagens
+          </p>
         </div>
-        <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">
-          <Sparkles className="w-3 h-3 inline mr-1" />
-          +5 XP a cada 5 mensagens
-        </p>
       </footer>
     </div>
   )
 }
 
-export default function AcademyChatPage() {
+export default function AgoraChatPage() {
   return (
     <Suspense
       fallback={
