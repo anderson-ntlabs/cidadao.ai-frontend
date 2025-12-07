@@ -20,8 +20,12 @@ export async function GET(request: Request): Promise<NextResponse> {
     try {
       const cookieStore = await cookies()
 
+      // Track cookies that need to be set on the response
+      // This is necessary because NextResponse.redirect() doesn't include
+      // cookies set via cookieStore.set() automatically
+      const cookiesToSet: Array<{ name: string; value: string; options: any }> = []
+
       // Create Supabase client with proper cookie handling for route handlers
-      // This is required for OAuth callbacks to persist session cookies
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,10 +34,13 @@ export async function GET(request: Request): Promise<NextResponse> {
             getAll() {
               return cookieStore.getAll()
             },
-            setAll(cookiesToSet) {
+            setAll(cookies) {
               try {
-                cookiesToSet.forEach(({ name, value, options }) => {
+                cookies.forEach(({ name, value, options }) => {
+                  // Set on cookieStore for immediate availability
                   cookieStore.set(name, value, options)
+                  // Also track for setting on redirect response
+                  cookiesToSet.push({ name, value, options })
                 })
               } catch (error) {
                 logger.error('OAuth callback cookie error', error)
@@ -56,6 +63,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         userId: data.session?.user.id,
         email: data.session?.user.email,
         expiresAt: data.session?.expires_at,
+        cookiesCount: cookiesToSet.length,
       })
 
       // Determine correct redirect URL
@@ -76,8 +84,14 @@ export async function GET(request: Request): Promise<NextResponse> {
       // Create response with redirect
       const response = NextResponse.redirect(redirectUrl)
 
+      // CRITICAL: Copy all session cookies to the redirect response
+      // Without this, the session cookies won't be sent to the browser
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options)
+        logger.debug('Setting cookie on response', { name, valueLength: value.length })
+      })
+
       // Set a cookie to indicate OAuth just completed successfully
-      // Extended to 30 seconds to handle slow connections
       response.cookies.set('oauth_session_ready', 'true', {
         path: '/',
         maxAge: 30,
