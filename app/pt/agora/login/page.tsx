@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAgoraAuth } from '@/hooks/use-agora-auth'
@@ -36,10 +36,12 @@ export default function AgoraLoginPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading, loginWithProvider } = useAgoraAuth()
   const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
 
-  // Select random background on mount (client-side only)
-  const randomBackground = useMemo(() => {
-    return BACKGROUND_IMAGES[Math.floor(Math.random() * BACKGROUND_IMAGES.length)]
+  // Select random background on mount (client-side only to avoid hydration mismatch)
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length)
+    setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
   }, [])
 
   // Redirect authenticated users to dashboard
@@ -87,15 +89,17 @@ export default function AgoraLoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Background pattern - random SVG selection */}
-      <div
-        className="fixed inset-0 -z-10 opacity-[0.03] dark:opacity-[0.08]"
-        style={{
-          backgroundImage: `url('${randomBackground}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+      {backgroundImage && (
+        <div
+          className="fixed inset-0 -z-10 opacity-[0.15] dark:opacity-[0.20] transition-opacity duration-500"
+          style={{
+            backgroundImage: `url('${backgroundImage}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
 
       <div className="w-full max-w-md">
         {/* Header */}
