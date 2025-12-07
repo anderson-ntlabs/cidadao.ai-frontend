@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAgora } from '@/hooks/use-agora'
 import { jsPDF } from 'jspdf'
-import { getTelemetryData, saveCertificate } from '@/app/pt/agora/actions'
+import { getTelemetryData, saveCertificate, getDailyActivityData } from '@/app/pt/agora/actions'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -50,7 +50,7 @@ const TOTAL_VIDEO_DURATIONS = [
 ]
 
 export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
-  const { user, xpTransactions, diaryEntries, sessions, isAuthenticated } = useAgora()
+  const { user, xpTransactions, diaryEntries, sessions, isRealAuth } = useAgora()
   const [isGenerating, setIsGenerating] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryData>({
     videosCompleted: 0,
@@ -76,23 +76,40 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
   const [consistency, setConsistency] = useState<ReturnType<
     typeof verifyTelemetryConsistency
   > | null>(null)
+  const [dailyActivity, setDailyActivity] = useState<
+    Array<{
+      date: string
+      minutes: number
+      xp: number
+      sessions: number
+    }>
+  >([])
 
   useEffect(() => {
     if (isOpen) {
       loadTelemetryData()
     }
-  }, [isOpen, user, xpTransactions, diaryEntries, sessions, isAuthenticated])
+  }, [isOpen, user, xpTransactions, diaryEntries, sessions, isRealAuth])
 
   const loadTelemetryData = async () => {
-    // If authenticated, load from Supabase
-    if (isAuthenticated) {
-      const result = await getTelemetryData()
-      if (result.success && result.data) {
-        setTelemetry(result.data as TelemetryData)
-        setValidation(validateCertificateRequirements(result.data as TelemetryData))
-        setConsistency(verifyTelemetryConsistency(result.data as TelemetryData))
-        return
+    // If authenticated with real auth (Supabase), load real data
+    if (isRealAuth) {
+      const [telemetryResult, activityResult] = await Promise.all([
+        getTelemetryData(),
+        getDailyActivityData(),
+      ])
+
+      if (telemetryResult.success && telemetryResult.data) {
+        setTelemetry(telemetryResult.data as TelemetryData)
+        setValidation(validateCertificateRequirements(telemetryResult.data as TelemetryData))
+        setConsistency(verifyTelemetryConsistency(telemetryResult.data as TelemetryData))
       }
+
+      if (activityResult.success && activityResult.data) {
+        setDailyActivity(activityResult.data)
+      }
+
+      if (telemetryResult.success) return
     }
 
     // Fallback to localStorage (demo mode)
@@ -512,7 +529,118 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       currentY += 10
     })
 
-    // ===== PAGE 3: DIARY ENTRIES =====
+    // ===== PAGE 3: DAILY ACTIVITY CHART =====
+    if (dailyActivity.length > 0) {
+      addNewPage()
+
+      doc.setFillColor(59, 130, 246) // blue-500
+      doc.rect(0, 0, pageWidth, 40, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(20)
+      doc.setFont('helvetica', 'bold')
+      doc.text('ATIVIDADE DIARIA', pageWidth / 2, 25, { align: 'center' })
+
+      currentY = 55
+
+      // Chart title
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(107, 114, 128)
+      doc.text('Tempo de estudo por dia (ultimos 30 dias)', margin, currentY)
+      currentY += 15
+
+      // Calculate chart dimensions
+      const chartWidth = pageWidth - margin * 2
+      const chartHeight = 100
+      const maxMinutes = Math.max(...dailyActivity.map((d) => d.minutes), 60) // Min 60 for scale
+      const barWidth = Math.max((chartWidth - 20) / dailyActivity.length - 2, 8)
+
+      // Draw chart background
+      doc.setFillColor(248, 250, 252)
+      doc.roundedRect(margin, currentY, chartWidth, chartHeight + 30, 5, 5, 'F')
+
+      // Draw bars
+      dailyActivity.forEach((day, index) => {
+        const x = margin + 10 + index * (barWidth + 2)
+        const barHeight = (day.minutes / maxMinutes) * chartHeight
+        const y = currentY + chartHeight - barHeight + 5
+
+        // Bar
+        doc.setFillColor(59, 130, 246) // blue-500
+        doc.roundedRect(x, y, barWidth, barHeight, 2, 2, 'F')
+
+        // Date label (only show some to avoid crowding)
+        if (
+          index % Math.ceil(dailyActivity.length / 10) === 0 ||
+          index === dailyActivity.length - 1
+        ) {
+          doc.setFontSize(7)
+          doc.setTextColor(107, 114, 128)
+          const dateStr = new Date(day.date).toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+          })
+          doc.text(dateStr, x + barWidth / 2, currentY + chartHeight + 20, { align: 'center' })
+        }
+      })
+
+      // Y-axis labels
+      doc.setFontSize(8)
+      doc.setTextColor(107, 114, 128)
+      doc.text(`${maxMinutes}min`, margin + 2, currentY + 10)
+      doc.text('0min', margin + 2, currentY + chartHeight + 5)
+
+      currentY += chartHeight + 40
+
+      // Daily summary table
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(55, 65, 81)
+      doc.text('Detalhamento por Dia', margin, currentY)
+      currentY += 10
+
+      // Table header
+      doc.setFillColor(240, 253, 244)
+      doc.rect(margin, currentY, pageWidth - margin * 2, 12, 'F')
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(55, 65, 81)
+      doc.text('Data', margin + 5, currentY + 8)
+      doc.text('Tempo', margin + 60, currentY + 8)
+      doc.text('Sessoes', margin + 100, currentY + 8)
+      doc.text('XP Ganho', pageWidth - margin - 20, currentY + 8, { align: 'right' })
+      currentY += 15
+
+      // Show last 10 days
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      const recentDays = dailyActivity.slice(-10).reverse()
+
+      recentDays.forEach((day) => {
+        if (currentY > pageHeight - 30) return
+
+        const dateStr = new Date(day.date).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+        const hours = Math.floor(day.minutes / 60)
+        const mins = day.minutes % 60
+        const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`
+
+        doc.setTextColor(107, 114, 128)
+        doc.text(dateStr, margin + 5, currentY + 5)
+        doc.setTextColor(59, 130, 246)
+        doc.text(timeStr, margin + 60, currentY + 5)
+        doc.setTextColor(55, 65, 81)
+        doc.text(day.sessions.toString(), margin + 100, currentY + 5)
+        doc.setTextColor(22, 163, 74)
+        doc.text(`+${day.xp}`, pageWidth - margin - 20, currentY + 5, { align: 'right' })
+        currentY += 10
+      })
+    }
+
+    // ===== PAGE 4: DIARY ENTRIES =====
     if (diaryEntries.length > 0) {
       addNewPage()
 
@@ -597,8 +725,8 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       const totalHours = Math.floor(user.totalTimeMinutes / 60)
       trackCertificateDownload(totalHours, user.currentLevel)
 
-      // Save certificate to Supabase if authenticated
-      if (isAuthenticated && certificateType) {
+      // Save certificate to Supabase if using real auth
+      if (isRealAuth && certificateType) {
         const certType = determineCertificateType(telemetry)
         await saveCertificate({
           certificateNumber: certId,

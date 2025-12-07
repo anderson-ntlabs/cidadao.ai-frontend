@@ -674,6 +674,61 @@ export async function getTelemetryData() {
   }
 }
 
+/**
+ * Get daily activity data for charts
+ * Returns sessions grouped by date with total time
+ */
+export async function getDailyActivityData() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    // Get sessions from last 30 days
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { data: sessions, error } = await supabase
+      .from('agora_sessions')
+      .select('started_at, duration_minutes, xp_earned')
+      .eq('user_id', user.id)
+      .gte('started_at', thirtyDaysAgo.toISOString())
+      .order('started_at', { ascending: true })
+
+    if (error) throw error
+
+    // Group by date
+    const dailyData: Record<
+      string,
+      { date: string; minutes: number; xp: number; sessions: number }
+    > = {}
+
+    sessions?.forEach((session) => {
+      const date = session.started_at.split('T')[0]
+      if (!dailyData[date]) {
+        dailyData[date] = { date, minutes: 0, xp: 0, sessions: 0 }
+      }
+      dailyData[date].minutes += session.duration_minutes || 0
+      dailyData[date].xp += session.xp_earned || 0
+      dailyData[date].sessions += 1
+    })
+
+    // Convert to array sorted by date
+    const chartData = Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date))
+
+    return { success: true, data: chartData }
+  } catch (error) {
+    console.error('Failed to get daily activity data:', error)
+    return { error: 'Failed to get daily activity data', data: null }
+  }
+}
+
 // ============================================
 // Data Fetching (for Server Components)
 // ============================================
