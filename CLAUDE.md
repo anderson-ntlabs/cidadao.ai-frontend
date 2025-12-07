@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-11-22
+**Last Updated**: 2025-12-07
 
 ---
 
@@ -129,6 +129,13 @@ app/
 │   │   ├── dashboard/       # Investigations dashboard
 │   │   ├── chat/           # AI chat interface
 │   │   └── [other protected routes]
+│   ├── agora/              # Learning platform (Ágora Academy)
+│   │   ├── dashboard/      # XP, badges, progress
+│   │   ├── chat/           # Agora-specific chat
+│   │   ├── trilhas/        # Learning tracks
+│   │   ├── ranking/        # Leaderboards
+│   │   ├── perfil/         # User profile
+│   │   └── onboarding/     # User onboarding flow
 │   ├── login/              # Auth page (SimplifiedHeader)
 │   └── [public pages]      # Landing, about, agents (Full Header or SimplifiedHeader)
 ├── en/                      # English (mirror structure)
@@ -183,15 +190,18 @@ Adapter    Adapter       ↓
 
 ### State Management (Zustand)
 
-Three main stores in `store/`:
+Six main stores in `store/`:
 
 - `chat-store.ts`: Chat sessions, messages, agents, investigations
   - Actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
   - Persisted to localStorage
 - `notification-store.ts`: Toast notifications (success/error/warning/info)
 - `tooltip-store.ts`: Tooltip visibility state
+- `badge-store.ts`: User achievement badges (fetching, caching, animations)
+- `survey-store.ts`: UX survey state (progress, answers, completion)
+- `voice-settings-store.ts`: Voice/TTS settings
 
-**Pattern**: Stores use Zustand with immer middleware for immutable updates.
+**Pattern**: Stores use Zustand with persist middleware for localStorage persistence.
 
 ### Agent System
 
@@ -217,6 +227,50 @@ Each agent has:
 - Description (PT/EN)
 - Avatar image in `public/agents/`
 - Wikipedia link for cultural context
+
+### Ágora Learning Platform
+
+Gamified learning platform at `/pt/agora/*` with XP system, badges, and learning tracks.
+
+**Auth Architecture** (`app/pt/agora/layout.tsx`):
+
+```tsx
+<AgoraAuthProvider>
+  {' '}
+  // Real auth (Supabase OAuth)
+  <AgoraDemoProvider>
+    {' '}
+    // Demo mode (localStorage)
+    <UnifiedAgoraProvider>
+      {' '}
+      // Auto-selects real/demo based on auth
+      {children}
+    </UnifiedAgoraProvider>
+  </AgoraDemoProvider>
+</AgoraAuthProvider>
+```
+
+**Hook Usage**:
+
+```typescript
+import { useAgora } from '@/hooks/use-agora'
+
+const { user, addXp, startSession, badges, mode } = useAgora()
+// mode: 'real' (OAuth) or 'demo' (localStorage)
+```
+
+**Database Tables** (Supabase):
+
+- `agora_profiles`: XP, level, rank, streak, badges
+- `agora_xp_transactions`: XP history
+- `agora_sessions`: Study sessions
+- `agora_diary_entries`: Learning diary
+
+**Components** (`components/agora/`):
+
+- `agora-header.tsx`, `agora-sidebar.tsx`: Navigation
+- `stat-card.tsx`, `badge-showcase.tsx`: UI elements
+- `lgpd-consent-modal.tsx`, `internship-contract-modal.tsx`: Compliance
 
 ### Progressive Web App (Serwist)
 
@@ -372,6 +426,20 @@ node scripts/diagnostics/diagnose-vlibras.js
 
 **File**: `components/a11y/vlibras-lazy.tsx`
 
+### Debugging Ágora
+
+```bash
+# Check for demo mode: URL param ?demo=true forces demo mode
+# Real auth: Requires OAuth login, uses Supabase tables
+# Demo mode: Uses localStorage, no backend required
+```
+
+**Files to check**:
+
+- `hooks/use-agora.tsx` - Unified hook (determines real/demo mode)
+- `hooks/use-agora-auth.ts` - OAuth flow
+- `app/pt/agora/layout.tsx` - Provider hierarchy
+
 ### Adding a New Agent
 
 1. Define in `data/agents.ts` with PT/EN translations
@@ -510,6 +578,16 @@ Opens webpack bundle analyzer in browser.
 - `store/chat-store.ts` - Chat state (messages, sessions, agents)
 - `store/notification-store.ts` - Toast notifications
 - `store/tooltip-store.ts` - Tooltip state
+- `store/badge-store.ts` - Achievement badges
+- `store/survey-store.ts` - UX survey state
+- `store/voice-settings-store.ts` - Voice/TTS settings
+
+**Ágora Platform**:
+
+- `hooks/use-agora.tsx` - Unified Ágora hook (real/demo mode)
+- `hooks/use-agora-auth.ts` - OAuth authentication
+- `hooks/use-agora-demo.ts` - Demo mode with localStorage
+- `components/agora/` - Ágora-specific components
 
 ---
 
@@ -619,7 +697,7 @@ npm run test:playwright     # All E2E tests must pass
 ## Library Organization
 
 **Chat System**: `lib/chat/` - ChatService, adapters, types
-**State Management**: `store/` - Zustand stores (chat, notifications, tooltips)
+**State Management**: `store/` - Zustand stores (chat, notifications, badges, survey, voice)
 **Caching**: `lib/cache/` - in-memory, IndexedDB, Vercel KV
 **Security**: `lib/security/` - CSP config, rate limiting, OWASP protections
 **Monitoring**: `lib/monitoring/` - Sentry config, metrics service
