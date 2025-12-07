@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAgoraAuth } from '@/hooks/use-agora-auth'
@@ -10,19 +10,37 @@ import { cn } from '@/lib/utils'
 import { Github, Mail, GraduationCap, Sparkles, ArrowRight, Loader2 } from 'lucide-react'
 
 /**
- * Academy Login Page
+ * Ágora Login Page
  *
  * OAuth login with GitHub and Google
  * No domain restrictions - open to all developers
+ * Random background selection from available SVGs
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-06
+ * Updated: 2025-12-07
  */
 
-export default function AcademyLoginPage() {
+// Available background images for random selection
+const BACKGROUND_IMAGES = [
+  '/agora/tarsila-modernismo.svg',
+  '/agora/cidadao-democratizando.svg',
+  '/agora/cidadao-slide-01.svg',
+  '/agora/cidadao-slide-02.svg',
+  '/agora/cidadao-slide-03.svg',
+  '/agora/cidadao-slide-04.svg',
+  '/agora/cidadao-slide-05.svg',
+  '/agora/cidadao-slide-06.svg',
+]
+
+export default function AgoraLoginPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading, loginWithProvider } = useAgoraAuth()
   const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
+
+  // Select random background on mount (client-side only)
+  const randomBackground = useMemo(() => {
+    return BACKGROUND_IMAGES[Math.floor(Math.random() * BACKGROUND_IMAGES.length)]
+  }, [])
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -68,13 +86,14 @@ export default function AcademyLoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Background pattern */}
+      {/* Background pattern - random SVG selection */}
       <div
-        className="fixed inset-0 -z-10 opacity-[0.02] dark:opacity-[0.05]"
+        className="fixed inset-0 -z-10 opacity-[0.03] dark:opacity-[0.08]"
         style={{
-          backgroundImage: `url('/operarios.png')`,
+          backgroundImage: `url('${randomBackground}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
         }}
       />
 
@@ -85,7 +104,7 @@ export default function AcademyLoginPage() {
             <GraduationCap className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Academy Cidadao.AI
+            Ágora Cidadão.AI
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Plataforma aberta de aprendizado em IA e desenvolvimento
