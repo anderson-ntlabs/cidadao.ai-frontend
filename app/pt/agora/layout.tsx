@@ -1,5 +1,7 @@
 'use client'
 
+import '@/styles/design-system/tokens/index.css'
+
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
