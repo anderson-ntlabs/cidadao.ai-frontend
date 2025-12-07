@@ -107,11 +107,11 @@ const STEPS = [
 ]
 
 // Full Cidadão.AI presentation with 40 slides
-// Slides available at public/agora/slide-XX.png
+// Slides available at public/agora/slides/slide-XX.png
 const PRESENTATION_SLIDES: Slide[] = [
   {
     id: 1,
-    src: '/agora/slide-01.png',
+    src: '/agora/slides/slide-01.png',
     alt: 'Slide 1 - Capa',
     title: 'Cidadão.AI',
     narration:
@@ -119,7 +119,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 2,
-    src: '/agora/slide-02.png',
+    src: '/agora/slides/slide-02.png',
     alt: 'Slide 2 - Introdução',
     title: 'Introdução ao Projeto',
     narration:
@@ -127,7 +127,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 3,
-    src: '/agora/slide-03.png',
+    src: '/agora/slides/slide-03.png',
     alt: 'Slide 3 - Problema',
     title: 'O Problema',
     narration:
@@ -135,7 +135,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 4,
-    src: '/agora/slide-04.png',
+    src: '/agora/slides/slide-04.png',
     alt: 'Slide 4 - Solução',
     title: 'Nossa Solução',
     narration:
@@ -143,7 +143,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 5,
-    src: '/agora/slide-05.png',
+    src: '/agora/slides/slide-05.png',
     alt: 'Slide 5 - Visão Geral',
     title: 'Visão Geral',
     narration:
@@ -151,7 +151,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 6,
-    src: '/agora/slide-06.png',
+    src: '/agora/slides/slide-06.png',
     alt: 'Slide 6 - Arquitetura',
     title: 'Arquitetura do Sistema',
     narration:
@@ -159,7 +159,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 7,
-    src: '/agora/slide-07.png',
+    src: '/agora/slides/slide-07.png',
     alt: 'Slide 7 - Agentes de IA',
     title: 'Nossos Agentes',
     narration:
@@ -167,7 +167,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 8,
-    src: '/agora/slide-08.png',
+    src: '/agora/slides/slide-08.png',
     alt: 'Slide 8 - Abaporu',
     title: 'Agente Abaporu',
     narration:
@@ -175,7 +175,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 9,
-    src: '/agora/slide-09.png',
+    src: '/agora/slides/slide-09.png',
     alt: 'Slide 9 - Zumbi',
     title: 'Agente Zumbi',
     narration:
@@ -183,7 +183,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 10,
-    src: '/agora/slide-10.png',
+    src: '/agora/slides/slide-10.png',
     alt: 'Slide 10 - Anita',
     title: 'Agente Anita',
     narration:
@@ -191,7 +191,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 11,
-    src: '/agora/slide-11.png',
+    src: '/agora/slides/slide-11.png',
     alt: 'Slide 11 - Tiradentes',
     title: 'Agente Tiradentes',
     narration:
@@ -199,7 +199,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 12,
-    src: '/agora/slide-12.png',
+    src: '/agora/slides/slide-12.png',
     alt: 'Slide 12 - Mais Agentes',
     title: 'Mais Agentes',
     narration:
@@ -207,7 +207,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 13,
-    src: '/agora/slide-13.png',
+    src: '/agora/slides/slide-13.png',
     alt: 'Slide 13 - Tecnologias',
     title: 'Tecnologias Utilizadas',
     narration:
@@ -215,7 +215,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 14,
-    src: '/agora/slide-14.png',
+    src: '/agora/slides/slide-14.png',
     alt: 'Slide 14 - Frontend',
     title: 'Frontend Moderno',
     narration:
@@ -223,7 +223,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 15,
-    src: '/agora/slide-15.png',
+    src: '/agora/slides/slide-15.png',
     alt: 'Slide 15 - Backend',
     title: 'Backend Robusto',
     narration:
@@ -231,7 +231,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 16,
-    src: '/agora/slide-16.png',
+    src: '/agora/slides/slide-16.png',
     alt: 'Slide 16 - IA/ML',
     title: 'Inteligência Artificial',
     narration:
@@ -239,7 +239,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 17,
-    src: '/agora/slide-17.png',
+    src: '/agora/slides/slide-17.png',
     alt: 'Slide 17 - Dados',
     title: 'Fontes de Dados',
     narration:
@@ -247,7 +247,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 18,
-    src: '/agora/slide-18.png',
+    src: '/agora/slides/slide-18.png',
     alt: 'Slide 18 - Academy',
     title: 'Academy Cidadão.AI',
     narration:
@@ -255,7 +255,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 19,
-    src: '/agora/slide-19.png',
+    src: '/agora/slides/slide-19.png',
     alt: 'Slide 19 - Trilhas',
     title: 'Trilhas de Aprendizado',
     narration:
@@ -263,7 +263,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 20,
-    src: '/agora/slide-20.png',
+    src: '/agora/slides/slide-20.png',
     alt: 'Slide 20 - Backend Track',
     title: 'Trilha Backend',
     narration:
@@ -271,7 +271,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 21,
-    src: '/agora/slide-21.png',
+    src: '/agora/slides/slide-21.png',
     alt: 'Slide 21 - Frontend Track',
     title: 'Trilha Frontend',
     narration:
@@ -279,7 +279,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 22,
-    src: '/agora/slide-22.png',
+    src: '/agora/slides/slide-22.png',
     alt: 'Slide 22 - IA Track',
     title: 'Trilha IA/ML',
     narration:
@@ -287,7 +287,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 23,
-    src: '/agora/slide-23.png',
+    src: '/agora/slides/slide-23.png',
     alt: 'Slide 23 - DevOps Track',
     title: 'Trilha DevOps',
     narration:
@@ -295,7 +295,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 24,
-    src: '/agora/slide-24.png',
+    src: '/agora/slides/slide-24.png',
     alt: 'Slide 24 - Gamificação',
     title: 'Sistema de Gamificação',
     narration:
@@ -303,7 +303,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 25,
-    src: '/agora/slide-25.png',
+    src: '/agora/slides/slide-25.png',
     alt: 'Slide 25 - Certificado',
     title: 'Certificação',
     narration:
@@ -311,7 +311,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 26,
-    src: '/agora/slide-26.png',
+    src: '/agora/slides/slide-26.png',
     alt: 'Slide 26 - GitHub',
     title: 'Open Source',
     narration:
@@ -319,7 +319,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 27,
-    src: '/agora/slide-27.png',
+    src: '/agora/slides/slide-27.png',
     alt: 'Slide 27 - Comunidade',
     title: 'Comunidade',
     narration:
@@ -327,7 +327,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 28,
-    src: '/agora/slide-28.png',
+    src: '/agora/slides/slide-28.png',
     alt: 'Slide 28 - Mentoria',
     title: 'Mentoria IA 24/7',
     narration:
@@ -335,7 +335,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 29,
-    src: '/agora/slide-29.png',
+    src: '/agora/slides/slide-29.png',
     alt: 'Slide 29 - Diário',
     title: 'Diário de Bordo',
     narration:
@@ -343,7 +343,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 30,
-    src: '/agora/slide-30.png',
+    src: '/agora/slides/slide-30.png',
     alt: 'Slide 30 - Progresso',
     title: 'Acompanhamento',
     narration:
@@ -351,7 +351,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 31,
-    src: '/agora/slide-31.png',
+    src: '/agora/slides/slide-31.png',
     alt: 'Slide 31 - Impacto',
     title: 'Impacto Social',
     narration:
@@ -359,7 +359,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 32,
-    src: '/agora/slide-32.png',
+    src: '/agora/slides/slide-32.png',
     alt: 'Slide 32 - Futuro',
     title: 'Visão de Futuro',
     narration:
@@ -367,7 +367,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 33,
-    src: '/agora/slide-33.png',
+    src: '/agora/slides/slide-33.png',
     alt: 'Slide 33 - Parcerias',
     title: 'Parcerias',
     narration:
@@ -375,7 +375,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 34,
-    src: '/agora/slide-34.png',
+    src: '/agora/slides/slide-34.png',
     alt: 'Slide 34 - Roadmap',
     title: 'Roadmap',
     narration:
@@ -383,7 +383,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 35,
-    src: '/agora/slide-35.png',
+    src: '/agora/slides/slide-35.png',
     alt: 'Slide 35 - Como Participar',
     title: 'Como Participar',
     narration:
@@ -391,7 +391,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 36,
-    src: '/agora/slide-36.png',
+    src: '/agora/slides/slide-36.png',
     alt: 'Slide 36 - Próximos Passos',
     title: 'Próximos Passos',
     narration:
@@ -399,7 +399,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 37,
-    src: '/agora/slide-37.png',
+    src: '/agora/slides/slide-37.png',
     alt: 'Slide 37 - Contato',
     title: 'Contato',
     narration:
@@ -407,7 +407,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 38,
-    src: '/agora/slide-38.png',
+    src: '/agora/slides/slide-38.png',
     alt: 'Slide 38 - Agradecimentos',
     title: 'Agradecimentos',
     narration:
@@ -415,7 +415,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 39,
-    src: '/agora/slide-39.png',
+    src: '/agora/slides/slide-39.png',
     alt: 'Slide 39 - Citação',
     title: 'Inspiração',
     narration:
@@ -423,7 +423,7 @@ const PRESENTATION_SLIDES: Slide[] = [
   },
   {
     id: 40,
-    src: '/agora/slide-40.png',
+    src: '/agora/slides/slide-40.png',
     alt: 'Slide 40 - Vamos Começar',
     title: 'Vamos Começar!',
     narration:
