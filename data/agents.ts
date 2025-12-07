@@ -271,6 +271,28 @@ export const agents: Agent[] = [
   },
 ]
 
+/**
+ * Educational agent IDs for Agora Academy
+ * These mentors focus on teaching and guiding students
+ */
+export const EDUCATIONAL_AGENT_IDS = ['santos-dumont', 'bobardi'] as const
+export type EducationalAgentId = (typeof EDUCATIONAL_AGENT_IDS)[number]
+
+/**
+ * Get all educational agents for Agora Academy
+ * Returns only mentors designed for teaching purposes
+ */
+export function getEducationalAgents(): Agent[] {
+  return agents.filter((agent) => EDUCATIONAL_AGENT_IDS.includes(agent.id as EducationalAgentId))
+}
+
+/**
+ * Check if an agent is an educational mentor
+ */
+export function isEducationalAgent(agentId: string): boolean {
+  return EDUCATIONAL_AGENT_IDS.includes(agentId as EducationalAgentId)
+}
+
 export function getAgentById(id: string): Agent | undefined {
   return agents.find((agent) => agent.id === id)
 }
