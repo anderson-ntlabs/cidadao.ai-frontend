@@ -435,7 +435,7 @@ export function DashboardClient({
 
               {/* Onboarding Card - Always visible for revisiting */}
               <Link
-                href={`/pt/agora/onboarding${isDemoMode ? '?demo=true' : ''}`}
+                href={`/pt/agora/onboarding?preview=true${isDemoMode ? '&demo=true' : ''}`}
                 className="block p-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-2xl border border-indigo-200/50 dark:border-indigo-700/30 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all group"
               >
                 <div className="flex items-center gap-4">
@@ -448,11 +448,11 @@ export function DashboardClient({
                         Apresentação Ágora
                       </h3>
                       <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
-                        NOVO
+                        40 slides
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Reveja nossa apresentação completa com 40 slides
+                      Reveja nossa apresentação completa do projeto
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:translate-x-1 transition-all" />
