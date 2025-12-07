@@ -2,11 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-supabase-auth'
+import { cn } from '@/lib/utils'
+
+// Available background images for random selection
+const BACKGROUND_IMAGES = [
+  '/agora/tarsila-modernismo.png',
+  '/agora/cidadao-democratizando.png',
+  '/agora/cidadao-slide-01.png',
+  '/agora/cidadao-slide-02.png',
+  '/agora/cidadao-slide-03.png',
+  '/agora/cidadao-slide-04.png',
+  '/agora/cidadao-slide-05.png',
+  '/agora/cidadao-slide-06.png',
+]
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -14,6 +28,14 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth()
   const [view, setView] = useState<'sign_in' | 'sign_up'>('sign_in')
   const [redirectTo, setRedirectTo] = useState<string>('')
+  const [backgroundImage, setBackgroundImage] = useState<string>('')
+  const [imageLoaded, setImageLoaded] = useState(false)
+
+  // Select random background on mount (client-side only to avoid hydration mismatch)
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length)
+    setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
+  }, [])
 
   useEffect(() => {
     // Redirect authenticated users to app (sistema autenticado)
@@ -51,18 +73,24 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-8 relative">
-      {/* Background pattern matching site design */}
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
-      />
+    <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Background image using Next/Image for better loading */}
+      {backgroundImage && (
+        <div className="fixed inset-0 -z-10">
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            className={cn(
+              'object-cover transition-opacity duration-1000',
+              imageLoaded ? 'opacity-15 dark:opacity-20' : 'opacity-0'
+            )}
+            onLoad={() => setImageLoaded(true)}
+            priority
+            unoptimized
+          />
+        </div>
+      )}
 
       {/* Gradient overlay matching site design */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />

@@ -1,13 +1,15 @@
 /**
- * Academy Agenda Page
+ * Academy Diário de Bordo Page
  *
- * Study calendar with FullCalendar integration:
- * - View study sessions, readings, and video deadlines
- * - Create and manage study events
+ * Personal learning diary with calendar integration:
+ * - Track study sessions, readings, and video completions
+ * - Write reflections and notes (earn XP for writing)
+ * - Schedule learning events with reminders
  * - Optional Google Calendar export
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
+ * Updated: 2025-12-07
  */
 
 'use client'
@@ -43,6 +45,7 @@ import {
   Sparkles,
   ExternalLink,
   Trash2,
+  PenLine,
 } from 'lucide-react'
 
 // Dynamic import for FullCalendar (SSR not supported)
@@ -84,9 +87,9 @@ interface CalendarEventInput {
 // Event type configuration
 const eventTypeConfig: Record<EventType, { color: string; icon: typeof Calendar; label: string }> =
   {
-    study: { color: '#16a34a', icon: Clock, label: 'Sessao de Estudo' },
+    study: { color: '#16a34a', icon: Clock, label: 'Sessão de Estudo' },
     reading: { color: '#2563eb', icon: BookOpen, label: 'Leitura' },
-    video: { color: '#9333ea', icon: Video, label: 'Video' },
+    video: { color: '#9333ea', icon: Video, label: 'Vídeo' },
     chat: { color: '#ea580c', icon: MessageSquare, label: 'Chat com Mentor' },
     deadline: { color: '#dc2626', icon: GraduationCap, label: 'Prazo' },
   }
@@ -99,7 +102,7 @@ function LoadingFallback() {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
           <Calendar className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando agenda...</p>
+        <p className="text-gray-600 dark:text-gray-400">Carregando diário...</p>
       </div>
     </div>
   )
@@ -417,14 +420,14 @@ function AcademyAgendaContent() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-white" />
+                    <PenLine className="w-5 h-5 text-white" />
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    Agenda de Estudos
+                    Diário de Bordo
                   </h1>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Organize suas sessoes de estudo e acompanhe seu progresso
+                  Organize suas sessões de estudo e acompanhe seu progresso
                 </p>
               </div>
 
@@ -484,7 +487,7 @@ function AcademyAgendaContent() {
                   <div className="flex items-center justify-center h-[600px]">
                     <div className="text-center">
                       <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin mx-auto mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400">Carregando calendario...</p>
+                      <p className="text-gray-500 dark:text-gray-400">Carregando calendário...</p>
                     </div>
                   </div>
                 )}
@@ -498,7 +501,7 @@ function AcademyAgendaContent() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {events.filter((e) => e.type === 'study').length}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Sessoes de Estudo</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Sessões de Estudo</p>
                 </div>
               </Card>
               <Card variant="filled" padding="md" className="bg-blue-50 dark:bg-blue-900/20">
@@ -514,7 +517,7 @@ function AcademyAgendaContent() {
                   <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {events.filter((e) => e.type === 'video').length}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Videos</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Vídeos</p>
                 </div>
               </Card>
               <Card variant="filled" padding="md" className="bg-yellow-50 dark:bg-yellow-900/20">
@@ -638,7 +641,7 @@ function AcademyAgendaContent() {
           <div className="space-y-4 mt-4 overflow-y-auto max-h-[60vh]">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Titulo
+                Título
               </label>
               <input
                 type="text"
@@ -676,7 +679,7 @@ function AcademyAgendaContent() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Inicio
+                  Início
                 </label>
                 <input
                   type="time"
@@ -700,7 +703,7 @@ function AcademyAgendaContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Descricao (opcional)
+                Descrição (opcional)
               </label>
               <textarea
                 value={newEvent.description}

@@ -23,14 +23,14 @@ import { Github, Mail, GraduationCap, Sparkles, ArrowRight, Loader2 } from 'luci
 
 // Available background images for random selection
 const BACKGROUND_IMAGES = [
-  '/agora/tarsila-modernismo.svg',
-  '/agora/cidadao-democratizando.svg',
-  '/agora/cidadao-slide-01.svg',
-  '/agora/cidadao-slide-02.svg',
-  '/agora/cidadao-slide-03.svg',
-  '/agora/cidadao-slide-04.svg',
-  '/agora/cidadao-slide-05.svg',
-  '/agora/cidadao-slide-06.svg',
+  '/agora/tarsila-modernismo.png',
+  '/agora/cidadao-democratizando.png',
+  '/agora/cidadao-slide-01.png',
+  '/agora/cidadao-slide-02.png',
+  '/agora/cidadao-slide-03.png',
+  '/agora/cidadao-slide-04.png',
+  '/agora/cidadao-slide-05.png',
+  '/agora/cidadao-slide-06.png',
 ]
 
 export default function AgoraLoginPage() {
@@ -69,7 +69,7 @@ export default function AgoraLoginPage() {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Verificando autenticacao...</p>
+          <p className="text-gray-600 dark:text-gray-400">Verificando autenticação...</p>
         </div>
       </div>
     )
@@ -192,7 +192,7 @@ export default function AgoraLoginPage() {
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
             { icon: '🎓', label: 'Certificado' },
-            { icon: '🏆', label: 'Gamificacao' },
+            { icon: '🏆', label: 'Gamificação' },
             { icon: '🤖', label: 'Mentoria IA' },
           ].map((feature) => (
             <div
@@ -208,7 +208,7 @@ export default function AgoraLoginPage() {
         {/* Footer */}
         <div className="text-center space-y-3">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Ao entrar, voce concorda com nossos{' '}
+            Ao entrar, você concorda com nossos{' '}
             <Link href="/pt/termos" className="text-green-600 dark:text-green-400 hover:underline">
               Termos de Uso
             </Link>{' '}
@@ -217,7 +217,7 @@ export default function AgoraLoginPage() {
               href="/pt/privacidade"
               className="text-green-600 dark:text-green-400 hover:underline"
             >
-              Politica de Privacidade
+              Política de Privacidade
             </Link>
           </p>
 
@@ -225,7 +225,7 @@ export default function AgoraLoginPage() {
             href="/pt"
             className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
-            ← Voltar ao inicio
+            ← Voltar ao início
           </Link>
         </div>
       </div>

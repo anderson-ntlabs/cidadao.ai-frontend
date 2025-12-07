@@ -26,9 +26,9 @@ import {
   Flame,
   Clock,
   Target,
-  Calendar,
+  BookOpen,
   Compass,
-  ClipboardList,
+  PenLine,
 } from 'lucide-react'
 
 interface NavItem {
@@ -51,10 +51,9 @@ const navItems: NavItem[] = [
   { href: '/pt/agora', label: 'Dashboard', icon: Home },
   { href: '/pt/agora/trilhas', label: 'Trilhas', icon: Compass },
   { href: '/pt/agora/chat', label: 'Chat com Mentor', icon: MessageSquare },
-  { href: '/pt/agora/agenda', label: 'Agenda', icon: Calendar },
-  { href: '/pt/agora/boletim', label: 'Boletim', icon: ClipboardList },
-  { href: '/pt/agora/videos', label: 'Videos', icon: Video },
-  { href: '/pt/agora/leituras', label: 'Leituras', icon: FileText },
+  { href: '/pt/agora/diario', label: 'Diário de Bordo', icon: PenLine },
+  { href: '/pt/agora/videos', label: 'Vídeos', icon: Video },
+  { href: '/pt/agora/leituras', label: 'Leituras', icon: BookOpen },
   { href: '/pt/agora/ranking', label: 'Ranking', icon: Trophy },
   { href: '/pt/agora/perfil', label: 'Meu Perfil', icon: GraduationCap },
 ]
