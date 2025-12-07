@@ -5,11 +5,15 @@
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
+ * Updated: 2025-12-07 - Added AgoraAgentSelector
  */
 
 // Layout components
 export { AgoraHeader } from './agora-header'
 export { AgoraSidebar } from './agora-sidebar'
+
+// Chat components
+export { AgoraAgentSelector } from './agora-agent-selector'
 
 // Card components
 export { StatCard } from './stat-card'
