@@ -254,6 +254,21 @@ export const agents: Agent[] = [
     wikipedia: 'https://pt.wikipedia.org/wiki/Lina_Bo_Bardi',
     tracks: ['ui-ux', 'frontend', 'design'],
   },
+  {
+    id: 'santos-dumont',
+    name: 'Santos-Dumont',
+    role: {
+      pt: 'Mentor de Engenharia',
+      en: 'Engineering Mentor',
+    },
+    description: {
+      pt: 'Pai da aviação, ensina inovação, arquitetura de software e engenharia criativa. Inspira estudantes a sonhar grande e construir soluções elegantes para problemas complexos.',
+      en: 'Father of aviation, teaches innovation, software architecture and creative engineering. Inspires students to dream big and build elegant solutions to complex problems.',
+    },
+    image: '/agents/santos-dumont.png',
+    wikipedia: 'https://pt.wikipedia.org/wiki/Santos_Dumont',
+    tracks: ['backend', 'devops', 'data'],
+  },
 ]
 
 export function getAgentById(id: string): Agent | undefined {
