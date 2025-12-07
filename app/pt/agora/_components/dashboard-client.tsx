@@ -337,32 +337,39 @@ export function DashboardClient({
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Mentor + Actions */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Mentor Card */}
+              {/* Mentors Card - Santos-Dumont & Lina Bo Bardi */}
               <GlassCard className="p-6">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-6">
                   <Sparkles className="w-5 h-5 text-yellow-500" />
                   <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                    Mentor IA disponivel
+                    Mentores IA disponíveis
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-6">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-5xl shadow-lg flex-shrink-0">
-                    ✈️
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                      Alberto Santos-Dumont
+                <div className="grid sm:grid-cols-2 gap-6">
+                  {/* Santos-Dumont */}
+                  <div className="flex flex-col items-center text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30">
+                    <div className="relative mb-4">
+                      <img
+                        src="/agents/santos-dumont.png"
+                        alt="Santos-Dumont"
+                        className="w-24 h-24 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-gray-800"
+                      />
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg shadow">
+                        ✈️
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                      Santos-Dumont
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                      O Pai da Aviacao e seu mentor na Academy! Incentiva inovacao, criatividade e
-                      persistencia.
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                      Pai da Aviação • Inovação e Criatividade
                     </p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {['Codigo', 'PRs', 'Arquitetura', 'Boas Praticas'].map((tag) => (
+                    <div className="flex flex-wrap justify-center gap-1 mb-4">
+                      {['Código', 'PRs', 'Arquitetura'].map((tag) => (
                         <span
                           key={tag}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400"
                         >
                           {tag}
                         </span>
@@ -374,11 +381,53 @@ export function DashboardClient({
                           `/pt/agora/chat?agent=santos-dumont${isDemoMode ? '&demo=true' : ''}`
                         )
                       }
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
                     >
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Iniciar Conversa
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      Conversar
+                    </Button>
+                  </div>
+
+                  {/* Lina Bo Bardi */}
+                  <div className="flex flex-col items-center text-center p-4 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/50 dark:border-rose-700/30">
+                    <div className="relative mb-4">
+                      <img
+                        src="/agents/Lina_Bo_Bardi.jpg"
+                        alt="Lina Bo Bardi"
+                        className="w-24 h-24 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-gray-800"
+                      />
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-lg shadow">
+                        🏛️
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                      Lina Bo Bardi
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                      Arquiteta Modernista • Design e Cultura
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-1 mb-4">
+                      {['Design', 'UX/UI', 'Cultura'].map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() =>
+                        router.push(
+                          `/pt/agora/chat?agent=lina-bo-bardi${isDemoMode ? '&demo=true' : ''}`
+                        )
+                      }
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border-0"
+                    >
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      Conversar
                     </Button>
                   </div>
                 </div>
