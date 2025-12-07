@@ -4,14 +4,32 @@ import { useEffect, useState, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { useAgora } from '@/hooks/use-agora'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Send, Sparkles, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Send, Sparkles, MessageSquare, Settings } from 'lucide-react'
 import { trackMentorChat, trackStudySession } from '@/lib/analytics/agora-tracker'
+
+// Lazy load voice components (same as main app)
+const VoiceRecorder = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
+
+const VoiceInputButton = dynamic(
+  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
+  {
+    loading: () => null,
+    ssr: false,
+  }
+)
 
 /**
  * Academy Chat Page - Simplified
@@ -310,12 +328,21 @@ Tente novamente em alguns instantes. Continue aprendendo! 🚀`
               <span className="text-sm font-medium">Voltar ao Dashboard</span>
             </Link>
 
-            {currentSession && (
-              <Badge variant="success" className="animate-pulse">
-                <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                Sessao ativa
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {currentSession && (
+                <Badge variant="success" className="animate-pulse">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                  Sessao ativa
+                </Badge>
+              )}
+              <Link
+                href="/pt/agora/configuracoes"
+                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                title="Configuracoes"
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
 
           {/* Mode Toggle */}
@@ -553,9 +580,32 @@ Tente novamente em alguns instantes. Continue aprendendo! 🚀`
         </div>
       </main>
 
-      {/* Input */}
+      {/* Input with Voice Features (same as main app) */}
       <footer className="sticky bottom-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 p-4">
-        <div className="max-w-4xl mx-auto flex gap-3">
+        <div className="max-w-4xl mx-auto flex gap-2 sm:gap-3 items-end">
+          {/* Voice Recorder (Audio Recording) */}
+          <VoiceRecorder
+            onTranscript={(transcript) => {
+              setInput(transcript)
+            }}
+            disabled={isSending}
+            size="md"
+            variant="default"
+          />
+
+          {/* Voice Input (Speech-to-Text) */}
+          <VoiceInputButton
+            onTranscript={(transcript) => {
+              setInput((prev) => prev + ' ' + transcript)
+            }}
+            disabled={isSending}
+            size="md"
+            variant="secondary"
+            lang="pt-BR"
+            showTooltip={true}
+            tooltipContent="Clique e fale (Speech-to-Text)"
+          />
+
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}

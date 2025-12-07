@@ -74,6 +74,7 @@ const navItems = {
   '/pt/agora/perfil': { label: 'Meu Perfil', icon: User },
   '/pt/agora/onboarding': { label: 'Onboarding', icon: Sparkles },
   '/pt/agora/boletim': { label: 'Boletim', icon: FileText },
+  '/pt/agora/configuracoes': { label: 'Configuracoes', icon: Settings },
 }
 
 // Rank colors mapping
@@ -243,6 +244,16 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   <Link href="/pt/agora/ranking" className="flex items-center gap-2 cursor-pointer">
                     <Trophy className="w-4 h-4" />
                     <span>Ranking</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/pt/agora/configuracoes"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Configuracoes</span>
                   </Link>
                 </DropdownMenuItem>
 
