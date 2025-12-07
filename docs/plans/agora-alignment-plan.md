@@ -195,10 +195,28 @@ import '@/styles/design-system/tokens/index.css'
 
 ## Critérios de Sucesso
 
-- [ ] Chat Ágora usa mesmos componentes visuais do app principal
-- [ ] Apenas 2 agentes disponíveis (Santos-Dumont, Lina Bo Bardi)
-- [ ] XP é concedido por conversas
-- [ ] VLibras funciona no Ágora
-- [ ] Painel de acessibilidade presente
-- [ ] Streaming funciona corretamente
-- [ ] Mobile funciona identicamente ao app principal
+- [x] Chat Ágora usa mesmos componentes visuais do app principal
+- [x] Apenas 2 agentes disponíveis (Santos-Dumont, Lina Bo Bardi)
+- [x] XP é concedido por conversas
+- [x] VLibras funciona no Ágora (global de /pt/layout.tsx)
+- [x] Painel de acessibilidade presente
+- [x] Streaming funciona corretamente
+- [x] Mobile funciona identicamente ao app principal
+
+---
+
+## Implementação Concluída
+
+**Data**: 2025-12-07
+**Commits realizados**: 8
+
+1. ✅ `feat(agents): add Santos-Dumont as engineering mentor`
+2. ✅ `feat(agents): add educational agents filter helpers`
+3. ✅ `feat(agora): create agora-chat-store with ChatService integration`
+4. ✅ `feat(agora): create AgoraAgentSelector component`
+5. ✅ `refactor(agora/chat): rewrite using shared components`
+6. ✅ `feat(agora): add AccessibilityPanel for a11y support`
+7. ✅ `style(agora): import design system tokens`
+8. ✅ `docs(agora): add alignment plan and update CLAUDE.md`
+
+**Resultado**: Código do chat Ágora reduzido de 654 para 486 linhas, reutilizando componentes do app principal.
