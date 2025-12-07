@@ -25,8 +25,8 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
     pathname.includes('/perfil') ||
     pathname.includes('/settings')
 
-  // Academy has its own layout - no main site header/footer
-  const isAcademyRoute = pathname.includes('/academy')
+  // Agora has its own layout - no main site header/footer
+  const isAgoraRoute = pathname.includes('/agora')
 
   // Check if we're on the landing page (root locale path) or login page
   const isLandingPage = pathname === `/${locale}` || pathname === `/${locale}/`
@@ -52,8 +52,8 @@ export function PTLayoutWrapper({ children, locale }: PTLayoutWrapperProps) {
           { name: 'System', href: '/en/system' },
         ]
 
-  // Academy routes have their own standalone layout
-  if (isAcademyRoute) {
+  // Ágora routes have their own standalone layout
+  if (isAgoraRoute) {
     return (
       <main id="main-content" role="main" className="flex-1">
         {children}

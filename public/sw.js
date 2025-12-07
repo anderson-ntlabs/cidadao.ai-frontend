@@ -77,26 +77,26 @@
     w = new WeakMap(),
     y = new WeakMap(),
     _ = new WeakMap(),
-    b = {
+    x = {
       get(e, t, a) {
         if (e instanceof IDBTransaction) {
           if ('done' === t) return w.get(e)
           if ('store' === t)
             return a.objectStoreNames[1] ? void 0 : a.objectStore(a.objectStoreNames[0])
         }
-        return x(e[t])
+        return b(e[t])
       },
       set: (e, t, a) => ((e[t] = a), !0),
       has: (e, t) => (e instanceof IDBTransaction && ('done' === t || 'store' === t)) || t in e,
     }
-  function x(e) {
+  function b(e) {
     if (e instanceof IDBRequest) {
       let t = new Promise((t, a) => {
         let s = () => {
             ;(e.removeEventListener('success', r), e.removeEventListener('error', n))
           },
           r = () => {
-            ;(t(x(e.result)), s())
+            ;(t(b(e.result)), s())
           },
           n = () => {
             ;(a(e.error), s())
@@ -117,10 +117,10 @@
           ])
         ).includes(e)
           ? function (...t) {
-              return (e.apply(E(this), t), x(this.request))
+              return (e.apply(E(this), t), b(this.request))
             }
           : function (...t) {
-              return x(e.apply(E(this), t))
+              return b(e.apply(E(this), t))
             }
       return (e instanceof IDBTransaction &&
         (function (e) {
@@ -144,7 +144,7 @@
           w.set(e, t)
         })(e),
       p(e, t || (t = [IDBDatabase, IDBObjectStore, IDBIndex, IDBCursor, IDBTransaction])))
-        ? new Proxy(e, b)
+        ? new Proxy(e, x)
         : e
     })(e)
     return (s !== e && (y.set(e, s), _.set(s, e)), s)
@@ -152,11 +152,11 @@
   let E = (e) => _.get(e)
   function R(e, t, { blocked: a, upgrade: s, blocking: r, terminated: n } = {}) {
     let i = indexedDB.open(e, t),
-      c = x(i)
+      c = b(i)
     return (
       s &&
         i.addEventListener('upgradeneeded', (e) => {
-          s(x(i.result), e.oldVersion, e.newVersion, x(i.transaction), e)
+          s(b(i.result), e.oldVersion, e.newVersion, b(i.transaction), e)
         }),
       a && i.addEventListener('blocked', (e) => a(e.oldVersion, e.newVersion, e)),
       c
@@ -185,11 +185,11 @@
     }
     return (S.set(t, n), n)
   }
-  b = ((e) => ({
+  x = ((e) => ({
     ...e,
     get: (t, a, s) => D(t, a) || e.get(t, a, s),
     has: (t, a) => !!D(t, a) || e.has(t, a),
-  }))(b)
+  }))(x)
   let N = ['continue', 'continuePrimaryKey', 'advance'],
     P = {},
     T = new WeakMap(),
@@ -221,11 +221,11 @@
       ('iterate' === t && p(e, [IDBIndex, IDBObjectStore]))
     )
   }
-  b = ((e) => ({
+  x = ((e) => ({
     ...e,
     get: (t, a, s) => (I(t, a) ? k : e.get(t, a, s)),
     has: (t, a) => I(t, a) || e.has(t, a),
-  }))(b)
+  }))(x)
   let L = (e) => (e && 'object' == typeof e ? e : { handle: e })
   class U {
     handler
@@ -252,7 +252,7 @@
       return !!this._allowlist.some((e) => e.test(a))
     }
   }
-  class O extends U {
+  class M extends U {
     constructor(e, t, a) {
       super(
         ({ url: t }) => {
@@ -264,7 +264,7 @@
       )
     }
   }
-  let M = async (e, t, a) => {
+  let O = async (e, t, a) => {
     let s = t.map((e, t) => ({ index: t, item: e })),
       r = async (e) => {
         let t = []
@@ -284,7 +284,7 @@
   function B(e) {
     return 'string' == typeof e ? new Request(e) : e
   }
-  class W {
+  class K {
     event
     request
     url
@@ -461,7 +461,7 @@
       return (!a && t && 200 !== t.status && (t = void 0), t)
     }
   }
-  class K {
+  class W {
     cacheName
     plugins
     fetchOptions
@@ -480,7 +480,7 @@
       e instanceof FetchEvent && (e = { event: e, request: e.request })
       let t = e.event,
         a = 'string' == typeof e.request ? new Request(e.request) : e.request,
-        s = new W(
+        s = new K(
           this,
           e.url ? { event: t, request: a, url: e.url, params: e.params } : { event: t, request: a }
         ),
@@ -532,7 +532,7 @@
   let j = {
     cacheWillUpdate: async ({ response: e }) => (200 === e.status || 0 === e.status ? e : null),
   }
-  class $ extends K {
+  class $ extends W {
     _networkTimeoutSeconds
     constructor(e = {}) {
       ;(super(e),
@@ -574,7 +574,7 @@
       return (e && clearTimeout(e), (r || !n) && (n = await s.cacheMatch(t)), n)
     }
   }
-  class H extends K {
+  class H extends W {
     _networkTimeoutSeconds
     constructor(e = {}) {
       ;(super(e), (this._networkTimeoutSeconds = e.networkTimeoutSeconds || 0))
@@ -876,7 +876,7 @@
         : n.body
     return new Response(o, c)
   }
-  class er extends K {
+  class er extends W {
     _fallbackToNetwork
     static defaultPrecacheCacheabilityPlugin = {
       cacheWillUpdate: async ({ response: e }) => (!e || e.status >= 400 ? null : e),
@@ -1212,7 +1212,7 @@
         if (void 0 !== u) {
           let e = new ed({ fallbackUrls: u.entries, serwist: this })
           o.forEach((t) => {
-            t.handler instanceof K &&
+            t.handler instanceof W &&
               !t.handler.plugins.some((e) => 'handlerDidError' in e) &&
               t.handler.plugins.push(e)
           })
@@ -1266,7 +1266,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         g(e, async () => {
           let t = new en()
           ;(this.precacheStrategy.plugins.push(t),
-            await M(
+            await O(
               this._concurrentPrecaching,
               Array.from(this._urlsToCacheKeys.entries()),
               async ([t, a]) => {
@@ -1338,7 +1338,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           let s = new URL(e, location.href)
           return new U(({ url: e }) => e.href === s.href, t, a)
         }
-        if (e instanceof RegExp) return new O(e, t, a)
+        if (e instanceof RegExp) return new M(e, t, a)
         if ('function' == typeof e) return new U(e, t, a)
         if (e instanceof U) return e
         throw new s('unsupported-route-type', {
@@ -1466,7 +1466,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           (function (e, { blocked: t } = {}) {
             let a = indexedDB.deleteDatabase(e)
             ;(t && a.addEventListener('blocked', (e) => t(e.oldVersion, e)),
-              x(a).then(() => void 0))
+              b(a).then(() => void 0))
           })(this._cacheName))
     }
     async setTimestamp(e, t) {
@@ -1593,7 +1593,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
       this._cacheExpirations = new Map()
     }
   }
-  let eb = async (e, t) => {
+  let ex = async (e, t) => {
     try {
       if (206 === t.status) return t
       let a = e.headers.get('range')
@@ -1639,11 +1639,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
       return new Response('', { status: 416, statusText: 'Range Not Satisfiable' })
     }
   }
-  class ex {
+  class eb {
     cachedResponseWillBeUsed = async ({ request: e, cachedResponse: t }) =>
-      t && e.headers.has('range') ? await eb(e, t) : t
+      t && e.headers.has('range') ? await ex(e, t) : t
   }
-  class eE extends K {
+  class eE extends W {
     async _handle(e, t) {
       let a,
         r = await t.cacheMatch(e)
@@ -1657,7 +1657,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
       return r
     }
   }
-  class eR extends K {
+  class eR extends W {
     constructor(e = {}) {
       ;(super(e), this.plugins.some((e) => 'cacheWillUpdate' in e) || this.plugins.unshift(j))
     }
@@ -1727,7 +1727,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           cacheName: 'static-audio-assets',
           plugins: [
             new e_({ maxEntries: 32, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' }),
-            new ex(),
+            new eb(),
           ],
         }),
       },
@@ -1737,7 +1737,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           cacheName: 'static-video-assets',
           plugins: [
             new e_({ maxEntries: 32, maxAgeSeconds: 86400, maxAgeFrom: 'last-used' }),
-            new ex(),
+            new eb(),
           ],
         }),
       },
@@ -1826,23 +1826,25 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
     eS = new ef({
       precacheEntries: [
         {
-          revision: 'a25fc98704848104ee4b2bf32d633fb6',
-          url: '/_next/static/DVf9HFbp1qkZ7y7OG2J_h/_buildManifest.js',
+          revision: '49fbe1830afaf9c77714a355b8410411',
+          url: '/_next/static/-lxdLIFFAoxwpFNt2pU8F/_buildManifest.js',
         },
         {
           revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/DVf9HFbp1qkZ7y7OG2J_h/_ssgManifest.js',
+          url: '/_next/static/-lxdLIFFAoxwpFNt2pU8F/_ssgManifest.js',
         },
         { revision: null, url: '/_next/static/chunks/1091.3e0f6ca343915ff4.js' },
         { revision: null, url: '/_next/static/chunks/1401.03ea562301633450.js' },
-        { revision: null, url: '/_next/static/chunks/1555.28f005c9d5b223d2.js' },
+        { revision: null, url: '/_next/static/chunks/1555.2069e3b2b3efae6c.js' },
         { revision: null, url: '/_next/static/chunks/2734.c54e8c4521886fc9.js' },
+        { revision: null, url: '/_next/static/chunks/2936.103e392ecd2b64ca.js' },
         { revision: null, url: '/_next/static/chunks/440.0aac126b2538078f.js' },
+        { revision: null, url: '/_next/static/chunks/5360.d4fd71d55cc7b6b1.js' },
         { revision: null, url: '/_next/static/chunks/5538.8a1d222aa4464578.js' },
         { revision: null, url: '/_next/static/chunks/5618.6fcbdcd2474a39c6.js' },
         { revision: null, url: '/_next/static/chunks/6762.96525e4cffa539cb.js' },
         { revision: null, url: '/_next/static/chunks/7012.cdf6f12d35d1f581.js' },
-        { revision: null, url: '/_next/static/chunks/7736.4b1a1ecde2a28337.js' },
+        { revision: null, url: '/_next/static/chunks/7736.b112ebce6dd8f0c2.js' },
         { revision: null, url: '/_next/static/chunks/7781.63a0f7cefa174de5.js' },
         { revision: null, url: '/_next/static/chunks/827.bf51314111519c40.js' },
         { revision: null, url: '/_next/static/chunks/966.50c1d8ebd75ec4e6.js' },
@@ -1876,12 +1878,12 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         { revision: null, url: '/_next/static/chunks/app/auth/callback/route-0d127d5406f4ce0e.js' },
         { revision: null, url: '/_next/static/chunks/app/auth/error/page-a2597fe13a7093b7.js' },
         { revision: null, url: '/_next/static/chunks/app/en/about/page-7c79ae9284733f5b.js' },
-        { revision: null, url: '/_next/static/chunks/app/en/agents/page-bcdcba73cb93f915.js' },
+        { revision: null, url: '/_next/static/chunks/app/en/agents/page-cd9f7ad67490a811.js' },
         { revision: null, url: '/_next/static/chunks/app/en/cookies/page-1fbd3a089b0b210c.js' },
-        { revision: null, url: '/_next/static/chunks/app/en/layout-502725932f4b0b53.js' },
+        { revision: null, url: '/_next/static/chunks/app/en/layout-0861bf48f82447b9.js' },
         { revision: null, url: '/_next/static/chunks/app/en/login/page-305c108b34a731ed.js' },
         { revision: null, url: '/_next/static/chunks/app/en/manifesto/page-1e943a45fcb5ac16.js' },
-        { revision: null, url: '/_next/static/chunks/app/en/page-184a08bf5bc7ddf9.js' },
+        { revision: null, url: '/_next/static/chunks/app/en/page-7271de62f9a6c92d.js' },
         { revision: null, url: '/_next/static/chunks/app/en/privacy/page-bebd2e3aea14851b.js' },
         { revision: null, url: '/_next/static/chunks/app/en/system/page-af4975217525f5a8.js' },
         { revision: null, url: '/_next/static/chunks/app/en/terms/page-946798d4a673f3db.js' },
@@ -1889,18 +1891,61 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         { revision: null, url: '/_next/static/chunks/app/not-found-4845093b3a1938c4.js' },
         { revision: null, url: '/_next/static/chunks/app/page-56befa56576ecd51.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/about/page-4b8087e4d81c7886.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/agents/page-e0134ae17e31bf81.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/ajuda/page-2c4554da062c854f.js' },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/atividades/page-d7af66ffed71b98c.js',
+          url: '/_next/static/chunks/app/pt/academy/agenda/page-d143272112b1a039.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/boletim/page-3e19d0fdc7e44c94.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/chat/page-17fb826f300d088d.js',
+        },
+        { revision: null, url: '/_next/static/chunks/app/pt/academy/layout-9ce81006cd7d1468.js' },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/leituras/page-8fbf696bb93bf535.js',
+        },
+        { revision: null, url: '/_next/static/chunks/app/pt/academy/loading-4b7fbeae320746d0.js' },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/login/page-aa6330f771e384a0.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/onboarding/page-cd2720fb10891728.js',
+        },
+        { revision: null, url: '/_next/static/chunks/app/pt/academy/page-da07adb08f47f8e8.js' },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/perfil/page-a8f53a47bb3ce8d2.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/ranking/page-91d54de1e9123890.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/trilhas/page-ecae442f32734769.js',
+        },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/academy/videos/page-1e9ace231bff5070.js',
+        },
+        { revision: null, url: '/_next/static/chunks/app/pt/agents/page-2ec63bd8ffd6fb4c.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/ajuda/page-444ed1fd7e06897c.js' },
+        {
+          revision: null,
+          url: '/_next/static/chunks/app/pt/app/atividades/page-72b6da53e7445ead.js',
         },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/error-fc840b0bf1c8f498.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/chat/layout-acf6582e93f91a54.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-c899c26615561bc1.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/chat/page-08d15b1e2c0df492.js' },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/configuracoes/page-18778d4f5a7ff9a1.js',
+          url: '/_next/static/chunks/app/pt/app/configuracoes/page-ef2970647824b222.js',
         },
         {
           revision: null,
@@ -1908,11 +1953,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/dashboard/page-66bd75f6cfb53619.js',
+          url: '/_next/static/chunks/app/pt/app/dashboard/page-2e14866c2e2b0c9a.js',
         },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/investigacoes/%5Bid%5D/page-a0e35349b4c62599.js',
+          url: '/_next/static/chunks/app/pt/app/investigacoes/%5Bid%5D/page-e220bc7e117af317.js',
         },
         {
           revision: null,
@@ -1920,24 +1965,24 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/investigacoes/nova/page-aad2fd5223f7fa50.js',
+          url: '/_next/static/chunks/app/pt/app/investigacoes/nova/page-8fd96c05bd1292be.js',
         },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/investigacoes/page-cb09c7d51f5690ed.js',
+          url: '/_next/static/chunks/app/pt/app/investigacoes/page-e56f0c7aaed875b8.js',
         },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-2782a248d7e6300e.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/layout-4605b500bf8b35d3.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/error-060aa0edae08daac.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/app/mapa/page-1021af18d0fe341f.js' },
         {
           revision: null,
-          url: '/_next/static/chunks/app/pt/app/notificacoes/page-fa10627b74dd5c57.js',
+          url: '/_next/static/chunks/app/pt/app/notificacoes/page-02805c662a22038c.js',
         },
         { revision: null, url: '/_next/static/chunks/app/pt/app/page-7314265bc60f3865.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/app/perfil/page-a5c20194353510e9.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/app/perfil/page-341b43f559865b1b.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/cookies/page-f7798ba376e302a5.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/debug/page-00a2185da22c70d2.js' },
-        { revision: null, url: '/_next/static/chunks/app/pt/layout-051668db48656233.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/layout-29bd849ed6961335.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/login/page-9c58da7c73f0f1fb.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/manifesto/page-e906041872808460.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/page-b7539bb30f272201.js' },
@@ -1945,17 +1990,25 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         { revision: null, url: '/_next/static/chunks/app/pt/system/page-7eb120dfd0e36a97.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/terms/page-8839d1daf44d8438.js' },
         { revision: null, url: '/_next/static/chunks/app/pt/test-voice/page-1ae93ae918942775.js' },
-        { revision: null, url: '/_next/static/chunks/commons-0475bee723843bfb.js' },
+        { revision: null, url: '/_next/static/chunks/commons-e8242fd9a536320c.js' },
         { revision: null, url: '/_next/static/chunks/framework-b9fd9bcc3ecde907.js' },
         { revision: null, url: '/_next/static/chunks/main-388de7b2142a1859.js' },
         { revision: null, url: '/_next/static/chunks/main-app-c756c3415517cebc.js' },
         { revision: null, url: '/_next/static/chunks/npm.axios-52357ab39f878a5e.js' },
         { revision: null, url: '/_next/static/chunks/npm.buffer-8b931334c29c2077.js' },
+        { revision: null, url: '/_next/static/chunks/npm.canvg.adb49be2ee0283d7.js' },
+        { revision: null, url: '/_next/static/chunks/npm.core-js.6161f3bb1e1e5875.js' },
         { revision: null, url: '/_next/static/chunks/npm.date-fns-21b41b03e7d3a9fc.js' },
-        { revision: null, url: '/_next/static/chunks/npm.dompurify-37c071d742b7409f.js' },
+        { revision: null, url: '/_next/static/chunks/npm.dompurify-1518501c4025c2b0.js' },
+        { revision: null, url: '/_next/static/chunks/npm.fast-png-668c127fad462b5b.js' },
+        { revision: null, url: '/_next/static/chunks/npm.fflate-5d4506dd41fc7701.js' },
         { revision: null, url: '/_next/static/chunks/npm.floating-ui-c40c518d78736d0f.js' },
         { revision: null, url: '/_next/static/chunks/npm.framer-motion-8b8b4a813d55c585.js' },
-        { revision: null, url: '/_next/static/chunks/npm.lucide-react-46ff4fbc76e634a9.js' },
+        { revision: null, url: '/_next/static/chunks/npm.fullcalendar.2512994d7f3e9158.js' },
+        { revision: null, url: '/_next/static/chunks/npm.html2canvas.3f76846fa6cf2676.js' },
+        { revision: null, url: '/_next/static/chunks/npm.immer-8a115fbbd0034723.js' },
+        { revision: null, url: '/_next/static/chunks/npm.jspdf-9c8fcf155252f434.js' },
+        { revision: null, url: '/_next/static/chunks/npm.lucide-react-cc8cbb99c88cb08b.js' },
         {
           revision: null,
           url: '/_next/static/chunks/npm.mdast-util-from-markdown.42aba5244fb22042.js',
@@ -1967,7 +2020,8 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         },
         { revision: null, url: '/_next/static/chunks/npm.micromark.5483e8fa98861f71.js' },
         { revision: null, url: '/_next/static/chunks/npm.motion-dom-b4aec77698dec672.js' },
-        { revision: null, url: '/_next/static/chunks/npm.next-230d24f40394984d.js' },
+        { revision: null, url: '/_next/static/chunks/npm.next-006144d061c31b86.js' },
+        { revision: null, url: '/_next/static/chunks/npm.pako-131a5cdc6c36aa95.js' },
         { revision: null, url: '/_next/static/chunks/npm.posthog-js-ffb89532afe4ae86.js' },
         {
           revision: null,
@@ -1987,11 +2041,11 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           revision: '846118c33b2c0e922d7b3a7676f81f6f',
           url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
         },
-        { revision: null, url: '/_next/static/chunks/runtime-d27935a9c9add15d.js' },
+        { revision: null, url: '/_next/static/chunks/runtime-e62e6d2386f47c8c.js' },
         { revision: null, url: '/_next/static/css/59e882a6b4251a5a.css' },
         { revision: null, url: '/_next/static/css/8a38bb2669d7ed47.css' },
-        { revision: null, url: '/_next/static/css/9d176a47f9aadb83.css' },
         { revision: null, url: '/_next/static/css/b5ccccc69160d62d.css' },
+        { revision: null, url: '/_next/static/css/f7313693f614c026.css' },
         {
           revision: '9dda5cfc9a46f256d0e131bb535e46f8',
           url: '/_next/static/media/19cfc7226ec3afaa-s.woff2',
@@ -2020,6 +2074,30 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           revision: '65850a373e258f1c897a2b3d75eb74de',
           url: '/_next/static/media/e4af272ccee01ff0-s.p.woff2',
         },
+        {
+          revision: 'ab89b51ab6011b49e08420901c68c161',
+          url: '/academy/cidadao-democratizando.svg',
+        },
+        { revision: 'e5780942e8746f7594058199f32dc310', url: '/academy/cidadao-slide-01.svg' },
+        { revision: 'baa0416565c4468cbecaa6b5f3f970ae', url: '/academy/cidadao-slide-02.svg' },
+        { revision: 'ede80259912d0b676250b82779f7a092', url: '/academy/cidadao-slide-03.svg' },
+        { revision: '876a4dbc8f8447904fcae7222c7443bd', url: '/academy/cidadao-slide-04.svg' },
+        { revision: '9aee793b5af922af332e9d9c8c3814c6', url: '/academy/cidadao-slide-05.svg' },
+        { revision: 'c25ef855b82116e18f45b8861f61a507', url: '/academy/cidadao-slide-06.svg' },
+        { revision: '3cb59d1abf5961c733e97fd34ecea165', url: '/academy/tarsila-modernismo.svg' },
+        { revision: '42c4349b611a739a8317f17ae74b7587', url: '/academy/videos/cat-coffee.gif' },
+        { revision: 'fab3623ce05f8d1fd59b55f9327a28e7', url: '/academy/videos/cat-computer.gif' },
+        { revision: '4ad4dc5c6cbfcc1f22e7c92f32e9abc6', url: '/academy/videos/cat-focus.gif' },
+        { revision: '9fe18fbca13610632d0b30c07d351a38', url: '/academy/videos/cat-hacker.gif' },
+        { revision: '42c4349b611a739a8317f17ae74b7587', url: '/academy/videos/cat-study.gif' },
+        { revision: 'a4e4a17be63d294f14a10f31b7ad1660', url: '/academy/videos/cat-typing.gif' },
+        { revision: '4d7374a206e6908075cc9a4b2a9c9539', url: '/academy/videos/cat-working.gif' },
+        { revision: '26add4bd00843ad0c709389f4baf5e5a', url: '/academy/videos/dog-coding.gif' },
+        { revision: '9c0310066ebbf0ab247618f720dfa502', url: '/academy/videos/dog-glasses.gif' },
+        { revision: '42c4349b611a739a8317f17ae74b7587', url: '/academy/videos/dog-smart.gif' },
+        { revision: 'dc95edbdd89a10ffb2527f44c3081be2', url: '/academy/videos/dog-typing.gif' },
+        { revision: 'f81fafc3939e3cc55a3e6f854b17e83f', url: '/academy/videos/dog-work.gif' },
+        { revision: '7af88b226ac614dfdff6612ff4c4b23f', url: '/agents/Lina_Bo_Bardi.jpg' },
         { revision: '034a07c8d3ffb7ec41e056f2882b5905', url: '/agents/abaporu.png' },
         { revision: 'b4ad43fb8bb1f424b66073c467bf2338', url: '/agents/anita.png' },
         { revision: '9ffb17f4327de874233fadd1eaf78a92', url: '/agents/bonifacio.png' },
@@ -2332,6 +2410,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         },
         { revision: '7554770e0e6ac50796a5de88aee852a3', url: '/agents/oxossi.png' },
         { revision: 'bfa8ddb24283bab0a8149d8a6b3fed0c', url: '/agents/quiteria.png' },
+        { revision: 'ca77ef4a710d5b7f96ecf2ccef3a43d0', url: '/agents/santos-dumont.png' },
         { revision: 'a2ec1bab4bb0a1e245130f83ba72ad8e', url: '/agents/senna.png' },
         { revision: 'afaa7dcad48da5c380ff0efcd698fe54', url: '/agents/system.png' },
         { revision: '4dcf49e42bf3b7eb56ab62f90c726862', url: '/agents/tiradentes.png' },
@@ -2351,8 +2430,12 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         { revision: 'b493d4a37571499fd637895a729cc998', url: '/icons/icon-72x72.png' },
         { revision: 'b493d4a37571499fd637895a729cc998', url: '/icons/icon-96x96.png' },
         { revision: 'e9b83ba14be5a390810d513321f218b3', url: '/images/Tarsila_Antropofagia.jpg' },
+        { revision: '294b110dd88c5c3fcba77882021c905c', url: '/logos/maritaca.png' },
         { revision: '2064cf635f35b7da8deb625160a1db50', url: '/manifest.json' },
+        { revision: 'fc32203e511dec8095b00f56ee9ffe36', url: '/maritaca_logo.avif' },
         { revision: '35b0c7f1c53c7460c1d572401d6f106c', url: '/operarios.png' },
+        { revision: '9ce3cd77d46cd93c49005448e3487b9d', url: '/sabia3.1.png' },
+        { revision: '93c27e004fbce3c35e8c3e9de0fe1bcd', url: '/sabiazinho.png' },
         { revision: '96a769e34e6c9e373eecd1d828e14dfe', url: '/splash/apple-splash-1125-2436.png' },
         { revision: 'cf3f8c8cdbabc7c4f5d25ac60241c2e2', url: '/splash/apple-splash-1170-2532.png' },
         { revision: '6997668511fd926081a9aa6682ebede3', url: '/splash/apple-splash-1179-2556.png' },
@@ -2396,47 +2479,31 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
     }),
     self.addEventListener('fetch', (e) => {
       let t = new URL(e.request.url)
-      if ('cidadao-api-production.up.railway.app' === t.hostname) {
-        let t = new URL(e.request.url)
-        ;((t.protocol = 'https:'),
+      if ('cidadao-api-production.up.railway.app' !== t.hostname) {
+        if ('http:' === t.protocol && 'localhost' !== t.hostname) {
+          t.protocol = 'https:'
+          let a = new Request(t.toString(), {
+            method: e.request.method,
+            headers: e.request.headers,
+            body:
+              'GET' !== e.request.method && 'HEAD' !== e.request.method ? e.request.body : void 0,
+            mode: e.request.mode,
+            credentials: e.request.credentials,
+          })
           e.respondWith(
-            fetch(t.toString(), {
-              method: e.request.method,
-              headers: e.request.headers,
-              body:
-                'GET' !== e.request.method && 'HEAD' !== e.request.method ? e.request.body : void 0,
-              mode: 'cors',
-              credentials: e.request.credentials,
-            }).catch(
-              () =>
-                new Response(JSON.stringify({ error: 'Service unavailable' }), {
-                  status: 503,
-                  headers: { 'Content-Type': 'application/json' },
-                })
-            )
-          ))
-        return
-      }
-      if ('http:' === t.protocol && 'localhost' !== t.hostname) {
-        t.protocol = 'https:'
-        let a = new Request(t.toString(), {
-          method: e.request.method,
-          headers: e.request.headers,
-          body: 'GET' !== e.request.method && 'HEAD' !== e.request.method ? e.request.body : void 0,
-          mode: e.request.mode,
-          credentials: e.request.credentials,
-        })
-        e.respondWith(
-          fetch(a).catch(() => new Response('Failed to upgrade to HTTPS', { status: 400 }))
+            fetch(a).catch(() => new Response('Failed to upgrade to HTTPS', { status: 400 }))
+          )
+          return
+        }
+        if (
+          'us.i.posthog.com' === t.hostname ||
+          'us-assets.i.posthog.com' === t.hostname ||
+          t.hostname.includes('sentry.io')
         )
-        return
+          return void e.respondWith(
+            fetch(e.request).catch(() => new Response(null, { status: 200 }))
+          )
       }
-      if (
-        'us.i.posthog.com' === t.hostname ||
-        'us-assets.i.posthog.com' === t.hostname ||
-        t.hostname.includes('sentry.io')
-      )
-        return void e.respondWith(fetch(e.request).catch(() => new Response(null, { status: 200 })))
     }),
     self.addEventListener('message', (e) => {
       e.data && 'SKIP_WAITING' === e.data.type && self.skipWaiting()

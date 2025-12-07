@@ -322,7 +322,7 @@ export default function PTPageOptimized(): JSX.Element {
                 Manifesto
               </Link>
               <Link
-                href="/pt/academy/login"
+                href="/pt/agora/login"
                 className="hover:text-green-600 transition-colors flex items-center gap-1"
               >
                 <span>🎓</span>
