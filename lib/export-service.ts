@@ -1,10 +1,17 @@
-import jsPDF from 'jspdf'
-// import autoTable from 'jspdf-autotable' // Removed for optimization
-import html2canvas from 'html2canvas'
-// @ts-ignore - papaparse types were removed
-import Papa from 'papaparse'
+/**
+ * Export Service with Lazy Loading
+ *
+ * jsPDF and html2canvas are loaded only when needed to reduce initial bundle size.
+ * These libraries add ~500KB+ to the bundle, so lazy loading is essential for performance.
+ */
+
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+
+// Lazy load heavy dependencies
+const loadJsPDF = () => import('jspdf').then((m) => m.default)
+const loadHtml2Canvas = () => import('html2canvas').then((m) => m.default)
+const loadPapaparse = () => import('papaparse').then((m) => m.default)
 
 interface ExportOptions {
   filename?: string
@@ -28,7 +35,8 @@ interface ChartExportData {
 
 export class ExportService {
   // Export data as CSV
-  static exportToCSV(data: any[], filename: string = 'export.csv') {
+  static async exportToCSV(data: any[], filename: string = 'export.csv') {
+    const Papa = await loadPapaparse()
     const csv = Papa.unparse(data, {
       header: true,
       delimiter: ',',
@@ -52,11 +60,13 @@ export class ExportService {
     metrics: Record<string, any>,
     options: ExportOptions = {}
   ) {
+    const [jsPDF, html2canvas] = await Promise.all([loadJsPDF(), loadHtml2Canvas()])
+
     const {
       filename = 'dashboard-cidadao-ai.pdf',
-      title = 'Dashboard de Transparência - Cidadão.AI',
+      title = 'Dashboard de Transparencia - Cidadao.AI',
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
-      author = 'Cidadão.AI',
+      author = 'Cidadao.AI',
       orientation = 'landscape',
       pageFormat = 'a4',
     } = options
@@ -87,7 +97,7 @@ export class ExportService {
     // Add metrics section
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Métricas Principais', margin, yPosition)
+    pdf.text('Metricas Principais', margin, yPosition)
     yPosition += 10
 
     const metricsData = Object.entries(metrics).map(([key, value]) => [
@@ -95,11 +105,9 @@ export class ExportService {
       String(value),
     ])
 
-    // autoTable functionality removed - using manual table rendering instead
-    // Simple table rendering
     pdf.setFontSize(10)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Métrica', margin, yPosition)
+    pdf.text('Metrica', margin, yPosition)
     pdf.text('Valor', pageWidth - margin - 50, yPosition)
 
     yPosition += 10
@@ -116,13 +124,11 @@ export class ExportService {
 
     // Add charts
     for (const chartData of charts) {
-      // Check if we need a new page
       if (yPosition + 100 > pageHeight - margin) {
         pdf.addPage()
         yPosition = margin
       }
 
-      // Add chart title
       pdf.setFontSize(12)
       pdf.setFont('helvetica', 'bold')
       pdf.text(chartData.title, margin, yPosition)
@@ -135,7 +141,6 @@ export class ExportService {
         yPosition += 5
       }
 
-      // Capture chart as image
       try {
         const canvas = await html2canvas(chartData.chartElement, {
           scale: 2,
@@ -147,7 +152,6 @@ export class ExportService {
         const imgWidth = contentWidth
         const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-        // Check if image fits on current page
         if (yPosition + imgHeight > pageHeight - margin) {
           pdf.addPage()
           yPosition = margin
@@ -166,7 +170,7 @@ export class ExportService {
       pdf.setPage(i)
       pdf.setFontSize(10)
       pdf.setFont('helvetica', 'normal')
-      pdf.text(`Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+      pdf.text(`Pagina ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
       pdf.text(
         `Gerado por ${author} - ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
         margin,
@@ -178,10 +182,12 @@ export class ExportService {
   }
 
   // Export table data as PDF
-  static exportTableToPDF(tableData: TableData, options: ExportOptions = {}) {
+  static async exportTableToPDF(tableData: TableData, options: ExportOptions = {}) {
+    const jsPDF = await loadJsPDF()
+
     const {
       filename = 'relatorio-cidadao-ai.pdf',
-      title = 'Relatório de Transparência',
+      title = 'Relatorio de Transparencia',
       subtitle = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }),
       orientation = 'portrait',
       pageFormat = 'a4',
@@ -205,19 +211,16 @@ export class ExportService {
     pdf.setFont('helvetica', 'normal')
     pdf.text(subtitle, pageWidth / 2, margin + 8, { align: 'center' })
 
-    // Add table - autoTable removed, using simple rendering
-    // Simple table rendering
+    // Add table
     let yPosition = margin + 20
     pdf.setFontSize(10)
     pdf.setFont('helvetica', 'bold')
 
-    // Headers
     const cellWidth = (pageWidth - 2 * margin) / tableData.headers.length
     tableData.headers.forEach((header, i) => {
       pdf.text(header, margin + i * cellWidth, yPosition)
     })
 
-    // Rows
     yPosition += 10
     pdf.setFont('helvetica', 'normal')
     tableData.rows.forEach((row) => {
@@ -233,7 +236,7 @@ export class ExportService {
       pdf.setPage(i)
       pdf.setFontSize(10)
       pdf.text(
-        `Página ${i} de ${totalPages}`,
+        `Pagina ${i} de ${totalPages}`,
         pageWidth / 2,
         pdf.internal.pageSize.getHeight() - 10,
         { align: 'center' }
@@ -244,13 +247,14 @@ export class ExportService {
   }
 
   // Generate financial report
-  static generateFinancialReport(
+  static async generateFinancialReport(
     financialData: any,
     charts: ChartExportData[],
     options: ExportOptions = {}
   ) {
-    const { totalInvestigated, totalSavings, suspiciousContracts, recoveryRate, monthlyData } =
-      financialData
+    const jsPDF = await loadJsPDF()
+
+    const { totalInvestigated, totalSavings, suspiciousContracts, recoveryRate } = financialData
 
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -260,7 +264,6 @@ export class ExportService {
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const margin = 20
-    const contentWidth = pageWidth - margin * 2
     let yPosition = margin
 
     // Cover page
@@ -270,10 +273,10 @@ export class ExportService {
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(24)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Relatório Financeiro', pageWidth / 2, 30, { align: 'center' })
+    pdf.text('Relatorio Financeiro', pageWidth / 2, 30, { align: 'center' })
 
     pdf.setFontSize(14)
-    pdf.text('Sistema de Transparência Cidadão.AI', pageWidth / 2, 40, { align: 'center' })
+    pdf.text('Sistema de Transparencia Cidadao.AI', pageWidth / 2, 40, { align: 'center' })
 
     pdf.setTextColor(0, 0, 0)
     yPosition = 80
@@ -287,11 +290,10 @@ export class ExportService {
     const summaryData = [
       ['Valor Total Investigado', this.formatCurrency(totalInvestigated)],
       ['Economia Identificada', this.formatCurrency(totalSavings)],
-      ['Taxa de Recuperação', `${recoveryRate}%`],
+      ['Taxa de Recuperacao', `${recoveryRate}%`],
       ['Contratos Suspeitos', String(suspiciousContracts.length)],
     ]
 
-    // Simple table rendering instead of autoTable
     summaryData.forEach((row) => {
       pdf.setFont('helvetica', 'bold')
       pdf.text(row[0], margin, yPosition)
@@ -299,30 +301,6 @@ export class ExportService {
       pdf.text(row[1], pageWidth - margin - 50, yPosition)
       yPosition += 8
     })
-
-    yPosition += 20
-
-    // Suspicious contracts
-    if (suspiciousContracts.length > 0) {
-      pdf.addPage()
-      yPosition = margin
-
-      pdf.setFontSize(16)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text('Contratos Suspeitos', margin, yPosition)
-      yPosition += 15
-
-      const contractsData = suspiciousContracts.map((contract: any) => [
-        contract.id,
-        contract.description || '-',
-        this.formatCurrency(contract.value),
-        contract.risk,
-        format(new Date(contract.date), 'dd/MM/yyyy'),
-      ])
-
-      // Simple table rendering instead of autoTable
-      // Removed autoTable block - using simple rendering
-    }
 
     pdf.save(options.filename || 'relatorio-financeiro-cidadao-ai.pdf')
   }
@@ -336,7 +314,9 @@ export class ExportService {
   }
 
   // Export investigation details
-  static exportInvestigationReport(investigation: any, options: ExportOptions = {}) {
+  static async exportInvestigationReport(investigation: any, options: ExportOptions = {}) {
+    const jsPDF = await loadJsPDF()
+
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -350,10 +330,10 @@ export class ExportService {
     // Header with investigation status
     const statusColor: [number, number, number] =
       investigation.status === 'completed'
-        ? [16, 185, 129] // green
+        ? [16, 185, 129]
         : investigation.status === 'in_progress'
-          ? [245, 158, 11] // yellow
-          : [239, 68, 68] // red
+          ? [245, 158, 11]
+          : [239, 68, 68]
 
     pdf.setFillColor(...statusColor)
     pdf.rect(0, 0, pageWidth, 40, 'F')
@@ -361,7 +341,7 @@ export class ExportService {
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(18)
     pdf.setFont('helvetica', 'bold')
-    pdf.text(`Investigação #${investigation.id}`, pageWidth / 2, 20, { align: 'center' })
+    pdf.text(`Investigacao #${investigation.id}`, pageWidth / 2, 20, { align: 'center' })
 
     pdf.setFontSize(12)
     pdf.text(investigation.title, pageWidth / 2, 30, { align: 'center' })
@@ -369,17 +349,15 @@ export class ExportService {
     pdf.setTextColor(0, 0, 0)
     yPosition = 50
 
-    // Investigation details
     const details = [
       ['Status', investigation.status],
-      ['Agente Responsável', investigation.agent],
-      ['Data de Início', format(new Date(investigation.startDate), 'dd/MM/yyyy HH:mm')],
-      ['Última Atualização', format(new Date(investigation.lastUpdate), 'dd/MM/yyyy HH:mm')],
+      ['Agente Responsavel', investigation.agent],
+      ['Data de Inicio', format(new Date(investigation.startDate), 'dd/MM/yyyy HH:mm')],
+      ['Ultima Atualizacao', format(new Date(investigation.lastUpdate), 'dd/MM/yyyy HH:mm')],
       ['Score de Anomalia', `${(investigation.anomalyScore * 100).toFixed(1)}%`],
       ['Categoria', investigation.category],
     ]
 
-    // Simple table rendering instead of autoTable
     details.forEach((row) => {
       pdf.setFont('helvetica', 'bold')
       pdf.text(row[0], margin, yPosition)
