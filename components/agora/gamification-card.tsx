@@ -107,10 +107,10 @@ function ChallengeItem({
       className={cn(
         'p-3 rounded-lg transition-all',
         challenge.claimed
-          ? 'bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 opacity-75'
+          ? 'bg-[hsl(var(--academy-bg-secondary))] border border-[hsl(var(--academy-border))] opacity-75'
           : challenge.completed
-            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-            : 'bg-gray-50 dark:bg-gray-800/50'
+            ? 'bg-[hsl(var(--academy-success)/0.1)] border border-[hsl(var(--academy-success)/0.3)]'
+            : 'bg-[hsl(var(--academy-bg-secondary))]'
       )}
     >
       <div className="flex items-center gap-3">
@@ -120,9 +120,7 @@ function ChallengeItem({
             <span
               className={cn(
                 'font-medium text-sm truncate',
-                challenge.claimed
-                  ? 'text-gray-500 dark:text-gray-500'
-                  : 'text-gray-900 dark:text-gray-100'
+                challenge.claimed ? 'academy-text-muted' : 'academy-text'
               )}
             >
               {challenge.name}
@@ -137,16 +135,7 @@ function ChallengeItem({
               <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
             )}
           </div>
-          <p
-            className={cn(
-              'text-xs truncate',
-              challenge.claimed
-                ? 'text-gray-400 dark:text-gray-600'
-                : 'text-gray-500 dark:text-gray-400'
-            )}
-          >
-            {challenge.description}
-          </p>
+          <p className="text-xs truncate academy-text-muted">{challenge.description}</p>
         </div>
         <div className="text-right flex-shrink-0">
           {canClaim ? (
@@ -166,7 +155,7 @@ function ChallengeItem({
               )}
             </Button>
           ) : challenge.claimed ? (
-            <span className="text-xs font-medium text-gray-400 dark:text-gray-500">Resgatado</span>
+            <span className="text-xs font-medium academy-text-muted">Resgatado</span>
           ) : (
             <>
               <span
@@ -198,7 +187,7 @@ function ResetTimerDisplay({ isWeekly }: { isWeekly: boolean }) {
   const time = useResetTimer(isWeekly)
 
   return (
-    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+    <div className="flex items-center gap-1 text-xs academy-text-muted">
       <Timer className="w-3 h-3" />
       <span>Reinicia em {formatTimeUntilReset(time)}</span>
     </div>
@@ -258,22 +247,17 @@ export function GamificationCard({ className }: GamificationCardProps) {
     .reduce((sum, c) => sum + c.xpReward, 0)
 
   return (
-    <div
-      className={cn(
-        'bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden',
-        className
-      )}
-    >
+    <div className={cn('academy-card rounded-xl overflow-hidden', className)}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
+      <div className="p-4 border-b border-[hsl(var(--academy-border))] bg-[hsl(var(--academy-accent)/0.1)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
               <Target className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Desafios</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Ganhe XP extra!</p>
+              <h3 className="font-semibold academy-text">Desafios</h3>
+              <p className="text-xs academy-text-muted">Ganhe XP extra!</p>
             </div>
           </div>
 
@@ -329,13 +313,11 @@ export function GamificationCard({ className }: GamificationCardProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Desafios Diarios
-              </span>
+              <span className="text-sm font-medium academy-text">Desafios Diarios</span>
             </div>
             <div className="flex items-center gap-3">
               <ResetTimerDisplay isWeekly={false} />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs academy-text-muted">
                 {claimedDaily}/{completedDaily}/{dailyChallenges.length}
               </span>
             </div>
@@ -365,14 +347,12 @@ export function GamificationCard({ className }: GamificationCardProps) {
         {/* Weekly Challenges Toggle */}
         <button
           onClick={() => setShowWeekly(!showWeekly)}
-          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[hsl(var(--academy-bg-secondary))] transition-colors"
         >
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Desafios Semanais
-            </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-sm font-medium academy-text">Desafios Semanais</span>
+            <span className="text-xs academy-text-muted">
               ({claimedWeekly}/{completedWeekly}/{weeklyChallenges.length})
             </span>
             {unclaimedWeeklyXp > 0 && (
@@ -390,11 +370,9 @@ export function GamificationCard({ className }: GamificationCardProps) {
 
         {/* Weekly Challenges */}
         {showWeekly && (
-          <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+          <div className="space-y-2 pt-2 border-t border-[hsl(var(--academy-border))]">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Total disponivel: {totalWeeklyXp} XP
-              </p>
+              <p className="text-xs academy-text-muted">Total disponivel: {totalWeeklyXp} XP</p>
               <ResetTimerDisplay isWeekly={true} />
             </div>
             {weeklyChallenges.map((challenge) => (

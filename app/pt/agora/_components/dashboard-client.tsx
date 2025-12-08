@@ -392,15 +392,15 @@ export function DashboardClient({
 
                   {/* User Info */}
                   <div className="flex-1 pt-4 sm:pt-0">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold academy-text">
                       Ola, {user.name.split(' ')[0]}! 👋
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 academy-text">
                         Level {user.currentLevel} - {rankInfo.name}
                       </span>
                       {nextRank && (
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="text-sm academy-text-muted">
                           {nextRank.minXp - user.totalXp} XP para {nextRank.name}
                         </span>
                       )}
@@ -423,28 +423,24 @@ export function DashboardClient({
                       <div className="w-12 h-12 mx-auto rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-2">
                         <Flame className="w-6 h-6 text-orange-500" />
                       </div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {user.currentStreak}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Streak</p>
+                      <p className="text-2xl font-bold academy-text">{user.currentStreak}</p>
+                      <p className="text-xs academy-text-muted">Streak</p>
                     </div>
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
                         <Clock className="w-6 h-6 text-blue-500" />
                       </div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl font-bold academy-text">
                         {Math.floor(user.totalTimeMinutes / 60)}h
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Estudo</p>
+                      <p className="text-xs academy-text-muted">Estudo</p>
                     </div>
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-2">
                         <MessageSquare className="w-6 h-6 text-purple-500" />
                       </div>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {user.totalSessions}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Sessoes</p>
+                      <p className="text-2xl font-bold academy-text">{user.totalSessions}</p>
+                      <p className="text-xs academy-text-muted">Sessoes</p>
                     </div>
                   </div>
                 </div>
@@ -478,10 +474,8 @@ export function DashboardClient({
                         ✈️
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                      Santos-Dumont
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <h3 className="text-lg font-bold academy-text mb-1">Santos-Dumont</h3>
+                    <p className="text-xs academy-text-muted mb-3">
                       Pai da Aviação • Inovação e Criatividade
                     </p>
                     <div className="flex flex-wrap justify-center gap-1 mb-4">
@@ -520,10 +514,8 @@ export function DashboardClient({
                         🏛️
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                      Lina Bo Bardi
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <h3 className="text-lg font-bold academy-text mb-1">Lina Bo Bardi</h3>
+                    <p className="text-xs academy-text-muted mb-3">
                       Arquiteta Modernista • Design e Cultura
                     </p>
                     <div className="flex flex-wrap justify-center gap-1 mb-4">
@@ -564,14 +556,12 @@ export function DashboardClient({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                          Apresentacao Agora
-                        </h3>
+                        <h3 className="font-semibold academy-text">Apresentacao Agora</h3>
                         <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
                           Concluido
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-sm academy-text-muted">
                         Reveja nossa apresentacao completa do projeto
                       </p>
                     </div>
@@ -591,14 +581,12 @@ export function DashboardClient({
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        Termo de Compromisso
-                      </h3>
+                      <h3 className="font-semibold academy-text">Termo de Compromisso</h3>
                       <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
                         LGPD
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm academy-text-muted">
                       Reveja seu contrato assinado e baixe o PDF
                     </p>
                   </div>
@@ -661,7 +649,7 @@ export function DashboardClient({
                       href={action.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-lg transition-all group"
+                      className="flex items-center gap-4 p-4 academy-card rounded-xl hover:shadow-lg transition-all group"
                     >
                       <div
                         className={cn(
@@ -672,18 +660,16 @@ export function DashboardClient({
                         {action.emoji}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {action.label}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                        <p className="font-semibold academy-text">{action.label}</p>
+                        <p className="text-sm academy-text-muted">{action.desc}</p>
                       </div>
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                      <ArrowUpRight className="w-5 h-5 academy-text-muted group-hover:text-indigo-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                     </a>
                   ) : (
                     <Link
                       key={action.label}
                       href={`${action.href}${isDemoMode ? '?demo=true' : ''}`}
-                      className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-lg transition-all group"
+                      className="flex items-center gap-4 p-4 academy-card rounded-xl hover:shadow-lg transition-all group"
                     >
                       <div
                         className={cn(
@@ -697,12 +683,10 @@ export function DashboardClient({
                         {action.emoji}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {action.label}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                        <p className="font-semibold academy-text">{action.label}</p>
+                        <p className="text-sm academy-text-muted">{action.desc}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 academy-text-muted group-hover:text-[hsl(var(--academy-accent))] group-hover:translate-x-1 transition-all" />
                     </Link>
                   )
                 )}
@@ -748,7 +732,7 @@ export function DashboardClient({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Medal className="w-5 h-5 text-yellow-500" />
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Badges</h3>
+                      <h3 className="font-semibold academy-text">Badges</h3>
                     </div>
                     {badges.length > 0 && (
                       <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-medium">
@@ -770,12 +754,10 @@ export function DashboardClient({
                             {badgeEmojis[badge.badge_id] || '🏅'}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                            <p className="font-medium text-sm academy-text truncate">
                               {badge.badge_name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {badge.criteria}
-                            </p>
+                            <p className="text-xs academy-text-muted truncate">{badge.criteria}</p>
                           </div>
                         </div>
                       ))}
@@ -790,10 +772,10 @@ export function DashboardClient({
                       <div className="w-12 h-12 mx-auto rounded-xl bg-yellow-100/50 dark:bg-yellow-900/20 flex items-center justify-center mb-2">
                         <span className="text-2xl">🍜</span>
                       </div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-sm font-medium academy-text">
                         Conquiste seu primeiro badge!
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-xs academy-text-muted mt-1">
                         Complete sessoes e atividades
                       </p>
                     </div>
@@ -826,7 +808,7 @@ export function DashboardClient({
           {/* Footer */}
           <footer className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-800">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic font-serif">
+              <p className="text-sm academy-text-muted italic font-serif">
                 Design: Bo Bardi + Dumont + Anderson
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500">
