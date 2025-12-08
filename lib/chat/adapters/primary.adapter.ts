@@ -2,6 +2,10 @@
  * Primary Chat Adapter - Backend API with SSE Streaming
  * Main adapter for production use with real-time streaming support
  *
+ * Performance optimizations:
+ * - Array-based chunk accumulation instead of string concatenation
+ * - Avoids O(n²) string concatenation by using array join at end
+ *
  * @author Anderson Henrique da Silva
  * @location Minas Gerais, Brasil
  * @date 2025-11-25
@@ -37,12 +41,15 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
   /**
    * Send message with SSE streaming support
    * This is the preferred method for real-time responses
+   *
+   * Performance: Uses array-based chunk accumulation to avoid O(n²) string concatenation
    */
   async sendStreaming(request: ChatRequest, callbacks: StreamCallbacks): Promise<ChatResponse> {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
-    let accumulatedContent = ''
+    // Use array for O(n) accumulation instead of O(n²) string concatenation
+    const contentChunks: string[] = []
     let agentId: string | undefined
     let agentName: string | undefined
     let suggestedActions: string[] | undefined
@@ -173,18 +180,22 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
                   case 'chunk':
                     if (event.content) {
-                      // Add space between chunks if needed (backend sends chunks without trailing spaces)
+                      // Check if we need to add space between chunks
+                      // Use last chunk for comparison (O(1) instead of checking full string)
+                      const lastChunk =
+                        contentChunks.length > 0 ? contentChunks[contentChunks.length - 1] : ''
                       const needsSpace =
-                        accumulatedContent.length > 0 &&
-                        !accumulatedContent.endsWith(' ') &&
-                        !accumulatedContent.endsWith('\n') &&
+                        lastChunk.length > 0 &&
+                        !lastChunk.endsWith(' ') &&
+                        !lastChunk.endsWith('\n') &&
                         !event.content.startsWith(' ') &&
                         !event.content.startsWith('\n')
 
+                      // O(1) array push instead of O(n) string concatenation
                       if (needsSpace) {
-                        accumulatedContent += ' '
+                        contentChunks.push(' ')
                       }
-                      accumulatedContent += event.content
+                      contentChunks.push(event.content)
                       callbacks.onChunk?.(needsSpace ? ' ' + event.content : event.content)
                     }
                     break
@@ -226,6 +237,9 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
       } finally {
         reader.releaseLock()
       }
+
+      // O(n) join at end instead of O(n²) incremental concatenation
+      const accumulatedContent = contentChunks.join('')
 
       return {
         success: true,
