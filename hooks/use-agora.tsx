@@ -556,25 +556,32 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user?.tracks])
 
-  // Onboarding data derived from user
-  const onboarding: OnboardingData | null = user
-    ? {
-        currentStep: user.onboardingStep,
-        completedSteps: Array.from({ length: user.onboardingStep }, (_, i) => i + 1),
-        selectedTracks: selectedTracks,
-        githubUsername: user.githubUsername,
-        githubForkVerified: false,
-        completedAt: user.hasCompletedOnboarding ? user.enrolledAt : undefined,
-        github: user.githubUsername
-          ? {
-              username: user.githubUsername,
-              hasForked: false,
-              commitCount: 0,
-              lastChecked: new Date().toISOString(),
-            }
-          : null,
-      }
-    : null
+  // Onboarding data derived from user - memoized to prevent infinite re-renders
+  const onboarding: OnboardingData | null = useMemo(() => {
+    if (!user) return null
+    return {
+      currentStep: user.onboardingStep,
+      completedSteps: Array.from({ length: user.onboardingStep }, (_, i) => i + 1),
+      selectedTracks: selectedTracks,
+      githubUsername: user.githubUsername,
+      githubForkVerified: false,
+      completedAt: user.hasCompletedOnboarding ? user.enrolledAt : undefined,
+      github: user.githubUsername
+        ? {
+            username: user.githubUsername,
+            hasForked: false,
+            commitCount: 0,
+            lastChecked: user.enrolledAt || '', // Use stable value instead of new Date()
+          }
+        : null,
+    }
+  }, [
+    user?.onboardingStep,
+    user?.githubUsername,
+    user?.hasCompletedOnboarding,
+    user?.enrolledAt,
+    selectedTracks,
+  ])
 
   // Load user data on mount
   useEffect(() => {
