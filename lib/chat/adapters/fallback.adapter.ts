@@ -15,13 +15,9 @@ export type MaritacaModel = 'sabiazinho-3' | 'sabia-3'
 export class FallbackAdapter implements ChatAdapter {
   name = 'fallback-maritaca'
   private model: MaritacaModel
-  private apiKey: string | null = null
 
   constructor(model: MaritacaModel = 'sabiazinho-3') {
     this.model = model
-    // API key would be stored server-side in production
-    // This is just for local development
-    this.apiKey = process.env.NEXT_PUBLIC_MARITACA_API_KEY || null
   }
 
   async send(request: ChatRequest): Promise<ChatResponse> {
