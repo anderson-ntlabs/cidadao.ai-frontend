@@ -1,10 +1,13 @@
 'use client'
 
+// Force dynamic rendering to avoid SSR issues with auth context
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
@@ -35,10 +38,36 @@ const BACKGROUND_IMAGES = [
 
 export default function AgoraLoginPage() {
   const router = useRouter()
-  const { isAuthenticated, isLoading, loginWithProvider } = useAgoraAuth()
+  const supabase = createClient()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
+
+  // Check auth status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
+      setIsLoading(false)
+    }
+    checkAuth()
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user)
+      if (event === 'SIGNED_IN' && session?.user) {
+        router.replace('/pt/agora')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase, router])
 
   // Select random background on mount (client-side only to avoid hydration mismatch)
   useEffect(() => {
@@ -56,7 +85,17 @@ export default function AgoraLoginPage() {
   const handleLogin = async (provider: 'github' | 'google') => {
     setIsLoggingIn(provider)
     try {
-      await loginWithProvider(provider)
+      const redirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/auth/callback?next=/pt/agora`
+          : '/auth/callback?next=/pt/agora'
+
+      await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+        },
+      })
     } catch {
       setIsLoggingIn(null)
     }
