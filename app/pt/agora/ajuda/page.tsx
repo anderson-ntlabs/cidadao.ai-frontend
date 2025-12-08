@@ -110,7 +110,7 @@ A **Agora** e a plataforma de aprendizado do Cidadao.AI, inspirada na agora greg
 1. Complete o onboarding para personalizar sua experiencia
 2. Escolha seu primeiro mentor para conversar
 3. Explore as trilhas de aprendizado disponiveis
-4. Acompanhe seu progresso no boletim`,
+4. Acompanhe seu progresso no perfil`,
     category: 'getting-started',
     tags: ['introducao', 'agora', 'cidadania'],
     helpful: 42,

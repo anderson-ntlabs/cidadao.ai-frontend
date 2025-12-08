@@ -77,7 +77,6 @@ const navItems = {
   '/pt/agora/ranking': { label: 'Ranking', icon: Trophy },
   '/pt/agora/perfil': { label: 'Meu Perfil', icon: User },
   '/pt/agora/onboarding': { label: 'Onboarding', icon: Sparkles },
-  '/pt/agora/boletim': { label: 'Boletim', icon: FileText },
   '/pt/agora/configuracoes': { label: 'Configuracoes', icon: Settings },
   '/pt/agora/acessibilidade': { label: 'Acessibilidade', icon: Accessibility },
   '/pt/agora/ajuda': { label: 'Central de Ajuda', icon: HelpCircle },
@@ -238,13 +237,6 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   <Link href="/pt/agora/perfil" className="flex items-center gap-2 cursor-pointer">
                     <User className="w-4 h-4" />
                     <span>Meu Perfil</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link href="/pt/agora/boletim" className="flex items-center gap-2 cursor-pointer">
-                    <FileText className="w-4 h-4" />
-                    <span>Boletim</span>
                   </Link>
                 </DropdownMenuItem>
 
