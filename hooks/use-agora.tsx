@@ -6,6 +6,11 @@ import { createClient } from '@/lib/supabase/client'
 import { createLogger } from '@/lib/logger'
 import { trackBadgeEarned, trackLevelUp, trackRankUp } from '@/lib/analytics/agora-tracker'
 import { useCelebrationStore } from '@/store/celebration-store'
+import {
+  syncChallengeProgress,
+  getChallengeProgress,
+  claimChallengeReward,
+} from '@/app/pt/agora/actions'
 
 const logger = createLogger('Agora')
 
@@ -1249,8 +1254,8 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, hasDailyBonus, supabase, addXp])
 
-  // Refresh daily and weekly challenges
-  const refreshChallenges = useCallback(() => {
+  // Refresh daily and weekly challenges (with server sync)
+  const refreshChallenges = useCallback(async () => {
     if (!user) return
 
     // Calculate today's sessions and diary entries
@@ -1288,9 +1293,10 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
 
     setDailyChallenges(daily)
 
-    // Calculate weekly stats
+    // Calculate weekly stats (week starts on Monday for consistency with server)
     const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay()) // Start of week (Sunday)
+    const dayOfWeek = weekStart.getDay()
+    weekStart.setDate(weekStart.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)) // Monday
     weekStart.setHours(0, 0, 0, 0)
     const weekStartStr = weekStart.toISOString()
 
@@ -1303,7 +1309,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
 
     // Calculate week end date
     const weekEnd = new Date(weekStart)
-    weekEnd.setDate(weekEnd.getDate() + 7)
+    weekEnd.setDate(weekEnd.getDate() + 6) // Sunday
 
     // Generate weekly challenges
     const weekly: WeeklyChallenge[] = WEEKLY_CHALLENGE_TEMPLATES.map((template) => {
@@ -1334,6 +1340,30 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       dailyCompleted: daily.filter((d) => d.completed).length,
       weeklyCompleted: weekly.filter((w) => w.completed).length,
     })
+
+    // Sync challenges with server (non-blocking)
+    try {
+      const challengesToSync = [
+        ...daily.map((d) => ({
+          challengeId: d.id,
+          challengeType: 'daily' as const,
+          currentProgress: d.progress,
+          targetValue: d.target,
+          xpReward: d.xpReward,
+        })),
+        ...weekly.map((w) => ({
+          challengeId: w.id,
+          challengeType: 'weekly' as const,
+          currentProgress: w.progress,
+          targetValue: w.target,
+          xpReward: w.xpReward,
+        })),
+      ]
+      await syncChallengeProgress(challengesToSync)
+      logger.debug('Challenges synced to server')
+    } catch (error) {
+      logger.warn('Failed to sync challenges to server', { error })
+    }
   }, [user, sessions, diaryEntries, xpTransactions, badges])
 
   // Initialize challenges when user data loads

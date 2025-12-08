@@ -83,12 +83,12 @@ export async function recordSession(durationMinutes: number) {
     // Get current profile
     const { data: profile } = await supabase
       .from('agora_profiles')
-      .select('total_time_minutes, total_sessions, current_streak, last_session_date')
+      .select('total_time_minutes, total_sessions, current_streak, last_activity_date')
       .eq('user_id', user.id)
       .single()
 
     const today = new Date().toISOString().split('T')[0]
-    const lastSession = profile?.last_session_date
+    const lastSession = profile?.last_activity_date
     let newStreak = profile?.current_streak || 0
 
     // Calculate streak
@@ -109,14 +109,14 @@ export async function recordSession(durationMinutes: number) {
       newStreak = 1
     }
 
-    // Update profile
+    // Update profile - use last_activity_date for consistency
     await supabase
       .from('agora_profiles')
       .update({
         total_time_minutes: (profile?.total_time_minutes || 0) + durationMinutes,
         total_sessions: (profile?.total_sessions || 0) + 1,
         current_streak: newStreak,
-        last_session_date: today,
+        last_activity_date: today,
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', user.id)
@@ -191,7 +191,12 @@ export async function acceptLgpdConsent() {
 // Badge Actions
 // ============================================
 
-export async function awardBadge(badgeId: string, badgeName: string, criteria: string) {
+/**
+ * Award a badge to the user
+ * Badges are stored as JSONB array in agora_profiles.badges
+ * Each badge is stored as its ID string
+ */
+export async function awardBadge(badgeId: string, badgeName: string) {
   const supabase = await createClient()
 
   const {
@@ -203,31 +208,36 @@ export async function awardBadge(badgeId: string, badgeName: string, criteria: s
   }
 
   try {
-    // Check if already has badge
-    const { data: existing } = await supabase
-      .from('agora_badges')
-      .select('id')
+    // Get current badges from profile
+    const { data: profile } = await supabase
+      .from('agora_profiles')
+      .select('badges')
       .eq('user_id', user.id)
-      .eq('badge_id', badgeId)
       .single()
 
-    if (existing) {
+    const currentBadges: string[] = profile?.badges || []
+
+    // Check if already has badge
+    if (currentBadges.includes(badgeId)) {
       return { success: true, alreadyHas: true }
     }
 
-    // Award badge
-    await supabase.from('agora_badges').insert({
-      user_id: user.id,
-      badge_id: badgeId,
-      badge_name: badgeName,
-      criteria,
-    })
+    // Add badge to array
+    const updatedBadges = [...currentBadges, badgeId]
+
+    await supabase
+      .from('agora_profiles')
+      .update({
+        badges: updatedBadges,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', user.id)
 
     // Add XP for badge
     await addXp(50, `Badge ${badgeName} conquistado!`, 'badge')
 
     revalidatePath('/pt/agora')
-    return { success: true }
+    return { success: true, badges: updatedBadges }
   } catch (error) {
     console.error('Failed to award badge:', error)
     return { error: 'Failed to award badge' }
@@ -759,12 +769,9 @@ export async function getAcademyUserData() {
       .eq('user_id', user.id)
       .single()
 
-    // Fetch badges
-    const { data: badges } = await supabase
-      .from('agora_badges')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+    // Badges are stored as JSONB array in profile
+    // We'll return the array of badge IDs from the profile
+    const badges = profile?.badges || []
 
     // Fetch recent XP transactions
     const { data: xpTransactions } = await supabase
@@ -1033,5 +1040,239 @@ export async function completeCalendarEvent(eventId: string) {
   } catch (error) {
     console.error('Failed to complete calendar event:', error)
     return { error: 'Failed to complete calendar event', data: null }
+  }
+}
+
+// ============================================
+// Challenge Progress Actions
+// ============================================
+
+export interface ChallengeProgress {
+  id: string
+  challenge_id: string
+  challenge_type: 'daily' | 'weekly'
+  current_progress: number
+  target_value: number
+  is_completed: boolean
+  completed_at: string | null
+  xp_reward: number
+  xp_claimed: boolean
+  period_start: string
+  period_end: string
+}
+
+/**
+ * Get the current period dates for a challenge type
+ */
+function getChallengePeriod(type: 'daily' | 'weekly'): { start: string; end: string } {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  if (type === 'daily') {
+    const dateStr = today.toISOString().split('T')[0]
+    return { start: dateStr, end: dateStr }
+  } else {
+    // Weekly - starts on Monday
+    const dayOfWeek = today.getDay()
+    const monday = new Date(today)
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+
+    return {
+      start: monday.toISOString().split('T')[0],
+      end: sunday.toISOString().split('T')[0],
+    }
+  }
+}
+
+/**
+ * Get all active challenges for the current period
+ */
+export async function getChallengeProgress() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    const dailyPeriod = getChallengePeriod('daily')
+    const weeklyPeriod = getChallengePeriod('weekly')
+
+    const { data, error } = await supabase
+      .from('agora_challenge_progress')
+      .select('*')
+      .eq('user_id', user.id)
+      .or(
+        `and(challenge_type.eq.daily,period_start.eq.${dailyPeriod.start}),and(challenge_type.eq.weekly,period_start.eq.${weeklyPeriod.start})`
+      )
+
+    if (error) throw error
+
+    return { success: true, data: data || [] }
+  } catch (error) {
+    console.error('Failed to get challenge progress:', error)
+    return { error: 'Failed to get challenge progress', data: null }
+  }
+}
+
+/**
+ * Update or create challenge progress
+ */
+export async function updateChallengeProgress(
+  challengeId: string,
+  challengeType: 'daily' | 'weekly',
+  currentProgress: number,
+  targetValue: number,
+  xpReward: number
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const period = getChallengePeriod(challengeType)
+    const isCompleted = currentProgress >= targetValue
+
+    const { data, error } = await supabase
+      .from('agora_challenge_progress')
+      .upsert(
+        {
+          user_id: user.id,
+          challenge_id: challengeId,
+          challenge_type: challengeType,
+          current_progress: currentProgress,
+          target_value: targetValue,
+          is_completed: isCompleted,
+          completed_at: isCompleted ? new Date().toISOString() : null,
+          xp_reward: xpReward,
+          period_start: period.start,
+          period_end: period.end,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,challenge_id,period_start' }
+      )
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data, isCompleted }
+  } catch (error) {
+    console.error('Failed to update challenge progress:', error)
+    return { error: 'Failed to update challenge progress' }
+  }
+}
+
+/**
+ * Claim XP reward for a completed challenge
+ */
+export async function claimChallengeReward(challengeId: string, periodStart: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    // Get the challenge
+    const { data: challenge, error: fetchError } = await supabase
+      .from('agora_challenge_progress')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('challenge_id', challengeId)
+      .eq('period_start', periodStart)
+      .single()
+
+    if (fetchError) throw fetchError
+    if (!challenge) return { error: 'Challenge not found' }
+    if (!challenge.is_completed) return { error: 'Challenge not completed' }
+    if (challenge.xp_claimed) return { error: 'Reward already claimed', alreadyClaimed: true }
+
+    // Mark as claimed
+    const { error: updateError } = await supabase
+      .from('agora_challenge_progress')
+      .update({
+        xp_claimed: true,
+        xp_claimed_at: new Date().toISOString(),
+      })
+      .eq('id', challenge.id)
+
+    if (updateError) throw updateError
+
+    // Award XP
+    const xpReward = challenge.xp_reward || 0
+    if (xpReward > 0) {
+      await addXp(xpReward, `Desafio concluído: ${challengeId}`, 'challenge')
+    }
+
+    revalidatePath('/pt/agora')
+    return { success: true, xpAwarded: xpReward }
+  } catch (error) {
+    console.error('Failed to claim challenge reward:', error)
+    return { error: 'Failed to claim challenge reward' }
+  }
+}
+
+/**
+ * Batch update multiple challenges at once
+ * Used when syncing local state with server
+ */
+export async function syncChallengeProgress(
+  challenges: Array<{
+    challengeId: string
+    challengeType: 'daily' | 'weekly'
+    currentProgress: number
+    targetValue: number
+    xpReward: number
+  }>
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  try {
+    const results = await Promise.all(
+      challenges.map((c) =>
+        updateChallengeProgress(
+          c.challengeId,
+          c.challengeType,
+          c.currentProgress,
+          c.targetValue,
+          c.xpReward
+        )
+      )
+    )
+
+    const errors = results.filter((r) => r.error)
+    if (errors.length > 0) {
+      console.warn('Some challenges failed to sync:', errors)
+    }
+
+    return { success: true, syncedCount: results.filter((r) => r.success).length }
+  } catch (error) {
+    console.error('Failed to sync challenge progress:', error)
+    return { error: 'Failed to sync challenge progress' }
   }
 }
