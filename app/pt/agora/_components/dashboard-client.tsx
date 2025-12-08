@@ -110,6 +110,7 @@ interface DashboardUser {
   totalTimeMinutes: number
   totalSessions: number
   hasAcceptedLgpd: boolean
+  hasCompletedOnboarding?: boolean
 }
 
 interface Badge {
@@ -320,6 +321,51 @@ export function DashboardClient({
             </div>
           )}
 
+          {/* Onboarding CTA - Prominent when not completed */}
+          {!user.hasCompletedOnboarding && (
+            <Link
+              href={`/pt/agora/onboarding${isDemoMode ? '?demo=true' : ''}`}
+              className="block mb-6 p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl text-white hover:shadow-2xl hover:scale-[1.01] transition-all group relative overflow-hidden"
+            >
+              {/* Animated background pattern */}
+              <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-10 animate-pulse" />
+
+              <div className="relative flex items-center gap-6">
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-4xl shadow-lg border border-white/20">
+                  🚀
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-bold">Complete sua Jornada de Onboarding!</h3>
+                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                      RECOMENDADO
+                    </span>
+                  </div>
+                  <p className="text-white/90 mb-3">
+                    Conheca a plataforma Agora atraves da nossa apresentacao interativa de 40
+                    slides.
+                  </p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                      <Target className="w-4 h-4" />
+                      Requisito para Trilhas
+                    </span>
+                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                      <Zap className="w-4 h-4" />
+                      +50 XP ao completar
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <span className="text-xs text-white/80">Iniciar</span>
+                </div>
+              </div>
+            </Link>
+          )}
+
           {/* Hero Section - User Profile + Stats (Using GlassCard like main app) */}
           <div className="mb-8">
             <GlassCard className="overflow-hidden">
@@ -506,31 +552,33 @@ export function DashboardClient({
                 </div>
               </GlassCard>
 
-              {/* Onboarding Card - Always visible for revisiting */}
-              <Link
-                href={`/pt/agora/onboarding?preview=true${isDemoMode ? '&demo=true' : ''}`}
-                className="block p-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-2xl border border-indigo-200/50 dark:border-indigo-700/30 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
-                    📽️
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        Apresentação Ágora
-                      </h3>
-                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
-                        40 slides
-                      </span>
+              {/* Onboarding Card - Only visible when completed (for revisiting) */}
+              {user.hasCompletedOnboarding && (
+                <Link
+                  href={`/pt/agora/onboarding?preview=true${isDemoMode ? '&demo=true' : ''}`}
+                  className="block p-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-2xl border border-indigo-200/50 dark:border-indigo-700/30 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
+                      📽️
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Reveja nossa apresentação completa do projeto
-                    </p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          Apresentacao Agora
+                        </h3>
+                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                          Concluido
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Reveja nossa apresentacao completa do projeto
+                      </p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <ChevronRight className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:translate-x-1 transition-all" />
-                </div>
-              </Link>
+                </Link>
+              )}
 
               {/* Contract Card - View signed contract */}
               <Link

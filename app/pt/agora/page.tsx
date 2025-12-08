@@ -76,6 +76,7 @@ function AcademyDashboardContent() {
     totalTimeMinutes: user.totalTimeMinutes,
     totalSessions: user.totalSessions,
     hasAcceptedLgpd: user.hasAcceptedLgpd,
+    hasCompletedOnboarding: user.hasCompletedOnboarding,
   }
 
   // Build badges data
