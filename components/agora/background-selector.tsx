@@ -26,15 +26,13 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
   const [activeTab, setActiveTab] = useState<'colors' | 'images'>('colors')
   const [isDark, setIsDark] = useState(false)
 
-  // Detect dark mode
+  // Detect dark mode - ONLY check the app's theme class, NOT system preference
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     const checkDark = () => {
-      setIsDark(
-        document.documentElement.classList.contains('dark') ||
-          window.matchMedia('(prefers-color-scheme: dark)').matches
-      )
+      // Only check the actual class on the document, not system preference
+      setIsDark(document.documentElement.classList.contains('dark'))
     }
 
     checkDark()
@@ -42,12 +40,8 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
     const observer = new MutationObserver(checkDark)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', checkDark)
-
     return () => {
       observer.disconnect()
-      mediaQuery.removeEventListener('change', checkDark)
     }
   }, [])
 

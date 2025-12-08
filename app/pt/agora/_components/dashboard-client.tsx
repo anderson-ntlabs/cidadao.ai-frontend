@@ -199,13 +199,13 @@ export function DashboardClient({
   const bgStyle = getBackgroundStyle()
   const overlayStyle = getOverlayStyle(isDark)
 
-  // Detect dark mode
+  // Detect dark mode - ONLY check the app's theme class, NOT system preference
+  // The app theme is controlled by the 'dark' class on documentElement
+  // System preference (prefers-color-scheme) should NOT override user's app choice
   useEffect(() => {
     const check = () => {
-      setIsDark(
-        document.documentElement.classList.contains('dark') ||
-          window.matchMedia('(prefers-color-scheme: dark)').matches
-      )
+      // Only check the actual class on the document, not system preference
+      setIsDark(document.documentElement.classList.contains('dark'))
     }
     check()
     const observer = new MutationObserver(check)
