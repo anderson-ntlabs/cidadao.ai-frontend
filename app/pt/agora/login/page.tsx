@@ -103,12 +103,12 @@ export default function AgoraLoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen flex items-center justify-center academy-bg">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Verificando autenticação...</p>
+          <p className="academy-text-muted">Verificando autenticação...</p>
         </div>
       </div>
     )
@@ -116,19 +116,19 @@ export default function AgoraLoginPage() {
 
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen flex items-center justify-center academy-bg">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Sparkles className="w-8 h-8 text-white animate-pulse" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para o dashboard...</p>
+          <p className="academy-text-muted">Redirecionando para o dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 academy-bg relative overflow-hidden">
       {/* Background image using Next/Image for better loading */}
       {backgroundImage && (
         <div className="fixed inset-0 -z-10">
@@ -150,13 +150,11 @@ export default function AgoraLoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500 via-green-600 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+          <div className="w-20 h-20 rounded-3xl academy-gradient flex items-center justify-center mx-auto mb-6 shadow-2xl">
             <GraduationCap className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Ágora Cidadão.AI
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold academy-text mb-2">Ágora Cidadão.AI</h1>
+          <p className="academy-text-muted">
             Plataforma aberta de aprendizado em IA e desenvolvimento
           </p>
         </div>
@@ -210,33 +208,30 @@ export default function AgoraLoginPage() {
           ].map((feature) => (
             <div
               key={feature.label}
-              className="flex flex-col items-center p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50"
+              className="flex flex-col items-center p-3 rounded-xl academy-card backdrop-blur-sm"
             >
               <span className="text-2xl mb-1">{feature.icon}</span>
-              <span className="text-xs text-gray-600 dark:text-gray-400">{feature.label}</span>
+              <span className="text-xs academy-text-muted">{feature.label}</span>
             </div>
           ))}
         </div>
 
         {/* Footer */}
         <div className="text-center space-y-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs academy-text-muted">
             Ao entrar, você concorda com nossos{' '}
-            <Link href="/pt/termos" className="text-green-600 dark:text-green-400 hover:underline">
+            <Link href="/pt/termos" className="text-tarsila-verde hover:underline">
               Termos de Uso
             </Link>{' '}
             e{' '}
-            <Link
-              href="/pt/privacidade"
-              className="text-green-600 dark:text-green-400 hover:underline"
-            >
+            <Link href="/pt/privacidade" className="text-tarsila-verde hover:underline">
               Política de Privacidade
             </Link>
           </p>
 
           <Link
             href="/pt"
-            className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            className="inline-flex items-center gap-1 text-sm academy-text-muted hover:text-tarsila-amarelo transition-colors"
           >
             ← Voltar ao início
           </Link>

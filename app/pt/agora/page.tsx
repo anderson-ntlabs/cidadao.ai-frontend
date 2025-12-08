@@ -18,12 +18,12 @@ import { GraduationCap } from 'lucide-react'
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen flex items-center justify-center academy-bg">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
+        <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
+        <p className="academy-text-muted">Carregando dashboard...</p>
       </div>
     </div>
   )
@@ -49,12 +49,12 @@ function AcademyDashboardContent() {
   // Not authenticated - show redirect message
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center academy-bg">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
+          <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
+          <p className="academy-text-muted">Redirecionando para login...</p>
         </div>
       </div>
     )

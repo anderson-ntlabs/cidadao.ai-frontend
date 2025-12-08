@@ -67,12 +67,12 @@ const publicPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/contr
 
 function AgoraLoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen flex items-center justify-center academy-bg">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+        <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando Agora...</p>
+        <p className="academy-text-muted">Carregando Ágora...</p>
       </div>
     </div>
   )
@@ -191,7 +191,7 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === '/pt/agora/login'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen academy-bg">
       {/* Global Header */}
       {shouldShowHeader && <AgoraHeaderWrapper />}
 

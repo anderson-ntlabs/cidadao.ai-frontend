@@ -117,8 +117,8 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
     <header
       className={cn(
         'sticky top-0 z-50',
-        'bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl',
-        'border-b border-gray-200/50 dark:border-gray-800/50',
+        'bg-[hsl(var(--academy-card))]/80 backdrop-blur-xl',
+        'border-b border-[hsl(var(--academy-border))]/50',
         'shadow-sm',
         className
       )}
@@ -141,10 +141,10 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                 </div>
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                <h1 className="font-bold academy-text group-hover:text-tarsila-verde transition-colors">
                   Ágora
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Cidadao.AI</p>
+                <p className="text-xs academy-text-muted">Cidadao.AI</p>
               </div>
             </Link>
 
