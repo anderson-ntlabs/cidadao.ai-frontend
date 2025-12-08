@@ -201,6 +201,10 @@ module.exports = {
           '0%': { transform: 'scale(0.9)', opacity: 0 },
           '100%': { transform: 'scale(1)', opacity: 1 },
         },
+        indeterminate: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
       },
       animation: {
         in: 'slide-in-from-bottom-5 0.3s ease-out',

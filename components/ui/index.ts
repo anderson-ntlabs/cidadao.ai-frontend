@@ -10,6 +10,7 @@ export * from './tabs'
 export * from './toast'
 export * from './tooltip'
 export * from './progress'
+export * from './loading'
 
 // Form Components
 export * from './select'
