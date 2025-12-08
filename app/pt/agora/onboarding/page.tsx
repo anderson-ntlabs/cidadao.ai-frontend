@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useAgora, TRACK_REPOS } from '@/hooks/use-agora'
 import {
   Code,
@@ -19,10 +20,12 @@ import {
   Sparkles,
   GraduationCap,
   Presentation,
+  Home,
+  Eye,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { PresentationCarousel, Slide } from '@/components/ui/presentation-carousel'
@@ -578,41 +581,74 @@ function OnboardingContent() {
     <div className="min-h-screen">
       {/* Preview Mode Banner */}
       {isPreviewMode && (
-        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white py-2 px-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-sm">
-            <span className="animate-pulse">👁️</span>
-            <span className="font-medium">Modo Preview</span>
-            <span className="hidden sm:inline text-white/80">
-              — Explore o onboarding sem alterar seus dados
-            </span>
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-3 px-4">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <Eye className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-semibold">Modo Preview</span>
+                <span className="hidden sm:inline text-white/80 ml-2">
+                  — Explore o onboarding sem alterar seus dados
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/pt/agora"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-medium"
+            >
+              <Home className="w-4 h-4" />
+              <span className="hidden sm:inline">Voltar ao Dashboard</span>
+            </Link>
           </div>
         </div>
       )}
 
-      {/* Auth Mode Indicator (dev/debug) */}
+      {/* Auth Mode Indicator */}
       {!isPreviewMode && isAuthenticated && (
-        <div className="py-1 px-4 text-center text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+        <div className="py-2 px-4 text-center text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-b border-green-200 dark:border-green-800">
           <span className="font-medium">Modo Autenticado</span>
-          <span className="hidden sm:inline"> — Dados salvos no Supabase</span>
+          <span className="hidden sm:inline"> — Seu progresso sera salvo</span>
         </div>
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-900 dark:text-gray-100">Onboarding</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Academy Cidadão.AI</p>
+          <div className="flex items-center gap-4">
+            {/* Back button */}
+            <Link
+              href="/pt/agora"
+              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-gray-900 dark:text-gray-100">
+                  {isPreviewMode ? 'Apresentacao Agora' : 'Onboarding'}
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Academy Cidadao.AI</p>
+              </div>
             </div>
           </div>
-          <Badge variant="warning" size="lg">
-            <Sparkles className="w-3 h-3 mr-1" />
-            {isPreviewMode ? 'Preview' : '+275 XP ao concluir'}
-          </Badge>
+          <div className="flex items-center gap-3">
+            {isPreviewMode ? (
+              <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                <Eye className="w-3 h-3 mr-1" />
+                Preview
+              </Badge>
+            ) : (
+              <Badge variant="warning" size="lg">
+                <Sparkles className="w-3 h-3 mr-1" />
+                +275 XP ao concluir
+              </Badge>
+            )}
+          </div>
         </div>
       </header>
 
@@ -676,8 +712,8 @@ function OnboardingContent() {
         </div>
 
         {/* Step Content */}
-        <Card variant="elevated" padding="lg" className="animate-fade-in">
-          <CardContent>
+        <GlassCard className="animate-fade-in">
+          <GlassCardContent className="p-6 md:p-8">
             {/* Step 1: Presentation */}
             {currentStep === 1 && (
               <div className="space-y-6 py-4">
@@ -726,11 +762,7 @@ function OnboardingContent() {
 
                 {/* Agent tip */}
                 {!presentationCompleted && (
-                  <Card
-                    variant="filled"
-                    padding="sm"
-                    className="max-w-lg mx-auto bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
-                  >
+                  <div className="max-w-lg mx-auto p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                     <div className="flex items-start gap-3">
                       <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
@@ -745,12 +777,12 @@ function OnboardingContent() {
                           Dica do Santos-Dumont:
                         </p>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                          Navegue pelos slides usando as setas ou clicando nos pontos. Chegue até o
-                          último slide para desbloquear as trilhas!
+                          Navegue pelos slides usando as setas ou clicando nos pontos. Chegue ate o
+                          ultimo slide para desbloquear as trilhas!
                         </p>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 )}
 
                 {/* CTA */}
@@ -937,7 +969,7 @@ function OnboardingContent() {
                   </p>
                 </div>
 
-                <Card variant="filled" padding="md" className="max-w-lg mx-auto">
+                <div className="max-w-lg mx-auto p-5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 rounded-xl bg-gray-900 dark:bg-white flex items-center justify-center">
                       <Github className="w-6 h-6 text-white dark:text-gray-900" />
@@ -947,7 +979,7 @@ function OnboardingContent() {
                         {TRACK_REPOS[selectedTracks[0]].owner}/{TRACK_REPOS[selectedTracks[0]].repo}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Repositório da trilha {selectedTracks[0].toUpperCase()}
+                        Repositorio da trilha {selectedTracks[0].toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -959,16 +991,12 @@ function OnboardingContent() {
                     className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Abrir página de fork no GitHub
+                    Abrir pagina de fork no GitHub
                   </a>
-                </Card>
+                </div>
 
                 {verifyError && (
-                  <Card
-                    variant="outlined"
-                    padding="sm"
-                    className="max-w-lg mx-auto border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20"
-                  >
+                  <div className="max-w-lg mx-auto p-4 rounded-xl border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20">
                     <div className="flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                       <div>
@@ -978,15 +1006,11 @@ function OnboardingContent() {
                         </p>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 )}
 
                 {onboarding.github?.hasForked && (
-                  <Card
-                    variant="outlined"
-                    padding="sm"
-                    className="max-w-lg mx-auto border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20"
-                  >
+                  <div className="max-w-lg mx-auto p-4 rounded-xl border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20">
                     <div className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <div>
@@ -1003,7 +1027,7 @@ function OnboardingContent() {
                         </a>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 )}
 
                 <div className="flex justify-between pt-4">
@@ -1051,11 +1075,7 @@ function OnboardingContent() {
                   </p>
                 </div>
 
-                <Card
-                  variant="filled"
-                  padding="md"
-                  className="max-w-md mx-auto bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
-                >
+                <div className="max-w-md mx-auto p-5 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/30">
                   <div className="flex items-center justify-center gap-2 text-green-700 dark:text-green-300 mb-4">
                     <Sparkles className="w-5 h-5" />
                     <span className="font-bold text-lg">+275 XP conquistados!</span>
@@ -1077,7 +1097,7 @@ function OnboardingContent() {
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
 
                 <div className="max-w-md mx-auto text-left">
                   <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-center">
@@ -1110,8 +1130,8 @@ function OnboardingContent() {
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </GlassCardContent>
+        </GlassCard>
       </main>
     </div>
   )
