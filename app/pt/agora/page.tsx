@@ -2,8 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { DashboardClient } from './_components/dashboard-client'
 import { GraduationCap } from 'lucide-react'
 
@@ -12,9 +11,10 @@ import { GraduationCap } from 'lucide-react'
  *
  * Design System v2 - Bo Bardi + Dumont + Anderson
  * Clean architecture with proper separation of concerns.
+ * Uses unified useAgora hook for consistent data flow.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-06
+ * Updated: 2025-12-07 - Migrated to unified useAgora hook
  */
 
 function LoadingFallback() {
@@ -33,11 +33,19 @@ function LoadingFallback() {
 function AcademyDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
+  const isDemoParam = searchParams.get('demo') === 'true'
 
-  // Auth hooks
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
+  // Unified Agora hook - automatically handles real vs demo mode
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    isDemoMode,
+    isRealAuth,
+    badges,
+    xpTransactions,
+    logout,
+  } = useAgora()
 
   // OAuth flow detection
   const [isOAuthFlow, setIsOAuthFlow] = useState(false)
@@ -51,7 +59,6 @@ function AcademyDashboardContent() {
     if (hasOAuthParam || hasOAuthCookie) {
       setIsOAuthFlow(true)
       // Increased timeout to 8 seconds to allow auth hook retries to complete
-      // Auth hook has up to 5 retries with 300-1500ms delays = ~4.5s + 500ms initial = ~5s
       const timer = setTimeout(() => setAuthCheckComplete(true), 8000)
       return () => clearTimeout(timer)
     } else {
@@ -62,40 +69,28 @@ function AcademyDashboardContent() {
   // Auth redirect - only redirect after OAuth timeout or if not in OAuth flow
   useEffect(() => {
     // Never redirect in demo mode
-    if (isDemoMode) return
+    if (isDemoParam || isDemoMode) return
 
     // Don't redirect while auth is loading
-    if (realAuth.isLoading) return
+    if (isLoading) return
 
     // Authenticated - no redirect needed
-    if (realAuth.isAuthenticated) return
+    if (isRealAuth) return
 
     // In OAuth flow - wait for timeout before redirecting
-    // This gives the auth hook time to complete all retries
     if (isOAuthFlow && !authCheckComplete) return
 
-    // Not authenticated and either:
-    // - Not in OAuth flow, or
-    // - OAuth flow timeout passed
-    // Redirect to login
+    // Not authenticated - redirect to login
     router.replace('/pt/agora/login')
-  }, [
-    isDemoMode,
-    realAuth.isLoading,
-    realAuth.isAuthenticated,
-    isOAuthFlow,
-    authCheckComplete,
-    router,
-  ])
+  }, [isDemoParam, isDemoMode, isLoading, isRealAuth, isOAuthFlow, authCheckComplete, router])
 
   // Loading state
-  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
-  if (isLoading || (isOAuthFlow && !authCheckComplete && !realAuth.isAuthenticated)) {
+  if (isLoading || (isOAuthFlow && !authCheckComplete && !isRealAuth)) {
     return <LoadingFallback />
   }
 
-  // Not authenticated
-  if (!isDemoMode && !realAuth.isAuthenticated) {
+  // Not authenticated (and not in demo mode)
+  if (!isDemoMode && !isRealAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
@@ -108,76 +103,55 @@ function AcademyDashboardContent() {
     )
   }
 
-  // Build user data
-  const user = isDemoMode
-    ? {
-        id: demoAuth.user.id,
-        name: demoAuth.user.name,
-        email: demoAuth.user.email,
-        avatar: demoAuth.user.avatar,
-        totalXp: demoAuth.user.totalXp,
-        currentLevel: demoAuth.user.currentLevel,
-        currentRank: demoAuth.user.currentRank,
-        currentStreak: demoAuth.user.currentStreak,
-        longestStreak: demoAuth.user.longestStreak || 0,
-        totalTimeMinutes: demoAuth.user.totalTimeMinutes,
-        totalSessions: demoAuth.user.totalSessions,
-        hasAcceptedLgpd: demoAuth.user.hasAcceptedInternshipContract,
-      }
-    : {
-        id: realAuth.user!.id,
-        name: realAuth.user!.name,
-        email: realAuth.user!.email,
-        avatar:
-          realAuth.user!.avatar ||
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(realAuth.user!.name)}&background=f59e0b&color=fff`,
-        totalXp: realAuth.user!.totalXp,
-        currentLevel: realAuth.user!.currentLevel,
-        currentRank: realAuth.user!.currentRank,
-        currentStreak: realAuth.user!.currentStreak,
-        longestStreak: 0,
-        totalTimeMinutes: realAuth.user!.totalTimeMinutes,
-        totalSessions: realAuth.user!.totalSessions,
-        hasAcceptedLgpd: realAuth.user!.hasAcceptedLgpd,
-      }
+  // Build user data from unified hook
+  const dashboardUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar:
+      user.avatar ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=f59e0b&color=fff`,
+    totalXp: user.totalXp,
+    currentLevel: user.currentLevel,
+    currentRank: user.currentRank,
+    currentStreak: user.currentStreak,
+    longestStreak: user.longestStreak || 0,
+    totalTimeMinutes: user.totalTimeMinutes,
+    totalSessions: user.totalSessions,
+    hasAcceptedLgpd: user.hasAcceptedLgpd,
+  }
 
   // Build badges data
-  const badges = isDemoMode
-    ? demoAuth.badges.map((b) => ({
-        id: b.id,
-        badge_id: b.id,
-        badge_name: b.name,
-        criteria: b.criteria,
-        created_at: b.earnedAt || new Date().toISOString(),
-      }))
-    : []
+  const dashboardBadges = badges.map((b) => ({
+    id: b.id,
+    badge_id: b.id,
+    badge_name: b.name,
+    criteria: b.criteria,
+    created_at: b.earnedAt || new Date().toISOString(),
+  }))
 
   // Build XP transactions
-  const xpTransactions = isDemoMode
-    ? demoAuth.xpTransactions.map((tx) => ({
-        id: tx.id,
-        amount: tx.amount,
-        description: tx.description,
-        source_type: tx.sourceType || 'system',
-        created_at: tx.createdAt,
-      }))
-    : []
+  const dashboardXpTransactions = xpTransactions.map((tx) => ({
+    id: tx.id,
+    amount: tx.amount,
+    description: tx.description,
+    source_type: tx.sourceType || 'system',
+    created_at: tx.createdAt,
+  }))
 
   // Logout handler
   const handleLogout = async () => {
+    await logout()
     if (isDemoMode) {
-      demoAuth.resetDemo()
       router.push('/pt/agora/login')
-    } else {
-      await realAuth.logout()
     }
   }
 
   return (
     <DashboardClient
-      user={user}
-      badges={badges}
-      xpTransactions={xpTransactions}
+      user={dashboardUser}
+      badges={dashboardBadges}
+      xpTransactions={dashboardXpTransactions}
       isDemoMode={isDemoMode}
       onLogout={handleLogout}
     />

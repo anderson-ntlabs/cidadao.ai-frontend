@@ -500,7 +500,16 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
           totalXp: profile.total_xp || 0,
           currentLevel: profile.current_level || 1,
           currentRank: profile.current_rank || 'novato',
+          currentStreak: profile.current_streak || 0,
+          totalTimeMinutes: profile.total_time_minutes || 0,
+          totalSessions: profile.total_sessions || 0,
           enrolledAt: profile.enrolled_at,
+        })
+
+        logger.debug('Profile refreshed', {
+          userId: user.id,
+          totalXp: profile.total_xp,
+          currentLevel: profile.current_level,
         })
       }
     } catch (error) {
