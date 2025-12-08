@@ -29,3 +29,7 @@ export { CertificateModal } from './certificate-modal'
 export { InternshipContractModal } from './internship-contract-modal'
 export { LgpdConsentModal } from './lgpd-consent-modal'
 export { BackgroundSelector } from './background-selector'
+export { TimelineModal } from './timeline-modal'
+
+// Timeline components
+export { TimelineCard } from './timeline-card'

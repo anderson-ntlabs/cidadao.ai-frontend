@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -12,6 +12,8 @@ import {
   LgpdConsentModal,
   BackgroundSelector,
   AgoraHeader,
+  TimelineCard,
+  TimelineModal,
 } from '@/components/agora'
 import { ErrorBoundary } from '@/components/error-boundary'
 import {
@@ -126,10 +128,32 @@ interface XpTransaction {
   created_at: string
 }
 
+interface DiaryEntry {
+  id: string
+  content: string
+  mood: string
+  what_learned: string
+  what_struggled: string
+  next_steps: string
+  entry_date: string
+  created_at: string
+}
+
+interface StudySession {
+  id: string
+  started_at: string
+  ended_at?: string
+  duration_minutes: number
+  xp_earned: number
+  status: string
+}
+
 interface DashboardClientProps {
   user: DashboardUser
   badges: Badge[]
   xpTransactions: XpTransaction[]
+  diaryEntries?: DiaryEntry[]
+  sessions?: StudySession[]
   isDemoMode: boolean
   onLogout: () => Promise<void>
 }
@@ -157,6 +181,8 @@ export function DashboardClient({
   user,
   badges,
   xpTransactions,
+  diaryEntries = [],
+  sessions = [],
   isDemoMode,
   onLogout,
 }: DashboardClientProps) {
@@ -165,6 +191,7 @@ export function DashboardClient({
   const [showCertificateModal, setShowCertificateModal] = useState(false)
   const [showLgpdModal, setShowLgpdModal] = useState(false)
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false)
+  const [showTimelineModal, setShowTimelineModal] = useState(false)
 
   // Background customization
   const { currentBackground, getBackgroundStyle, getOverlayStyle } = useAgoraBackground()
@@ -191,6 +218,63 @@ export function DashboardClient({
       setShowLgpdModal(true)
     }
   }, [user.hasAcceptedLgpd, isDemoMode])
+
+  // Convert data for Timeline components
+  const timelineXpTransactions = useMemo(
+    () =>
+      xpTransactions.map((tx) => ({
+        id: tx.id,
+        amount: tx.amount,
+        balanceAfter: 0, // Not available in this format
+        sourceType: tx.source_type,
+        description: tx.description,
+        createdAt: tx.created_at,
+      })),
+    [xpTransactions]
+  )
+
+  const timelineDiaryEntries = useMemo(
+    () =>
+      diaryEntries.map((entry) => ({
+        id: entry.id,
+        content: entry.content,
+        mood: entry.mood as 'great' | 'good' | 'neutral' | 'struggling',
+        whatLearned: entry.what_learned || '',
+        whatStruggled: entry.what_struggled || '',
+        nextSteps: entry.next_steps || '',
+        entryDate: entry.entry_date,
+        createdAt: entry.created_at,
+      })),
+    [diaryEntries]
+  )
+
+  const timelineSessions = useMemo(
+    () =>
+      sessions.map((session) => ({
+        id: session.id,
+        startedAt: session.started_at,
+        endedAt: session.ended_at,
+        durationMinutes: session.duration_minutes,
+        xpEarned: session.xp_earned,
+        agentsUsed: [] as string[],
+        status: session.status as 'active' | 'completed' | 'abandoned',
+      })),
+    [sessions]
+  )
+
+  const timelineBadges = useMemo(
+    () =>
+      badges.map((badge) => ({
+        id: badge.id,
+        type: badge.badge_id,
+        name: badge.badge_name,
+        description: badge.criteria,
+        emoji: badgeEmojis[badge.badge_id] || '🏅',
+        earnedAt: badge.created_at,
+        criteria: badge.criteria,
+      })),
+    [badges]
+  )
 
   const rankInfo = ranks[user.currentRank as keyof typeof ranks] || ranks.novato
   const nextRank = Object.values(ranks).find((r) => r.minXp > user.totalXp)
@@ -607,47 +691,16 @@ export function DashboardClient({
               </button>
             </div>
 
-            {/* Right Column - Activity + Badges */}
+            {/* Right Column - Timeline + Badges */}
             <div className="space-y-6">
-              {/* Activity Feed - Using same pattern as main app */}
-              <GlassCard>
-                <GlassCardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Atividade Recente
-                    </h2>
-                  </div>
-                </GlassCardHeader>
-
-                <GlassCardContent>
-                  {/* Convert XP transactions to activity format for ActivityTimeline */}
-                  <ActivityTimeline
-                    activities={xpTransactions.slice(0, 5).map((tx) => ({
-                      id: tx.id,
-                      user_id: user.id,
-                      type: 'chat' as const,
-                      title: tx.description,
-                      description: `+${tx.amount} XP`,
-                      created_at: tx.created_at,
-                    }))}
-                    isLoading={false}
-                    emptyMessage="Nenhuma atividade ainda. Converse com o mentor!"
-                    maxItems={5}
-                  />
-
-                  <Button
-                    variant="secondary"
-                    className="w-full mt-4"
-                    onClick={() => router.push(`/pt/agora/chat${isDemoMode ? '?demo=true' : ''}`)}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Conversar com Mentores
-                  </Button>
-                </GlassCardContent>
-              </GlassCard>
+              {/* Timeline Card - Real telemetry data */}
+              <TimelineCard
+                xpTransactions={timelineXpTransactions}
+                diaryEntries={timelineDiaryEntries}
+                sessions={timelineSessions}
+                badges={timelineBadges}
+                onOpenModal={() => setShowTimelineModal(true)}
+              />
 
               {/* Badges - Using GlassCard */}
               <GlassCard>
@@ -745,6 +798,15 @@ export function DashboardClient({
         <BackgroundSelector
           isOpen={showBackgroundSelector}
           onClose={() => setShowBackgroundSelector(false)}
+        />
+        <TimelineModal
+          isOpen={showTimelineModal}
+          onClose={() => setShowTimelineModal(false)}
+          xpTransactions={timelineXpTransactions}
+          diaryEntries={timelineDiaryEntries}
+          sessions={timelineSessions}
+          badges={timelineBadges}
+          userName={user.name}
         />
       </div>
     </ErrorBoundary>
