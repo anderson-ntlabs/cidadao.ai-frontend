@@ -815,15 +815,19 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       if (!user) return
 
       try {
-        await supabase.from('agora_consent').insert({
-          user_id: user.id,
-          consent_version: 'v1.0',
-          tracking_consent: true,
-          data_processing_consent: true,
-          certificate_consent: true,
-          ip_address: ipAddress,
-          user_agent: userAgent,
-        })
+        // Use upsert to avoid 409 conflict if consent already exists
+        await supabase.from('agora_consent').upsert(
+          {
+            user_id: user.id,
+            consent_version: 'v1.0',
+            tracking_consent: true,
+            data_processing_consent: true,
+            certificate_consent: true,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+          },
+          { onConflict: 'user_id' }
+        )
 
         setUser((prev) => (prev ? { ...prev, hasAcceptedLgpd: true } : null))
         logger.info('LGPD consent accepted', { ipAddress })
