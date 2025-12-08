@@ -1,5 +1,26 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+
+/**
+ * Secure cookie options for auth tokens
+ *
+ * Security features:
+ * - httpOnly: Prevents XSS attacks from accessing tokens via JavaScript
+ * - secure: Only sends cookies over HTTPS in production
+ * - sameSite: 'lax' prevents CSRF while allowing navigation requests
+ * - path: '/' ensures cookies are available for all routes
+ */
+function getSecureCookieOptions(): CookieOptions {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    path: '/',
+    // Max age is set by Supabase based on token expiration
+  }
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -14,6 +35,8 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  const secureCookieOptions = getSecureCookieOptions()
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -27,9 +50,14 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          // Merge Supabase options with our secure defaults
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const mergedOptions = {
+              ...secureCookieOptions,
+              ...options, // Allow Supabase to override maxAge, etc.
+            }
+            supabaseResponse.cookies.set(name, value, mergedOptions)
+          })
         },
       },
     }
