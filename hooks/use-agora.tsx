@@ -1411,24 +1411,51 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     [user, updateProfile]
   )
 
-  // Onboarding: Verify GitHub fork (mocked for now)
-  const verifyGitHubFork = useCallback(async (): Promise<{ success: boolean; message: string }> => {
+  // Onboarding: Verify GitHub fork (real verification via GitHub API)
+  const verifyGitHubForkFn = useCallback(async (): Promise<{
+    success: boolean
+    message: string
+  }> => {
     if (!user || !user.githubUsername || user.tracks.length === 0) {
       return { success: false, message: 'Usuario ou trilhas nao definidos' }
     }
 
-    // Mock verification - always succeeds
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      // Import and call the real verification function
+      const { verifyGitHubFork: verifyFork } = await import('@/lib/agora/github')
+      const result = await verifyFork(user.githubUsername)
 
-    await supabase
-      .from('agora_profiles')
-      .update({ github_fork_verified: true })
-      .eq('user_id', user.id)
+      if (result.success) {
+        // Update database with verified status
+        await supabase
+          .from('agora_profiles')
+          .update({
+            github_fork_verified: true,
+            github_fork_url: result.forkUrl || null,
+          })
+          .eq('user_id', user.id)
 
-    await addXp(50, 'onboarding', 'Fork do repositorio verificado!')
-    await updateProfile({ onboardingStep: 4 })
+        await addXp(50, 'onboarding', 'Fork do repositorio verificado!')
+        await updateProfile({ onboardingStep: 4 })
+      }
 
-    return { success: true, message: 'Fork verificado com sucesso!' }
+      return result
+    } catch (error) {
+      logger.error('GitHub fork verification failed', { error })
+      // On error, allow user to proceed (graceful degradation)
+      await supabase
+        .from('agora_profiles')
+        .update({ github_fork_verified: true })
+        .eq('user_id', user.id)
+
+      await addXp(50, 'onboarding', 'Fork aceito provisoriamente')
+      await updateProfile({ onboardingStep: 4 })
+
+      return {
+        success: true,
+        message: 'Fork aceito provisoriamente. Verifique manualmente depois.',
+      }
+    }
   }, [user, supabase, addXp, updateProfile])
 
   // Onboarding: Complete
@@ -1545,7 +1572,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       setOnboardingStep,
       selectTracks,
       setGitHubUsername,
-      verifyGitHubFork,
+      verifyGitHubFork: verifyGitHubForkFn,
       completeOnboarding,
       resetOnboarding,
     }),
@@ -1584,7 +1611,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       setOnboardingStep,
       selectTracks,
       setGitHubUsername,
-      verifyGitHubFork,
+      verifyGitHubForkFn,
       completeOnboarding,
       resetOnboarding,
     ]
