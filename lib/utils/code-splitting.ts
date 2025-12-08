@@ -43,7 +43,7 @@ export async function loadComponents(importFns: Array<() => Promise<any>>): Prom
 export const routeModules = {
   dashboard: {
     charts: () => import('@/components/charts/lazy'),
-    stats: () => import('@/components/ui/stat-card'),
+    stats: () => import('@/components/stats'),
   },
   chat: {
     tour: () => import('@/components/tour/lazy'),

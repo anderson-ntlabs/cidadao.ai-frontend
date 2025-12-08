@@ -19,7 +19,7 @@ export * from './slider'
 export * from './separator'
 
 // Cards & Display
-export * from './stat-card'
+// Note: StatCard is in components/stats/ (more feature-rich version)
 export * from './chart-card'
 export * from './glass-card'
 export * from './skeleton'
