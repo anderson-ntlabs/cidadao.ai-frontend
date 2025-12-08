@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useCelebrationStore } from '@/store/celebration-store'
+import { useCelebrationStore } from '../../../store/celebration-store'
 
 describe('Celebration Store', () => {
   beforeEach(() => {
