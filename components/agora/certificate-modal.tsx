@@ -50,7 +50,7 @@ const TOTAL_VIDEO_DURATIONS = [
 ]
 
 export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
-  const { user, xpTransactions, diaryEntries, sessions, isRealAuth } = useAgora()
+  const { user, xpTransactions, diaryEntries, sessions, isAuthenticated } = useAgora()
   const [isGenerating, setIsGenerating] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryData>({
     videosCompleted: 0,
@@ -86,14 +86,17 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
   >([])
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && user) {
       loadTelemetryData()
     }
-  }, [isOpen, user, xpTransactions, diaryEntries, sessions, isRealAuth])
+  }, [isOpen, user, xpTransactions, diaryEntries, sessions, isAuthenticated])
 
   const loadTelemetryData = async () => {
+    // Skip if user not available
+    if (!user) return
+
     // If authenticated with real auth (Supabase), load real data
-    if (isRealAuth) {
+    if (isAuthenticated) {
       const [telemetryResult, activityResult] = await Promise.all([
         getTelemetryData(),
         getDailyActivityData(),
@@ -190,6 +193,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
   // Generate simplified certificate (only total hours)
   const generateCertificatePDF = () => {
+    if (!user) throw new Error('User is required to generate certificate')
     const doc = new jsPDF('landscape')
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
@@ -314,6 +318,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
 
   // Generate detailed internship report with full telemetry
   const generateReportPDF = () => {
+    if (!user) throw new Error('User is required to generate report')
     const doc = new jsPDF('portrait')
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
@@ -716,6 +721,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
 
   const handleGenerateCertificate = async () => {
+    if (!user) return
     setIsGenerating(true)
     try {
       const { pdf, certId } = generateCertificatePDF()
@@ -725,8 +731,8 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       const totalHours = Math.floor(user.totalTimeMinutes / 60)
       trackCertificateDownload(totalHours, user.currentLevel)
 
-      // Save certificate to Supabase if using real auth
-      if (isRealAuth && certificateType) {
+      // Save certificate to Supabase if authenticated
+      if (isAuthenticated && user && certificateType) {
         const certType = determineCertificateType(telemetry)
         await saveCertificate({
           certificateNumber: certId,
@@ -749,6 +755,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
   }
 
   const handleGenerateReport = async () => {
+    if (!user) return
     setIsGeneratingReport(true)
     try {
       const { pdf, reportId } = generateReportPDF()
@@ -852,6 +859,11 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       default:
         return CheckCircle
     }
+  }
+
+  // Don't render if user is not available
+  if (!user) {
+    return null
   }
 
   return (

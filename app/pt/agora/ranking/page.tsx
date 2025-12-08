@@ -121,16 +121,19 @@ export default function AcademyRankingPage() {
     setIsRefreshing(false)
   }
 
-  // Add current demo user to leaderboard (if using mock data or user not in DB)
+  // Add current user to leaderboard (if using mock data or user not in DB)
   const getLeaderboardWithUser = useCallback(() => {
     const leaderboard = [...leaderboardData]
 
-    // Only add demo user if not already in the list
+    // Skip if no user
+    if (!user) return leaderboard
+
+    // Only add user if not already in the list
     const userInList = leaderboard.some((e) => e.user_id === user.id)
 
     if (!userInList) {
-      const demoUserEntry: LeaderboardEntry = {
-        id: 'demo-user',
+      const currentUserEntry: LeaderboardEntry = {
+        id: 'current-user',
         user_id: user.id,
         full_name: user.name,
         avatar_url: user.avatar,
@@ -141,16 +144,16 @@ export default function AcademyRankingPage() {
         total_time_minutes: user.totalTimeMinutes,
       }
 
-      // Check if demo user is already in the list (by similar XP)
+      // Check if user is already in the list (by similar XP)
       const existingIndex = leaderboard.findIndex(
         (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
       )
 
       if (existingIndex === -1) {
-        leaderboard.push(demoUserEntry)
+        leaderboard.push(currentUserEntry)
       } else {
-        // Replace a similar entry with demo user
-        leaderboard[existingIndex] = demoUserEntry
+        // Replace a similar entry with current user
+        leaderboard[existingIndex] = currentUserEntry
       }
     }
 
@@ -165,7 +168,7 @@ export default function AcademyRankingPage() {
   })
 
   // Find user rank
-  const userRank = sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1
+  const userRank = user ? sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1 : 0
 
   const isLoading = demoLoading || isLoadingData
 
@@ -281,7 +284,7 @@ export default function AcademyRankingPage() {
                   <p className="text-green-100 text-sm mb-1">Seus pontos</p>
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-yellow-300" />
-                    <p className="text-3xl font-bold">{user.totalXp} XP</p>
+                    <p className="text-3xl font-bold">{user?.totalXp || 0} XP</p>
                   </div>
                 </div>
               </div>
@@ -318,7 +321,7 @@ export default function AcademyRankingPage() {
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {sortedLeaderboard.map((entry, index) => {
                 const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
-                const isCurrentUser = entry.user_id === user.id
+                const isCurrentUser = user ? entry.user_id === user.id : false
                 const position = index + 1
 
                 return (

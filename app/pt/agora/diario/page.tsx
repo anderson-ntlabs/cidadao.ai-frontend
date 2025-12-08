@@ -172,7 +172,7 @@ function AcademyAgendaContent() {
       if (typeof window === 'undefined') return
 
       // Try to load from Supabase if authenticated
-      if (isRealAuth) {
+      if (isAuthenticated) {
         const result = await getCalendarEvents()
         if (result.success && result.data) {
           // Convert Supabase format to local format
@@ -238,7 +238,7 @@ function AcademyAgendaContent() {
     }
 
     loadEvents()
-  }, [isRealAuth])
+  }, [isAuthenticated])
 
   // Save events to localStorage (and Supabase will be synced separately)
   const saveEvents = useCallback((newEvents: AcademyEvent[]) => {
@@ -248,17 +248,15 @@ function AcademyAgendaContent() {
 
   // Redirect unauthenticated users
   useEffect(() => {
-    if (!isDemoMode && !isDemoParam && !isLoading && !isRealAuth) {
+    if (!isDemoParam && !isLoading && !isAuthenticated) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, isDemoParam, isLoading, isRealAuth, router])
+  }, [isDemoParam, isLoading, isAuthenticated, router])
 
   // Handle logout
   const handleLogout = async () => {
     await logout()
-    if (isDemoMode) {
-      window.location.href = '/pt/agora'
-    }
+    router.replace('/pt/agora/login')
   }
 
   // Handle event click
@@ -296,7 +294,7 @@ function AcademyAgendaContent() {
     })
 
     // Save to Supabase if authenticated
-    if (isRealAuth) {
+    if (isAuthenticated) {
       const result = await createCalendarEvent({
         title: newEvent.title,
         start_time: startTime,
@@ -323,7 +321,7 @@ function AcademyAgendaContent() {
         toast.error('Erro', 'Falha ao criar evento')
       }
     } else {
-      // Demo mode - save locally
+      // Local storage fallback (not authenticated)
       const event: AcademyEvent = {
         id: Date.now().toString(),
         title: newEvent.title,
@@ -358,7 +356,7 @@ function AcademyAgendaContent() {
     }
 
     // Delete from Supabase if authenticated
-    if (isRealAuth) {
+    if (isAuthenticated) {
       const result = await deleteCalendarEvent(eventId)
       if (!result.success) {
         toast.error('Erro', 'Falha ao deletar evento')
@@ -385,7 +383,7 @@ function AcademyAgendaContent() {
     }
 
     // Complete in Supabase if authenticated (also awards XP)
-    if (isRealAuth) {
+    if (isAuthenticated) {
       const result = await completeCalendarEvent(eventId)
       if (result.success) {
         toast.success('Evento concluido!', `+${result.xpAwarded || event.xpReward || 10} XP`)
@@ -400,7 +398,7 @@ function AcademyAgendaContent() {
         return
       }
     } else {
-      // Demo mode - award XP locally
+      // Local fallback - track and award XP locally
       trackAgendaEventCompleted({
         eventType: event.type as AgendaEventType,
         eventTitle: event.title,

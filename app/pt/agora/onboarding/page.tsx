@@ -439,6 +439,7 @@ function OnboardingContent() {
 
   const {
     user,
+    isAuthenticated,
     onboarding,
     initOnboarding,
     toggleTrack,
@@ -447,9 +448,6 @@ function OnboardingContent() {
     verifyGitHubFork,
     completeOnboarding,
     updateOnboarding,
-    mode,
-    isDemoMode,
-    isRealAuth,
   } = useAgora()
 
   const [githubInput, setGithubInput] = useState('')
@@ -472,16 +470,19 @@ function OnboardingContent() {
       initOnboarding()
       return
     }
+    // Skip if user not loaded
+    if (!user) return
     if (user.hasAcceptedInternshipContract && !onboarding && !user.hasCompletedOnboarding) {
       initOnboarding()
     }
   }, [
-    user.hasAcceptedInternshipContract,
-    user.hasCompletedOnboarding,
+    user?.hasAcceptedInternshipContract,
+    user?.hasCompletedOnboarding,
     onboarding,
     initOnboarding,
     isPreviewMode,
     isHydrated,
+    user,
   ])
 
   useEffect(() => {
@@ -489,20 +490,24 @@ function OnboardingContent() {
     if (!isHydrated) return
     // Skip redirects in preview mode
     if (isPreviewMode) return
+    // Skip if user not loaded
+    if (!user) return
     if (!user.hasAcceptedInternshipContract) {
       router.replace('/pt/agora/contract')
     }
-  }, [user.hasAcceptedInternshipContract, router, isPreviewMode, isHydrated])
+  }, [user?.hasAcceptedInternshipContract, router, isPreviewMode, isHydrated, user])
 
   useEffect(() => {
     // Wait for hydration before redirecting
     if (!isHydrated) return
     // Skip redirects in preview mode
     if (isPreviewMode) return
+    // Skip if user not loaded
+    if (!user) return
     if (user.hasCompletedOnboarding) {
       router.replace('/pt/agora')
     }
-  }, [user.hasCompletedOnboarding, router, isPreviewMode, isHydrated])
+  }, [user?.hasCompletedOnboarding, router, isPreviewMode, isHydrated, user])
 
   const currentStep = onboarding?.currentStep || 1
   const selectedTracks = onboarding?.selectedTracks || []
@@ -585,25 +590,10 @@ function OnboardingContent() {
       )}
 
       {/* Auth Mode Indicator (dev/debug) */}
-      {!isPreviewMode && (
-        <div
-          className={`py-1 px-4 text-center text-xs ${
-            isRealAuth
-              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-          }`}
-        >
-          {isRealAuth ? (
-            <>
-              <span className="font-medium">Modo Autenticado</span>
-              <span className="hidden sm:inline"> — Dados salvos no Supabase</span>
-            </>
-          ) : (
-            <>
-              <span className="font-medium">Modo Demo</span>
-              <span className="hidden sm:inline"> — Dados salvos localmente</span>
-            </>
-          )}
+      {!isPreviewMode && isAuthenticated && (
+        <div className="py-1 px-4 text-center text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+          <span className="font-medium">Modo Autenticado</span>
+          <span className="hidden sm:inline"> — Dados salvos no Supabase</span>
         </div>
       )}
 
@@ -1054,7 +1044,7 @@ function OnboardingContent() {
 
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                    Parabéns, {user.name.split(' ')[0]}!
+                    Parabéns, {user?.name?.split(' ')[0] || 'Estagiário'}!
                   </h1>
                   <p className="text-lg text-gray-600 dark:text-gray-400">
                     Você completou o onboarding e está pronto para começar!
