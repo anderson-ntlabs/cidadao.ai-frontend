@@ -133,7 +133,7 @@ const DEFAULT_DEMO_USER: AgoraDemoUser = {
   id: 'demo-user-001',
   name: 'Estudante Demo',
   email: 'demo@cidadao.ai',
-  avatar: 'https://ui-avatars.com/api/?name=Estudante+Demo&background=16a34a&color=fff&size=128',
+  avatar: 'https://ui-avatars.com/api/?name=Estudante%20Demo&background=16a34a&color=fff&size=128',
   totalXp: 0,
   currentLevel: 1,
   currentRank: 'novato',
