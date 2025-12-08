@@ -10,14 +10,10 @@ import type {
   ChatMessage,
   CursorPaginationResponse,
   AgentInfo,
-  SSEEvent,
   SSEEventType,
 } from '@/types/chat'
-import { sendChatAsInvestigation, getMockAgents, getMockSuggestions } from './chat-adapter'
-import { sendBackendMessage } from './chat-adapter-backend'
-import { sendFallbackMessage } from './chat-adapter-fallback'
+import { getMockAgents, getMockSuggestions } from './chat-adapter'
 import { chatService as unifiedChatService } from '@/lib/chat'
-import { isFeatureEnabled } from '@/lib/feature-flags'
 import {
   sanitizeSearchQuery,
   isValidInvestigationId,
@@ -37,7 +33,7 @@ const CHAT_ENDPOINTS = {
 
 // Chat service for API interactions
 export const chatService = {
-  // Send a chat message
+  // Send a chat message using unified chat service
   async sendMessage(request: ChatRequest): Promise<ChatResponse | null> {
     try {
       // Validate and sanitize input
@@ -66,97 +62,43 @@ export const chatService = {
         hasSessionId: !!request.session_id,
       })
 
-      // Use unified chat service if feature is enabled (default)
-      if (isFeatureEnabled('unifiedChatEnabled')) {
-        logger.debug('Using Unified Chat Service (primary + fallback adapters)')
+      // Check if Maritaca model is selected in localStorage
+      const maritacaModel =
+        typeof window !== 'undefined'
+          ? (localStorage.getItem('maritaca_selected_model') as any)
+          : null
 
-        // Check if Maritaca model is selected in localStorage
-        const maritacaModel =
-          typeof window !== 'undefined'
-            ? (localStorage.getItem('maritaca_selected_model') as any)
-            : null
-
-        // Map ChatRequest to unified chat request format
-        const unifiedRequest = {
-          message: sanitizedMessage,
-          sessionId: request.session_id,
-          agentId: request.context?.agent_id,
-          context: {
-            ...request.context,
-            maritacaModel: maritacaModel || undefined,
-          },
-        }
-
-        const unifiedResponse = await unifiedChatService.sendMessage(unifiedRequest)
-
-        // Map unified response back to ChatResponse format
-        if (unifiedResponse.success && unifiedResponse.data) {
-          return {
-            session_id: request.session_id || '',
-            message_id: `msg_${Date.now()}`,
-            agent_id: unifiedResponse.data.agentId || '',
-            agent_name: unifiedResponse.data.agentName || '',
-            message: unifiedResponse.data.response || '',
-            confidence: unifiedResponse.data.confidence || 0,
-            suggested_actions: unifiedResponse.data.suggestions,
-            metadata: unifiedResponse.data.metadata || {},
-          }
-        } else {
-          // Handle error case
-          logger.error('Unified chat service failed', {
-            error: unifiedResponse.error,
-          })
-          throw new Error(unifiedResponse.error?.message || 'Chat service failed')
-        }
-      }
-
-      // Legacy path: Use smart chat service if feature is enabled
-      if (isFeatureEnabled('smartChatEnabled')) {
-        logger.debug('Using Legacy Smart Chat Service (deprecated)')
-
-        // Check if Maritaca model is selected in localStorage
-        const maritacaModel =
-          typeof window !== 'undefined'
-            ? (localStorage.getItem('maritaca_selected_model') as any)
-            : null
-
-        // Import dynamically to avoid issues if deprecated service is removed
-        const { cachedSmartChatService } = await import('@/lib/services/cached-smart-chat.service')
-
-        // Determine model preference based on context
-        const modelPreference = request.context?.model_preference || 'auto'
-
-        const response = await cachedSmartChatService.sendMessage(sanitizedMessage, {
-          preferredModel: modelPreference,
-          useDrummond: true,
-          useMaritaca: !!maritacaModel,
-          maritacaModel: maritacaModel || undefined,
-        })
-
-        return response
-      }
-
-      // Fallback: Use the official backend adapter
-      logger.debug('Using official backend adapter')
-
-      // Create sanitized request
-      const sanitizedRequest: ChatRequest = {
-        ...request,
+      // Map ChatRequest to unified chat request format
+      const unifiedRequest = {
         message: sanitizedMessage,
+        sessionId: request.session_id,
+        agentId: request.context?.agent_id,
+        context: {
+          ...request.context,
+          maritacaModel: maritacaModel || undefined,
+        },
       }
 
-      try {
-        const response = await sendBackendMessage(sanitizedRequest)
-        logger.debug('Backend responded successfully')
-        return response
-      } catch (backendError) {
-        logger.warn('Backend adapter failed, falling back', { error: backendError })
+      const unifiedResponse = await unifiedChatService.sendMessage(unifiedRequest)
 
-        // Fallback to consolidated fallback adapter
-        const response = await sendFallbackMessage(sanitizedRequest)
-        logger.debug('Chat response from fallback')
-
-        return response
+      // Map unified response back to ChatResponse format
+      if (unifiedResponse.success && unifiedResponse.data) {
+        return {
+          session_id: request.session_id || '',
+          message_id: `msg_${Date.now()}`,
+          agent_id: unifiedResponse.data.agentId || '',
+          agent_name: unifiedResponse.data.agentName || '',
+          message: unifiedResponse.data.response || '',
+          confidence: unifiedResponse.data.confidence || 0,
+          suggested_actions: unifiedResponse.data.suggestions,
+          metadata: unifiedResponse.data.metadata || {},
+        }
+      } else {
+        // Handle error case
+        logger.error('Unified chat service failed', {
+          error: unifiedResponse.error,
+        })
+        throw new Error(unifiedResponse.error?.message || 'Chat service failed')
       }
     } catch (error) {
       logger.error('Chat service error', {
