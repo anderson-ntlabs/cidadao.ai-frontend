@@ -100,10 +100,9 @@ export function AuthLayoutV2({
       return
     }
 
-    // If authenticated, clear OAuth cookies and we're done
+    // If authenticated, we're done
     if (isAuthenticated) {
-      document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-      logger.debug('User authenticated, cleared OAuth cookie')
+      logger.debug('User authenticated')
       return
     }
 
@@ -113,18 +112,16 @@ export function AuthLayoutV2({
     }
 
     // Check if OAuth just completed - give extra time for session to be ready
+    // Using URL param only (cookie is httpOnly)
     const isOAuthComplete =
-      typeof window !== 'undefined' &&
-      (window.location.search.includes('oauth_complete=') ||
-        document.cookie.includes('oauth_session_ready=true'))
+      typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')
 
     if (isOAuthComplete) {
       logger.debug('OAuth flow detected, waiting for session to be ready...')
 
       // The useAuth hook will handle retries, but give it time
       const timer = setTimeout(() => {
-        // If still not authenticated after waiting, clear cookie and redirect
-        document.cookie = 'oauth_session_ready=; path=/; max-age=0'
+        // If still not authenticated after waiting, redirect to login
         logger.info('OAuth session timeout, redirecting to login')
         localStorage.setItem('redirectAfterLogin', pathname)
         router.push('/pt/login')

@@ -6,8 +6,11 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  // Skip auth check in E2E test mode
-  if (process.env.PLAYWRIGHT_TEST_BASE_URL || request.headers.get('x-playwright-test')) {
+  // Skip auth check in E2E test mode (development only)
+  if (
+    process.env.NODE_ENV === 'development' &&
+    (process.env.PLAYWRIGHT_TEST_BASE_URL || request.headers.get('x-playwright-test'))
+  ) {
     return supabaseResponse
   }
 

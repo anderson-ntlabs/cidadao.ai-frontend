@@ -68,11 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication status on mount
   useEffect(() => {
-    // Detect if we just came from OAuth callback
+    // Detect if we just came from OAuth callback (using URL param only)
+    // Cookie oauth_session_ready is httpOnly and cannot be read by JS
     const isOAuthComplete =
-      typeof window !== 'undefined' &&
-      (window.location.search.includes('oauth_complete=') ||
-        document.cookie.includes('oauth_session_ready=true'))
+      typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')
 
     const checkSession = async (retryCount = 0): Promise<boolean> => {
       try {
@@ -108,11 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
           setIsAuthenticated(true)
 
-          // Clear OAuth cookie on successful auth
-          if (typeof document !== 'undefined') {
-            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-          }
-
           // Clean up URL if it has oauth_complete param
           if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
             const url = new URL(window.location.href)
@@ -122,11 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           return true
         } else {
-          // Check if OAuth session should be ready - retry with exponential backoff
-          const oauthSessionReady =
-            typeof document !== 'undefined' && document.cookie.includes('oauth_session_ready=true')
-
-          if ((oauthSessionReady || isOAuthComplete) && retryCount < 5) {
+          // Retry with exponential backoff if OAuth just completed
+          if (isOAuthComplete && retryCount < 5) {
             const delay = 300 * (retryCount + 1) // 300ms, 600ms, 900ms, 1200ms, 1500ms
             logger.debug(`No session but OAuth completed, retrying in ${delay}ms...`)
             await new Promise((resolve) => setTimeout(resolve, delay))
@@ -168,11 +159,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(convertSupabaseUser(session.user))
         setIsAuthenticated(true)
         setIsLoading(false)
-
-        // Clear OAuth cookie
-        if (typeof document !== 'undefined') {
-          document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setIsAuthenticated(false)
