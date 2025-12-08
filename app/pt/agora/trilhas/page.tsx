@@ -14,7 +14,7 @@
  * @date 2025-12-07
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -475,6 +475,13 @@ export default function AgoraTrilhasPage() {
   const { user, isLoading, isDemoMode } = useAgora()
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
 
+  // Redirect to onboarding if not completed - required for trilhas
+  useEffect(() => {
+    if (!isLoading && user && !user.hasCompletedOnboarding) {
+      router.replace('/pt/agora/onboarding?redirect=trilhas')
+    }
+  }, [isLoading, user, router])
+
   // Get user's enrolled tracks
   const enrolledTracks = user?.tracks || []
 
@@ -504,14 +511,19 @@ export default function AgoraTrilhasPage() {
     }
   })
 
-  if (isLoading) {
+  // Show loading or redirect if onboarding not completed
+  if (isLoading || (user && !user.hasCompletedOnboarding)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando trilhas...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {user && !user.hasCompletedOnboarding
+              ? 'Redirecionando para onboarding...'
+              : 'Carregando trilhas...'}
+          </p>
         </div>
       </div>
     )

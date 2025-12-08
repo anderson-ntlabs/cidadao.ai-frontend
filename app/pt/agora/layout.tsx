@@ -131,8 +131,8 @@ function AgoraHeaderWrapper() {
   )
 }
 
-// Onboarding protection component
-function OnboardingGuard({ children }: { children: React.ReactNode }) {
+// Auth protection component (onboarding is now optional, shown on dashboard)
+function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isAuthenticated, isLoading } = useAgora()
@@ -149,13 +149,9 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // Redirect to onboarding if not completed
-    if (!user.hasCompletedOnboarding) {
-      router.replace('/pt/agora/onboarding')
-      return
-    }
-
     // Redirect to contract if LGPD or terms not accepted
+    // Note: Onboarding is now optional - users can access dashboard without it
+    // Onboarding is required only for trilhas (learning tracks)
     if (!user.hasAcceptedLgpd || !user.hasAcceptedTerms) {
       router.replace('/pt/agora/contract')
       return
@@ -178,7 +174,8 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
     return <AgoraLoadingFallback />
   }
 
-  if (!user.hasCompletedOnboarding || !user.hasAcceptedLgpd || !user.hasAcceptedTerms) {
+  // Only check LGPD/terms, not onboarding
+  if (!user.hasAcceptedLgpd || !user.hasAcceptedTerms) {
     return <AgoraLoadingFallback />
   }
 
@@ -198,10 +195,10 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Global Header */}
       {shouldShowHeader && <AgoraHeaderWrapper />}
 
-      {/* Main content with onboarding protection */}
-      <OnboardingGuard>
+      {/* Main content with auth protection (onboarding is optional) */}
+      <AuthGuard>
         <div className={isMobile && !isLoginPage ? 'pb-20' : ''}>{children}</div>
-      </OnboardingGuard>
+      </AuthGuard>
 
       {/* Mobile Bottom Navigation - same as main app */}
       {isMobile && !isLoginPage && <BottomNavigation items={agoraNavItems} />}
