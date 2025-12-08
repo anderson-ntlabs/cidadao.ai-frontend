@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import withSerwistInit from '@serwist/next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
@@ -150,5 +151,22 @@ const nextConfig = {
   },
 }
 
-// Compose plugins: bundleAnalyzer -> withSerwist -> nextConfig
-export default bundleAnalyzer(withSerwist(nextConfig));
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // Suppresses source map uploading logs during build
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  // Upload source maps only in production
+  disableSourceMapUpload: process.env.NODE_ENV !== 'production',
+  // Hides source maps from generated client bundles
+  hideSourceMaps: true,
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+  // Enables automatic instrumentation of Vercel Cron Monitors
+  automaticVercelMonitors: true,
+};
+
+// Compose plugins: Sentry -> bundleAnalyzer -> withSerwist -> nextConfig
+const configWithPlugins = bundleAnalyzer(withSerwist(nextConfig));
+export default withSentryConfig(configWithPlugins, sentryWebpackPluginOptions);
