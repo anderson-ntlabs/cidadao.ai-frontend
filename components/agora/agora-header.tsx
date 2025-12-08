@@ -166,12 +166,20 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
           </div>
 
           {/* Right: User info + Actions */}
-          <div className="flex items-center gap-3">
-            {/* XP Display */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* XP Display - Desktop */}
             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200/50 dark:border-yellow-700/30">
               <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
               <span className="font-bold text-yellow-700 dark:text-yellow-400">
                 {user.totalXp.toLocaleString()} XP
+              </span>
+            </div>
+
+            {/* XP Display - Mobile (compact) */}
+            <div className="flex sm:hidden items-center gap-1 px-2 py-1 bg-yellow-100/80 dark:bg-yellow-900/30 rounded-lg">
+              <Sparkles className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400">
+                {user.totalXp >= 1000 ? `${(user.totalXp / 1000).toFixed(1)}k` : user.totalXp}
               </span>
             </div>
 
@@ -183,7 +191,7 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-2 pl-2 pr-3 h-10 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 pr-2 sm:pr-3 h-10 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <AvatarWithBadge
                     src={user.avatar}
@@ -192,6 +200,13 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                     size="sm"
                     showBadge={false}
                   />
+                  {/* Mobile: Show level badge */}
+                  <div className="flex sm:hidden items-center justify-center min-w-[24px] h-5 px-1 rounded bg-gray-100 dark:bg-gray-800">
+                    <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">
+                      {user.currentLevel}
+                    </span>
+                  </div>
+                  {/* Desktop: Show name and level */}
                   <div className="hidden sm:flex flex-col items-start">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight">
                       {user.name.split(' ')[0]}
@@ -200,7 +215,7 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                       Lv.{user.currentLevel}
                     </span>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                  <ChevronDown className="w-4 h-4 text-gray-400 hidden sm:block" />
                 </Button>
               </DropdownMenuTrigger>
 

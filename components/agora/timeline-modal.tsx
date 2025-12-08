@@ -216,31 +216,41 @@ export function TimelineModal({
         </ModalHeader>
 
         <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-center">
-              <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                {stats.totalXp.toLocaleString()}
+          {/* Stats Grid - 2x2 on mobile, 4 on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-center">
+              <div className="text-base sm:text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                {stats.totalXp >= 1000
+                  ? `${(stats.totalXp / 1000).toFixed(1)}k`
+                  : stats.totalXp.toLocaleString()}
               </div>
-              <div className="text-xs text-yellow-600/70 dark:text-yellow-400/70">XP Total</div>
+              <div className="text-[10px] sm:text-xs text-yellow-600/70 dark:text-yellow-400/70">
+                XP Total
+              </div>
             </div>
-            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+            <div className="p-2 sm:p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+              <div className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
                 {stats.totalSessions}
               </div>
-              <div className="text-xs text-green-600/70 dark:text-green-400/70">Sessoes</div>
+              <div className="text-[10px] sm:text-xs text-green-600/70 dark:text-green-400/70">
+                Sessoes
+              </div>
             </div>
-            <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-center">
-              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+            <div className="p-2 sm:p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-center">
+              <div className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400">
                 {stats.totalDiaryEntries}
               </div>
-              <div className="text-xs text-purple-600/70 dark:text-purple-400/70">Anotacoes</div>
+              <div className="text-[10px] sm:text-xs text-purple-600/70 dark:text-purple-400/70">
+                Anotacoes
+              </div>
             </div>
-            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+            <div className="p-2 sm:p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
+              <div className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
                 {stats.totalBadges}
               </div>
-              <div className="text-xs text-blue-600/70 dark:text-blue-400/70">Badges</div>
+              <div className="text-[10px] sm:text-xs text-blue-600/70 dark:text-blue-400/70">
+                Badges
+              </div>
             </div>
           </div>
 
