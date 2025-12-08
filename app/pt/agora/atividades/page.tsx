@@ -231,8 +231,37 @@ function AtividadesContent() {
     return <LoadingFallback />
   }
 
+  // If not authenticated and not in demo mode, show login prompt instead of blank page
   if (!isDemoMode && !realAuth.isAuthenticated) {
-    return <LoadingFallback />
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <Activity className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+            Acesso Restrito
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Faça login para ver seu histórico de atividades na Ágora.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/pt/agora/login"
+              className="w-full py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors"
+            >
+              Fazer Login
+            </Link>
+            <Link
+              href="/pt/agora/atividades?demo=true"
+              className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
+            >
+              Explorar em modo demo
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
