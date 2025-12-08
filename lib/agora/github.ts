@@ -7,6 +7,10 @@
  * Created: 2025-12-08
  */
 
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('GitHubAPI')
+
 // Repository to verify fork
 const REPO_OWNER = 'anderson-ufrj'
 const REPO_NAME = 'cidadao.ai-frontend'
@@ -142,7 +146,7 @@ export async function verifyGitHubFork(username: string): Promise<VerifyForkResu
       message: `Nao encontramos um fork do repositorio ${REPO_OWNER}/${REPO_NAME} na sua conta. Por favor, faca o fork primeiro.`,
     }
   } catch (error) {
-    console.error('GitHub API error:', error)
+    logger.error('GitHub API error', { error })
 
     // On API error, we give benefit of the doubt to the user
     // This prevents blocking users due to GitHub rate limits

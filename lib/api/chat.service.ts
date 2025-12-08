@@ -135,7 +135,7 @@ export const chatService = {
       logger.warn('⚠️ Backend agents endpoint failed, using mocks')
       return getMockAgents()
     } catch (error) {
-      console.error('Failed to load agents from backend:', error)
+      logger.error('Failed to load agents from backend', { error })
       // Fallback to mocks on error
       return getMockAgents()
     }
@@ -195,7 +195,7 @@ export const chatService = {
         const data = JSON.parse(event.data)
         onEvent(data.type || 'chunk', data)
       } catch (error) {
-        console.error('Error parsing SSE data:', error)
+        logger.error('Error parsing SSE data', { error })
       }
     }
 
@@ -216,14 +216,14 @@ export const chatService = {
           const data = JSON.parse(event.data)
           onEvent(eventType, data)
         } catch (error) {
-          console.error(`Error parsing ${eventType} event:`, error)
+          logger.error(`Error parsing ${eventType} event`, { error })
         }
       })
     })
 
     // Handle errors
     eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error)
+      logger.error('SSE connection error', { error })
       eventSource.close()
       if (onError) {
         onError(new Error('Streaming connection failed'))

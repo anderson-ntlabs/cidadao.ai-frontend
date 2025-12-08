@@ -7,6 +7,9 @@
 
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ExportService')
 
 // Lazy load heavy dependencies
 const loadJsPDF = () => import('jspdf').then((m) => m.default)
@@ -160,7 +163,7 @@ export class ExportService {
         pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight)
         yPosition += imgHeight + 10
       } catch (error) {
-        console.error('Error capturing chart:', error)
+        logger.error('Error capturing chart', { error })
       }
     }
 
