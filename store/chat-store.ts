@@ -44,6 +44,8 @@ export interface StreamingState {
 interface ChatStore {
   // State
   messages: ChatMessage[]
+  // O(1) lookup index for messages by ID - optimizes updateMessage from O(n) to O(1)
+  messageIndex: Map<string, number>
   session: ChatSession | null
   connectionStatus: ChatConnectionStatus
   isTyping: boolean
@@ -119,6 +121,7 @@ export const useChatStore = create<ChatStore>()(
   devtools((set, get) => ({
     // Initial state
     messages: [],
+    messageIndex: new Map<string, number>(),
     session: null,
     connectionStatus: 'disconnected',
     isTyping: false,
@@ -160,9 +163,14 @@ export const useChatStore = create<ChatStore>()(
               metadata: supabaseSession.session_metadata || {},
             }
 
+            // Build index for O(1) lookups
+            const messageIndex = new Map<string, number>()
+            messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+
             set({
               session: chatSession,
               messages,
+              messageIndex,
             })
 
             // Load initial data
@@ -639,7 +647,10 @@ export const useChatStore = create<ChatStore>()(
       set({ isLoading: true })
       try {
         const messages = await chatService.getHistory(sessionId)
-        set({ messages })
+        // Rebuild index for O(1) lookups
+        const messageIndex = new Map<string, number>()
+        messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+        set({ messages, messageIndex })
       } catch (error: any) {
         set({ error: error.message || 'Failed to load chat history' })
       } finally {
@@ -661,13 +672,20 @@ export const useChatStore = create<ChatStore>()(
         )
 
         if (response) {
+          let newMessages: ChatMessage[]
           if (direction === 'prev') {
             // Prepend older messages
-            set({ messages: [...response.items, ...state.messages] })
+            newMessages = [...response.items, ...state.messages]
           } else {
             // Append newer messages
-            set({ messages: [...state.messages, ...response.items] })
+            newMessages = [...state.messages, ...response.items]
           }
+
+          // Rebuild index for O(1) lookups
+          const messageIndex = new Map<string, number>()
+          newMessages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+
+          set({ messages: newMessages, messageIndex })
         }
       } catch (error: any) {
         set({ error: error.message || 'Failed to load more messages' })
@@ -681,7 +699,7 @@ export const useChatStore = create<ChatStore>()(
 
       try {
         await chatService.clearHistory(state.session.session_id)
-        set({ messages: [], currentInvestigation: null })
+        set({ messages: [], messageIndex: new Map(), currentInvestigation: null })
       } catch (error: any) {
         set({ error: error.message || 'Failed to clear chat' })
       }
@@ -783,19 +801,34 @@ export const useChatStore = create<ChatStore>()(
       state.ws?.unsubscribeFromInvestigation(investigationId)
     },
 
-    // Message actions
+    // Message actions - optimized with O(1) index lookup
     addMessage: (message) => {
-      set((state) => ({
-        messages: [...state.messages, message],
-      }))
+      set((state) => {
+        const newIndex = state.messages.length
+        const newMessageIndex = new Map(state.messageIndex)
+        newMessageIndex.set(message.id, newIndex)
+        return {
+          messages: [...state.messages, message],
+          messageIndex: newMessageIndex,
+        }
+      })
     },
 
     updateMessage: (messageId, updates) => {
-      set((state) => ({
-        messages: state.messages.map((msg) =>
-          msg.id === messageId ? { ...msg, ...updates } : msg
-        ),
-      }))
+      set((state) => {
+        // O(1) lookup using index instead of O(n) array scan
+        const index = state.messageIndex.get(messageId)
+        if (index === undefined) {
+          logger.warn('Message not found for update', { messageId })
+          return state
+        }
+
+        // Create new array with updated message at the correct index
+        const newMessages = [...state.messages]
+        newMessages[index] = { ...newMessages[index], ...updates }
+
+        return { messages: newMessages }
+      })
     },
 
     // Session actions
@@ -810,6 +843,7 @@ export const useChatStore = create<ChatStore>()(
       set({
         session: chatSession,
         messages: [],
+        messageIndex: new Map(),
         currentInvestigation: null,
       })
 
@@ -845,6 +879,10 @@ export const useChatStore = create<ChatStore>()(
             metadata: msg.metadata,
           }))
 
+          // Build index for O(1) lookups
+          const messageIndex = new Map<string, number>()
+          messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+
           const chatSession: ChatSession = {
             session_id: supabaseSession.session_id,
             created_at: supabaseSession.created_at,
@@ -855,6 +893,7 @@ export const useChatStore = create<ChatStore>()(
           set({
             session: chatSession,
             messages,
+            messageIndex,
             currentInvestigation: null,
             error: null,
           })
