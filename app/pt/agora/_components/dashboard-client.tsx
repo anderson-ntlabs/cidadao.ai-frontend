@@ -741,11 +741,7 @@ export function DashboardClient({
           isOpen={showCertificateModal}
           onClose={() => setShowCertificateModal(false)}
         />
-        <LgpdConsentModal
-          isOpen={showLgpdModal}
-          onClose={() => setShowLgpdModal(false)}
-          useRealAuth={!isDemoMode}
-        />
+        <LgpdConsentModal isOpen={showLgpdModal} onClose={() => setShowLgpdModal(false)} />
         <BackgroundSelector
           isOpen={showBackgroundSelector}
           onClose={() => setShowBackgroundSelector(false)}

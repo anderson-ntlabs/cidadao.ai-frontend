@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { jsPDF } from 'jspdf'
 
 interface InternshipContractModalProps {
@@ -13,13 +13,21 @@ interface InternshipContractModalProps {
 
 const CONTRACT_VERSION = 'v2.0-2025'
 
+/**
+ * Internship Contract Modal
+ *
+ * Real authentication only - no demo mode.
+ *
+ * Author: Anderson Henrique da Silva
+ * Updated: 2025-12-08 - Removed demo mode
+ */
 export function InternshipContractModal({
   isOpen,
   onClose,
   redirectToOnboarding = true,
 }: InternshipContractModalProps) {
   const router = useRouter()
-  const { user, acceptInternshipContract } = useAgoraDemo()
+  const { user, acceptInternshipContract } = useAgora()
   const [isAccepting, setIsAccepting] = useState(false)
   const [checkboxes, setCheckboxes] = useState({
     telemetry: false,
@@ -83,10 +91,10 @@ export function InternshipContractModal({
     addWrappedText(`Versão do Termo: ${CONTRACT_VERSION}`, 10)
     yPos += 5
 
-    // User Info
+    // User Info (user is guaranteed to be defined when this function is called)
     addWrappedText('1. IDENTIFICAÇÃO DO USUÁRIO', 14, true)
-    addWrappedText(`Nome: ${user.name}`, 11)
-    addWrappedText(`Email: ${user.email}`, 11)
+    addWrappedText(`Nome: ${user!.name}`, 11)
+    addWrappedText(`Email: ${user!.email}`, 11)
     yPos += 5
 
     // Object
@@ -170,7 +178,7 @@ export function InternshipContractModal({
 
     // Declaration
     addWrappedText('7. DECLARAÇÃO DE ACEITE', 14, true)
-    addWrappedText(`Eu, ${user.name}, DECLARO que:`, 11)
+    addWrappedText(`Eu, ${user!.name}, DECLARO que:`, 11)
     yPos += 3
     addWrappedText('[X] Li e compreendi integralmente estes Termos de Uso', 11)
     addWrappedText(
@@ -186,7 +194,7 @@ export function InternshipContractModal({
     doc.setDrawColor(0)
     doc.line(margin, yPos + 20, margin + 80, yPos + 20)
     doc.setFontSize(10)
-    doc.text(user.name, margin, yPos + 28)
+    doc.text(user!.name, margin, yPos + 28)
     doc.text('Usuário(a)', margin, yPos + 35)
 
     yPos += 50
@@ -194,7 +202,7 @@ export function InternshipContractModal({
     // Digital signature info
     addWrappedText('8. ASSINATURA DIGITAL', 14, true)
     addWrappedText(`Data/Hora do Aceite: ${new Date().toLocaleString('pt-BR')}`, 11)
-    addWrappedText(`IP do Dispositivo: ${user.lastIpAddress || 'Coletado no aceite'}`, 11)
+    addWrappedText(`IP do Dispositivo: Coletado no aceite`, 11)
     addWrappedText(`User Agent: ${navigator.userAgent.substring(0, 80)}...`, 10)
     addWrappedText(`Hash do Termo: ${contractId}-${Date.now().toString(16)}`, 10)
     yPos += 10
@@ -254,7 +262,7 @@ export function InternshipContractModal({
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen || !user) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

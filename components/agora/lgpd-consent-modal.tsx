@@ -1,31 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { Shield, Loader2 } from 'lucide-react'
 
 interface LgpdConsentModalProps {
   isOpen: boolean
   onClose?: () => void
-  useRealAuth?: boolean
 }
 
 /**
  * LGPD Consent Modal
  *
  * Shows consent form for data processing according to Brazilian LGPD law.
- * Supports both real authentication and demo mode.
+ * Real authentication only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-06
+ * Updated: 2025-12-08 - Removed demo mode
  */
-export function LgpdConsentModal({ isOpen, onClose, useRealAuth = false }: LgpdConsentModalProps) {
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  const user = useRealAuth ? realAuth.user : demoAuth.user
-  const acceptLgpdConsent = useRealAuth ? realAuth.acceptLgpdConsent : demoAuth.acceptLgpdConsent
+export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
+  const { user, acceptLgpdConsent } = useAgora()
 
   const [isAccepting, setIsAccepting] = useState(false)
   const [checkboxes, setCheckboxes] = useState({
@@ -61,7 +55,7 @@ export function LgpdConsentModal({ isOpen, onClose, useRealAuth = false }: LgpdC
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen || !user) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -91,19 +85,6 @@ export function LgpdConsentModal({ isOpen, onClose, useRealAuth = false }: LgpdC
               consentimento para o tratamento de dados pessoais, conforme a Lei Geral de Protecao de
               Dados (Lei 13.709/2018 - LGPD).
             </p>
-
-            {!useRealAuth && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🎮</span>
-                  <h3 className="font-bold text-amber-800 dark:text-amber-200">Modo Demo</h3>
-                </div>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Voce esta no modo demonstracao. Os dados sao salvos apenas localmente no seu
-                  navegador e nao sao enviados para servidores externos.
-                </p>
-              </div>
-            )}
 
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
               <h3 className="font-bold text-yellow-800 dark:text-yellow-200 mb-2">

@@ -15,14 +15,13 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { FontSizeControl } from '@/components/a11y/font-size-control'
 import { HighContrastToggle } from '@/components/a11y/high-contrast-toggle'
 import { VLibrasToggle } from '@/components/a11y/vlibras-toggle'
 import { AgoraHeader } from '@/components/agora'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import {
   ArrowLeft,
   Accessibility,
@@ -48,38 +47,28 @@ function LoadingFallback() {
   )
 }
 
-// Content component that uses useSearchParams
+// Content component
 function AccessibilityContent() {
-  const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
+  const router = useRouter()
+  const { user, isAuthenticated, isLoading, logout } = useAgora()
 
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  // Determine user data based on auth mode
-  const user = isDemoMode
-    ? demoAuth.user
-    : realAuth.isAuthenticated && realAuth.user
-      ? {
-          name: realAuth.user.name,
-          avatar: realAuth.user.avatar,
-          totalXp: realAuth.user.totalXp,
-          currentLevel: realAuth.user.currentLevel,
-          currentRank: realAuth.user.currentRank,
-        }
-      : demoAuth.user
-
-  const handleLogout = async () => {
-    if (isDemoMode) {
-      demoAuth.resetDemo()
-      window.location.href = '/pt/agora'
-    } else {
-      await realAuth.logout()
-    }
+  // Redirect to login if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    router.replace('/pt/agora/login')
+    return null
   }
 
-  // Build URL with demo param if needed
-  const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
+  const handleLogout = async () => {
+    await logout()
+    router.push('/pt/agora/login')
+  }
+
+  // Build URL helper
+  const buildUrl = (path: string) => path
+
+  if (!user) {
+    return <LoadingFallback />
+  }
 
   return (
     <div className="min-h-screen">
@@ -92,7 +81,7 @@ function AccessibilityContent() {
           currentRank: user.currentRank,
         }}
         onLogout={handleLogout}
-        isDemoMode={isDemoMode}
+        isDemoMode={false}
       />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
