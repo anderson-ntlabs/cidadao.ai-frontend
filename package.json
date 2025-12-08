@@ -39,7 +39,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@emotion/is-prop-valid": "^1.4.0",
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
@@ -113,7 +112,6 @@
     "eslint": "^8",
     "eslint-config-next": "^15.5.7",
     "eslint-plugin-storybook": "^0.11.0",
-    "happy-dom": "^20.0.10",
     "husky": "^9.1.7",
     "jest-axe": "^10.0.0",
     "jsdom": "^27.2.0",
