@@ -1,6 +1,9 @@
 /**
  * Cost metrics and monitoring for chat API usage
  * Tracks model usage and provides cost estimates
+ *
+ * Performance optimizations:
+ * - Circular buffer for O(1) insertions instead of O(n) array slice
  */
 
 import { logger } from '@/lib/logger'
@@ -31,8 +34,89 @@ export interface CostReport {
   periodEnd: Date
 }
 
+/**
+ * Circular Buffer for O(1) insertions
+ * Replaces array slice which is O(n) when trimming
+ */
+class CircularBuffer<T> {
+  private buffer: (T | undefined)[]
+  private head = 0
+  private tail = 0
+  private count = 0
+  private readonly capacity: number
+
+  constructor(capacity: number) {
+    this.capacity = capacity
+    this.buffer = new Array(capacity)
+  }
+
+  push(item: T): void {
+    this.buffer[this.tail] = item
+    this.tail = (this.tail + 1) % this.capacity
+
+    if (this.count < this.capacity) {
+      this.count++
+    } else {
+      // Buffer is full, move head forward (overwrite oldest)
+      this.head = (this.head + 1) % this.capacity
+    }
+  }
+
+  get length(): number {
+    return this.count
+  }
+
+  /**
+   * Iterate through all items from oldest to newest
+   */
+  *[Symbol.iterator](): Iterator<T> {
+    for (let i = 0; i < this.count; i++) {
+      const index = (this.head + i) % this.capacity
+      yield this.buffer[index] as T
+    }
+  }
+
+  /**
+   * Get items as array (creates new array)
+   */
+  toArray(): T[] {
+    const result: T[] = []
+    for (const item of this) {
+      result.push(item)
+    }
+    return result
+  }
+
+  /**
+   * Filter items matching predicate
+   */
+  filter(predicate: (item: T) => boolean): T[] {
+    const result: T[] = []
+    for (const item of this) {
+      if (predicate(item)) {
+        result.push(item)
+      }
+    }
+    return result
+  }
+
+  /**
+   * Get last N items
+   */
+  slice(count: number): T[] {
+    const result: T[] = []
+    const start = Math.max(0, this.count - count)
+    for (let i = start; i < this.count; i++) {
+      const index = (this.head + i) % this.capacity
+      result.push(this.buffer[index] as T)
+    }
+    return result
+  }
+}
+
 export class CostMetricsService {
-  private metrics: ChatMetric[] = []
+  // Circular buffer for O(1) insertions - replaces O(n) array slice
+  private metrics = new CircularBuffer<ChatMetric>(10000)
   private readonly maxMetrics = 10000
 
   // Cost per 1000 tokens (in USD)
@@ -50,7 +134,7 @@ export class CostMetricsService {
   }
 
   /**
-   * Record a metric
+   * Record a metric - O(1) with circular buffer
    */
   record(metric: Partial<ChatMetric>): void {
     const fullMetric: ChatMetric = {
@@ -65,12 +149,8 @@ export class CostMetricsService {
       message_length: metric.message_length,
     }
 
+    // O(1) insertion with circular buffer - no more O(n) slice!
     this.metrics.push(fullMetric)
-
-    // Limit array size
-    if (this.metrics.length > this.maxMetrics) {
-      this.metrics = this.metrics.slice(-this.maxMetrics)
-    }
 
     // Log significant events
     if (!fullMetric.success) {
@@ -292,7 +372,7 @@ export class CostMetricsService {
       {
         report,
         breakdown,
-        metrics: this.metrics.slice(-100), // Last 100 for detail
+        metrics: this.metrics.slice(100), // Last 100 for detail
       },
       null,
       2
