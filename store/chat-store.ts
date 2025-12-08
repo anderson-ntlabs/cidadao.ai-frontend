@@ -45,7 +45,8 @@ interface ChatStore {
   // State
   messages: ChatMessage[]
   // O(1) lookup index for messages by ID - optimizes updateMessage from O(n) to O(1)
-  messageIndex: Map<string, number>
+  // Using Record instead of Map for JSON serialization compatibility with devtools
+  messageIndex: Record<string, number>
   session: ChatSession | null
   connectionStatus: ChatConnectionStatus
   isTyping: boolean
@@ -61,9 +62,6 @@ interface ChatStore {
 
   // Streaming state
   streaming: StreamingState
-
-  // WebSocket instance
-  ws: ChatWebSocket | null
 
   // Actions
   initializeChat: (sessionId?: string) => Promise<void>
@@ -121,7 +119,7 @@ export const useChatStore = create<ChatStore>()(
   devtools((set, get) => ({
     // Initial state
     messages: [],
-    messageIndex: new Map<string, number>(),
+    messageIndex: {},
     session: null,
     connectionStatus: 'disconnected',
     isTyping: false,
@@ -133,7 +131,6 @@ export const useChatStore = create<ChatStore>()(
     isLoading: false,
     selectedAgentId: null,
     streaming: initialStreamingState,
-    ws: null,
 
     // Initialize chat
     initializeChat: async (sessionId?: string) => {
@@ -164,8 +161,8 @@ export const useChatStore = create<ChatStore>()(
             }
 
             // Build index for O(1) lookups
-            const messageIndex = new Map<string, number>()
-            messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+            const messageIndex: Record<string, number> = {}
+            messages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
 
             set({
               session: chatSession,
@@ -224,97 +221,92 @@ export const useChatStore = create<ChatStore>()(
       set({ isLoading: true, error: null })
 
       try {
-        if (useWebSocket && state.ws?.isConnected()) {
-          // Send via WebSocket
-          state.ws.sendChatMessage(content)
-        } else {
-          // Send via REST API
-          const response = await chatService.sendMessage({
-            message: content,
-            session_id: sessionId,
-          })
+        // Send via REST API (WebSocket not supported by backend)
+        const response = await chatService.sendMessage({
+          message: content,
+          session_id: sessionId,
+        })
 
-          logger.debug('Backend response received', { response })
+        logger.debug('Backend response received', { response })
 
-          if (response) {
-            // Extract message content from response
-            // Backend may return 'message', 'response', or 'content' field
-            const responseAny = response as any
-            const messageContent =
-              response.message || responseAny.response || responseAny.content || ''
+        if (response) {
+          // Extract message content from response
+          // Backend may return 'message', 'response', or 'content' field
+          const responseAny = response as any
+          const messageContent =
+            response.message || responseAny.response || responseAny.content || ''
 
-            logger.debug('Message content extracted', { messageContent })
+          logger.debug('Message content extracted', { messageContent })
 
-            if (!messageContent || messageContent.trim().length === 0) {
-              logger.warn('Empty message from backend', {
-                fullResponse: JSON.stringify(response),
-              })
-            }
-
-            // Add assistant response
-            const assistantMessage: ChatMessage = {
-              id: `msg_${Date.now()}_assistant`,
-              session_id: response.session_id,
-              role: 'assistant',
-              content: messageContent || 'Desculpe, não consegui processar sua mensagem.',
-              agent_id: response.agent_id,
-              agent_name: response.agent_name,
-              timestamp: new Date().toISOString(),
-              metadata: response.metadata,
-            }
-
-            get().addMessage(assistantMessage)
-
-            // Save message to Supabase
-            try {
-              await chatSessionService.addMessage(sessionId, {
-                role: 'user',
-                content: content,
-                agent_id: '',
-                agent_name: '',
-              })
-
-              await chatSessionService.addMessage(sessionId, {
-                role: 'assistant',
-                content: assistantMessage.content,
-                agent_id: response.agent_id || '',
-                agent_name: response.agent_name || '',
-              })
-            } catch (error) {
-              console.error('Failed to save message to Supabase:', error)
-            }
-
-            // Update suggested actions
-            if (response.suggested_actions) {
-              set({
-                suggestedActions: response.suggested_actions.map((action, idx) => ({
-                  id: `action_${idx}`,
-                  label: action,
-                  icon: 'MessageSquare',
-                  action,
-                })),
-              })
-            }
-
-            // Check for investigation
-            if (response.metadata?.investigation_id) {
-              set({
-                currentInvestigation: {
-                  id: response.metadata.investigation_id,
-                  title: response.metadata.investigation_title || 'Investigation',
-                  status: 'in_progress',
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                  agents_involved: [response.agent_id],
-                  findings_count: 0,
-                  anomalies_count: 0,
-                  confidence_score: response.confidence,
-                },
-              })
-            }
-          } else {
-            throw new Error('No response from server')
+          if (!messageContent || messageContent.trim().length === 0) {
+            logger.warn('Empty message from backend', {
+              fullResponse: JSON.stringify(response),
+            })
           }
+
+          // Add assistant response
+          const assistantMessage: ChatMessage = {
+            id: `msg_${Date.now()}_assistant`,
+            session_id: response.session_id,
+            role: 'assistant',
+            content: messageContent || 'Desculpe, não consegui processar sua mensagem.',
+            agent_id: response.agent_id,
+            agent_name: response.agent_name,
+            timestamp: new Date().toISOString(),
+            metadata: response.metadata,
+          }
+
+          get().addMessage(assistantMessage)
+
+          // Save message to Supabase
+          try {
+            await chatSessionService.addMessage(sessionId, {
+              role: 'user',
+              content: content,
+              agent_id: '',
+              agent_name: '',
+            })
+
+            await chatSessionService.addMessage(sessionId, {
+              role: 'assistant',
+              content: assistantMessage.content,
+              agent_id: response.agent_id || '',
+              agent_name: response.agent_name || '',
+            })
+          } catch (error) {
+            console.error('Failed to save message to Supabase:', error)
+          }
+
+          // Update suggested actions
+          if (response.suggested_actions) {
+            set({
+              suggestedActions: response.suggested_actions.map((action, idx) => ({
+                id: `action_${idx}`,
+                label: action,
+                icon: 'MessageSquare',
+                action,
+              })),
+            })
+          }
+
+          // Check for investigation
+          if (response.metadata?.investigation_id) {
+            set({
+              currentInvestigation: {
+                id: response.metadata.investigation_id,
+                title: response.metadata.investigation_title || 'Investigation',
+                status: 'in_progress',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                agents_involved: [response.agent_id],
+                findings_count: 0,
+                anomalies_count: 0,
+                confidence_score: response.confidence,
+              },
+            })
+          }
+        } else {
+          throw new Error('No response from server')
         }
       } catch (error: any) {
         set({ error: error.message || 'Failed to send message' })
@@ -648,8 +640,8 @@ export const useChatStore = create<ChatStore>()(
       try {
         const messages = await chatService.getHistory(sessionId)
         // Rebuild index for O(1) lookups
-        const messageIndex = new Map<string, number>()
-        messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+        const messageIndex: Record<string, number> = {}
+        messages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
         set({ messages, messageIndex })
       } catch (error: any) {
         set({ error: error.message || 'Failed to load chat history' })
@@ -682,8 +674,8 @@ export const useChatStore = create<ChatStore>()(
           }
 
           // Rebuild index for O(1) lookups
-          const messageIndex = new Map<string, number>()
-          newMessages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+          const messageIndex: Record<string, number> = {}
+          newMessages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
 
           set({ messages: newMessages, messageIndex })
         }
@@ -699,7 +691,7 @@ export const useChatStore = create<ChatStore>()(
 
       try {
         await chatService.clearHistory(state.session.session_id)
-        set({ messages: [], messageIndex: new Map(), currentInvestigation: null })
+        set({ messages: [], messageIndex: {}, currentInvestigation: null })
       } catch (error: any) {
         set({ error: error.message || 'Failed to clear chat' })
       }
@@ -758,10 +750,10 @@ export const useChatStore = create<ChatStore>()(
           */
     },
 
-    // Disconnect WebSocket
+    // Disconnect WebSocket (no-op - WebSocket not supported by backend)
     disconnectWebSocket: () => {
       closeChatWebSocket()
-      set({ ws: null, connectionStatus: 'disconnected' })
+      set({ connectionStatus: 'disconnected' })
     },
 
     // UI state actions
@@ -790,26 +782,24 @@ export const useChatStore = create<ChatStore>()(
       }
     },
 
-    // Investigation subscriptions
-    subscribeToInvestigation: (investigationId) => {
-      const state = get()
-      state.ws?.subscribeToInvestigation(investigationId)
+    // Investigation subscriptions (no-op - WebSocket not supported by backend)
+    subscribeToInvestigation: (_investigationId) => {
+      // WebSocket not supported by current backend
+      logger.debug('subscribeToInvestigation called but WebSocket not supported')
     },
 
-    unsubscribeFromInvestigation: (investigationId) => {
-      const state = get()
-      state.ws?.unsubscribeFromInvestigation(investigationId)
+    unsubscribeFromInvestigation: (_investigationId) => {
+      // WebSocket not supported by current backend
+      logger.debug('unsubscribeFromInvestigation called but WebSocket not supported')
     },
 
     // Message actions - optimized with O(1) index lookup
     addMessage: (message) => {
       set((state) => {
         const newIndex = state.messages.length
-        const newMessageIndex = new Map(state.messageIndex)
-        newMessageIndex.set(message.id, newIndex)
         return {
           messages: [...state.messages, message],
-          messageIndex: newMessageIndex,
+          messageIndex: { ...state.messageIndex, [message.id]: newIndex },
         }
       })
     },
@@ -817,7 +807,7 @@ export const useChatStore = create<ChatStore>()(
     updateMessage: (messageId, updates) => {
       set((state) => {
         // O(1) lookup using index instead of O(n) array scan
-        const index = state.messageIndex.get(messageId)
+        const index = state.messageIndex[messageId]
         if (index === undefined) {
           logger.warn('Message not found for update', { messageId })
           return state
@@ -843,7 +833,7 @@ export const useChatStore = create<ChatStore>()(
       set({
         session: chatSession,
         messages: [],
-        messageIndex: new Map(),
+        messageIndex: {},
         currentInvestigation: null,
       })
 
@@ -880,8 +870,8 @@ export const useChatStore = create<ChatStore>()(
           }))
 
           // Build index for O(1) lookups
-          const messageIndex = new Map<string, number>()
-          messages.forEach((msg, idx) => messageIndex.set(msg.id, idx))
+          const messageIndex: Record<string, number> = {}
+          messages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
 
           const chatSession: ChatSession = {
             session_id: supabaseSession.session_id,
