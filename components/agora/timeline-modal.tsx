@@ -10,10 +10,11 @@
 
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { VirtualizedList } from '@/components/ui/virtualized-list'
 import { cn } from '@/lib/utils'
 import {
   Clock,
@@ -283,8 +284,8 @@ export function TimelineModal({
             ))}
           </div>
 
-          {/* Timeline Content */}
-          <div className="flex-1 overflow-y-auto pr-2">
+          {/* Timeline Content - Virtualized for O(1) render performance */}
+          <div className="flex-1 overflow-hidden">
             {filteredEvents.length === 0 ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -296,15 +297,25 @@ export function TimelineModal({
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {Array.from(groupedEvents.entries()).map(([dateKey, events]) => {
+              <VirtualizedList
+                items={Array.from(groupedEvents.entries())}
+                estimateSize={(index) => {
+                  const [dateKey] = Array.from(groupedEvents.entries())[index]
+                  const events = groupedEvents.get(dateKey) || []
+                  // Header: 64px, each event: 100px when expanded
+                  return isExpanded(dateKey) ? 64 + events.length * 100 : 64
+                }}
+                height="100%"
+                className="pr-2"
+                overscan={2}
+                renderItem={([dateKey, events]) => {
                   const expanded = isExpanded(dateKey)
                   const dayXp = events
                     .filter((e) => e.type === 'xp')
                     .reduce((sum, e) => sum + (e.metadata?.amount || 0), 0)
 
                   return (
-                    <div key={dateKey} className="relative">
+                    <div className="relative mb-4">
                       {/* Date Header */}
                       <button
                         onClick={() => toggleDay(dateKey)}
@@ -385,8 +396,8 @@ export function TimelineModal({
                       )}
                     </div>
                   )
-                })}
-              </div>
+                }}
+              />
             )}
           </div>
 

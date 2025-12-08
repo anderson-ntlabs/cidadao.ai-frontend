@@ -14,11 +14,12 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { VirtualizedList } from '@/components/ui/virtualized-list'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -315,20 +316,30 @@ export default function AcademyRankingPage() {
           </GlassCardContent>
         </GlassCard>
 
-        {/* Leaderboard */}
+        {/* Leaderboard - Virtualized for O(1) render performance */}
         <GlassCard className="overflow-hidden">
           <GlassCardContent className="p-0">
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {sortedLeaderboard.map((entry, index) => {
+            <VirtualizedList
+              items={sortedLeaderboard}
+              estimateSize={80}
+              height={Math.min(sortedLeaderboard.length * 80, 600)}
+              getItemKey={(entry) => entry.id}
+              overscan={3}
+              emptyState={
+                <div className="text-center py-12">
+                  <Trophy className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">Nenhum participante ainda</p>
+                </div>
+              }
+              renderItem={(entry, index) => {
                 const rankInfo = ranks[entry.current_rank as keyof typeof ranks] || ranks.novato
                 const isCurrentUser = user ? entry.user_id === user.id : false
                 const position = index + 1
 
                 return (
                   <div
-                    key={entry.id}
                     className={cn(
-                      'flex items-center gap-4 p-4 transition-colors',
+                      'flex items-center gap-4 p-4 transition-colors border-b border-gray-200 dark:border-gray-700',
                       isCurrentUser && 'bg-green-50 dark:bg-green-900/20',
                       position <= 3 &&
                         !isCurrentUser &&
@@ -384,7 +395,7 @@ export default function AcademyRankingPage() {
                         </p>
                         {isCurrentUser && (
                           <Badge variant="success" size="sm">
-                            Você
+                            Voce
                           </Badge>
                         )}
                       </div>
@@ -437,8 +448,8 @@ export default function AcademyRankingPage() {
                     </div>
                   </div>
                 )
-              })}
-            </div>
+              }}
+            />
           </GlassCardContent>
         </GlassCard>
 
