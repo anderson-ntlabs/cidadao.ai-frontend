@@ -87,6 +87,30 @@ module.exports = {
             600: 'var(--cidadao-red-600)',
           },
         },
+        // Tarsila do Amaral palette (Brazilian Modernism)
+        tarsila: {
+          amarelo: 'hsl(var(--tarsila-amarelo))',
+          ocre: 'hsl(var(--tarsila-ocre))',
+          terra: 'hsl(var(--tarsila-terra))',
+          verde: 'hsl(var(--tarsila-verde))',
+          azul: 'hsl(var(--tarsila-azul))',
+          laranja: 'hsl(var(--tarsila-laranja))',
+          rosa: 'hsl(var(--tarsila-rosa))',
+          creme: 'hsl(var(--tarsila-creme))',
+        },
+        // Academy (Ágora) theme colors
+        academy: {
+          bg: 'hsl(var(--academy-bg))',
+          'bg-secondary': 'hsl(var(--academy-bg-secondary))',
+          card: 'hsl(var(--academy-card))',
+          'card-hover': 'hsl(var(--academy-card-hover))',
+          border: 'hsl(var(--academy-border))',
+          text: 'hsl(var(--academy-text))',
+          'text-muted': 'hsl(var(--academy-text-muted))',
+          accent: 'hsl(var(--academy-accent))',
+          'accent-hover': 'hsl(var(--academy-accent-hover))',
+          success: 'hsl(var(--academy-success))',
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

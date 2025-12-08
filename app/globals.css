@@ -91,6 +91,18 @@
     --tarsila-rosa: 15 69% 87%; /* #F5D0C5 - Pale Pink */
     --tarsila-creme: 42 100% 96%; /* #FFF8E7 - Cream (warm white) */
 
+    /* Cidadão Brand Colors (connected to Tailwind via brand-*) */
+    --cidadao-green-500: #16a34a;
+    --cidadao-green-600: #15803d;
+    --cidadao-green-700: #166534;
+    --cidadao-blue-500: #2563eb;
+    --cidadao-blue-600: #1d4ed8;
+    --cidadao-blue-700: #1e40af;
+    --cidadao-yellow-500: #eab308;
+    --cidadao-yellow-600: #ca8a04;
+    --cidadao-purple-600: #9333ea;
+    --cidadao-red-600: #dc2626;
+
     /* Academy-specific (Light - Tarsila Theme) */
     --academy-bg: 42 100% 98%; /* Warm cream background */
     --academy-bg-secondary: 42 60% 95%; /* Slightly darker cream */
@@ -142,6 +154,18 @@
     --tarsila-laranja: 24 100% 55%; /* Brighter orange */
     --tarsila-rosa: 15 40% 70%; /* Muted pink */
     --tarsila-creme: 42 20% 90%; /* Off-white */
+
+    /* Cidadão Brand Colors (adjusted for dark mode) */
+    --cidadao-green-500: #22c55e;
+    --cidadao-green-600: #16a34a;
+    --cidadao-green-700: #15803d;
+    --cidadao-blue-500: #3b82f6;
+    --cidadao-blue-600: #2563eb;
+    --cidadao-blue-700: #1d4ed8;
+    --cidadao-yellow-500: #facc15;
+    --cidadao-yellow-600: #eab308;
+    --cidadao-purple-600: #a855f7;
+    --cidadao-red-600: #ef4444;
 
     /* Academy-specific (Dark - Elegant Gray Theme) */
     --academy-bg: 0 0% 9%; /* #171717 - Deep charcoal */
