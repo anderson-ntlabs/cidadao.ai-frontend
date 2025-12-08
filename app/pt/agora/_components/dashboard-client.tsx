@@ -729,7 +729,7 @@ export function DashboardClient({
             </div>
 
             {/* Right Column - Timeline + Badges */}
-            <div className="space-y-6 lg:sticky lg:top-20">
+            <div className="space-y-6">
               {/* Timeline Card - Real telemetry data */}
               <TimelineCard
                 xpTransactions={timelineXpTransactions}
