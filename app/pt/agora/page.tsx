@@ -89,8 +89,8 @@ function AcademyDashboardContent() {
     return <LoadingFallback />
   }
 
-  // Not authenticated (and not in demo mode)
-  if (!isDemoMode && !isRealAuth) {
+  // Not authenticated - redirect to login
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
@@ -103,6 +103,7 @@ function AcademyDashboardContent() {
     )
   }
 
+  // At this point, user is guaranteed to be non-null
   // Build user data from unified hook
   const dashboardUser = {
     id: user.id,

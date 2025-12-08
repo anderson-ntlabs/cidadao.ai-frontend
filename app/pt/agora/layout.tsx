@@ -4,9 +4,7 @@ import '@/styles/design-system/tokens/index.css'
 
 import { Suspense } from 'react'
 import { usePathname } from 'next/navigation'
-import { AgoraDemoProvider } from '@/hooks/use-agora-demo'
-import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
-import { UnifiedAgoraProvider } from '@/hooks/use-agora'
+import { AgoraProvider } from '@/hooks/use-agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -14,26 +12,20 @@ import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'luci
 /**
  * Agora Layout
  *
- * Provides auth contexts for all Agora pages:
- * - AgoraAuthProvider: Handles real authentication with Supabase
- * - AgoraDemoProvider: Provides demo mode functionality
- * - UnifiedAgoraProvider: Auto-selects between real/demo based on auth state
- * - BottomNavigation: Mobile navigation (same as main app)
+ * Provides auth context for all Agora pages via AgoraProvider.
+ * Real authentication only - no demo mode.
  *
- * Accessibility options are now integrated into AgoraHeader dropdown menu.
- * VLibras is available globally from /pt/layout.tsx
- *
- * Use `useAgora()` hook in pages for automatic mode selection.
+ * Use `useAgora()` hook in pages for user data and actions.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-07 - Removed AccessibilityPanel FAB (moved to header menu)
+ * Updated: 2025-12-08 - Removed demo mode, real auth only
  */
 
-// Ágora navigation items for mobile bottom nav
+// Agora navigation items for mobile bottom nav
 const agoraNavItems = [
   {
     id: 'dashboard',
-    label: 'Início',
+    label: 'Inicio',
     path: '/pt/agora',
     icon: Home,
   },
@@ -45,7 +37,7 @@ const agoraNavItems = [
   },
   {
     id: 'diario',
-    label: 'Diário',
+    label: 'Diario',
     path: '/pt/agora/diario',
     icon: BookOpen,
   },
@@ -70,7 +62,7 @@ function AgoraLoadingFallback() {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando Ágora...</p>
+        <p className="text-gray-600 dark:text-gray-400">Carregando Agora...</p>
       </div>
     </div>
   )
@@ -96,14 +88,10 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function AgoraLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AgoraAuthProvider>
-      <AgoraDemoProvider>
-        <Suspense fallback={<AgoraLoadingFallback />}>
-          <UnifiedAgoraProvider>
-            <AgoraLayoutContent>{children}</AgoraLayoutContent>
-          </UnifiedAgoraProvider>
-        </Suspense>
-      </AgoraDemoProvider>
-    </AgoraAuthProvider>
+    <Suspense fallback={<AgoraLoadingFallback />}>
+      <AgoraProvider>
+        <AgoraLayoutContent>{children}</AgoraLayoutContent>
+      </AgoraProvider>
+    </Suspense>
   )
 }

@@ -1,52 +1,42 @@
 'use client'
 
 import { createContext, useContext, useMemo, useState, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useAgoraAuth } from './use-agora-auth'
-import {
-  useAgoraDemo,
-  AgoraDemoUser,
-  AgoraTrack,
-  XpTransaction,
-  DiaryEntry,
-  StudySession,
-  AgoraBadge,
-  OnboardingData,
-  LgpdConsent,
-  InternshipContract,
-  TRACK_REPOS,
-} from './use-agora-demo'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { createLogger } from '@/lib/logger'
+import { trackBadgeEarned, trackLevelUp, trackRankUp } from '@/lib/analytics/agora-tracker'
 
-const logger = createLogger('AgoraUnified')
+const logger = createLogger('Agora')
 
 /**
- * Unified Agora Hook - Full Supabase Integration
+ * Agora Hook - Real Auth Only
  *
- * Automatically selects between real auth (Supabase) and demo mode (localStorage)
- * based on:
- * 1. URL parameter ?demo=true -> Demo mode
- * 2. Authenticated via OAuth -> Real auth mode
- * 3. Not authenticated -> Falls back to demo mode
+ * Full Supabase integration for the Agora platform.
+ * No demo mode - requires OAuth authentication.
  *
- * Real auth integrates with:
- * - agora_profiles (XP, level, rank, streak, badges)
+ * Tables used:
+ * - agora_profiles (XP, level, rank, streak, badges, tracks)
  * - agora_xp_transactions (XP history)
  * - agora_sessions (study sessions)
  * - agora_diary_entries (learning diary)
+ * - agora_consent (LGPD)
+ * - agora_calendar_events (agenda)
  *
  * Author: Anderson Henrique da Silva
- * Date: 2025-12-06
+ * Date: 2025-12-08
  */
 
-export type AgoraMode = 'real' | 'demo'
+export type AgoraTrack = 'backend' | 'frontend' | 'ia' | 'devops'
 
-interface UnifiedAgoraUser {
+export interface AgoraUser {
   id: string
   name: string
   email: string
   avatar: string
+  githubUsername?: string
+  matricula?: string
+  curso?: string
+  periodo?: number
   totalXp: number
   currentLevel: number
   currentRank: string
@@ -55,93 +45,97 @@ interface UnifiedAgoraUser {
   longestStreak: number
   totalSessions: number
   totalTimeMinutes: number
+  totalVideosCompleted: number
   hasAcceptedLgpd: boolean
-  hasAcceptedInternshipContract: boolean
+  hasAcceptedTerms: boolean
+  hasAcceptedInternshipContract: boolean // Alias for hasAcceptedTerms (backwards compat)
   hasCompletedOnboarding: boolean
+  onboardingStep: number
+  isSuperuser: boolean
   enrolledAt: string
-  // Real auth specific
-  githubUsername?: string
-  matricula?: string
-  curso?: string
-  periodo?: number
+  lastActivityDate?: string
 }
 
-interface UnifiedAgoraContextType {
-  // Mode information
-  mode: AgoraMode
-  isRealAuth: boolean
-  isDemoMode: boolean
-
-  // Common data
-  user: UnifiedAgoraUser
-  isAuthenticated: boolean
-  isLoading: boolean
-  xpTransactions: XpTransaction[]
-  diaryEntries: DiaryEntry[]
-  sessions: StudySession[]
-  currentSession: StudySession | null
-  badges: AgoraBadge[]
-  onboarding: OnboardingData | null
-  lgpdConsent: LgpdConsent | null
-  internshipContract: InternshipContract | null
-
-  // Common actions
-  updateProfile: (updates: Partial<UnifiedAgoraUser>) => void
-  addXp: (amount: number, sourceType: string, description: string) => void | Promise<void>
-  addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => void | Promise<void>
-  startSession: () => void | Promise<void>
-  endSession: (xpEarned?: number, agentsUsed?: string[]) => void | Promise<void>
-  acceptLgpdConsent: (ipAddress?: string, userAgent?: string) => Promise<void>
-  acceptInternshipContract: (
-    ipAddress?: string,
-    userAgent?: string,
-    contractId?: string
-  ) => Promise<void>
-  checkAndAwardBadges: () => void | Promise<void>
-  logout: () => Promise<void>
-
-  // Onboarding actions
-  initOnboarding: () => void
-  updateOnboarding: (updates: Partial<OnboardingData>) => void
-  toggleTrack: (track: AgoraTrack) => void
-  confirmTracks: () => void
-  setGitHubUsername: (username: string) => Promise<void>
-  verifyGitHubFork: () => Promise<{ success: boolean; message: string }>
-  completeOnboarding: () => void
-}
-
-const UnifiedAgoraContext = createContext<UnifiedAgoraContextType | undefined>(undefined)
-
-// Badge definitions for checking eligibility
-// Using internal type since AgoraBadge has different structure
-interface BadgeDefinition {
+export interface XpTransaction {
   id: string
-  type: AgoraBadge['type']
+  amount: number
+  balanceAfter: number
+  sourceType: string
+  description: string
+  createdAt: string
+}
+
+export interface DiaryEntry {
+  id: string
+  content: string
+  mood: 'great' | 'good' | 'neutral' | 'struggling'
+  whatLearned: string
+  whatStruggled: string
+  nextSteps: string
+  entryDate: string
+  createdAt: string
+}
+
+export interface StudySession {
+  id: string
+  startedAt: string
+  endedAt?: string
+  durationMinutes: number
+  xpEarned: number
+  agentsUsed: string[]
+  status: 'active' | 'completed' | 'abandoned'
+}
+
+export interface AgoraBadge {
+  id: string
+  type: string
   name: string
   description: string
   emoji: string
+  earnedAt: string
   criteria: string
-  xpReward: number
 }
 
-const BADGE_DEFINITIONS: BadgeDefinition[] = [
+export interface GitHubContribution {
+  username: string
+  hasForked: boolean
+  forkUrl?: string
+  commitCount: number
+  lastCommitDate?: string
+  lastChecked: string
+}
+
+export interface OnboardingData {
+  currentStep: number
+  completedSteps: number[]
+  selectedTracks: AgoraTrack[]
+  githubUsername?: string
+  githubForkVerified: boolean
+  completedAt?: string
+  github: GitHubContribution | null
+}
+
+// Badge definitions
+const BADGE_DEFINITIONS = [
   {
     id: 'pioneiro',
     type: 'pioneiro',
     name: 'Pioneiro',
-    description: 'Fez login pela primeira vez na Academy',
-    emoji: '🎉',
+    description: 'Primeiro login na Agora',
+    emoji: '🚀',
     criteria: 'Primeiro login',
-    xpReward: 10,
+    xpReward: 25,
+    check: () => true,
   },
   {
     id: 'dedicado',
     type: 'dedicado',
     name: 'Dedicado',
     description: '7 dias seguidos de estudo',
-    emoji: '⚡',
+    emoji: '⭐',
     criteria: '7+ dias de streak',
-    xpReward: 50,
+    xpReward: 75,
+    check: (user: AgoraUser) => user.currentStreak >= 7,
   },
   {
     id: 'explorador',
@@ -151,505 +145,575 @@ const BADGE_DEFINITIONS: BadgeDefinition[] = [
     emoji: '🧭',
     criteria: '5+ sessoes',
     xpReward: 30,
+    check: (user: AgoraUser) => user.totalSessions >= 5,
   },
   {
     id: 'japaguri',
     type: 'japaguri',
     name: 'Japaguri',
-    description: 'Assiduo: 3+ dias seguidos, 5+ sessoes ou 3+ diarios',
+    description: 'Assiduo: 3+ dias seguidos ou 5+ sessoes',
     emoji: '🍜',
-    criteria: '3+ streak OU 5+ sessoes OU 3+ diarios',
+    criteria: '3+ streak OU 5+ sessoes',
     xpReward: 50,
+    check: (user: AgoraUser) => user.currentStreak >= 3 || user.totalSessions >= 5,
   },
 ]
 
-export function UnifiedAgoraProvider({ children }: { children: React.ReactNode }) {
-  const searchParams = useSearchParams()
-  const isDemoParam = searchParams.get('demo') === 'true'
+// GitHub repos by track
+export const TRACK_REPOS: Record<string, { owner: string; repo: string }> = {
+  backend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-backend' },
+  frontend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-frontend' },
+  ia: { owner: 'anderson-ufrj', repo: 'cidadao.ai-ml' },
+  devops: { owner: 'anderson-ufrj', repo: 'cidadao.ai-infra' },
+}
 
-  // Get both auth contexts
-  const agoraAuth = useAgoraAuth()
-  const agoraDemo = useAgoraDemo()
+interface AgoraContextType {
+  // State
+  user: AgoraUser | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  isSuperuser: boolean
+  xpTransactions: XpTransaction[]
+  diaryEntries: DiaryEntry[]
+  sessions: StudySession[]
+  currentSession: StudySession | null
+  badges: AgoraBadge[]
+  onboarding: OnboardingData | null
 
-  // State for real auth data
-  const [realXpTransactions, setRealXpTransactions] = useState<XpTransaction[]>([])
-  const [realDiaryEntries, setRealDiaryEntries] = useState<DiaryEntry[]>([])
-  const [realSessions, setRealSessions] = useState<StudySession[]>([])
-  const [realCurrentSession, setRealCurrentSession] = useState<StudySession | null>(null)
-  const [realBadges, setRealBadges] = useState<AgoraBadge[]>([])
+  // Backwards compatibility (always real auth now)
+  mode: 'real'
+  isDemoMode: false
+  isRealAuth: true
 
-  // Ref to track current session ID in Supabase
+  // Actions
+  refreshProfile: () => Promise<void>
+  updateProfile: (updates: Partial<AgoraUser>) => Promise<void>
+  addXp: (amount: number, sourceType: string, description: string) => Promise<void>
+  addDiaryEntry: (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => Promise<void>
+  startSession: () => Promise<void>
+  endSession: (xpEarned?: number, agentsUsed?: string[]) => Promise<void>
+  acceptLgpdConsent: (ipAddress?: string, userAgent?: string) => Promise<void>
+  acceptTerms: (ipAddress?: string, userAgent?: string, contractId?: string) => Promise<void>
+  acceptInternshipContract: (
+    ipAddress?: string,
+    userAgent?: string,
+    contractId?: string
+  ) => Promise<void>
+  checkAndAwardBadges: () => Promise<void>
+  logout: () => Promise<void>
+
+  // Onboarding
+  initOnboarding: () => void
+  updateOnboarding: (updates: Partial<OnboardingData>) => void
+  toggleTrack: (track: AgoraTrack) => void
+  confirmTracks: () => Promise<void>
+  setOnboardingStep: (step: number) => Promise<void>
+  selectTracks: (tracks: AgoraTrack[]) => Promise<void>
+  setGitHubUsername: (username: string) => Promise<void>
+  verifyGitHubFork: () => Promise<{ success: boolean; message: string }>
+  completeOnboarding: () => Promise<void>
+  resetOnboarding: () => Promise<void>
+}
+
+const AgoraContext = createContext<AgoraContextType | undefined>(undefined)
+
+const DEFAULT_USER: AgoraUser = {
+  id: '',
+  name: '',
+  email: '',
+  avatar: '',
+  totalXp: 0,
+  currentLevel: 1,
+  currentRank: 'novato',
+  tracks: [],
+  currentStreak: 0,
+  longestStreak: 0,
+  totalSessions: 0,
+  totalTimeMinutes: 0,
+  totalVideosCompleted: 0,
+  hasAcceptedLgpd: false,
+  hasAcceptedTerms: false,
+  hasAcceptedInternshipContract: false,
+  hasCompletedOnboarding: false,
+  onboardingStep: 0,
+  isSuperuser: false,
+  enrolledAt: new Date().toISOString(),
+}
+
+export function AgoraProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const supabase = createClient()
+
+  // State
+  const [user, setUser] = useState<AgoraUser | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [xpTransactions, setXpTransactions] = useState<XpTransaction[]>([])
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
+  const [sessions, setSessions] = useState<StudySession[]>([])
+  const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
+  const [badges, setBadges] = useState<AgoraBadge[]>([])
+
+  // Ref for current session ID
   const currentSessionIdRef = useRef<string | null>(null)
 
-  // Determine the mode
-  const [mode, setMode] = useState<AgoraMode>('demo')
+  // Derived state
+  const isAuthenticated = !!user
+  const isSuperuser = user?.isSuperuser ?? false
 
+  // Track state for toggleTrack
+  const [selectedTracks, setSelectedTracks] = useState<AgoraTrack[]>([])
+
+  // Sync selectedTracks with user.tracks when user changes
   useEffect(() => {
-    if (isDemoParam) {
-      setMode('demo')
-      logger.debug('Mode: demo (URL param)')
-    } else if (agoraAuth.isAuthenticated) {
-      setMode('real')
-      logger.debug('Mode: real (OAuth authenticated)', {
-        userId: agoraAuth.user?.id,
-        email: agoraAuth.user?.email,
-      })
-    } else {
-      setMode('demo')
-      logger.debug('Mode: demo (not authenticated)')
+    if (user) {
+      setSelectedTracks(user.tracks)
     }
-  }, [isDemoParam, agoraAuth.isAuthenticated, agoraAuth.user?.id, agoraAuth.user?.email])
+  }, [user?.tracks])
 
-  const isRealAuth = mode === 'real'
-  const isDemoMode = mode === 'demo'
+  // Onboarding data derived from user
+  const onboarding: OnboardingData | null = user
+    ? {
+        currentStep: user.onboardingStep,
+        completedSteps: Array.from({ length: user.onboardingStep }, (_, i) => i + 1),
+        selectedTracks: selectedTracks,
+        githubUsername: user.githubUsername,
+        githubForkVerified: false,
+        completedAt: user.hasCompletedOnboarding ? user.enrolledAt : undefined,
+        github: user.githubUsername
+          ? {
+              username: user.githubUsername,
+              hasForked: false,
+              commitCount: 0,
+              lastChecked: new Date().toISOString(),
+            }
+          : null,
+      }
+    : null
 
-  // Loading state
-  const isLoading = isDemoMode ? agoraDemo.isLoading : agoraAuth.isLoading || agoraDemo.isLoading
-
-  // Load real data from Supabase when authenticated
+  // Load user data on mount
   useEffect(() => {
-    if (!isRealAuth || !agoraAuth.user) return
+    loadUserData()
 
-    const loadRealData = async () => {
-      const supabase = createClient()
-      const userId = agoraAuth.user!.id
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        await loadUserData()
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setXpTransactions([])
+        setDiaryEntries([])
+        setSessions([])
+        setBadges([])
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Load all user data from Supabase
+  const loadUserData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser()
+
+      if (!authUser) {
+        setUser(null)
+        setIsLoading(false)
+        return
+      }
+
+      // Load profile
+      const { data: profile } = await supabase
+        .from('agora_profiles')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single()
+
+      // Load consent
+      const { data: consent } = await supabase
+        .from('agora_consent')
+        .select('id')
+        .eq('user_id', authUser.id)
+        .single()
+
+      // Build user object
+      const metadata = authUser.user_metadata || {}
+      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.full_name || metadata.name || 'User')}&background=16a34a&color=fff&size=128`
+
+      const hasTerms = profile?.has_accepted_terms || false
+      const userData: AgoraUser = {
+        id: authUser.id,
+        name: profile?.full_name || metadata.full_name || metadata.name || 'Estudante',
+        email: authUser.email || '',
+        avatar: profile?.avatar_url || metadata.avatar_url || defaultAvatar,
+        githubUsername: profile?.github_username || metadata.user_name,
+        matricula: profile?.matricula,
+        curso: profile?.curso,
+        periodo: profile?.periodo,
+        totalXp: profile?.total_xp || 0,
+        currentLevel: profile?.current_level || 1,
+        currentRank: profile?.current_rank || 'novato',
+        tracks: profile?.tracks || [],
+        currentStreak: profile?.current_streak || 0,
+        longestStreak: profile?.longest_streak || 0,
+        totalSessions: profile?.total_sessions || 0,
+        totalTimeMinutes: profile?.total_time_minutes || 0,
+        totalVideosCompleted: profile?.total_videos_completed || 0,
+        hasAcceptedLgpd: !!consent,
+        hasAcceptedTerms: hasTerms,
+        hasAcceptedInternshipContract: hasTerms, // Alias
+        hasCompletedOnboarding: profile?.has_completed_onboarding || false,
+        onboardingStep: profile?.onboarding_step || 0,
+        isSuperuser: profile?.is_superuser || false,
+        enrolledAt: profile?.enrolled_at || authUser.created_at || new Date().toISOString(),
+        lastActivityDate: profile?.last_activity_date,
+      }
+
+      setUser(userData)
+
+      // Load XP transactions
+      const { data: xpData } = await supabase
+        .from('agora_xp_transactions')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (xpData) {
+        setXpTransactions(
+          xpData.map((t) => ({
+            id: t.id,
+            amount: t.amount,
+            balanceAfter: t.balance_after,
+            sourceType: t.source_type,
+            description: t.description,
+            createdAt: t.created_at,
+          }))
+        )
+      }
+
+      // Load diary entries
+      const { data: diaryData } = await supabase
+        .from('agora_diary_entries')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (diaryData) {
+        setDiaryEntries(
+          diaryData.map((d) => ({
+            id: d.id,
+            content: d.content,
+            mood: d.mood || 'neutral',
+            whatLearned: d.what_learned || '',
+            whatStruggled: d.what_struggled || '',
+            nextSteps: d.next_steps || '',
+            entryDate: d.entry_date || d.created_at?.split('T')[0] || '',
+            createdAt: d.created_at,
+          }))
+        )
+      }
+
+      // Load sessions
+      const { data: sessionsData } = await supabase
+        .from('agora_sessions')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .order('started_at', { ascending: false })
+        .limit(50)
+
+      if (sessionsData) {
+        setSessions(
+          sessionsData.map((s) => ({
+            id: s.id,
+            startedAt: s.started_at,
+            endedAt: s.ended_at,
+            durationMinutes: s.duration_minutes || 0,
+            xpEarned: s.xp_earned || 0,
+            agentsUsed: s.conversations?.map((c: { agent_name: string }) => c.agent_name) || [],
+            status: s.status || 'completed',
+          }))
+        )
+
+        // Check for active session
+        const activeSession = sessionsData.find((s) => s.status === 'active')
+        if (activeSession) {
+          currentSessionIdRef.current = activeSession.id
+          setCurrentSession({
+            id: activeSession.id,
+            startedAt: activeSession.started_at,
+            durationMinutes: activeSession.duration_minutes || 0,
+            xpEarned: activeSession.xp_earned || 0,
+            agentsUsed: [],
+            status: 'active',
+          })
+        }
+      }
+
+      // Load badges from profile
+      if (profile?.badges) {
+        const earnedBadgeIds = profile.badges as string[]
+        setBadges(
+          BADGE_DEFINITIONS.filter((b) => earnedBadgeIds.includes(b.id)).map((badge) => ({
+            id: badge.id,
+            type: badge.type,
+            name: badge.name,
+            description: badge.description,
+            emoji: badge.emoji,
+            earnedAt: new Date().toISOString(),
+            criteria: badge.criteria,
+          }))
+        )
+      }
+
+      logger.info('User data loaded', {
+        userId: authUser.id,
+        totalXp: userData.totalXp,
+        isSuperuser: userData.isSuperuser,
+      })
+    } catch (error) {
+      logger.error('Failed to load user data', { error })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Refresh profile
+  const refreshProfile = useCallback(async () => {
+    await loadUserData()
+  }, [loadUserData])
+
+  // Update profile
+  const updateProfile = useCallback(
+    async (updates: Partial<AgoraUser>) => {
+      if (!user) return
 
       try {
-        // Load XP transactions
-        const { data: xpData } = await supabase
-          .from('agora_xp_transactions')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(50)
+        const dbUpdates: Record<string, unknown> = {}
 
-        if (xpData) {
-          setRealXpTransactions(
-            xpData.map((t) => ({
-              id: t.id,
-              amount: t.amount,
-              balanceAfter: t.balance_after,
-              sourceType: t.source_type,
-              description: t.description,
-              createdAt: t.created_at,
-            }))
-          )
-        }
+        if (updates.name !== undefined) dbUpdates.full_name = updates.name
+        if (updates.avatar !== undefined) dbUpdates.avatar_url = updates.avatar
+        if (updates.githubUsername !== undefined) dbUpdates.github_username = updates.githubUsername
+        if (updates.matricula !== undefined) dbUpdates.matricula = updates.matricula
+        if (updates.curso !== undefined) dbUpdates.curso = updates.curso
+        if (updates.periodo !== undefined) dbUpdates.periodo = updates.periodo
+        if (updates.tracks !== undefined) dbUpdates.tracks = updates.tracks
+        if (updates.onboardingStep !== undefined) dbUpdates.onboarding_step = updates.onboardingStep
+        if (updates.hasCompletedOnboarding !== undefined)
+          dbUpdates.has_completed_onboarding = updates.hasCompletedOnboarding
+        if (updates.hasAcceptedTerms !== undefined)
+          dbUpdates.has_accepted_terms = updates.hasAcceptedTerms
 
-        // Load diary entries
-        const { data: diaryData } = await supabase
-          .from('agora_diary_entries')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(50)
+        await supabase.from('agora_profiles').update(dbUpdates).eq('user_id', user.id)
 
-        if (diaryData) {
-          setRealDiaryEntries(
-            diaryData.map((d) => ({
-              id: d.id,
-              content: d.content,
-              mood: d.mood || 'neutral',
-              whatLearned: d.what_learned || '',
-              whatStruggled: d.what_struggled || '',
-              nextSteps: d.next_steps || '',
-              entryDate: d.entry_date || d.created_at?.split('T')[0] || '',
-              createdAt: d.created_at,
-            }))
-          )
-        }
-
-        // Load sessions
-        const { data: sessionsData } = await supabase
-          .from('agora_sessions')
-          .select('*')
-          .eq('user_id', userId)
-          .order('started_at', { ascending: false })
-          .limit(50)
-
-        if (sessionsData) {
-          setRealSessions(
-            sessionsData.map((s) => ({
-              id: s.id,
-              startedAt: s.started_at,
-              endedAt: s.ended_at,
-              durationMinutes: s.duration_minutes,
-              xpEarned: s.xp_earned,
-              agentsUsed: s.conversations?.map((c: { agent_name: string }) => c.agent_name) || [],
-            }))
-          )
-
-          // Check for active session
-          const activeSession = sessionsData.find((s) => s.status === 'active')
-          if (activeSession) {
-            currentSessionIdRef.current = activeSession.id
-            setRealCurrentSession({
-              id: activeSession.id,
-              startedAt: activeSession.started_at,
-              durationMinutes: activeSession.duration_minutes,
-              xpEarned: activeSession.xp_earned,
-              agentsUsed: [],
-            })
-          }
-        }
-
-        // Load badges from profile
-        const { data: profileData } = await supabase
-          .from('agora_profiles')
-          .select('badges')
-          .eq('user_id', userId)
-          .single()
-
-        if (profileData?.badges) {
-          const earnedBadgeIds = profileData.badges as string[]
-          setRealBadges(
-            BADGE_DEFINITIONS.filter((b) => earnedBadgeIds.includes(b.id)).map((badge) => ({
-              id: badge.id,
-              type: badge.type,
-              name: badge.name,
-              description: badge.description,
-              emoji: badge.emoji,
-              earnedAt: new Date().toISOString(),
-              criteria: badge.criteria,
-            }))
-          )
-        } else {
-          setRealBadges([])
-        }
-
-        logger.info('Loaded real data from Supabase', {
-          xpTransactions: xpData?.length || 0,
-          diaryEntries: diaryData?.length || 0,
-          sessions: sessionsData?.length || 0,
-        })
+        setUser((prev) => (prev ? { ...prev, ...updates } : null))
+        logger.debug('Profile updated', { updates })
       } catch (error) {
-        logger.error('Failed to load real data', { error })
-      }
-    }
-
-    loadRealData()
-  }, [isRealAuth, agoraAuth.user])
-
-  // Unified user object
-  const user = useMemo((): UnifiedAgoraUser => {
-    if (isRealAuth && agoraAuth.user) {
-      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(agoraAuth.user.name)}&background=16a34a&color=fff`
-      return {
-        id: agoraAuth.user.id,
-        name: agoraAuth.user.name,
-        email: agoraAuth.user.email,
-        avatar: agoraAuth.user.avatar || defaultAvatar,
-        totalXp: agoraAuth.user.totalXp,
-        currentLevel: agoraAuth.user.currentLevel,
-        currentRank: agoraAuth.user.currentRank,
-        tracks: agoraDemo.user.tracks,
-        currentStreak: agoraAuth.user.currentStreak,
-        longestStreak: agoraAuth.user.currentStreak, // Will be updated from DB
-        totalSessions: agoraAuth.user.totalSessions,
-        totalTimeMinutes: agoraAuth.user.totalTimeMinutes,
-        hasAcceptedLgpd: agoraAuth.user.hasAcceptedLgpd,
-        hasAcceptedInternshipContract: agoraDemo.user.hasAcceptedInternshipContract,
-        hasCompletedOnboarding: agoraDemo.user.hasCompletedOnboarding,
-        enrolledAt: agoraAuth.user.enrolledAt || agoraDemo.user.enrolledAt,
-        githubUsername: agoraAuth.user.githubUsername,
-        matricula: agoraAuth.user.matricula,
-        curso: agoraAuth.user.curso,
-        periodo: agoraAuth.user.periodo,
-      }
-    }
-
-    return {
-      ...agoraDemo.user,
-      githubUsername: undefined,
-      matricula: undefined,
-      curso: undefined,
-      periodo: undefined,
-    }
-  }, [isRealAuth, agoraAuth.user, agoraDemo.user])
-
-  // === UNIFIED ACTIONS ===
-
-  const updateProfile = useCallback(
-    (updates: Partial<UnifiedAgoraUser>) => {
-      if (isRealAuth) {
-        agoraAuth.refreshProfile()
-      }
-      agoraDemo.updateProfile(updates as Partial<AgoraDemoUser>)
-    },
-    [isRealAuth, agoraAuth, agoraDemo]
-  )
-
-  const acceptLgpdConsent = useCallback(
-    async (ipAddress?: string, userAgent?: string) => {
-      if (isRealAuth) {
-        logger.info('Accepting LGPD consent via real auth (Supabase)')
-        await agoraAuth.acceptLgpdConsent(ipAddress, userAgent)
-      } else {
-        logger.info('Accepting LGPD consent via demo mode (localStorage)')
-        await agoraDemo.acceptLgpdConsent(ipAddress, userAgent)
+        logger.error('Failed to update profile', { error })
       }
     },
-    [isRealAuth, agoraAuth, agoraDemo]
+    [user, supabase]
   )
 
-  const logout = useCallback(async () => {
-    if (isRealAuth) {
-      await agoraAuth.logout()
-    } else {
-      agoraDemo.resetDemo()
-    }
-  }, [isRealAuth, agoraAuth, agoraDemo])
-
-  // === ADD XP - Full Supabase integration ===
+  // Add XP
   const addXp = useCallback(
     async (amount: number, sourceType: string, description: string) => {
-      // Always update local state for immediate UI feedback
-      agoraDemo.addXp(amount, sourceType, description)
+      if (!user) return
 
-      if (isRealAuth && agoraAuth.user) {
-        try {
-          const supabase = createClient()
-          const newXp = (agoraAuth.user.totalXp || 0) + amount
-          const newLevel = Math.floor(newXp / 100) + 1
-
-          let newRank = 'novato'
-          if (newXp >= 5000) newRank = 'arquiteto'
-          else if (newXp >= 2000) newRank = 'mentor'
-          else if (newXp >= 500) newRank = 'contribuidor'
-          else if (newXp >= 100) newRank = 'aprendiz'
-
-          // Update profile
-          await supabase
-            .from('agora_profiles')
-            .update({
-              total_xp: newXp,
-              current_level: newLevel,
-              current_rank: newRank,
-              last_activity_date: new Date().toISOString().split('T')[0],
-            })
-            .eq('user_id', agoraAuth.user.id)
-
-          // Insert XP transaction
-          const { data: txData } = await supabase
-            .from('agora_xp_transactions')
-            .insert({
-              user_id: agoraAuth.user.id,
-              amount,
-              balance_after: newXp,
-              source_type: sourceType,
-              description,
-            })
-            .select()
-            .single()
-
-          if (txData) {
-            setRealXpTransactions((prev) => [
-              {
-                id: txData.id,
-                amount: txData.amount,
-                balanceAfter: txData.balance_after,
-                sourceType: txData.source_type,
-                description: txData.description,
-                createdAt: txData.created_at,
-              },
-              ...prev,
-            ])
-          }
-
-          logger.info('XP added to Supabase', { amount, newXp, sourceType })
-          agoraAuth.refreshProfile()
-        } catch (error) {
-          logger.error('Error adding XP to Supabase', { error })
-        }
-      }
-    },
-    [isRealAuth, agoraAuth, agoraDemo]
-  )
-
-  // === START SESSION - Full Supabase integration ===
-  const startSession = useCallback(async () => {
-    // Always update local state
-    agoraDemo.startSession()
-
-    if (isRealAuth && agoraAuth.user) {
       try {
-        const supabase = createClient()
+        const newXp = user.totalXp + amount
+        const newLevel = Math.floor(newXp / 100) + 1
+        const oldLevel = user.currentLevel
+        const oldRank = user.currentRank
 
-        // Create session in Supabase
-        const { data, error } = await supabase
-          .from('agora_sessions')
+        let newRank = 'novato'
+        if (newXp >= 5000) newRank = 'arquiteto'
+        else if (newXp >= 2000) newRank = 'mentor'
+        else if (newXp >= 500) newRank = 'contribuidor'
+        else if (newXp >= 100) newRank = 'aprendiz'
+
+        // Update profile
+        await supabase
+          .from('agora_profiles')
+          .update({
+            total_xp: newXp,
+            current_level: newLevel,
+            current_rank: newRank,
+            last_activity_date: new Date().toISOString().split('T')[0],
+          })
+          .eq('user_id', user.id)
+
+        // Insert XP transaction
+        const { data: txData } = await supabase
+          .from('agora_xp_transactions')
           .insert({
-            user_id: agoraAuth.user.id,
-            started_at: new Date().toISOString(),
-            status: 'active',
+            user_id: user.id,
+            amount,
+            balance_after: newXp,
+            source_type: sourceType,
+            description,
           })
           .select()
           .single()
 
-        if (error) {
-          logger.error('Failed to create session in Supabase', { error })
-          return
+        if (txData) {
+          setXpTransactions((prev) => [
+            {
+              id: txData.id,
+              amount: txData.amount,
+              balanceAfter: txData.balance_after,
+              sourceType: txData.source_type,
+              description: txData.description,
+              createdAt: txData.created_at,
+            },
+            ...prev,
+          ])
         }
 
-        currentSessionIdRef.current = data.id
-        setRealCurrentSession({
-          id: data.id,
-          startedAt: data.started_at,
-          durationMinutes: 0,
-          xpEarned: 0,
-          agentsUsed: [],
-        })
+        // Track milestones
+        if (newLevel > oldLevel) {
+          trackLevelUp(oldLevel, newLevel, newXp)
+        }
+        if (newRank !== oldRank) {
+          trackRankUp(oldRank, newRank, newLevel)
+        }
 
-        // Update streak
-        await updateStreak()
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                totalXp: newXp,
+                currentLevel: newLevel,
+                currentRank: newRank,
+              }
+            : null
+        )
 
-        logger.info('Session started in Supabase', { sessionId: data.id })
+        logger.info('XP added', { amount, newXp, sourceType })
       } catch (error) {
-        logger.error('Error starting session', { error })
-      }
-    }
-  }, [isRealAuth, agoraAuth, agoraDemo])
-
-  // === END SESSION - Full Supabase integration ===
-  const endSession = useCallback(
-    async (xpEarned?: number, agentsUsed?: string[]) => {
-      // Always update local state
-      agoraDemo.endSession(xpEarned, agentsUsed)
-
-      if (isRealAuth && agoraAuth.user && currentSessionIdRef.current) {
-        try {
-          const supabase = createClient()
-          const sessionId = currentSessionIdRef.current
-          const startedAt = realCurrentSession?.startedAt || new Date().toISOString()
-          const durationMinutes = Math.floor((Date.now() - new Date(startedAt).getTime()) / 60000)
-
-          // Update session
-          await supabase
-            .from('agora_sessions')
-            .update({
-              ended_at: new Date().toISOString(),
-              duration_minutes: durationMinutes,
-              xp_earned: xpEarned || 0,
-              conversations: agentsUsed?.map((a) => ({ agent_name: a })) || [],
-              status: 'completed',
-            })
-            .eq('id', sessionId)
-
-          // Update profile stats
-          await supabase
-            .from('agora_profiles')
-            .update({
-              total_sessions: (agoraAuth.user.totalSessions || 0) + 1,
-              total_time_minutes: (agoraAuth.user.totalTimeMinutes || 0) + durationMinutes,
-            })
-            .eq('user_id', agoraAuth.user.id)
-
-          // Add to local state
-          setRealSessions((prev) => [
-            {
-              id: sessionId,
-              startedAt,
-              endedAt: new Date().toISOString(),
-              durationMinutes,
-              xpEarned: xpEarned || 0,
-              agentsUsed: agentsUsed || [],
-            },
-            ...prev,
-          ])
-
-          currentSessionIdRef.current = null
-          setRealCurrentSession(null)
-
-          logger.info('Session ended in Supabase', { sessionId, durationMinutes, xpEarned })
-          agoraAuth.refreshProfile()
-        } catch (error) {
-          logger.error('Error ending session', { error })
-        }
+        logger.error('Failed to add XP', { error })
       }
     },
-    [isRealAuth, agoraAuth, agoraDemo, realCurrentSession]
+    [user, supabase]
   )
 
-  // === ADD DIARY ENTRY - Full Supabase integration ===
-  const addDiaryEntry = useCallback(
-    async (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => {
-      // Always update local state
-      agoraDemo.addDiaryEntry(entry)
-
-      if (isRealAuth && agoraAuth.user) {
-        try {
-          const supabase = createClient()
-
-          const { data, error } = await supabase
-            .from('agora_diary_entries')
-            .insert({
-              user_id: agoraAuth.user.id,
-              session_id: currentSessionIdRef.current,
-              content: entry.content,
-              mood: entry.mood,
-              what_learned: entry.whatLearned,
-              what_struggled: entry.whatStruggled,
-              next_steps: entry.nextSteps,
-              entry_date: entry.entryDate,
-            })
-            .select()
-            .single()
-
-          if (error) {
-            logger.error('Failed to create diary entry', { error })
-            return
-          }
-
-          setRealDiaryEntries((prev) => [
-            {
-              id: data.id,
-              content: data.content,
-              mood: data.mood || 'neutral',
-              whatLearned: data.what_learned || '',
-              whatStruggled: data.what_struggled || '',
-              nextSteps: data.next_steps || '',
-              entryDate: data.entry_date || '',
-              createdAt: data.created_at,
-            },
-            ...prev,
-          ])
-
-          // Award XP for diary entry
-          await addXp(10, 'diary', 'Entrada no diario de aprendizado')
-
-          logger.info('Diary entry created in Supabase', { entryId: data.id })
-        } catch (error) {
-          logger.error('Error creating diary entry', { error })
-        }
-      }
-    },
-    [isRealAuth, agoraAuth, agoraDemo, addXp]
-  )
-
-  // === UPDATE STREAK - Helper function ===
-  const updateStreak = useCallback(async () => {
-    if (!isRealAuth || !agoraAuth.user) return
+  // Start session
+  const startSession = useCallback(async () => {
+    if (!user) return
 
     try {
-      const supabase = createClient()
-
-      // Get current profile
-      const { data: profile } = await supabase
-        .from('agora_profiles')
-        .select('current_streak, longest_streak, last_activity_date')
-        .eq('user_id', agoraAuth.user.id)
+      const { data, error } = await supabase
+        .from('agora_sessions')
+        .insert({
+          user_id: user.id,
+          started_at: new Date().toISOString(),
+          status: 'active',
+        })
+        .select()
         .single()
 
-      if (!profile) return
+      if (error) throw error
 
+      currentSessionIdRef.current = data.id
+      setCurrentSession({
+        id: data.id,
+        startedAt: data.started_at,
+        durationMinutes: 0,
+        xpEarned: 0,
+        agentsUsed: [],
+        status: 'active',
+      })
+
+      // Update streak
+      await updateStreak()
+
+      logger.info('Session started', { sessionId: data.id })
+    } catch (error) {
+      logger.error('Failed to start session', { error })
+    }
+  }, [user, supabase])
+
+  // End session
+  const endSession = useCallback(
+    async (xpEarned = 0, agentsUsed: string[] = []) => {
+      if (!user || !currentSessionIdRef.current) return
+
+      try {
+        const sessionId = currentSessionIdRef.current
+        const startedAt = currentSession?.startedAt || new Date().toISOString()
+        const durationMinutes = Math.floor((Date.now() - new Date(startedAt).getTime()) / 60000)
+
+        await supabase
+          .from('agora_sessions')
+          .update({
+            ended_at: new Date().toISOString(),
+            duration_minutes: durationMinutes,
+            xp_earned: xpEarned,
+            conversations: agentsUsed.map((a) => ({ agent_name: a })),
+            status: 'completed',
+          })
+          .eq('id', sessionId)
+
+        // Update profile stats
+        await supabase
+          .from('agora_profiles')
+          .update({
+            total_sessions: user.totalSessions + 1,
+            total_time_minutes: user.totalTimeMinutes + durationMinutes,
+          })
+          .eq('user_id', user.id)
+
+        setSessions((prev) => [
+          {
+            id: sessionId,
+            startedAt,
+            endedAt: new Date().toISOString(),
+            durationMinutes,
+            xpEarned,
+            agentsUsed,
+            status: 'completed',
+          },
+          ...prev,
+        ])
+
+        currentSessionIdRef.current = null
+        setCurrentSession(null)
+
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                totalSessions: prev.totalSessions + 1,
+                totalTimeMinutes: prev.totalTimeMinutes + durationMinutes,
+              }
+            : null
+        )
+
+        logger.info('Session ended', { sessionId, durationMinutes, xpEarned })
+      } catch (error) {
+        logger.error('Failed to end session', { error })
+      }
+    },
+    [user, currentSession, supabase]
+  )
+
+  // Update streak
+  const updateStreak = useCallback(async () => {
+    if (!user) return
+
+    try {
       const today = new Date().toISOString().split('T')[0]
-      const lastActivity = profile.last_activity_date
+      const lastActivity = user.lastActivityDate
 
-      let newStreak = profile.current_streak || 0
-      let newLongestStreak = profile.longest_streak || 0
+      let newStreak = user.currentStreak
+      let newLongestStreak = user.longestStreak
 
       if (!lastActivity) {
-        // First activity ever
         newStreak = 1
       } else {
         const lastDate = new Date(lastActivity)
@@ -661,10 +725,8 @@ export function UnifiedAgoraProvider({ children }: { children: React.ReactNode }
         if (diffDays === 0) {
           // Same day, no change
         } else if (diffDays === 1) {
-          // Consecutive day
-          newStreak = (profile.current_streak || 0) + 1
+          newStreak = user.currentStreak + 1
         } else {
-          // Streak broken
           newStreak = 1
         }
       }
@@ -680,195 +742,397 @@ export function UnifiedAgoraProvider({ children }: { children: React.ReactNode }
           longest_streak: newLongestStreak,
           last_activity_date: today,
         })
-        .eq('user_id', agoraAuth.user.id)
+        .eq('user_id', user.id)
+
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentStreak: newStreak,
+              longestStreak: newLongestStreak,
+              lastActivityDate: today,
+            }
+          : null
+      )
 
       logger.info('Streak updated', { newStreak, newLongestStreak })
-      agoraAuth.refreshProfile()
     } catch (error) {
-      logger.error('Error updating streak', { error })
+      logger.error('Failed to update streak', { error })
     }
-  }, [isRealAuth, agoraAuth])
+  }, [user, supabase])
 
-  // === CHECK AND AWARD BADGES - Full Supabase integration ===
+  // Add diary entry
+  const addDiaryEntry = useCallback(
+    async (entry: Omit<DiaryEntry, 'id' | 'createdAt'>) => {
+      if (!user) return
+
+      try {
+        const { data, error } = await supabase
+          .from('agora_diary_entries')
+          .insert({
+            user_id: user.id,
+            session_id: currentSessionIdRef.current,
+            content: entry.content,
+            mood: entry.mood,
+            what_learned: entry.whatLearned,
+            what_struggled: entry.whatStruggled,
+            next_steps: entry.nextSteps,
+            entry_date: entry.entryDate,
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+
+        setDiaryEntries((prev) => [
+          {
+            id: data.id,
+            content: data.content,
+            mood: data.mood || 'neutral',
+            whatLearned: data.what_learned || '',
+            whatStruggled: data.what_struggled || '',
+            nextSteps: data.next_steps || '',
+            entryDate: data.entry_date || '',
+            createdAt: data.created_at,
+          },
+          ...prev,
+        ])
+
+        // Award XP
+        await addXp(10, 'diary', 'Entrada no diario de aprendizado')
+
+        logger.info('Diary entry created', { entryId: data.id })
+      } catch (error) {
+        logger.error('Failed to create diary entry', { error })
+      }
+    },
+    [user, supabase, addXp]
+  )
+
+  // Accept LGPD consent
+  const acceptLgpdConsent = useCallback(
+    async (ipAddress?: string, userAgent?: string) => {
+      if (!user) return
+
+      try {
+        await supabase.from('agora_consent').insert({
+          user_id: user.id,
+          consent_version: 'v1.0',
+          tracking_consent: true,
+          data_processing_consent: true,
+          certificate_consent: true,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+        })
+
+        setUser((prev) => (prev ? { ...prev, hasAcceptedLgpd: true } : null))
+        logger.info('LGPD consent accepted', { ipAddress })
+      } catch (error) {
+        logger.error('Failed to accept LGPD consent', { error })
+      }
+    },
+    [user, supabase]
+  )
+
+  // Accept terms
+  const acceptTerms = useCallback(
+    async (_ipAddress?: string, _userAgent?: string, _contractId?: string) => {
+      if (!user) return
+
+      try {
+        await supabase
+          .from('agora_profiles')
+          .update({ has_accepted_terms: true })
+          .eq('user_id', user.id)
+
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                hasAcceptedTerms: true,
+                hasAcceptedInternshipContract: true,
+              }
+            : null
+        )
+
+        // Award welcome bonus
+        await addXp(100, 'terms_accept', 'Bonus de boas-vindas - Aceite dos Termos de Uso')
+
+        logger.info('Terms accepted')
+      } catch (error) {
+        logger.error('Failed to accept terms', { error })
+      }
+    },
+    [user, supabase, addXp]
+  )
+
+  // Check and award badges
   const checkAndAwardBadges = useCallback(async () => {
-    // Always check demo
-    agoraDemo.checkAndAwardBadges()
-
-    if (!isRealAuth || !agoraAuth.user) return
+    if (!user) return
 
     try {
-      const supabase = createClient()
-
-      // Get current badges
       const { data: profile } = await supabase
         .from('agora_profiles')
-        .select('badges, current_streak, total_sessions, total_xp')
-        .eq('user_id', agoraAuth.user.id)
+        .select('badges')
+        .eq('user_id', user.id)
         .single()
 
-      if (!profile) return
-
-      const currentBadges: string[] = (profile.badges as string[]) || []
+      const currentBadges: string[] = (profile?.badges as string[]) || []
       const newBadgeIds: string[] = []
       let bonusXp = 0
 
-      // Check each badge
       for (const badge of BADGE_DEFINITIONS) {
         if (currentBadges.includes(badge.id)) continue
-
-        let earned = false
-
-        switch (badge.id) {
-          case 'pioneiro':
-            earned = true // If they're here, they logged in
-            break
-          case 'dedicado':
-            earned = (profile.current_streak || 0) >= 7
-            break
-          case 'explorador':
-            earned = (profile.total_sessions || 0) >= 5
-            break
-          case 'japaguri':
-            // Assiduous: 3+ streak OR 5+ sessions OR 3+ diary entries
-            earned =
-              (profile.current_streak || 0) >= 3 ||
-              (profile.total_sessions || 0) >= 5 ||
-              realDiaryEntries.length >= 3
-            break
-        }
-
-        if (earned) {
+        if (badge.check(user)) {
           newBadgeIds.push(badge.id)
           bonusXp += badge.xpReward
-          logger.info('Badge earned', { badgeId: badge.id, badgeName: badge.name })
+          trackBadgeEarned(badge.id, badge.name)
+          logger.info('Badge earned', { badgeId: badge.id })
         }
       }
 
       if (newBadgeIds.length > 0) {
-        // Update badges in profile
         await supabase
           .from('agora_profiles')
-          .update({
-            badges: [...currentBadges, ...newBadgeIds],
-          })
-          .eq('user_id', agoraAuth.user.id)
+          .update({ badges: [...currentBadges, ...newBadgeIds] })
+          .eq('user_id', user.id)
 
-        // Award bonus XP
         if (bonusXp > 0) {
           await addXp(bonusXp, 'badge', `Badges conquistados: ${newBadgeIds.join(', ')}`)
         }
 
-        // Update local state - add new badges
-        const newBadges: AgoraBadge[] = BADGE_DEFINITIONS.filter((b) =>
-          newBadgeIds.includes(b.id)
-        ).map((badge) => ({
-          id: badge.id,
-          type: badge.type,
-          name: badge.name,
-          description: badge.description,
-          emoji: badge.emoji,
-          earnedAt: new Date().toISOString(),
-          criteria: badge.criteria,
-        }))
+        const newBadges = BADGE_DEFINITIONS.filter((b) => newBadgeIds.includes(b.id)).map(
+          (badge) => ({
+            id: badge.id,
+            type: badge.type,
+            name: badge.name,
+            description: badge.description,
+            emoji: badge.emoji,
+            earnedAt: new Date().toISOString(),
+            criteria: badge.criteria,
+          })
+        )
 
-        setRealBadges((prev) => [...prev, ...newBadges])
-
-        agoraAuth.refreshProfile()
+        setBadges((prev) => [...prev, ...newBadges])
       }
     } catch (error) {
-      logger.error('Error checking badges', { error })
+      logger.error('Failed to check badges', { error })
     }
-  }, [isRealAuth, agoraAuth, agoraDemo, realDiaryEntries, addXp])
+  }, [user, supabase, addXp])
 
-  // Context value
+  // Logout
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    router.push('/pt/agora/login')
+  }, [supabase, router])
+
+  // Onboarding: Set step
+  const setOnboardingStep = useCallback(
+    async (step: number) => {
+      if (!user) return
+      await updateProfile({ onboardingStep: step })
+    },
+    [user, updateProfile]
+  )
+
+  // Onboarding: Select tracks
+  const selectTracks = useCallback(
+    async (tracks: AgoraTrack[]) => {
+      if (!user) return
+      await updateProfile({ tracks, onboardingStep: Math.max(user.onboardingStep, 2) })
+      await addXp(25 * tracks.length, 'onboarding', `Trilhas selecionadas: ${tracks.join(', ')}`)
+    },
+    [user, updateProfile, addXp]
+  )
+
+  // Onboarding: Set GitHub username
+  const setGitHubUsername = useCallback(
+    async (username: string) => {
+      if (!user) return
+      await updateProfile({
+        githubUsername: username,
+        onboardingStep: Math.max(user.onboardingStep, 3),
+      })
+    },
+    [user, updateProfile]
+  )
+
+  // Onboarding: Verify GitHub fork (mocked for now)
+  const verifyGitHubFork = useCallback(async (): Promise<{ success: boolean; message: string }> => {
+    if (!user || !user.githubUsername || user.tracks.length === 0) {
+      return { success: false, message: 'Usuario ou trilhas nao definidos' }
+    }
+
+    // Mock verification - always succeeds
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    await supabase
+      .from('agora_profiles')
+      .update({ github_fork_verified: true })
+      .eq('user_id', user.id)
+
+    await addXp(50, 'onboarding', 'Fork do repositorio verificado!')
+    await updateProfile({ onboardingStep: 4 })
+
+    return { success: true, message: 'Fork verificado com sucesso!' }
+  }, [user, supabase, addXp, updateProfile])
+
+  // Onboarding: Complete
+  const completeOnboarding = useCallback(async () => {
+    if (!user) return
+    await updateProfile({ hasCompletedOnboarding: true, onboardingStep: 5 })
+    await addXp(100, 'onboarding', 'Onboarding concluido! Bem-vindo a Agora!')
+    await checkAndAwardBadges()
+  }, [user, updateProfile, addXp, checkAndAwardBadges])
+
+  // Onboarding: Reset (for testing)
+  const resetOnboarding = useCallback(async () => {
+    if (!user) return
+    await supabase
+      .from('agora_profiles')
+      .update({
+        has_completed_onboarding: false,
+        has_accepted_terms: false,
+        onboarding_step: 0,
+        tracks: [],
+        github_fork_verified: false,
+      })
+      .eq('user_id', user.id)
+
+    setSelectedTracks([])
+    await refreshProfile()
+    logger.info('Onboarding reset')
+  }, [user, supabase, refreshProfile])
+
+  // Backwards compatibility: initOnboarding (no-op, onboarding is always initialized)
+  const initOnboarding = useCallback(() => {
+    logger.debug('initOnboarding called (no-op in real auth mode)')
+  }, [])
+
+  // Backwards compatibility: updateOnboarding
+  const updateOnboarding = useCallback(
+    (updates: Partial<OnboardingData>) => {
+      if (updates.selectedTracks) {
+        setSelectedTracks(updates.selectedTracks)
+      }
+      if (updates.currentStep !== undefined && user) {
+        updateProfile({ onboardingStep: updates.currentStep })
+      }
+    },
+    [user, updateProfile]
+  )
+
+  // Backwards compatibility: toggleTrack
+  const toggleTrack = useCallback((track: AgoraTrack) => {
+    setSelectedTracks((prev) => {
+      if (prev.includes(track)) {
+        return prev.filter((t) => t !== track)
+      } else {
+        return [...prev, track]
+      }
+    })
+  }, [])
+
+  // Backwards compatibility: confirmTracks
+  const confirmTracks = useCallback(async () => {
+    if (!user || selectedTracks.length === 0) return
+    await selectTracks(selectedTracks)
+  }, [user, selectedTracks, selectTracks])
+
+  // Backwards compatibility: acceptInternshipContract (alias for acceptTerms)
+  const acceptInternshipContract = useCallback(
+    async (ipAddress?: string, userAgent?: string, contractId?: string) => {
+      await acceptTerms(ipAddress, userAgent, contractId)
+    },
+    [acceptTerms]
+  )
+
   const contextValue = useMemo(
-    (): UnifiedAgoraContextType => ({
-      // Mode info
-      mode,
-      isRealAuth,
-      isDemoMode,
-
-      // Common data - use real data if authenticated
+    (): AgoraContextType => ({
       user,
-      isAuthenticated: isRealAuth ? agoraAuth.isAuthenticated : true,
+      isAuthenticated,
       isLoading,
-      xpTransactions: isRealAuth ? realXpTransactions : agoraDemo.xpTransactions,
-      diaryEntries: isRealAuth ? realDiaryEntries : agoraDemo.diaryEntries,
-      sessions: isRealAuth ? realSessions : agoraDemo.sessions,
-      currentSession: isRealAuth ? realCurrentSession : agoraDemo.currentSession,
-      badges: isRealAuth ? realBadges : agoraDemo.badges,
-      onboarding: agoraDemo.onboarding,
-      lgpdConsent: agoraDemo.lgpdConsent,
-      internshipContract: agoraDemo.internshipContract,
-
-      // Actions - all unified
+      isSuperuser,
+      xpTransactions,
+      diaryEntries,
+      sessions,
+      currentSession,
+      badges,
+      onboarding,
+      // Backwards compatibility
+      mode: 'real',
+      isDemoMode: false,
+      isRealAuth: true,
+      // Actions
+      refreshProfile,
       updateProfile,
       addXp,
       addDiaryEntry,
       startSession,
       endSession,
       acceptLgpdConsent,
-      acceptInternshipContract: agoraDemo.acceptInternshipContract,
+      acceptTerms,
+      acceptInternshipContract,
       checkAndAwardBadges,
       logout,
-
-      // Onboarding (still demo only)
-      initOnboarding: agoraDemo.initOnboarding,
-      updateOnboarding: agoraDemo.updateOnboarding,
-      toggleTrack: agoraDemo.toggleTrack,
-      confirmTracks: agoraDemo.confirmTracks,
-      setGitHubUsername: agoraDemo.setGitHubUsername,
-      verifyGitHubFork: agoraDemo.verifyGitHubFork,
-      completeOnboarding: agoraDemo.completeOnboarding,
+      // Onboarding
+      initOnboarding,
+      updateOnboarding,
+      toggleTrack,
+      confirmTracks,
+      setOnboardingStep,
+      selectTracks,
+      setGitHubUsername,
+      verifyGitHubFork,
+      completeOnboarding,
+      resetOnboarding,
     }),
     [
-      mode,
-      isRealAuth,
-      isDemoMode,
       user,
-      agoraAuth.isAuthenticated,
+      isAuthenticated,
       isLoading,
-      realXpTransactions,
-      realDiaryEntries,
-      realSessions,
-      realCurrentSession,
-      realBadges,
-      agoraDemo,
+      isSuperuser,
+      xpTransactions,
+      diaryEntries,
+      sessions,
+      currentSession,
+      badges,
+      onboarding,
+      refreshProfile,
       updateProfile,
       addXp,
       addDiaryEntry,
       startSession,
       endSession,
       acceptLgpdConsent,
+      acceptTerms,
+      acceptInternshipContract,
       checkAndAwardBadges,
       logout,
+      initOnboarding,
+      updateOnboarding,
+      toggleTrack,
+      confirmTracks,
+      setOnboardingStep,
+      selectTracks,
+      setGitHubUsername,
+      verifyGitHubFork,
+      completeOnboarding,
+      resetOnboarding,
     ]
   )
 
-  return (
-    <UnifiedAgoraContext.Provider value={contextValue}>{children}</UnifiedAgoraContext.Provider>
-  )
+  return <AgoraContext.Provider value={contextValue}>{children}</AgoraContext.Provider>
 }
 
 export function useAgora() {
-  const context = useContext(UnifiedAgoraContext)
+  const context = useContext(AgoraContext)
   if (context === undefined) {
-    throw new Error('useAgora must be used within a UnifiedAgoraProvider')
+    throw new Error('useAgora must be used within an AgoraProvider')
   }
   return context
 }
 
-// Re-export for convenience
-export { TRACK_REPOS }
-export type {
-  AgoraDemoUser,
-  AgoraTrack,
-  XpTransaction,
-  DiaryEntry,
-  StudySession,
-  AgoraBadge,
-  OnboardingData,
-  LgpdConsent,
-  InternshipContract,
-  UnifiedAgoraUser,
-}
+// Re-export types
+export type { AgoraContextType }
