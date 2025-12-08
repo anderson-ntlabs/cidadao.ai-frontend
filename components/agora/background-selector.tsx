@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Check, Palette, ImageIcon, Sun, Moon, RotateCcw, X } from 'lucide-react'
+import { Check, Palette, ImageIcon, Shuffle, RotateCcw, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAgoraBackground, type BackgroundOption } from '@/hooks/use-agora-background'
@@ -58,6 +58,8 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
     setOverlayOpacity,
     overlayEnabled,
     overlayOpacity,
+    randomMode,
+    toggleRandomMode,
     reset,
     solidOptions,
     gradientOptions,
@@ -163,6 +165,49 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Random Mode Toggle */}
+        <div className="px-4 py-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-b border-gray-200 dark:border-gray-800">
+          <button
+            onClick={toggleRandomMode}
+            className={cn(
+              'w-full flex items-center justify-between p-3 rounded-xl transition-all',
+              randomMode
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <Shuffle className={cn('w-5 h-5', randomMode && 'animate-pulse')} />
+              <div className="text-left">
+                <p className="font-medium text-sm">Modo Aleatorio</p>
+                <p
+                  className={cn(
+                    'text-xs',
+                    randomMode ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
+                  )}
+                >
+                  {randomMode ? 'Um novo fundo a cada sessao' : 'Desativado - escolha manual'}
+                </p>
+              </div>
+            </div>
+            <div
+              className={cn(
+                'w-12 h-6 rounded-full transition-colors flex items-center p-1',
+                randomMode ? 'bg-white/30' : 'bg-gray-200 dark:bg-gray-600'
+              )}
+            >
+              <div
+                className={cn(
+                  'w-4 h-4 rounded-full transition-transform',
+                  randomMode
+                    ? 'translate-x-6 bg-white'
+                    : 'translate-x-0 bg-gray-400 dark:bg-gray-400'
+                )}
+              />
+            </div>
           </button>
         </div>
 

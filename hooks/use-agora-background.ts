@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 /**
  * Agora Background Customization Hook
  *
- * Simple background customization for Agora dashboard.
- * Supports solid colors, gradients, and TCC slide images.
+ * Supports solid colors, gradients, TCC slide images, and random mode.
+ * Random mode selects a new image background each session.
  *
  * Design: Bo Bardi + Dumont + Anderson
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
+ * Updated: 2025-12-08 - Added random session mode
  */
 
 export interface BackgroundOption {
@@ -152,40 +153,77 @@ export const BACKGROUND_OPTIONS: BackgroundOption[] = [
 ]
 
 const STORAGE_KEY = 'agora_background'
+const SESSION_KEY = 'agora_random_bg'
 
 interface BackgroundState {
   selectedId: string
   overlayEnabled: boolean
   overlayOpacity: number
+  randomMode: boolean
 }
 
 const DEFAULT_STATE: BackgroundState = {
   selectedId: 'default',
   overlayEnabled: true,
-  overlayOpacity: 0.9,
+  overlayOpacity: 0.85,
+  randomMode: true, // Default to random mode enabled
+}
+
+// Get image options for random selection
+const IMAGE_OPTIONS = BACKGROUND_OPTIONS.filter((bg) => bg.type === 'image')
+
+// Select a random image background
+function getRandomImageId(): string {
+  const randomIndex = Math.floor(Math.random() * IMAGE_OPTIONS.length)
+  return IMAGE_OPTIONS[randomIndex].id
 }
 
 export function useAgoraBackground() {
   const [state, setState] = useState<BackgroundState>(DEFAULT_STATE)
+  const [sessionBgId, setSessionBgId] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  const initializedRef = useRef(false)
 
-  // Load from localStorage on mount
+  // Load from localStorage and handle random mode on mount
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined' || initializedRef.current) return
+    initializedRef.current = true
 
     try {
+      // Load persisted preferences
       const stored = localStorage.getItem(STORAGE_KEY)
+      let loadedState = DEFAULT_STATE
+
       if (stored) {
         const parsed = JSON.parse(stored)
-        setState({ ...DEFAULT_STATE, ...parsed })
+        loadedState = { ...DEFAULT_STATE, ...parsed }
       }
+
+      // Handle random mode
+      if (loadedState.randomMode) {
+        // Check if we already have a random background for this session
+        const existingSessionBg = sessionStorage.getItem(SESSION_KEY)
+
+        if (existingSessionBg) {
+          // Use existing session background
+          setSessionBgId(existingSessionBg)
+        } else {
+          // Select new random background for this session
+          const randomId = getRandomImageId()
+          sessionStorage.setItem(SESSION_KEY, randomId)
+          setSessionBgId(randomId)
+        }
+      }
+
+      setState(loadedState)
     } catch (e) {
       console.error('Failed to load background preference:', e)
     }
+
     setIsLoaded(true)
   }, [])
 
-  // Save to localStorage
+  // Save to localStorage (persists preferences across sessions)
   const saveState = useCallback((newState: Partial<BackgroundState>) => {
     setState((prev) => {
       const updated = { ...prev, ...newState }
@@ -198,20 +236,55 @@ export function useAgoraBackground() {
     })
   }, [])
 
+  // Determine effective background ID (considering random mode)
+  const effectiveBackgroundId = state.randomMode && sessionBgId ? sessionBgId : state.selectedId
+
   // Get current background option
   const currentBackground =
-    BACKGROUND_OPTIONS.find((bg) => bg.id === state.selectedId) || BACKGROUND_OPTIONS[0]
+    BACKGROUND_OPTIONS.find((bg) => bg.id === effectiveBackgroundId) || BACKGROUND_OPTIONS[0]
 
-  // Set background by ID
+  // Set background by ID (disables random mode when user manually selects)
   const setBackground = useCallback(
     (id: string) => {
       const exists = BACKGROUND_OPTIONS.find((bg) => bg.id === id)
       if (exists) {
-        saveState({ selectedId: id })
+        // Clear session storage when manually selecting
+        sessionStorage.removeItem(SESSION_KEY)
+        setSessionBgId(null)
+        saveState({ selectedId: id, randomMode: false })
       }
     },
     [saveState]
   )
+
+  // Enable random mode
+  const enableRandomMode = useCallback(() => {
+    const randomId = getRandomImageId()
+    sessionStorage.setItem(SESSION_KEY, randomId)
+    setSessionBgId(randomId)
+    saveState({ randomMode: true })
+  }, [saveState])
+
+  // Disable random mode (keeps current background)
+  const disableRandomMode = useCallback(() => {
+    // Keep the current session background as the selected one
+    if (sessionBgId) {
+      saveState({ selectedId: sessionBgId, randomMode: false })
+    } else {
+      saveState({ randomMode: false })
+    }
+    sessionStorage.removeItem(SESSION_KEY)
+    setSessionBgId(null)
+  }, [sessionBgId, saveState])
+
+  // Toggle random mode
+  const toggleRandomMode = useCallback(() => {
+    if (state.randomMode) {
+      disableRandomMode()
+    } else {
+      enableRandomMode()
+    }
+  }, [state.randomMode, enableRandomMode, disableRandomMode])
 
   // Get CSS styles for current background
   const getBackgroundStyle = useCallback((): React.CSSProperties => {
@@ -264,8 +337,12 @@ export function useAgoraBackground() {
     [saveState]
   )
 
-  // Reset to defaults
+  // Reset to defaults (enables random mode)
   const reset = useCallback(() => {
+    sessionStorage.removeItem(SESSION_KEY)
+    const randomId = getRandomImageId()
+    sessionStorage.setItem(SESSION_KEY, randomId)
+    setSessionBgId(randomId)
     saveState(DEFAULT_STATE)
   }, [saveState])
 
@@ -275,12 +352,16 @@ export function useAgoraBackground() {
     isLoaded,
     overlayEnabled: state.overlayEnabled,
     overlayOpacity: state.overlayOpacity,
+    randomMode: state.randomMode,
 
     // Actions
     setBackground,
     toggleOverlay,
     setOverlayOpacity,
     reset,
+    enableRandomMode,
+    disableRandomMode,
+    toggleRandomMode,
 
     // Style helpers
     getBackgroundStyle,
@@ -290,6 +371,6 @@ export function useAgoraBackground() {
     options: BACKGROUND_OPTIONS,
     solidOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'solid'),
     gradientOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'gradient'),
-    imageOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'image'),
+    imageOptions: IMAGE_OPTIONS,
   }
 }
