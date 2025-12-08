@@ -10,11 +10,11 @@ import type {
 } from '@/types/chat'
 import type { ChatSession as SupabaseChatSession } from '@/types/supabase'
 import { chatService, generateSessionId } from '@/lib/api/chat.service'
-import { ChatWebSocket, getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket'
+import { closeChatWebSocket } from '@/lib/websocket/chat-websocket'
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
 import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
-import type { StreamCallbacks, ContractData } from '@/lib/chat/types'
+import type { StreamCallbacks } from '@/lib/chat/types'
 
 const logger = createLogger('ChatStore')
 
@@ -697,57 +697,10 @@ export const useChatStore = create<ChatStore>()(
       }
     },
 
-    // WebSocket connection
+    // WebSocket connection (not supported by current backend)
     connectWebSocket: () => {
-      // WebSocket not supported by current backend deployment
-      logger.info('WebSocket connection skipped - not supported by backend')
+      logger.debug('WebSocket connection skipped - not supported by backend')
       set({ connectionStatus: 'disconnected' })
-      return
-
-      /* Disabled until backend supports WebSocket
-          const state = get();
-          if (!state.session || state.ws?.isConnected()) return;
-
-          const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-
-          const ws = getChatWebSocket(
-            {
-              sessionId: state.session.session_id,
-              token: token || undefined,
-            },
-            {
-              onConnectionStatus: (status) => set({ connectionStatus: status }),
-              onChat: (data) => {
-                if (data.is_complete) {
-                  // Complete message received
-                  const message: ChatMessage = {
-                    id: `msg_${Date.now()}_ws`,
-                    session_id: state.session!.session_id,
-                    role: 'assistant',
-                    content: data.content,
-                    agent_id: data.agent_id,
-                    agent_name: data.agent_name,
-                    timestamp: new Date().toISOString(),
-                    metadata: data.metadata,
-                  };
-                  get().addMessage(message);
-                  set({ agentTyping: false });
-                } else {
-                  // Handle streaming chunks if needed
-                  set({ agentTyping: true });
-                }
-              },
-              onTyping: (isTyping) => set({ agentTyping: isTyping }),
-              onError: (error) => {
-                console.error('WebSocket error:', error);
-                set({ connectionStatus: 'error' });
-              },
-            }
-          );
-
-          ws.connect();
-          set({ ws });
-          */
     },
 
     // Disconnect WebSocket (no-op - WebSocket not supported by backend)
