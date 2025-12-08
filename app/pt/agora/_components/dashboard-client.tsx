@@ -13,6 +13,7 @@ import {
   BackgroundSelector,
   TimelineCard,
   TimelineModal,
+  GamificationCard,
 } from '@/components/agora'
 import { ErrorBoundary } from '@/components/error-boundary'
 import {
@@ -689,6 +690,9 @@ export function DashboardClient({
                 badges={timelineBadges}
                 onOpenModal={() => setShowTimelineModal(true)}
               />
+
+              {/* Gamification Card - Daily bonus and challenges */}
+              <GamificationCard />
 
               {/* Badges - Using GlassCard */}
               <GlassCard className="overflow-hidden">

@@ -47,7 +47,6 @@ import {
   User,
   Settings,
   ChevronDown,
-  Bell,
   HelpCircle,
   Activity,
 } from 'lucide-react'
@@ -79,7 +78,6 @@ const navItems = {
   '/pt/agora/configuracoes': { label: 'Configuracoes', icon: Settings },
   '/pt/agora/trilhas': { label: 'Trilhas', icon: BookOpen },
   '/pt/agora/ajuda': { label: 'Central de Ajuda', icon: HelpCircle },
-  '/pt/agora/notificacoes': { label: 'Notificacoes', icon: Bell },
   '/pt/agora/atividades': { label: 'Atividades', icon: Activity },
 }
 
@@ -280,16 +278,6 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   >
                     <Activity className="w-4 h-4" />
                     <span>Atividades</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/pt/agora/notificacoes"
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Bell className="w-4 h-4" />
-                    <span>Notificacoes</span>
                   </Link>
                 </DropdownMenuItem>
 

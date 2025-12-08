@@ -33,3 +33,6 @@ export { TimelineModal } from './timeline-modal'
 
 // Timeline components
 export { TimelineCard } from './timeline-card'
+
+// Gamification components
+export { GamificationCard } from './gamification-card'

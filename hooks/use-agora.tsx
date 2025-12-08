@@ -54,6 +54,34 @@ export interface AgoraUser {
   isSuperuser: boolean
   enrolledAt: string
   lastActivityDate?: string
+  lastDailyBonusDate?: string // Track daily login bonus
+}
+
+// Daily challenges configuration
+export interface DailyChallenge {
+  id: string
+  name: string
+  description: string
+  emoji: string
+  xpReward: number
+  type: 'session' | 'diary' | 'time'
+  target: number
+  progress: number
+  completed: boolean
+}
+
+// Weekly challenges configuration
+export interface WeeklyChallenge {
+  id: string
+  name: string
+  description: string
+  emoji: string
+  xpReward: number
+  type: 'sessions' | 'xp' | 'streak'
+  target: number
+  progress: number
+  completed: boolean
+  expiresAt: string
 }
 
 export interface XpTransaction {
@@ -284,6 +312,116 @@ export const TRACK_REPOS: Record<string, { owner: string; repo: string }> = {
   devops: { owner: 'anderson-ufrj', repo: 'cidadao.ai-infra' },
 }
 
+// Gamification constants
+export const GAMIFICATION = {
+  DAILY_LOGIN_BONUS: 5,
+  STREAK_MULTIPLIERS: {
+    3: 1.1, // 10% bonus after 3 days
+    7: 1.25, // 25% bonus after 7 days
+    14: 1.5, // 50% bonus after 14 days
+    30: 2.0, // 100% bonus after 30 days
+  } as Record<number, number>,
+  STREAK_MILESTONES: [3, 7, 14, 21, 30, 60, 90, 180, 365] as const,
+}
+
+// Get streak multiplier based on current streak
+export function getStreakMultiplier(streak: number): number {
+  const thresholds = Object.keys(GAMIFICATION.STREAK_MULTIPLIERS)
+    .map(Number)
+    .sort((a, b) => b - a) // Sort descending
+
+  for (const threshold of thresholds) {
+    if (streak >= threshold) {
+      return GAMIFICATION.STREAK_MULTIPLIERS[threshold]
+    }
+  }
+  return 1.0 // No multiplier
+}
+
+// Daily challenge types
+type DailyChallengeType = 'session' | 'diary' | 'time'
+
+// Weekly challenge types
+type WeeklyChallengeType = 'sessions' | 'xp' | 'streak'
+
+// Daily challenges templates
+export const DAILY_CHALLENGE_TEMPLATES: Array<{
+  id: string
+  name: string
+  description: string
+  emoji: string
+  xpReward: number
+  type: DailyChallengeType
+  target: number
+}> = [
+  {
+    id: 'daily-session',
+    name: 'Sessao Diaria',
+    description: 'Complete 1 sessao de estudo hoje',
+    emoji: '🎯',
+    xpReward: 15,
+    type: 'session',
+    target: 1,
+  },
+  {
+    id: 'daily-diary',
+    name: 'Reflexao Diaria',
+    description: 'Escreva uma entrada no diario',
+    emoji: '📝',
+    xpReward: 10,
+    type: 'diary',
+    target: 1,
+  },
+  {
+    id: 'daily-time',
+    name: 'Tempo Dedicado',
+    description: 'Estude por 30 minutos hoje',
+    emoji: '⏱️',
+    xpReward: 20,
+    type: 'time',
+    target: 30,
+  },
+]
+
+// Weekly challenges templates
+export const WEEKLY_CHALLENGE_TEMPLATES: Array<{
+  id: string
+  name: string
+  description: string
+  emoji: string
+  xpReward: number
+  type: WeeklyChallengeType
+  target: number
+}> = [
+  {
+    id: 'weekly-sessions',
+    name: 'Maratonista Semanal',
+    description: 'Complete 5 sessoes esta semana',
+    emoji: '🏃',
+    xpReward: 100,
+    type: 'sessions',
+    target: 5,
+  },
+  {
+    id: 'weekly-xp',
+    name: 'Cacador de XP',
+    description: 'Ganhe 200 XP esta semana',
+    emoji: '⭐',
+    xpReward: 75,
+    type: 'xp',
+    target: 200,
+  },
+  {
+    id: 'weekly-streak',
+    name: 'Consistencia',
+    description: 'Mantenha um streak de 5 dias',
+    emoji: '🔥',
+    xpReward: 150,
+    type: 'streak',
+    target: 5,
+  },
+]
+
 interface AgoraContextType {
   // State
   user: AgoraUser | null
@@ -296,6 +434,12 @@ interface AgoraContextType {
   currentSession: StudySession | null
   badges: AgoraBadge[]
   onboarding: OnboardingData | null
+
+  // Gamification state
+  dailyChallenges: DailyChallenge[]
+  weeklyChallenges: WeeklyChallenge[]
+  hasDailyBonus: boolean
+  streakMultiplier: number
 
   // Backwards compatibility (always real auth now)
   mode: 'real'
@@ -318,6 +462,10 @@ interface AgoraContextType {
   ) => Promise<void>
   checkAndAwardBadges: () => Promise<void>
   logout: () => Promise<void>
+
+  // Gamification actions
+  claimDailyBonus: () => Promise<boolean>
+  refreshChallenges: () => void
 
   // Onboarding
   initOnboarding: () => void
@@ -370,12 +518,18 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null)
   const [badges, setBadges] = useState<AgoraBadge[]>([])
 
+  // Gamification state
+  const [dailyChallenges, setDailyChallenges] = useState<DailyChallenge[]>([])
+  const [weeklyChallenges, setWeeklyChallenges] = useState<WeeklyChallenge[]>([])
+  const [hasDailyBonus, setHasDailyBonus] = useState(false)
+
   // Ref for current session ID
   const currentSessionIdRef = useRef<string | null>(null)
 
   // Derived state
   const isAuthenticated = !!user
   const isSuperuser = user?.isSuperuser ?? false
+  const streakMultiplier = user ? getStreakMultiplier(user.currentStreak) : 1.0
 
   // Track state for toggleTrack
   const [selectedTracks, setSelectedTracks] = useState<AgoraTrack[]>([])
@@ -488,9 +642,15 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         isSuperuser: profile?.is_superuser || false,
         enrolledAt: profile?.enrolled_at || authUser.created_at || new Date().toISOString(),
         lastActivityDate: profile?.last_activity_date,
+        lastDailyBonusDate: profile?.last_daily_bonus_date,
       }
 
       setUser(userData)
+
+      // Check if daily bonus was already claimed today
+      const today = new Date().toISOString().split('T')[0]
+      const bonusClaimed = profile?.last_daily_bonus_date === today
+      setHasDailyBonus(!bonusClaimed)
 
       // Load XP transactions
       const { data: xpData } = await supabase
@@ -1041,6 +1201,138 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, supabase, addXp])
 
+  // Claim daily login bonus
+  const claimDailyBonus = useCallback(async (): Promise<boolean> => {
+    if (!user || !hasDailyBonus) return false
+
+    try {
+      const today = new Date().toISOString().split('T')[0]
+
+      // Update the last daily bonus date
+      await supabase
+        .from('agora_profiles')
+        .update({ last_daily_bonus_date: today })
+        .eq('user_id', user.id)
+
+      // Calculate bonus with streak multiplier
+      const baseBonus = GAMIFICATION.DAILY_LOGIN_BONUS
+      const multiplier = getStreakMultiplier(user.currentStreak)
+      const bonusAmount = Math.round(baseBonus * multiplier)
+
+      // Award XP with potential streak bonus
+      const bonusDescription =
+        multiplier > 1
+          ? `Bonus diario de login (+${Math.round((multiplier - 1) * 100)}% streak bonus!)`
+          : 'Bonus diario de login'
+
+      await addXp(bonusAmount, 'daily_login', bonusDescription)
+
+      // Update local state
+      setUser((prev) => (prev ? { ...prev, lastDailyBonusDate: today } : null))
+      setHasDailyBonus(false)
+
+      logger.info('Daily bonus claimed', { amount: bonusAmount, multiplier })
+      return true
+    } catch (error) {
+      logger.error('Failed to claim daily bonus', { error })
+      return false
+    }
+  }, [user, hasDailyBonus, supabase, addXp])
+
+  // Refresh daily and weekly challenges
+  const refreshChallenges = useCallback(() => {
+    if (!user) return
+
+    // Calculate today's sessions and diary entries
+    const today = new Date().toISOString().split('T')[0]
+    const todaySessions = sessions.filter(
+      (s) => s.startedAt.split('T')[0] === today && s.status === 'completed'
+    ).length
+    const todayDiaryEntries = diaryEntries.filter((d) => d.entryDate === today).length
+    const todayMinutes = sessions
+      .filter((s) => s.startedAt.split('T')[0] === today && s.status === 'completed')
+      .reduce((sum, s) => sum + (s.durationMinutes || 0), 0)
+
+    // Generate daily challenges
+    const daily: DailyChallenge[] = DAILY_CHALLENGE_TEMPLATES.map((template) => {
+      let progress = 0
+      let completed = false
+
+      switch (template.type) {
+        case 'session':
+          progress = todaySessions
+          completed = todaySessions >= template.target
+          break
+        case 'diary':
+          progress = todayDiaryEntries
+          completed = todayDiaryEntries >= template.target
+          break
+        case 'time':
+          progress = todayMinutes
+          completed = todayMinutes >= template.target
+          break
+      }
+
+      return { ...template, progress, completed }
+    })
+
+    setDailyChallenges(daily)
+
+    // Calculate weekly stats
+    const weekStart = new Date()
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay()) // Start of week (Sunday)
+    weekStart.setHours(0, 0, 0, 0)
+    const weekStartStr = weekStart.toISOString()
+
+    const weekSessions = sessions.filter(
+      (s) => s.startedAt >= weekStartStr && s.status === 'completed'
+    ).length
+    const weekXp = xpTransactions
+      .filter((tx) => tx.createdAt >= weekStartStr)
+      .reduce((sum, tx) => sum + tx.amount, 0)
+
+    // Calculate week end date
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+
+    // Generate weekly challenges
+    const weekly: WeeklyChallenge[] = WEEKLY_CHALLENGE_TEMPLATES.map((template) => {
+      let progress = 0
+      let completed = false
+
+      switch (template.type) {
+        case 'sessions':
+          progress = weekSessions
+          completed = weekSessions >= template.target
+          break
+        case 'xp':
+          progress = weekXp
+          completed = weekXp >= template.target
+          break
+        case 'streak':
+          progress = user.currentStreak
+          completed = user.currentStreak >= template.target
+          break
+      }
+
+      return { ...template, progress, completed, expiresAt: weekEnd.toISOString() }
+    })
+
+    setWeeklyChallenges(weekly)
+
+    logger.debug('Challenges refreshed', {
+      dailyCompleted: daily.filter((d) => d.completed).length,
+      weeklyCompleted: weekly.filter((w) => w.completed).length,
+    })
+  }, [user, sessions, diaryEntries, xpTransactions, badges])
+
+  // Initialize challenges when user data loads
+  useEffect(() => {
+    if (user && !isLoading) {
+      refreshChallenges()
+    }
+  }, [user, isLoading, sessions, diaryEntries, badges])
+
   // Logout
   const logout = useCallback(async () => {
     await supabase.auth.signOut()
@@ -1181,6 +1473,11 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       currentSession,
       badges,
       onboarding,
+      // Gamification state
+      dailyChallenges,
+      weeklyChallenges,
+      hasDailyBonus,
+      streakMultiplier,
       // Backwards compatibility
       mode: 'real',
       isDemoMode: false,
@@ -1197,6 +1494,9 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       acceptInternshipContract,
       checkAndAwardBadges,
       logout,
+      // Gamification actions
+      claimDailyBonus,
+      refreshChallenges,
       // Onboarding
       initOnboarding,
       updateOnboarding,
@@ -1220,6 +1520,10 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       currentSession,
       badges,
       onboarding,
+      dailyChallenges,
+      weeklyChallenges,
+      hasDailyBonus,
+      streakMultiplier,
       refreshProfile,
       updateProfile,
       addXp,
@@ -1231,6 +1535,8 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       acceptInternshipContract,
       checkAndAwardBadges,
       logout,
+      claimDailyBonus,
+      refreshChallenges,
       initOnboarding,
       updateOnboarding,
       toggleTrack,
