@@ -17,9 +17,17 @@
 import { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
+import { useAgora } from '@/hooks/use-agora'
 import { AgoraHeader, AgoraSidebar } from '@/components/agora'
+import {
+  getCalendarEvents,
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+  completeCalendarEvent,
+  type CalendarEvent,
+} from '../actions'
+import { toast } from '@/hooks/use-toast'
 import {
   trackAgendaView,
   trackAgendaEventCreated,
@@ -112,41 +120,10 @@ function LoadingFallback() {
 function AcademyAgendaContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
+  const isDemoParam = searchParams.get('demo') === 'true'
 
-  // Auth hooks
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  // Determine which auth to use
-  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
-  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
-
-  // Get user data
-  const user = useMemo(() => {
-    if (isDemoMode) {
-      return demoAuth.user
-    }
-    if (realAuth.isAuthenticated && realAuth.user) {
-      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(realAuth.user.name)}&background=16a34a&color=fff`
-      return {
-        ...demoAuth.user,
-        id: realAuth.user.id,
-        name: realAuth.user.name,
-        email: realAuth.user.email,
-        avatar: realAuth.user.avatar || defaultAvatar,
-        totalXp: realAuth.user.totalXp,
-        currentLevel: realAuth.user.currentLevel,
-        currentRank: realAuth.user.currentRank,
-        currentStreak: realAuth.user.currentStreak,
-        totalTimeMinutes: realAuth.user.totalTimeMinutes,
-        totalSessions: realAuth.user.totalSessions,
-      }
-    }
-    return demoAuth.user
-  }, [isDemoMode, realAuth.isAuthenticated, realAuth.user, demoAuth.user])
-
-  const { resetDemo } = demoAuth
+  // Unified Agora hook
+  const { user, isLoading, isDemoMode, isRealAuth, logout, addXp } = useAgora()
 
   // State
   const [events, setEvents] = useState<AcademyEvent[]>([])
@@ -189,9 +166,35 @@ function AcademyAgendaContent() {
     loadPlugins()
   }, [])
 
-  // Load events from localStorage
+  // Load events from Supabase (real auth) or localStorage (demo)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const loadEvents = async () => {
+      if (typeof window === 'undefined') return
+
+      // Try to load from Supabase if authenticated
+      if (isRealAuth) {
+        const result = await getCalendarEvents()
+        if (result.success && result.data) {
+          // Convert Supabase format to local format
+          const supabaseEvents: AcademyEvent[] = result.data.map((e: CalendarEvent) => ({
+            id: e.id,
+            title: e.title,
+            start: e.start_time,
+            end: e.end_time,
+            type: e.event_type as EventType,
+            description: e.description,
+            xpReward: e.xp_reward,
+            completed: e.completed,
+            url: e.url,
+          }))
+          setEvents(supabaseEvents)
+          // Also save to localStorage as backup
+          localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(supabaseEvents))
+          return
+        }
+      }
+
+      // Fallback to localStorage
       const stored = localStorage.getItem(STORAGE_EVENTS_KEY)
       if (stored) {
         try {
@@ -233,9 +236,11 @@ function AcademyAgendaContent() {
         localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(sampleEvents))
       }
     }
-  }, [])
 
-  // Save events to localStorage
+    loadEvents()
+  }, [isRealAuth])
+
+  // Save events to localStorage (and Supabase will be synced separately)
   const saveEvents = useCallback((newEvents: AcademyEvent[]) => {
     setEvents(newEvents)
     localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(newEvents))
@@ -243,17 +248,15 @@ function AcademyAgendaContent() {
 
   // Redirect unauthenticated users
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+    if (!isDemoMode && !isDemoParam && !isLoading && !isRealAuth) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [isDemoMode, isDemoParam, isLoading, isRealAuth, router])
 
   // Handle logout
   const handleLogout = async () => {
-    if (isRealAuth) {
-      await realAuth.logout()
-    } else {
-      resetDemo()
+    await logout()
+    if (isDemoMode) {
       window.location.href = '/pt/agora'
     }
   }
@@ -274,18 +277,11 @@ function AcademyAgendaContent() {
   }
 
   // Create new event
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (!newEvent.title || !selectedDate) return
 
-    const event: AcademyEvent = {
-      id: Date.now().toString(),
-      title: newEvent.title,
-      start: `${selectedDate}T${newEvent.startTime}:00`,
-      end: `${selectedDate}T${newEvent.endTime}:00`,
-      type: newEvent.type,
-      description: newEvent.description,
-      xpReward: newEvent.xpReward,
-    }
+    const startTime = `${selectedDate}T${newEvent.startTime}:00`
+    const endTime = `${selectedDate}T${newEvent.endTime}:00`
 
     // Calculate duration in minutes
     const startParts = newEvent.startTime.split(':').map(Number)
@@ -299,7 +295,47 @@ function AcademyAgendaContent() {
       duration: durationMinutes > 0 ? durationMinutes : undefined,
     })
 
-    saveEvents([...events, event])
+    // Save to Supabase if authenticated
+    if (isRealAuth) {
+      const result = await createCalendarEvent({
+        title: newEvent.title,
+        start_time: startTime,
+        end_time: endTime,
+        event_type: newEvent.type,
+        description: newEvent.description,
+        xp_reward: newEvent.xpReward,
+      })
+
+      if (result.success && result.data) {
+        const event: AcademyEvent = {
+          id: result.data.id,
+          title: result.data.title,
+          start: result.data.start_time,
+          end: result.data.end_time,
+          type: result.data.event_type as EventType,
+          description: result.data.description,
+          xpReward: result.data.xp_reward,
+          completed: result.data.completed,
+        }
+        saveEvents([...events, event])
+        toast.success('Evento criado!', 'Evento adicionado ao calendario')
+      } else {
+        toast.error('Erro', 'Falha ao criar evento')
+      }
+    } else {
+      // Demo mode - save locally
+      const event: AcademyEvent = {
+        id: Date.now().toString(),
+        title: newEvent.title,
+        start: startTime,
+        end: endTime,
+        type: newEvent.type,
+        description: newEvent.description,
+        xpReward: newEvent.xpReward,
+      }
+      saveEvents([...events, event])
+    }
+
     setShowCreateModal(false)
     setNewEvent({
       title: '',
@@ -312,7 +348,7 @@ function AcademyAgendaContent() {
   }
 
   // Delete event
-  const handleDeleteEvent = (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
     const event = events.find((e) => e.id === eventId)
     if (event) {
       trackAgendaEventDeleted({
@@ -320,29 +356,51 @@ function AcademyAgendaContent() {
         eventTitle: event.title,
       })
     }
+
+    // Delete from Supabase if authenticated
+    if (isRealAuth) {
+      const result = await deleteCalendarEvent(eventId)
+      if (!result.success) {
+        toast.error('Erro', 'Falha ao deletar evento')
+        return
+      }
+    }
+
     saveEvents(events.filter((e) => e.id !== eventId))
     setShowEventModal(false)
     setSelectedEvent(null)
   }
 
   // Mark event as completed
-  const handleCompleteEvent = (eventId: string) => {
+  const handleCompleteEvent = async (eventId: string) => {
     const event = events.find((e) => e.id === eventId)
-    const updated = events.map((e) => (e.id === eventId ? { ...e, completed: true } : e))
-    saveEvents(updated)
-    setShowEventModal(false)
-    setSelectedEvent(null)
+    if (!event) return
 
-    // Award XP and track completion
-    if (event) {
-      // Calculate duration if available
-      let durationMinutes: number | undefined
-      if (event.start && event.end) {
-        const startTime = new Date(event.start).getTime()
-        const endTime = new Date(event.end).getTime()
-        durationMinutes = Math.round((endTime - startTime) / 60000)
+    // Calculate duration if available
+    let durationMinutes: number | undefined
+    if (event.start && event.end) {
+      const startTime = new Date(event.start).getTime()
+      const endTime = new Date(event.end).getTime()
+      durationMinutes = Math.round((endTime - startTime) / 60000)
+    }
+
+    // Complete in Supabase if authenticated (also awards XP)
+    if (isRealAuth) {
+      const result = await completeCalendarEvent(eventId)
+      if (result.success) {
+        toast.success('Evento concluido!', `+${result.xpAwarded || event.xpReward || 10} XP`)
+        trackAgendaEventCompleted({
+          eventType: event.type as AgendaEventType,
+          eventTitle: event.title,
+          duration: durationMinutes,
+          xpEarned: result.xpAwarded || event.xpReward,
+        })
+      } else {
+        toast.error('Erro', result.error || 'Falha ao completar evento')
+        return
       }
-
+    } else {
+      // Demo mode - award XP locally
       trackAgendaEventCompleted({
         eventType: event.type as AgendaEventType,
         eventTitle: event.title,
@@ -351,9 +409,15 @@ function AcademyAgendaContent() {
       })
 
       if (event.xpReward) {
-        demoAuth.addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
+        addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
       }
     }
+
+    // Update local state
+    const updated = events.map((e) => (e.id === eventId ? { ...e, completed: true } : e))
+    saveEvents(updated)
+    setShowEventModal(false)
+    setSelectedEvent(null)
   }
 
   // Generate Google Calendar link
@@ -393,7 +457,7 @@ function AcademyAgendaContent() {
     return <LoadingFallback />
   }
 
-  if (!isDemoMode && !realAuth.isAuthenticated) {
+  if (!isDemoMode && !isRealAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

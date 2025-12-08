@@ -801,3 +801,237 @@ export async function getAcademyUserData() {
     return null
   }
 }
+
+// ============================================
+// Calendar Events (Diary/Agenda)
+// ============================================
+
+export interface CalendarEvent {
+  id: string
+  title: string
+  start_time: string
+  end_time?: string
+  event_type: 'study' | 'reading' | 'video' | 'chat' | 'deadline'
+  description?: string
+  xp_reward?: number
+  completed?: boolean
+  url?: string
+  created_at?: string
+}
+
+/**
+ * Get all calendar events for the authenticated user
+ */
+export async function getCalendarEvents() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    const { data: events, error } = await supabase
+      .from('agora_calendar_events')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('start_time', { ascending: true })
+
+    if (error) throw error
+
+    return { success: true, data: events }
+  } catch (error) {
+    console.error('Failed to get calendar events:', error)
+    return { error: 'Failed to get calendar events', data: null }
+  }
+}
+
+/**
+ * Create a new calendar event
+ */
+export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'created_at'>) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('agora_calendar_events')
+      .insert({
+        user_id: user.id,
+        title: event.title,
+        start_time: event.start_time,
+        end_time: event.end_time,
+        event_type: event.event_type,
+        description: event.description,
+        xp_reward: event.xp_reward || 10,
+        completed: false,
+        url: event.url,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to create calendar event:', error)
+    return { error: 'Failed to create calendar event', data: null }
+  }
+}
+
+/**
+ * Update a calendar event
+ */
+export async function updateCalendarEvent(
+  eventId: string,
+  updates: Partial<Omit<CalendarEvent, 'id' | 'created_at'>>
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('agora_calendar_events')
+      .update(updates)
+      .eq('id', eventId)
+      .eq('user_id', user.id) // Security: only update own events
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Failed to update calendar event:', error)
+    return { error: 'Failed to update calendar event', data: null }
+  }
+}
+
+/**
+ * Delete a calendar event
+ */
+export async function deleteCalendarEvent(eventId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    const { error } = await supabase
+      .from('agora_calendar_events')
+      .delete()
+      .eq('id', eventId)
+      .eq('user_id', user.id) // Security: only delete own events
+
+    if (error) throw error
+
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete calendar event:', error)
+    return { error: 'Failed to delete calendar event' }
+  }
+}
+
+/**
+ * Mark a calendar event as completed and award XP
+ */
+export async function completeCalendarEvent(eventId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Not authenticated', data: null }
+  }
+
+  try {
+    // Get the event to know XP reward
+    const { data: event, error: fetchError } = await supabase
+      .from('agora_calendar_events')
+      .select('*')
+      .eq('id', eventId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError) throw fetchError
+    if (!event) return { error: 'Event not found', data: null }
+    if (event.completed) return { error: 'Event already completed', data: null }
+
+    // Mark as completed
+    const { error: updateError } = await supabase
+      .from('agora_calendar_events')
+      .update({ completed: true, completed_at: new Date().toISOString() })
+      .eq('id', eventId)
+
+    if (updateError) throw updateError
+
+    // Award XP
+    const xpReward = event.xp_reward || 10
+
+    // Get current profile for balance
+    const { data: profile } = await supabase
+      .from('agora_profiles')
+      .select('total_xp, current_level')
+      .eq('user_id', user.id)
+      .single()
+
+    const currentXp = profile?.total_xp || 0
+    const newXp = currentXp + xpReward
+    const newLevel = Math.floor(newXp / 100) + 1
+
+    let newRank = 'novato'
+    if (newXp >= 5000) newRank = 'arquiteto'
+    else if (newXp >= 2000) newRank = 'mentor'
+    else if (newXp >= 500) newRank = 'contribuidor'
+    else if (newXp >= 100) newRank = 'aprendiz'
+
+    // Update profile
+    await supabase
+      .from('agora_profiles')
+      .update({
+        total_xp: newXp,
+        current_level: newLevel,
+        current_rank: newRank,
+        last_activity_date: new Date().toISOString().split('T')[0],
+      })
+      .eq('user_id', user.id)
+
+    // Log XP transaction
+    await supabase.from('agora_xp_transactions').insert({
+      user_id: user.id,
+      amount: xpReward,
+      balance_after: newXp,
+      source_type: 'calendar_event',
+      description: `Evento concluido: ${event.title}`,
+    })
+
+    return { success: true, xpAwarded: xpReward, data: { ...event, completed: true } }
+  } catch (error) {
+    console.error('Failed to complete calendar event:', error)
+    return { error: 'Failed to complete calendar event', data: null }
+  }
+}
