@@ -6,7 +6,7 @@ import { Suspense } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AgoraProvider, useAgora } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
-import { AgoraHeader } from '@/components/agora'
+import { AgoraHeader, CelebrationModal } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -123,6 +123,9 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation - same as main app */}
       {isMobile && !isLoginPage && <BottomNavigation items={agoraNavItems} />}
+
+      {/* Global Celebration Modal - uses store state */}
+      <CelebrationModal />
     </div>
   )
 }

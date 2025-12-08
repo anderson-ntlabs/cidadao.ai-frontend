@@ -3,6 +3,7 @@
  *
  * Shows achievement celebrations with confetti animation.
  * Used for badges, level ups, and milestone achievements.
+ * Now uses global celebration store for triggering from anywhere.
  *
  * Author: Anderson Henrique da Silva
  * Date: 2025-12-08
@@ -14,23 +15,20 @@ import { useEffect, useState, useCallback } from 'react'
 import { Modal, ModalContent } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Sparkles, Star, Trophy, Award, Zap } from 'lucide-react'
+import { Sparkles, Star, Trophy, Award, Zap, Video } from 'lucide-react'
+import {
+  useCelebrationStore,
+  type CelebrationType,
+  type CelebrationData,
+} from '@/store/celebration-store'
 
-export type CelebrationType = 'badge' | 'level_up' | 'rank_up' | 'streak' | 'milestone'
-
-interface CelebrationData {
-  type: CelebrationType
-  title: string
-  subtitle: string
-  emoji: string
-  xpReward?: number
-  description?: string
-}
+// Re-export types for backwards compatibility
+export type { CelebrationType, CelebrationData }
 
 interface CelebrationModalProps {
-  isOpen: boolean
-  onClose: () => void
-  celebration: CelebrationData | null
+  isOpen?: boolean
+  onClose?: () => void
+  celebration?: CelebrationData | null
 }
 
 // Generate random confetti particles
@@ -115,6 +113,8 @@ function getCelebrationIcon(type: CelebrationType) {
       return Sparkles
     case 'milestone':
       return Star
+    case 'video':
+      return Video
     default:
       return Star
   }
@@ -133,12 +133,24 @@ function getCelebrationGradient(type: CelebrationType) {
       return 'from-orange-400 via-red-500 to-pink-500'
     case 'milestone':
       return 'from-green-400 via-emerald-500 to-teal-500'
+    case 'video':
+      return 'from-red-400 via-rose-500 to-pink-500'
     default:
       return 'from-yellow-400 to-orange-500'
   }
 }
 
-export function CelebrationModal({ isOpen, onClose, celebration }: CelebrationModalProps) {
+export function CelebrationModal({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  celebration: propCelebration,
+}: CelebrationModalProps) {
+  // Use store if no props provided
+  const store = useCelebrationStore()
+  const isOpen = propIsOpen ?? store.isOpen
+  const celebration = propCelebration ?? store.celebration
+  const onClose = propOnClose ?? store.hideCelebration
+
   const [confetti, setConfetti] = useState<ReturnType<typeof generateConfetti>>([])
   const [showContent, setShowContent] = useState(false)
 
@@ -268,107 +280,5 @@ export function CelebrationModal({ isOpen, onClose, celebration }: CelebrationMo
   )
 }
 
-// Hook to manage celebration state
-export function useCelebration() {
-  const [celebration, setCelebration] = useState<CelebrationData | null>(null)
-  const [isOpen, setIsOpen] = useState(false)
-
-  const showCelebration = useCallback((data: CelebrationData) => {
-    setCelebration(data)
-    setIsOpen(true)
-  }, [])
-
-  const hideCelebration = useCallback(() => {
-    setIsOpen(false)
-    // Clear celebration after animation
-    setTimeout(() => setCelebration(null), 300)
-  }, [])
-
-  // Helper functions for common celebration types
-  const celebrateBadge = useCallback(
-    (badgeName: string, badgeEmoji: string, xpReward?: number) => {
-      showCelebration({
-        type: 'badge',
-        title: 'Badge Conquistado!',
-        subtitle: badgeName,
-        emoji: badgeEmoji,
-        xpReward,
-        description: 'Continue assim! Voce esta no caminho certo.',
-      })
-    },
-    [showCelebration]
-  )
-
-  const celebrateLevelUp = useCallback(
-    (newLevel: number, xpReward?: number) => {
-      showCelebration({
-        type: 'level_up',
-        title: 'Level Up!',
-        subtitle: `Nivel ${newLevel}`,
-        emoji: '🚀',
-        xpReward,
-        description: 'Seu conhecimento esta crescendo!',
-      })
-    },
-    [showCelebration]
-  )
-
-  const celebrateRankUp = useCallback(
-    (newRank: string, xpReward?: number) => {
-      const rankEmojis: Record<string, string> = {
-        aprendiz: '📚',
-        contribuidor: '🔧',
-        mentor: '🎓',
-        arquiteto: '🏛️',
-      }
-      showCelebration({
-        type: 'rank_up',
-        title: 'Novo Rank!',
-        subtitle: newRank,
-        emoji: rankEmojis[newRank.toLowerCase()] || '⭐',
-        xpReward,
-        description: 'Sua dedicacao esta sendo reconhecida!',
-      })
-    },
-    [showCelebration]
-  )
-
-  const celebrateStreak = useCallback(
-    (days: number, xpReward?: number) => {
-      showCelebration({
-        type: 'streak',
-        title: 'Streak Incrivel!',
-        subtitle: `${days} dias consecutivos!`,
-        emoji: '🔥',
-        xpReward,
-        description: 'A consistencia e a chave do sucesso!',
-      })
-    },
-    [showCelebration]
-  )
-
-  const celebrateMilestone = useCallback(
-    (title: string, subtitle: string, emoji: string, xpReward?: number) => {
-      showCelebration({
-        type: 'milestone',
-        title,
-        subtitle,
-        emoji,
-        xpReward,
-      })
-    },
-    [showCelebration]
-  )
-
-  return {
-    celebration,
-    isOpen,
-    showCelebration,
-    hideCelebration,
-    celebrateBadge,
-    celebrateLevelUp,
-    celebrateRankUp,
-    celebrateStreak,
-    celebrateMilestone,
-  }
-}
+// Re-export the celebration store as useCelebration for backwards compatibility
+export { useCelebrationStore as useCelebration } from '@/store/celebration-store'

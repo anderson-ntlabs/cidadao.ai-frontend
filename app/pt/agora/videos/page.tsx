@@ -13,7 +13,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -21,8 +20,9 @@ import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
-import { ArrowLeft, Play, Video, Check, Clock, Sparkles, Star, X, ExternalLink } from 'lucide-react'
+import { Play, Video, Check, Clock, Star } from 'lucide-react'
 import { trackVideoCompleted } from '@/lib/analytics/agora-tracker'
+import { useCelebrationStore } from '@/store/celebration-store'
 import { updateVideoProgress, getVideoProgress } from '../actions'
 
 interface VideoItem {
@@ -344,6 +344,8 @@ export default function AcademyVideosPage() {
     }
     saveProgress(newProgress)
 
+    const xpAmount = video.is_required ? 25 : 15
+
     if (user) {
       // Sync with Supabase for authenticated users (XP auto-awarded by server action)
       const result = await updateVideoProgress(
@@ -353,16 +355,17 @@ export default function AcademyVideosPage() {
         true
       )
       if (result.success) {
-        toast.success('Vídeo concluído!', `+${result.xpAwarded || 25} XP`)
+        // Trigger celebration modal
+        useCelebrationStore.getState().celebrateVideo(video.title, result.xpAwarded || xpAmount)
       } else {
         // Fallback to demo mode XP if server action fails
-        addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
-        toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+        addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
+        useCelebrationStore.getState().celebrateVideo(video.title, xpAmount)
       }
     } else {
       // Demo mode: use local XP
-      addXp(video.is_required ? 25 : 15, 'video', `Video assistido: ${video.title}`)
-      toast.success('Vídeo concluído!', `+${video.is_required ? 25 : 15} XP`)
+      addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
+      useCelebrationStore.getState().celebrateVideo(video.title, xpAmount)
     }
 
     // Track video completion in PostHog
@@ -413,36 +416,30 @@ export default function AcademyVideosPage() {
       {/* Gradient Overlay */}
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
 
-      {/* Header */}
-      <header className="relative z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/pt/agora"
-              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Video className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Vídeos do Programa
-                </h1>
-              </div>
+      {/* Page Title Section */}
+      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
+              <Video className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-2xl text-gray-900 dark:text-gray-100">
+                Vídeos do Programa
+              </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {completedCount} de {videos.length} assistidos
               </p>
             </div>
-            <Badge variant="warning" size="default">
-              <Star className="w-3 h-3" />
-              {totalRequired} obrigatórios
-            </Badge>
           </div>
+          <Badge variant="warning" size="default">
+            <Star className="w-3 h-3" />
+            {totalRequired} obrigatórios
+          </Badge>
         </div>
-      </header>
+      </section>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 pb-8 pt-4">
         {/* Category filter */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (

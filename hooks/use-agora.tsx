@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { createLogger } from '@/lib/logger'
 import { trackBadgeEarned, trackLevelUp, trackRankUp } from '@/lib/analytics/agora-tracker'
+import { useCelebrationStore } from '@/store/celebration-store'
 
 const logger = createLogger('Agora')
 
@@ -852,12 +853,16 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           ])
         }
 
-        // Track milestones
+        // Track milestones and trigger celebrations
         if (newLevel > oldLevel) {
           trackLevelUp(oldLevel, newLevel, newXp)
+          // Trigger level up celebration
+          useCelebrationStore.getState().celebrateLevelUp(newLevel)
         }
         if (newRank !== oldRank) {
           trackRankUp(oldRank, newRank, newLevel)
+          // Trigger rank up celebration
+          useCelebrationStore.getState().celebrateRankUp(newRank)
         }
 
         setUser((prev) =>
@@ -1195,6 +1200,11 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         )
 
         setBadges((prev) => [...prev, ...newBadges])
+
+        // Trigger celebration for each new badge (queued if multiple)
+        for (const badge of newBadges) {
+          useCelebrationStore.getState().celebrateBadge(badge.name, badge.emoji, 0) // XP already added
+        }
       }
     } catch (error) {
       logger.error('Failed to check badges', { error })
