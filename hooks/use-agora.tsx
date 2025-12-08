@@ -1484,7 +1484,8 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   const selectTracks = useCallback(
     async (tracks: AgoraTrack[]) => {
       if (!user) return
-      await updateProfile({ tracks, onboardingStep: Math.max(user.onboardingStep, 2) })
+      // Set onboardingStep to 3 (GitHub step) when tracks are confirmed
+      await updateProfile({ tracks, onboardingStep: 3 })
       await addXp(25 * tracks.length, 'onboarding', `Trilhas selecionadas: ${tracks.join(', ')}`)
     },
     [user, updateProfile, addXp]
@@ -1494,9 +1495,10 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   const setGitHubUsername = useCallback(
     async (username: string) => {
       if (!user) return
+      // Advance to step 4 (Fork verification) after setting GitHub username
       await updateProfile({
         githubUsername: username,
-        onboardingStep: Math.max(user.onboardingStep, 3),
+        onboardingStep: 4,
       })
     },
     [user, updateProfile]
@@ -1608,6 +1610,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   // Backwards compatibility: confirmTracks
   const confirmTracks = useCallback(async () => {
     if (!user || selectedTracks.length === 0) return
+    // selectTracks already advances to step 3
     await selectTracks(selectedTracks)
   }, [user, selectedTracks, selectTracks])
 
