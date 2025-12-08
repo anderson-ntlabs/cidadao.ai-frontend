@@ -36,3 +36,5 @@ export { TimelineCard } from './timeline-card'
 
 // Gamification components
 export { GamificationCard } from './gamification-card'
+export { CelebrationModal, useCelebration } from './celebration-modal'
+export type { CelebrationType } from './celebration-modal'
