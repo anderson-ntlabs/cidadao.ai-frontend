@@ -1,3 +1,22 @@
+try {
+  !(function () {
+    var e =
+        'undefined' != typeof window
+          ? window
+          : 'undefined' != typeof global
+            ? global
+            : 'undefined' != typeof globalThis
+              ? globalThis
+              : 'undefined' != typeof self
+                ? self
+                : {},
+      t = new e.Error().stack
+    t &&
+      ((e._sentryDebugIds = e._sentryDebugIds || {}),
+      (e._sentryDebugIds[t] = 'fe3d60f9-92b7-4b6d-8a3f-89eeaba2c6ba'),
+      (e._sentryDebugIdIdentifier = 'sentry-dbid-fe3d60f9-92b7-4b6d-8a3f-89eeaba2c6ba'))
+  })()
+} catch (e) {}
 ;(() => {
   'use strict'
   self.onmessage = async (e) => {

@@ -2,52 +2,62 @@
  * Rate Limiting Middleware
  *
  * Implements token bucket algorithm for API rate limiting
+ *
+ * Storage Strategy:
+ * - Development: In-memory Map (fast, no external deps)
+ * - Production: Vercel KV (distributed, persistent across serverless invocations)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit as kvCheckRateLimit } from '@/lib/cache/kv-cache.service'
 
 interface RateLimitConfig {
   /**
    * Maximum number of requests allowed
    */
-  limit: number;
+  limit: number
 
   /**
    * Time window in milliseconds
    */
-  window: number;
+  window: number
 
   /**
    * Message to return when rate limit is exceeded
    */
-  message?: string;
+  message?: string
 }
 
 interface RateLimitEntry {
-  count: number;
-  resetTime: number;
+  count: number
+  resetTime: number
 }
 
 /**
- * In-memory rate limit store
- * In production, use Redis or Vercel KV for distributed rate limiting
+ * In-memory rate limit store (fallback for development/non-KV environments)
  */
-const rateLimitStore = new Map<string, RateLimitEntry>();
+const rateLimitStore = new Map<string, RateLimitEntry>()
 
 /**
- * Clean up expired entries periodically
+ * Check if KV is available
  */
-setInterval(
-  () => {
-    const now = Date.now();
+const isKVAvailable = (): boolean => {
+  return !!process.env.KV_REST_API_URL
+}
+
+/**
+ * Clean up expired entries periodically (in-memory only)
+ */
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
     for (const [key, entry] of rateLimitStore.entries()) {
       if (entry.resetTime < now) {
-        rateLimitStore.delete(key);
+        rateLimitStore.delete(key)
       }
     }
-  },
-  60 * 1000
-); // Clean every minute
+  }, 60 * 1000) // Clean every minute
+}
 
 /**
  * Get client identifier from request
@@ -57,66 +67,107 @@ function getClientId(request: NextRequest): string {
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0] ||
     request.headers.get('x-real-ip') ||
-    'unknown';
+    'unknown'
 
   // For authenticated requests, use user ID if available
-  const userId = request.headers.get('x-user-id');
+  const userId = request.headers.get('x-user-id')
 
-  return userId || ip;
+  return userId || ip
 }
 
 /**
- * Check if request should be rate limited
+ * Check if request should be rate limited (synchronous, in-memory)
  */
-export function checkRateLimit(
+function checkRateLimitInMemory(
   request: NextRequest,
   config: RateLimitConfig
 ): {
-  allowed: boolean;
-  remaining: number;
-  resetTime: number;
+  allowed: boolean
+  remaining: number
+  resetTime: number
 } {
-  const clientId = getClientId(request);
-  const now = Date.now();
-  const key = `${clientId}:${request.nextUrl.pathname}`;
+  const clientId = getClientId(request)
+  const now = Date.now()
+  const key = `${clientId}:${request.nextUrl.pathname}`
 
   // Get or create rate limit entry
-  let entry = rateLimitStore.get(key);
+  let entry = rateLimitStore.get(key)
 
   if (!entry || entry.resetTime < now) {
     // Create new entry or reset expired one
     entry = {
       count: 0,
       resetTime: now + config.window,
-    };
-    rateLimitStore.set(key, entry);
+    }
+    rateLimitStore.set(key, entry)
   }
 
   // Increment counter
-  entry.count++;
+  entry.count++
 
   // Check if limit exceeded
-  const allowed = entry.count <= config.limit;
-  const remaining = Math.max(0, config.limit - entry.count);
+  const allowed = entry.count <= config.limit
+  const remaining = Math.max(0, config.limit - entry.count)
 
   return {
     allowed,
     remaining,
     resetTime: entry.resetTime,
-  };
+  }
+}
+
+/**
+ * Check if request should be rate limited (async, uses KV in production)
+ *
+ * In production with Vercel KV configured, this uses distributed rate limiting.
+ * Falls back to in-memory rate limiting for development or when KV is unavailable.
+ */
+export async function checkRateLimitAsync(
+  request: NextRequest,
+  config: RateLimitConfig
+): Promise<{
+  allowed: boolean
+  remaining: number
+  resetTime: number
+}> {
+  // Use KV-based rate limiting in production
+  if (isKVAvailable()) {
+    const clientId = getClientId(request)
+    const identifier = `${clientId}:${request.nextUrl.pathname}`
+    const windowSeconds = Math.ceil(config.window / 1000)
+
+    const result = await kvCheckRateLimit(identifier, config.limit, windowSeconds)
+    return result
+  }
+
+  // Fallback to in-memory
+  return checkRateLimitInMemory(request, config)
+}
+
+/**
+ * Check if request should be rate limited (sync version for compatibility)
+ * @deprecated Use checkRateLimitAsync for production workloads with KV
+ */
+export function checkRateLimit(
+  request: NextRequest,
+  config: RateLimitConfig
+): {
+  allowed: boolean
+  remaining: number
+  resetTime: number
+} {
+  return checkRateLimitInMemory(request, config)
 }
 
 /**
  * Rate limit middleware wrapper
  */
 export function rateLimit(config: RateLimitConfig) {
-  return function rateLimitMiddleware(
-    request: NextRequest
-  ): NextResponse | null {
-    const { allowed, remaining, resetTime } = checkRateLimit(request, config);
+  return function rateLimitMiddleware(request: NextRequest): NextResponse | null {
+    const { allowed, remaining, resetTime } = checkRateLimit(request, config)
 
     if (!allowed) {
-      const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
+      const retryAfter = Math.ceil((resetTime - Date.now()) / 1000)
 
       return new NextResponse(
         JSON.stringify({
@@ -133,12 +184,12 @@ export function rateLimit(config: RateLimitConfig) {
             'X-RateLimit-Reset': resetTime.toString(),
           },
         }
-      );
+      )
     }
 
     // Request allowed - return null to continue
-    return null;
-  };
+    return null
+  }
 }
 
 /**
@@ -189,7 +240,7 @@ export const rateLimitConfigs = {
     window: 60 * 60 * 1000,
     message: 'Rate limit exceeded. Please try again later.',
   },
-};
+}
 
 /**
  * Add rate limit headers to response
@@ -199,11 +250,11 @@ export function addRateLimitHeaders(
   request: NextRequest,
   config: RateLimitConfig
 ): NextResponse {
-  const { remaining, resetTime } = checkRateLimit(request, config);
+  const { remaining, resetTime } = checkRateLimit(request, config)
 
-  response.headers.set('X-RateLimit-Limit', config.limit.toString());
-  response.headers.set('X-RateLimit-Remaining', remaining.toString());
-  response.headers.set('X-RateLimit-Reset', resetTime.toString());
+  response.headers.set('X-RateLimit-Limit', config.limit.toString())
+  response.headers.set('X-RateLimit-Remaining', remaining.toString())
+  response.headers.set('X-RateLimit-Reset', resetTime.toString())
 
-  return response;
+  return response
 }

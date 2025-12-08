@@ -168,11 +168,10 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true
 
-    // Detect if we just came from OAuth callback
+    // Detect if we just came from OAuth callback (using URL param only)
+    // Cookie oauth_session_ready is httpOnly and cannot be read by JS
     const isOAuthComplete =
-      typeof window !== 'undefined' &&
-      (window.location.search.includes('oauth_complete=') ||
-        document.cookie.includes('oauth_session_ready=true'))
+      typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
@@ -205,10 +204,7 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
                 setIsAuthenticated(true)
                 setIsLoading(false)
 
-                // Clear OAuth indicators
-                if (typeof document !== 'undefined') {
-                  document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-                }
+                // Clean up URL if it has oauth_complete param
                 if (
                   typeof window !== 'undefined' &&
                   window.location.search.includes('oauth_complete=')
@@ -253,11 +249,8 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!supabaseUser) {
-          // Check if OAuth session should be ready - retry with exponential backoff
-          const oauthSessionReady =
-            typeof document !== 'undefined' && document.cookie.includes('oauth_session_ready=true')
-
-          if ((oauthSessionReady || isOAuthComplete) && retryCount < 5) {
+          // Retry with exponential backoff if OAuth just completed
+          if (isOAuthComplete && retryCount < 5) {
             const delay = 300 * (retryCount + 1) // 300ms, 600ms, 900ms, 1200ms, 1500ms
             logger.debug(`Ágora: No session but OAuth completed, retrying in ${delay}ms...`)
             await new Promise((resolve) => setTimeout(resolve, delay))
@@ -285,11 +278,6 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
             email: agoraUser.email,
             name: agoraUser.name,
           })
-
-          // Clear OAuth cookie on successful auth
-          if (typeof document !== 'undefined') {
-            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-          }
 
           // Clean up URL if it has oauth_complete param
           if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
@@ -337,10 +325,7 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
           setIsAuthenticated(true)
           setIsLoading(false)
 
-          // Clear OAuth indicators on successful auth via listener
-          if (typeof document !== 'undefined') {
-            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-          }
+          // Clean up URL if it has oauth_complete param
           if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
             const url = new URL(window.location.href)
             url.searchParams.delete('oauth_complete')

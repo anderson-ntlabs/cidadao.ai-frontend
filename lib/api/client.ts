@@ -1,5 +1,8 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
 import { getSecureApiUrl } from '@/lib/utils/ensure-https'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('ApiClient')
 
 // API configuration - Always use HTTPS
 export const API_BASE_URL = getSecureApiUrl()
@@ -97,7 +100,7 @@ apiClient.interceptors.response.use(
           : data.detail[0]?.msg
         : data?.message || 'An unexpected error occurred'
 
-      console.error(`API Error ${status}:`, errorMessage, data)
+      logger.error(`API Error ${status}`, { message: errorMessage, data })
 
       return Promise.reject({
         message: errorMessage,
@@ -140,7 +143,7 @@ export async function apiRequest<T = any>(config: AxiosRequestConfig): Promise<A
       success: true,
     }
   } catch (error: any) {
-    console.error('API request error:', error.response?.data || error.message)
+    logger.error('API request error', { error: error.response?.data || error.message })
     return {
       error: {
         message: error.message || 'An error occurred',

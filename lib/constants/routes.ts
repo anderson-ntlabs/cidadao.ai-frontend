@@ -98,17 +98,24 @@ export function isAuthRoute(pathname: string): boolean {
  */
 export function isPublicRoute(pathname: string): boolean {
   const publicPaths = [
-    '/pt', '/en',
-    '/pt/login', '/en/login',
-    '/pt/about', '/en/about',
-    '/pt/agents', '/en/agents',
-    '/pt/privacy', '/en/privacy',
-    '/pt/terms', '/en/terms',
-    '/pt/help', '/en/help',
-    '/auth/callback'
+    '/pt',
+    '/en',
+    '/pt/login',
+    '/en/login',
+    '/pt/about',
+    '/en/about',
+    '/pt/agents',
+    '/en/agents',
+    '/pt/privacy',
+    '/en/privacy',
+    '/pt/terms',
+    '/en/terms',
+    '/pt/help',
+    '/en/help',
+    '/auth/callback',
   ]
 
-  return publicPaths.some(path => pathname === path || pathname.startsWith(path + '?'))
+  return publicPaths.some((path) => pathname === path || pathname.startsWith(path + '?'))
 }
 
 /**
@@ -127,10 +134,67 @@ export function getLoginRoute(locale: 'pt' | 'en'): string {
 }
 
 // ============================================================================
+// OAuth Redirect Validation
+// ============================================================================
+
+/**
+ * Allowed OAuth redirect paths
+ * These are the only paths that can be used as redirect targets after OAuth
+ * This prevents Open Redirect attacks
+ */
+export const ALLOWED_OAUTH_REDIRECTS = [
+  '/pt/app',
+  '/pt/app/chat',
+  '/pt/app/dashboard',
+  '/pt/app/investigacoes',
+  '/pt/app/perfil',
+  '/pt/app/configuracoes',
+  '/pt/app/notificacoes',
+  '/pt/agora',
+  '/pt/agora/dashboard',
+  '/pt/agora/chat',
+  '/pt/agora/trilhas',
+  '/pt/agora/ranking',
+  '/pt/agora/perfil',
+  '/en/app',
+] as const
+
+/**
+ * Validate if a redirect path is allowed after OAuth
+ * Only allows internal paths that start with allowed prefixes
+ * Rejects absolute URLs, protocol-relative URLs, and external paths
+ */
+export function isValidOAuthRedirect(path: string | null): boolean {
+  if (!path) return false
+
+  // Must start with /
+  if (!path.startsWith('/')) return false
+
+  // Reject protocol-relative URLs (//example.com)
+  if (path.startsWith('//')) return false
+
+  // Reject paths with protocols (javascript:, data:, etc)
+  if (path.includes(':')) return false
+
+  // Check against allowed paths (exact match or starts with path + /)
+  return ALLOWED_OAUTH_REDIRECTS.some(
+    (allowed) => path === allowed || path.startsWith(allowed + '/')
+  )
+}
+
+/**
+ * Get safe redirect path for OAuth
+ * Returns the path if valid, otherwise returns default
+ */
+export function getSafeOAuthRedirect(path: string | null, defaultPath = '/pt/app'): string {
+  return isValidOAuthRedirect(path) ? path! : defaultPath
+}
+
+// ============================================================================
 // Type Exports
 // ============================================================================
 
-export type PublicRoutePT = typeof PUBLIC_ROUTES_PT[keyof typeof PUBLIC_ROUTES_PT]
-export type PublicRouteEN = typeof PUBLIC_ROUTES_EN[keyof typeof PUBLIC_ROUTES_EN]
-export type AuthRoute = typeof AUTH_ROUTES[keyof typeof AUTH_ROUTES]
+export type PublicRoutePT = (typeof PUBLIC_ROUTES_PT)[keyof typeof PUBLIC_ROUTES_PT]
+export type PublicRouteEN = (typeof PUBLIC_ROUTES_EN)[keyof typeof PUBLIC_ROUTES_EN]
+export type AuthRoute = (typeof AUTH_ROUTES)[keyof typeof AUTH_ROUTES]
 export type Locale = 'pt' | 'en'

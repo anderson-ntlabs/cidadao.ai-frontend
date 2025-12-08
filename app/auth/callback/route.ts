@@ -2,13 +2,16 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createLogger } from '@/lib/logger'
+import { getSafeOAuthRedirect } from '@/lib/constants/routes'
 
 const logger = createLogger('OAuthCallback')
 
 export async function GET(request: Request): Promise<NextResponse> {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') ?? '/pt/app'
+  const rawNext = requestUrl.searchParams.get('next')
+  // Validate redirect to prevent Open Redirect attacks
+  const next = getSafeOAuthRedirect(rawNext, '/pt/app')
 
   logger.info('OAuth callback received', {
     hasCode: !!code,
@@ -92,10 +95,12 @@ export async function GET(request: Request): Promise<NextResponse> {
       })
 
       // Set a cookie to indicate OAuth just completed successfully
+      // httpOnly prevents XSS attacks from reading this cookie
       response.cookies.set('oauth_session_ready', 'true', {
         path: '/',
         maxAge: 30,
-        httpOnly: false,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
       })
 

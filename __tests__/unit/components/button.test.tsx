@@ -24,7 +24,8 @@ describe('Button Component', () => {
     it('applies primary variant classes (default)', () => {
       render(<Button variant="primary">Primary</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('from-green-600')
+      // Primary uses custom gradient class bg-gradient-green-blue
+      expect(button).toHaveClass('bg-gradient-green-blue')
     })
 
     it('applies destructive variant classes', () => {
@@ -136,7 +137,11 @@ describe('Button Component', () => {
     })
 
     it('supports aria-disabled', () => {
-      render(<Button disabled aria-disabled="true">Disabled</Button>)
+      render(
+        <Button disabled aria-disabled="true">
+          Disabled
+        </Button>
+      )
       expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'true')
     })
   })

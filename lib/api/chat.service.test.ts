@@ -12,18 +12,17 @@ import {
   formatAgentName,
 } from './chat.service'
 import { api } from './client'
-import { sendBackendMessage } from './chat-adapter-backend'
-import { cachedSmartChatService } from '@/lib/services/cached-smart-chat.service'
 import { getMockAgents, getMockSuggestions } from './chat-adapter'
-import { isFeatureEnabled } from '@/lib/feature-flags'
 import type { ChatRequest, ChatResponse, ChatMessage } from '@/types/chat'
 
 // Mock all dependencies
 vi.mock('./client')
-vi.mock('./chat-adapter-backend')
-vi.mock('@/lib/services/cached-smart-chat.service')
 vi.mock('./chat-adapter')
-vi.mock('@/lib/feature-flags')
+vi.mock('@/lib/chat', () => ({
+  chatService: {
+    sendMessage: vi.fn(),
+  },
+}))
 
 // Mock EventSource
 let mockEventSource: any

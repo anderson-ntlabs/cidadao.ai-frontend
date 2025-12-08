@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/api/auth.service'
+import { createLogger } from '@/lib/logger'
 import { toast } from './use-toast'
+
+const logger = createLogger('Auth')
 
 interface User {
   id: string
@@ -81,7 +84,7 @@ export function useAuth(): UseAuthReturn {
         setIsAuthenticated(false)
       }
     } catch (error) {
-      console.error('Auth check failed:', error)
+      logger.error('Auth check failed', { error })
       setUser(null)
       setIsAuthenticated(false)
     } finally {
@@ -122,7 +125,7 @@ export function useAuth(): UseAuthReturn {
           router.push('/pt/app')
         }
       } catch (error) {
-        console.error('Login failed:', error)
+        logger.error('Login failed', { error })
         toast.error('Falha no login', 'Verifique suas credenciais e tente novamente')
         throw error
       } finally {
@@ -154,7 +157,7 @@ export function useAuth(): UseAuthReturn {
         // OAuth will redirect to provider, then back to callback
         // So we don't set user state here - it happens after redirect
       } catch (error) {
-        console.error('Provider login failed:', error)
+        logger.error('Provider login failed', { error })
         toast.error('Falha no login', 'Tente novamente mais tarde')
         throw error
       } finally {
@@ -178,7 +181,7 @@ export function useAuth(): UseAuthReturn {
       const supabase = createClient()
       await supabase.auth.signOut()
     } catch (error) {
-      console.error('Logout error:', error)
+      logger.error('Logout error', { error })
     } finally {
       // Always clear local state
       localStorage.removeItem('user')

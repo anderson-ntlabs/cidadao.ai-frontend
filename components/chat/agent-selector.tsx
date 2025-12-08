@@ -17,7 +17,7 @@
 
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, memo } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { agents } from '@/data/agents'
@@ -49,7 +49,7 @@ const ALL_OPTIONS: AgentOption[] = agents.map((a) => ({
   image: a.image,
 }))
 
-export function AgentSelector({
+export const AgentSelector = memo(function AgentSelector({
   selectedAgentId,
   onSelectAgent,
   disabled = false,
@@ -343,4 +343,4 @@ export function AgentSelector({
       </div>
     </div>
   )
-}
+})

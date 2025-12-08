@@ -14,6 +14,9 @@ import {
   isSpeechRecognitionSupported,
   logBrowserCompatibility,
 } from './browser-detection'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('SpeechRecognition')
 import type {
   VoiceInputConfig,
   VoiceInputCallbacks,
@@ -71,7 +74,7 @@ export class SpeechRecognitionService {
   private initialize(): void {
     const SpeechRecognition = getSpeechRecognition()
     if (!SpeechRecognition) {
-      console.error('Speech Recognition API not available')
+      logger.error('Speech Recognition API not available')
       return
     }
 
@@ -166,7 +169,7 @@ export class SpeechRecognitionService {
         message: this.getErrorMessage(event.error),
       }
 
-      console.error('Speech recognition error:', error)
+      logger.error('Speech recognition error', { error })
       this.setState('error')
       this.callbacks.onError?.(error)
 
@@ -178,35 +181,35 @@ export class SpeechRecognitionService {
 
     // On no match
     this.recognition.onnomatch = () => {
-      console.log('No speech match')
+      logger.debug('No speech match')
     }
 
     // On audio start/end
     this.recognition.onaudiostart = () => {
-      console.log('Audio capture started')
+      logger.debug('Audio capture started')
     }
 
     this.recognition.onaudioend = () => {
-      console.log('Audio capture ended')
+      logger.debug('Audio capture ended')
     }
 
     // On sound start/end
     this.recognition.onsoundstart = () => {
-      console.log('Sound detected')
+      logger.debug('Sound detected')
     }
 
     this.recognition.onsoundend = () => {
-      console.log('Sound ended')
+      logger.debug('Sound ended')
     }
 
     // On speech start/end
     this.recognition.onspeechstart = () => {
-      console.log('Speech started')
+      logger.debug('Speech started')
       this.resetAutoStopTimer()
     }
 
     this.recognition.onspeechend = () => {
-      console.log('Speech ended')
+      logger.debug('Speech ended')
     }
   }
 
@@ -224,7 +227,7 @@ export class SpeechRecognitionService {
     }
 
     if (this.isListening) {
-      console.log('Already listening')
+      logger.debug('Already listening')
       return
     }
 
@@ -250,7 +253,7 @@ export class SpeechRecognitionService {
 
       this.recognition?.start()
     } catch (err) {
-      console.error('Failed to start recognition:', err)
+      logger.error('Failed to start recognition', { error: err })
       if (this.isListening) {
         // Already started, ignore
         return
@@ -275,7 +278,7 @@ export class SpeechRecognitionService {
       this.isListening = false
       this.clearAutoStopTimer()
     } catch (err) {
-      console.error('Failed to stop recognition:', err)
+      logger.error('Failed to stop recognition', { error: err })
     }
   }
 
@@ -290,7 +293,7 @@ export class SpeechRecognitionService {
       this.isListening = false
       this.clearAutoStopTimer()
     } catch (err) {
-      console.error('Failed to abort recognition:', err)
+      logger.error('Failed to abort recognition', { error: err })
     }
   }
 
@@ -367,7 +370,7 @@ export class SpeechRecognitionService {
     if (this.config.autoStopTimeout > 0) {
       this.autoStopTimer = setTimeout(() => {
         if (this.isListening) {
-          console.log('Auto-stopping due to silence')
+          logger.debug('Auto-stopping due to silence')
           this.stop()
         }
       }, this.config.autoStopTimeout)
@@ -416,11 +419,13 @@ export class SpeechRecognitionService {
    */
   public logDebugInfo(): void {
     logBrowserCompatibility()
-    console.log('Current state:', this.state)
-    console.log('Is listening:', this.isListening)
-    console.log('Config:', this.config)
-    console.log('Final transcript:', this.finalTranscript)
-    console.log('Interim transcript:', this.interimTranscript)
+    logger.debug('Speech recognition debug info', {
+      state: this.state,
+      isListening: this.isListening,
+      config: this.config,
+      finalTranscript: this.finalTranscript,
+      interimTranscript: this.interimTranscript,
+    })
   }
 }
 

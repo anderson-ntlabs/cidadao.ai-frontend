@@ -68,11 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check authentication status on mount
   useEffect(() => {
-    // Detect if we just came from OAuth callback
+    // Detect if we just came from OAuth callback (using URL param only)
+    // Cookie oauth_session_ready is httpOnly and cannot be read by JS
     const isOAuthComplete =
-      typeof window !== 'undefined' &&
-      (window.location.search.includes('oauth_complete=') ||
-        document.cookie.includes('oauth_session_ready=true'))
+      typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')
 
     const checkSession = async (retryCount = 0): Promise<boolean> => {
       try {
@@ -92,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await new Promise((resolve) => setTimeout(resolve, 300 * (retryCount + 1)))
             return checkSession(retryCount + 1)
           }
-          console.error('[Auth] Session error:', error)
+          logger.error('Session error', { error })
           setUser(null)
           setIsAuthenticated(false)
           return false
@@ -108,11 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
           setIsAuthenticated(true)
 
-          // Clear OAuth cookie on successful auth
-          if (typeof document !== 'undefined') {
-            document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-          }
-
           // Clean up URL if it has oauth_complete param
           if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
             const url = new URL(window.location.href)
@@ -122,11 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           return true
         } else {
-          // Check if OAuth session should be ready - retry with exponential backoff
-          const oauthSessionReady =
-            typeof document !== 'undefined' && document.cookie.includes('oauth_session_ready=true')
-
-          if ((oauthSessionReady || isOAuthComplete) && retryCount < 5) {
+          // Retry with exponential backoff if OAuth just completed
+          if (isOAuthComplete && retryCount < 5) {
             const delay = 300 * (retryCount + 1) // 300ms, 600ms, 900ms, 1200ms, 1500ms
             logger.debug(`No session but OAuth completed, retrying in ${delay}ms...`)
             await new Promise((resolve) => setTimeout(resolve, delay))
@@ -139,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return false
         }
       } catch (error) {
-        console.error('[Auth] Unexpected error:', error)
+        logger.error('Unexpected auth error', { error })
         setUser(null)
         setIsAuthenticated(false)
         return false
@@ -168,11 +159,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(convertSupabaseUser(session.user))
         setIsAuthenticated(true)
         setIsLoading(false)
-
-        // Clear OAuth cookie
-        if (typeof document !== 'undefined') {
-          document.cookie = 'oauth_session_ready=; path=/; max-age=0'
-        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setIsAuthenticated(false)
@@ -211,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error: any) {
-        console.error('Login error:', error)
+        logger.error('Login error', { error })
         toast.error('Falha no login', error.message || 'Verifique suas credenciais')
         throw error
       } finally {
@@ -246,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           )
         }
       } catch (error: any) {
-        console.error('Signup error:', error)
+        logger.error('Signup error', { error })
         toast.error('Erro ao criar conta', error.message || 'Tente novamente')
         throw error
       } finally {
@@ -270,7 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) throw error
       } catch (error: any) {
-        console.error('OAuth login error:', error)
+        logger.error('OAuth login error', { error })
         toast.error('Erro no login social', error.message || 'Tente novamente')
         throw error
       } finally {
@@ -305,7 +291,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Using window.location instead of router to ensure clean state
       window.location.href = '/pt'
     } catch (error: any) {
-      console.error('Logout error:', error)
+      logger.error('Logout error', { error })
       toast.error('Erro ao sair', error.message || 'Tente novamente')
     } finally {
       setIsLoading(false)
@@ -325,7 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true)
       }
     } catch (error) {
-      console.error('Session refresh error:', error)
+      logger.error('Session refresh error', { error })
       await logout()
     }
   }, [supabase, logout])

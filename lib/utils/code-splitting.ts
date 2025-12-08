@@ -1,5 +1,8 @@
 import dynamic from 'next/dynamic'
 import { ComponentType } from 'react'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('CodeSplitting')
 
 interface DynamicOptions {
   loading?: () => JSX.Element | null
@@ -26,7 +29,7 @@ export async function prefetchComponent(importFn: () => Promise<any>): Promise<v
   try {
     await importFn()
   } catch (error) {
-    console.error('Failed to prefetch component:', error)
+    logger.error('Failed to prefetch component', { error })
   }
 }
 

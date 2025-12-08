@@ -95,14 +95,17 @@ npm run test:mobile           # Mobile-specific tests
 npx playwright test --headed  # Watch execution
 npx playwright test --debug   # Debug mode
 
-# Manual integration scripts (60+ available)
+# Manual integration scripts (67 available)
 # Organized by category in scripts/:
-# - scripts/testing/         - Test scripts (40+)
-# - scripts/diagnostics/     - Troubleshooting (5+)
-# - scripts/monitoring/      - Performance monitoring (5+)
-# - scripts/analysis/        - Code analysis (5+)
-# - scripts/generation/      - Code generation (5+)
-# - scripts/utilities/       - Various utilities (10+)
+# - scripts/testing/         - Test scripts
+# - scripts/diagnostics/     - Troubleshooting
+# - scripts/monitoring/      - Performance monitoring
+# - scripts/analysis/        - Code analysis
+# - scripts/generation/      - Code generation
+# - scripts/utilities/       - Various utilities
+# - scripts/db/              - Database utilities
+# - scripts/admin/           - Admin utilities
+# - scripts/debug/           - Debug utilities
 ```
 
 ### Performance & Analysis
@@ -239,13 +242,13 @@ Gamified learning platform at `/pt/agora/*` with XP system, badges, and learning
 ```tsx
 <AgoraAuthProvider>
   {' '}
-  // Real auth (Supabase OAuth)
+  {/* Real auth (Supabase OAuth) */}
   <AgoraDemoProvider>
     {' '}
-    // Demo mode (localStorage)
+    {/* Demo mode (localStorage) */}
     <UnifiedAgoraProvider>
       {' '}
-      // Auto-selects real/demo based on auth
+      {/* Auto-selects real/demo based on auth */}
       {children}
     </UnifiedAgoraProvider>
   </AgoraDemoProvider>
@@ -329,7 +332,7 @@ const { user, addXp, startSession, badges, mode } = useAgora()
 - Mobile configs: Pixel 5, iPhone 12 (`config/playwright.mobile.config.ts`)
 - Main config: `config/playwright.config.ts`
 
-**Manual Scripts**: 60+ scripts organized in `/scripts` subdirectories
+**Manual Scripts**: 67 scripts organized in `/scripts` subdirectories
 
 ---
 
@@ -770,7 +773,7 @@ npm run test:coverage
 
 ## Common Script Categories
 
-The `scripts/` directory contains 60+ utility scripts organized by purpose:
+The `scripts/` directory contains 67 utility scripts organized by purpose:
 
 **Testing** (`scripts/testing/`):
 

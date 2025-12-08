@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import { investigationService } from '@/lib/services/investigation.service'
+import { createLogger } from '@/lib/logger'
 import type { Investigation } from '@/types/supabase'
+
+const logger = createLogger('Investigations')
 
 /**
  * Data for creating a new investigation
@@ -79,9 +82,7 @@ export function useInvestigations() {
    *
    * @param {string} [status] - Optional status filter ('active' | 'completed' | 'archived')
    */
-  const loadInvestigations = useCallback(async (
-    status?: 'active' | 'completed' | 'archived'
-  ) => {
+  const loadInvestigations = useCallback(async (status?: 'active' | 'completed' | 'archived') => {
     setIsLoading(true)
     setError(null)
 
@@ -91,7 +92,7 @@ export function useInvestigations() {
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao carregar investigações'
       setError(errorMessage)
-      console.error('Error loading investigations:', err)
+      logger.error('Error loading investigations', { error: err })
     } finally {
       setIsLoading(false)
     }
@@ -113,7 +114,7 @@ export function useInvestigations() {
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao carregar investigação'
       setError(errorMessage)
-      console.error('Error loading investigation:', err)
+      logger.error('Error loading investigation', { error: err })
       return null
     } finally {
       setIsLoading(false)
@@ -126,30 +127,31 @@ export function useInvestigations() {
    * @param {CreateInvestigationData} data - Investigation data
    * @returns {Promise<Investigation|null>} The created investigation or null on error
    */
-  const createInvestigation = useCallback(async (
-    data: CreateInvestigationData
-  ): Promise<Investigation | null> => {
-    setIsLoading(true)
-    setError(null)
+  const createInvestigation = useCallback(
+    async (data: CreateInvestigationData): Promise<Investigation | null> => {
+      setIsLoading(true)
+      setError(null)
 
-    try {
-      const investigation = await investigationService.createInvestigation(data)
+      try {
+        const investigation = await investigationService.createInvestigation(data)
 
-      if (investigation) {
-        // Add to local state
-        setInvestigations((prev) => [investigation, ...prev])
+        if (investigation) {
+          // Add to local state
+          setInvestigations((prev) => [investigation, ...prev])
+        }
+
+        return investigation
+      } catch (err: any) {
+        const errorMessage = err.message || 'Erro ao criar investigação'
+        setError(errorMessage)
+        logger.error('Error creating investigation', { error: err })
+        return null
+      } finally {
+        setIsLoading(false)
       }
-
-      return investigation
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao criar investigação'
-      setError(errorMessage)
-      console.error('Error creating investigation:', err)
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+    },
+    []
+  )
 
   /**
    * Update an investigation
@@ -158,33 +160,31 @@ export function useInvestigations() {
    * @param {Partial<Investigation>} updates - Fields to update
    * @returns {Promise<Investigation|null>} The updated investigation or null on error
    */
-  const updateInvestigation = useCallback(async (
-    id: string,
-    updates: Partial<Investigation>
-  ): Promise<Investigation | null> => {
-    setIsLoading(true)
-    setError(null)
+  const updateInvestigation = useCallback(
+    async (id: string, updates: Partial<Investigation>): Promise<Investigation | null> => {
+      setIsLoading(true)
+      setError(null)
 
-    try {
-      const investigation = await investigationService.updateInvestigation(id, updates)
+      try {
+        const investigation = await investigationService.updateInvestigation(id, updates)
 
-      if (investigation) {
-        // Update local state
-        setInvestigations((prev) =>
-          prev.map((inv) => (inv.id === id ? investigation : inv))
-        )
+        if (investigation) {
+          // Update local state
+          setInvestigations((prev) => prev.map((inv) => (inv.id === id ? investigation : inv)))
+        }
+
+        return investigation
+      } catch (err: any) {
+        const errorMessage = err.message || 'Erro ao atualizar investigação'
+        setError(errorMessage)
+        logger.error('Error updating investigation', { error: err })
+        return null
+      } finally {
+        setIsLoading(false)
       }
-
-      return investigation
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao atualizar investigação'
-      setError(errorMessage)
-      console.error('Error updating investigation:', err)
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+    },
+    []
+  )
 
   /**
    * Delete an investigation
@@ -208,7 +208,7 @@ export function useInvestigations() {
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao deletar investigação'
       setError(errorMessage)
-      console.error('Error deleting investigation:', err)
+      logger.error('Error deleting investigation', { error: err })
       return false
     } finally {
       setIsLoading(false)
@@ -221,9 +221,12 @@ export function useInvestigations() {
    * @param {string} id - Investigation ID
    * @returns {Promise<Investigation|null>} The archived investigation or null on error
    */
-  const archiveInvestigation = useCallback(async (id: string): Promise<Investigation | null> => {
-    return updateInvestigation(id, { status: 'archived' })
-  }, [updateInvestigation])
+  const archiveInvestigation = useCallback(
+    async (id: string): Promise<Investigation | null> => {
+      return updateInvestigation(id, { status: 'archived' })
+    },
+    [updateInvestigation]
+  )
 
   /**
    * Mark investigation as completed
@@ -231,9 +234,12 @@ export function useInvestigations() {
    * @param {string} id - Investigation ID
    * @returns {Promise<Investigation|null>} The completed investigation or null on error
    */
-  const completeInvestigation = useCallback(async (id: string): Promise<Investigation | null> => {
-    return updateInvestigation(id, { status: 'completed' })
-  }, [updateInvestigation])
+  const completeInvestigation = useCallback(
+    async (id: string): Promise<Investigation | null> => {
+      return updateInvestigation(id, { status: 'completed' })
+    },
+    [updateInvestigation]
+  )
 
   return {
     investigations,
@@ -245,6 +251,6 @@ export function useInvestigations() {
     archiveInvestigation,
     completeInvestigation,
     isLoading,
-    error
+    error,
   }
 }
