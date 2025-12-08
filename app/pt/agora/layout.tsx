@@ -5,6 +5,7 @@ import '@/styles/design-system/tokens/index.css'
 import { Suspense } from 'react'
 import { usePathname } from 'next/navigation'
 import { AgoraProvider } from '@/hooks/use-agora'
+import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -12,13 +13,14 @@ import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'luci
 /**
  * Agora Layout
  *
- * Provides auth context for all Agora pages via AgoraProvider.
+ * Provides auth context for all Agora pages via AgoraProvider + AgoraAuthProvider.
  * Real authentication only - no demo mode.
  *
  * Use `useAgora()` hook in pages for user data and actions.
+ * Use `useAgoraAuth()` hook for auth-specific operations (login, logout).
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Removed demo mode, real auth only
+ * Updated: 2025-12-08 - Added AgoraAuthProvider for auth operations
  */
 
 // Agora navigation items for mobile bottom nav
@@ -89,9 +91,11 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AgoraLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<AgoraLoadingFallback />}>
-      <AgoraProvider>
-        <AgoraLayoutContent>{children}</AgoraLayoutContent>
-      </AgoraProvider>
+      <AgoraAuthProvider>
+        <AgoraProvider>
+          <AgoraLayoutContent>{children}</AgoraLayoutContent>
+        </AgoraProvider>
+      </AgoraAuthProvider>
     </Suspense>
   )
 }
