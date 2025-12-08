@@ -1,7 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { createLogger } from '@/lib/logger'
 import type { ChatMessage } from '@/types/chat'
+
+const logger = createLogger('ChatModeHistory')
 
 /**
  * Chat Mode History Hook
@@ -52,7 +55,7 @@ function loadFromStorage(): ChatModeHistoryState {
       }
     }
   } catch (error) {
-    console.error('Failed to load chat history from storage:', error)
+    logger.error('Failed to load chat history from storage', { error })
   }
 
   return initialState
@@ -76,7 +79,7 @@ function saveToStorage(state: ChatModeHistoryState): void {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
   } catch (error) {
-    console.error('Failed to save chat history to storage:', error)
+    logger.error('Failed to save chat history to storage', { error })
   }
 }
 
@@ -221,7 +224,7 @@ export function useChatModeHistory() {
         return true
       }
     } catch (error) {
-      console.error('Failed to import chat history:', error)
+      logger.error('Failed to import chat history', { error })
     }
     return false
   }, [])

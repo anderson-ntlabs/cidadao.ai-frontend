@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react'
+import { createLogger } from '@/lib/logger'
 import { agents } from '@/data/agents'
+
+const logger = createLogger('Chat')
 
 /**
  * Message structure for chat requests
- * 
+ *
  * @interface ChatMessage
  */
 interface ChatMessage {
@@ -21,7 +24,7 @@ interface ChatMessage {
 
 /**
  * Response structure from chat API
- * 
+ *
  * @interface ChatResponse
  */
 interface ChatResponse {
@@ -43,7 +46,7 @@ interface ChatResponse {
 
 /**
  * Response structure for investigation queries
- * 
+ *
  * @interface InvestigationResponse
  */
 interface InvestigationResponse {
@@ -65,29 +68,29 @@ interface InvestigationResponse {
 
 /**
  * useChat - Hook for managing chat interactions with AI agents
- * 
+ *
  * @hook
  * @example
  * ```tsx
  * const { sendMessage, startInvestigation, isLoading, error } = useChat();
- * 
+ *
  * // Send a regular message
  * const response = await sendMessage({
  *   message: "What can you tell me about public contracts?",
  *   agent_id: "zumbi"
  * });
- * 
+ *
  * // Start an investigation
  * const investigation = await startInvestigation("suspicious contracts in 2024");
  * ```
- * 
+ *
  * @returns {Object} Chat methods and state
  * @returns {Function} returns.sendMessage - Send a message to an agent
  * @returns {Function} returns.startInvestigation - Start a new investigation
  * @returns {Function} returns.getAgentByRole - Get agent by role
  * @returns {boolean} returns.isLoading - Loading state
  * @returns {string|null} returns.error - Error message if any
- * 
+ *
  * @since 1.0.0
  */
 export function useChat() {
@@ -100,19 +103,20 @@ export function useChat() {
 
     try {
       // Use the unified chat endpoint with Maritaca AI integration
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app'
       const response = await fetch(`${apiUrl}/api/v1/chat/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           message: params.message,
           session_id: params.session_id || `session-${Date.now()}`,
-          context: params.context || {}
-        })
-      }).catch(err => {
+          context: params.context || {},
+        }),
+      }).catch((err) => {
         throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão.')
       })
 
@@ -139,7 +143,7 @@ export function useChat() {
         agent: data.agent_id || data.agent_name || 'drummond',
         confidence: data.confidence || 0.8,
         sources: data.metadata?.sources || [],
-        activeAgents: []
+        activeAgents: [],
       }
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao se comunicar com o servidor'
@@ -159,14 +163,14 @@ export function useChat() {
         'Analise licitações do meu município',
         'Procure anomalias em contratos de obras públicas',
         'Quais são os principais tipos de irregularidades?',
-        'Me ajude a entender o Portal da Transparência'
+        'Me ajude a entender o Portal da Transparência',
       ]
-      
-      return { 
-        suggestions: suggestions.slice(0, 3) // Retornar apenas 3 sugestões
+
+      return {
+        suggestions: suggestions.slice(0, 3), // Retornar apenas 3 sugestões
       }
     } catch (err) {
-      console.error('Erro ao buscar sugestões:', err)
+      logger.error('Error fetching suggestions', { error: err })
       return { suggestions: [] }
     }
   }, [])
@@ -175,6 +179,6 @@ export function useChat() {
     sendMessage,
     getSuggestions,
     isLoading,
-    error
+    error,
   }
 }

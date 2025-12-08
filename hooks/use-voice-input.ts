@@ -12,11 +12,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/lib/speech/speech-recognition.service'
 import { isSpeechRecognitionSupported, getBrowserInfo } from '@/lib/speech/browser-detection'
+import { createLogger } from '@/lib/logger'
 import type {
   VoiceInputConfig,
   SpeechRecognitionState,
   SpeechRecognitionError,
 } from '@/lib/speech/types'
+
+const logger = createLogger('VoiceInput')
 
 /**
  * Voice input hook options
@@ -118,7 +121,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setBrowserInfo(getBrowserInfo())
 
     if (!supported) {
-      console.warn('Speech recognition not supported in this browser')
+      logger.warn('Speech recognition not supported in this browser')
       return
     }
 
@@ -203,7 +206,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   // Start listening
   const start = useCallback(async () => {
     if (!serviceRef.current) {
-      console.error('Speech recognition service not initialized')
+      logger.error('Speech recognition service not initialized')
       return
     }
 
@@ -230,7 +233,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
       await serviceRef.current.start()
     } catch (err) {
-      console.error('Failed to start voice input:', err)
+      logger.error('Failed to start voice input', { error: err })
     }
   }, [isSupported, continuous, onError])
 

@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await new Promise((resolve) => setTimeout(resolve, 300 * (retryCount + 1)))
             return checkSession(retryCount + 1)
           }
-          console.error('[Auth] Session error:', error)
+          logger.error('Session error', { error })
           setUser(null)
           setIsAuthenticated(false)
           return false
@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return false
         }
       } catch (error) {
-        console.error('[Auth] Unexpected error:', error)
+        logger.error('Unexpected auth error', { error })
         setUser(null)
         setIsAuthenticated(false)
         return false
@@ -197,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error: any) {
-        console.error('Login error:', error)
+        logger.error('Login error', { error })
         toast.error('Falha no login', error.message || 'Verifique suas credenciais')
         throw error
       } finally {
@@ -232,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           )
         }
       } catch (error: any) {
-        console.error('Signup error:', error)
+        logger.error('Signup error', { error })
         toast.error('Erro ao criar conta', error.message || 'Tente novamente')
         throw error
       } finally {
@@ -256,7 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) throw error
       } catch (error: any) {
-        console.error('OAuth login error:', error)
+        logger.error('OAuth login error', { error })
         toast.error('Erro no login social', error.message || 'Tente novamente')
         throw error
       } finally {
@@ -291,7 +291,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Using window.location instead of router to ensure clean state
       window.location.href = '/pt'
     } catch (error: any) {
-      console.error('Logout error:', error)
+      logger.error('Logout error', { error })
       toast.error('Erro ao sair', error.message || 'Tente novamente')
     } finally {
       setIsLoading(false)
@@ -311,7 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true)
       }
     } catch (error) {
-      console.error('Session refresh error:', error)
+      logger.error('Session refresh error', { error })
       await logout()
     }
   }, [supabase, logout])

@@ -179,7 +179,7 @@ export const useChatStore = create<ChatStore>()(
                 return
               }
             } catch (error) {
-              console.error('Failed to load session:', error)
+              logger.error('Failed to load session', { error })
               // Continue to create new session
             }
           }
@@ -276,7 +276,7 @@ export const useChatStore = create<ChatStore>()(
                   agent_name: response.agent_name || '',
                 })
               } catch (error) {
-                console.error('Failed to save message to Supabase:', error)
+                logger.error('Failed to save message to Supabase', { error })
               }
 
               // Update suggested actions
@@ -723,7 +723,7 @@ export const useChatStore = create<ChatStore>()(
             const agents = await chatService.getAgents()
             set({ activeAgents: agents })
           } catch (error) {
-            console.error('Failed to load agents:', error)
+            logger.error('Failed to load agents', { error })
           }
         },
 
@@ -733,7 +733,7 @@ export const useChatStore = create<ChatStore>()(
             const suggestions = await chatService.getSuggestions()
             set({ suggestedActions: suggestions })
           } catch (error) {
-            console.error('Failed to load suggestions:', error)
+            logger.error('Failed to load suggestions', { error })
           }
         },
 
@@ -801,7 +801,7 @@ export const useChatStore = create<ChatStore>()(
             })
           } catch (error) {
             // Silently ignore - chat works without Supabase persistence
-            console.error('Failed to create session in Supabase:', error)
+            logger.error('Failed to create session in Supabase', { error })
           }
         },
 
@@ -846,7 +846,7 @@ export const useChatStore = create<ChatStore>()(
               throw new Error('Session not found')
             }
           } catch (error) {
-            console.error('Failed to load session:', error)
+            logger.error('Failed to load session', { error })
             set({ error: 'Failed to load chat session' })
           } finally {
             set({ isLoading: false })

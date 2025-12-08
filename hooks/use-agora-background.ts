@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger('AgoraBackground')
 
 /**
  * Agora Background Customization Hook
@@ -217,7 +220,7 @@ export function useAgoraBackground() {
 
       setState(loadedState)
     } catch (e) {
-      console.error('Failed to load background preference:', e)
+      logger.error('Failed to load background preference', { error: e })
     }
 
     setIsLoaded(true)
@@ -230,7 +233,7 @@ export function useAgoraBackground() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
       } catch (e) {
-        console.error('Failed to save background preference:', e)
+        logger.error('Failed to save background preference', { error: e })
       }
       return updated
     })

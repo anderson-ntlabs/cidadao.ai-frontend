@@ -9,7 +9,10 @@
  * @date 2025-11-19
  */
 
+import { createLogger } from '@/lib/logger'
 import type { BrowserInfo } from './types'
+
+const logger = createLogger('BrowserDetection')
 
 /**
  * Check if the browser supports Web Speech API (SpeechRecognition)
@@ -192,7 +195,7 @@ export function getUnsupportedBrowserMessage(lang: 'pt' | 'en' = 'pt'): string {
 }
 
 /**
- * Log browser compatibility information to console
+ * Log browser compatibility information
  * Useful for debugging
  */
 export function logBrowserCompatibility(): void {
@@ -202,19 +205,17 @@ export function logBrowserCompatibility(): void {
 
   const info = getBrowserInfo()
 
-  console.group('🎤 Voice Input Browser Compatibility')
-  console.log('Browser:', info.name, info.version)
-  console.log('Mobile:', info.isMobile ? 'Yes' : 'No')
-  console.log(
-    'Speech Recognition:',
-    info.supportsSpeechRecognition ? '✅ Supported' : '❌ Not Supported'
-  )
-
-  if (info.supportsSpeechRecognition) {
-    console.log('API:', getSpeechRecognition() ? 'Available' : 'Not Available')
-  } else {
-    console.log('💡 Recommendation: Use Chrome or Edge for voice input')
-  }
-
-  console.groupEnd()
+  logger.debug('Voice Input Browser Compatibility', {
+    browser: `${info.name} ${info.version}`,
+    mobile: info.isMobile,
+    speechRecognition: info.supportsSpeechRecognition,
+    api: info.supportsSpeechRecognition
+      ? getSpeechRecognition()
+        ? 'Available'
+        : 'Not Available'
+      : 'N/A',
+    recommendation: !info.supportsSpeechRecognition
+      ? 'Use Chrome or Edge for voice input'
+      : undefined,
+  })
 }
