@@ -39,6 +39,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
