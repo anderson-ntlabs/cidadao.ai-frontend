@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -24,6 +24,8 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Timer,
+  Trophy,
 } from 'lucide-react'
 import { useAgora, type DailyChallenge, type WeeklyChallenge } from '@/hooks/use-agora'
 
@@ -31,59 +33,174 @@ interface GamificationCardProps {
   className?: string
 }
 
-// Compact challenge item
+// Calculate time until reset
+function getTimeUntilReset(isWeekly: boolean): { hours: number; minutes: number; seconds: number } {
+  const now = new Date()
+
+  if (isWeekly) {
+    // Weekly reset on Monday at 00:00
+    const dayOfWeek = now.getDay()
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek
+    const nextMonday = new Date(now)
+    nextMonday.setDate(now.getDate() + daysUntilMonday)
+    nextMonday.setHours(0, 0, 0, 0)
+    const diff = nextMonday.getTime() - now.getTime()
+    return {
+      hours: Math.floor(diff / (1000 * 60 * 60)),
+      minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((diff % (1000 * 60)) / 1000),
+    }
+  } else {
+    // Daily reset at midnight
+    const tomorrow = new Date(now)
+    tomorrow.setDate(now.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    const diff = tomorrow.getTime() - now.getTime()
+    return {
+      hours: Math.floor(diff / (1000 * 60 * 60)),
+      minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((diff % (1000 * 60)) / 1000),
+    }
+  }
+}
+
+// Format time as HH:MM:SS
+function formatTimeUntilReset(time: { hours: number; minutes: number; seconds: number }): string {
+  return `${time.hours.toString().padStart(2, '0')}:${time.minutes.toString().padStart(2, '0')}:${time.seconds.toString().padStart(2, '0')}`
+}
+
+// Reset timer hook
+function useResetTimer(isWeekly: boolean) {
+  const [time, setTime] = useState(getTimeUntilReset(isWeekly))
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(getTimeUntilReset(isWeekly))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [isWeekly])
+
+  return time
+}
+
+// Challenge item component
 function ChallengeItem({
   challenge,
   isWeekly = false,
+  onClaim,
+  isClaiming,
 }: {
   challenge: DailyChallenge | WeeklyChallenge
   isWeekly?: boolean
+  onClaim: (challengeId: string, periodStart: string, isWeekly: boolean) => Promise<void>
+  isClaiming: boolean
 }) {
   const progress = Math.min((challenge.progress / challenge.target) * 100, 100)
+  const canClaim = challenge.completed && !challenge.claimed
+
+  const handleClaim = async () => {
+    await onClaim(challenge.id, challenge.periodStart, isWeekly)
+  }
 
   return (
     <div
       className={cn(
         'p-3 rounded-lg transition-all',
-        challenge.completed
-          ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-          : 'bg-gray-50 dark:bg-gray-800/50'
+        challenge.claimed
+          ? 'bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 opacity-75'
+          : challenge.completed
+            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+            : 'bg-gray-50 dark:bg-gray-800/50'
       )}
     >
       <div className="flex items-center gap-3">
         <span className="text-xl">{challenge.emoji}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+            <span
+              className={cn(
+                'font-medium text-sm truncate',
+                challenge.claimed
+                  ? 'text-gray-500 dark:text-gray-500'
+                  : 'text-gray-900 dark:text-gray-100'
+              )}
+            >
               {challenge.name}
             </span>
-            {challenge.completed && (
+            {challenge.claimed && (
+              <Trophy
+                className="w-4 h-4 text-yellow-500 flex-shrink-0"
+                aria-label="Recompensa resgatada"
+              />
+            )}
+            {challenge.completed && !challenge.claimed && (
               <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
             )}
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          <p
+            className={cn(
+              'text-xs truncate',
+              challenge.claimed
+                ? 'text-gray-400 dark:text-gray-600'
+                : 'text-gray-500 dark:text-gray-400'
+            )}
+          >
             {challenge.description}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
-          <span
-            className={cn(
-              'text-xs font-bold',
-              challenge.completed
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-yellow-600 dark:text-yellow-400'
-            )}
-          >
-            +{challenge.xpReward} XP
-          </span>
-          <p className="text-[10px] text-gray-400">
-            {challenge.progress}/{challenge.target}
-          </p>
+          {canClaim ? (
+            <Button
+              onClick={handleClaim}
+              disabled={isClaiming}
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white h-7 px-2 text-xs"
+            >
+              {isClaiming ? (
+                <Sparkles className="w-3 h-3 animate-spin" />
+              ) : (
+                <>
+                  <Gift className="w-3 h-3 mr-1" />
+                  Resgatar
+                </>
+              )}
+            </Button>
+          ) : challenge.claimed ? (
+            <span className="text-xs font-medium text-gray-400 dark:text-gray-500">Resgatado</span>
+          ) : (
+            <>
+              <span
+                className={cn(
+                  'text-xs font-bold',
+                  challenge.completed
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-yellow-600 dark:text-yellow-400'
+                )}
+              >
+                +{challenge.xpReward} XP
+              </span>
+              <p className="text-[10px] text-gray-400">
+                {challenge.progress}/{challenge.target}
+              </p>
+            </>
+          )}
         </div>
       </div>
-      {!challenge.completed && (
+      {!challenge.completed && !challenge.claimed && (
         <Progress value={progress} className="h-1.5 mt-2" indicatorClassName="bg-yellow-500" />
       )}
+    </div>
+  )
+}
+
+// Reset timer display component
+function ResetTimerDisplay({ isWeekly }: { isWeekly: boolean }) {
+  const time = useResetTimer(isWeekly)
+
+  return (
+    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+      <Timer className="w-3 h-3" />
+      <span>Reinicia em {formatTimeUntilReset(time)}</span>
     </div>
   )
 }
@@ -96,9 +213,11 @@ export function GamificationCard({ className }: GamificationCardProps) {
     dailyChallenges,
     weeklyChallenges,
     claimDailyBonus,
+    claimChallenge,
   } = useAgora()
 
   const [isClaimingBonus, setIsClaimingBonus] = useState(false)
+  const [claimingChallengeId, setClaimingChallengeId] = useState<string | null>(null)
   const [showWeekly, setShowWeekly] = useState(false)
 
   if (!user) return null
@@ -112,10 +231,31 @@ export function GamificationCard({ className }: GamificationCardProps) {
     }
   }
 
+  const handleClaimChallenge = async (
+    challengeId: string,
+    periodStart: string,
+    isWeekly: boolean
+  ) => {
+    setClaimingChallengeId(challengeId)
+    try {
+      await claimChallenge(challengeId, periodStart, isWeekly)
+    } finally {
+      setClaimingChallengeId(null)
+    }
+  }
+
   const completedDaily = dailyChallenges.filter((c) => c.completed).length
+  const claimedDaily = dailyChallenges.filter((c) => c.claimed).length
   const completedWeekly = weeklyChallenges.filter((c) => c.completed).length
+  const claimedWeekly = weeklyChallenges.filter((c) => c.claimed).length
   const totalDailyXp = dailyChallenges.reduce((sum, c) => sum + c.xpReward, 0)
   const totalWeeklyXp = weeklyChallenges.reduce((sum, c) => sum + c.xpReward, 0)
+  const unclaimedDailyXp = dailyChallenges
+    .filter((c) => c.completed && !c.claimed)
+    .reduce((sum, c) => sum + c.xpReward, 0)
+  const unclaimedWeeklyXp = weeklyChallenges
+    .filter((c) => c.completed && !c.claimed)
+    .reduce((sum, c) => sum + c.xpReward, 0)
 
   return (
     <div
@@ -193,13 +333,31 @@ export function GamificationCard({ className }: GamificationCardProps) {
                 Desafios Diarios
               </span>
             </div>
-            <span className="text-xs text-gray-500">
-              {completedDaily}/{dailyChallenges.length} ({totalDailyXp} XP)
-            </span>
+            <div className="flex items-center gap-3">
+              <ResetTimerDisplay isWeekly={false} />
+              <span className="text-xs text-gray-500">
+                {claimedDaily}/{completedDaily}/{dailyChallenges.length}
+              </span>
+            </div>
           </div>
+
+          {/* Unclaimed XP indicator */}
+          {unclaimedDailyXp > 0 && (
+            <div className="mb-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md text-xs text-green-700 dark:text-green-300 flex items-center gap-1">
+              <Gift className="w-3 h-3" />
+              <span>{unclaimedDailyXp} XP disponiveis para resgate!</span>
+            </div>
+          )}
+
           <div className="space-y-2">
             {dailyChallenges.map((challenge) => (
-              <ChallengeItem key={challenge.id} challenge={challenge} />
+              <ChallengeItem
+                key={challenge.id}
+                challenge={challenge}
+                isWeekly={false}
+                onClaim={handleClaimChallenge}
+                isClaiming={claimingChallengeId === challenge.id}
+              />
             ))}
           </div>
         </div>
@@ -215,8 +373,13 @@ export function GamificationCard({ className }: GamificationCardProps) {
               Desafios Semanais
             </span>
             <span className="text-xs text-gray-500">
-              ({completedWeekly}/{weeklyChallenges.length})
+              ({claimedWeekly}/{completedWeekly}/{weeklyChallenges.length})
             </span>
+            {unclaimedWeeklyXp > 0 && (
+              <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 rounded text-[10px] text-green-700 dark:text-green-300">
+                {unclaimedWeeklyXp} XP
+              </span>
+            )}
           </div>
           {showWeekly ? (
             <ChevronUp className="w-4 h-4 text-gray-400" />
@@ -228,11 +391,20 @@ export function GamificationCard({ className }: GamificationCardProps) {
         {/* Weekly Challenges */}
         {showWeekly && (
           <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-xs text-gray-500 dark:text-gray-400 px-1">
-              Total disponivel: {totalWeeklyXp} XP
-            </p>
+            <div className="flex items-center justify-between px-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Total disponivel: {totalWeeklyXp} XP
+              </p>
+              <ResetTimerDisplay isWeekly={true} />
+            </div>
             {weeklyChallenges.map((challenge) => (
-              <ChallengeItem key={challenge.id} challenge={challenge} isWeekly />
+              <ChallengeItem
+                key={challenge.id}
+                challenge={challenge}
+                isWeekly
+                onClaim={handleClaimChallenge}
+                isClaiming={claimingChallengeId === challenge.id}
+              />
             ))}
           </div>
         )}

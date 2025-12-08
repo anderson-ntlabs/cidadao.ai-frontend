@@ -74,6 +74,8 @@ export interface DailyChallenge {
   target: number
   progress: number
   completed: boolean
+  claimed: boolean
+  periodStart: string // For server sync
 }
 
 // Weekly challenges configuration
@@ -87,6 +89,8 @@ export interface WeeklyChallenge {
   target: number
   progress: number
   completed: boolean
+  claimed: boolean
+  periodStart: string // For server sync
   expiresAt: string
 }
 
@@ -471,6 +475,11 @@ interface AgoraContextType {
 
   // Gamification actions
   claimDailyBonus: () => Promise<boolean>
+  claimChallenge: (
+    challengeId: string,
+    periodStart: string,
+    isWeekly?: boolean
+  ) => Promise<{ success: boolean; xpAwarded?: number; error?: string }>
   refreshChallenges: () => void
 
   // Onboarding
@@ -1258,8 +1267,30 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   const refreshChallenges = useCallback(async () => {
     if (!user) return
 
-    // Calculate today's sessions and diary entries
+    // Calculate period dates
     const today = new Date().toISOString().split('T')[0]
+
+    // Week starts on Monday for consistency with server
+    const weekStart = new Date()
+    const dayOfWeek = weekStart.getDay()
+    weekStart.setDate(weekStart.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)) // Monday
+    weekStart.setHours(0, 0, 0, 0)
+    const weekStartStr = weekStart.toISOString().split('T')[0]
+
+    // Fetch claimed status from server
+    let serverClaimed: Record<string, boolean> = {}
+    try {
+      const result = await getChallengeProgress()
+      if (result.success && result.data) {
+        result.data.forEach((cp) => {
+          serverClaimed[cp.challenge_id] = cp.xp_claimed || false
+        })
+      }
+    } catch (error) {
+      logger.warn('Failed to fetch challenge progress from server', { error })
+    }
+
+    // Calculate today's sessions and diary entries
     const todaySessions = sessions.filter(
       (s) => s.startedAt.split('T')[0] === today && s.status === 'completed'
     ).length
@@ -1288,23 +1319,23 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           break
       }
 
-      return { ...template, progress, completed }
+      return {
+        ...template,
+        progress,
+        completed,
+        claimed: serverClaimed[template.id] || false,
+        periodStart: today,
+      }
     })
 
     setDailyChallenges(daily)
 
-    // Calculate weekly stats (week starts on Monday for consistency with server)
-    const weekStart = new Date()
-    const dayOfWeek = weekStart.getDay()
-    weekStart.setDate(weekStart.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)) // Monday
-    weekStart.setHours(0, 0, 0, 0)
-    const weekStartStr = weekStart.toISOString()
-
+    // Calculate weekly stats
     const weekSessions = sessions.filter(
-      (s) => s.startedAt >= weekStartStr && s.status === 'completed'
+      (s) => s.startedAt >= weekStart.toISOString() && s.status === 'completed'
     ).length
     const weekXp = xpTransactions
-      .filter((tx) => tx.createdAt >= weekStartStr)
+      .filter((tx) => tx.createdAt >= weekStart.toISOString())
       .reduce((sum, tx) => sum + tx.amount, 0)
 
     // Calculate week end date
@@ -1331,7 +1362,14 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           break
       }
 
-      return { ...template, progress, completed, expiresAt: weekEnd.toISOString() }
+      return {
+        ...template,
+        progress,
+        completed,
+        claimed: serverClaimed[template.id] || false,
+        periodStart: weekStartStr,
+        expiresAt: weekEnd.toISOString(),
+      }
     })
 
     setWeeklyChallenges(weekly)
@@ -1339,6 +1377,8 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     logger.debug('Challenges refreshed', {
       dailyCompleted: daily.filter((d) => d.completed).length,
       weeklyCompleted: weekly.filter((w) => w.completed).length,
+      dailyClaimed: daily.filter((d) => d.claimed).length,
+      weeklyClaimed: weekly.filter((w) => w.claimed).length,
     })
 
     // Sync challenges with server (non-blocking)
@@ -1379,6 +1419,57 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     router.push('/pt/agora/login')
   }, [supabase, router])
+
+  // Claim challenge reward
+  const claimChallenge = useCallback(
+    async (
+      challengeId: string,
+      periodStart: string,
+      isWeekly: boolean = false
+    ): Promise<{ success: boolean; xpAwarded?: number; error?: string }> => {
+      if (!user) return { success: false, error: 'Not authenticated' }
+
+      try {
+        const result = await claimChallengeReward(challengeId, periodStart)
+
+        if (result.error) {
+          if (result.alreadyClaimed) {
+            return { success: true, xpAwarded: 0 }
+          }
+          return { success: false, error: result.error }
+        }
+
+        // Update local state
+        if (isWeekly) {
+          setWeeklyChallenges((prev) =>
+            prev.map((c) => (c.id === challengeId ? { ...c, claimed: true } : c))
+          )
+        } else {
+          setDailyChallenges((prev) =>
+            prev.map((c) => (c.id === challengeId ? { ...c, claimed: true } : c))
+          )
+        }
+
+        // Trigger celebration
+        const xpAwarded = result.xpAwarded || 0
+        if (xpAwarded > 0) {
+          useCelebrationStore
+            .getState()
+            .celebrateMilestone('Desafio Concluido!', `+${xpAwarded} XP`, '🎯', xpAwarded)
+        }
+
+        // Refresh profile to update XP
+        await refreshProfile()
+
+        logger.info('Challenge reward claimed', { challengeId, xpAwarded })
+        return { success: true, xpAwarded }
+      } catch (error) {
+        logger.error('Failed to claim challenge reward', { error, challengeId })
+        return { success: false, error: 'Erro ao resgatar recompensa' }
+      }
+    },
+    [user, refreshProfile]
+  )
 
   // Onboarding: Set step
   const setOnboardingStep = useCallback(
@@ -1563,6 +1654,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       logout,
       // Gamification actions
       claimDailyBonus,
+      claimChallenge,
       refreshChallenges,
       // Onboarding
       initOnboarding,
@@ -1603,6 +1695,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       checkAndAwardBadges,
       logout,
       claimDailyBonus,
+      claimChallenge,
       refreshChallenges,
       initOnboarding,
       updateOnboarding,
