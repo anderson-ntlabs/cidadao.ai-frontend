@@ -2,11 +2,11 @@
 
 import '@/styles/design-system/tokens/index.css'
 
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AgoraProvider, useAgora } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
-import { AgoraHeader, CelebrationModal } from '@/components/agora'
+import { AgoraHeader, CelebrationModal, SessionManager, LogoutModal } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -78,12 +78,21 @@ function AgoraLoadingFallback() {
   )
 }
 
-// Header wrapper that uses the Agora hook
+// Header wrapper that uses the Agora hook with logout confirmation
 function AgoraHeaderWrapper() {
   const router = useRouter()
-  const { user, isAuthenticated, logout } = useAgora()
+  const { user, isAuthenticated, logout, endSession, currentSession } = useAgora()
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  const handleLogout = async () => {
+  const handleLogoutRequest = () => {
+    setShowLogoutModal(true)
+  }
+
+  const handleLogoutConfirm = async () => {
+    // End active session if exists
+    if (currentSession) {
+      await endSession()
+    }
     await logout()
     router.push('/pt/agora/login')
   }
@@ -93,18 +102,32 @@ function AgoraHeaderWrapper() {
     return null
   }
 
+  // Calculate session duration in minutes
+  const sessionDuration = currentSession
+    ? Math.floor((Date.now() - new Date(currentSession.startedAt).getTime()) / 60000)
+    : 0
+
   return (
-    <AgoraHeader
-      user={{
-        name: user.name,
-        avatar: user.avatar,
-        totalXp: user.totalXp,
-        currentLevel: user.currentLevel,
-        currentRank: user.currentRank,
-      }}
-      onLogout={handleLogout}
-      isDemoMode={false}
-    />
+    <>
+      <AgoraHeader
+        user={{
+          name: user.name,
+          avatar: user.avatar,
+          totalXp: user.totalXp,
+          currentLevel: user.currentLevel,
+          currentRank: user.currentRank,
+        }}
+        onLogout={handleLogoutRequest}
+        isDemoMode={false}
+      />
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+        hasActiveSession={!!currentSession}
+        sessionDuration={sessionDuration}
+      />
+    </>
   )
 }
 
@@ -185,6 +208,9 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Global Celebration Modal - uses store state */}
       <CelebrationModal />
+
+      {/* Session Manager - handles inactivity timeout */}
+      <SessionManager timeoutMinutes={30} warningMinutes={5} enabled={true} />
     </div>
   )
 }

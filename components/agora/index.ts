@@ -38,3 +38,7 @@ export { TimelineCard } from './timeline-card'
 export { GamificationCard } from './gamification-card'
 export { CelebrationModal, useCelebration } from './celebration-modal'
 export type { CelebrationType } from './celebration-modal'
+
+// Session management components
+export { LogoutModal } from './logout-modal'
+export { SessionManager } from './session-manager'
