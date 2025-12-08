@@ -18,14 +18,25 @@ const CSRF_COOKIE_NAME = 'csrf_token'
 const CSRF_HEADER_NAME = 'x-csrf-token'
 
 /**
- * Generate CSRF token
+ * Generate CSRF token using cryptographically secure random values
  */
 export function generateCSRFToken(): string {
+  // Prefer crypto.randomUUID() - available in modern browsers and Node.js 19+
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID()
   }
-  // Fallback for older environments
-  return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
+
+  // Fallback to crypto.getRandomValues() - more widely available than randomUUID
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint8Array(16)
+    crypto.getRandomValues(array)
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  }
+
+  // Last resort fallback for very old environments (should never happen in practice)
+  // This is NOT cryptographically secure but prevents runtime errors
+  console.warn('CSRF: Using insecure Math.random() fallback - upgrade your environment')
+  return Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
 }
 
 /**
