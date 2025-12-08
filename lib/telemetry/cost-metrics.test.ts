@@ -32,10 +32,11 @@ describe('CostMetricsService', () => {
 
       service.record(metric)
 
-      // Check internal metrics array
+      // Check internal metrics using CircularBuffer methods
       const metrics = service['metrics']
-      expect(metrics).toHaveLength(1)
-      expect(metrics[0]).toMatchObject({
+      expect(metrics.length).toBe(1)
+      const metricsArray = metrics.toArray()
+      expect(metricsArray[0]).toMatchObject({
         timestamp: mockNow,
         model_used: 'sabia-3',
         tokens_used: 250,
@@ -51,8 +52,9 @@ describe('CostMetricsService', () => {
       service.record({})
 
       const metrics = service['metrics']
-      expect(metrics).toHaveLength(1)
-      expect(metrics[0]).toMatchObject({
+      expect(metrics.length).toBe(1)
+      const metricsArray = metrics.toArray()
+      expect(metricsArray[0]).toMatchObject({
         timestamp: mockNow,
         model_used: 'unknown',
         response_time: 0,
@@ -67,8 +69,8 @@ describe('CostMetricsService', () => {
         message_length: 400, // Should estimate ~100 tokens (400/4)
       })
 
-      const metrics = service['metrics']
-      expect(metrics[0].tokens_used).toBe(300) // 100 (request) + 200 (response)
+      const metricsArray = service['metrics'].toArray()
+      expect(metricsArray[0].tokens_used).toBe(300) // 100 (request) + 200 (response)
     })
 
     it('should limit metrics array size', () => {
@@ -78,8 +80,9 @@ describe('CostMetricsService', () => {
       }
 
       const metrics = service['metrics']
-      expect(metrics).toHaveLength(10000)
-      expect(metrics[0].model_used).toBe('model-5') // First 5 should be removed
+      expect(metrics.length).toBe(10000)
+      const metricsArray = metrics.toArray()
+      expect(metricsArray[0].model_used).toBe('model-5') // First 5 should be removed
     })
 
     it('should log warnings for failed requests', async () => {
@@ -369,9 +372,9 @@ describe('CostMetricsService', () => {
         // No message_length or tokens_used
       })
 
-      const metrics = service['metrics']
+      const metricsArray = service['metrics'].toArray()
       // Should use default: 50 (request) + 200 (response)
-      expect(metrics[0].tokens_used).toBe(250)
+      expect(metricsArray[0].tokens_used).toBe(250)
     })
 
     it('should handle very long messages', () => {
@@ -380,9 +383,9 @@ describe('CostMetricsService', () => {
         message_length: 10000, // Very long message
       })
 
-      const metrics = service['metrics']
+      const metricsArray = service['metrics'].toArray()
       // 10000/4 = 2500 request tokens + 200 response tokens
-      expect(metrics[0].tokens_used).toBe(2700)
+      expect(metricsArray[0].tokens_used).toBe(2700)
     })
 
     it('should handle all cached requests', () => {

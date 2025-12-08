@@ -233,8 +233,9 @@ describe('PrimaryAdapter', () => {
       const available = await adapter.isAvailable()
 
       expect(available).toBe(true)
+      // Note: Implementation uses trailing slash to avoid 307 redirect
       expect(global.fetch).toHaveBeenCalledWith(
-        `${mockBaseUrl}/health`,
+        `${mockBaseUrl}/health/`,
         expect.objectContaining({
           method: 'GET',
         })

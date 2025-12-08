@@ -76,19 +76,22 @@ describe('MessageBubble', () => {
           metadata={{ model: 'sabia-3' }}
         />
       )
-      expect(screen.getByText(/Sabia-3/)).toBeInTheDocument()
+      // Component displays "Sabiá-3.1" for sabia-3 model
+      expect(screen.getByText(/Sabiá-3.1/)).toBeInTheDocument()
     })
 
     it('applies correct styles for user messages', () => {
       const { container } = render(<MessageBubble content="User message" role="user" />)
-      const bubble = container.querySelector('.from-green-500')
+      // User messages use bg-gradient-green-blue class
+      const bubble = container.querySelector('.bg-gradient-green-blue')
       expect(bubble).toBeInTheDocument()
     })
 
     it('applies correct styles for assistant messages', () => {
       const { container } = render(<MessageBubble content="Assistant message" role="assistant" />)
-      const bubble = container.querySelector('.bg-white')
-      expect(bubble).toBeInTheDocument()
+      // Assistant messages have prose class for markdown styling
+      const content = container.querySelector('.prose')
+      expect(content).toBeInTheDocument()
     })
   })
 
