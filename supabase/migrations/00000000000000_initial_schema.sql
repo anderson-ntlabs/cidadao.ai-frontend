@@ -1020,8 +1020,11 @@ CREATE POLICY "Users can insert own consent" ON public.agora_consent FOR INSERT 
 CREATE POLICY "Users can update own consent" ON public.agora_consent FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 9.13 Agora Sessions & XP Policies
-CREATE POLICY "Users can view own sessions" ON public.agora_sessions USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own sessions" ON public.agora_sessions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own sessions" ON public.agora_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own sessions" ON public.agora_sessions FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can view own xp transactions" ON public.agora_xp_transactions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own xp transactions" ON public.agora_xp_transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- 9.14 Agora Content Policies
 CREATE POLICY "Users can manage own diary" ON public.agora_diary_entries USING (auth.uid() = user_id);
