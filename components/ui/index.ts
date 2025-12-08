@@ -17,6 +17,9 @@ export * from './label'
 export * from './switch'
 export * from './slider'
 export * from './separator'
+export * from './checkbox'
+export * from './radio'
+export * from './textarea'
 
 // Cards & Display
 // Note: StatCard is in components/stats/ (more feature-rich version)
