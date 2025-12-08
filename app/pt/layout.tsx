@@ -55,6 +55,7 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { SurveyProvider } from '@/components/survey'
+import { ConditionalBackground } from '@/components/conditional-background'
 
 export default function PTLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
@@ -98,16 +99,8 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
             <Providers>
               <AnalyticsProvider>
                 <SentryInit />
-                {/* Camada de fundo fixo com a imagem */}
-                <div
-                  className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"
-                  style={{
-                    backgroundImage: 'url(/operarios.png)',
-                  }}
-                />
-
-                {/* Overlay semi-transparente */}
-                <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
+                {/* Conditional background - not applied on Agora routes */}
+                <ConditionalBackground />
 
                 {/* Conteúdo principal */}
                 <div className="relative z-20 min-h-screen flex flex-col">
