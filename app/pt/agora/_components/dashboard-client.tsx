@@ -459,6 +459,32 @@ export function DashboardClient({
                 </div>
               </Link>
 
+              {/* Contract Card - View signed contract */}
+              <Link
+                href="/pt/agora/contract"
+                className="block p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 dark:from-green-500/20 dark:via-emerald-500/20 dark:to-teal-500/20 rounded-2xl border border-green-200/50 dark:border-green-700/30 hover:border-green-300 dark:hover:border-green-600 hover:shadow-lg transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg">
+                    📜
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        Termo de Compromisso
+                      </h3>
+                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                        LGPD
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Reveja seu contrato assinado e baixe o PDF
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 group-hover:translate-x-1 transition-all" />
+                </div>
+              </Link>
+
               {/* Quick Actions Grid */}
               <div className="grid sm:grid-cols-2 gap-4">
                 {[

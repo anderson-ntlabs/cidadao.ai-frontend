@@ -48,15 +48,10 @@ export default function AgoraContractPage() {
 
   const contractNumber = `${CONTRACT_NUMBER_PREFIX}-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`
 
-  // Check if user has already accepted
+  // Check if user has already accepted (view mode)
   const hasAccepted = user?.hasAcceptedLgpd && user?.hasAcceptedInternshipContract
 
-  // Redirect if already accepted
-  useEffect(() => {
-    if (hasAccepted && !isLoading) {
-      router.push('/pt/agora')
-    }
-  }, [hasAccepted, isLoading, router])
+  // No redirect - allow revisiting to view signed contract
 
   // Track scroll to bottom of contract
   useEffect(() => {
@@ -385,7 +380,7 @@ export default function AgoraContractPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href="/pt/agora/login"
+                href={hasAccepted ? '/pt/agora' : '/pt/agora/login'}
                 className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -715,53 +710,100 @@ export default function AgoraContractPage() {
           {/* Accept Section */}
           <div className="bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 p-6">
             <div className="max-w-2xl mx-auto">
-              <label
-                className={cn(
-                  'flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all',
-                  acceptTerms
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400',
-                  !hasReadContract && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => hasReadContract && setAcceptTerms(e.target.checked)}
-                  disabled={!hasReadContract}
-                  className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  <strong>Declaro que li integralmente este Termo de Compromisso</strong>,
-                  compreendi todas as clausulas e concordo com os termos aqui estabelecidos,
-                  incluindo a coleta e tratamento dos meus dados pessoais conforme a LGPD.
-                </span>
-              </label>
-
-              <div className="mt-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
-                  <p>Versao: {CONTRACT_VERSION}</p>
-                  <p className="text-green-600 dark:text-green-400 font-medium flex items-center gap-1 mt-1">
-                    <Download className="w-4 h-4" />
-                    PDF sera baixado automaticamente
+              {hasAccepted ? (
+                // View mode - already signed
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    <span className="text-xl font-semibold text-green-600 dark:text-green-400">
+                      Contrato Assinado
+                    </span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Voce ja assinou este termo de compromisso. Pode baixar uma copia a qualquer
+                    momento.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                    <Button
+                      variant="secondary"
+                      onClick={handlePrint}
+                      leftIcon={<Printer className="w-4 h-4" />}
+                    >
+                      Visualizar PDF
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const { pdf, contractNumber: contractId } = generateContractPDF()
+                        pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
+                      }}
+                      leftIcon={<Download className="w-4 h-4" />}
+                    >
+                      Baixar PDF
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push('/pt/agora')}
+                      rightIcon={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Voltar ao Dashboard
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                    Versao: {CONTRACT_VERSION}
                   </p>
                 </div>
-                <Button
-                  onClick={handleAccept}
-                  disabled={!acceptTerms || !hasReadContract || isAccepting}
-                  loading={isAccepting}
-                  size="lg"
-                  className={cn(
-                    'w-full sm:w-auto min-w-[200px]',
-                    acceptTerms && hasReadContract
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
-                      : ''
-                  )}
-                  rightIcon={<CheckCircle2 className="w-5 h-5" />}
-                >
-                  {isAccepting ? 'Processando...' : 'Assinar e Continuar'}
-                </Button>
-              </div>
+              ) : (
+                // Sign mode - needs signature
+                <>
+                  <label
+                    className={cn(
+                      'flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all',
+                      acceptTerms
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400',
+                      !hasReadContract && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={acceptTerms}
+                      onChange={(e) => hasReadContract && setAcceptTerms(e.target.checked)}
+                      disabled={!hasReadContract}
+                      className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>Declaro que li integralmente este Termo de Compromisso</strong>,
+                      compreendi todas as clausulas e concordo com os termos aqui estabelecidos,
+                      incluindo a coleta e tratamento dos meus dados pessoais conforme a LGPD.
+                    </span>
+                  </label>
+
+                  <div className="mt-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
+                      <p>Versao: {CONTRACT_VERSION}</p>
+                      <p className="text-green-600 dark:text-green-400 font-medium flex items-center gap-1 mt-1">
+                        <Download className="w-4 h-4" />
+                        PDF sera baixado automaticamente
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleAccept}
+                      disabled={!acceptTerms || !hasReadContract || isAccepting}
+                      loading={isAccepting}
+                      size="lg"
+                      className={cn(
+                        'w-full sm:w-auto min-w-[200px]',
+                        acceptTerms && hasReadContract
+                          ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
+                          : ''
+                      )}
+                      rightIcon={<CheckCircle2 className="w-5 h-5" />}
+                    >
+                      {isAccepting ? 'Processando...' : 'Assinar e Continuar'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
