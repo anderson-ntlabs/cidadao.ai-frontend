@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-12-07
+**Last Updated**: 2025-12-08
 
 ---
 
@@ -190,7 +190,7 @@ Adapter    Adapter       ↓
 
 ### State Management (Zustand)
 
-Six main stores in `store/`:
+Eight main stores in `store/`:
 
 - `chat-store.ts`: Chat sessions, messages, agents, investigations
   - Actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
@@ -200,6 +200,8 @@ Six main stores in `store/`:
 - `badge-store.ts`: User achievement badges (fetching, caching, animations)
 - `survey-store.ts`: UX survey state (progress, answers, completion)
 - `voice-settings-store.ts`: Voice/TTS settings
+- `agora-chat-store.ts`: Ágora platform chat state (separate from main chat)
+- `celebration-store.ts`: Achievement celebration animations and triggers
 
 **Pattern**: Stores use Zustand with persist middleware for localStorage persistence.
 
@@ -322,7 +324,7 @@ const { user, addXp, startSession, badges, mode } = useAgora()
 
 **E2E Tests** (Playwright):
 
-- 9 test files in `__tests__/e2e/`
+- 8 test files in `__tests__/e2e/`
 - Multi-browser: Chromium, Firefox, WebKit
 - Mobile configs: Pixel 5, iPhone 12 (`config/playwright.mobile.config.ts`)
 - Main config: `config/playwright.config.ts`
@@ -806,5 +808,20 @@ The `scripts/` directory contains 60+ utility scripts organized by purpose:
 - `check-wcag-contrast.js` - WCAG contrast checker
 - `security-audit.js` - Security audit
 - `migrate-console-logs.js` - Replace console.log with logger
+
+**Database** (`scripts/db/`):
+
+- `apply-migration.js` - Apply database migrations
+- `check-badges.js` - Verify badge system
+- `diagnose-agora-persistence.js` - Debug Ágora data issues
+
+**Admin** (`scripts/admin/`):
+
+- `set-superuser.js` - Set superuser permissions
+
+**Debug** (`scripts/debug/`):
+
+- `debug-backend.js` - Backend debugging utilities
+- `debug-backend-response.js` - Response inspection
 
 Run any script: `node scripts/<category>/<script-name>.js`
