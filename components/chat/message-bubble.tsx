@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense, memo } from 'react'
 import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
@@ -42,7 +42,7 @@ function TypingCursor() {
   return <span className="inline-block w-0.5 h-5 bg-green-500 animate-pulse ml-0.5 align-middle" />
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   content,
   role,
   agentName,
@@ -490,4 +490,4 @@ export function MessageBubble({
       )}
     </div>
   )
-}
+})
