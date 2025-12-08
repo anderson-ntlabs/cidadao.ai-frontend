@@ -3,9 +3,10 @@
 import '@/styles/design-system/tokens/index.css'
 
 import { Suspense } from 'react'
-import { usePathname } from 'next/navigation'
-import { AgoraProvider } from '@/hooks/use-agora'
+import { usePathname, useRouter } from 'next/navigation'
+import { AgoraProvider, useAgora } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
+import { AgoraHeader } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -14,13 +15,14 @@ import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'luci
  * Agora Layout
  *
  * Provides auth context for all Agora pages via AgoraProvider + AgoraAuthProvider.
+ * Includes AgoraHeader for consistent navigation across all pages.
  * Real authentication only - no demo mode.
  *
  * Use `useAgora()` hook in pages for user data and actions.
  * Use `useAgoraAuth()` hook for auth-specific operations (login, logout).
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Added AgoraAuthProvider for auth operations
+ * Updated: 2025-12-08 - Added AgoraHeader to layout for consistency
  */
 
 // Agora navigation items for mobile bottom nav
@@ -57,6 +59,9 @@ const agoraNavItems = [
   },
 ]
 
+// Pages that should NOT show the header
+const noHeaderPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/contract']
+
 function AgoraLoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -70,15 +75,49 @@ function AgoraLoadingFallback() {
   )
 }
 
+// Header wrapper that uses the Agora hook
+function AgoraHeaderWrapper() {
+  const router = useRouter()
+  const { user, isAuthenticated, logout } = useAgora()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push('/pt/agora/login')
+  }
+
+  // Don't render header if not authenticated or no user
+  if (!isAuthenticated || !user) {
+    return null
+  }
+
+  return (
+    <AgoraHeader
+      user={{
+        name: user.name,
+        avatar: user.avatar,
+        totalXp: user.totalXp,
+        currentLevel: user.currentLevel,
+        currentRank: user.currentRank,
+      }}
+      onLogout={handleLogout}
+      isDemoMode={false}
+    />
+  )
+}
+
 function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   const isMobile = useMobileDetection()
   const pathname = usePathname()
 
-  // Don't show bottom nav on login page
+  // Check if we should show header
+  const shouldShowHeader = !noHeaderPages.some((page) => pathname?.startsWith(page))
   const isLoginPage = pathname === '/pt/agora/login'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Global Header */}
+      {shouldShowHeader && <AgoraHeaderWrapper />}
+
       {/* Main content with bottom padding for mobile nav */}
       <div className={isMobile && !isLoginPage ? 'pb-20' : ''}>{children}</div>
 

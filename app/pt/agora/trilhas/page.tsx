@@ -52,6 +52,37 @@ import {
 // Track definitions with modules
 const TRACKS = [
   {
+    id: 'introducao' as const,
+    name: 'Introdução',
+    subtitle: 'Conheça o Cidadão.AI',
+    description:
+      'Descubra a plataforma, conheça os agentes de IA e aprenda como aproveitar ao máximo a Ágora Academy',
+    icon: GraduationCap,
+    color: 'emerald',
+    gradient: 'from-emerald-500 to-teal-500',
+    bgLight: 'bg-emerald-50',
+    bgDark: 'dark:bg-emerald-950/30',
+    borderColor: 'border-emerald-200 dark:border-emerald-800',
+    textColor: 'text-emerald-600 dark:text-emerald-400',
+    mentor: {
+      id: 'abaporu',
+      name: 'Abaporu',
+      role: 'Agente Orquestrador',
+      image: '/agents/abaporu.png',
+    },
+    duration: '1-2 horas',
+    xpTotal: 500,
+    isIntro: true,
+    modules: [
+      { id: 1, name: 'Bem-vindo ao Cidadao.AI', type: 'video', duration: '10min' },
+      { id: 2, name: 'Como funciona a Agora', type: 'reading', duration: '15min' },
+      { id: 3, name: 'Conheca os Agentes de IA', type: 'video', duration: '20min' },
+      { id: 4, name: 'Transparencia e Dados Abertos', type: 'reading', duration: '15min' },
+      { id: 5, name: 'Converse com Abaporu', type: 'chat', duration: '10min' },
+      { id: 6, name: 'Configure seu Perfil', type: 'project', duration: '15min' },
+    ],
+  },
+  {
     id: 'backend' as const,
     name: 'Backend',
     subtitle: 'APIs & Arquitetura',
@@ -208,7 +239,8 @@ function TrackCard({
         isExpanded && track.color === 'blue' && 'ring-blue-500',
         isExpanded && track.color === 'purple' && 'ring-purple-500',
         isExpanded && track.color === 'green' && 'ring-green-500',
-        isExpanded && track.color === 'orange' && 'ring-orange-500'
+        isExpanded && track.color === 'orange' && 'ring-orange-500',
+        isExpanded && track.color === 'emerald' && 'ring-emerald-500'
       )}
     >
       {/* Card Header - Always visible */}
@@ -487,8 +519,10 @@ export default function AgoraTrilhasPage() {
 
   return (
     <div className="min-h-screen pb-24">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
+      {/* Header is now provided by the layout */}
+
+      {/* Page Title */}
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
@@ -503,13 +537,9 @@ export default function AgoraTrilhasPage() {
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Escolha sua especializacao</p>
             </div>
-            <Badge variant="success" size="default">
-              <Sparkles className="w-3 h-3" />
-              {user?.totalXp || 0} XP
-            </Badge>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Stats Summary */}

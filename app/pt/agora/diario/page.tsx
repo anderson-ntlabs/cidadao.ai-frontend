@@ -18,7 +18,7 @@ import { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'rea
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useAgora } from '@/hooks/use-agora'
-import { AgoraHeader, AgoraSidebar } from '@/components/agora'
+import { AgoraSidebar } from '@/components/agora'
 import {
   getCalendarEvents,
   createCalendarEvent,
@@ -253,12 +253,6 @@ function AcademyAgendaContent() {
     }
   }, [isDemoParam, isLoading, isAuthenticated, router])
 
-  // Handle logout
-  const handleLogout = async () => {
-    await logout()
-    router.replace('/pt/agora/login')
-  }
-
   // Handle event click
   const handleEventClick = (info: { event: { id: string } }) => {
     const event = events.find((e) => e.id === info.event.id)
@@ -470,7 +464,7 @@ function AcademyAgendaContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AgoraHeader user={user} onLogout={handleLogout} isDemoMode={false} />
+      {/* Header is now provided by the layout */}
 
       <div className="flex flex-1">
         <AgoraSidebar user={user} />

@@ -11,7 +11,6 @@ import {
   CertificateModal,
   LgpdConsentModal,
   BackgroundSelector,
-  AgoraHeader,
   TimelineCard,
   TimelineModal,
 } from '@/components/agora'
@@ -299,18 +298,7 @@ export function DashboardClient({
           <div className="fixed inset-0 pointer-events-none z-0" style={overlayStyle} />
         )}
 
-        {/* Header - Using shared AgoraHeader component (same as main app pattern) */}
-        <AgoraHeader
-          user={{
-            name: user.name,
-            avatar: user.avatar,
-            totalXp: user.totalXp,
-            currentLevel: user.currentLevel,
-            currentRank: user.currentRank,
-          }}
-          onLogout={onLogout}
-          isDemoMode={isDemoMode}
-        />
+        {/* Header is now provided by the layout */}
 
         {/* Main Content */}
         <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -692,7 +680,7 @@ export function DashboardClient({
             </div>
 
             {/* Right Column - Timeline + Badges */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:sticky lg:top-20">
               {/* Timeline Card - Real telemetry data */}
               <TimelineCard
                 xpTransactions={timelineXpTransactions}
@@ -703,32 +691,34 @@ export function DashboardClient({
               />
 
               {/* Badges - Using GlassCard */}
-              <GlassCard>
-                <GlassCardHeader>
-                  <div className="flex items-center gap-2">
-                    <Medal className="w-5 h-5 text-yellow-500" />
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Badges</h3>
+              <GlassCard className="overflow-hidden">
+                <GlassCardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Medal className="w-5 h-5 text-yellow-500" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Badges</h3>
+                    </div>
                     {badges.length > 0 && (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        ({badges.length})
+                      <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-medium">
+                        {badges.length} conquistados
                       </span>
                     )}
                   </div>
                 </GlassCardHeader>
 
-                <GlassCardContent>
+                <GlassCardContent className="pt-2">
                   {badges.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {badges.slice(0, 3).map((badge) => (
                         <div
                           key={badge.id}
-                          className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30"
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30"
                         >
-                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-2xl shadow">
+                          <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm flex-shrink-0">
                             {badgeEmojis[badge.badge_id] || '🏅'}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-white">
+                            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
                               {badge.badge_name}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
@@ -737,34 +727,39 @@ export function DashboardClient({
                           </div>
                         </div>
                       ))}
+                      {badges.length > 3 && (
+                        <p className="text-xs text-center text-gray-400 mt-2">
+                          +{badges.length - 3} mais badges
+                        </p>
+                      )}
                     </div>
                   ) : (
-                    <div className="text-center py-6">
-                      <div className="w-14 h-14 mx-auto rounded-xl bg-yellow-100/50 dark:bg-yellow-900/20 flex items-center justify-center mb-3">
-                        <span className="text-3xl">🍜</span>
+                    <div className="text-center py-4">
+                      <div className="w-12 h-12 mx-auto rounded-xl bg-yellow-100/50 dark:bg-yellow-900/20 flex items-center justify-center mb-2">
+                        <span className="text-2xl">🍜</span>
                       </div>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Seja assiduo para ganhar Japaguri!
+                        Conquiste seu primeiro badge!
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        3+ dias, 5+ sessoes ou 3+ diarios
+                        Complete sessoes e atividades
                       </p>
                     </div>
                   )}
 
-                  {/* Locked badges preview */}
-                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">
-                      Proximos badges
+                  {/* Locked badges preview - Compact */}
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">
+                      Proximos
                     </p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {['🍜', '🚀', '⭐', '🎬']
+                    <div className="flex gap-2 justify-center">
+                      {['🍜', '🚀', '⭐', '🎬', '🧭', '📚']
                         .filter((e) => !badges.some((b) => badgeEmojis[b.badge_id] === e))
                         .slice(0, 4)
                         .map((emoji, i) => (
                           <div
                             key={i}
-                            className="aspect-square rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl opacity-40 grayscale"
+                            className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-base opacity-40 grayscale"
                           >
                             {emoji}
                           </div>
