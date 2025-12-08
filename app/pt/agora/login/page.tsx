@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
-import { Github, Mail, GraduationCap, Sparkles, ArrowRight, Loader2 } from 'lucide-react'
+import { Github, Mail, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
 
 /**
  * Ágora Login Page
@@ -198,32 +198,6 @@ export default function AgoraLoginPage() {
               )}
               Entrar com Google
             </Button>
-
-            {/* Divider */}
-            <div className="relative my-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white/80 dark:bg-gray-800/80 text-gray-500">
-                  ou continue como visitante
-                </span>
-              </div>
-            </div>
-
-            {/* Demo Mode */}
-            <Link
-              href="/pt/agora?demo=true"
-              className={cn(
-                'flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl',
-                'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700',
-                'text-gray-700 dark:text-gray-300 font-medium transition-colors'
-              )}
-            >
-              <Sparkles className="w-4 h-4" />
-              Explorar em modo demo
-              <ArrowRight className="w-4 h-4" />
-            </Link>
           </GlassCardContent>
         </GlassCard>
 

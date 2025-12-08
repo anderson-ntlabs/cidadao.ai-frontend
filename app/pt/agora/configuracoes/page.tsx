@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
@@ -16,10 +16,9 @@ import {
   ArrowLeft,
   GraduationCap,
 } from 'lucide-react'
-import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -27,14 +26,13 @@ import { logger } from '@/lib/utils/logger'
 /**
  * Agora Settings Page
  *
- * Copied from app/pt/app/configuracoes/page.tsx and adapted for Agora.
- * Manages user preferences for accessibility, notifications, and voice.
+ * Real auth only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-12-07
+ * Updated: 2025-12-08 - Removed demo mode
  */
 
-// Lazy load heavy panel components (same as main app)
+// Lazy load heavy panel components
 const ActionPanel = dynamic(
   () => import('@/components/panels').then((mod) => ({ default: mod.ActionPanel })),
   {
@@ -62,7 +60,7 @@ const ActionPanelSection = dynamic(
   }
 )
 
-// Lazy load accessibility controls (same as main app)
+// Lazy load accessibility controls
 const FontSizeControl = dynamic(
   () =>
     import('@/components/a11y/font-size-control').then((mod) => ({ default: mod.FontSizeControl })),
@@ -95,7 +93,7 @@ const VLibrasToggle = dynamic(
   }
 )
 
-// Lazy load voice settings (same as main app)
+// Lazy load voice settings
 const VoiceSettings = dynamic(
   () =>
     import('@/components/settings/voice-settings').then((mod) => ({ default: mod.VoiceSettings })),
@@ -117,7 +115,7 @@ function LoadingFallback() {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando configuracoes...</p>
+        <p className="text-gray-600 dark:text-gray-400">Carregando configurações...</p>
       </div>
     </div>
   )
@@ -125,15 +123,7 @@ function LoadingFallback() {
 
 function ConfiguracoesContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
-
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
-  const user = isRealAuth ? realAuth.user : demoAuth.user
-  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
+  const { user, isAuthenticated, isLoading } = useAgora()
 
   const [isSaving, setIsSaving] = useState(false)
   const [preferences, setPreferences] = useState<UserPreferences>({
@@ -146,17 +136,19 @@ function ConfiguracoesContent() {
     email_notifications: false,
   })
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router])
 
+  // Load preferences when user is authenticated
   useEffect(() => {
-    if (user && isRealAuth) {
+    if (user && isAuthenticated) {
       loadPreferences()
     }
-  }, [user, isRealAuth])
+  }, [user, isAuthenticated])
 
   const loadPreferences = async () => {
     if (!user) return
@@ -170,18 +162,15 @@ function ConfiguracoesContent() {
   }
 
   const handleSavePreferences = async () => {
-    if (!user || !isRealAuth) {
-      toast.info('Modo demo', 'As preferencias nao sao salvas no modo demo.')
-      return
-    }
+    if (!user) return
 
     try {
       setIsSaving(true)
       await userProfileService.updatePreferences(user.id, preferences)
-      toast.success('Preferencias salvas', 'Suas configuracoes foram atualizadas com sucesso.')
+      toast.success('Preferências salvas', 'Suas configurações foram atualizadas com sucesso.')
     } catch (error) {
       logger.error('Failed to save preferences', { error })
-      toast.error('Erro ao salvar', 'Nao foi possivel salvar suas preferencias. Tente novamente.')
+      toast.error('Erro ao salvar', 'Não foi possível salvar suas preferências. Tente novamente.')
     } finally {
       setIsSaving(false)
     }
@@ -198,11 +187,18 @@ function ConfiguracoesContent() {
     return <LoadingFallback />
   }
 
-  if (!isDemoMode && !realAuth.isAuthenticated) {
-    return <LoadingFallback />
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
   }
-
-  const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
 
   return (
     <div className="min-h-screen relative">
@@ -224,7 +220,7 @@ function ConfiguracoesContent() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
-              href={buildUrl('/pt/agora')}
+              href="/pt/agora"
               className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -233,11 +229,11 @@ function ConfiguracoesContent() {
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Configuracoes
+                  Configurações
                 </h1>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Personalize sua experiencia na Agora
+                Personalize sua experiência na Ágora
               </p>
             </div>
             <Button
@@ -294,13 +290,13 @@ function ConfiguracoesContent() {
                       {
                         title: 'Alto Contraste',
                         description:
-                          'Aumenta o contraste para melhor visualizacao. Atalho: Alt + H',
+                          'Aumenta o contraste para melhor visualização. Atalho: Alt + H',
                         icon: Eye,
                         action: <HighContrastToggle />,
                       },
                       {
                         title: 'VLibras (LIBRAS)',
-                        description: 'Traducao automatica para Lingua Brasileira de Sinais',
+                        description: 'Tradução automática para Língua Brasileira de Sinais',
                         icon: Volume2,
                         action: <VLibrasToggle locale="pt" variant="switch" />,
                       },
@@ -314,7 +310,7 @@ function ConfiguracoesContent() {
 
           {/* Appearance */}
           <ActionPanelSection
-            title="Aparencia"
+            title="Aparência"
             description="Personalize o tema visual do sistema"
             icon={Palette}
           >
@@ -324,11 +320,11 @@ function ConfiguracoesContent() {
                   items={[
                     {
                       title: 'Tema',
-                      description: 'Escolha entre claro, escuro ou automatico',
+                      description: 'Escolha entre claro, escuro ou automático',
                       icon: Palette,
                       badge:
                         preferences.theme === 'system'
-                          ? 'Automatico'
+                          ? 'Automático'
                           : preferences.theme === 'dark'
                             ? 'Escuro'
                             : 'Claro',
@@ -345,7 +341,7 @@ function ConfiguracoesContent() {
                         setPreferences({ ...preferences, theme: nextTheme })
                         toast.info(
                           'Tema alterado',
-                          `Tema alterado para ${nextTheme === 'system' ? 'automatico' : nextTheme === 'dark' ? 'escuro' : 'claro'}`
+                          `Tema alterado para ${nextTheme === 'system' ? 'automático' : nextTheme === 'dark' ? 'escuro' : 'claro'}`
                         )
                       },
                     },
@@ -366,8 +362,8 @@ function ConfiguracoesContent() {
 
           {/* Notifications */}
           <ActionPanelSection
-            title="Notificacoes"
-            description="Gerencie como voce recebe atualizacoes"
+            title="Notificações"
+            description="Gerencie como você recebe atualizações"
             icon={Bell}
           >
             <GlassCard>
@@ -375,8 +371,8 @@ function ConfiguracoesContent() {
                 <ActionPanel
                   items={[
                     {
-                      title: 'Notificacoes do Sistema',
-                      description: 'Receba notificacoes sobre atividades importantes',
+                      title: 'Notificações do Sistema',
+                      description: 'Receba notificações sobre atividades importantes',
                       icon: Bell,
                       badge: preferences.notifications_enabled ? 'Ativado' : 'Desativado',
                       badgeColor: preferences.notifications_enabled ? 'green' : 'red',
@@ -385,15 +381,15 @@ function ConfiguracoesContent() {
                         togglePreference('notifications_enabled')
                         const enabled = !preferences.notifications_enabled
                         toast.info(
-                          enabled ? 'Notificacoes ativadas' : 'Notificacoes desativadas',
+                          enabled ? 'Notificações ativadas' : 'Notificações desativadas',
                           enabled
-                            ? 'Voce recebera notificacoes sobre atividades importantes'
-                            : 'Voce nao recebera mais notificacoes do sistema'
+                            ? 'Você receberá notificações sobre atividades importantes'
+                            : 'Você não receberá mais notificações do sistema'
                         )
                       },
                     },
                     {
-                      title: 'Notificacoes por Email',
+                      title: 'Notificações por Email',
                       description: 'Receba resumos e alertas por email',
                       icon: Bell,
                       badge: preferences.email_notifications ? 'Ativado' : 'Desativado',
@@ -405,8 +401,8 @@ function ConfiguracoesContent() {
                         toast.info(
                           enabled ? 'Emails ativados' : 'Emails desativados',
                           enabled
-                            ? 'Voce recebera resumos e alertas por email'
-                            : 'Voce nao recebera mais emails'
+                            ? 'Você receberá resumos e alertas por email'
+                            : 'Você não receberá mais emails'
                         )
                       },
                       disabled: !preferences.notifications_enabled,
@@ -427,7 +423,7 @@ function ConfiguracoesContent() {
               disabled={isSaving}
               className="w-full"
             >
-              {isSaving ? 'Salvando...' : 'Salvar Alteracoes'}
+              {isSaving ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </div>
         </div>

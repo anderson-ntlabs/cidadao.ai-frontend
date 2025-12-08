@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Bell,
@@ -23,18 +23,16 @@ import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NotificationItem } from '@/components/ui/notification-item'
 import { useNotificationStore } from '@/store/notification-store'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import type { NotificationType } from '@/types/notification'
 
 /**
  * Agora Notifications Page
  *
- * Copied from app/pt/app/notificacoes/page.tsx and adapted for Agora.
- * Shows notifications related to learning progress, XP, achievements.
+ * Real auth only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-12-07
+ * Updated: 2025-12-08 - Removed demo mode
  */
 
 function LoadingFallback() {
@@ -44,7 +42,7 @@ function LoadingFallback() {
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
           <GraduationCap className="w-8 h-8 text-white" />
         </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando notificacoes...</p>
+        <p className="text-gray-600 dark:text-gray-400">Carregando notificações...</p>
       </div>
     </div>
   )
@@ -52,15 +50,7 @@ function LoadingFallback() {
 
 function NotificacoesContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
-
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
-  const _user = isRealAuth ? realAuth.user : demoAuth.user // Reserved for future user-specific notifications
-  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
+  const { user, isAuthenticated, isLoading } = useAgora()
 
   const [selectedType, setSelectedType] = useState<NotificationType | 'all'>('all')
 
@@ -76,11 +66,12 @@ function NotificacoesContent() {
 
   const stats = getStats()
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router])
 
   // Filter notifications
   const filteredNotifications = notifications.filter((notification) => {
@@ -91,7 +82,7 @@ function NotificacoesContent() {
   // Agora-specific notification types
   const typeConfig = {
     all: { label: 'Todas', icon: Bell, color: 'text-gray-600' },
-    info: { label: 'Informacao', icon: Info, color: 'text-blue-600' },
+    info: { label: 'Informação', icon: Info, color: 'text-blue-600' },
     success: { label: 'Conquista', icon: Trophy, color: 'text-green-600' },
     warning: { label: 'Aviso', icon: AlertTriangle, color: 'text-yellow-600' },
     error: { label: 'Erro', icon: AlertCircle, color: 'text-red-600' },
@@ -103,11 +94,18 @@ function NotificacoesContent() {
     return <LoadingFallback />
   }
 
-  if (!isDemoMode && !realAuth.isAuthenticated) {
-    return <LoadingFallback />
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
   }
-
-  const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
 
   return (
     <div className="min-h-screen relative">
@@ -130,7 +128,7 @@ function NotificacoesContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href={buildUrl('/pt/agora')}
+                href="/pt/agora"
                 className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -139,11 +137,11 @@ function NotificacoesContent() {
                 <div className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
                   <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                    Notificacoes
+                    Notificações
                   </h1>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Acompanhe seu progresso na Agora
+                  Acompanhe seu progresso na Ágora
                 </p>
               </div>
             </div>
@@ -163,7 +161,7 @@ function NotificacoesContent() {
                 </Button>
               )}
 
-              <Link href={buildUrl('/pt/agora/configuracoes')}>
+              <Link href="/pt/agora/configuracoes">
                 <Button variant="secondary" size="sm">
                   <Settings className="w-4 h-4" />
                 </Button>
@@ -192,7 +190,7 @@ function NotificacoesContent() {
             <GlassCardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Nao lidas</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Não lidas</p>
                   <p className="text-2xl font-bold text-blue-600">{stats.unread}</p>
                 </div>
                 <div className="relative">
@@ -280,12 +278,12 @@ function NotificacoesContent() {
               <div className="py-12 text-center">
                 <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                  Nenhuma notificacao
+                  Nenhuma notificação
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400">
                   {selectedType !== 'all'
-                    ? `Nao ha notificacoes do tipo "${typeConfig[selectedType as keyof typeof typeConfig]?.label || selectedType}"`
-                    : 'Voce esta em dia com tudo!'}
+                    ? `Não há notificações do tipo "${typeConfig[selectedType as keyof typeof typeConfig]?.label || selectedType}"`
+                    : 'Você está em dia com tudo!'}
                 </p>
               </div>
             )}

@@ -1,27 +1,9 @@
-/**
- * Academy Profile Page
- *
- * User profile with:
- * - Personal information
- * - Statistics and progress
- * - Badge showcase
- * - Activity history
- * - Settings
- *
- * Supports both real authentication and demo mode.
- *
- * Author: Anderson Henrique da Silva
- * Created: 2025-12-06
- * Updated: 2025-12-06
- */
-
 'use client'
 
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
+import { useRouter } from 'next/navigation'
+import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
@@ -35,19 +17,24 @@ import {
   Clock,
   Target,
   BookOpen,
-  MessageSquare,
   Calendar,
-  Edit3,
   Github,
   Mail,
   Sparkles,
   TrendingUp,
-  Award,
   Zap,
-  RotateCcw,
   LogOut,
   GraduationCap,
 } from 'lucide-react'
+
+/**
+ * Agora Profile Page
+ *
+ * Real auth only - no demo mode.
+ *
+ * Author: Anderson Henrique da Silva
+ * Updated: 2025-12-08 - Removed demo mode
+ */
 
 const ranks = {
   novato: {
@@ -89,32 +76,6 @@ const tracks = {
   devops: { name: 'DevOps', emoji: '🚀', color: 'orange' },
 }
 
-// Combined user type for profile page
-interface ProfileUser {
-  id: string
-  name: string
-  email: string
-  avatar: string
-  totalXp: number
-  currentLevel: number
-  currentRank: string
-  currentStreak: number
-  totalTimeMinutes: number
-  totalSessions: number
-  longestStreak: number
-  tracks: string[] // User can have multiple tracks
-  enrolledAt: string
-  hasAcceptedLgpd: boolean
-  hasAcceptedInternshipContract?: boolean
-  hasCompletedOnboarding?: boolean
-  // Optional fields from real auth
-  githubUsername?: string
-  matricula?: string
-  curso?: string
-  periodo?: number
-}
-
-// Loading fallback component
 function LoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -128,79 +89,36 @@ function LoadingFallback() {
   )
 }
 
-// Inner component that uses useSearchParams
-function AcademyProfileContent() {
+function ProfileContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    logout,
+    xpTransactions,
+    diaryEntries,
+    sessions,
+    badges,
+  } = useAgora()
 
-  // Auth hooks
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  // Determine which auth to use
-  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
-  const isLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
-
-  // Get user data based on auth mode
-  const user: ProfileUser = useMemo(() => {
-    if (isDemoMode) {
-      return {
-        ...demoAuth.user,
-        githubUsername: undefined,
-        matricula: undefined,
-        curso: undefined,
-        periodo: undefined,
-      }
-    }
-    if (realAuth.isAuthenticated && realAuth.user) {
-      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(realAuth.user.name)}&background=16a34a&color=fff`
-      return {
-        ...demoAuth.user, // Keep demo defaults for missing fields
-        id: realAuth.user.id,
-        name: realAuth.user.name,
-        email: realAuth.user.email,
-        avatar: realAuth.user.avatar || defaultAvatar,
-        totalXp: realAuth.user.totalXp,
-        currentLevel: realAuth.user.currentLevel,
-        currentRank: realAuth.user.currentRank,
-        currentStreak: realAuth.user.currentStreak,
-        totalTimeMinutes: realAuth.user.totalTimeMinutes,
-        totalSessions: realAuth.user.totalSessions,
-        hasAcceptedLgpd: realAuth.user.hasAcceptedLgpd,
-        githubUsername: realAuth.user.githubUsername,
-        matricula: realAuth.user.matricula,
-        curso: realAuth.user.curso,
-        periodo: realAuth.user.periodo,
-        enrolledAt: realAuth.user.enrolledAt || new Date().toISOString(),
-      }
-    }
-    return {
-      ...demoAuth.user,
-      githubUsername: undefined,
-      matricula: undefined,
-      curso: undefined,
-      periodo: undefined,
-    }
-  }, [isDemoMode, realAuth.isAuthenticated, realAuth.user, demoAuth.user])
-
-  const { xpTransactions, diaryEntries, sessions, badges, onboarding, resetDemo } = demoAuth
-
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
-
-  // Redirect unauthenticated users to login (if not in demo mode)
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router])
+
+  const handleLogout = async () => {
+    await logout()
+    router.push('/pt/agora/login')
+  }
 
   if (isLoading) {
     return <LoadingFallback />
   }
 
-  // If not demo and not authenticated, show loading (redirect will happen)
-  if (!isDemoMode && !realAuth.isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -214,12 +132,11 @@ function AcademyProfileContent() {
   }
 
   const rankInfo = ranks[user.currentRank as keyof typeof ranks] || ranks.novato
-  // Get info for all user tracks (with fallback for legacy mainTrack data)
   const userTracks = user.tracks || []
   const userTracksInfo =
     userTracks.length > 0
-      ? userTracks.map((t) => tracks[t as keyof typeof tracks]).filter(Boolean)
-      : [tracks.backend] // Default fallback
+      ? userTracks.map((t: string) => tracks[t as keyof typeof tracks]).filter(Boolean)
+      : [tracks.backend]
   const nextRankXp =
     user.currentRank === 'novato'
       ? 100
@@ -232,24 +149,6 @@ function AcademyProfileContent() {
             : null
 
   const xpProgress = nextRankXp ? Math.min((user.totalXp / nextRankXp) * 100, 100) : 100
-
-  const handleLogout = async () => {
-    if (isRealAuth) {
-      await realAuth.logout()
-    } else {
-      resetDemo()
-      window.location.href = '/pt/agora'
-    }
-  }
-
-  const handleReset = () => {
-    resetDemo()
-    setShowResetConfirm(false)
-    window.location.href = '/pt/agora'
-  }
-
-  // Build URL with demo param if needed
-  const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
 
   return (
     <div className="min-h-screen relative">
@@ -272,7 +171,7 @@ function AcademyProfileContent() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Link
-              href={buildUrl('/pt/agora')}
+              href="/pt/agora"
               className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -306,7 +205,10 @@ function AcademyProfileContent() {
               {/* Avatar */}
               <div className="relative">
                 <img
-                  src={user.avatar}
+                  src={
+                    user.avatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=16a34a&color=fff`
+                  }
                   alt={user.name}
                   className="w-28 h-28 rounded-3xl shadow-xl ring-4 ring-white dark:ring-gray-800"
                 />
@@ -334,7 +236,7 @@ function AcademyProfileContent() {
                     <Trophy className="w-3 h-3" />
                     {rankInfo.name}
                   </Badge>
-                  {userTracksInfo.map((trackInfo, idx) => (
+                  {userTracksInfo.map((trackInfo: { emoji: string; name: string }, idx: number) => (
                     <Badge key={idx} variant="outline" size="default">
                       <span>{trackInfo.emoji}</span>
                       {trackInfo.name}
@@ -348,36 +250,37 @@ function AcademyProfileContent() {
                     <Mail className="w-4 h-4" />
                     {user.email}
                   </span>
-                  {(user.githubUsername || onboarding?.github?.username) && (
+                  {user.githubUsername && (
                     <a
-                      href={`https://github.com/${user.githubUsername || onboarding?.github?.username}`}
+                      href={`https://github.com/${user.githubUsername}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                     >
-                      <Github className="w-4 h-4" />@
-                      {user.githubUsername || onboarding?.github?.username}
+                      <Github className="w-4 h-4" />@{user.githubUsername}
                     </a>
                   )}
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    Desde {new Date(user.enrolledAt).toLocaleDateString('pt-BR')}
-                  </span>
+                  {user.enrolledAt && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      Desde {new Date(user.enrolledAt).toLocaleDateString('pt-BR')}
+                    </span>
+                  )}
                 </div>
 
-                {/* Academic info for real users */}
-                {isRealAuth && (user.matricula || user.curso) && (
+                {/* Academic info */}
+                {(user.matricula || user.curso) && (
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-gray-500 dark:text-gray-400 mt-2">
                     {user.matricula && (
                       <span className="flex items-center gap-1">
                         <GraduationCap className="w-4 h-4" />
-                        Matricula: {user.matricula}
+                        Matrícula: {user.matricula}
                       </span>
                     )}
                     {user.curso && (
                       <span className="flex items-center gap-1">
                         📚 {user.curso}
-                        {user.periodo && ` - ${user.periodo}° periodo`}
+                        {user.periodo && ` - ${user.periodo}° período`}
                       </span>
                     )}
                   </div>
@@ -427,7 +330,7 @@ function AcademyProfileContent() {
                     {user.currentStreak}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Dias seguidos</p>
-                  {user.longestStreak > user.currentStreak && (
+                  {(user.longestStreak || 0) > user.currentStreak && (
                     <p className="text-xs text-orange-600 dark:text-orange-400">
                       Recorde: {user.longestStreak}
                     </p>
@@ -553,108 +456,37 @@ function AcademyProfileContent() {
           </GlassCard>
         </div>
 
-        {/* GitHub Integration Info */}
-        {onboarding?.github?.hasForked && (
-          <GlassCard className="mt-6">
-            <GlassCardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <Github className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
-                    Repositório conectado
-                  </p>
-                  <a
-                    href={onboarding.github.forkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-green-600 dark:text-green-400 hover:underline"
-                  >
-                    {onboarding.github.forkUrl}
-                  </a>
-                </div>
-                <Badge variant="success" size="sm">
-                  <Sparkles className="w-3 h-3" />
-                  Fork verificado
-                </Badge>
+        {/* Logout Section */}
+        <GlassCard className="mt-8">
+          <GlassCardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Sair da conta</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Você será redirecionado para a página de login
+                </p>
               </div>
-            </GlassCardContent>
-          </GlassCard>
-        )}
-
-        {/* Danger Zone - Only for demo mode */}
-        {isDemoMode && (
-          <GlassCard className="mt-8 border-red-200 dark:border-red-900/50">
-            <GlassCardHeader>
-              <h3 className="text-lg font-semibold flex items-center gap-2 text-red-600 dark:text-red-400">
-                <RotateCcw className="w-5 h-5" />
-                Zona de Perigo
-              </h3>
-            </GlassCardHeader>
-            <GlassCardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Resetar o demo apagara todo seu progresso, XP, badges e entradas do diario. Esta
-                acao nao pode ser desfeita.
-              </p>
-              {!showResetConfirm ? (
-                <Button
-                  variant="ghost"
-                  size="md"
-                  onClick={() => setShowResetConfirm(true)}
-                  className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Resetar Demo
-                </Button>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Button variant="destructive" size="md" onClick={handleReset}>
-                    Confirmar Reset
-                  </Button>
-                  <Button variant="ghost" size="md" onClick={() => setShowResetConfirm(false)}>
-                    Cancelar
-                  </Button>
-                </div>
-              )}
-            </GlassCardContent>
-          </GlassCard>
-        )}
-
-        {/* Logout Section for Real Users */}
-        {isRealAuth && (
-          <GlassCard className="mt-8">
-            <GlassCardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">Sair da conta</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Voce sera redirecionado para a pagina de login
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="md"
-                  onClick={handleLogout}
-                  className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sair
-                </Button>
-              </div>
-            </GlassCardContent>
-          </GlassCard>
-        )}
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={handleLogout}
+                className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </Button>
+            </div>
+          </GlassCardContent>
+        </GlassCard>
       </main>
     </div>
   )
 }
 
-// Main export with Suspense boundary for useSearchParams
-export default function AcademyProfilePage() {
+export default function AgoraProfilePage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <AcademyProfileContent />
+      <ProfileContent />
     </Suspense>
   )
 }

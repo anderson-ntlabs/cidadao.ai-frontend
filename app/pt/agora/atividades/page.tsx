@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
@@ -16,8 +16,7 @@ import {
 } from 'lucide-react'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
-import { useAgoraAuth } from '@/hooks/use-agora-auth'
-import { useAgoraDemo } from '@/hooks/use-agora-demo'
+import { useAgora } from '@/hooks/use-agora'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -26,11 +25,10 @@ import { format, subDays } from 'date-fns'
 /**
  * Agora Activities Page
  *
- * Copied from app/pt/app/atividades/page.tsx and adapted for Agora.
- * Shows activity history for learning progress, XP gains, etc.
+ * Real auth only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-12-07
+ * Updated: 2025-12-08 - Removed demo mode
  */
 
 // Lazy load the heavy ActivityTimeline component
@@ -51,19 +49,19 @@ const ActivityTimeline = dynamic(
   }
 )
 
-// Agora-specific activity types
+// Activity types
 const activityTypes: Array<{ value: UserActivity['type']; label: string; icon: typeof Activity }> =
   [
     { value: 'chat', label: 'Conversas', icon: MessageSquare },
     { value: 'agent_interaction', label: 'Mentores', icon: GraduationCap },
-    { value: 'export', label: 'Exportacoes', icon: Download },
-    { value: 'settings_update', label: 'Configuracoes', icon: Calendar },
+    { value: 'export', label: 'Exportações', icon: Download },
+    { value: 'settings_update', label: 'Configurações', icon: Calendar },
   ]
 
 const timeRanges = [
-  { value: '7d', label: 'Ultimos 7 dias', days: 7 },
-  { value: '30d', label: 'Ultimos 30 dias', days: 30 },
-  { value: '90d', label: 'Ultimos 90 dias', days: 90 },
+  { value: '7d', label: 'Últimos 7 dias', days: 7 },
+  { value: '30d', label: 'Últimos 30 dias', days: 30 },
+  { value: '90d', label: 'Últimos 90 dias', days: 90 },
   { value: 'all', label: 'Todos', days: null },
 ]
 
@@ -82,35 +80,30 @@ function LoadingFallback() {
 
 function AtividadesContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isDemoMode = searchParams.get('demo') === 'true'
-
-  const realAuth = useAgoraAuth()
-  const demoAuth = useAgoraDemo()
-
-  const isRealAuth = !isDemoMode && realAuth.isAuthenticated
-  const user = isRealAuth ? realAuth.user : demoAuth.user
-  const isAuthLoading = isDemoMode ? demoAuth.isLoading : realAuth.isLoading
+  const { user, isAuthenticated, isLoading } = useAgora()
 
   const [activities, setActivities] = useState<UserActivity[]>([])
   const [filteredActivities, setFilteredActivities] = useState<UserActivity[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedType, setSelectedType] = useState<UserActivity['type'] | 'all'>('all')
   const [selectedTimeRange, setSelectedTimeRange] = useState('30d')
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isDemoMode && !realAuth.isLoading && !realAuth.isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       router.replace('/pt/agora/login')
     }
-  }, [isDemoMode, realAuth.isLoading, realAuth.isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router])
 
+  // Load activities
   useEffect(() => {
     if (user) {
       loadActivities()
     }
   }, [user])
 
+  // Filter activities
   useEffect(() => {
     filterActivities()
   }, [activities, searchQuery, selectedType, selectedTimeRange])
@@ -119,53 +112,13 @@ function AtividadesContent() {
     if (!user) return
 
     try {
-      setIsLoading(true)
-
-      if (isDemoMode) {
-        // Generate demo activities
-        const demoActivities: UserActivity[] = [
-          {
-            id: '1',
-            user_id: user.id,
-            type: 'chat',
-            title: 'Conversa com Tiradentes',
-            description: 'Discutiu sobre a Inconfidencia Mineira',
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            user_id: user.id,
-            type: 'agent_interaction',
-            title: 'Novo badge: Curioso',
-            description: 'Fez 10 perguntas aos mentores',
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-          },
-          {
-            id: '3',
-            user_id: user.id,
-            type: 'chat',
-            title: 'Conversa com Dandara',
-            description: 'Aprendeu sobre resistencia quilombola',
-            created_at: new Date(Date.now() - 172800000).toISOString(),
-          },
-          {
-            id: '4',
-            user_id: user.id,
-            type: 'settings_update',
-            title: 'Configuracoes atualizadas',
-            description: 'Alterou preferencias de acessibilidade',
-            created_at: new Date(Date.now() - 259200000).toISOString(),
-          },
-        ]
-        setActivities(demoActivities)
-      } else {
-        const data = await userProfileService.getActivities(user.id)
-        setActivities(data)
-      }
+      setIsLoadingActivities(true)
+      const data = await userProfileService.getActivities(user.id)
+      setActivities(data)
     } catch (error) {
       logger.error('Failed to load activities', { error })
     } finally {
-      setIsLoading(false)
+      setIsLoadingActivities(false)
     }
   }
 
@@ -210,14 +163,12 @@ function AtividadesContent() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      if (!isDemoMode) {
-        await userProfileService.logActivity(
-          user.id,
-          'export',
-          'Exportou historico de atividades',
-          `${filteredActivities.length} atividades exportadas`
-        )
-      }
+      await userProfileService.logActivity(
+        user.id,
+        'export',
+        'Exportou histórico de atividades',
+        `${filteredActivities.length} atividades exportadas`
+      )
     } catch (error) {
       logger.error('Failed to export activities', { error })
     }
@@ -227,44 +178,22 @@ function AtividadesContent() {
     loadActivities()
   }
 
-  if (isAuthLoading) {
+  if (isLoading) {
     return <LoadingFallback />
   }
 
-  // If not authenticated and not in demo mode, show login prompt instead of blank page
-  if (!isDemoMode && !realAuth.isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <Activity className="w-10 h-10 text-white" />
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <GraduationCap className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-            Acesso Restrito
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Faça login para ver seu histórico de atividades na Ágora.
-          </p>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/pt/agora/login"
-              className="w-full py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors"
-            >
-              Fazer Login
-            </Link>
-            <Link
-              href="/pt/agora/atividades?demo=true"
-              className="w-full py-3 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors"
-            >
-              Explorar em modo demo
-            </Link>
-          </div>
+          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
         </div>
       </div>
     )
   }
-
-  const buildUrl = (path: string) => `${path}${isDemoMode ? '?demo=true' : ''}`
 
   return (
     <div className="min-h-screen relative">
@@ -287,7 +216,7 @@ function AtividadesContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href={buildUrl('/pt/agora')}
+                href="/pt/agora"
                 className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -298,7 +227,7 @@ function AtividadesContent() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Historico de Atividades
+                    Histórico de Atividades
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
                     {filteredActivities.length}{' '}
@@ -309,8 +238,13 @@ function AtividadesContent() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="secondary" size="sm" onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoadingActivities}
+              >
+                <RefreshCw className={cn('w-4 h-4 mr-2', isLoadingActivities && 'animate-spin')} />
                 Atualizar
               </Button>
               <Button
@@ -399,11 +333,11 @@ function AtividadesContent() {
           <GlassCardContent className="p-6">
             <ActivityTimeline
               activities={filteredActivities}
-              isLoading={isLoading}
+              isLoading={isLoadingActivities}
               emptyMessage={
                 searchQuery || selectedType !== 'all'
                   ? 'Nenhuma atividade encontrada com os filtros aplicados'
-                  : 'Nenhuma atividade registrada ainda. Comece a usar a Agora!'
+                  : 'Nenhuma atividade registrada ainda. Comece a usar a Ágora!'
               }
               showFullTimestamp={true}
             />

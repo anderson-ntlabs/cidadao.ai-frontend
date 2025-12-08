@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
 import { DashboardClient } from './_components/dashboard-client'
 import { GraduationCap } from 'lucide-react'
@@ -9,12 +9,11 @@ import { GraduationCap } from 'lucide-react'
 /**
  * Academy Dashboard Page
  *
- * Design System v2 - Bo Bardi + Dumont + Anderson
- * Clean architecture with proper separation of concerns.
+ * Real authentication only - no demo mode.
  * Uses unified useAgora hook for consistent data flow.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-07 - Migrated to unified useAgora hook
+ * Updated: 2025-12-08 - Removed demo mode, real auth only
  */
 
 function LoadingFallback() {
@@ -32,64 +31,22 @@ function LoadingFallback() {
 
 function AcademyDashboardContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isDemoParam = searchParams.get('demo') === 'true'
 
-  // Unified Agora hook - automatically handles real vs demo mode
-  const {
-    user,
-    isAuthenticated,
-    isLoading,
-    isDemoMode,
-    isRealAuth,
-    badges,
-    xpTransactions,
-    logout,
-  } = useAgora()
+  const { user, isAuthenticated, isLoading, badges, xpTransactions, logout } = useAgora()
 
-  // OAuth flow detection
-  const [isOAuthFlow, setIsOAuthFlow] = useState(false)
-  const [authCheckComplete, setAuthCheckComplete] = useState(false)
-
-  // Detect OAuth flow on mount
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const hasOAuthParam = window.location.search.includes('oauth_complete=')
-    const hasOAuthCookie = document.cookie.includes('oauth_session_ready=true')
-    if (hasOAuthParam || hasOAuthCookie) {
-      setIsOAuthFlow(true)
-      // Increased timeout to 8 seconds to allow auth hook retries to complete
-      const timer = setTimeout(() => setAuthCheckComplete(true), 8000)
-      return () => clearTimeout(timer)
-    } else {
-      setAuthCheckComplete(true)
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/pt/agora/login')
     }
-  }, [])
-
-  // Auth redirect - only redirect after OAuth timeout or if not in OAuth flow
-  useEffect(() => {
-    // Never redirect in demo mode
-    if (isDemoParam || isDemoMode) return
-
-    // Don't redirect while auth is loading
-    if (isLoading) return
-
-    // Authenticated - no redirect needed
-    if (isRealAuth) return
-
-    // In OAuth flow - wait for timeout before redirecting
-    if (isOAuthFlow && !authCheckComplete) return
-
-    // Not authenticated - redirect to login
-    router.replace('/pt/agora/login')
-  }, [isDemoParam, isDemoMode, isLoading, isRealAuth, isOAuthFlow, authCheckComplete, router])
+  }, [isLoading, isAuthenticated, router])
 
   // Loading state
-  if (isLoading || (isOAuthFlow && !authCheckComplete && !isRealAuth)) {
+  if (isLoading) {
     return <LoadingFallback />
   }
 
-  // Not authenticated - redirect to login
+  // Not authenticated - show redirect message
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -103,8 +60,7 @@ function AcademyDashboardContent() {
     )
   }
 
-  // At this point, user is guaranteed to be non-null
-  // Build user data from unified hook
+  // Build user data for dashboard
   const dashboardUser = {
     id: user.id,
     name: user.name,
@@ -143,9 +99,7 @@ function AcademyDashboardContent() {
   // Logout handler
   const handleLogout = async () => {
     await logout()
-    if (isDemoMode) {
-      router.push('/pt/agora/login')
-    }
+    router.push('/pt/agora/login')
   }
 
   return (
@@ -153,7 +107,7 @@ function AcademyDashboardContent() {
       user={dashboardUser}
       badges={dashboardBadges}
       xpTransactions={dashboardXpTransactions}
-      isDemoMode={isDemoMode}
+      isDemoMode={false}
       onLogout={handleLogout}
     />
   )
