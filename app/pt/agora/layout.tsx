@@ -191,7 +191,7 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   const isLoginPage = pathname === '/pt/agora/login'
 
   return (
-    <div className="min-h-screen academy-bg">
+    <div className="min-h-screen">
       {/* Global Header */}
       {shouldShowHeader && <AgoraHeaderWrapper />}
 

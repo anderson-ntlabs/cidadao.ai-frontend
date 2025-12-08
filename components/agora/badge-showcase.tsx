@@ -83,9 +83,7 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
           <Trophy className="w-5 h-5 text-yellow-500" />
           Badges Conquistados
           {badges.length > 0 && (
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              ({badges.length})
-            </span>
+            <span className="text-sm font-normal academy-text-muted">({badges.length})</span>
           )}
         </CardTitle>
       </CardHeader>
@@ -105,14 +103,12 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-3xl shadow-md">
+                <div className="w-12 h-12 rounded-xl bg-[hsl(var(--academy-card))] flex items-center justify-center text-3xl shadow-md">
                   {badge.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-gray-100">{badge.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {badge.criteria}
-                  </p>
+                  <p className="font-bold academy-text">{badge.name}</p>
+                  <p className="text-xs academy-text-muted truncate">{badge.criteria}</p>
                 </div>
                 <Sparkles className="w-5 h-5 text-yellow-500 animate-pulse" />
               </div>
@@ -120,13 +116,13 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
           </div>
         ) : (
           <div className="text-center py-6">
-            <div className="w-16 h-16 rounded-2xl bg-yellow-100/50 dark:bg-yellow-900/20 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-[hsl(var(--academy-accent)/0.2)] flex items-center justify-center mx-auto mb-4">
               <span className="text-4xl">🍜</span>
             </div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="text-sm font-medium academy-text">
               Seja assíduo para ganhar o badge Japaguri!
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs academy-text-muted mt-1">
               3+ dias seguidos, 5+ sessões ou 3+ diários
             </p>
           </div>
@@ -134,8 +130,8 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
 
         {/* Locked badges preview */}
         {showLocked && lockedBadges.length > 0 && badges.length > 0 && (
-          <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-            <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+          <div className="mt-6 pt-4 border-t border-[hsl(var(--academy-border)/0.5)]">
+            <p className="text-xs font-medium academy-text-muted uppercase tracking-wider mb-3">
               Próximos badges
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -145,11 +141,11 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
                   className="relative group"
                   title={`${badge.name}: ${badge.criteria}`}
                 >
-                  <div className="w-full aspect-square rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-2xl opacity-40 grayscale">
+                  <div className="w-full aspect-square rounded-xl bg-[hsl(var(--academy-bg-secondary))] flex items-center justify-center text-2xl opacity-40 grayscale">
                     {badge.emoji}
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-gray-400" />
+                    <Lock className="w-4 h-4 academy-text-muted" />
                   </div>
                 </div>
               ))}

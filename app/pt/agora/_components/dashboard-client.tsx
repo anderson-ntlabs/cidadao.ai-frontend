@@ -48,10 +48,10 @@ const ActivityTimeline = dynamic(
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="flex items-start gap-4">
-            <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 mt-2" />
+            <div className="w-2 h-2 rounded-full bg-[hsl(var(--academy-border))] mt-2" />
             <div className="flex-1">
-              <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2" />
-              <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+              <div className="h-4 w-3/4 bg-[hsl(var(--academy-bg-secondary))] animate-pulse rounded mb-2" />
+              <div className="h-3 w-1/2 bg-[hsl(var(--academy-bg-secondary))] animate-pulse rounded" />
             </div>
           </div>
         ))}
@@ -383,7 +383,7 @@ export function DashboardClient({
                       src={user.avatar}
                       alt={user.name}
                       fallbackName={user.name}
-                      className="w-32 h-32 rounded-2xl border-4 border-white dark:border-gray-900 shadow-xl object-cover bg-gray-100 dark:bg-gray-800"
+                      className="w-32 h-32 rounded-2xl border-4 border-[hsl(var(--academy-card))] shadow-xl object-cover bg-[hsl(var(--academy-bg-secondary))]"
                     />
                     <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg">
                       {rankInfo.emoji}
@@ -396,7 +396,7 @@ export function DashboardClient({
                       Ola, {user.name.split(' ')[0]}! 👋
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 academy-text">
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-[hsl(var(--academy-bg-secondary))] academy-text">
                         Level {user.currentLevel} - {rankInfo.name}
                       </span>
                       {nextRank && (
@@ -408,7 +408,7 @@ export function DashboardClient({
 
                     {/* XP Progress */}
                     <div className="mt-4 max-w-md">
-                      <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className="h-3 bg-[hsl(var(--academy-bg-secondary))] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full transition-all duration-500"
                           style={{ width: `${xpProgress}%` }}
@@ -750,7 +750,7 @@ export function DashboardClient({
                           key={badge.id}
                           className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30"
                         >
-                          <div className="w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-xl shadow-sm flex-shrink-0">
+                          <div className="w-9 h-9 rounded-lg bg-[hsl(var(--academy-card))] flex items-center justify-center text-xl shadow-sm flex-shrink-0">
                             {badgeEmojis[badge.badge_id] || '🏅'}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -782,8 +782,8 @@ export function DashboardClient({
                   )}
 
                   {/* Locked badges preview - Compact */}
-                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">
+                  <div className="mt-3 pt-3 border-t border-[hsl(var(--academy-border))]">
+                    <p className="text-[10px] academy-text-muted uppercase tracking-wider mb-2">
                       Proximos
                     </p>
                     <div className="flex gap-2 justify-center">
@@ -793,7 +793,7 @@ export function DashboardClient({
                         .map((emoji, i) => (
                           <div
                             key={i}
-                            className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-base opacity-40 grayscale"
+                            className="w-8 h-8 rounded-lg bg-[hsl(var(--academy-bg-secondary))] flex items-center justify-center text-base opacity-40 grayscale"
                           >
                             {emoji}
                           </div>

@@ -76,7 +76,7 @@ export function StatCard({
       )}
     >
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-gray-100/50 to-transparent dark:from-gray-800/50 rounded-bl-[80px] -z-0" />
+      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[hsl(var(--academy-bg-secondary)/0.5)] to-transparent rounded-bl-[80px] -z-0" />
 
       <div className="relative z-10 flex flex-col h-full justify-between">
         {/* Header with icon and trend */}
@@ -111,21 +111,17 @@ export function StatCard({
 
         {/* Value and Label */}
         <div className="flex-1">
-          <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-            {value}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+          <p className="text-2xl sm:text-3xl font-bold academy-text leading-tight">{value}</p>
+          <p className="text-sm academy-text-muted mt-1">{label}</p>
 
           {/* Sublabel */}
-          {sublabel && !progress && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{sublabel}</p>
-          )}
+          {sublabel && !progress && <p className="text-xs academy-text-muted mt-1">{sublabel}</p>}
         </div>
 
         {/* Progress bar */}
         {progress && (
-          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-2">
+          <div className="mt-4 pt-3 border-t border-[hsl(var(--academy-border))]">
+            <div className="h-2 bg-[hsl(var(--academy-bg-secondary))] rounded-full overflow-hidden mb-2">
               <div
                 className={cn(
                   'h-full bg-gradient-to-r rounded-full transition-all duration-500',
@@ -134,14 +130,12 @@ export function StatCard({
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex justify-between text-xs academy-text-muted">
               <span>{progress.current.toLocaleString()} XP</span>
               <span>{progress.max.toLocaleString()} XP</span>
             </div>
             {progress.label && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                {progress.label}
-              </p>
+              <p className="text-xs academy-text-muted mt-1 truncate">{progress.label}</p>
             )}
           </div>
         )}
