@@ -123,7 +123,7 @@ function AcademyAgendaContent() {
   const isDemoParam = searchParams.get('demo') === 'true'
 
   // Unified Agora hook
-  const { user, isLoading, isDemoMode, isRealAuth, logout, addXp } = useAgora()
+  const { user, isAuthenticated, isLoading, logout, addXp } = useAgora()
 
   // State
   const [events, setEvents] = useState<AcademyEvent[]>([])
@@ -457,7 +457,7 @@ function AcademyAgendaContent() {
     return <LoadingFallback />
   }
 
-  if (!isDemoMode && !isRealAuth) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -472,7 +472,7 @@ function AcademyAgendaContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AgoraHeader user={user} onLogout={handleLogout} isDemoMode={isDemoMode} />
+      <AgoraHeader user={user} onLogout={handleLogout} isDemoMode={false} />
 
       <div className="flex flex-1">
         <AgoraSidebar user={user} />
