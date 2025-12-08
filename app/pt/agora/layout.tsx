@@ -6,6 +6,7 @@ import { Suspense } from 'react'
 import { usePathname } from 'next/navigation'
 import { AgoraProvider } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
+import { AgoraDemoProvider } from '@/hooks/use-agora-demo'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
@@ -92,9 +93,11 @@ export default function AgoraLayout({ children }: { children: React.ReactNode })
   return (
     <Suspense fallback={<AgoraLoadingFallback />}>
       <AgoraAuthProvider>
-        <AgoraProvider>
-          <AgoraLayoutContent>{children}</AgoraLayoutContent>
-        </AgoraProvider>
+        <AgoraDemoProvider>
+          <AgoraProvider>
+            <AgoraLayoutContent>{children}</AgoraLayoutContent>
+          </AgoraProvider>
+        </AgoraDemoProvider>
       </AgoraAuthProvider>
     </Suspense>
   )
