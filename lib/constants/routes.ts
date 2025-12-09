@@ -156,6 +156,9 @@ export const ALLOWED_OAUTH_REDIRECTS = [
   '/pt/agora/trilhas',
   '/pt/agora/ranking',
   '/pt/agora/perfil',
+  '/pt/agora/kids',
+  '/pt/agora/kids/dashboard',
+  '/pt/agora/pais',
   '/en/app',
 ] as const
 
