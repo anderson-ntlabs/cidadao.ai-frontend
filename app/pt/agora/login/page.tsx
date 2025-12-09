@@ -11,14 +11,13 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
-import { Github, Mail, GraduationCap, Sparkles, Loader2, Baby, CheckCircle } from 'lucide-react'
+import { Github, Mail, GraduationCap, Sparkles, Loader2, ChevronDown } from 'lucide-react'
 
 /**
  * Ágora Login Page
  *
  * OAuth login with GitHub and Google
- * Mode selector: Ágora (adult) or Kids (children)
- * OAuth redirect changes based on selected mode
+ * Kids section as accordion that expands login options
  *
  * Author: Anderson Henrique da Silva
  * Updated: 2025-12-09
@@ -45,17 +44,17 @@ const KIDS_IMAGES = [
   '/kids/ze_carioca.png',
 ]
 
-type LoginMode = 'agora' | 'kids'
-
 export default function AgoraLoginPage() {
   const router = useRouter()
   const supabase = createClient()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
+  const [isLoggingIn, setIsLoggingIn] = useState<
+    'github' | 'google' | 'github-kids' | 'google-kids' | null
+  >(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [loginMode, setLoginMode] = useState<LoginMode>('agora')
+  const [kidsExpanded, setKidsExpanded] = useState(false)
   const [kidsImageIndex, setKidsImageIndex] = useState(0)
 
   // Check auth status on mount
@@ -75,9 +74,10 @@ export default function AgoraLoginPage() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user)
       if (event === 'SIGNED_IN' && session?.user) {
-        // Redirect based on stored mode preference
+        // Check if logging in for Kids
         const storedMode = sessionStorage.getItem('login_mode')
         if (storedMode === 'kids') {
+          sessionStorage.removeItem('login_mode')
           router.replace('/pt/agora/kids')
         } else {
           router.replace('/pt/agora')
@@ -88,25 +88,27 @@ export default function AgoraLoginPage() {
     return () => subscription.unsubscribe()
   }, [supabase, router])
 
-  // Select random background on mount (client-side only to avoid hydration mismatch)
+  // Select random background on mount
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length)
     setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
   }, [])
 
-  // Rotate kids images every 3 seconds
+  // Rotate kids images every 3 seconds when expanded
   useEffect(() => {
+    if (!kidsExpanded) return
     const interval = setInterval(() => {
       setKidsImageIndex((prev) => (prev + 1) % KIDS_IMAGES.length)
     }, 3000)
     return () => clearInterval(interval)
-  }, [])
+  }, [kidsExpanded])
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       const storedMode = sessionStorage.getItem('login_mode')
       if (storedMode === 'kids') {
+        sessionStorage.removeItem('login_mode')
         router.replace('/pt/agora/kids')
       } else {
         router.replace('/pt/agora')
@@ -114,14 +116,19 @@ export default function AgoraLoginPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  const handleLogin = async (provider: 'github' | 'google') => {
-    setIsLoggingIn(provider)
+  const handleLogin = async (provider: 'github' | 'google', isKids: boolean = false) => {
+    const loginKey = isKids ? `${provider}-kids` : provider
+    setIsLoggingIn(loginKey as typeof isLoggingIn)
 
     // Store mode preference before OAuth redirect
-    sessionStorage.setItem('login_mode', loginMode)
+    if (isKids) {
+      sessionStorage.setItem('login_mode', 'kids')
+    } else {
+      sessionStorage.removeItem('login_mode')
+    }
 
     try {
-      const nextPath = loginMode === 'kids' ? '/pt/agora/kids' : '/pt/agora'
+      const nextPath = isKids ? '/pt/agora/kids' : '/pt/agora'
       const redirectTo =
         typeof window !== 'undefined'
           ? `${window.location.origin}/auth/callback?next=${nextPath}`
@@ -166,7 +173,7 @@ export default function AgoraLoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 academy-bg relative overflow-hidden">
-      {/* Background image using Next/Image for better loading */}
+      {/* Background image */}
       {backgroundImage && (
         <div className="fixed inset-0 -z-10">
           <Image
@@ -185,127 +192,20 @@ export default function AgoraLoginPage() {
       )}
 
       <div className="w-full max-w-md relative z-10">
-        {/* Header - changes based on mode */}
+        {/* Header */}
         <div className="text-center mb-8">
-          <div
-            className={cn(
-              'w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl transition-all duration-500',
-              loginMode === 'kids'
-                ? 'bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4]'
-                : 'academy-gradient'
-            )}
-          >
-            {loginMode === 'kids' ? (
-              <Baby className="w-10 h-10 text-white" />
-            ) : (
-              <GraduationCap className="w-10 h-10 text-white" />
-            )}
+          <div className="w-20 h-20 rounded-3xl academy-gradient flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <GraduationCap className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold academy-text mb-2">
-            {loginMode === 'kids' ? 'Área Kids' : 'Ágora Cidadão.AI'}
-          </h1>
+          <h1 className="text-3xl font-bold academy-text mb-2">Ágora Cidadão.AI</h1>
           <p className="academy-text-muted">
-            {loginMode === 'kids'
-              ? 'Aprendizado seguro e divertido para crianças de 6-12 anos'
-              : 'Plataforma aberta de aprendizado em IA e desenvolvimento'}
+            Plataforma aberta de aprendizado em IA e desenvolvimento
           </p>
-        </div>
-
-        {/* Mode Selector */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {/* Ágora Mode */}
-          <button
-            onClick={() => setLoginMode('agora')}
-            className={cn(
-              'relative p-4 rounded-xl border-2 transition-all text-left',
-              loginMode === 'agora'
-                ? 'border-tarsila-verde bg-tarsila-verde/10 shadow-lg'
-                : 'border-border hover:border-tarsila-verde/50 academy-card'
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'h-10 w-10 rounded-lg flex items-center justify-center',
-                  loginMode === 'agora' ? 'academy-gradient' : 'bg-muted'
-                )}
-              >
-                <GraduationCap
-                  className={cn(
-                    'h-5 w-5',
-                    loginMode === 'agora' ? 'text-white' : 'academy-text-muted'
-                  )}
-                />
-              </div>
-              <div>
-                <span className="font-bold academy-text block">Ágora</span>
-                <span className="text-xs academy-text-muted">Adultos</span>
-              </div>
-            </div>
-            {loginMode === 'agora' && (
-              <CheckCircle className="absolute top-2 right-2 h-5 w-5 text-tarsila-verde" />
-            )}
-          </button>
-
-          {/* Kids Mode */}
-          <button
-            onClick={() => setLoginMode('kids')}
-            className={cn(
-              'relative p-4 rounded-xl border-2 transition-all text-left',
-              loginMode === 'kids'
-                ? 'border-[#FF6B6B] bg-[#FF6B6B]/10 shadow-lg'
-                : 'border-border hover:border-[#FF6B6B]/50 academy-card'
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'h-10 w-10 rounded-lg flex items-center justify-center overflow-hidden',
-                  loginMode === 'kids'
-                    ? 'bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] p-0.5'
-                    : 'bg-muted'
-                )}
-              >
-                {loginMode === 'kids' ? (
-                  <Image
-                    src={KIDS_IMAGES[kidsImageIndex]}
-                    alt="Kids"
-                    width={40}
-                    height={40}
-                    className="rounded-md object-cover w-full h-full"
-                  />
-                ) : (
-                  <Baby className="h-5 w-5 academy-text-muted" />
-                )}
-              </div>
-              <div>
-                <span className="font-bold academy-text block">Kids</span>
-                <span className="text-xs academy-text-muted">6-12 anos</span>
-              </div>
-            </div>
-            {loginMode === 'kids' && (
-              <CheckCircle className="absolute top-2 right-2 h-5 w-5 text-[#FF6B6B]" />
-            )}
-          </button>
         </div>
 
         {/* Login Card */}
         <GlassCard className="mb-6">
           <GlassCardContent className="p-6 space-y-4">
-            {/* Mode indicator */}
-            <div
-              className={cn(
-                'text-center text-sm font-medium py-2 px-4 rounded-lg mb-2',
-                loginMode === 'kids'
-                  ? 'bg-[#FF6B6B]/20 text-[#FF6B6B]'
-                  : 'bg-tarsila-verde/20 text-tarsila-verde'
-              )}
-            >
-              {loginMode === 'kids'
-                ? '👶 Entrando como Pai/Responsável para configurar Área Kids'
-                : '🎓 Entrando no Ágora Academy'}
-            </div>
-
             {/* GitHub Login */}
             <Button
               onClick={() => handleLogin('github')}
@@ -343,20 +243,103 @@ export default function AgoraLoginPage() {
           </GlassCardContent>
         </GlassCard>
 
-        {/* Features - changes based on mode */}
+        {/* Kids Accordion */}
+        <div className="mb-6">
+          <button
+            onClick={() => setKidsExpanded(!kidsExpanded)}
+            className={cn(
+              'w-full p-4 rounded-xl border-2 transition-all',
+              'flex items-center gap-4',
+              kidsExpanded
+                ? 'border-[#FF6B6B] bg-[#FF6B6B]/10 rounded-b-none'
+                : 'border-border hover:border-[#FF6B6B]/50 academy-card'
+            )}
+          >
+            <div className="h-12 w-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] p-0.5">
+              <Image
+                src={KIDS_IMAGES[kidsImageIndex]}
+                alt="Área Kids"
+                width={48}
+                height={48}
+                className="rounded-lg object-cover w-full h-full"
+              />
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="font-bold academy-text">Área Kids</h3>
+              <p className="text-xs academy-text-muted">Aprendizado para crianças de 6-12 anos</p>
+            </div>
+            <ChevronDown
+              className={cn(
+                'h-5 w-5 academy-text-muted transition-transform',
+                kidsExpanded && 'rotate-180'
+              )}
+            />
+          </button>
+
+          {/* Accordion Content */}
+          <div
+            className={cn(
+              'overflow-hidden transition-all duration-300',
+              kidsExpanded ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+            )}
+          >
+            <div className="p-4 border-2 border-t-0 border-[#FF6B6B] rounded-b-xl bg-[#FF6B6B]/5 space-y-3">
+              <p className="text-sm text-center academy-text-muted mb-4">
+                Pais: façam login para configurar a Área Kids
+              </p>
+
+              {/* GitHub Kids */}
+              <Button
+                onClick={() => handleLogin('github', true)}
+                disabled={isLoggingIn !== null}
+                size="lg"
+                className={cn(
+                  'w-full justify-center gap-3 h-12 text-sm',
+                  'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
+                  'text-white dark:text-gray-900'
+                )}
+              >
+                {isLoggingIn === 'github-kids' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Github className="w-4 h-4" />
+                )}
+                Entrar com GitHub
+              </Button>
+
+              {/* Google Kids */}
+              <Button
+                onClick={() => handleLogin('google', true)}
+                disabled={isLoggingIn !== null}
+                variant="secondary"
+                size="lg"
+                className="w-full justify-center gap-3 h-12 text-sm"
+              >
+                {isLoggingIn === 'google-kids' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Mail className="w-4 h-4" />
+                )}
+                Entrar com Google
+              </Button>
+
+              <Link
+                href="/pt/agora/kids/termos"
+                className="block text-center text-xs text-[#FF6B6B] hover:underline mt-2"
+              >
+                Termos de Uso da Área Kids
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Features */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {(loginMode === 'kids'
-            ? [
-                { icon: '🎮', label: 'Jogos' },
-                { icon: '📹', label: 'Vídeos' },
-                { icon: '🤖', label: 'Mentores' },
-              ]
-            : [
-                { icon: '🎓', label: 'Certificado' },
-                { icon: '🏆', label: 'Gamificação' },
-                { icon: '🤖', label: 'Mentoria IA' },
-              ]
-          ).map((feature) => (
+          {[
+            { icon: '🎓', label: 'Certificado' },
+            { icon: '🏆', label: 'Gamificação' },
+            { icon: '🤖', label: 'Mentoria IA' },
+          ].map((feature) => (
             <div
               key={feature.label}
               className="flex flex-col items-center p-3 rounded-xl academy-card backdrop-blur-sm"
@@ -371,13 +354,7 @@ export default function AgoraLoginPage() {
         <div className="text-center space-y-3">
           <p className="text-xs academy-text-muted">
             Ao entrar, você concorda com nossos{' '}
-            <Link
-              href={loginMode === 'kids' ? '/pt/agora/kids/termos' : '/pt/termos'}
-              className={cn(
-                'hover:underline',
-                loginMode === 'kids' ? 'text-[#FF6B6B]' : 'text-tarsila-verde'
-              )}
-            >
+            <Link href="/pt/termos" className="text-tarsila-verde hover:underline">
               Termos de Uso
             </Link>{' '}
             e{' '}
