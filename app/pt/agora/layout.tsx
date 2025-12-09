@@ -82,6 +82,39 @@ function AgoraLoadingFallback() {
   )
 }
 
+// Session cleanup on page close/refresh
+function useSessionCleanup() {
+  const { currentSession, endSession } = useAgora()
+  const { isKidsMode, endSession: endKidsSession, isSessionActive } = useKids()
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // End Agora session
+      if (currentSession) {
+        // Use sendBeacon for reliable cleanup on page close
+        navigator.sendBeacon(
+          '/api/agora/end-session',
+          JSON.stringify({
+            sessionId: currentSession.id,
+          })
+        )
+      }
+      // End Kids session
+      if (isKidsMode && isSessionActive) {
+        navigator.sendBeacon(
+          '/api/kids/end-session',
+          JSON.stringify({
+            timestamp: Date.now(),
+          })
+        )
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [currentSession, isKidsMode, isSessionActive])
+}
+
 // Header wrapper that uses the Agora hook with logout confirmation
 function AgoraHeaderWrapper() {
   const router = useRouter()
@@ -202,6 +235,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   const isMobile = useMobileDetection()
   const pathname = usePathname()
+
+  // Setup session cleanup on page close
+  useSessionCleanup()
 
   // Check if we should show header
   const shouldShowHeader = !noHeaderPages.some((page) => pathname?.startsWith(page))
