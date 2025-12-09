@@ -288,6 +288,29 @@ export function calculateKidsTelemetry(): KidsTelemetryData {
 }
 
 /**
+ * Get list of watched video IDs
+ * Useful for tracking progress across video tracks
+ */
+export function getWatchedVideoIds(): string[] {
+  const sessions = getKidsActivityLog()
+  const currentSession = getCurrentSession()
+
+  const allSessions = currentSession ? [...sessions, currentSession] : sessions
+
+  const videosWatched = new Set<string>()
+
+  allSessions.forEach((session) => {
+    session.events.forEach((event) => {
+      if (event.type === 'video_watched') {
+        videosWatched.add(event.data.videoId)
+      }
+    })
+  })
+
+  return Array.from(videosWatched)
+}
+
+/**
  * Clear all Kids activity data
  * Called when parent disables Kids mode
  */

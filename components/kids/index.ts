@@ -19,3 +19,4 @@ export {
   getAvatarPath,
   getAvatarName,
 } from './kids-avatar-selector'
+export { KidsTrackCard } from './kids-track-card'
