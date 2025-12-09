@@ -33,8 +33,9 @@ import {
   KeyRound,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { KidsContractModal } from '@/components/kids'
 
-type Step = 'choice' | 'setup' | 'code-generated' | 'child-access'
+type Step = 'choice' | 'setup' | 'contract' | 'code-generated' | 'child-access'
 
 export default function KidsEntryPage() {
   const router = useRouter()
@@ -49,11 +50,14 @@ export default function KidsEntryPage() {
 
   const [step, setStep] = useState<Step>('choice')
   const [childName, setChildName] = useState('')
+  const [parentName, setParentName] = useState('')
+  const [parentEmail, setParentEmail] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState<'lobato' | 'tarsila'>('lobato')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
   const [codeCopied, setCodeCopied] = useState(false)
+  const [contractId, setContractId] = useState<string | null>(null)
 
   const avatars = [
     {
@@ -78,11 +82,25 @@ export default function KidsEntryPage() {
   const handleParentSetup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Validate required fields
+    if (!childName || !parentName || !parentEmail) {
+      setError('Preencha todos os campos obrigatórios.')
+      return
+    }
+
+    // Go to contract step
+    setStep('contract')
+  }
+
+  const handleContractAccept = async (acceptedContractId: string) => {
+    setContractId(acceptedContractId)
     setIsLoading(true)
+    setError(null)
 
     try {
       // Enable kids mode (this will create the profile)
-      const success = await enableKidsMode(childName, '', selectedAvatar)
+      const success = await enableKidsMode(childName, parentEmail, selectedAvatar)
 
       if (success) {
         // Generate unique parental code
@@ -92,15 +110,22 @@ export default function KidsEntryPage() {
           setStep('code-generated')
         } else {
           setError('Erro ao gerar código de acesso. Tente novamente.')
+          setStep('setup')
         }
       } else {
         setError('Erro ao configurar área Kids. Tente novamente.')
+        setStep('setup')
       }
     } catch {
       setError('Erro inesperado. Tente novamente.')
+      setStep('setup')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleContractClose = () => {
+    setStep('setup')
   }
 
   const handleCopyCode = async () => {
@@ -208,10 +233,43 @@ export default function KidsEntryPage() {
               </div>
 
               <form onSubmit={handleParentSetup} className="space-y-6">
+                {/* Parent Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="parentName" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Nome do Responsável
+                  </Label>
+                  <Input
+                    id="parentName"
+                    value={parentName}
+                    onChange={(e) => setParentName(e.target.value)}
+                    placeholder="Ex: João da Silva"
+                    required
+                    className="text-lg h-12"
+                  />
+                </div>
+
+                {/* Parent Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="parentEmail" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Email do Responsável
+                  </Label>
+                  <Input
+                    id="parentEmail"
+                    type="email"
+                    value={parentEmail}
+                    onChange={(e) => setParentEmail(e.target.value)}
+                    placeholder="Ex: joao@email.com"
+                    required
+                    className="text-lg h-12"
+                  />
+                </div>
+
                 {/* Child Name */}
                 <div className="space-y-2">
                   <Label htmlFor="childName" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                    <Baby className="h-4 w-4" />
                     Nome da Criança
                   </Label>
                   <Input
@@ -279,24 +337,38 @@ export default function KidsEntryPage() {
                 {/* Submit */}
                 <Button
                   type="submit"
-                  disabled={isLoading || !childName}
+                  disabled={isLoading || !childName || !parentName || !parentEmail}
                   className="w-full h-14 text-lg bg-kids-coral hover:bg-kids-coral/90"
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Configurando...
-                    </>
-                  ) : (
-                    <>
-                      Criar Área Kids
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </>
-                  )}
+                  Continuar para os Termos
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </form>
             </GlassCardContent>
           </GlassCard>
+        )}
+
+        {/* Step: Contract */}
+        {step === 'contract' && (
+          <>
+            <KidsContractModal
+              isOpen={true}
+              onAccept={handleContractAccept}
+              onClose={handleContractClose}
+              parentName={parentName}
+              parentEmail={parentEmail}
+              childName={childName}
+            />
+            {/* Loading overlay while processing contract */}
+            {isLoading && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center space-y-4">
+                  <Loader2 className="h-12 w-12 animate-spin mx-auto text-kids-coral" />
+                  <p className="text-lg font-medium">Configurando Área Kids...</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Step: Code Generated */}
