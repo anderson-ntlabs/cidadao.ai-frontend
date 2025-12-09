@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
-import { Github, Mail, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
+import { Github, Mail, GraduationCap, Sparkles, Loader2, Baby } from 'lucide-react'
 
 /**
  * Ágora Login Page
@@ -198,6 +198,30 @@ export default function AgoraLoginPage() {
             </Button>
           </GlassCardContent>
         </GlassCard>
+
+        {/* Kids Area Access */}
+        <Link href="/pt/agora/kids">
+          <GlassCard className="mb-6 cursor-pointer hover:shadow-lg transition-all group border-2 border-transparent hover:border-[#FF6B6B]/50">
+            <GlassCardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] flex items-center justify-center flex-shrink-0">
+                  <Baby className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold academy-text group-hover:text-[#FF6B6B] transition-colors">
+                    Área Kids
+                  </h3>
+                  <p className="text-xs academy-text-muted">
+                    Aprendizado seguro e divertido para crianças de 6-12 anos
+                  </p>
+                </div>
+                <span className="text-[#FF6B6B] text-xl group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </div>
+            </GlassCardContent>
+          </GlassCard>
+        </Link>
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mb-6">
