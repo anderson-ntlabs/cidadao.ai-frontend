@@ -3,34 +3,48 @@
  *
  * Catalog of curated videos for children learning programming.
  * Displays all available videos in a kid-friendly grid.
+ * Integrates with Kids tracker for parent reports.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-09 - Added telemetry integration
  */
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { KIDS_VIDEOS, TOTAL_KIDS_VIDEOS } from '@/data/kids-videos'
 import { KidsVideoCard, KidsVideo } from '@/components/kids'
 import { PlayCircle, Loader2, ArrowLeft, Trophy } from 'lucide-react'
 import Link from 'next/link'
+import { trackKidsVideoWatched, calculateKidsTelemetry } from '@/lib/analytics/kids-tracker'
 
 export default function KidsVideosPage() {
   const { isReady, isLoading } = useRequireKidsMode()
   const { trackVideo } = useKids()
 
-  // In a real app, this would come from the store/API
-  const [watchedVideos] = useState<string[]>([])
+  // Track watched videos from telemetry
+  const [telemetry, setTelemetry] = useState(() => calculateKidsTelemetry())
+
+  // Refresh telemetry on mount
+  useEffect(() => {
+    setTelemetry(calculateKidsTelemetry())
+  }, [])
 
   const handleVideoClick = (video: KidsVideo) => {
     trackVideo(video.id)
+    // Track video watched for parent report (estimate duration from string "MM:SS")
+    const [minutes, seconds] = video.duration.split(':').map(Number)
+    const durationSeconds = (minutes || 0) * 60 + (seconds || 0)
+    trackKidsVideoWatched(video.id, video.title, durationSeconds)
+    // Update telemetry
+    setTimeout(() => setTelemetry(calculateKidsTelemetry()), 100)
     // Open YouTube video
     window.open(`https://www.youtube.com/watch?v=${video.youtubeId}`, '_blank')
   }
 
-  const progress = Math.round((watchedVideos.length / TOTAL_KIDS_VIDEOS) * 100)
+  const progress = Math.round((telemetry.videosWatched / TOTAL_KIDS_VIDEOS) * 100)
 
   // Loading state
   if (isLoading) {
@@ -100,20 +114,14 @@ export default function KidsVideosPage() {
           />
         </div>
         <p className="text-sm text-muted-foreground mt-2">
-          {watchedVideos.length} de {TOTAL_KIDS_VIDEOS} vídeos assistidos
+          {telemetry.videosWatched} de {TOTAL_KIDS_VIDEOS} vídeos assistidos
         </p>
       </div>
 
       {/* Videos Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {KIDS_VIDEOS.map((video) => (
-          <KidsVideoCard
-            key={video.id}
-            video={video}
-            lang="pt"
-            onClick={handleVideoClick}
-            isWatched={watchedVideos.includes(video.id)}
-          />
+          <KidsVideoCard key={video.id} video={video} lang="pt" onClick={handleVideoClick} />
         ))}
       </div>
 

@@ -3,9 +3,11 @@
  *
  * Simplified chat interface for children to interact with
  * Monteiro Lobato and Tarsila do Amaral agents.
+ * Integrates with Kids tracker for parent reports.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-09 - Added telemetry integration
  */
 
 'use client'
@@ -17,8 +19,9 @@ import { getKidsAgents, getAgentById } from '@/data/agents'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
-import { Send, Loader2, ArrowLeft, MessageCircle, Sparkles } from 'lucide-react'
+import { Send, Loader2, ArrowLeft, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import { trackKidsChatMessage } from '@/lib/analytics/kids-tracker'
 
 interface Message {
   id: string
@@ -79,6 +82,9 @@ function KidsChatContent() {
     setInput('')
     setIsLoading(true)
     trackAgent(agent.id)
+
+    // Track chat message for parent report
+    trackKidsChatMessage(agent.id, input.trim().length)
 
     try {
       // Call the backend API
