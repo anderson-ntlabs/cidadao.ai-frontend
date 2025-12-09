@@ -32,11 +32,9 @@ import {
   ArrowUpRight,
   Users,
   TrendingUp,
-  Baby,
 } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { toast } from '@/hooks/use-toast'
-import { KidsModeToggle } from '@/components/kids'
 
 /**
  * Academy Dashboard Client Component
@@ -653,18 +651,6 @@ export function DashboardClient({
                   <ChevronRight className="w-4 h-4 academy-text-muted group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </Link>
-
-              {/* Kids Mode Section */}
-              <GlassCard className="p-5 border-2 border-dashed border-pink-200 dark:border-pink-800/50 bg-gradient-to-br from-pink-50/50 to-orange-50/50 dark:from-pink-900/10 dark:to-orange-900/10">
-                <div className="flex items-center gap-2 mb-4">
-                  <Baby className="w-5 h-5 text-pink-500" />
-                  <span className="text-sm font-semibold academy-text">Para os Pais</span>
-                  <span className="px-2 py-0.5 text-[9px] font-medium rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-300">
-                    NOVO
-                  </span>
-                </div>
-                <KidsModeToggle lang="pt" />
-              </GlassCard>
 
               {/* Quick Actions Grid */}
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
