@@ -13,6 +13,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
 import {
   Gift,
@@ -247,9 +248,9 @@ export function GamificationCard({ className }: GamificationCardProps) {
     .reduce((sum, c) => sum + c.xpReward, 0)
 
   return (
-    <div className={cn('academy-card rounded-xl overflow-hidden', className)}>
+    <GlassCard className={cn('overflow-hidden', className)}>
       {/* Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+      <GlassCardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
@@ -271,9 +272,9 @@ export function GamificationCard({ className }: GamificationCardProps) {
             </div>
           )}
         </div>
-      </div>
+      </GlassCardHeader>
 
-      <div className="p-4 space-y-4">
+      <GlassCardContent className="pt-2 space-y-4">
         {/* Daily Bonus */}
         {hasDailyBonus && (
           <div className="p-3 rounded-lg bg-emerald-600 text-white">
@@ -401,7 +402,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
             )}
           </div>
         )}
-      </div>
-    </div>
+      </GlassCardContent>
+    </GlassCard>
   )
 }

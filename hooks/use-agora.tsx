@@ -457,6 +457,7 @@ interface AgoraContextType {
   isRealAuth: true
 
   // Actions
+  refreshUser: () => Promise<void>
   refreshProfile: () => Promise<void>
   updateProfile: (updates: Partial<AgoraUser>) => Promise<void>
   addXp: (amount: number, sourceType: string, description: string) => Promise<void>
@@ -1651,6 +1652,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       isDemoMode: false,
       isRealAuth: true,
       // Actions
+      refreshUser: loadUserData,
       refreshProfile,
       updateProfile,
       addXp,
@@ -1693,6 +1695,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       weeklyChallenges,
       hasDailyBonus,
       streakMultiplier,
+      loadUserData,
       refreshProfile,
       updateProfile,
       addXp,

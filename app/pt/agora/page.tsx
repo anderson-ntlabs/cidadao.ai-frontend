@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, Suspense } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
+import { createClient } from '@/lib/supabase/client'
 import { DashboardClient } from './_components/dashboard-client'
 import { GraduationCap } from 'lucide-react'
 
@@ -13,7 +14,7 @@ import { GraduationCap } from 'lucide-react'
  * Uses unified useAgora hook for consistent data flow.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Removed demo mode, real auth only
+ * Updated: 2025-12-09 - Fix OAuth redirect stuck on loading
  */
 
 function LoadingFallback() {
@@ -31,8 +32,32 @@ function LoadingFallback() {
 
 function AcademyDashboardContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const { user, isAuthenticated, isLoading, badges, xpTransactions, logout } = useAgora()
+  const { user, isAuthenticated, isLoading, badges, xpTransactions, logout, refreshUser } =
+    useAgora()
+
+  // Handle OAuth completion - force session refresh
+  useEffect(() => {
+    const oauthComplete = searchParams.get('oauth_complete')
+    if (oauthComplete && !isAuthenticated && !isRefreshing) {
+      setIsRefreshing(true)
+      // Force refresh after OAuth redirect to ensure session is synced
+      const supabase = createClient()
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          // Session exists, refresh user data
+          refreshUser?.()
+        }
+        // Clean URL by removing oauth_complete param
+        const url = new URL(window.location.href)
+        url.searchParams.delete('oauth_complete')
+        window.history.replaceState({}, '', url.toString())
+        setIsRefreshing(false)
+      })
+    }
+  }, [searchParams, isAuthenticated, isRefreshing, refreshUser])
 
   // Redirect to login if not authenticated
   useEffect(() => {
