@@ -606,6 +606,35 @@
     color: hsl(var(--kids-orange));
   }
 
+  /* Kids Border Colors */
+  .border-kids-coral {
+    border-color: hsl(var(--kids-coral));
+  }
+
+  .border-kids-turquoise {
+    border-color: hsl(var(--kids-turquoise));
+  }
+
+  .border-kids-yellow {
+    border-color: hsl(var(--kids-yellow));
+  }
+
+  .border-kids-purple {
+    border-color: hsl(var(--kids-purple));
+  }
+
+  .border-kids-green {
+    border-color: hsl(var(--kids-green));
+  }
+
+  .border-kids-orange {
+    border-color: hsl(var(--kids-orange));
+  }
+
+  .border-kids-pink {
+    border-color: hsl(var(--kids-pink));
+  }
+
   /* Kids Typography */
   .theme-kids .text-kids-heading {
     font-size: 1.75rem;
