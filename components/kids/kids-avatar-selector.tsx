@@ -23,8 +23,9 @@ export const KIDS_AVATARS = [
   { id: 'monica', name: 'Monica', file: 'monica.jpg' },
   { id: 'cocorico', name: 'Cocorico', file: 'cocorico.jpg' },
   { id: 'ze_carioca', name: 'Ze Carioca', file: 'ze_carioca.png' },
-  { id: 'jorel', name: 'Irmao do Jorel', file: 'jorel.webp' },
-  { id: 'luluzinha', name: 'Luluzinha', file: 'luluzinha.webp' },
+  { id: 'jorel', name: 'Irmao do Jorel', file: 'jorel.png' },
+  { id: 'luluzinha', name: 'Luluzinha', file: 'luluzinha.png' },
+  { id: 'luluzinha2', name: 'Luluzinha 2', file: 'luluzinha2.png' },
 ]
 
 // Helper to get avatar image path
