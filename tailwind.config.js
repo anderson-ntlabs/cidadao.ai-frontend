@@ -98,6 +98,16 @@ module.exports = {
           rosa: 'hsl(var(--tarsila-rosa))',
           creme: 'hsl(var(--tarsila-creme))',
         },
+        // Kids Mode Palette (vibrant, playful colors)
+        kids: {
+          coral: '#FF6B6B',
+          turquoise: '#4ECDC4',
+          yellow: '#FFE66D',
+          orange: '#F39C12',
+          purple: '#9B59B6',
+          green: '#2ECC71',
+          cream: '#FFF8F0',
+        },
         // Academy (Ágora) theme colors
         academy: {
           bg: 'hsl(var(--academy-bg))',
