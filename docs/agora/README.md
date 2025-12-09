@@ -54,28 +54,28 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 
 ### 01. Fundamentos
 
-- [Visão e Missão](./01-fundamentos/visao-missao.md)
+- [Visão e Missão](./01-fundamentos/visao-missao.md) ✅
 - [Público-Alvo](./01-fundamentos/publico-alvo.md)
 - [Glossário de Termos](./01-fundamentos/glossario.md)
 
 ### 02. Pedagogia
 
-- [Referencial Teórico](./02-pedagogia/referencial-teorico.md)
+- [Referencial Teórico](./02-pedagogia/referencial-teorico.md) ✅
 - [Metodologia de Ensino](./02-pedagogia/metodologia.md)
 - [Objetivos de Aprendizagem](./02-pedagogia/objetivos-aprendizagem.md)
 - [Taxonomia de Bloom Aplicada](./02-pedagogia/taxonomia-bloom.md)
 
 ### 03. Gamificação
 
-- [Sistema de XP e Níveis](./03-gamificacao/xp-niveis.md)
-- [Badges e Conquistas](./03-gamificacao/badges.md)
+- [Sistema de XP e Níveis](./03-gamificacao/xp-niveis.md) ✅
+- [Badges e Conquistas](./03-gamificacao/badges.md) ✅
 - [Desafios e Missões](./03-gamificacao/desafios.md)
 - [Ranking e Competição](./03-gamificacao/ranking.md)
 - [Psicologia da Gamificação](./03-gamificacao/psicologia.md)
 
 ### 04. Trilhas de Aprendizagem
 
-- [Visão Geral das Trilhas](./04-trilhas/visao-geral.md)
+- [Sistema de Trilhas e Módulos](./04-trilhas/sistema-trilhas.md) ✅
 - [Trilha: Introdução](./04-trilhas/introducao.md)
 - [Trilha: Backend](./04-trilhas/backend.md)
 - [Trilha: Frontend](./04-trilhas/frontend.md)
@@ -85,14 +85,14 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 
 ### 05. Avaliação
 
-- [Modelo de Avaliação](./05-avaliacao/modelo-avaliacao.md)
+- [Sistema de Avaliação](./05-avaliacao/sistema-avaliacao.md) ✅
 - [Quizzes e Exercícios](./05-avaliacao/quizzes.md)
 - [Rubricas de Projetos](./05-avaliacao/rubricas.md)
 - [Certificação](./05-avaliacao/certificacao.md)
 
 ### 06. Arquitetura Técnica
 
-- [Visão Geral da Arquitetura](./06-arquitetura/visao-geral.md)
+- [Visão Geral da Arquitetura](./06-arquitetura/visao-geral.md) ✅
 - [Componentes e Hooks](./06-arquitetura/componentes.md)
 - [Estado e Store](./06-arquitetura/estado.md)
 - [Banco de Dados](./06-arquitetura/banco-dados.md)
@@ -100,6 +100,7 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 
 ### 07. Acessibilidade
 
+- [Guia de Acessibilidade Educacional](./07-acessibilidade/guia-acessibilidade.md) ✅
 - [Conformidade WCAG](./07-acessibilidade/wcag.md)
 - [VLibras e LIBRAS](./07-acessibilidade/vlibras.md)
 - [Design Inclusivo](./07-acessibilidade/design-inclusivo.md)
@@ -107,12 +108,13 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 ### 08. Roadmap
 
 - [Roadmap 2025-2026](./08-roadmap/roadmap-geral.md)
-- [Features Propostas](./08-roadmap/features-propostas.md)
+- [Features Propostas](./08-roadmap/features-propostas.md) ✅
 - [Melhorias Pedagógicas](./08-roadmap/melhorias-pedagogicas.md)
 - [Visão de Produto](./08-roadmap/visao-produto.md)
 
 ### 09. API e Integração
 
+- [APIs e Integrações](./09-api/integracao-api.md) ✅
 - [Endpoints da Ágora](./09-api/endpoints.md)
 - [Server Actions](./09-api/server-actions.md)
 - [Supabase Schema](./09-api/supabase-schema.md)

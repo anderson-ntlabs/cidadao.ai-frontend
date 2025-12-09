@@ -1,12 +1,12 @@
-# Referencial Teorico Pedagogico
+# Referencial Teórico Pedagógico
 
-> Fundamentacao cientifica para o design educacional da Agora Academy
+> Fundamentação científica para o design educacional da Ágora Academy
 
 ---
 
-## 1. Introducao
+## 1. Introdução
 
-Este documento apresenta o referencial teorico que fundamenta as decisoes pedagogicas da plataforma Agora Academy. A fundamentacao baseia-se em teorias consolidadas da educacao, psicologia cognitiva e ciencia da aprendizagem.
+Este documento apresenta o referencial teórico que fundamenta as decisões pedagógicas da plataforma Ágora Academy. A fundamentação baseia-se em teorias consolidadas da educação, psicologia cognitiva e ciência da aprendizagem.
 
 ---
 
@@ -14,21 +14,21 @@ Este documento apresenta o referencial teorico que fundamenta as decisoes pedago
 
 ### 2.1 Construtivismo (Piaget, Vygotsky)
 
-**Principio**: O conhecimento e construido ativamente pelo aprendiz, nao transmitido passivamente.
+**Princípio**: O conhecimento é construído ativamente pelo aprendiz, não transmitido passivamente.
 
-**Aplicacao na Agora**:
+**Aplicação na Ágora**:
 
-- Projetos praticos ao final de cada trilha
-- Contribuicao real ao repositorio do Cidadao.AI
-- Mentoria que guia, nao instrui diretamente
+- Projetos práticos ao final de cada trilha
+- Contribuição real ao repositório do Cidadão.AI
+- Mentoria que guia, não instrui diretamente
 
-| Conceito                         | Implementacao                                    |
+| Conceito                         | Implementação                                    |
 | -------------------------------- | ------------------------------------------------ |
-| Assimilacao                      | Novos conceitos conectados a conhecimento previo |
-| Acomodacao                       | Desafios que exigem reestruturacao mental        |
+| Assimilação                      | Novos conceitos conectados a conhecimento prévio |
+| Acomodação                       | Desafios que exigem reestruturação mental        |
 | Zona de Desenvolvimento Proximal | Mentores IA que ajustam dificuldade              |
 
-**Referencia**:
+**Referência**:
 
 > PIAGET, J. (1972). The Psychology of Intelligence. Routledge.
 > VYGOTSKY, L. S. (1978). Mind in Society. Harvard University Press.
@@ -37,33 +37,33 @@ Este documento apresenta o referencial teorico que fundamenta as decisoes pedago
 
 ### 2.2 Aprendizagem Experiencial (Kolb)
 
-**Principio**: Aprendizagem ocorre atraves de um ciclo de experiencia, reflexao, conceituacao e experimentacao.
+**Princípio**: Aprendizagem ocorre através de um ciclo de experiência, reflexão, conceituação e experimentação.
 
-**Ciclo de Kolb na Agora**:
+**Ciclo de Kolb na Ágora**:
 
 ```
-    Experiencia Concreta
-    (Projeto pratico)
+    Experiência Concreta
+    (Projeto prático)
            |
            v
-    Observacao Reflexiva  <----  Experimentacao Ativa
-    (Diario de bordo)            (Tentar novamente)
+    Observação Reflexiva  <----  Experimentação Ativa
+    (Diário de bordo)            (Tentar novamente)
            |
            v
-    Conceituacao Abstrata
-    (Videos e leituras)
+    Conceituação Abstrata
+    (Vídeos e leituras)
 ```
 
-**Implementacao**:
+**Implementação**:
 
-| Fase                  | Componente na Agora                  |
+| Fase                  | Componente na Ágora                  |
 | --------------------- | ------------------------------------ |
-| Experiencia Concreta  | Projetos, contribuicoes de codigo    |
-| Observacao Reflexiva  | Diario de aprendizado, mood tracking |
-| Conceituacao Abstrata | Videos explicativos, documentacao    |
-| Experimentacao Ativa  | Exercicios, iteracao em PRs          |
+| Experiência Concreta  | Projetos, contribuições de código    |
+| Observação Reflexiva  | Diário de aprendizado, mood tracking |
+| Conceituação Abstrata | Vídeos explicativos, documentação    |
+| Experimentação Ativa  | Exercícios, iteração em PRs          |
 
-**Referencia**:
+**Referência**:
 
 > KOLB, D. A. (1984). Experiential Learning. Prentice-Hall.
 
@@ -71,24 +71,24 @@ Este documento apresenta o referencial teorico que fundamenta as decisoes pedago
 
 ### 2.3 Conectivismo (Siemens)
 
-**Principio**: Na era digital, aprendizagem reside em conexoes - entre pessoas, sistemas e fontes de informacao.
+**Princípio**: Na era digital, aprendizagem reside em conexões - entre pessoas, sistemas e fontes de informação.
 
-**Aplicacao na Agora**:
+**Aplicação na Ágora**:
 
-- Mentores IA como nos de conhecimento
+- Mentores IA como nós de conhecimento
 - Ranking e comunidade para aprendizagem social
-- Integracao com GitHub para aprendizagem em rede
+- Integração com GitHub para aprendizagem em rede
 
-**Principios Conectivistas Aplicados**:
+**Princípios Conectivistas Aplicados**:
 
-1. **Diversidade de opiniao** - Multiplos agentes de IA com perspectivas diferentes
-2. **Conexao de nos** - Chat conecta estudante a mentores especializados
-3. **Conhecimento em dispositivos** - Persistencia de progresso em nuvem
-4. **Capacidade de saber mais** - Importante e saber onde encontrar, nao memorizar
-5. **Manutencao de conexoes** - Streak incentiva retorno diario
-6. **Tomada de decisao** - Escolha de trilhas como ato de aprendizagem
+1. **Diversidade de opinião** - Múltiplos agentes de IA com perspectivas diferentes
+2. **Conexão de nós** - Chat conecta estudante a mentores especializados
+3. **Conhecimento em dispositivos** - Persistência de progresso em nuvem
+4. **Capacidade de saber mais** - Importante é saber onde encontrar, não memorizar
+5. **Manutenção de conexões** - Streak incentiva retorno diário
+6. **Tomada de decisão** - Escolha de trilhas como ato de aprendizagem
 
-**Referencia**:
+**Referência**:
 
 > SIEMENS, G. (2005). Connectivism: A Learning Theory for the Digital Age.
 
@@ -96,19 +96,19 @@ Este documento apresenta o referencial teorico que fundamenta as decisoes pedago
 
 ### 2.4 Andragogia (Knowles)
 
-**Principio**: Adultos aprendem diferente de criancas - precisam de autonomia, relevancia e aplicacao imediata.
+**Princípio**: Adultos aprendem diferente de crianças - precisam de autonomia, relevância e aplicação imediata.
 
-**Premissas de Knowles na Agora**:
+**Premissas de Knowles na Ágora**:
 
-| Premissa      | Implementacao                                   |
+| Premissa      | Implementação                                   |
 | ------------- | ----------------------------------------------- |
 | Auto-conceito | Estudante escolhe trilha e ritmo                |
-| Experiencia   | Conteudo conecta a problemas reais              |
-| Prontidao     | Aprendizagem quando precisa para o projeto      |
-| Orientacao    | Foco em resolucao de problemas, nao disciplinas |
-| Motivacao     | Certificado, portfolio, possivel estagio        |
+| Experiência   | Conteúdo conecta a problemas reais              |
+| Prontidão     | Aprendizagem quando precisa para o projeto      |
+| Orientação    | Foco em resolução de problemas, não disciplinas |
+| Motivação     | Certificado, portfólio, possível estágio        |
 
-**Referencia**:
+**Referência**:
 
 > KNOWLES, M. S. (1984). The Adult Learner: A Neglected Species. Gulf Publishing.
 
@@ -116,35 +116,35 @@ Este documento apresenta o referencial teorico que fundamenta as decisoes pedago
 
 ### 2.5 Teoria da Carga Cognitiva (Sweller)
 
-**Principio**: A memoria de trabalho e limitada; design instrucional deve minimizar carga extrinseca.
+**Princípio**: A memória de trabalho é limitada; design instrucional deve minimizar carga extrínseca.
 
-**Aplicacao no Design da Agora**:
+**Aplicação no Design da Ágora**:
 
 ```
 Tipos de Carga Cognitiva:
 
-1. Carga Intrinseca (inerente ao conteudo)
-   -> Sequenciamento de modulos do simples ao complexo
-   -> Pre-requisitos entre trilhas
+1. Carga Intrínseca (inerente ao conteúdo)
+   → Sequenciamento de módulos do simples ao complexo
+   → Pré-requisitos entre trilhas
 
-2. Carga Extrinseca (design ruim)
-   -> Interface limpa e consistente
-   -> Navegacao intuitiva
-   -> Feedback imediato
+2. Carga Extrínseca (design ruim)
+   → Interface limpa e consistente
+   → Navegação intuitiva
+   → Feedback imediato
 
 3. Carga Germane (processamento produtivo)
-   -> Exercicios que promovem elaboracao
-   -> Conexoes explicitas entre conceitos
+   → Exercícios que promovem elaboração
+   → Conexões explícitas entre conceitos
 ```
 
-**Estrategias Implementadas**:
+**Estratégias Implementadas**:
 
-- Chunking: Modulos de 15-45 minutos
-- Scaffolding: Trilha Introducao obrigatoria
-- Dual coding: Video + texto + pratica
+- Chunking: Módulos de 15-45 minutos
+- Scaffolding: Trilha Introdução obrigatória
+- Dual coding: Vídeo + texto + prática
 - Worked examples: Exemplos comentados no mentor IA
 
-**Referencia**:
+**Referência**:
 
 > SWELLER, J. (1988). Cognitive Load During Problem Solving. Cognitive Science, 12(2).
 
@@ -154,104 +154,104 @@ Tipos de Carga Cognitiva:
 
 ### 3.1 Fundamentos
 
-A Aprendizagem Baseada em Projetos (Project-Based Learning) e central na metodologia da Agora.
+A Aprendizagem Baseada em Projetos (Project-Based Learning) é central na metodologia da Ágora.
 
-**Caracteristicas do PBL na Agora**:
+**Características do PBL na Ágora**:
 
-| Caracteristica    | Implementacao                                       |
+| Característica    | Implementação                                       |
 | ----------------- | --------------------------------------------------- |
-| Questao motriz    | "Como posso contribuir para transparencia publica?" |
-| Investigacao      | Exploracao do codebase existente                    |
-| Autenticidade     | Projeto real em producao                            |
+| Questão motriz    | "Como posso contribuir para transparência pública?" |
+| Investigação      | Exploração do codebase existente                    |
+| Autenticidade     | Projeto real em produção                            |
 | Voz do estudante  | Escolha de issues e abordagens                      |
-| Reflexao          | Diario de bordo                                     |
-| Critica e revisao | Code review em PRs                                  |
-| Produto publico   | Contribuicao visivel no GitHub                      |
+| Reflexão          | Diário de bordo                                     |
+| Crítica e revisão | Code review em PRs                                  |
+| Produto público   | Contribuição visível no GitHub                      |
 
-### 3.2 Alinhamento com Habilidades do Seculo XXI
+### 3.2 Alinhamento com Habilidades do Século XXI
 
 ```
-4 Cs do Seculo XXI:
+4 Cs do Século XXI:
 
 1. Criatividade
-   -> Solucoes originais para issues
-   -> Design de features novas
+   → Soluções originais para issues
+   → Design de features novas
 
-2. Pensamento Critico
-   -> Analise de codigo existente
-   -> Debugging e otimizacao
+2. Pensamento Crítico
+   → Análise de código existente
+   → Debugging e otimização
 
-3. Comunicacao
-   -> Documentacao de PRs
-   -> Interacao com mentores
+3. Comunicação
+   → Documentação de PRs
+   → Interação com mentores
 
-4. Colaboracao
-   -> Open source por natureza
-   -> Ranking e comunidade
+4. Colaboração
+   → Open source por natureza
+   → Ranking e comunidade
 ```
 
-**Referencia**:
+**Referência**:
 
 > LARMER, J. & MERGENDOLLER, J. (2010). 7 Essentials for Project-Based Learning. Educational Leadership.
 
 ---
 
-## 4. Gamificacao Educacional
+## 4. Gamificação Educacional
 
-### 4.1 Teoria da Autodeterminacao (Deci & Ryan)
+### 4.1 Teoria da Autodeterminação (Deci & Ryan)
 
-A gamificacao da Agora e fundamentada na Teoria da Autodeterminacao (SDT), que identifica tres necessidades psicologicas basicas:
+A gamificação da Ágora é fundamentada na Teoria da Autodeterminação (SDT), que identifica três necessidades psicológicas básicas:
 
 ```
-           AUTODETERMINACAO
+           AUTODETERMINAÇÃO
                  |
     +------------+------------+
     |            |            |
-AUTONOMIA   COMPETENCIA   RELACIONAMENTO
+AUTONOMIA   COMPETÊNCIA   RELACIONAMENTO
     |            |            |
  Escolha de   Sistema de   Ranking e
   trilhas     XP/badges    comunidade
 ```
 
-**Implementacao**:
+**Implementação**:
 
-| Necessidade    | Mecanica                | Exemplo            |
+| Necessidade    | Mecânica                | Exemplo            |
 | -------------- | ----------------------- | ------------------ |
-| Autonomia      | Escolhas significativas | Selecao de trilha  |
-| Competencia    | Feedback de progresso   | XP, niveis, badges |
-| Relacionamento | Conexao social          | Ranking, chat      |
+| Autonomia      | Escolhas significativas | Seleção de trilha  |
+| Competência    | Feedback de progresso   | XP, níveis, badges |
+| Relacionamento | Conexão social          | Ranking, chat      |
 
 ### 4.2 Modelo Octalysis (Chou)
 
-Framework de gamificacao que identifica 8 drives motivacionais:
+Framework de gamificação que identifica 8 drives motivacionais:
 
 ```
-        Significado Epico
+        Significado Épico
               /\
              /  \
-    Realizacao    Empoderamento
+    Realização    Empoderamento
            |      |
-    Propriedade --+-- Influencia Social
+    Propriedade --+-- Influência Social
            |      |
     Escassez      Imprevisibilidade
               \/
-         Evitacao
+         Evitação
 ```
 
-**Aplicacao na Agora**:
+**Aplicação na Ágora**:
 
-| Drive             | Implementacao                         | Status       |
+| Drive             | Implementação                         | Status       |
 | ----------------- | ------------------------------------- | ------------ |
-| Significado Epico | Contribuir para transparencia publica | Implementado |
-| Realizacao        | Badges, niveis, certificado           | Implementado |
+| Significado Épico | Contribuir para transparência pública | Implementado |
+| Realização        | Badges, níveis, certificado           | Implementado |
 | Empoderamento     | Escolhas de trilha, criatividade      | Implementado |
-| Propriedade       | Portfolio de contribuicoes            | Parcial      |
-| Influencia Social | Ranking, colaboracao                  | Implementado |
+| Propriedade       | Portfólio de contribuições            | Parcial      |
+| Influência Social | Ranking, colaboração                  | Implementado |
 | Escassez          | Badges raros, tempo limitado          | Planejado    |
-| Imprevisibilidade | Recompensas aleatorias                | Planejado    |
-| Evitacao          | Perda de streak                       | Implementado |
+| Imprevisibilidade | Recompensas aleatórias                | Planejado    |
+| Evitação          | Perda de streak                       | Implementado |
 
-**Referencia**:
+**Referência**:
 
 > CHOU, Y. (2015). Actionable Gamification: Beyond Points, Badges, and Leaderboards.
 
@@ -259,103 +259,103 @@ Framework de gamificacao que identifica 8 drives motivacionais:
 
 ## 5. Taxonomia de Bloom Revisada
 
-### 5.1 Niveis Cognitivos
+### 5.1 Níveis Cognitivos
 
-A Agora alinha atividades aos niveis da Taxonomia de Bloom Revisada:
+A Ágora alinha atividades aos níveis da Taxonomia de Bloom Revisada:
 
 ```
-        CRIAR        <- Projeto final
+        CRIAR        ← Projeto final
           |
-       AVALIAR       <- Code review (proposto)
+       AVALIAR       ← Code review (proposto)
           |
-       ANALISAR      <- Debugging, otimizacao
+       ANALISAR      ← Debugging, otimização
           |
-       APLICAR       <- Exercicios praticos
+       APLICAR       ← Exercícios práticos
           |
-      ENTENDER       <- Videos, leituras
+      ENTENDER       ← Vídeos, leituras
           |
-       LEMBRAR       <- Quizzes (proposto)
+       LEMBRAR       ← Quizzes (proposto)
 ```
 
 ### 5.2 Mapeamento por Tipo de Atividade
 
-| Nivel Bloom | Tipo de Modulo    | Verbo de Acao                    |
+| Nível Bloom | Tipo de Módulo    | Verbo de Ação                    |
 | ----------- | ----------------- | -------------------------------- |
-| Lembrar     | Quiz de revisao   | Listar, definir, identificar     |
-| Entender    | Video explicativo | Explicar, descrever, resumir     |
-| Aplicar     | Exercicio guiado  | Implementar, executar, usar      |
-| Analisar    | Analise de codigo | Comparar, diferenciar, examinar  |
+| Lembrar     | Quiz de revisão   | Listar, definir, identificar     |
+| Entender    | Vídeo explicativo | Explicar, descrever, resumir     |
+| Aplicar     | Exercício guiado  | Implementar, executar, usar      |
+| Analisar    | Análise de código | Comparar, diferenciar, examinar  |
 | Avaliar     | Code review       | Criticar, julgar, justificar     |
 | Criar       | Projeto final     | Desenvolver, projetar, construir |
 
-**Referencia**:
+**Referência**:
 
 > ANDERSON, L. W. & KRATHWOHL, D. R. (2001). A Taxonomy for Learning, Teaching, and Assessing.
 
 ---
 
-## 6. Feedback e Avaliacao Formativa
+## 6. Feedback e Avaliação Formativa
 
 ### 6.1 Modelo de Hattie & Timperley
 
-O feedback eficaz responde a tres questoes:
+O feedback eficaz responde a três questões:
 
 ```
 1. Para onde vou? (Feed Up)
-   -> Objetivos de aprendizagem claros
-   -> XP necessario para proximo nivel
+   → Objetivos de aprendizagem claros
+   → XP necessário para próximo nível
 
 2. Como estou indo? (Feed Back)
-   -> Progresso em tempo real
-   -> Feedback do mentor IA
+   → Progresso em tempo real
+   → Feedback do mentor IA
 
 3. Para onde vou agora? (Feed Forward)
-   -> Proximo modulo recomendado
-   -> Sugestoes de melhoria
+   → Próximo módulo recomendado
+   → Sugestões de melhoria
 ```
 
-### 6.2 Principios de Feedback na Agora
+### 6.2 Princípios de Feedback na Ágora
 
-| Principio   | Implementacao                      |
+| Princípio   | Implementação                      |
 | ----------- | ---------------------------------- |
-| Imediato    | Celebracao instantanea (confetti)  |
-| Especifico  | XP com descricao da fonte          |
-| Acionavel   | Sugestoes de proximo passo         |
-| Equilibrado | Reconhecimento + areas de melhoria |
+| Imediato    | Celebração instantânea (confetti)  |
+| Específico  | XP com descrição da fonte          |
+| Acionável   | Sugestões de próximo passo         |
+| Equilibrado | Reconhecimento + áreas de melhoria |
 
-**Referencia**:
+**Referência**:
 
 > HATTIE, J. & TIMPERLEY, H. (2007). The Power of Feedback. Review of Educational Research.
 
 ---
 
-## 7. Espacamento e Revisao (Ebbinghaus)
+## 7. Espaçamento e Revisão (Ebbinghaus)
 
 ### 7.1 Curva do Esquecimento
 
 ```
-Retencao
+Retenção
    |
 100%|*
    |  *
    |    *
-   |      *  *  *  *  <- Com revisao espacada
+   |      *  *  *  *  ← Com revisão espaçada
    |        *
    |          *
-   |            *  <- Sem revisao
+   |            *  ← Sem revisão
    |______________
        Tempo
 ```
 
-### 7.2 Aplicacao Proposta
+### 7.2 Aplicação Proposta
 
-| Intervalo | Acao                    | Status   |
+| Intervalo | Ação                    | Status   |
 | --------- | ----------------------- | -------- |
-| 1 dia     | Quiz de revisao rapida  | Proposto |
-| 7 dias    | Notificacao de revisao  | Proposto |
-| 30 dias   | Desafio de consolidacao | Proposto |
+| 1 dia     | Quiz de revisão rápida  | Proposto |
+| 7 dias    | Notificação de revisão  | Proposto |
+| 30 dias   | Desafio de consolidação | Proposto |
 
-**Referencia**:
+**Referência**:
 
 > EBBINGHAUS, H. (1885). Memory: A Contribution to Experimental Psychology.
 
@@ -372,19 +372,19 @@ Retencao
               /    \
      FATORES       AMBIENTE
      PESSOAIS
-     (autoeficacia)
+     (autoeficácia)
 ```
 
-**Aplicacao na Agora**:
+**Aplicação na Ágora**:
 
-| Conceito             | Implementacao                       |
+| Conceito             | Implementação                       |
 | -------------------- | ----------------------------------- |
-| Modelagem            | Mentores IA demonstram solucoes     |
-| Autoeficacia         | Progresso visivel aumenta confianca |
-| Aprendizagem vicaria | Ver ranking e conquistas de outros  |
-| Autorregulacao       | Diario de bordo, metas pessoais     |
+| Modelagem            | Mentores IA demonstram soluções     |
+| Autoeficácia         | Progresso visível aumenta confiança |
+| Aprendizagem vicária | Ver ranking e conquistas de outros  |
+| Autorregulação       | Diário de bordo, metas pessoais     |
 
-**Referencia**:
+**Referência**:
 
 > BANDURA, A. (1986). Social Foundations of Thought and Action.
 
@@ -402,43 +402,43 @@ Ansiedade
     |  /
     | /
     |/_________
-         Tedio     Habilidade
+         Tédio     Habilidade
 ```
 
-### 9.2 Equilibrio Desafio-Habilidade na Agora
+### 9.2 Equilíbrio Desafio-Habilidade na Ágora
 
 | Fase              | Desafio     | Habilidade Esperada |
 | ----------------- | ----------- | ------------------- |
-| Introducao        | Baixo       | Iniciante           |
-| Modulos iniciais  | Medio-baixo | Basico              |
-| Modulos avancados | Medio       | Intermediario       |
-| Projeto final     | Alto        | Avancado            |
+| Introdução        | Baixo       | Iniciante           |
+| Módulos iniciais  | Médio-baixo | Básico              |
+| Módulos avançados | Médio       | Intermediário       |
+| Projeto final     | Alto        | Avançado            |
 
-**Estrategias**:
+**Estratégias**:
 
 - Dificuldade progressiva dentro de trilhas
-- Mentores IA ajustam explicacoes
-- Opcao de pular para desafios maiores
+- Mentores IA ajustam explicações
+- Opção de pular para desafios maiores
 
-**Referencia**:
+**Referência**:
 
 > CSIKSZENTMIHALYI, M. (1990). Flow: The Psychology of Optimal Experience.
 
 ---
 
-## 10. Sintese: Framework Pedagogico da Agora
+## 10. Síntese: Framework Pedagógico da Ágora
 
 ### 10.1 Modelo Integrado
 
 ```
 +------------------------------------------------------------------+
-|                    FRAMEWORK PEDAGOGICO AGORA                     |
+|                    FRAMEWORK PEDAGÓGICO ÁGORA                     |
 +------------------------------------------------------------------+
 |                                                                    |
-|  FUNDAMENTOS                METODOLOGIA              AVALIACAO    |
+|  FUNDAMENTOS                METODOLOGIA              AVALIAÇÃO    |
 |  +-----------+             +------------+           +-----------+ |
 |  |Constru-   |             |Aprendizagem|           |Formativa  | |
-|  |tivismo    |------------>|Baseada em  |---------->|Continua   | |
+|  |tivismo    |------------>|Baseada em  |---------->|Contínua   | |
 |  +-----------+             |Projetos    |           +-----------+ |
 |        |                   +------------+                 |       |
 |        v                         |                        v       |
@@ -449,27 +449,27 @@ Ansiedade
 |        |                   |Kolb        |                 |       |
 |        v                   +------------+                 v       |
 |  +-----------+                   |                  +-----------+ |
-|  |Andragogia |                   v                  |Espacamento| |
+|  |Andragogia |                   v                  |Espaçamento| |
 |  +-----------+             +------------+           +-----------+ |
-|                            |Gamificacao |                         |
+|                            |Gamificação |                         |
 |                            |SDT/Octalysis|                        |
 |                            +------------+                         |
 |                                                                    |
 +------------------------------------------------------------------+
 ```
 
-### 10.2 Principios Orientadores
+### 10.2 Princípios Orientadores
 
-1. **Aprendiz no Centro** - Autonomia, escolha, ritmo proprio
-2. **Pratica Autentica** - Projeto real, contribuicoes visiveis
-3. **Feedback Rico** - Imediato, especifico, acionavel
-4. **Comunidade de Pratica** - Aprendizagem social, ranking
-5. **Progressao Clara** - XP, niveis, certificacao
+1. **Aprendiz no Centro** - Autonomia, escolha, ritmo próprio
+2. **Prática Autêntica** - Projeto real, contribuições visíveis
+3. **Feedback Rico** - Imediato, específico, acionável
+4. **Comunidade de Prática** - Aprendizagem social, ranking
+5. **Progressão Clara** - XP, níveis, certificação
 6. **Acessibilidade Universal** - WCAG AAA, VLibras, mobile-first
 
 ---
 
-## 11. Referencias Completas
+## 11. Referências Completas
 
 ### Teorias de Aprendizagem
 
@@ -482,14 +482,14 @@ Ansiedade
 - SWELLER, J. (1988). Cognitive Load During Problem Solving. Cognitive Science, 12(2), 257-285.
 - VYGOTSKY, L. S. (1978). Mind in Society. Harvard University Press.
 
-### Gamificacao e Motivacao
+### Gamificação e Motivação
 
 - CHOU, Y. (2015). Actionable Gamification: Beyond Points, Badges, and Leaderboards. Octalysis Media.
 - CSIKSZENTMIHALYI, M. (1990). Flow: The Psychology of Optimal Experience. Harper & Row.
 - DECI, E. L. & RYAN, R. M. (1985). Intrinsic Motivation and Self-Determination in Human Behavior. Plenum.
 - DETERDING, S. et al. (2011). From Game Design Elements to Gamefulness. MindTrek '11.
 
-### Feedback e Avaliacao
+### Feedback e Avaliação
 
 - BLACK, P. & WILIAM, D. (1998). Inside the Black Box. Phi Delta Kappan.
 - EBBINGHAUS, H. (1885). Memory: A Contribution to Experimental Psychology.
@@ -503,5 +503,5 @@ Ansiedade
 ---
 
 **Autor**: Anderson Henrique da Silva
-**Revisao Academica**: Profa. Dra. Aracele Fassbinder (IFSULDEMINAS)
-**Ultima atualizacao**: 2025-12-09
+**Revisão Acadêmica**: Profa. Dra. Aracele Fassbinder (IFSULDEMINAS)
+**Última atualização**: 2025-12-09

@@ -1,14 +1,14 @@
 # Features Propostas - Roadmap Completo
 
-> Visao de produto para tornar a Agora Academy um sistema PERFEITO
+> Visão de produto para tornar a Ágora Academy um sistema PERFEITO
 
 ---
 
-## 1. Visao Geral
+## 1. Visão Geral
 
-Este documento apresenta todas as features propostas para evolucao da Agora Academy, organizadas por prioridade, impacto e complexidade.
+Este documento apresenta todas as features propostas para evolução da Ágora Academy, organizadas por prioridade, impacto e complexidade.
 
-### 1.1 Principios de Priorizacao
+### 1.1 Princípios de Priorização
 
 ```
                     ALTO IMPACTO
@@ -27,19 +27,19 @@ Este documento apresenta todas as features propostas para evolucao da Agora Acad
 
 ---
 
-## 2. Features de Prioridade CRITICA
+## 2. Features de Prioridade CRÍTICA
 
-### 2.1 Sistema de Avaliacao Formativa
+### 2.1 Sistema de Avaliação Formativa
 
-**Status**: Nao implementado
+**Status**: Não implementado
 **Impacto**: Muito Alto
-**Complexidade**: Media
+**Complexidade**: Média
 
 #### Problema
 
-Atualmente nao ha verificacao real de aprendizado. Modulos sao marcados como "completos" apenas por acesso.
+Atualmente não há verificação real de aprendizado. Módulos são marcados como "completos" apenas por acesso.
 
-#### Solucao Proposta
+#### Solução Proposta
 
 ```typescript
 // Novo componente: QuizModule
@@ -63,45 +63,45 @@ interface Question {
 }
 ```
 
-#### Implementacao
+#### Implementação
 
 ```
-Fase 1: Quiz basico (2 semanas)
-- Multipla escolha
+Fase 1: Quiz básico (2 semanas)
+- Múltipla escolha
 - Verdadeiro/Falso
-- 3-5 questoes por modulo
+- 3-5 questões por módulo
 - Feedback imediato
 
-Fase 2: Quiz avancado (2 semanas)
-- Completar codigo
+Fase 2: Quiz avançado (2 semanas)
+- Completar código
 - Arrastar e soltar
-- Banco de questoes randomizado
+- Banco de questões randomizado
 
 Fase 3: Analytics (1 semana)
 - Dashboard de performance
-- Identificacao de lacunas
-- Recomendacoes personalizadas
+- Identificação de lacunas
+- Recomendações personalizadas
 ```
 
-#### Metricas de Sucesso
+#### Métricas de Sucesso
 
-- Taxa de aprovacao no primeiro attempt: >60%
-- Correlacao quiz-projeto: r > 0.5
-- Reducao de abandono pos-modulo: -20%
+- Taxa de aprovação no primeiro attempt: >60%
+- Correlação quiz-projeto: r > 0.5
+- Redução de abandono pós-módulo: -20%
 
 ---
 
 ### 2.2 Tutoria Inteligente Adaptativa
 
-**Status**: Parcial (chat generico)
+**Status**: Parcial (chat genérico)
 **Impacto**: Muito Alto
 **Complexidade**: Alta
 
 #### Problema
 
-Mentores IA atuais sao chatbots genericos. Nao rastreiam progresso nem adaptam explicacoes.
+Mentores IA atuais são chatbots genéricos. Não rastreiam progresso nem adaptam explicações.
 
-#### Solucao Proposta
+#### Solução Proposta
 
 ```typescript
 // Sistema de Student Model
@@ -126,7 +126,7 @@ interface StudentModel {
     kinesthetic: number
   }
 
-  // Historico de dificuldades
+  // Histórico de dificuldades
   struggles: {
     concept: string
     frequency: number
@@ -140,7 +140,7 @@ class AdaptiveTutor {
     // 1. Identificar conceito da pergunta
     const concept = await this.identifyConcept(message)
 
-    // 2. Verificar nivel do estudante
+    // 2. Verificar nível do estudante
     const mastery = student.conceptMastery.get(concept)
 
     // 3. Adaptar resposta
@@ -156,7 +156,7 @@ class AdaptiveTutor {
 }
 ```
 
-#### Fluxo de Adaptacao
+#### Fluxo de Adaptação
 
 ```
 Estudante pergunta sobre JWT
@@ -167,23 +167,23 @@ Verificar StudentModel
     +----+----+
     |         |
     v         v
-Nivel 0-1   Nivel 2+
+Nível 0-1   Nível 2+
     |         |
     v         v
 Explicar    Explicar
-desde       em nivel
-o basico    avancado
+desde       em nível
+o básico    avançado
     |         |
     v         v
 Incluir     Incluir
 analogias   detalhes
-e exemplos  tecnicos
+e exemplos  técnicos
     |         |
     +----+----+
          |
          v
   Oferecer quiz
-  de verificacao
+  de verificação
          |
          v
 Atualizar StudentModel
@@ -212,25 +212,25 @@ CREATE TABLE concept_assessments (
 
 ---
 
-### 2.3 Sistema de Exercicios Praticos
+### 2.3 Sistema de Exercícios Práticos
 
-**Status**: Nao implementado
+**Status**: Não implementado
 **Impacto**: Alto
-**Complexidade**: Media
+**Complexidade**: Média
 
 #### Problema
 
-Salto grande entre "assistir video" e "projeto final". Falta pratica guiada intermediaria.
+Salto grande entre "assistir vídeo" e "projeto final". Falta prática guiada intermediária.
 
-#### Solucao Proposta
+#### Solução Proposta
 
 ```typescript
-// Tipos de exercicio
+// Tipos de exercício
 type ExerciseType =
-  | 'code_completion' // Completar codigo faltante
+  | 'code_completion' // Completar código faltante
   | 'bug_fix' // Encontrar e corrigir bug
-  | 'refactor' // Melhorar codigo existente
-  | 'implement' // Implementar funcao/componente
+  | 'refactor' // Melhorar código existente
+  | 'implement' // Implementar função/componente
   | 'debug' // Usar debugger para encontrar problema
 
 interface Exercise {
@@ -239,43 +239,43 @@ interface Exercise {
   type: ExerciseType
   difficulty: 'easy' | 'medium' | 'hard'
 
-  // Conteudo
+  // Conteúdo
   title: string
   description: string
   starterCode: string
   testCases: TestCase[]
   hints: string[]
-  solution: string // Revelado apos 3 tentativas
+  solution: string // Revelado após 3 tentativas
 
-  // Gamificacao
+  // Gamificação
   xpReward: number
-  timeBonus: boolean // XP extra se resolver rapido
+  timeBonus: boolean // XP extra se resolver rápido
 }
 
 interface TestCase {
   input: any
   expectedOutput: any
-  isHidden: boolean // Alguns testes sao surpresa
+  isHidden: boolean // Alguns testes são surpresa
 }
 ```
 
-#### Interface de Exercicio
+#### Interface de Exercício
 
 ```
 +------------------------------------------------------------------+
-|  Exercicio: Implementar funcao de validacao de CPF               |
+|  Exercício: Implementar função de validação de CPF               |
 +------------------------------------------------------------------+
 |                                                                    |
-|  Descricao:                                                       |
-|  Implemente a funcao `validateCPF` que recebe uma string          |
-|  e retorna true se for um CPF valido.                             |
+|  Descrição:                                                       |
+|  Implemente a função `validateCPF` que recebe uma string          |
+|  e retorna true se for um CPF válido.                             |
 |                                                                    |
 |  +---------------------------+  +---------------------------+     |
-|  | // Seu codigo             |  | Testes                    |     |
+|  | // Seu código             |  | Testes                    |     |
 |  |                           |  |                           |     |
-|  | function validateCPF(cpf) |  | [x] CPF valido            |     |
-|  |   // TODO                 |  | [ ] CPF invalido          |     |
-|  | }                         |  | [ ] CPF com mascara       |     |
+|  | function validateCPF(cpf) |  | [x] CPF válido            |     |
+|  |   // TODO                 |  | [ ] CPF inválido          |     |
+|  | }                         |  | [ ] CPF com máscara       |     |
 |  |                           |  | [ ] String vazia          |     |
 |  |                           |  | [?] Teste secreto         |     |
 |  +---------------------------+  +---------------------------+     |
@@ -293,14 +293,14 @@ interface TestCase {
 
 ### 3.1 Code Review entre Pares
 
-**Status**: Nao implementado
+**Status**: Não implementado
 **Impacto**: Alto
-**Complexidade**: Media
+**Complexidade**: Média
 
 ```typescript
 interface CodeReview {
   id: string
-  submissionId: string // PR ou exercicio
+  submissionId: string // PR ou exercício
   reviewerId: string
   authorId: string
 
@@ -308,7 +308,7 @@ interface CodeReview {
 
   comments: ReviewComment[]
 
-  // Gamificacao
+  // Gamificação
   reviewerXp: number // XP para quem revisou
   authorXp: number // XP se aprovado
 }
@@ -320,16 +320,16 @@ interface ReviewComment {
 }
 ```
 
-**Beneficios Pedagogicos**:
+**Benefícios Pedagógicos**:
 
 - Aprendizagem social (Bandura)
-- Pensamento critico
-- Exposicao a diferentes abordagens
-- Soft skills de comunicacao
+- Pensamento crítico
+- Exposição a diferentes abordagens
+- Soft skills de comunicação
 
 ---
 
-### 3.2 Portfolio Automatico
+### 3.2 Portfólio Automático
 
 **Status**: Parcial (apenas commits no GitHub)
 **Impacto**: Alto
@@ -339,7 +339,7 @@ interface ReviewComment {
 interface Portfolio {
   userId: string
 
-  // Automatico
+  // Automático
   contributions: {
     type: 'pr' | 'issue' | 'review'
     url: string
@@ -366,76 +366,76 @@ interface Portfolio {
     prsAccepted: number
   }
 
-  // Personalizacao
+  // Personalização
   bio: string
   socialLinks: Record<string, string>
 }
 ```
 
-**Pagina publica**: `/portfolio/{username}`
+**Página pública**: `/portfolio/{username}`
 
 ---
 
-### 3.3 Sistema de Notificacoes Inteligentes
+### 3.3 Sistema de Notificações Inteligentes
 
-**Status**: Nao implementado
+**Status**: Não implementado
 **Impacto**: Alto
-**Complexidade**: Media
+**Complexidade**: Média
 
 ```typescript
 interface NotificationRule {
   id: string
   type: 'reminder' | 'achievement' | 'social' | 'deadline'
 
-  // Condicoes
+  // Condições
   trigger: {
     event: string
     conditions: Record<string, any>
   }
 
-  // Acao
+  // Ação
   channels: ('push' | 'email' | 'in_app')[]
   template: string
 
-  // Personalizacao
+  // Personalização
   respectQuietHours: boolean
   maxFrequency: string // '1/day', '3/week'
 }
 
-// Exemplos de notificacoes
+// Exemplos de notificações
 const notifications = [
   {
     type: 'reminder',
     trigger: { event: 'streak_at_risk', conditions: { hoursLeft: 4 } },
-    template: '🔥 Seu streak de {streak} dias esta em risco! Faca uma sessao rapida.',
+    template: '🔥 Seu streak de {streak} dias está em risco! Faça uma sessão rápida.',
   },
   {
     type: 'achievement',
     trigger: { event: 'badge_close', conditions: { progress: 0.9 } },
-    template: '🏆 Voce esta a {remaining} de conquistar o badge {badgeName}!',
+    template: '🏆 Você está a {remaining} de conquistar o badge {badgeName}!',
   },
   {
     type: 'social',
     trigger: { event: 'overtaken_in_ranking' },
-    template: '📈 {userName} acabou de passar voce no ranking! Hora de estudar?',
+    template: '📈 {userName} acabou de passar você no ranking! Hora de estudar?',
   },
   {
     type: 'spaced_repetition',
     trigger: { event: 'review_due', conditions: { concept: 'JWT' } },
-    template: '🧠 Que tal revisar JWT? Faz 7 dias desde sua ultima interacao.',
+    template: '🧠 Que tal revisar JWT? Faz 7 dias desde sua última interação.',
   },
 ]
 ```
 
 ---
 
-### 3.4 Revisao Espacada (Spaced Repetition)
+### 3.4 Revisão Espaçada (Spaced Repetition)
 
-**Status**: Nao implementado
+**Status**: Não implementado
 **Impacto**: Alto
-**Complexidade**: Media
+**Complexidade**: Média
 
-Baseado na curva de Ebbinghaus para retencao de longo prazo.
+Baseado na curva de Ebbinghaus para retenção de longo prazo.
 
 ```typescript
 interface SpacedRepetitionItem {
@@ -444,7 +444,7 @@ interface SpacedRepetitionItem {
 
   // Algoritmo SM-2
   easeFactor: number // 1.3 - 2.5
-  interval: number // dias ate proxima revisao
+  interval: number // dias até próxima revisão
   repetitions: number
 
   nextReview: Date
@@ -478,35 +478,35 @@ function calculateNextReview(item: SpacedRepetitionItem, quality: number): Space
 }
 ```
 
-**Interface de Revisao**:
+**Interface de Revisão**:
 
 ```
 +----------------------------------+
-|   📚 Revisao do Dia              |
+|   📚 Revisão do Dia              |
 +----------------------------------+
 |                                  |
 |   3 conceitos para revisar       |
 |                                  |
 |   1. JWT Authentication          |
-|      Ultimo: 7 dias atras        |
+|      Último: 7 dias atrás        |
 |      [ Revisar ]                 |
 |                                  |
 |   2. React Hooks                 |
-|      Ultimo: 14 dias atras       |
+|      Último: 14 dias atrás       |
 |      [ Revisar ]                 |
 |                                  |
 |   3. SQL Joins                   |
-|      Ultimo: 21 dias atras       |
+|      Último: 21 dias atrás       |
 |      [ Revisar ]                 |
 |                                  |
-|   +15 XP por revisao completa    |
+|   +15 XP por revisão completa    |
 |                                  |
 +----------------------------------+
 ```
 
 ---
 
-## 4. Features de Prioridade MEDIA
+## 4. Features de Prioridade MÉDIA
 
 ### 4.1 Modo Colaborativo / Pair Programming
 
@@ -521,19 +521,19 @@ interface PairSession {
   cursor: { line: number; column: number }
   chat: Message[]
 
-  // Gamificacao
+  // Gamificação
   bothEarnXp: boolean // XP para ambos
 }
 ```
 
-### 4.2 Desafios Semanais Tematicos
+### 4.2 Desafios Semanais Temáticos
 
 ```typescript
 interface WeeklyChallenge {
   id: string
   week: string // '2025-W50'
 
-  theme: string // 'Acessibilidade', 'Performance', 'Seguranca'
+  theme: string // 'Acessibilidade', 'Performance', 'Segurança'
   description: string
 
   tasks: {
@@ -575,7 +575,7 @@ interface Mentor {
 }
 ```
 
-### 4.4 Integracao com LeetCode/HackerRank
+### 4.4 Integração com LeetCode/HackerRank
 
 ```typescript
 interface ExternalChallenge {
@@ -583,7 +583,7 @@ interface ExternalChallenge {
   problemId: string
   difficulty: string
 
-  // Sincronizacao
+  // Sincronização
   completedAt?: Date
   xpAwarded: number
 }
@@ -593,30 +593,30 @@ interface ExternalChallenge {
 
 ## 5. Features de Prioridade BAIXA
 
-### 5.1 Modo Offline (PWA Avancado)
+### 5.1 Modo Offline (PWA Avançado)
 
-- Cache de conteudo de modulos
-- Exercicios offline
-- Sincronizacao ao reconectar
+- Cache de conteúdo de módulos
+- Exercícios offline
+- Sincronização ao reconectar
 
-### 5.2 Gamificacao Avancada
+### 5.2 Gamificação Avançada
 
 - Economia virtual (moedas para gastar)
-- Loja de cosmeticos (temas, avatares)
+- Loja de cosméticos (temas, avatares)
 - Apostas de XP em desafios
 - Seasons com reset parcial
 
-### 5.3 Integracao com IDE
+### 5.3 Integração com IDE
 
-- Extensao VS Code
-- Notificacoes no editor
-- Submit de codigo direto
+- Extensão VS Code
+- Notificações no editor
+- Submit de código direto
 
-### 5.4 IA Generativa para Conteudo
+### 5.4 IA Generativa para Conteúdo
 
-- Geracao de quizzes personalizados
-- Explicacoes adaptadas
-- Criacao de exercicios on-demand
+- Geração de quizzes personalizados
+- Explicações adaptadas
+- Criação de exercícios on-demand
 
 ---
 
@@ -625,99 +625,99 @@ interface ExternalChallenge {
 ```
 2025 Q1 (Jan-Mar)
 ├── Sistema de Quizzes (MVP)
-├── Exercicios basicos
+├── Exercícios básicos
 └── Melhorias no chat IA
 
 2025 Q2 (Abr-Jun)
 ├── Tutoria adaptativa (v1)
 ├── Code review entre pares
-├── Portfolio publico
-└── Notificacoes inteligentes
+├── Portfólio público
+└── Notificações inteligentes
 
 2025 Q3 (Jul-Set)
-├── Revisao espacada
+├── Revisão espaçada
 ├── Desafios semanais
 ├── Tutoria adaptativa (v2)
-└── Badges de competencia
+└── Badges de competência
 
 2025 Q4 (Out-Dez)
 ├── Mentoria humana
 ├── Modo colaborativo
-├── Integracao LeetCode
-└── PWA avancado
+├── Integração LeetCode
+└── PWA avançado
 
 2026 Q1+
 ├── Economia virtual
-├── Extensao VS Code
+├── Extensão VS Code
 ├── IA generativa
-└── Expansao internacional
+└── Expansão internacional
 ```
 
 ---
 
-## 7. Metricas de Sucesso por Feature
+## 7. Métricas de Sucesso por Feature
 
-| Feature            | Metrica Principal | Meta         |
+| Feature            | Métrica Principal | Meta         |
 | ------------------ | ----------------- | ------------ |
-| Quizzes            | Taxa de aprovacao | >70%         |
-| Tutoria adaptativa | Satisfacao (NPS)  | >50          |
-| Exercicios         | Conclusao         | >60%         |
-| Code review        | Participacao      | 30% usuarios |
-| Portfolio          | Visitas/usuario   | 10/mes       |
-| Notificacoes       | Open rate         | >40%         |
-| Revisao espacada   | Retencao 30d      | +25%         |
+| Quizzes            | Taxa de aprovação | >70%         |
+| Tutoria adaptativa | Satisfação (NPS)  | >50          |
+| Exercícios         | Conclusão         | >60%         |
+| Code review        | Participação      | 30% usuários |
+| Portfólio          | Visitas/usuário   | 10/mês       |
+| Notificações       | Open rate         | >40%         |
+| Revisão espaçada   | Retenção 30d      | +25%         |
 
 ---
 
-## 8. Estimativas de Esforco
+## 8. Estimativas de Esforço
 
 | Feature            | Devs | Semanas | Prioridade |
 | ------------------ | ---- | ------- | ---------- |
-| Quizzes MVP        | 2    | 3       | Critica    |
-| Exercicios basicos | 2    | 2       | Critica    |
-| Tutoria v1         | 3    | 6       | Critica    |
+| Quizzes MVP        | 2    | 3       | Crítica    |
+| Exercícios básicos | 2    | 2       | Crítica    |
+| Tutoria v1         | 3    | 6       | Crítica    |
 | Code review        | 2    | 3       | Alta       |
-| Portfolio          | 1    | 2       | Alta       |
-| Notificacoes       | 1    | 2       | Alta       |
-| Revisao espacada   | 2    | 3       | Alta       |
-| Desafios semanais  | 1    | 2       | Media      |
-| Mentoria humana    | 2    | 4       | Media      |
+| Portfólio          | 1    | 2       | Alta       |
+| Notificações       | 1    | 2       | Alta       |
+| Revisão espaçada   | 2    | 3       | Alta       |
+| Desafios semanais  | 1    | 2       | Média      |
+| Mentoria humana    | 2    | 4       | Média      |
 
 ---
 
-## 9. Dependencias Tecnicas
+## 9. Dependências Técnicas
 
 ```
 Quizzes
-  └── Banco de questoes
-      └── Exercicios
+  └── Banco de questões
+      └── Exercícios
           └── Tutoria adaptativa
-              └── Revisao espacada
+              └── Revisão espaçada
 
 Code Review
   └── Sistema de matching
       └── Mentoria humana
 
-Portfolio
-  └── Integracao GitHub melhorada
-      └── Certificados verificaveis
+Portfólio
+  └── Integração GitHub melhorada
+      └── Certificados verificáveis
 ```
 
 ---
 
-## 10. Conclusao
+## 10. Conclusão
 
-Este roadmap representa uma visao ambiciosa mas realizavel para transformar a Agora Academy em uma plataforma de referencia em EdTech. As prioridades foram definidas com base em:
+Este roadmap representa uma visão ambiciosa mas realizável para transformar a Ágora Academy em uma plataforma de referência em EdTech. As prioridades foram definidas com base em:
 
-1. **Impacto pedagogico** - Features que melhoram aprendizado real
-2. **Retencao de usuarios** - Features que trazem usuarios de volta
-3. **Diferenciacao** - Features unicas no mercado
-4. **Viabilidade tecnica** - Complexidade vs. recursos disponiveis
+1. **Impacto pedagógico** - Features que melhoram aprendizado real
+2. **Retenção de usuários** - Features que trazem usuários de volta
+3. **Diferenciação** - Features únicas no mercado
+4. **Viabilidade técnica** - Complexidade vs. recursos disponíveis
 
-A execucao deve ser iterativa, com MVPs para validacao antes de investimento completo.
+A execução deve ser iterativa, com MVPs para validação antes de investimento completo.
 
 ---
 
 **Autor**: Anderson Henrique da Silva
-**Revisao**: Time de Produto
-**Ultima atualizacao**: 2025-12-09
+**Revisão**: Time de Produto
+**Última atualização**: 2025-12-09

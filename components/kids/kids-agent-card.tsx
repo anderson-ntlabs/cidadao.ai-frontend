@@ -31,9 +31,9 @@ export function KidsAgentCard({ agent, lang = 'pt', onSelect }: KidsAgentCardPro
   // Determine card color based on agent
   const getCardColor = () => {
     switch (agent.id) {
-      case 'monteiro-lobato':
+      case 'monteiro_lobato':
         return 'border-kids-green hover:border-kids-green/80 hover:shadow-kids-green/20'
-      case 'tarsila-amaral':
+      case 'tarsila':
         return 'border-kids-coral hover:border-kids-coral/80 hover:shadow-kids-coral/20'
       default:
         return 'border-kids-turquoise hover:border-kids-turquoise/80'
@@ -42,9 +42,9 @@ export function KidsAgentCard({ agent, lang = 'pt', onSelect }: KidsAgentCardPro
 
   const getIconColor = () => {
     switch (agent.id) {
-      case 'monteiro-lobato':
+      case 'monteiro_lobato':
         return 'bg-kids-green text-white'
-      case 'tarsila-amaral':
+      case 'tarsila':
         return 'bg-kids-coral text-white'
       default:
         return 'bg-kids-turquoise text-white'

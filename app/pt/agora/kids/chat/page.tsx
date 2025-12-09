@@ -33,7 +33,7 @@ function KidsChatContent() {
   const { isReady, isLoading: modeLoading } = useRequireKidsMode()
   const { trackAgent } = useKids()
 
-  const agentId = searchParams.get('agent') || 'monteiro-lobato'
+  const agentId = searchParams.get('agent') || 'monteiro_lobato'
   const agent = getAgentById(agentId)
   const kidsAgents = getKidsAgents()
 
@@ -51,7 +51,7 @@ function KidsChatContent() {
   useEffect(() => {
     if (agent && messages.length === 0) {
       const greeting =
-        agent.id === 'monteiro-lobato'
+        agent.id === 'monteiro_lobato'
           ? 'Olá, amiguinho! Sou o Monteiro Lobato, criador do Sítio do Picapau Amarelo. Quer ouvir uma história enquanto aprendemos sobre programação? Posso te ensinar de um jeito bem divertido!'
           : 'Oi! Sou a Tarsila do Amaral, pintora do Abaporu. Vou te ensinar que programar é como pintar: você cria algo novo do zero! O que quer aprender hoje?'
 
@@ -111,7 +111,7 @@ function KidsChatContent() {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         content:
-          agent.id === 'monteiro-lobato'
+          agent.id === 'monteiro_lobato'
             ? 'Que legal sua pergunta! Programar é como escrever histórias: você conta para o computador o que ele deve fazer, passo a passo. É mágico!'
             : 'Que criativo você é! Sabia que programar usa muitas cores e formas? Podemos criar animações lindas com código!',
         agentId: agent.id,

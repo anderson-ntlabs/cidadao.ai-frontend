@@ -1,25 +1,25 @@
 # Badges e Conquistas
 
-> Sistema completo de badges da Agora Academy
+> Sistema completo de badges da Ágora Academy
 
 ---
 
-## 1. Visao Geral
+## 1. Visão Geral
 
-Badges sao conquistas visuais que reconhecem marcos importantes na jornada do estudante. Cada badge possui criterios especificos, recompensa em XP e significado pedagogico.
+Badges são conquistas visuais que reconhecem marcos importantes na jornada do estudante. Cada badge possui critérios específicos, recompensa em XP e significado pedagógico.
 
-### 1.1 Proposito dos Badges
+### 1.1 Propósito dos Badges
 
 ```
 +------------------------------------------------------------------+
-|                    FUNCOES DOS BADGES                             |
+|                    FUNÇÕES DOS BADGES                             |
 +------------------------------------------------------------------+
 |                                                                    |
 |  1. RECONHECIMENTO  - Validar conquistas do estudante             |
-|  2. MOTIVACAO       - Criar metas de curto prazo                  |
-|  3. ORIENTACAO      - Guiar comportamentos desejaveis             |
+|  2. MOTIVAÇÃO       - Criar metas de curto prazo                  |
+|  3. ORIENTAÇÃO      - Guiar comportamentos desejáveis             |
 |  4. IDENTIDADE      - Construir senso de pertencimento            |
-|  5. PORTFOLIO       - Evidencia de competencias                   |
+|  5. PORTFÓLIO       - Evidência de competências                   |
 |                                                                    |
 +------------------------------------------------------------------+
 ```
@@ -28,15 +28,15 @@ Badges sao conquistas visuais que reconhecem marcos importantes na jornada do es
 
 ## 2. Badges Implementados
 
-### 2.1 Tier 1 - Iniciante (Facilmente Alcancaveis)
+### 2.1 Tier 1 - Iniciante (Facilmente Alcançáveis)
 
-| Badge          | Emoji | Nome           | Criterio       | XP  | Pedagogico          |
+| Badge          | Emoji | Nome           | Critério       | XP  | Pedagógico          |
 | -------------- | ----- | -------------- | -------------- | --- | ------------------- |
 | pioneiro       | 🚀    | Pioneiro       | Primeiro login | 25  | Boas-vindas         |
 | curioso        | 🔍    | Curioso        | 100+ XP        | 15  | Engajamento inicial |
-| primeiro-passo | 👣    | Primeiro Passo | 1+ sessao      | 20  | Habito de estudo    |
+| primeiro-passo | 👣    | Primeiro Passo | 1+ sessão      | 20  | Hábito de estudo    |
 
-**Codigo de Implementacao**:
+**Código de Implementação**:
 
 ```typescript
 // hooks/use-agora.tsx:157-188
@@ -44,11 +44,11 @@ Badges sao conquistas visuais que reconhecem marcos importantes na jornada do es
   id: 'pioneiro',
   type: 'pioneiro',
   name: 'Pioneiro',
-  description: 'Primeiro login na Agora',
+  description: 'Primeiro login na Ágora',
   emoji: '🚀',
   criteria: 'Primeiro login',
   xpReward: 25,
-  check: () => true, // Automatico no primeiro login
+  check: () => true, // Automático no primeiro login
 },
 {
   id: 'curioso',
@@ -64,51 +64,51 @@ Badges sao conquistas visuais que reconhecem marcos importantes na jornada do es
   id: 'primeiro-passo',
   type: 'primeiro-passo',
   name: 'Primeiro Passo',
-  description: 'Completou a primeira sessao de estudo',
+  description: 'Completou a primeira sessão de estudo',
   emoji: '👣',
-  criteria: '1+ sessao',
+  criteria: '1+ sessão',
   xpReward: 20,
   check: (user: AgoraUser) => user.totalSessions >= 1,
 },
 ```
 
-### 2.2 Tier 2 - Intermediario
+### 2.2 Tier 2 - Intermediário
 
-| Badge       | Emoji | Nome        | Criterio                | XP  | Pedagogico   |
+| Badge       | Emoji | Nome        | Critério                | XP  | Pedagógico   |
 | ----------- | ----- | ----------- | ----------------------- | --- | ------------ |
-| explorador  | 🧭    | Explorador  | 5+ sessoes              | 30  | Consistencia |
-| japaguri    | 🍜    | Japaguri    | 3+ streak OU 5+ sessoes | 50  | Assiduidade  |
-| estudioso   | 📚    | Estudioso   | 500+ XP                 | 40  | Dedicacao    |
+| explorador  | 🧭    | Explorador  | 5+ sessões              | 30  | Consistência |
+| japaguri    | 🍜    | Japaguri    | 3+ streak OU 5+ sessões | 50  | Assiduidade  |
+| estudioso   | 📚    | Estudioso   | 500+ XP                 | 40  | Dedicação    |
 | maratonista | 🏃    | Maratonista | 60+ minutos             | 35  | Foco         |
 
-**Nota Cultural**: O badge "Japaguri" faz referencia ao prato coreano popularizado no filme "Parasita", simbolizando a fusao de ingredientes simples em algo especial - assim como a combinacao de pequenos esforcos diarios resulta em grande aprendizado.
+**Nota Cultural**: O badge "Japaguri" faz referência ao prato coreano popularizado no filme "Parasita", simbolizando a fusão de ingredientes simples em algo especial - assim como a combinação de pequenos esforços diários resulta em grande aprendizado.
 
-### 2.3 Tier 3 - Avancado
+### 2.3 Tier 3 - Avançado
 
-| Badge       | Emoji | Nome        | Criterio        | XP  | Pedagogico   |
+| Badge       | Emoji | Nome        | Critério        | XP  | Pedagógico   |
 | ----------- | ----- | ----------- | --------------- | --- | ------------ |
 | dedicado    | ⭐    | Dedicado    | 7+ dias streak  | 75  | Disciplina   |
-| veterano    | 🎖️    | Veterano    | 20+ sessoes     | 60  | Experiencia  |
+| veterano    | 🎖️    | Veterano    | 20+ sessões     | 60  | Experiência  |
 | scholar     | 🎓    | Scholar     | 1000+ XP        | 75  | Conhecimento |
-| persistente | 💪    | Persistente | 14+ dias streak | 100 | Resiliencia  |
+| persistente | 💪    | Persistente | 14+ dias streak | 100 | Resiliência  |
 
 ### 2.4 Tier 4 - Elite
 
-| Badge     | Emoji | Nome      | Criterio        | XP  | Pedagogico        |
+| Badge     | Emoji | Nome      | Critério        | XP  | Pedagógico        |
 | --------- | ----- | --------- | --------------- | --- | ----------------- |
 | mestre    | 👑    | Mestre    | 2500+ XP        | 150 | Maestria          |
-| lenda     | 🏆    | Lenda     | 30+ dias streak | 200 | Excelencia        |
-| centuriao | ⚔️    | Centuriao | 100+ sessoes    | 250 | Dedicacao extrema |
-| iluminado | ✨    | Iluminado | 5000+ XP        | 300 | Transcendencia    |
+| lenda     | 🏆    | Lenda     | 30+ dias streak | 200 | Excelência        |
+| centurião | ⚔️    | Centurião | 100+ sessões    | 250 | Dedicação extrema |
+| iluminado | ✨    | Iluminado | 5000+ XP        | 300 | Transcendência    |
 
 ---
 
-## 3. Sistema de Verificacao
+## 3. Sistema de Verificação
 
-### 3.1 Fluxo de Verificacao
+### 3.1 Fluxo de Verificação
 
 ```
-Acao do Usuario
+Ação do Usuário
        |
        v
   addXp() ou
@@ -121,18 +121,18 @@ checkAndAwardBadges()
 +------+------+
 |             |
 v             v
-Badge      Badge nao
-elegivel    elegivel
+Badge      Badge não
+elegível    elegível
 |             |
 v             |
 Persistir     |
 no Supabase   |
 |             |
 v             |
-Celebracao <--+
+Celebração <--+
 ```
 
-### 3.2 Codigo de Verificacao
+### 3.2 Código de Verificação
 
 ```typescript
 // hooks/use-agora.tsx:1177-1233
@@ -168,7 +168,7 @@ const checkAndAwardBadges = useCallback(async () => {
         .update({ badges: [...currentBadges, ...newBadgeIds] })
         .eq('user_id', user.id)
 
-      // 4. Adicionar XP bonus
+      // 4. Adicionar XP bônus
       if (bonusXp > 0) {
         await addXp(bonusXp, 'badge', `Badges conquistados: ${newBadgeIds.join(', ')}`)
       }
@@ -186,7 +186,7 @@ const checkAndAwardBadges = useCallback(async () => {
 
 ---
 
-## 4. Visualizacao de Badges
+## 4. Visualização de Badges
 
 ### 4.1 Componente BadgeShowcase
 
@@ -214,7 +214,7 @@ const checkAndAwardBadges = useCallback(async () => {
 </div>
 ```
 
-### 4.2 Celebracao de Badge
+### 4.2 Celebração de Badge
 
 ```typescript
 // store/celebration-store.ts
@@ -226,7 +226,7 @@ celebrateBadge: (badgeName, emoji, xpReward) => {
       title: 'Novo Badge!',
       subtitle: badgeName,
       emoji: emoji,
-      description: 'Voce conquistou um novo badge!',
+      description: 'Você conquistou um novo badge!',
       xpReward: xpReward,
     },
   })
@@ -237,83 +237,83 @@ celebrateBadge: (badgeName, emoji, xpReward) => {
 
 ## 5. Badges Propostos
 
-### 5.1 Badges de Competencia (Prioridade Alta)
+### 5.1 Badges de Competência (Prioridade Alta)
 
-| Badge        | Emoji | Nome            | Criterio                 | XP  | Justificativa          |
+| Badge        | Emoji | Nome            | Critério                 | XP  | Justificativa          |
 | ------------ | ----- | --------------- | ------------------------ | --- | ---------------------- |
-| code-quality | 💎    | Codigo Limpo    | PR aprovado sem revisoes | 100 | Qualidade > quantidade |
+| code-quality | 💎    | Código Limpo    | PR aprovado sem revisões | 100 | Qualidade > quantidade |
 | helper       | 🤝    | Colaborador     | Ajudar 3 colegas no chat | 75  | Aprendizagem social    |
-| debugger     | 🔧    | Cacador de Bugs | Corrigir bug documentado | 80  | Resolucao de problemas |
-| documenter   | 📝    | Documentador    | PR com docs completas    | 60  | Comunicacao tecnica    |
-| reviewer     | 👁️    | Revisor         | 5 code reviews aceitos   | 90  | Pensamento critico     |
+| debugger     | 🔧    | Caçador de Bugs | Corrigir bug documentado | 80  | Resolução de problemas |
+| documenter   | 📝    | Documentador    | PR com docs completas    | 60  | Comunicação técnica    |
+| reviewer     | 👁️    | Revisor         | 5 code reviews aceitos   | 90  | Pensamento crítico     |
 
-### 5.2 Badges de Trilha (Prioridade Media)
+### 5.2 Badges de Trilha (Prioridade Média)
 
-| Badge           | Emoji | Nome               | Criterio             | XP  | Trilha     |
+| Badge           | Emoji | Nome               | Critério             | XP  | Trilha     |
 | --------------- | ----- | ------------------ | -------------------- | --- | ---------- |
-| intro-complete  | 🎯    | Iniciado           | Completar Introducao | 100 | Introducao |
-| backend-hero    | 🖥️    | Heroi do Backend   | Completar Backend    | 200 | Backend    |
+| intro-complete  | 🎯    | Iniciado           | Completar Introdução | 100 | Introdução |
+| backend-hero    | 🖥️    | Herói do Backend   | Completar Backend    | 200 | Backend    |
 | frontend-master | 🎨    | Mestre do Frontend | Completar Frontend   | 200 | Frontend   |
 | ai-wizard       | 🧙    | Mago da IA         | Completar IA/ML      | 250 | IA/ML      |
 | devops-ninja    | 🥷    | Ninja DevOps       | Completar DevOps     | 200 | DevOps     |
-| full-stack      | 🦄    | Unicornio          | Completar 3+ trilhas | 500 | Multi      |
+| full-stack      | 🦄    | Unicórnio          | Completar 3+ trilhas | 500 | Multi      |
 
 ### 5.3 Badges de Evento (Prioridade Baixa)
 
-| Badge       | Emoji | Nome              | Criterio                 | XP  | Tipo           |
+| Badge       | Emoji | Nome              | Critério                 | XP  | Tipo           |
 | ----------- | ----- | ----------------- | ------------------------ | --- | -------------- |
-| early-bird  | 🐦    | Early Adopter     | Cadastro no primeiro mes | 50  | Temporal       |
+| early-bird  | 🐦    | Early Adopter     | Cadastro no primeiro mês | 50  | Temporal       |
 | hackathon   | 🏅    | Hackathonista     | Participar de hackathon  | 100 | Evento         |
-| beta-tester | 🧪    | Beta Tester       | Reportar bug valido      | 75  | Contribuicao   |
-| mentor-pick | ⭐    | Escolha do Mentor | Destaque do mes          | 150 | Reconhecimento |
+| beta-tester | 🧪    | Beta Tester       | Reportar bug válido      | 75  | Contribuição   |
+| mentor-pick | ⭐    | Escolha do Mentor | Destaque do mês          | 150 | Reconhecimento |
 
 ### 5.4 Badges Secretos
 
-| Badge           | Emoji | Nome                       | Criterio                     | XP  | Descoberta |
+| Badge           | Emoji | Nome                       | Critério                     | XP  | Descoberta |
 | --------------- | ----- | -------------------------- | ---------------------------- | --- | ---------- |
-| night-owl       | 🦉    | Coruja                     | 10 sessoes apos meia-noite   | 50  | Secreto    |
-| weekend-warrior | 🗡️    | Guerreiro de Fim de Semana | 20 sessoes no fim de semana  | 60  | Secreto    |
+| night-owl       | 🦉    | Coruja                     | 10 sessões após meia-noite   | 50  | Secreto    |
+| weekend-warrior | 🗡️    | Guerreiro de Fim de Semana | 20 sessões no fim de semana  | 60  | Secreto    |
 | speed-runner    | ⚡    | Speed Runner               | Completar trilha em 1 semana | 100 | Secreto    |
 | perfectionist   | 💯    | Perfeccionista             | 100% em todos os quizzes     | 150 | Secreto    |
 
 ---
 
-## 6. Metricas de Badges
+## 6. Métricas de Badges
 
-### 6.1 Distribuicao Ideal
+### 6.1 Distribuição Ideal
 
 ```
-Tier 1 (Iniciante):  70% dos usuarios
-Tier 2 (Intermediario): 40% dos usuarios
-Tier 3 (Avancado): 15% dos usuarios
-Tier 4 (Elite): 5% dos usuarios
-Secretos: <1% dos usuarios
+Tier 1 (Iniciante):  70% dos usuários
+Tier 2 (Intermediário): 40% dos usuários
+Tier 3 (Avançado): 15% dos usuários
+Tier 4 (Elite): 5% dos usuários
+Secretos: <1% dos usuários
 ```
 
 ### 6.2 KPIs
 
-| Metrica               | Descricao                              | Meta |
+| Métrica               | Descrição                              | Meta |
 | --------------------- | -------------------------------------- | ---- |
-| Taxa de 1o Badge      | % usuarios com pelo menos 1 badge      | >90% |
-| Badges/Usuario        | Media de badges por usuario ativo      | 4-6  |
-| Tempo para Tier 2     | Dias medios para primeiro badge Tier 2 | 7-14 |
-| Engajamento pos-badge | Retorno em 7 dias apos badge           | >60% |
+| Taxa de 1º Badge      | % usuários com pelo menos 1 badge      | >90% |
+| Badges/Usuário        | Média de badges por usuário ativo      | 4-6  |
+| Tempo para Tier 2     | Dias médios para primeiro badge Tier 2 | 7-14 |
+| Engajamento pós-badge | Retorno em 7 dias após badge           | >60% |
 
 ---
 
-## 7. Implementacao Tecnica
+## 7. Implementação Técnica
 
 ### 7.1 Schema do Banco
 
 ```sql
--- Badges sao armazenados como array em agora_profiles
+-- Badges são armazenados como array em agora_profiles
 badges TEXT[] DEFAULT '{}'
 
 -- Exemplo de valor
 badges = ['pioneiro', 'curioso', 'primeiro-passo', 'japaguri']
 ```
 
-### 7.2 Migracao para Tabela Separada (Proposta)
+### 7.2 Migração para Tabela Separada (Proposta)
 
 ```sql
 -- Proposta: tabela separada para mais flexibilidade
@@ -329,13 +329,13 @@ CREATE TABLE agora_badges (
 -- Permite:
 -- 1. Queries mais eficientes
 -- 2. Metadata por badge (ex: qual PR desbloqueou)
--- 3. Historico de conquistas
--- 4. Rankings por badge especifico
+-- 3. Histórico de conquistas
+-- 4. Rankings por badge específico
 ```
 
 ---
 
-## 8. Celebracao Visual
+## 8. Celebração Visual
 
 ### 8.1 Modal de Badge
 
@@ -351,19 +351,19 @@ CREATE TABLE agora_badges (
 |   |                       |      |
 |   |     Japaguri          |      |
 |   |                       |      |
-|   | "Assiduo: 3+ dias     |      |
+|   | "Assíduo: 3+ dias     |      |
 |   |  seguidos"            |      |
 |   |                       |      |
 |   +-----------------------+      |
 |                                  |
 |        +50 XP                    |
 |                                  |
-|      [ INCRIVEL! ]               |
+|      [ INCRÍVEL! ]               |
 |                                  |
 +----------------------------------+
 ```
 
-### 8.2 Confetti Animation
+### 8.2 Animação de Confetti
 
 ```css
 /* components/agora/celebration-modal.tsx */
@@ -386,29 +386,29 @@ CREATE TABLE agora_badges (
 
 ---
 
-## 9. Integracao com Outras Features
+## 9. Integração com Outras Features
 
-### 9.1 Perfil do Usuario
+### 9.1 Perfil do Usuário
 
-- Badges exibidos no perfil publico
+- Badges exibidos no perfil público
 - Opção de destacar badges favoritos
-- Historico de conquistas
+- Histórico de conquistas
 
 ### 9.2 Ranking
 
-- Filtro por badges especificos
+- Filtro por badges específicos
 - Leaderboard de badges raros
 - Destaques semanais
 
 ### 9.3 Certificado
 
 - Badges relevantes listados no certificado
-- QR code para verificacao
+- QR code para verificação
 - Selo especial para badges de elite
 
 ---
 
-## 10. Referencias
+## 10. Referências
 
 - Hamari, J. (2017). Do badges increase user activity? A field experiment on the effects of gamification. Computers in Human Behavior.
 - Antin, J. & Churchill, E. (2011). Badges in Social Media: A Social Psychological Perspective. CHI 2011.
@@ -417,5 +417,5 @@ CREATE TABLE agora_badges (
 ---
 
 **Autor**: Anderson Henrique da Silva
-**Ultima atualizacao**: 2025-12-09
-**Codigo fonte**: `hooks/use-agora.tsx:157-315`, `components/agora/badge-showcase.tsx`
+**Última atualização**: 2025-12-09
+**Código fonte**: `hooks/use-agora.tsx:157-315`, `components/agora/badge-showcase.tsx`

@@ -271,7 +271,7 @@ export const agents: Agent[] = [
   },
   // Kids Mode Agents
   {
-    id: 'monteiro-lobato',
+    id: 'monteiro_lobato',
     name: 'Monteiro Lobato',
     role: {
       pt: 'Contador de Histórias',
@@ -286,7 +286,7 @@ export const agents: Agent[] = [
     isKidsAgent: true,
   },
   {
-    id: 'tarsila-amaral',
+    id: 'tarsila',
     name: 'Tarsila do Amaral',
     role: {
       pt: 'Artista Criativa',
@@ -312,8 +312,9 @@ export type EducationalAgentId = (typeof EDUCATIONAL_AGENT_IDS)[number]
 /**
  * Kids agent IDs for Agora Kids Mode
  * These mentors are designed specifically for children
+ * Note: IDs match backend agent_id values
  */
-export const KIDS_AGENT_IDS = ['monteiro-lobato', 'tarsila-amaral'] as const
+export const KIDS_AGENT_IDS = ['monteiro_lobato', 'tarsila'] as const
 export type KidsAgentId = (typeof KIDS_AGENT_IDS)[number]
 
 /**

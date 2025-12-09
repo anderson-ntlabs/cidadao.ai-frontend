@@ -1,18 +1,18 @@
-# Arquitetura Tecnica da Agora Academy
+# Arquitetura Técnica da Ágora Academy
 
-> Visao geral da arquitetura de software do sistema
+> Visão geral da arquitetura de software do sistema
 
 ---
 
-## 1. Visao Geral
+## 1. Visão Geral
 
-A Agora Academy e construida como parte do frontend do Cidadao.AI, utilizando Next.js 15 com App Router, TypeScript, e Supabase como backend.
+A Ágora Academy é construída como parte do frontend do Cidadão.AI, utilizando Next.js 15 com App Router, TypeScript, e Supabase como backend.
 
-### 1.1 Stack Tecnologico
+### 1.1 Stack Tecnológico
 
 ```
 +------------------------------------------------------------------+
-|                      STACK AGORA ACADEMY                          |
+|                      STACK ÁGORA ACADEMY                          |
 +------------------------------------------------------------------+
 |                                                                    |
 |  FRONTEND                                                         |
@@ -27,9 +27,9 @@ A Agora Academy e construida como parte do frontend do Cidadao.AI, utilizando Ne
 |  ├── Railway (API Principal - cidadao.ai-backend)                 |
 |  └── Vercel (Hosting, Edge Functions)                             |
 |                                                                    |
-|  INTEGRACAO                                                       |
+|  INTEGRAÇÃO                                                       |
 |  ├── GitHub OAuth                                                 |
-|  ├── GitHub API (verificacao de fork)                             |
+|  ├── GitHub API (verificação de fork)                             |
 |  └── Maritaca AI / Anthropic (Mentores IA)                        |
 |                                                                    |
 +------------------------------------------------------------------+
@@ -37,10 +37,10 @@ A Agora Academy e construida como parte do frontend do Cidadao.AI, utilizando Ne
 
 ---
 
-## 2. Arquitetura de Alto Nivel
+## 2. Arquitetura de Alto Nível
 
 ```
-                              USUARIO
+                              USUÁRIO
                                  |
                                  v
                      +---------------------+
@@ -60,23 +60,23 @@ A Agora Academy e construida como parte do frontend do Cidadao.AI, utilizando Ne
 ### 2.1 Fluxo de Dados
 
 ```
-1. AUTENTICACAO
-   Usuario -> GitHub OAuth -> Supabase Auth -> JWT -> App
+1. AUTENTICAÇÃO
+   Usuário → GitHub OAuth → Supabase Auth → JWT → App
 
-2. GAMIFICACAO
-   Acao Usuario -> Hook useAgora -> Supabase RPC -> Atualizacao
+2. GAMIFICAÇÃO
+   Ação Usuário → Hook useAgora → Supabase RPC → Atualização
 
 3. CHAT COM MENTOR
-   Mensagem -> AgoraChatStore -> Railway API (SSE) -> Resposta
+   Mensagem → AgoraChatStore → Railway API (SSE) → Resposta
 
-4. PERSISTENCIA
-   Estado Local -> Zustand Persist -> localStorage
-   Estado Remoto -> Supabase Tables -> PostgreSQL
+4. PERSISTÊNCIA
+   Estado Local → Zustand Persist → localStorage
+   Estado Remoto → Supabase Tables → PostgreSQL
 ```
 
 ---
 
-## 3. Estrutura de Diretorios
+## 3. Estrutura de Diretórios
 
 ```
 app/pt/agora/
@@ -88,26 +88,26 @@ app/pt/agora/
 ├── _components/
 │   └── dashboard-client.tsx    # Dashboard client component
 ├── login/
-│   └── page.tsx                # Pagina de login
+│   └── page.tsx                # Página de login
 ├── onboarding/
 │   └── page.tsx                # Fluxo de onboarding
 ├── trilhas/
 │   ├── page.tsx                # Lista de trilhas
 │   └── [trackId]/
 │       └── [moduleId]/
-│           └── page.tsx        # Modulo individual
+│           └── page.tsx        # Módulo individual
 ├── chat/
 │   └── page.tsx                # Chat com mentores
 ├── diario/
-│   └── page.tsx                # Diario de bordo
+│   └── page.tsx                # Diário de bordo
 ├── ranking/
 │   └── page.tsx                # Leaderboard
 ├── perfil/
-│   └── page.tsx                # Perfil do usuario
+│   └── page.tsx                # Perfil do usuário
 ├── configuracoes/
-│   └── page.tsx                # Configuracoes
+│   └── page.tsx                # Configurações
 ├── videos/
-│   └── page.tsx                # Catalogo de videos
+│   └── page.tsx                # Catálogo de vídeos
 ├── leituras/
 │   └── page.tsx                # Material de leitura
 ├── atividades/
@@ -115,20 +115,20 @@ app/pt/agora/
 ├── ajuda/
 │   └── page.tsx                # Central de ajuda
 └── contract/
-    └── page.tsx                # Contrato de estagio
+    └── page.tsx                # Contrato de estágio
 
 components/agora/
 ├── agora-header.tsx            # Header principal
-├── agora-sidebar.tsx           # Sidebar de navegacao
+├── agora-sidebar.tsx           # Sidebar de navegação
 ├── agora-agent-selector.tsx    # Seletor de mentores
 ├── agent-card.tsx              # Card de agente
-├── badge-showcase.tsx          # Exibicao de badges
-├── celebration-modal.tsx       # Modal de celebracao
-├── gamification-card.tsx       # Card de gamificacao
-├── stat-card.tsx               # Card de estatisticas
-├── quick-action-card.tsx       # Acoes rapidas
+├── badge-showcase.tsx          # Exibição de badges
+├── celebration-modal.tsx       # Modal de celebração
+├── gamification-card.tsx       # Card de gamificação
+├── stat-card.tsx               # Card de estatísticas
+├── quick-action-card.tsx       # Ações rápidas
 ├── activity-feed.tsx           # Feed de atividades
-├── session-manager.tsx         # Gerenciador de sessao
+├── session-manager.tsx         # Gerenciador de sessão
 ├── timeline-card.tsx           # Card de timeline
 ├── timeline-modal.tsx          # Modal de timeline
 ├── lgpd-consent-modal.tsx      # Modal LGPD
@@ -139,17 +139,17 @@ components/agora/
 
 hooks/
 ├── use-agora.tsx               # Hook principal (1736 linhas)
-├── use-agora-auth.tsx          # Autenticacao OAuth
+├── use-agora-auth.tsx          # Autenticação OAuth
 └── use-agora-demo.tsx          # Modo demo (deprecated)
 
 store/
 ├── agora-chat-store.ts         # Estado do chat
-└── celebration-store.ts        # Estado de celebracoes
+└── celebration-store.ts        # Estado de celebrações
 
 lib/agora/
-├── leaderboard.ts              # Servico de ranking
+├── leaderboard.ts              # Serviço de ranking
 ├── certificate-requirements.ts # Requisitos de certificado
-└── github.ts                   # Integracao GitHub
+└── github.ts                   # Integração GitHub
 ```
 
 ---
@@ -158,7 +158,7 @@ lib/agora/
 
 ### 4.1 Hook useAgora
 
-O hook `useAgora` e o coracao do sistema, gerenciando todo o estado e acoes.
+O hook `useAgora` é o coração do sistema, gerenciando todo o estado e ações.
 
 ```typescript
 // hooks/use-agora.tsx
@@ -173,7 +173,7 @@ interface AgoraContextType {
   dailyChallenges: DailyChallenge[]
   weeklyChallenges: WeeklyChallenge[]
 
-  // Acoes
+  // Ações
   addXp: (amount, source, description) => Promise<void>
   startSession: () => Promise<void>
   endSession: (xpEarned, agentsUsed) => Promise<void>
@@ -206,7 +206,7 @@ interface AgoraChatState {
     accumulatedContent: string
   }
 
-  // Acoes
+  // Ações
   sendMessage: (content: string) => Promise<void>
   selectAgent: (agentId: string) => void
   clearChat: () => void
@@ -215,7 +215,7 @@ interface AgoraChatState {
 
 ### 4.3 CelebrationStore
 
-Store para gerenciar celebracoes (badges, level up, etc).
+Store para gerenciar celebrações (badges, level up, etc).
 
 ```typescript
 // store/celebration-store.ts
@@ -225,7 +225,7 @@ interface CelebrationState {
   celebration: CelebrationData | null
   queue: CelebrationData[]
 
-  // Acoes
+  // Ações
   celebrateBadge: (name, emoji, xp) => void
   celebrateLevelUp: (level) => void
   celebrateRankUp: (rank) => void
@@ -240,7 +240,7 @@ interface CelebrationState {
 ### 5.1 Schema
 
 ```sql
--- Perfil do usuario na Agora
+-- Perfil do usuário na Ágora
 CREATE TABLE agora_profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users,
   full_name TEXT,
@@ -250,7 +250,7 @@ CREATE TABLE agora_profiles (
   curso TEXT,
   periodo INTEGER,
 
-  -- Gamificacao
+  -- Gamificação
   total_xp INTEGER DEFAULT 0,
   current_level INTEGER DEFAULT 1,
   current_rank TEXT DEFAULT 'novato',
@@ -263,7 +263,7 @@ CREATE TABLE agora_profiles (
   last_activity_date DATE,
   last_daily_bonus_date DATE,
 
-  -- Estatisticas
+  -- Estatísticas
   total_sessions INTEGER DEFAULT 0,
   total_time_minutes INTEGER DEFAULT 0,
   total_videos_completed INTEGER DEFAULT 0,
@@ -280,7 +280,7 @@ CREATE TABLE agora_profiles (
   CONSTRAINT valid_rank CHECK (current_rank IN ('novato', 'aprendiz', 'contribuidor', 'mentor', 'arquiteto'))
 );
 
--- Transacoes de XP
+-- Transações de XP
 CREATE TABLE agora_xp_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users NOT NULL,
@@ -291,7 +291,7 @@ CREATE TABLE agora_xp_transactions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Sessoes de estudo
+-- Sessões de estudo
 CREATE TABLE agora_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users NOT NULL,
@@ -305,7 +305,7 @@ CREATE TABLE agora_sessions (
   CONSTRAINT valid_status CHECK (status IN ('active', 'completed', 'abandoned'))
 );
 
--- Entradas do diario
+-- Entradas do diário
 CREATE TABLE agora_diary_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users NOT NULL,
@@ -333,7 +333,7 @@ CREATE TABLE agora_consent (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Eventos do calendario
+-- Eventos do calendário
 CREATE TABLE agora_calendar_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users NOT NULL,
@@ -369,7 +369,7 @@ CREATE TABLE agora_challenge_progress (
 ### 5.2 Row Level Security (RLS)
 
 ```sql
--- Usuarios so podem ver/editar seus proprios dados
+-- Usuários só podem ver/editar seus próprios dados
 ALTER TABLE agora_profiles ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own profile"
@@ -387,7 +387,7 @@ CREATE POLICY "Users can insert own profile"
 -- Aplicar a todas as tabelas...
 ```
 
-### 5.3 Funcoes RPC
+### 5.3 Funções RPC
 
 ```sql
 -- Leaderboard
@@ -425,7 +425,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Posicao do usuario no ranking
+-- Posição do usuário no ranking
 CREATE OR REPLACE FUNCTION get_user_rank(target_user_id UUID)
 RETURNS INTEGER AS $$
 DECLARE
@@ -475,7 +475,7 @@ export async function claimChallengeReward(challengeId: string, periodStart: str
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Verificar se ja foi resgatado
+  // Verificar se já foi resgatado
   const { data: progress } = await supabase
     .from('agora_challenge_progress')
     .select('*')
@@ -524,7 +524,7 @@ export async function claimChallengeReward(challengeId: string, periodStart: str
   return { success: true, xpAwarded: progress.xp_reward }
 }
 
-// Eventos do calendario
+// Eventos do calendário
 export async function getCalendarEvents() { ... }
 export async function createCalendarEvent(event: CalendarEventInput) { ... }
 export async function updateCalendarEvent(id: string, updates: Partial<CalendarEvent>) { ... }
@@ -534,12 +534,12 @@ export async function completeCalendarEvent(id: string) { ... }
 
 ---
 
-## 7. Integracao com Chat (Railway)
+## 7. Integração com Chat (Railway)
 
 ### 7.1 Arquitetura de Chat
 
 ```
-Usuario
+Usuário
    |
    v
 AgoraChatStore
@@ -603,51 +603,51 @@ const EDUCATIONAL_AGENTS = [
 
 ## 8. Fluxos Principais
 
-### 8.1 Fluxo de Autenticacao
+### 8.1 Fluxo de Autenticação
 
 ```
-1. Usuario clica "Entrar com GitHub"
+1. Usuário clica "Entrar com GitHub"
 2. Redirect para GitHub OAuth
 3. GitHub redireciona para /auth/callback
-4. Supabase processa OAuth e cria sessao
-5. useAgoraAuth detecta sessao
+4. Supabase processa OAuth e cria sessão
+5. useAgoraAuth detecta sessão
 6. Verifica se perfil existe em agora_profiles
-7. Se nao existe, cria perfil inicial
+7. Se não existe, cria perfil inicial
 8. Redireciona para dashboard ou onboarding
 ```
 
 ### 8.2 Fluxo de Ganho de XP
 
 ```
-1. Usuario realiza acao (ex: completar sessao)
-2. addXp(amount, sourceType, description) e chamado
-3. Calcula novo XP, nivel e rank
+1. Usuário realiza ação (ex: completar sessão)
+2. addXp(amount, sourceType, description) é chamado
+3. Calcula novo XP, nível e rank
 4. Atualiza agora_profiles no Supabase
 5. Insere registro em agora_xp_transactions
-6. Verifica se subiu de nivel/rank
-7. Se sim, dispara celebracao
+6. Verifica se subiu de nível/rank
+7. Se sim, dispara celebração
 8. Chama checkAndAwardBadges()
 9. Verifica elegibilidade para cada badge
 10. Persiste novos badges
-11. Dispara celebracoes de badges
+11. Dispara celebrações de badges
 ```
 
-### 8.3 Fluxo de Sessao de Estudo
+### 8.3 Fluxo de Sessão de Estudo
 
 ```
-1. Usuario acessa pagina de chat
+1. Usuário acessa página de chat
 2. startSession() cria registro em agora_sessions
-3. Usuario interage com mentor
+3. Usuário interage com mentor
 4. A cada 5 mensagens, +5 XP
 5. Ao sair ou inatividade (30min):
-   - endSession() atualiza duracao e XP
+   - endSession() atualiza duração e XP
    - Atualiza total_sessions e total_time_minutes
    - Verifica badges relacionados
 ```
 
 ---
 
-## 9. Performance e Otimizacoes
+## 9. Performance e Otimizações
 
 ### 9.1 Code Splitting
 
@@ -674,7 +674,7 @@ const useAgoraChatStore = create(
     {
       name: 'agora-chat',
       partialize: (state) => ({
-        messages: state.messages.slice(-50), // Ultimas 50 mensagens
+        messages: state.messages.slice(-50), // Últimas 50 mensagens
         selectedAgentId: state.selectedAgentId,
       }),
     }
@@ -682,13 +682,13 @@ const useAgoraChatStore = create(
 )
 ```
 
-### 9.3 Otimizacoes de Render
+### 9.3 Otimizações de Render
 
 ```typescript
-// Memoizacao de componentes pesados
+// Memoização de componentes pesados
 const BadgeShowcase = memo(({ badges }: Props) => { ... })
 
-// Memoizacao de valores derivados
+// Memoização de valores derivados
 const onboarding = useMemo(() => ({
   currentStep: user.onboardingStep,
   completedSteps: Array.from({ length: user.onboardingStep }, (_, i) => i + 1),
@@ -715,10 +715,10 @@ trackAgendaEventCreated(eventDetails)
 trackAgendaEventCompleted(eventDetails)
 ```
 
-### 10.2 Integracao PostHog
+### 10.2 Integração PostHog
 
 ```typescript
-// Eventos customizados para analise de funil
+// Eventos customizados para análise de funil
 posthog.capture('agora_onboarding_started')
 posthog.capture('agora_onboarding_step', { step: 2 })
 posthog.capture('agora_onboarding_completed')
@@ -728,38 +728,38 @@ posthog.capture('agora_first_badge')
 
 ---
 
-## 11. Seguranca
+## 11. Segurança
 
-### 11.1 Autenticacao
+### 11.1 Autenticação
 
 - OAuth 2.0 via GitHub
 - JWT gerenciado pelo Supabase
-- Refresh token automatico
+- Refresh token automático
 - Session expiration handling
 
-### 11.2 Autorizacao
+### 11.2 Autorização
 
 - Row Level Security (RLS) em todas as tabelas
-- Verificacao de user_id em Server Actions
-- Sanitizacao de inputs
+- Verificação de user_id em Server Actions
+- Sanitização de inputs
 
-### 11.3 Dados Sensiveis
+### 11.3 Dados Sensíveis
 
-- Nenhum dado sensivel no localStorage
-- LGPD compliance com consentimento explicito
-- Opcao de exclusao de dados
+- Nenhum dado sensível no localStorage
+- LGPD compliance com consentimento explícito
+- Opção de exclusão de dados
 
 ---
 
-## 12. Proximos Passos Arquiteturais
+## 12. Próximos Passos Arquiteturais
 
-1. **Migracao para Edge Functions** - Server Actions criticos
+1. **Migração para Edge Functions** - Server Actions críticos
 2. **Cache Layer** - Redis para leaderboard
 3. **WebSockets** - Chat em tempo real (substituir SSE)
-4. **Microservices** - Separar servico de gamificacao
+4. **Microservices** - Separar serviço de gamificação
 5. **Event Sourcing** - Auditoria completa de XP
 
 ---
 
 **Autor**: Anderson Henrique da Silva
-**Ultima atualizacao**: 2025-12-09
+**Última atualização**: 2025-12-09

@@ -198,17 +198,21 @@ Caracteristicas:
 
 ### Monteiro Lobato
 
-- **ID**: `monteiro-lobato`
+- **ID**: `monteiro_lobato`
+- **Backend**: `agent_id: "monteiro_lobato"`
 - **Papel**: Contador de Historias
 - **Estilo**: Ensina atraves de narrativas e aventuras
 - **Inspiracao**: Sitio do Picapau Amarelo
+- **Exemplo**: Fala sobre "caixinhas magicas" (variaveis), o Saci (loops), receitas da Tia Nastacia (funcoes)
 
 ### Tarsila do Amaral
 
-- **ID**: `tarsila-amaral`
+- **ID**: `tarsila`
+- **Backend**: `agent_id: "tarsila"`
 - **Papel**: Artista Criativa
 - **Estilo**: Ensina atraves de cores, formas e criatividade
 - **Inspiracao**: Abaporu e arte moderna brasileira
+- **Exemplo**: Fala sobre cores quentes, harmonia, contraste e composicao
 
 ---
 
@@ -289,7 +293,7 @@ const { trackVideo, trackAgent } = useKids()
 trackVideo('intro-programacao')
 
 // Quando crianca interage com mentor
-trackAgent('monteiro-lobato')
+trackAgent('monteiro_lobato')
 ```
 
 ---
