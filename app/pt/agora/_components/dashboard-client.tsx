@@ -393,14 +393,9 @@ export function DashboardClient({
 
           {/* Hero Section - User Profile + Stats */}
           <div className="mb-8">
-            <GlassCard className="overflow-hidden">
-              {/* Clean Header Bar */}
-              <div className="h-24 bg-gradient-to-r from-slate-800 to-slate-700 dark:from-slate-900 dark:to-slate-800 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent" />
-              </div>
-
+            <GlassCard className="overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
               {/* Profile Content */}
-              <div className="px-6 sm:px-8 pb-6 -mt-12 relative">
+              <div className="p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
                   {/* Avatar */}
                   <div className="relative">
@@ -408,15 +403,15 @@ export function DashboardClient({
                       src={user.avatar}
                       alt={user.name}
                       fallbackName={user.name}
-                      className="w-24 h-24 rounded-xl border-4 border-white dark:border-slate-800 shadow-lg object-cover bg-slate-100 dark:bg-slate-700"
+                      className="w-20 h-20 rounded-xl border-2 border-emerald-200 dark:border-emerald-800 shadow-md object-cover bg-slate-100 dark:bg-slate-700"
                     />
-                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-lg shadow-md">
+                    <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-sm shadow-md">
                       {rankInfo.emoji}
                     </div>
                   </div>
 
                   {/* User Info */}
-                  <div className="flex-1 pt-2 sm:pt-0">
+                  <div className="flex-1">
                     <h2 className="text-xl sm:text-2xl font-semibold academy-text">
                       Ola, {user.name.split(' ')[0]}!
                     </h2>
