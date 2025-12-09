@@ -337,7 +337,7 @@ export function DashboardClient({
         {/* Header is now provided by the layout */}
 
         {/* Main Content */}
-        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-3xl my-4 shadow-xl">
           {/* Demo Banner */}
           {isDemoMode && (
             <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">

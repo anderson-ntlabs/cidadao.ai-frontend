@@ -1,102 +1,102 @@
-# Agora Academy - Documentacao Completa
+# Ágora Academy - Documentação Completa
 
-> **Plataforma de Aprendizagem Gamificada do Cidadao.AI**
+> **Plataforma de Aprendizagem Gamificada do Cidadão.AI**
 > **Feito por alunos, para alunos**
 
 [![Status](https://img.shields.io/badge/Status-Beta-yellow)]()
-[![Versao](https://img.shields.io/badge/Versao-1.0.0-blue)]()
-[![Licenca](https://img.shields.io/badge/Licenca-MIT-green)]()
+[![Versão](https://img.shields.io/badge/Versão-1.0.0-blue)]()
+[![Licença](https://img.shields.io/badge/Licença-MIT-green)]()
 
 ---
 
-## Visao Geral
+## Visão Geral
 
-A **Agora Academy** e uma plataforma de aprendizagem gamificada projetada para capacitar desenvolvedores brasileiros em tecnologias modernas (Backend, Frontend, IA/ML, DevOps) atraves de contribuicoes reais ao projeto open-source Cidadao.AI.
+A **Ágora Academy** é uma plataforma de aprendizagem gamificada projetada para capacitar desenvolvedores brasileiros em tecnologias modernas (Backend, Frontend, IA/ML, DevOps) através de contribuições reais ao projeto open-source Cidadão.AI.
 
 ### Parceria Institucional
 
-- **Neural Thinker AI Engineering** - Mentoria tecnica e manutencao
-- **IFSULDEMINAS/LabSoft** - Orientacao academica e validacao pedagogica
-- **Profa. Dra. Aracele Fassbinder** - Coordenacao academica
+- **Neural Thinker AI Engineering** - Mentoria técnica e manutenção
+- **IFSULDEMINAS/LabSoft** - Orientação acadêmica e validação pedagógica
+- **Profa. Dra. Aracele Fassbinder** - Coordenação acadêmica
 
-### Missao
+### Missão
 
-> Democratizar o acesso a educacao tecnologica de qualidade atraves de uma experiencia de aprendizagem pratica, gamificada e culturalmente relevante para o contexto brasileiro.
+> Democratizar o acesso à educação tecnológica de qualidade através de uma experiência de aprendizagem prática, gamificada e culturalmente relevante para o contexto brasileiro.
 
-### Valores Pedagogicos
+### Valores Pedagógicos
 
-1. **Aprender Fazendo** - Contribuicao real em projeto open-source
-2. **Mentoria Acessivel** - Agentes de IA disponiveis 24/7
+1. **Aprender Fazendo** - Contribuição real em projeto open-source
+2. **Mentoria Acessível** - Agentes de IA disponíveis 24/7
 3. **Reconhecimento** - Sistema de XP, badges e certificados
-4. **Inclusao** - Acessibilidade WCAG AAA e VLibras
+4. **Inclusão** - Acessibilidade WCAG AAA e VLibras
 
 ---
 
-## Sistema de Progressao
+## Sistema de Progressão
 
 ```
-Novato (0-100 XP) -> Aprendiz (100-500 XP) -> Contribuidor (500-2000 XP) -> Mentor (2000-5000 XP) -> Arquiteto (5000+ XP)
+Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → Mentor (2000-5000 XP) → Arquiteto (5000+ XP)
 ```
 
-## Trilhas Disponiveis
+## Trilhas Disponíveis
 
-| Trilha         | Tecnologias                     | Nivel            | XP Total |
+| Trilha         | Tecnologias                     | Nível            | XP Total |
 | -------------- | ------------------------------- | ---------------- | -------- |
-| **Introducao** | Plataforma, GitHub, Agentes     | Iniciante        | 500      |
-| **Backend**    | Python, FastAPI, PostgreSQL     | Basico em Python | 2000     |
-| **Frontend**   | Next.js, React, Tailwind        | Basico em JS/CSS | 2000     |
-| **IA/ML**      | DSPy, LangChain, Transformers   | Intermediario    | 2500     |
-| **DevOps**     | Docker, GitHub Actions, Grafana | Basico em Linux  | 2000     |
+| **Introdução** | Plataforma, GitHub, Agentes     | Iniciante        | 500      |
+| **Backend**    | Python, FastAPI, PostgreSQL     | Básico em Python | 2000     |
+| **Frontend**   | Next.js, React, Tailwind        | Básico em JS/CSS | 2000     |
+| **IA/ML**      | DSPy, LangChain, Transformers   | Intermediário    | 2500     |
+| **DevOps**     | Docker, GitHub Actions, Grafana | Básico em Linux  | 2000     |
 
 ---
 
-## Indice da Documentacao
+## Índice da Documentação
 
 ### 01. Fundamentos
 
-- [Visao e Missao](./01-fundamentos/visao-missao.md)
-- [Publico-Alvo](./01-fundamentos/publico-alvo.md)
-- [Glossario de Termos](./01-fundamentos/glossario.md)
+- [Visão e Missão](./01-fundamentos/visao-missao.md)
+- [Público-Alvo](./01-fundamentos/publico-alvo.md)
+- [Glossário de Termos](./01-fundamentos/glossario.md)
 
 ### 02. Pedagogia
 
-- [Referencial Teorico](./02-pedagogia/referencial-teorico.md)
+- [Referencial Teórico](./02-pedagogia/referencial-teorico.md)
 - [Metodologia de Ensino](./02-pedagogia/metodologia.md)
 - [Objetivos de Aprendizagem](./02-pedagogia/objetivos-aprendizagem.md)
 - [Taxonomia de Bloom Aplicada](./02-pedagogia/taxonomia-bloom.md)
 
-### 03. Gamificacao
+### 03. Gamificação
 
-- [Sistema de XP e Niveis](./03-gamificacao/xp-niveis.md)
+- [Sistema de XP e Níveis](./03-gamificacao/xp-niveis.md)
 - [Badges e Conquistas](./03-gamificacao/badges.md)
-- [Desafios e Missoes](./03-gamificacao/desafios.md)
-- [Ranking e Competicao](./03-gamificacao/ranking.md)
-- [Psicologia da Gamificacao](./03-gamificacao/psicologia.md)
+- [Desafios e Missões](./03-gamificacao/desafios.md)
+- [Ranking e Competição](./03-gamificacao/ranking.md)
+- [Psicologia da Gamificação](./03-gamificacao/psicologia.md)
 
 ### 04. Trilhas de Aprendizagem
 
-- [Visao Geral das Trilhas](./04-trilhas/visao-geral.md)
-- [Trilha: Introducao](./04-trilhas/introducao.md)
+- [Visão Geral das Trilhas](./04-trilhas/visao-geral.md)
+- [Trilha: Introdução](./04-trilhas/introducao.md)
 - [Trilha: Backend](./04-trilhas/backend.md)
 - [Trilha: Frontend](./04-trilhas/frontend.md)
 - [Trilha: IA/ML](./04-trilhas/ia-ml.md)
 - [Trilha: DevOps](./04-trilhas/devops.md)
 - [Design Instrucional](./04-trilhas/design-instrucional.md)
 
-### 05. Avaliacao
+### 05. Avaliação
 
-- [Modelo de Avaliacao](./05-avaliacao/modelo-avaliacao.md)
-- [Quizzes e Exercicios](./05-avaliacao/quizzes.md)
+- [Modelo de Avaliação](./05-avaliacao/modelo-avaliacao.md)
+- [Quizzes e Exercícios](./05-avaliacao/quizzes.md)
 - [Rubricas de Projetos](./05-avaliacao/rubricas.md)
-- [Certificacao](./05-avaliacao/certificacao.md)
+- [Certificação](./05-avaliacao/certificacao.md)
 
-### 06. Arquitetura Tecnica
+### 06. Arquitetura Técnica
 
-- [Visao Geral da Arquitetura](./06-arquitetura/visao-geral.md)
+- [Visão Geral da Arquitetura](./06-arquitetura/visao-geral.md)
 - [Componentes e Hooks](./06-arquitetura/componentes.md)
 - [Estado e Store](./06-arquitetura/estado.md)
 - [Banco de Dados](./06-arquitetura/banco-dados.md)
-- [Integracao com Backend](./06-arquitetura/integracao.md)
+- [Integração com Backend](./06-arquitetura/integracao.md)
 
 ### 07. Acessibilidade
 
@@ -108,12 +108,12 @@ Novato (0-100 XP) -> Aprendiz (100-500 XP) -> Contribuidor (500-2000 XP) -> Ment
 
 - [Roadmap 2025-2026](./08-roadmap/roadmap-geral.md)
 - [Features Propostas](./08-roadmap/features-propostas.md)
-- [Melhorias Pedagogicas](./08-roadmap/melhorias-pedagogicas.md)
-- [Visao de Produto](./08-roadmap/visao-produto.md)
+- [Melhorias Pedagógicas](./08-roadmap/melhorias-pedagogicas.md)
+- [Visão de Produto](./08-roadmap/visao-produto.md)
 
-### 09. API e Integracao
+### 09. API e Integração
 
-- [Endpoints da Agora](./09-api/endpoints.md)
+- [Endpoints da Ágora](./09-api/endpoints.md)
 - [Server Actions](./09-api/server-actions.md)
 - [Supabase Schema](./09-api/supabase-schema.md)
 
@@ -141,40 +141,40 @@ Novato (0-100 XP) -> Aprendiz (100-500 XP) -> Contribuidor (500-2000 XP) -> Ment
 ### Para Desenvolvedores
 
 ```bash
-# Clone o repositorio
+# Clone o repositório
 git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
 
-# Instale dependencias
+# Instale dependências
 npm install
 
-# Configure variaveis de ambiente
+# Configure variáveis de ambiente
 cp .env.example .env.local
 
 # Inicie o servidor de desenvolvimento
 npm run dev
 
-# Acesse a Agora
+# Acesse a Ágora
 open http://localhost:3000/pt/agora
 ```
 
 ---
 
-## Metricas do Sistema
+## Métricas do Sistema
 
-| Metrica                   | Valor Atual | Meta  |
+| Métrica                   | Valor Atual | Meta  |
 | ------------------------- | ----------- | ----- |
-| Trilhas disponiveis       | 5           | 8     |
+| Trilhas disponíveis       | 5           | 8     |
 | Badges implementados      | 13          | 25    |
 | Cobertura de testes       | ~50%        | 80%   |
 | Score WCAG                | AA          | AAA   |
-| Tempo medio de onboarding | 5 min       | 3 min |
+| Tempo médio de onboarding | 5 min       | 3 min |
 
 ---
 
-## Links Uteis
+## Links Úteis
 
-- [Cidadao.AI API](https://cidadao-api-production.up.railway.app/)
-- [Documentacao API](https://cidadao-api-production.up.railway.app/docs)
+- [Cidadão.AI API](https://cidadao-api-production.up.railway.app/)
+- [Documentação API](https://cidadao-api-production.up.railway.app/docs)
 - [HuggingFace Space](https://neural-thinker-cidadao-ai-backend.hf.space/)
 - [LabSoft IFSULDEMINAS](https://integra.ifsuldeminas.edu.br/)
 
@@ -182,22 +182,22 @@ open http://localhost:3000/pt/agora
 
 ## Contribuindo
 
-Veja o [Guia do Desenvolvedor](./10-guias/guia-desenvolvedor.md) para informacoes sobre como contribuir com a documentacao e o codigo da Agora Academy.
+Veja o [Guia do Desenvolvedor](./10-guias/guia-desenvolvedor.md) para informações sobre como contribuir com a documentação e o código da Ágora Academy.
 
 ---
 
-## Referencias
+## Referências
 
 - [Design Science Research](../dsr/)
 - [CLAUDE.md do Projeto](../../CLAUDE.md)
-- [Documentacao Geral](../)
+- [Documentação Geral](../)
 
 ---
 
-**Mantido por**: Anderson Henrique da Silva
+**Autor**: Anderson Henrique da Silva
 **Parceria**: Neural Thinker AI Engineering + IFSULDEMINAS/LabSoft
-**Ultima atualizacao**: 2025-12-09
+**Última atualização**: 2025-12-09
 
-## Licenca
+## Licença
 
 MIT License - Veja [LICENSE](../../LICENSE) para detalhes.
