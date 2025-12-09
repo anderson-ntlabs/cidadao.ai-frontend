@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { User as SupabaseUser, Provider } from '@supabase/supabase-js'
 import { toast } from './use-toast'
 import { createLogger } from '@/lib/logger'
+import { useKidsStore } from '@/store/kids-store'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 
 const logger = createLogger('AgoraAuth')
 
@@ -325,6 +327,14 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setIsAuthenticated(false)
         setIsLoading(false)
+
+        // Use centralized service for cleanup
+        navigationSessionService.clearAllSessionStorage()
+
+        // Legacy cleanup (kept for backwards compatibility)
+        useKidsStore.getState().reset()
+
+        logger.info('Auth session ended, all session data cleared')
       }
     })
 
@@ -365,11 +375,14 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      // Use centralized navigation session service for complete cleanup
+      await navigationSessionService.logout()
 
       setUser(null)
       setIsAuthenticated(false)
+
+      // Legacy cleanup (kept for backwards compatibility)
+      useKidsStore.getState().reset()
 
       toast.success('Logout realizado', 'Ate a proxima sessao de estudos!')
       window.location.href = '/pt/agora/login'
@@ -380,7 +393,7 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   const acceptLgpdConsent = useCallback(
     async (ipAddress?: string, userAgent?: string) => {

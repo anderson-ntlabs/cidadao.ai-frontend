@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { createLogger } from '@/lib/logger'
 import { trackBadgeEarned, trackLevelUp, trackRankUp } from '@/lib/analytics/agora-tracker'
 import { useCelebrationStore } from '@/store/celebration-store'
+import { useKidsStore } from '@/store/kids-store'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 import {
   syncChallengeProgress,
   getChallengeProgress,
@@ -1463,10 +1465,15 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
 
   // Logout
   const logout = useCallback(async () => {
-    await supabase.auth.signOut()
+    // Use centralized navigation session service for complete cleanup
+    await navigationSessionService.logout()
+
+    // Legacy cleanup (kept for backwards compatibility)
+    useKidsStore.getState().reset()
+
     setUser(null)
     router.push('/pt/agora/login')
-  }, [supabase, router])
+  }, [router])
 
   // Claim challenge reward
   const claimChallenge = useCallback(
