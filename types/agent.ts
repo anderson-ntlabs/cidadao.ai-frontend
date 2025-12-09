@@ -15,6 +15,8 @@ export interface Agent {
   wikipedia?: string
   /** Tracks where this agent is available (undefined = available to all) */
   tracks?: InternTrack[]
+  /** Whether this agent is designed for Kids mode */
+  isKidsAgent?: boolean
 }
 
 export interface ProjectLink {

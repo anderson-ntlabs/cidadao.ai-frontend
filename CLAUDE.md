@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-12-08
+**Last Updated**: 2025-12-09
 
 ---
 
@@ -193,7 +193,7 @@ Adapter    Adapter       ↓
 
 ### State Management (Zustand)
 
-Eight main stores in `store/`:
+Nine main stores in `store/`:
 
 - `chat-store.ts`: Chat sessions, messages, agents, investigations
   - Actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
@@ -205,12 +205,13 @@ Eight main stores in `store/`:
 - `voice-settings-store.ts`: Voice/TTS settings
 - `agora-chat-store.ts`: Ágora platform chat state (separate from main chat)
 - `celebration-store.ts`: Achievement celebration animations and triggers
+- `kids-store.ts`: Kids mode state (profiles, sessions, parental tracking)
 
 **Pattern**: Stores use Zustand with persist middleware for localStorage persistence.
 
 ### Agent System
 
-17 AI agents with Brazilian identities defined in `data/agents.ts`:
+19 AI agents with Brazilian identities defined in `data/agents.ts`:
 
 **Tier 1 - Operational (10)**:
 
@@ -224,6 +225,11 @@ Eight main stores in `store/`:
 - Machado de Assis (communication)
 - +2 more
 
+**Kids Mode Agents (2)**:
+
+- Monteiro Lobato (storytelling mentor for children)
+- Tarsila do Amaral (creative art mentor for children)
+
 **Tier 2-3**: Framework ready, implementation pending
 
 Each agent has:
@@ -236,6 +242,21 @@ Each agent has:
 ### Ágora Learning Platform
 
 Gamified learning platform at `/pt/agora/*` with XP system, badges, and learning tracks.
+
+**Full Documentation**: See `docs/agora/README.md` for comprehensive documentation including:
+
+| Category       | Document                                   | Description                                                 |
+| -------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| Fundamentos    | `01-fundamentos/visao-missao.md`           | Vision 2030, mission, values, personas                      |
+| Pedagogia      | `02-pedagogia/referencial-teorico.md`      | Learning theories (Piaget, Vygotsky, Kolb, Bloom)           |
+| Gamificação    | `03-gamificacao/xp-niveis.md`              | XP system, levels, ranks, formulas                          |
+| Gamificação    | `03-gamificacao/badges.md`                 | 13 implemented badges + proposals                           |
+| Trilhas        | `04-trilhas/sistema-trilhas.md`            | 5 learning tracks (Intro, Backend, Frontend, AI/ML, DevOps) |
+| Avaliação      | `05-avaliacao/sistema-avaliacao.md`        | Quizzes, exercises, code review, rubrics                    |
+| Arquitetura    | `06-arquitetura/visao-geral.md`            | Technical architecture, DB schema, Server Actions           |
+| Acessibilidade | `07-acessibilidade/guia-acessibilidade.md` | WCAG AAA, VLibras, checklists                               |
+| Roadmap        | `08-roadmap/features-propostas.md`         | 2025-2026 roadmap, proposed features                        |
+| API            | `09-api/integracao-api.md`                 | Supabase, GitHub, PostHog, authentication                   |
 
 **Auth Architecture** (`app/pt/agora/layout.tsx`):
 
@@ -730,9 +751,18 @@ Complete documentation in `/docs`:
 - `08-testing/`: Testing strategies, coverage
 - `09-deployment/`: Deployment guides
 - `10-reference/`: Migration guides, Renovate, tools
+- `agora/`: **Ágora Academy complete documentation** (11 docs, ~5.6k lines)
+  - Pedagogical foundations (Piaget, Vygotsky, Bloom)
+  - Gamification system (XP, levels, badges)
+  - Learning tracks and evaluation system
+  - Technical architecture and API integrations
+  - Accessibility guidelines and roadmap
 - `archive/`: Archived documentation
 
-**Entry point**: `/docs/README.md` (comprehensive index)
+**Entry points**:
+
+- `/docs/README.md` - Main project documentation index
+- `/docs/agora/README.md` - Ágora Academy documentation index
 
 ---
 

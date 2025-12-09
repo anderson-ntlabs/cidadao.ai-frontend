@@ -269,6 +269,37 @@ export const agents: Agent[] = [
     wikipedia: 'https://pt.wikipedia.org/wiki/Santos_Dumont',
     tracks: ['backend', 'devops', 'data'],
   },
+  // Kids Mode Agents
+  {
+    id: 'monteiro-lobato',
+    name: 'Monteiro Lobato',
+    role: {
+      pt: 'Contador de Histórias',
+      en: 'Storyteller',
+    },
+    description: {
+      pt: 'Criador do Sítio do Picapau Amarelo! Vou te contar histórias incríveis enquanto você aprende a programar. Junto com a Emília e o Visconde, vamos descobrir o mundo mágico do código!',
+      en: 'Creator of Sítio do Picapau Amarelo! I will tell you amazing stories while you learn to code. Together with Emília and Visconde, we will discover the magical world of code!',
+    },
+    image: '/agents/monteiro_lobato.jpg',
+    wikipedia: 'https://pt.wikipedia.org/wiki/Monteiro_Lobato',
+    isKidsAgent: true,
+  },
+  {
+    id: 'tarsila-amaral',
+    name: 'Tarsila do Amaral',
+    role: {
+      pt: 'Artista Criativa',
+      en: 'Creative Artist',
+    },
+    description: {
+      pt: 'Pintora do Abaporu e da Negra! Vou te ensinar a criar coisas lindas com cores, formas e muita imaginação. Programar é como pintar: você cria algo novo do zero!',
+      en: 'Painter of Abaporu and A Negra! I will teach you to create beautiful things with colors, shapes and lots of imagination. Coding is like painting: you create something new from scratch!',
+    },
+    image: '/agents/tarsila_a_musa.png',
+    wikipedia: 'https://pt.wikipedia.org/wiki/Tarsila_do_Amaral',
+    isKidsAgent: true,
+  },
 ]
 
 /**
@@ -277,6 +308,13 @@ export const agents: Agent[] = [
  */
 export const EDUCATIONAL_AGENT_IDS = ['santos-dumont', 'bobardi'] as const
 export type EducationalAgentId = (typeof EDUCATIONAL_AGENT_IDS)[number]
+
+/**
+ * Kids agent IDs for Agora Kids Mode
+ * These mentors are designed specifically for children
+ */
+export const KIDS_AGENT_IDS = ['monteiro-lobato', 'tarsila-amaral'] as const
+export type KidsAgentId = (typeof KIDS_AGENT_IDS)[number]
 
 /**
  * Get all educational agents for Agora Academy
@@ -324,4 +362,26 @@ export function getAgentsByTracks(userTracks: InternTrack[]): Agent[] {
  */
 export function getTrackExclusiveAgents(): Agent[] {
   return agents.filter((agent) => agent.tracks && agent.tracks.length > 0)
+}
+
+/**
+ * Get all Kids mode agents
+ * Returns only mentors designed for children
+ */
+export function getKidsAgents(): Agent[] {
+  return agents.filter((agent) => agent.isKidsAgent === true)
+}
+
+/**
+ * Check if an agent is a Kids mode mentor
+ */
+export function isKidsAgent(agentId: string): boolean {
+  return KIDS_AGENT_IDS.includes(agentId as KidsAgentId)
+}
+
+/**
+ * Get a Kids agent by ID
+ */
+export function getKidsAgentById(id: KidsAgentId): Agent | undefined {
+  return agents.find((agent) => agent.id === id && agent.isKidsAgent)
 }

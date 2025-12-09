@@ -181,6 +181,107 @@
     --academy-gradient-start: 43 89% 55%; /* Yellow */
     --academy-gradient-end: 24 100% 55%; /* Orange */
   }
+
+  /* ===========================================
+     KIDS MODE THEME
+     Vibrant, playful colors for children
+     Design: Monteiro Lobato + Tarsila do Amaral inspired
+     =========================================== */
+
+  .theme-kids {
+    /* Primary Colors - Vibrant and playful */
+    --background: 30 100% 97%; /* #FFF8F0 - Warm cream */
+    --foreground: 200 10% 20%; /* #2D3436 - Soft dark gray */
+    --card: 0 0% 100%;
+    --card-foreground: 200 10% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 10% 20%;
+    --primary: 0 73% 65%; /* #FF6B6B - Coral vibrante */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 172 59% 56%; /* #4ECDC4 - Turquesa */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 30 50% 92%;
+    --muted-foreground: 200 10% 40%;
+    --accent: 51 100% 71%; /* #FFE66D - Amarelo vivo */
+    --accent-foreground: 200 10% 20%;
+    --destructive: 0 73% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 30% 85%;
+    --input: 30 30% 85%;
+    --ring: 0 73% 65%;
+    --radius: 1.5rem; /* Extra rounded for kids */
+
+    /* Kids-specific colors */
+    --kids-coral: 0 73% 65%; /* #FF6B6B */
+    --kids-turquoise: 172 59% 56%; /* #4ECDC4 */
+    --kids-yellow: 51 100% 71%; /* #FFE66D */
+    --kids-cream: 30 100% 97%; /* #FFF8F0 */
+    --kids-purple: 270 60% 60%; /* #9B59B6 */
+    --kids-green: 150 60% 50%; /* #2ECC71 */
+    --kids-orange: 30 100% 60%; /* #FF9F43 */
+    --kids-pink: 340 80% 70%; /* #FF7979 */
+
+    /* Academy overrides for Kids */
+    --academy-bg: 30 100% 97%;
+    --academy-bg-secondary: 30 80% 94%;
+    --academy-card: 0 0% 100%;
+    --academy-card-hover: 30 60% 96%;
+    --academy-border: 30 40% 85%;
+    --academy-text: 200 10% 20%;
+    --academy-text-muted: 200 10% 45%;
+    --academy-accent: 0 73% 65%;
+    --academy-accent-hover: 0 73% 55%;
+    --academy-success: 150 60% 50%;
+    --academy-gradient-start: 0 73% 65%;
+    --academy-gradient-end: 172 59% 56%;
+  }
+
+  /* Kids theme dark mode */
+  .theme-kids.dark {
+    --background: 220 20% 15%;
+    --foreground: 30 100% 97%;
+    --card: 220 20% 18%;
+    --card-foreground: 30 100% 97%;
+    --popover: 220 20% 18%;
+    --popover-foreground: 30 100% 97%;
+    --primary: 0 73% 70%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 172 59% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 20% 25%;
+    --muted-foreground: 30 50% 70%;
+    --accent: 51 100% 75%;
+    --accent-foreground: 200 10% 15%;
+    --destructive: 0 73% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 25%;
+    --input: 220 20% 25%;
+    --ring: 0 73% 70%;
+
+    /* Kids dark mode colors */
+    --kids-coral: 0 73% 70%;
+    --kids-turquoise: 172 59% 60%;
+    --kids-yellow: 51 100% 75%;
+    --kids-cream: 30 60% 90%;
+    --kids-purple: 270 60% 65%;
+    --kids-green: 150 60% 55%;
+    --kids-orange: 30 100% 65%;
+    --kids-pink: 340 80% 75%;
+
+    /* Academy overrides for Kids dark */
+    --academy-bg: 220 20% 12%;
+    --academy-bg-secondary: 220 20% 15%;
+    --academy-card: 220 20% 18%;
+    --academy-card-hover: 220 20% 22%;
+    --academy-border: 220 20% 25%;
+    --academy-text: 30 100% 97%;
+    --academy-text-muted: 30 50% 70%;
+    --academy-accent: 0 73% 70%;
+    --academy-accent-hover: 0 73% 75%;
+    --academy-success: 150 60% 55%;
+    --academy-gradient-start: 0 73% 70%;
+    --academy-gradient-end: 172 59% 60%;
+  }
 }
 
 @layer base {
@@ -441,5 +542,147 @@
 
   .designer-signature:hover {
     opacity: 1;
+  }
+
+  /* ===========================================
+     KIDS MODE UTILITIES
+     Child-friendly styles and animations
+     =========================================== */
+
+  /* Kids Color Utilities */
+  .bg-kids-coral {
+    background-color: hsl(var(--kids-coral));
+  }
+
+  .bg-kids-turquoise {
+    background-color: hsl(var(--kids-turquoise));
+  }
+
+  .bg-kids-yellow {
+    background-color: hsl(var(--kids-yellow));
+  }
+
+  .bg-kids-cream {
+    background-color: hsl(var(--kids-cream));
+  }
+
+  .bg-kids-purple {
+    background-color: hsl(var(--kids-purple));
+  }
+
+  .bg-kids-green {
+    background-color: hsl(var(--kids-green));
+  }
+
+  .bg-kids-orange {
+    background-color: hsl(var(--kids-orange));
+  }
+
+  .bg-kids-pink {
+    background-color: hsl(var(--kids-pink));
+  }
+
+  .text-kids-coral {
+    color: hsl(var(--kids-coral));
+  }
+
+  .text-kids-turquoise {
+    color: hsl(var(--kids-turquoise));
+  }
+
+  .text-kids-yellow {
+    color: hsl(var(--kids-yellow));
+  }
+
+  .text-kids-purple {
+    color: hsl(var(--kids-purple));
+  }
+
+  .text-kids-green {
+    color: hsl(var(--kids-green));
+  }
+
+  .text-kids-orange {
+    color: hsl(var(--kids-orange));
+  }
+
+  /* Kids Typography */
+  .theme-kids .text-kids-heading {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .theme-kids .text-kids-body {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .theme-kids .text-kids-large {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  /* Kids Card Styles */
+  .kids-card {
+    background-color: hsl(var(--card));
+    border-radius: var(--radius);
+    border: 3px solid hsl(var(--border));
+    box-shadow:
+      0 4px 0 hsl(var(--border)),
+      0 8px 16px hsl(var(--border) / 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .kids-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 8px 0 hsl(var(--border)),
+      0 12px 24px hsl(var(--border) / 0.25);
+  }
+
+  /* Kids Button Styles */
+  .kids-button {
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 0.875rem 2rem;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 0 currentColor;
+    transition: all 0.15s ease;
+  }
+
+  .kids-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 currentColor;
+  }
+
+  .kids-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 currentColor;
+  }
+
+  /* Kids Gradient */
+  .kids-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--kids-coral)) 0%,
+      hsl(var(--kids-turquoise)) 50%,
+      hsl(var(--kids-yellow)) 100%
+    );
+  }
+
+  .kids-gradient-text {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--kids-coral)) 0%,
+      hsl(var(--kids-purple)) 50%,
+      hsl(var(--kids-turquoise)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
