@@ -27,6 +27,9 @@ import { KidsVideo } from '@/components/kids/kids-video-card'
  * 9. Animations
  * 10. Complete project
  */
+// Helper to generate YouTube thumbnail URL
+const ytThumb = (videoId: string) => `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+
 export const KIDS_VIDEOS: KidsVideo[] = [
   // Módulo 1: Introdução
   {
@@ -36,7 +39,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Descubra o que os programadores fazem e como eles criam jogos, apps e sites! Uma introdução divertida ao mundo da programação.',
     youtubeId: 'tRcr4vtV-4o',
     duration: '10:30',
-    thumbnail: '',
+    thumbnail: ytThumb('tRcr4vtV-4o'),
     order: 1,
   },
   {
@@ -46,7 +49,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Aprenda a pensar como um computador! Dividir problemas grandes em pedacinhos pequenos é o segredo dos programadores.',
     youtubeId: 'oDsY_cKufMk',
     duration: '8:45',
-    thumbnail: '',
+    thumbnail: ytThumb('oDsY_cKufMk'),
     order: 2,
   },
 
@@ -58,7 +61,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'O que são algoritmos? É como fazer uma receita de bolo! Passo a passo, o computador segue suas instruções.',
     youtubeId: 'Aw3yHB5EYlY',
     duration: '7:20',
-    thumbnail: '',
+    thumbnail: ytThumb('Aw3yHB5EYlY'),
     order: 3,
   },
   {
@@ -68,7 +71,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Aprenda a colocar as coisas na ordem certa! Sequências são super importantes na programação.',
     youtubeId: 'vKwNP3b6kYk',
     duration: '9:15',
-    thumbnail: '',
+    thumbnail: ytThumb('vKwNP3b6kYk'),
     order: 4,
   },
 
@@ -80,7 +83,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Hora de colocar a mão na massa! Vamos criar seu primeiro programa usando Scratch, a linguagem visual do MIT.',
     youtubeId: '7oBJz-mPwYs',
     duration: '15:00',
-    thumbnail: '',
+    thumbnail: ytThumb('7oBJz-mPwYs'),
     order: 5,
   },
   {
@@ -90,7 +93,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Faça seus personagens andarem, pularem e dançarem! Aprenda os blocos de movimento do Scratch.',
     youtubeId: 'hSgLSbQ_a9E',
     duration: '12:00',
-    thumbnail: '',
+    thumbnail: ytThumb('hSgLSbQ_a9E'),
     order: 6,
   },
 
@@ -102,7 +105,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Aprenda lógica jogando! Desafios divertidos que vão treinar seu cérebro de programador.',
     youtubeId: '9kq3iyLz7xQ',
     duration: '12:15',
-    thumbnail: '',
+    thumbnail: ytThumb('9kq3iyLz7xQ'),
     order: 7,
   },
   {
@@ -112,7 +115,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Variáveis são como caixinhas mágicas que guardam informações! Aprenda a usar esse superpoder.',
     youtubeId: 'KNUbPRj9TGM',
     duration: '9:00',
-    thumbnail: '',
+    thumbnail: ytThumb('KNUbPRj9TGM'),
     order: 8,
   },
 
@@ -124,7 +127,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Por que fazer 100 vezes se o computador pode repetir sozinho? Aprenda o poder dos loops!',
     youtubeId: 'pTB0EiLXUC8',
     duration: '11:30',
-    thumbnail: '',
+    thumbnail: ytThumb('pTB0EiLXUC8'),
     order: 9,
   },
   {
@@ -134,7 +137,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Ensine o computador a tomar decisões! Se acontecer isso, faça aquilo. A lógica das condições.',
     youtubeId: 'Rw0pZS4Wn8A',
     duration: '10:00',
-    thumbnail: '',
+    thumbnail: ytThumb('Rw0pZS4Wn8A'),
     order: 10,
   },
 
@@ -146,7 +149,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Transforme suas ideias em animações! Faça personagens falarem, dançarem e contarem histórias.',
     youtubeId: 'JfGJRJf0jZI',
     duration: '14:00',
-    thumbnail: '',
+    thumbnail: ytThumb('JfGJRJf0jZI'),
     order: 11,
   },
   {
@@ -156,7 +159,7 @@ export const KIDS_VIDEOS: KidsVideo[] = [
       'Chegou a hora! Use tudo que aprendeu para criar um jogo completo do zero. Você consegue!',
     youtubeId: 'N2RTjWQvn_8',
     duration: '20:00',
-    thumbnail: '',
+    thumbnail: ytThumb('N2RTjWQvn_8'),
     order: 12,
   },
 ]

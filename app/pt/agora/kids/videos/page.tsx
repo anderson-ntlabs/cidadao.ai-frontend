@@ -12,6 +12,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useRequireKidsMode, useKids } from '@/hooks/use-kids'
 import { KIDS_VIDEOS, TOTAL_KIDS_VIDEOS } from '@/data/kids-videos'
 import { KidsVideo } from '@/components/kids'
@@ -33,6 +34,7 @@ import {
 import { trackKidsVideoWatched, calculateKidsTelemetry } from '@/lib/analytics/kids-tracker'
 
 export default function KidsVideosPage() {
+  const router = useRouter()
   const { isReady, isLoading } = useRequireKidsMode()
   const { trackVideo } = useKids()
 
@@ -48,7 +50,8 @@ export default function KidsVideosPage() {
     const durationSeconds = (minutes || 0) * 60 + (seconds || 0)
     trackKidsVideoWatched(video.id, video.title, durationSeconds)
     setTimeout(() => setTelemetry(calculateKidsTelemetry()), 100)
-    window.open(`https://www.youtube.com/watch?v=${video.youtubeId}`, '_blank')
+    // Navigate to video player page instead of opening new tab
+    router.push(`/pt/agora/kids/videos/${video.id}`)
   }
 
   const progress = Math.round((telemetry.videosWatched / TOTAL_KIDS_VIDEOS) * 100)

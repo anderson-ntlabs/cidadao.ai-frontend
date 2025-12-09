@@ -104,7 +104,8 @@ export default function KidsDashboardPage() {
     setTimeout(() => {
       setTelemetry(calculateKidsTelemetry())
     }, 100)
-    window.open(`https://www.youtube.com/watch?v=${video.youtubeId}`, '_blank')
+    // Navigate to video player page instead of opening new tab
+    router.push(`/pt/agora/kids/videos/${video.id}`)
   }
 
   // Loading state
