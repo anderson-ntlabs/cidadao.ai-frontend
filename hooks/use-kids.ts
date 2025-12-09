@@ -30,14 +30,14 @@ export interface UseKidsReturn {
 
   // Child info
   childName: string | null
-  childAvatar: 'lobato' | 'tarsila' | null
+  childAvatar: string | null
 
   // Actions
   enableKidsMode: (
     parentName: string,
     parentEmail: string,
     childName: string,
-    avatar?: 'lobato' | 'tarsila',
+    avatar?: string,
     contractId?: string
   ) => Promise<boolean>
   disableKidsMode: () => Promise<boolean>
@@ -131,7 +131,7 @@ export function useKids(): UseKidsReturn {
       parentName: string,
       parentEmail: string,
       childName: string,
-      avatar: 'lobato' | 'tarsila' = 'lobato',
+      avatar: string = 'monica',
       contractId?: string
     ): Promise<boolean> => {
       if (!user?.id) {

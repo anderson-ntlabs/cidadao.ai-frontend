@@ -13,6 +13,9 @@ import { persist } from 'zustand/middleware'
 import { createClient } from '@/lib/supabase/client'
 import { logger } from '@/lib/logger'
 
+// Kids avatar type - Brazilian cartoon characters
+export type KidsAvatarType = 'monica' | 'cocorico' | 'ze_carioca' | 'jorel' | 'luluzinha' | string
+
 // Types
 export interface KidsProfile {
   id: string
@@ -20,7 +23,7 @@ export interface KidsProfile {
   parentName: string
   parentEmail: string
   childName: string
-  childAvatar: 'lobato' | 'tarsila'
+  childAvatar: KidsAvatarType
   contractId: string | null
   contractVersion: string
   contractAcceptedAt: string | null
@@ -70,7 +73,7 @@ interface KidsState {
     parentName: string,
     parentEmail: string,
     childName: string,
-    avatar?: 'lobato' | 'tarsila',
+    avatar?: KidsAvatarType,
     contractId?: string
   ) => Promise<boolean>
   disableKidsMode: (parentUserId: string) => Promise<boolean>
@@ -126,7 +129,7 @@ export const useKidsStore = create<KidsState>()(
         parentName,
         parentEmail,
         childName,
-        avatar = 'lobato',
+        avatar = 'monica',
         contractId
       ) => {
         const supabase = createClient()

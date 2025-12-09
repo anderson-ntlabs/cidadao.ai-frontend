@@ -52,7 +52,7 @@ export default function KidsEntryPage() {
   const [childName, setChildName] = useState('')
   const [parentName, setParentName] = useState('')
   const [parentEmail, setParentEmail] = useState('')
-  const [selectedAvatar, setSelectedAvatar] = useState<'lobato' | 'tarsila'>('lobato')
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('monica')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
@@ -60,16 +60,32 @@ export default function KidsEntryPage() {
   const [contractId, setContractId] = useState<string | null>(null)
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
 
+  // Kids avatar options - Brazilian characters from /public/kids
   const avatars = [
     {
-      id: 'lobato' as const,
-      name: 'Monteiro Lobato',
-      image: '/agents/monteiro_lobato.jpg',
+      id: 'monica' as const,
+      name: 'Mônica',
+      image: '/kids/monica.jpg',
     },
     {
-      id: 'tarsila' as const,
-      name: 'Tarsila do Amaral',
-      image: '/agents/tarsila_a_musa.png',
+      id: 'cocorico' as const,
+      name: 'Cocoricó',
+      image: '/kids/cocorico.jpg',
+    },
+    {
+      id: 'ze_carioca' as const,
+      name: 'Zé Carioca',
+      image: '/kids/ze_carioca.png',
+    },
+    {
+      id: 'jorel' as const,
+      name: 'Irmão do Jorel',
+      image: '/kids/jorel.webp',
+    },
+    {
+      id: 'luluzinha' as const,
+      name: 'Luluzinha',
+      image: '/kids/luluzinha.webp',
     },
   ]
 

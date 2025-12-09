@@ -34,6 +34,8 @@ import {
   Clock,
   BookOpen,
   Gamepad2,
+  Shield,
+  KeyRound,
 } from 'lucide-react'
 import {
   calculateKidsTelemetry,
@@ -42,6 +44,23 @@ import {
 } from '@/lib/analytics/kids-tracker'
 import { calculateKidsLevel } from '@/lib/agora/kids-certificate-requirements'
 import type { KidsTelemetryData } from '@/lib/agora/kids-certificate-requirements'
+
+// Map avatar IDs to image paths (Brazilian cartoon characters)
+const AVATAR_IMAGES: Record<string, string> = {
+  monica: '/kids/monica.jpg',
+  cocorico: '/kids/cocorico.jpg',
+  ze_carioca: '/kids/ze_carioca.png',
+  jorel: '/kids/jorel.webp',
+  luluzinha: '/kids/luluzinha.webp',
+  // Fallback for legacy avatars
+  lobato: '/agents/monteiro-lobato.png',
+  tarsila: '/agents/tarsila-amaral.png',
+}
+
+function getAvatarImage(avatarId: string | null): string {
+  if (!avatarId) return AVATAR_IMAGES.monica
+  return AVATAR_IMAGES[avatarId] || AVATAR_IMAGES.monica
+}
 
 export default function KidsDashboardPage() {
   const router = useRouter()
@@ -138,23 +157,13 @@ export default function KidsDashboardPage() {
             <div className="relative">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-kids-turquoise to-kids-coral p-1 shadow-lg">
                 <div className="w-full h-full rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                  {childAvatar === 'tarsila' ? (
-                    <Image
-                      src="/agents/tarsila-amaral.png"
-                      alt="Avatar"
-                      width={80}
-                      height={80}
-                      className="object-cover"
-                    />
-                  ) : (
-                    <Image
-                      src="/agents/monteiro-lobato.png"
-                      alt="Avatar"
-                      width={80}
-                      height={80}
-                      className="object-cover"
-                    />
-                  )}
+                  <Image
+                    src={getAvatarImage(childAvatar)}
+                    alt="Avatar"
+                    width={80}
+                    height={80}
+                    className="object-cover"
+                  />
                 </div>
               </div>
               {certificateInfo?.currentLevel && (
@@ -522,6 +531,29 @@ export default function KidsDashboardPage() {
               </div>
             </GlassCard>
           )}
+
+          {/* Parent Dashboard Access Card */}
+          <GlassCard className="p-5 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-600">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              </div>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Área dos Pais
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              Responsáveis podem acompanhar o progresso e atividades através do código de acesso.
+            </p>
+            <Link
+              href="/pt/agora/pais"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium transition-colors"
+            >
+              <KeyRound className="w-4 h-4" />
+              Acessar Dashboard dos Pais
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </GlassCard>
         </div>
       </div>
 
