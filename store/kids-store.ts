@@ -61,6 +61,11 @@ interface KidsState {
   sessionAgents: string[]
   sessionStartTime: number | null
 
+  // Operation guards to prevent duplicate calls
+  _isStartingSession: boolean
+  _isEndingSession: boolean
+  _isLoadingProfile: boolean
+
   // Actions
   setKidsMode: (enabled: boolean) => void
   setKidsProfile: (profile: KidsProfile | null) => void
@@ -111,6 +116,9 @@ const initialState = {
   sessionVideos: [],
   sessionAgents: [],
   sessionStartTime: null,
+  _isStartingSession: false,
+  _isEndingSession: false,
+  _isLoadingProfile: false,
 }
 
 export const useKidsStore = create<KidsState>()(
@@ -263,8 +271,14 @@ export const useKidsStore = create<KidsState>()(
 
       // Load existing profile
       loadKidsProfile: async (parentUserId) => {
+        // Guard against duplicate calls
+        if (get()._isLoadingProfile) {
+          logger.debug('[Kids Store] Already loading profile, skipping')
+          return null
+        }
+
         const supabase = createClient()
-        set({ isLoading: true })
+        set({ isLoading: true, _isLoadingProfile: true })
 
         logger.info('[Kids Store] Loading kids profile', { parentUserId })
 
@@ -279,14 +293,24 @@ export const useKidsStore = create<KidsState>()(
 
           if (error) {
             logger.error('[Kids Store] Error loading kids profile', { error, parentUserId })
-            set({ isKidsMode: false, kidsProfile: null, isLoading: false })
+            set({
+              isKidsMode: false,
+              kidsProfile: null,
+              isLoading: false,
+              _isLoadingProfile: false,
+            })
             return null
           }
 
           if (!data) {
             // No profile exists - this is normal for new users
             logger.info('[Kids Store] No kids profile found', { parentUserId })
-            set({ isKidsMode: false, kidsProfile: null, isLoading: false })
+            set({
+              isKidsMode: false,
+              kidsProfile: null,
+              isLoading: false,
+              _isLoadingProfile: false,
+            })
             return null
           }
 
@@ -308,11 +332,16 @@ export const useKidsStore = create<KidsState>()(
             profileId: profile.id,
             childName: profile.childName,
           })
-          set({ kidsProfile: profile, isKidsMode: true, isLoading: false })
+          set({
+            kidsProfile: profile,
+            isKidsMode: true,
+            isLoading: false,
+            _isLoadingProfile: false,
+          })
           return profile
         } catch (error) {
           logger.error('[Kids Store] Failed to load kids profile', { error })
-          set({ isLoading: false })
+          set({ isLoading: false, _isLoadingProfile: false })
           return null
         }
       },
@@ -354,7 +383,7 @@ export const useKidsStore = create<KidsState>()(
 
       // Start a new session
       startKidsSession: async () => {
-        const { kidsProfile, currentSession } = get()
+        const { kidsProfile, currentSession, _isStartingSession } = get()
 
         if (!kidsProfile) {
           logger.warn('Cannot start session without kids profile')
@@ -367,6 +396,13 @@ export const useKidsStore = create<KidsState>()(
           return
         }
 
+        // Guard against duplicate calls
+        if (_isStartingSession) {
+          logger.debug('[Kids Store] Already starting session, skipping')
+          return
+        }
+
+        set({ _isStartingSession: true })
         const supabase = createClient()
 
         try {
@@ -395,23 +431,33 @@ export const useKidsStore = create<KidsState>()(
             sessionVideos: [],
             sessionAgents: [],
             sessionStartTime: Date.now(),
+            _isStartingSession: false,
           })
 
           logger.info('Kids session started', { sessionId: session.id })
         } catch (error) {
           logger.error('Failed to start kids session', { error })
+          set({ _isStartingSession: false })
         }
       },
 
       // End current session
       endKidsSession: async () => {
-        const { currentSession, sessionVideos, sessionAgents, sessionStartTime } = get()
+        const { currentSession, sessionVideos, sessionAgents, sessionStartTime, _isEndingSession } =
+          get()
 
         if (!currentSession) {
           logger.debug('No active session to end')
           return
         }
 
+        // Guard against duplicate calls
+        if (_isEndingSession) {
+          logger.debug('[Kids Store] Already ending session, skipping')
+          return
+        }
+
+        set({ _isEndingSession: true })
         const supabase = createClient()
         const durationMinutes = sessionStartTime
           ? Math.round((Date.now() - sessionStartTime) / 60000)
@@ -435,6 +481,7 @@ export const useKidsStore = create<KidsState>()(
             sessionVideos: [],
             sessionAgents: [],
             sessionStartTime: null,
+            _isEndingSession: false,
           })
 
           logger.info('Kids session ended', {
@@ -445,6 +492,7 @@ export const useKidsStore = create<KidsState>()(
           })
         } catch (error) {
           logger.error('Failed to end kids session', { error })
+          set({ _isEndingSession: false })
         }
       },
 

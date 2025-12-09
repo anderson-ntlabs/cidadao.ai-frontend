@@ -11,7 +11,7 @@
 
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useKidsStore, KidsProfile, KidsDailyStats } from '@/store/kids-store'
 import { useAgora } from '@/hooks/use-agora'
 import { logger } from '@/lib/logger'
@@ -85,6 +85,11 @@ export interface UseKidsReturn {
 export function useKids(): UseKidsReturn {
   const { user } = useAgora()
 
+  // Refs to prevent infinite loops and duplicate calls
+  const isStartingSession = useRef(false)
+  const hasLoadedProfile = useRef(false)
+  const lastUserId = useRef<string | null>(null)
+
   const {
     isKidsMode,
     kidsProfile,
@@ -104,28 +109,56 @@ export function useKids(): UseKidsReturn {
     getDailyStats,
   } = useKidsStore()
 
-  // Load kids profile when user changes
+  // Load kids profile when user changes (only once per user)
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && user.id !== lastUserId.current) {
+      lastUserId.current = user.id
+      hasLoadedProfile.current = false
+    }
+
+    if (user?.id && !hasLoadedProfile.current && !isLoading) {
+      hasLoadedProfile.current = true
       loadKidsProfile(user.id)
     }
-  }, [user?.id, loadKidsProfile])
+  }, [user?.id, isLoading, loadKidsProfile])
 
-  // Auto-start session when entering kids mode
+  // Auto-start session when entering kids mode (with guard against duplicate calls)
   useEffect(() => {
-    if (isKidsMode && kidsProfile && !currentSession) {
-      startKidsSession()
+    const shouldStartSession =
+      isKidsMode && kidsProfile && !currentSession && !isStartingSession.current
+
+    if (shouldStartSession) {
+      isStartingSession.current = true
+      startKidsSession().finally(() => {
+        // Reset flag after a delay to prevent rapid re-triggers
+        setTimeout(() => {
+          isStartingSession.current = false
+        }, 1000)
+      })
     }
   }, [isKidsMode, kidsProfile, currentSession, startKidsSession])
 
-  // Auto-end session on unmount or mode change
+  // Reset starting flag when session is created
   useEffect(() => {
+    if (currentSession) {
+      isStartingSession.current = false
+    }
+  }, [currentSession])
+
+  // Auto-end session on unmount (but NOT on every currentSession change)
+  useEffect(() => {
+    // Capture session ID at effect creation time
+    const sessionId = currentSession?.id
+
     return () => {
-      if (currentSession) {
+      // Only end session on unmount if we had an active session
+      if (sessionId) {
         endKidsSession()
       }
     }
-  }, [currentSession, endKidsSession])
+    // Intentionally not including currentSession in deps to prevent cleanup on every change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Enable kids mode
   const enableKidsMode = useCallback(
