@@ -34,9 +34,11 @@ export interface UseKidsReturn {
 
   // Actions
   enableKidsMode: (
-    childName: string,
+    parentName: string,
     parentEmail: string,
-    avatar?: 'lobato' | 'tarsila'
+    childName: string,
+    avatar?: 'lobato' | 'tarsila',
+    contractId?: string
   ) => Promise<boolean>
   disableKidsMode: () => Promise<boolean>
   startSession: () => Promise<void>
@@ -126,16 +128,18 @@ export function useKids(): UseKidsReturn {
   // Enable kids mode
   const enableKidsMode = useCallback(
     async (
-      childName: string,
+      parentName: string,
       parentEmail: string,
-      avatar: 'lobato' | 'tarsila' = 'lobato'
+      childName: string,
+      avatar: 'lobato' | 'tarsila' = 'lobato',
+      contractId?: string
     ): Promise<boolean> => {
       if (!user?.id) {
         logger.warn('Cannot enable kids mode without authenticated user')
         return false
       }
 
-      return storeEnableKidsMode(user.id, childName, parentEmail, avatar)
+      return storeEnableKidsMode(user.id, parentName, parentEmail, childName, avatar, contractId)
     },
     [user?.id, storeEnableKidsMode]
   )
@@ -202,7 +206,7 @@ export function useKids(): UseKidsReturn {
     isSessionActive: !!currentSession,
 
     // Parent info
-    parentName: user?.name || null,
+    parentName: kidsProfile?.parentName || null,
     parentEmail: kidsProfile?.parentEmail || null,
 
     // Child info

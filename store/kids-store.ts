@@ -17,9 +17,13 @@ import { logger } from '@/lib/logger'
 export interface KidsProfile {
   id: string
   parentUserId: string
+  parentName: string
+  parentEmail: string
   childName: string
   childAvatar: 'lobato' | 'tarsila'
-  parentEmail: string
+  contractId: string | null
+  contractVersion: string
+  contractAcceptedAt: string | null
   createdAt: string
   isActive: boolean
 }
@@ -63,9 +67,11 @@ interface KidsState {
   // Profile management
   enableKidsMode: (
     parentUserId: string,
-    childName: string,
+    parentName: string,
     parentEmail: string,
-    avatar?: 'lobato' | 'tarsila'
+    childName: string,
+    avatar?: 'lobato' | 'tarsila',
+    contractId?: string
   ) => Promise<boolean>
   disableKidsMode: (parentUserId: string) => Promise<boolean>
   loadKidsProfile: (parentUserId: string) => Promise<KidsProfile | null>
@@ -115,7 +121,14 @@ export const useKidsStore = create<KidsState>()(
       setError: (error) => set({ error }),
 
       // Enable Kids Mode
-      enableKidsMode: async (parentUserId, childName, parentEmail, avatar = 'lobato') => {
+      enableKidsMode: async (
+        parentUserId,
+        parentName,
+        parentEmail,
+        childName,
+        avatar = 'lobato',
+        contractId
+      ) => {
         const supabase = createClient()
         set({ isLoading: true, error: null })
 
@@ -133,9 +146,14 @@ export const useKidsStore = create<KidsState>()(
               .from('agora_kids_profiles')
               .update({
                 is_active: true,
-                child_name: childName,
+                parent_name: parentName,
                 parent_email: parentEmail,
+                child_name: childName,
                 child_avatar: avatar,
+                contract_id: contractId || existing.contract_id,
+                contract_accepted_at: contractId
+                  ? new Date().toISOString()
+                  : existing.contract_accepted_at,
               })
               .eq('parent_user_id', parentUserId)
               .select()
@@ -146,9 +164,13 @@ export const useKidsStore = create<KidsState>()(
             const profile: KidsProfile = {
               id: data.id,
               parentUserId: data.parent_user_id,
+              parentName: data.parent_name,
+              parentEmail: data.parent_email,
               childName: data.child_name,
               childAvatar: data.child_avatar,
-              parentEmail: data.parent_email,
+              contractId: data.contract_id,
+              contractVersion: data.contract_version,
+              contractAcceptedAt: data.contract_accepted_at,
               createdAt: data.created_at,
               isActive: data.is_active,
             }
@@ -163,9 +185,12 @@ export const useKidsStore = create<KidsState>()(
             .from('agora_kids_profiles')
             .insert({
               parent_user_id: parentUserId,
-              child_name: childName,
+              parent_name: parentName,
               parent_email: parentEmail,
+              child_name: childName,
               child_avatar: avatar,
+              contract_id: contractId,
+              contract_accepted_at: contractId ? new Date().toISOString() : null,
             })
             .select()
             .single()
@@ -175,9 +200,13 @@ export const useKidsStore = create<KidsState>()(
           const profile: KidsProfile = {
             id: data.id,
             parentUserId: data.parent_user_id,
+            parentName: data.parent_name,
+            parentEmail: data.parent_email,
             childName: data.child_name,
             childAvatar: data.child_avatar,
-            parentEmail: data.parent_email,
+            contractId: data.contract_id,
+            contractVersion: data.contract_version,
+            contractAcceptedAt: data.contract_accepted_at,
             createdAt: data.created_at,
             isActive: data.is_active,
           }
@@ -248,9 +277,13 @@ export const useKidsStore = create<KidsState>()(
           const profile: KidsProfile = {
             id: data.id,
             parentUserId: data.parent_user_id,
+            parentName: data.parent_name,
+            parentEmail: data.parent_email,
             childName: data.child_name,
             childAvatar: data.child_avatar,
-            parentEmail: data.parent_email,
+            contractId: data.contract_id,
+            contractVersion: data.contract_version,
+            contractAcceptedAt: data.contract_accepted_at,
             createdAt: data.created_at,
             isActive: data.is_active,
           }

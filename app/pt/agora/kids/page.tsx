@@ -100,7 +100,13 @@ export default function KidsEntryPage() {
 
     try {
       // Enable kids mode (this will create the profile)
-      const success = await enableKidsMode(childName, parentEmail, selectedAvatar)
+      const success = await enableKidsMode(
+        parentName,
+        parentEmail,
+        childName,
+        selectedAvatar,
+        acceptedContractId
+      )
 
       if (success) {
         // Generate unique parental code

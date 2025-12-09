@@ -7,9 +7,13 @@
 CREATE TABLE IF NOT EXISTS agora_kids_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   parent_user_id UUID REFERENCES auth.users NOT NULL,
+  parent_name TEXT NOT NULL,
+  parent_email TEXT NOT NULL,
   child_name TEXT NOT NULL,
   child_avatar TEXT DEFAULT 'lobato',
-  parent_email TEXT NOT NULL,
+  contract_id TEXT,                          -- ID do contrato PDF aceito
+  contract_version TEXT DEFAULT 'KIDS-v1.0-2025',
+  contract_accepted_at TIMESTAMPTZ,          -- Data/hora do aceite
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   is_active BOOLEAN DEFAULT TRUE,
@@ -28,14 +32,15 @@ CREATE TABLE IF NOT EXISTS agora_kids_sessions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Códigos de acesso parental
+-- Códigos de acesso parental (permanentes, não expiram)
 CREATE TABLE IF NOT EXISTS agora_parental_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   parent_user_id UUID REFERENCES auth.users NOT NULL,
   code TEXT NOT NULL UNIQUE,
+  code_hash TEXT,                             -- Hash do código para verificação segura
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '24 hours',
-  used_at TIMESTAMPTZ
+  last_used_at TIMESTAMPTZ,                   -- Última vez que foi usado (não expira)
+  UNIQUE(parent_user_id)                      -- Um código por pai
 );
 
 -- Índices para performance
@@ -44,7 +49,6 @@ CREATE INDEX IF NOT EXISTS idx_kids_sessions_profile ON agora_kids_sessions(kids
 CREATE INDEX IF NOT EXISTS idx_kids_sessions_date ON agora_kids_sessions(started_at);
 CREATE INDEX IF NOT EXISTS idx_parental_codes_parent ON agora_parental_codes(parent_user_id);
 CREATE INDEX IF NOT EXISTS idx_parental_codes_code ON agora_parental_codes(code);
-CREATE INDEX IF NOT EXISTS idx_parental_codes_expires ON agora_parental_codes(expires_at);
 
 -- RLS Policies
 ALTER TABLE agora_kids_profiles ENABLE ROW LEVEL SECURITY;
@@ -138,24 +142,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Função para validar código parental
+-- Função para validar código parental (códigos não expiram)
 CREATE OR REPLACE FUNCTION validate_parental_code(p_code TEXT)
 RETURNS TABLE (
   is_valid BOOLEAN,
   parent_user_id UUID,
   kids_profile_id UUID,
-  child_name TEXT
+  child_name TEXT,
+  parent_name TEXT
 ) AS $$
 BEGIN
+  -- Atualiza last_used_at quando código é usado
+  UPDATE agora_parental_codes
+  SET last_used_at = NOW()
+  WHERE code = p_code;
+
   RETURN QUERY
   SELECT
-    CASE
-      WHEN pc.expires_at > NOW() AND pc.used_at IS NULL THEN TRUE
-      ELSE FALSE
-    END as is_valid,
+    TRUE as is_valid,
     pc.parent_user_id,
     kp.id as kids_profile_id,
-    kp.child_name
+    kp.child_name,
+    kp.parent_name
   FROM agora_parental_codes pc
   LEFT JOIN agora_kids_profiles kp ON kp.parent_user_id = pc.parent_user_id
   WHERE pc.code = p_code;
@@ -203,10 +211,10 @@ CREATE TRIGGER trigger_update_kids_profile_updated_at
   EXECUTE FUNCTION update_kids_profile_updated_at();
 
 -- Comentários para documentação
-COMMENT ON TABLE agora_kids_profiles IS 'Perfis de modo Kids vinculados a contas de pais';
+COMMENT ON TABLE agora_kids_profiles IS 'Perfis de modo Kids com consentimento parental e contrato aceito';
 COMMENT ON TABLE agora_kids_sessions IS 'Sessões de uso no modo Kids para relatórios parentais';
-COMMENT ON TABLE agora_parental_codes IS 'Códigos de acesso temporários para dashboard parental';
+COMMENT ON TABLE agora_parental_codes IS 'Códigos de acesso permanentes para dashboard parental (único por pai)';
 COMMENT ON FUNCTION generate_parental_code() IS 'Gera código alfanumérico de 6 caracteres';
-COMMENT ON FUNCTION create_parental_access_code(UUID) IS 'Cria novo código de acesso parental';
-COMMENT ON FUNCTION validate_parental_code(TEXT) IS 'Valida código e retorna dados do perfil Kids';
-COMMENT ON FUNCTION get_kids_daily_stats(UUID, DATE) IS 'Retorna estatísticas diárias para relatório';
+COMMENT ON FUNCTION create_parental_access_code(UUID) IS 'Cria código de acesso parental único e permanente';
+COMMENT ON FUNCTION validate_parental_code(TEXT) IS 'Valida código e retorna dados do perfil Kids (atualiza last_used_at)';
+COMMENT ON FUNCTION get_kids_daily_stats(UUID, DATE) IS 'Retorna estatísticas diárias para relatório parental';
