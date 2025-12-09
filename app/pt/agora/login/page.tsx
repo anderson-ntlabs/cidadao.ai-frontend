@@ -11,17 +11,17 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
-import { Github, Mail, GraduationCap, Sparkles, Loader2, Baby } from 'lucide-react'
+import { Github, Mail, GraduationCap, Sparkles, Loader2, Baby, CheckCircle } from 'lucide-react'
 
 /**
  * Ágora Login Page
  *
  * OAuth login with GitHub and Google
- * No domain restrictions - open to all developers
- * Random background selection from available SVGs
+ * Mode selector: Ágora (adult) or Kids (children)
+ * OAuth redirect changes based on selected mode
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-07
+ * Updated: 2025-12-09
  */
 
 // Available background images for random selection
@@ -36,6 +36,17 @@ const BACKGROUND_IMAGES = [
   '/agora/cidadao-slide-06.png',
 ]
 
+// Kids mascot images for rotation
+const KIDS_IMAGES = [
+  '/kids/monica.jpg',
+  '/kids/cocorico.jpg',
+  '/kids/jorel.webp',
+  '/kids/luluzinha.webp',
+  '/kids/ze_carioca.png',
+]
+
+type LoginMode = 'agora' | 'kids'
+
 export default function AgoraLoginPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -44,6 +55,8 @@ export default function AgoraLoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [loginMode, setLoginMode] = useState<LoginMode>('agora')
+  const [kidsImageIndex, setKidsImageIndex] = useState(0)
 
   // Check auth status on mount
   useEffect(() => {
@@ -62,7 +75,13 @@ export default function AgoraLoginPage() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user)
       if (event === 'SIGNED_IN' && session?.user) {
-        router.replace('/pt/agora')
+        // Redirect based on stored mode preference
+        const storedMode = sessionStorage.getItem('login_mode')
+        if (storedMode === 'kids') {
+          router.replace('/pt/agora/kids')
+        } else {
+          router.replace('/pt/agora')
+        }
       }
     })
 
@@ -75,20 +94,38 @@ export default function AgoraLoginPage() {
     setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
   }, [])
 
+  // Rotate kids images every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setKidsImageIndex((prev) => (prev + 1) % KIDS_IMAGES.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
   // Redirect authenticated users to dashboard
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      router.replace('/pt/agora')
+      const storedMode = sessionStorage.getItem('login_mode')
+      if (storedMode === 'kids') {
+        router.replace('/pt/agora/kids')
+      } else {
+        router.replace('/pt/agora')
+      }
     }
   }, [isAuthenticated, isLoading, router])
 
   const handleLogin = async (provider: 'github' | 'google') => {
     setIsLoggingIn(provider)
+
+    // Store mode preference before OAuth redirect
+    sessionStorage.setItem('login_mode', loginMode)
+
     try {
+      const nextPath = loginMode === 'kids' ? '/pt/agora/kids' : '/pt/agora'
       const redirectTo =
         typeof window !== 'undefined'
-          ? `${window.location.origin}/auth/callback?next=/pt/agora`
-          : '/auth/callback?next=/pt/agora'
+          ? `${window.location.origin}/auth/callback?next=${nextPath}`
+          : `/auth/callback?next=${nextPath}`
 
       await supabase.auth.signInWithOAuth({
         provider,
@@ -148,20 +185,127 @@ export default function AgoraLoginPage() {
       )}
 
       <div className="w-full max-w-md relative z-10">
-        {/* Header */}
+        {/* Header - changes based on mode */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-3xl academy-gradient flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <GraduationCap className="w-10 h-10 text-white" />
+          <div
+            className={cn(
+              'w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl transition-all duration-500',
+              loginMode === 'kids'
+                ? 'bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4]'
+                : 'academy-gradient'
+            )}
+          >
+            {loginMode === 'kids' ? (
+              <Baby className="w-10 h-10 text-white" />
+            ) : (
+              <GraduationCap className="w-10 h-10 text-white" />
+            )}
           </div>
-          <h1 className="text-3xl font-bold academy-text mb-2">Ágora Cidadão.AI</h1>
+          <h1 className="text-3xl font-bold academy-text mb-2">
+            {loginMode === 'kids' ? 'Área Kids' : 'Ágora Cidadão.AI'}
+          </h1>
           <p className="academy-text-muted">
-            Plataforma aberta de aprendizado em IA e desenvolvimento
+            {loginMode === 'kids'
+              ? 'Aprendizado seguro e divertido para crianças de 6-12 anos'
+              : 'Plataforma aberta de aprendizado em IA e desenvolvimento'}
           </p>
+        </div>
+
+        {/* Mode Selector */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {/* Ágora Mode */}
+          <button
+            onClick={() => setLoginMode('agora')}
+            className={cn(
+              'relative p-4 rounded-xl border-2 transition-all text-left',
+              loginMode === 'agora'
+                ? 'border-tarsila-verde bg-tarsila-verde/10 shadow-lg'
+                : 'border-border hover:border-tarsila-verde/50 academy-card'
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'h-10 w-10 rounded-lg flex items-center justify-center',
+                  loginMode === 'agora' ? 'academy-gradient' : 'bg-muted'
+                )}
+              >
+                <GraduationCap
+                  className={cn(
+                    'h-5 w-5',
+                    loginMode === 'agora' ? 'text-white' : 'academy-text-muted'
+                  )}
+                />
+              </div>
+              <div>
+                <span className="font-bold academy-text block">Ágora</span>
+                <span className="text-xs academy-text-muted">Adultos</span>
+              </div>
+            </div>
+            {loginMode === 'agora' && (
+              <CheckCircle className="absolute top-2 right-2 h-5 w-5 text-tarsila-verde" />
+            )}
+          </button>
+
+          {/* Kids Mode */}
+          <button
+            onClick={() => setLoginMode('kids')}
+            className={cn(
+              'relative p-4 rounded-xl border-2 transition-all text-left',
+              loginMode === 'kids'
+                ? 'border-[#FF6B6B] bg-[#FF6B6B]/10 shadow-lg'
+                : 'border-border hover:border-[#FF6B6B]/50 academy-card'
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'h-10 w-10 rounded-lg flex items-center justify-center overflow-hidden',
+                  loginMode === 'kids'
+                    ? 'bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] p-0.5'
+                    : 'bg-muted'
+                )}
+              >
+                {loginMode === 'kids' ? (
+                  <Image
+                    src={KIDS_IMAGES[kidsImageIndex]}
+                    alt="Kids"
+                    width={40}
+                    height={40}
+                    className="rounded-md object-cover w-full h-full"
+                  />
+                ) : (
+                  <Baby className="h-5 w-5 academy-text-muted" />
+                )}
+              </div>
+              <div>
+                <span className="font-bold academy-text block">Kids</span>
+                <span className="text-xs academy-text-muted">6-12 anos</span>
+              </div>
+            </div>
+            {loginMode === 'kids' && (
+              <CheckCircle className="absolute top-2 right-2 h-5 w-5 text-[#FF6B6B]" />
+            )}
+          </button>
         </div>
 
         {/* Login Card */}
         <GlassCard className="mb-6">
           <GlassCardContent className="p-6 space-y-4">
+            {/* Mode indicator */}
+            <div
+              className={cn(
+                'text-center text-sm font-medium py-2 px-4 rounded-lg mb-2',
+                loginMode === 'kids'
+                  ? 'bg-[#FF6B6B]/20 text-[#FF6B6B]'
+                  : 'bg-tarsila-verde/20 text-tarsila-verde'
+              )}
+            >
+              {loginMode === 'kids'
+                ? '👶 Entrando como Pai/Responsável para configurar Área Kids'
+                : '🎓 Entrando no Ágora Academy'}
+            </div>
+
             {/* GitHub Login */}
             <Button
               onClick={() => handleLogin('github')}
@@ -199,37 +343,20 @@ export default function AgoraLoginPage() {
           </GlassCardContent>
         </GlassCard>
 
-        {/* Kids Area Access */}
-        <Link href="/pt/agora/kids">
-          <GlassCard className="mb-6 cursor-pointer hover:shadow-lg transition-all group border-2 border-transparent hover:border-[#FF6B6B]/50">
-            <GlassCardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] flex items-center justify-center flex-shrink-0">
-                  <Baby className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold academy-text group-hover:text-[#FF6B6B] transition-colors">
-                    Área Kids
-                  </h3>
-                  <p className="text-xs academy-text-muted">
-                    Aprendizado seguro e divertido para crianças de 6-12 anos
-                  </p>
-                </div>
-                <span className="text-[#FF6B6B] text-xl group-hover:translate-x-1 transition-transform">
-                  →
-                </span>
-              </div>
-            </GlassCardContent>
-          </GlassCard>
-        </Link>
-
-        {/* Features */}
+        {/* Features - changes based on mode */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {[
-            { icon: '🎓', label: 'Certificado' },
-            { icon: '🏆', label: 'Gamificação' },
-            { icon: '🤖', label: 'Mentoria IA' },
-          ].map((feature) => (
+          {(loginMode === 'kids'
+            ? [
+                { icon: '🎮', label: 'Jogos' },
+                { icon: '📹', label: 'Vídeos' },
+                { icon: '🤖', label: 'Mentores' },
+              ]
+            : [
+                { icon: '🎓', label: 'Certificado' },
+                { icon: '🏆', label: 'Gamificação' },
+                { icon: '🤖', label: 'Mentoria IA' },
+              ]
+          ).map((feature) => (
             <div
               key={feature.label}
               className="flex flex-col items-center p-3 rounded-xl academy-card backdrop-blur-sm"
@@ -244,7 +371,13 @@ export default function AgoraLoginPage() {
         <div className="text-center space-y-3">
           <p className="text-xs academy-text-muted">
             Ao entrar, você concorda com nossos{' '}
-            <Link href="/pt/termos" className="text-tarsila-verde hover:underline">
+            <Link
+              href={loginMode === 'kids' ? '/pt/agora/kids/termos' : '/pt/termos'}
+              className={cn(
+                'hover:underline',
+                loginMode === 'kids' ? 'text-[#FF6B6B]' : 'text-tarsila-verde'
+              )}
+            >
               Termos de Uso
             </Link>{' '}
             e{' '}
