@@ -133,12 +133,12 @@ export const useKidsStore = create<KidsState>()(
         set({ isLoading: true, error: null })
 
         try {
-          // Check if profile already exists
+          // Check if profile already exists (use maybeSingle to avoid 406 when no profile)
           const { data: existing } = await supabase
             .from('agora_kids_profiles')
             .select('*')
             .eq('parent_user_id', parentUserId)
-            .single()
+            .maybeSingle()
 
           if (existing) {
             // Reactivate existing profile
@@ -262,14 +262,22 @@ export const useKidsStore = create<KidsState>()(
         const supabase = createClient()
 
         try {
+          // Use maybeSingle() instead of single() to avoid 406 error when no profile exists
           const { data, error } = await supabase
             .from('agora_kids_profiles')
             .select('*')
             .eq('parent_user_id', parentUserId)
             .eq('is_active', true)
-            .single()
+            .maybeSingle()
 
-          if (error || !data) {
+          if (error) {
+            logger.error('Error loading kids profile', { error })
+            set({ isKidsMode: false, kidsProfile: null })
+            return null
+          }
+
+          if (!data) {
+            // No profile exists - this is normal for new users
             set({ isKidsMode: false, kidsProfile: null })
             return null
           }
