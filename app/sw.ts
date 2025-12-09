@@ -84,6 +84,14 @@ self.addEventListener('fetch', (event: FetchEvent) => {
     return
   }
 
+  // Bypass service worker for Next.js RSC (React Server Components) requests
+  // RSC requests have _rsc query parameter and need direct network access
+  // Service Worker caching can cause "no-response" errors for these dynamic requests
+  if (url.searchParams.has('_rsc')) {
+    // Let browser handle RSC requests directly
+    return
+  }
+
   // Block any HTTP requests (enforce HTTPS only)
   if (url.protocol === 'http:' && url.hostname !== 'localhost') {
     // Upgrade HTTP to HTTPS automatically

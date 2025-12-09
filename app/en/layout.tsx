@@ -48,7 +48,6 @@ import { ToastProvider } from '@/components/toast-provider'
 import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
 import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
-import { SentryInit } from '@/components/sentry-init'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
@@ -94,7 +93,7 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
           <LiveAnnouncerProvider>
             <Providers>
               <AnalyticsProvider>
-                <SentryInit />
+                {/* Note: Sentry is automatically initialized by @sentry/nextjs via sentry.client.config.ts */}
                 {/* Fixed background layer with image */}
                 <div
                   className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"

@@ -48,7 +48,6 @@ import { ToastProvider } from '@/components/toast-provider'
 import { SkipLinks } from '@/components/skip-link'
 import { Providers } from '@/components/providers'
 import { PTLayoutWrapper } from '@/components/pt-layout-wrapper'
-import { SentryInit } from '@/components/sentry-init'
 import { VLibrasLazy } from '@/components/a11y/vlibras-lazy'
 import { WebVitalsProvider } from '@/components/web-vitals-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
@@ -98,7 +97,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
           <LiveAnnouncerProvider>
             <Providers>
               <AnalyticsProvider>
-                <SentryInit />
+                {/* Note: Sentry is automatically initialized by @sentry/nextjs via sentry.client.config.ts */}
                 {/* Conditional background - not applied on Agora routes */}
                 <ConditionalBackground />
 

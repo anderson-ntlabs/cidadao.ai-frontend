@@ -94,34 +94,23 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
       let profile = null
       let hasConsent = false
 
+      // Fetch profile and consent in parallel to reduce latency
       try {
-        const { data, error } = await supabase
-          .from('agora_profiles')
-          .select('*')
-          .eq('user_id', supabaseUser.id)
-          .single()
+        const [profileResult, consentResult] = await Promise.all([
+          supabase.from('agora_profiles').select('*').eq('user_id', supabaseUser.id).maybeSingle(),
+          supabase.from('agora_consent').select('id').eq('user_id', supabaseUser.id).maybeSingle(),
+        ])
 
-        if (!error && data) {
-          profile = data
+        if (!profileResult.error && profileResult.data) {
+          profile = profileResult.data
         }
-      } catch (e) {
-        // Table might not exist yet - that's OK for new installations
-        logger.debug('agora_profiles table not available', { error: e })
-      }
 
-      try {
-        const { data, error } = await supabase
-          .from('agora_consent')
-          .select('id')
-          .eq('user_id', supabaseUser.id)
-          .single()
-
-        if (!error && data) {
+        if (!consentResult.error && consentResult.data) {
           hasConsent = true
         }
       } catch (e) {
-        // Table might not exist yet - that's OK for new installations
-        logger.debug('agora_consent table not available', { error: e })
+        // Tables might not exist yet - that's OK for new installations
+        logger.debug('Agora tables not available yet', { error: e })
       }
 
       if (profile) {
