@@ -18,9 +18,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { getKidsAgents } from '@/data/agents'
-import { KIDS_VIDEOS } from '@/data/kids-videos'
+import { KIDS_VIDEOS, KIDS_TRACKS, TOTAL_KIDS_VIDEOS, KidsTrackId } from '@/data/kids-videos'
 import { GlassCard } from '@/components/ui/glass-card'
-import { KidsCertificateDisplay, KidsLevelBadges, KidsAvatarSelector } from '@/components/kids'
+import {
+  KidsCertificateDisplay,
+  KidsLevelBadges,
+  KidsAvatarSelector,
+  KidsTrackCard,
+} from '@/components/kids'
 import {
   Sparkles,
   PlayCircle,
@@ -36,11 +41,13 @@ import {
   Gamepad2,
   Shield,
   KeyRound,
+  LayoutGrid,
 } from 'lucide-react'
 import {
   calculateKidsTelemetry,
   startKidsSession,
   endKidsSession,
+  getWatchedVideoIds,
 } from '@/lib/analytics/kids-tracker'
 import { calculateKidsLevel } from '@/lib/agora/kids-certificate-requirements'
 import type { KidsTelemetryData } from '@/lib/agora/kids-certificate-requirements'
@@ -52,9 +59,25 @@ export default function KidsDashboardPage() {
 
   const [showCertificate, setShowCertificate] = useState(false)
   const [telemetry, setTelemetry] = useState<KidsTelemetryData | null>(null)
+  const [watchedVideoIds, setWatchedVideoIds] = useState<string[]>([])
 
   const kidsAgents = getKidsAgents()
   const featuredVideos = KIDS_VIDEOS.slice(0, 4)
+
+  // Calculate watched videos per track
+  const watchedByTrack = useMemo(() => {
+    const result: Record<KidsTrackId, number> = {
+      programacao: 0,
+      'porque-programar': 0,
+      'historia-computacao': 0,
+    }
+
+    for (const track of KIDS_TRACKS) {
+      result[track.id] = track.videos.filter((v) => watchedVideoIds.includes(v.id)).length
+    }
+
+    return result
+  }, [watchedVideoIds])
 
   // Start session and load telemetry on mount
   useEffect(() => {
@@ -62,6 +85,7 @@ export default function KidsDashboardPage() {
       startKidsSession(childName)
       const data = calculateKidsTelemetry()
       setTelemetry(data)
+      setWatchedVideoIds(getWatchedVideoIds())
     }
 
     return () => {
@@ -86,6 +110,7 @@ export default function KidsDashboardPage() {
     trackVideo(video.id)
     setTimeout(() => {
       setTelemetry(calculateKidsTelemetry())
+      setWatchedVideoIds(getWatchedVideoIds())
     }, 100)
     // Navigate to video player page instead of opening new tab
     router.push(`/pt/agora/kids/videos/${video.id}`)
@@ -263,7 +288,57 @@ export default function KidsDashboardPage() {
             </div>
           </GlassCard>
 
-          {/* Videos Trail Card */}
+          {/* Learning Tracks Card */}
+          <GlassCard className="p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-kids-purple/20 flex items-center justify-center">
+                  <LayoutGrid className="w-4 h-4 text-kids-purple" />
+                </div>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Trilhas de Aprendizado
+                </span>
+              </div>
+              <Link
+                href="/pt/agora/kids/videos"
+                className="text-xs font-medium text-kids-coral hover:underline flex items-center gap-1"
+              >
+                Ver todas
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+
+            {/* Track Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {KIDS_TRACKS.map((track) => (
+                <KidsTrackCard
+                  key={track.id}
+                  track={track}
+                  watchedCount={watchedByTrack[track.id]}
+                />
+              ))}
+            </div>
+
+            {/* Total Progress */}
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-gray-600 dark:text-gray-400">Progresso total</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {telemetry?.videosWatched || 0}/{TOTAL_KIDS_VIDEOS} videos
+                </span>
+              </div>
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-kids-coral via-kids-orange to-kids-yellow rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.round(((telemetry?.videosWatched || 0) / TOTAL_KIDS_VIDEOS) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Featured Videos Card */}
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
@@ -271,14 +346,14 @@ export default function KidsDashboardPage() {
                   <PlayCircle className="w-4 h-4 text-kids-coral" />
                 </div>
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Trilha de Programação
+                  Videos em Destaque
                 </span>
               </div>
               <Link
-                href="/pt/agora/kids/videos"
+                href="/pt/agora/kids/videos?trilha=programacao"
                 className="text-xs font-medium text-kids-coral hover:underline flex items-center gap-1"
               >
-                Ver todos
+                Ver mais
                 <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
