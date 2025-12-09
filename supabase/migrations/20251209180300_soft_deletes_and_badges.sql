@@ -234,15 +234,15 @@ BEGIN
     -- Soft delete kids profiles
     UPDATE public.agora_kids_profiles
     SET deleted_at = NOW()
-    WHERE user_id = p_user_id AND deleted_at IS NULL;
+    WHERE parent_user_id = p_user_id AND deleted_at IS NULL;
     GET DIAGNOSTICS v_count = ROW_COUNT;
     IF v_count > 0 THEN v_tables := v_tables + 1; v_records := v_records + v_count; END IF;
 
     -- Soft delete kids sessions
     UPDATE public.agora_kids_sessions
     SET deleted_at = NOW()
-    WHERE profile_id IN (
-        SELECT id FROM public.agora_kids_profiles WHERE user_id = p_user_id
+    WHERE kids_profile_id IN (
+        SELECT id FROM public.agora_kids_profiles WHERE parent_user_id = p_user_id
     ) AND deleted_at IS NULL;
     GET DIAGNOSTICS v_count = ROW_COUNT;
     IF v_count > 0 THEN v_tables := v_tables + 1; v_records := v_records + v_count; END IF;
