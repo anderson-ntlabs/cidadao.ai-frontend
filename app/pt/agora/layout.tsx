@@ -239,27 +239,34 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   // Setup session cleanup on page close
   useSessionCleanup()
 
-  // Check if we should show header
-  const shouldShowHeader = !noHeaderPages.some((page) => pathname?.startsWith(page))
+  // Check if we're on a kids page - Kids pages have their own UI, no Agora elements
+  const isKidsPage = pathname?.startsWith('/pt/agora/kids')
+
+  // Check if we should show header (not on login/onboarding/contract, and not on kids pages)
+  const shouldShowHeader = !noHeaderPages.some((page) => pathname?.startsWith(page)) && !isKidsPage
   const isLoginPage = pathname === '/pt/agora/login'
+
+  // Don't show bottom nav or celebration on kids pages
+  const showBottomNav = isMobile && !isLoginPage && !isKidsPage
+  const showCelebration = !isKidsPage
 
   return (
     <div className="min-h-screen">
-      {/* Global Header */}
+      {/* Global Header - NOT shown on Kids pages */}
       {shouldShowHeader && <AgoraHeaderWrapper />}
 
       {/* Main content with auth protection (onboarding is optional) */}
       <AuthGuard>
-        <div className={isMobile && !isLoginPage ? 'pb-20' : ''}>{children}</div>
+        <div className={showBottomNav ? 'pb-20' : ''}>{children}</div>
       </AuthGuard>
 
-      {/* Mobile Bottom Navigation - same as main app */}
-      {isMobile && !isLoginPage && <BottomNavigation items={agoraNavItems} />}
+      {/* Mobile Bottom Navigation - NOT shown on Kids pages */}
+      {showBottomNav && <BottomNavigation items={agoraNavItems} />}
 
-      {/* Global Celebration Modal - uses store state */}
-      <CelebrationModal />
+      {/* Global Celebration Modal - NOT shown on Kids pages (no gamification) */}
+      {showCelebration && <CelebrationModal />}
 
-      {/* Session Manager - handles inactivity timeout */}
+      {/* Session Manager - handles inactivity timeout (also for kids) */}
       <SessionManager timeoutMinutes={30} warningMinutes={5} enabled={true} />
     </div>
   )
