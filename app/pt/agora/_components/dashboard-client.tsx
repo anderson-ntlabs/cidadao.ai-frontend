@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import { useAgoraBackground } from '@/hooks/use-agora-background'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -25,50 +24,28 @@ import {
   GraduationCap,
   Sparkles,
   ArrowRight,
-  Palette,
   ChevronRight,
   Zap,
   Target,
   BookOpen,
   Medal,
-  Filter,
-  Activity,
   ArrowUpRight,
-  Presentation,
+  Users,
+  TrendingUp,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
 import { toast } from '@/hooks/use-toast'
-
-// Lazy load ActivityTimeline (same as main app)
-const ActivityTimeline = dynamic(
-  () => import('@/components/activity').then((mod) => ({ default: mod.ActivityTimeline })),
-  {
-    loading: () => (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-start gap-4">
-            <div className="w-2 h-2 rounded-full bg-[hsl(var(--academy-border))] mt-2" />
-            <div className="flex-1">
-              <div className="h-4 w-3/4 bg-[hsl(var(--academy-bg-secondary))] animate-pulse rounded mb-2" />
-              <div className="h-3 w-1/2 bg-[hsl(var(--academy-bg-secondary))] animate-pulse rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
-    ),
-    ssr: false,
-  }
-)
 
 /**
  * Academy Dashboard Client Component
  *
- * New Design System v2 - Bo Bardi + Dumont + Anderson
- * Clean, modern, with better visual hierarchy.
+ * Design System v3 - Sober & Professional
+ * Clean, modern design with cohesive color palette for learning platform.
+ * Primary accent: Emerald (growth, learning)
+ * Secondary: Slate tones for professional look
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-12-06
+ * Updated: 2025-12-08
  */
 
 // Avatar component with error fallback
@@ -178,6 +155,47 @@ const badgeEmojis: Record<string, string> = {
   leitor: '📚',
 }
 
+// Track definitions for "Continue Track" card
+const TRACKS_INFO = {
+  introducao: {
+    id: 'introducao',
+    name: 'Introducao',
+    icon: '🎓',
+    color: 'emerald',
+    totalModules: 6,
+  },
+  backend: {
+    id: 'backend',
+    name: 'Backend',
+    icon: '🖥️',
+    color: 'blue',
+    totalModules: 6,
+  },
+  frontend: {
+    id: 'frontend',
+    name: 'Frontend',
+    icon: '🎨',
+    color: 'purple',
+    totalModules: 6,
+  },
+  ia: {
+    id: 'ia',
+    name: 'IA/ML',
+    icon: '🧠',
+    color: 'green',
+    totalModules: 7,
+  },
+  devops: {
+    id: 'devops',
+    name: 'DevOps',
+    icon: '⚙️',
+    color: 'orange',
+    totalModules: 6,
+  },
+} as const
+
+type TrackId = keyof typeof TRACKS_INFO
+
 export function DashboardClient({
   user,
   badges,
@@ -193,6 +211,22 @@ export function DashboardClient({
   const [showLgpdModal, setShowLgpdModal] = useState(false)
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false)
   const [showTimelineModal, setShowTimelineModal] = useState(false)
+  const [lastTrack, setLastTrack] = useState<{ trackId: TrackId; moduleId: number } | null>(null)
+
+  // Load last accessed track from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('agora_last_track')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.trackId && TRACKS_INFO[parsed.trackId as TrackId]) {
+          setLastTrack(parsed)
+        }
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, [])
 
   // Background customization
   const { currentBackground, getBackgroundStyle, getOverlayStyle } = useAgoraBackground()
@@ -306,17 +340,15 @@ export function DashboardClient({
         <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Demo Banner */}
           {isDemoMode && (
-            <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-2xl">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎮</span>
-                <div>
-                  <span className="font-semibold text-yellow-800 dark:text-yellow-200">
-                    Modo Demonstracao
-                  </span>
-                  <span className="text-sm text-yellow-600 dark:text-yellow-400 ml-2">
-                    Dados salvos apenas localmente
-                  </span>
-                </div>
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  Modo Demo
+                </span>
+                <span className="text-xs text-amber-600 dark:text-amber-400">
+                  • Dados salvos localmente
+                </span>
               </div>
             </div>
           )}
@@ -325,57 +357,50 @@ export function DashboardClient({
           {!user.hasCompletedOnboarding && (
             <Link
               href={`/pt/agora/onboarding${isDemoMode ? '?demo=true' : ''}`}
-              className="block mb-6 p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl text-white hover:shadow-2xl hover:scale-[1.01] transition-all group relative overflow-hidden"
+              className="block mb-6 p-6 bg-emerald-600 dark:bg-emerald-700 rounded-2xl text-white hover:bg-emerald-700 dark:hover:bg-emerald-600 hover:shadow-xl transition-all group"
             >
-              {/* Animated background pattern */}
-              <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-10 animate-pulse" />
-
-              <div className="relative flex items-center gap-6">
-                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-4xl shadow-lg border border-white/20">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center text-3xl">
                   🚀
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-bold">Complete sua Jornada de Onboarding!</h3>
-                    <span className="px-2 py-1 text-xs font-bold rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold">Complete o Onboarding</h3>
+                    <span className="px-2 py-0.5 text-[10px] font-medium rounded bg-white/20">
                       RECOMENDADO
                     </span>
                   </div>
-                  <p className="text-white/90 mb-3">
-                    Conheca a plataforma Agora atraves da nossa apresentacao interativa de 40
-                    slides.
+                  <p className="text-white/80 text-sm mb-2">
+                    Conheca a plataforma Agora atraves da apresentacao interativa.
                   </p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm">
-                      <Target className="w-4 h-4" />
+                  <div className="flex items-center gap-4 text-xs text-white/70">
+                    <span className="flex items-center gap-1.5">
+                      <Target className="w-3.5 h-3.5" />
                       Requisito para Trilhas
                     </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm">
-                      <Zap className="w-4 h-4" />
-                      +50 XP ao completar
+                    <span className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5" />
+                      +50 XP
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                  <span className="text-xs text-white/80">Iniciar</span>
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
             </Link>
           )}
 
-          {/* Hero Section - User Profile + Stats (Using GlassCard like main app) */}
+          {/* Hero Section - User Profile + Stats */}
           <div className="mb-8">
             <GlassCard className="overflow-hidden">
-              {/* Gradient Header */}
-              <div className="h-32 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 relative">
-                <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-20" />
+              {/* Clean Header Bar */}
+              <div className="h-24 bg-gradient-to-r from-slate-800 to-slate-700 dark:from-slate-900 dark:to-slate-800 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-transparent" />
               </div>
 
               {/* Profile Content */}
-              <div className="px-6 sm:px-8 pb-8 -mt-16 relative">
+              <div className="px-6 sm:px-8 pb-6 -mt-12 relative">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
                   {/* Avatar */}
                   <div className="relative">
@@ -383,64 +408,73 @@ export function DashboardClient({
                       src={user.avatar}
                       alt={user.name}
                       fallbackName={user.name}
-                      className="w-32 h-32 rounded-2xl border-4 border-[hsl(var(--academy-card))] shadow-xl object-cover bg-[hsl(var(--academy-bg-secondary))]"
+                      className="w-24 h-24 rounded-xl border-4 border-white dark:border-slate-800 shadow-lg object-cover bg-slate-100 dark:bg-slate-700"
                     />
-                    <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg">
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-lg shadow-md">
                       {rankInfo.emoji}
                     </div>
                   </div>
 
                   {/* User Info */}
-                  <div className="flex-1 pt-4 sm:pt-0">
-                    <h2 className="text-2xl sm:text-3xl font-bold academy-text">
-                      Ola, {user.name.split(' ')[0]}! 👋
+                  <div className="flex-1 pt-2 sm:pt-0">
+                    <h2 className="text-xl sm:text-2xl font-semibold academy-text">
+                      Ola, {user.name.split(' ')[0]}!
                     </h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-[hsl(var(--academy-bg-secondary))] academy-text">
-                        Level {user.currentLevel} - {rankInfo.name}
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                        Level {user.currentLevel} • {rankInfo.name}
+                      </span>
+                      <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 dark:bg-slate-800 academy-text">
+                        {user.totalXp.toLocaleString()} XP
                       </span>
                       {nextRank && (
-                        <span className="text-sm academy-text-muted">
+                        <span className="text-xs academy-text-muted">
                           {nextRank.minXp - user.totalXp} XP para {nextRank.name}
                         </span>
                       )}
                     </div>
 
                     {/* XP Progress */}
-                    <div className="mt-4 max-w-md">
-                      <div className="h-3 bg-[hsl(var(--academy-bg-secondary))] rounded-full overflow-hidden">
+                    <div className="mt-3 max-w-sm">
+                      <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full transition-all duration-500"
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                           style={{ width: `${xpProgress}%` }}
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Stats Mini */}
-                  <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                    <div className="text-center">
-                      <div className="w-12 h-12 mx-auto rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-2">
-                        <Flame className="w-6 h-6 text-orange-500" />
+                  {/* Stats Mini - Now with unified colors */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <div className="w-10 h-10 mx-auto rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-1.5">
+                        <Flame className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <p className="text-2xl font-bold academy-text">{user.currentStreak}</p>
-                      <p className="text-xs academy-text-muted">Streak</p>
+                      <p className="text-xl font-bold academy-text">{user.currentStreak}</p>
+                      <p className="text-[10px] academy-text-muted uppercase tracking-wide">
+                        Streak
+                      </p>
                     </div>
-                    <div className="text-center">
-                      <div className="w-12 h-12 mx-auto rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
-                        <Clock className="w-6 h-6 text-blue-500" />
+                    <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <div className="w-10 h-10 mx-auto rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-1.5">
+                        <Clock className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                       </div>
-                      <p className="text-2xl font-bold academy-text">
+                      <p className="text-xl font-bold academy-text">
                         {Math.floor(user.totalTimeMinutes / 60)}h
                       </p>
-                      <p className="text-xs academy-text-muted">Estudo</p>
+                      <p className="text-[10px] academy-text-muted uppercase tracking-wide">
+                        Estudo
+                      </p>
                     </div>
-                    <div className="text-center">
-                      <div className="w-12 h-12 mx-auto rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-2">
-                        <MessageSquare className="w-6 h-6 text-purple-500" />
+                    <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <div className="w-10 h-10 mx-auto rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center mb-1.5">
+                        <MessageSquare className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                       </div>
-                      <p className="text-2xl font-bold academy-text">{user.totalSessions}</p>
-                      <p className="text-xs academy-text-muted">Sessoes</p>
+                      <p className="text-xl font-bold academy-text">{user.totalSessions}</p>
+                      <p className="text-[10px] academy-text-muted uppercase tracking-wide">
+                        Sessoes
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -453,40 +487,43 @@ export function DashboardClient({
             {/* Left Column - Mentor + Actions */}
             <div className="lg:col-span-2 space-y-6">
               {/* Mentors Card - Santos-Dumont & Lina Bo Bardi */}
-              <GlassCard className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <Sparkles className="w-5 h-5 text-yellow-500" />
-                  <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                    Mentores IA disponíveis
-                  </span>
+              <GlassCard className="p-5">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-sm font-medium academy-text">Mentores IA</span>
+                  </div>
+                  <span className="text-xs academy-text-muted">2 disponiveis</span>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6">
+                <div className="grid sm:grid-cols-2 gap-4">
                   {/* Santos-Dumont */}
-                  <div className="flex flex-col items-center text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30">
-                    <div className="relative mb-4">
-                      <img
-                        src="/agents/santos-dumont.png"
-                        alt="Santos-Dumont"
-                        className="w-24 h-24 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-gray-800"
-                      />
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-lg shadow">
-                        ✈️
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src="/agents/santos-dumont.png"
+                          alt="Santos-Dumont"
+                          className="w-14 h-14 rounded-lg object-cover"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-xs">
+                          ✈️
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-lg font-bold academy-text mb-1">Santos-Dumont</h3>
-                    <p className="text-xs academy-text-muted mb-3">
-                      Pai da Aviação • Inovação e Criatividade
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-1 mb-4">
-                      {['Código', 'PRs', 'Arquitetura'].map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold academy-text text-sm">Santos-Dumont</h3>
+                        <p className="text-xs academy-text-muted mb-2">Backend & Arquitetura</p>
+                        <div className="flex flex-wrap gap-1">
+                          {['Codigo', 'PRs', 'Arquitetura'].map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-200 dark:bg-slate-700 academy-text-muted"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <Button
                       onClick={() =>
@@ -495,38 +532,40 @@ export function DashboardClient({
                         )
                       }
                       size="sm"
-                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
+                      className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
                     >
-                      <MessageSquare className="w-3 h-3 mr-1" />
+                      <MessageSquare className="w-3 h-3 mr-1.5" />
                       Conversar
                     </Button>
                   </div>
 
                   {/* Lina Bo Bardi */}
-                  <div className="flex flex-col items-center text-center p-4 rounded-2xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border border-rose-200/50 dark:border-rose-700/30">
-                    <div className="relative mb-4">
-                      <img
-                        src="/agents/Lina_Bo_Bardi.jpg"
-                        alt="Lina Bo Bardi"
-                        className="w-24 h-24 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-gray-800"
-                      />
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-lg shadow">
-                        🏛️
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src="/agents/Lina_Bo_Bardi.jpg"
+                          alt="Lina Bo Bardi"
+                          className="w-14 h-14 rounded-lg object-cover"
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-xs">
+                          🏛️
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-lg font-bold academy-text mb-1">Lina Bo Bardi</h3>
-                    <p className="text-xs academy-text-muted mb-3">
-                      Arquiteta Modernista • Design e Cultura
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-1 mb-4">
-                      {['Design', 'UX/UI', 'Cultura'].map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold academy-text text-sm">Lina Bo Bardi</h3>
+                        <p className="text-xs academy-text-muted mb-2">Design & Frontend</p>
+                        <div className="flex flex-wrap gap-1">
+                          {['Design', 'UX/UI', 'Cultura'].map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-200 dark:bg-slate-700 academy-text-muted"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                     <Button
                       onClick={() =>
@@ -535,37 +574,63 @@ export function DashboardClient({
                         )
                       }
                       size="sm"
-                      className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white border-0"
+                      className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
                     >
-                      <MessageSquare className="w-3 h-3 mr-1" />
+                      <MessageSquare className="w-3 h-3 mr-1.5" />
                       Conversar
                     </Button>
                   </div>
                 </div>
               </GlassCard>
 
+              {/* Continue Track Card - Shows last accessed track */}
+              {lastTrack && TRACKS_INFO[lastTrack.trackId] && (
+                <Link
+                  href={`/pt/agora/trilhas/${lastTrack.trackId}/${lastTrack.moduleId}${isDemoMode ? '?demo=true' : ''}`}
+                  className="block p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-xl">
+                      {TRACKS_INFO[lastTrack.trackId].icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-medium text-emerald-900 dark:text-emerald-100 text-sm">
+                          Continuar Trilha
+                        </h3>
+                        <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-emerald-200 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300">
+                          Em progresso
+                        </span>
+                      </div>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                        {TRACKS_INFO[lastTrack.trackId].name} - Modulo {lastTrack.moduleId}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              )}
+
               {/* Onboarding Card - Only visible when completed (for revisiting) */}
               {user.hasCompletedOnboarding && (
                 <Link
                   href={`/pt/agora/onboarding?preview=true${isDemoMode ? '&demo=true' : ''}`}
-                  className="block p-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-2xl border border-indigo-200/50 dark:border-indigo-700/30 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all group"
+                  className="block p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
+                    <div className="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xl">
                       📽️
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold academy-text">Apresentacao Agora</h3>
-                        <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-medium academy-text text-sm">Apresentacao Agora</h3>
+                        <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
                           Concluido
                         </span>
                       </div>
-                      <p className="text-sm academy-text-muted">
-                        Reveja nossa apresentacao completa do projeto
-                      </p>
+                      <p className="text-xs academy-text-muted">Reveja a apresentacao do projeto</p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="w-4 h-4 academy-text-muted group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
               )}
@@ -573,73 +638,82 @@ export function DashboardClient({
               {/* Contract Card - View signed contract */}
               <Link
                 href="/pt/agora/contract"
-                className="block p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 dark:from-green-500/20 dark:via-emerald-500/20 dark:to-teal-500/20 rounded-2xl border border-green-200/50 dark:border-green-700/30 hover:border-green-300 dark:hover:border-green-600 hover:shadow-lg transition-all group"
+                className="block p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg">
+                  <div className="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xl">
                     📜
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold academy-text">Termo de Compromisso</h3>
-                      <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-medium academy-text text-sm">Termo de Compromisso</h3>
+                      <span className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-slate-200 dark:bg-slate-600 academy-text-muted">
                         LGPD
                       </span>
                     </div>
-                    <p className="text-sm academy-text-muted">
-                      Reveja seu contrato assinado e baixe o PDF
-                    </p>
+                    <p className="text-xs academy-text-muted">Reveja seu contrato e baixe o PDF</p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 group-hover:translate-x-1 transition-all" />
+                  <ChevronRight className="w-4 h-4 academy-text-muted group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </Link>
 
               {/* Quick Actions Grid */}
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   {
                     icon: Target,
-                    emoji: '🧭',
-                    label: 'Minhas Trilhas',
-                    desc: 'Progresso e conquistas',
+                    label: 'Trilhas',
+                    desc: 'Cursos',
                     href: '/pt/agora/trilhas',
-                    color: 'green',
                     external: false,
                   },
                   {
-                    icon: Video,
-                    emoji: '🎬',
-                    label: 'Vídeos',
-                    desc: 'Continue assistindo',
-                    href: '/pt/agora/videos',
-                    color: 'blue',
+                    icon: Clock,
+                    label: 'Diario',
+                    desc: 'Agenda',
+                    href: '/pt/agora/diario',
                     external: false,
                   },
                   {
-                    icon: BookOpen,
-                    emoji: '📚',
-                    label: 'Leituras',
-                    desc: 'Material essencial',
-                    href: '/pt/agora/leituras',
-                    color: 'purple',
+                    icon: TrendingUp,
+                    label: 'Atividades',
+                    desc: 'Historico',
+                    href: '/pt/agora/atividades',
                     external: false,
                   },
                   {
                     icon: Trophy,
-                    emoji: '🏆',
                     label: 'Ranking',
-                    desc: 'Sua posição',
+                    desc: 'Posicao',
                     href: '/pt/agora/ranking',
-                    color: 'yellow',
+                    external: false,
+                  },
+                  {
+                    icon: Video,
+                    label: 'Videos',
+                    desc: 'Assistir',
+                    href: '/pt/agora/videos',
+                    external: false,
+                  },
+                  {
+                    icon: BookOpen,
+                    label: 'Leituras',
+                    desc: 'Material',
+                    href: '/pt/agora/leituras',
+                    external: false,
+                  },
+                  {
+                    icon: Users,
+                    label: 'Perfil',
+                    desc: 'Conta',
+                    href: '/pt/agora/perfil',
                     external: false,
                   },
                   {
                     icon: MessageSquare,
-                    emoji: '💬',
-                    label: 'Comunidade',
-                    desc: 'Discord da Academia',
+                    label: 'Discord',
+                    desc: 'Comunidade',
                     href: 'https://discord.gg/TCdNN6gZ',
-                    color: 'indigo',
                     external: true,
                   },
                 ].map((action) =>
@@ -649,44 +723,31 @@ export function DashboardClient({
                       href={action.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-4 academy-card rounded-xl hover:shadow-lg transition-all group"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all group"
                     >
-                      <div
-                        className={cn(
-                          'w-12 h-12 rounded-xl flex items-center justify-center text-2xl',
-                          action.color === 'indigo' && 'bg-indigo-100 dark:bg-indigo-900/30'
-                        )}
-                      >
-                        {action.emoji}
+                      <div className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                        <action.icon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold academy-text">{action.label}</p>
-                        <p className="text-sm academy-text-muted">{action.desc}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium academy-text text-sm">{action.label}</p>
+                        <p className="text-xs academy-text-muted">{action.desc}</p>
                       </div>
-                      <ArrowUpRight className="w-5 h-5 academy-text-muted group-hover:text-indigo-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                      <ArrowUpRight className="w-4 h-4 academy-text-muted group-hover:text-emerald-600 transition-colors" />
                     </a>
                   ) : (
                     <Link
                       key={action.label}
                       href={`${action.href}${isDemoMode ? '?demo=true' : ''}`}
-                      className="flex items-center gap-4 p-4 academy-card rounded-xl hover:shadow-lg transition-all group"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all group"
                     >
-                      <div
-                        className={cn(
-                          'w-12 h-12 rounded-xl flex items-center justify-center text-2xl',
-                          action.color === 'green' && 'bg-green-100 dark:bg-green-900/30',
-                          action.color === 'blue' && 'bg-blue-100 dark:bg-blue-900/30',
-                          action.color === 'purple' && 'bg-purple-100 dark:bg-purple-900/30',
-                          action.color === 'yellow' && 'bg-yellow-100 dark:bg-yellow-900/30'
-                        )}
-                      >
-                        {action.emoji}
+                      <div className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                        <action.icon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold academy-text">{action.label}</p>
-                        <p className="text-sm academy-text-muted">{action.desc}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium academy-text text-sm">{action.label}</p>
+                        <p className="text-xs academy-text-muted">{action.desc}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 academy-text-muted group-hover:text-[hsl(var(--academy-accent))] group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-4 h-4 academy-text-muted group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
                     </Link>
                   )
                 )}
@@ -695,19 +756,17 @@ export function DashboardClient({
               {/* Certificate CTA */}
               <button
                 onClick={() => setShowCertificateModal(true)}
-                className="w-full p-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl text-white text-left hover:from-green-600 hover:to-emerald-700 transition-all group shadow-lg"
+                className="w-full p-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-white text-left transition-all group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center text-3xl">
-                    🎓
+                  <div className="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold">Certificado de Conclusao</h3>
-                    <p className="text-green-100 text-sm">
-                      Baixe seu certificado com QR Code verificavel
-                    </p>
+                    <h3 className="font-medium">Certificado de Conclusao</h3>
+                    <p className="text-emerald-100 text-xs">Baixe com QR Code verificavel</p>
                   </div>
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </button>
             </div>
@@ -726,17 +785,17 @@ export function DashboardClient({
               {/* Gamification Card - Daily bonus and challenges */}
               <GamificationCard />
 
-              {/* Badges - Using GlassCard */}
+              {/* Badges - Clean Design */}
               <GlassCard className="overflow-hidden">
                 <GlassCardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Medal className="w-5 h-5 text-yellow-500" />
-                      <h3 className="font-semibold academy-text">Badges</h3>
+                      <Medal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <h3 className="font-medium academy-text text-sm">Badges</h3>
                     </div>
                     {badges.length > 0 && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-medium">
-                        {badges.length} conquistados
+                      <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 academy-text-muted">
+                        {badges.length}
                       </span>
                     )}
                   </div>
@@ -748,52 +807,54 @@ export function DashboardClient({
                       {badges.slice(0, 3).map((badge) => (
                         <div
                           key={badge.id}
-                          className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200/50 dark:border-yellow-700/30"
+                          className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
                         >
-                          <div className="w-9 h-9 rounded-lg bg-[hsl(var(--academy-card))] flex items-center justify-center text-xl shadow-sm flex-shrink-0">
+                          <div className="w-8 h-8 rounded-md bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-lg flex-shrink-0">
                             {badgeEmojis[badge.badge_id] || '🏅'}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm academy-text truncate">
+                            <p className="font-medium text-xs academy-text truncate">
                               {badge.badge_name}
                             </p>
-                            <p className="text-xs academy-text-muted truncate">{badge.criteria}</p>
+                            <p className="text-[10px] academy-text-muted truncate">
+                              {badge.criteria}
+                            </p>
                           </div>
                         </div>
                       ))}
                       {badges.length > 3 && (
-                        <p className="text-xs text-center text-gray-400 mt-2">
-                          +{badges.length - 3} mais badges
+                        <p className="text-[10px] text-center academy-text-muted mt-1">
+                          +{badges.length - 3} mais
                         </p>
                       )}
                     </div>
                   ) : (
                     <div className="text-center py-4">
-                      <div className="w-12 h-12 mx-auto rounded-xl bg-yellow-100/50 dark:bg-yellow-900/20 flex items-center justify-center mb-2">
-                        <span className="text-2xl">🍜</span>
+                      <div className="w-10 h-10 mx-auto rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-2">
+                        <Medal className="w-5 h-5 text-slate-400" />
                       </div>
-                      <p className="text-sm font-medium academy-text">
-                        Conquiste seu primeiro badge!
+                      <p className="text-xs font-medium academy-text">
+                        Conquiste seu primeiro badge
                       </p>
-                      <p className="text-xs academy-text-muted mt-1">
+                      <p className="text-[10px] academy-text-muted mt-0.5">
                         Complete sessoes e atividades
                       </p>
                     </div>
                   )}
 
                   {/* Locked badges preview - Compact */}
-                  <div className="mt-3 pt-3 border-t border-[hsl(var(--academy-border))]">
-                    <p className="text-[10px] academy-text-muted uppercase tracking-wider mb-2">
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <p className="text-[9px] academy-text-muted uppercase tracking-wider mb-2">
                       Proximos
                     </p>
-                    <div className="flex gap-2 justify-center">
+                    <div className="flex gap-1.5 justify-center">
                       {['🍜', '🚀', '⭐', '🎬', '🧭', '📚']
                         .filter((e) => !badges.some((b) => badgeEmojis[b.badge_id] === e))
                         .slice(0, 4)
                         .map((emoji, i) => (
                           <div
                             key={i}
-                            className="w-8 h-8 rounded-lg bg-[hsl(var(--academy-bg-secondary))] flex items-center justify-center text-base opacity-40 grayscale"
+                            className="w-7 h-7 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm opacity-40 grayscale"
                           >
                             {emoji}
                           </div>
@@ -806,13 +867,11 @@ export function DashboardClient({
           </div>
 
           {/* Footer */}
-          <footer className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm academy-text-muted italic font-serif">
-                Design: Bo Bardi + Dumont + Anderson
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                Academy Cidadao.AI - Formando desenvolvedores brasileiros
+          <footer className="mt-10 pt-5 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+              <p className="text-xs academy-text-muted">Academy Cidadao.AI</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-600">
+                Formando desenvolvedores brasileiros
               </p>
             </div>
           </footer>

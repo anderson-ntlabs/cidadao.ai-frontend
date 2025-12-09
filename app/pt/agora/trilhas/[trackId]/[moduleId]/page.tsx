@@ -82,6 +82,24 @@ export default function LearningModulePage() {
   // Get selected video
   const selectedVideo = module?.videos.find((v) => v.style === selectedStyle)
 
+  // Save last accessed track to localStorage for "Continue Track" card on dashboard
+  useEffect(() => {
+    if (trackId && moduleId && track) {
+      try {
+        localStorage.setItem(
+          'agora_last_track',
+          JSON.stringify({
+            trackId,
+            moduleId,
+            timestamp: Date.now(),
+          })
+        )
+      } catch {
+        // Ignore localStorage errors
+      }
+    }
+  }, [trackId, moduleId, track])
+
   // Calculate diary XP
   const diaryWordCount = diaryText
     .trim()
