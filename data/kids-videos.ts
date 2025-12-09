@@ -1,36 +1,46 @@
 /**
  * Kids Videos Data
  *
- * Curated YouTube videos for children learning programming.
- * Main source: Canal "Programação Descomplicada" and similar educational channels.
+ * Curated YouTube videos for children organized in learning tracks.
  *
- * Playlist reference: https://www.youtube.com/watch?v=tRcr4vtV-4o
+ * Tracks:
+ * 1. Programação para Crianças - Scratch and coding basics
+ * 2. Por que Aprender a Programar? - Motivation and benefits
+ * 3. História da Computação - Evolution of computers
+ *
+ * Sources: Smile and Learn, Manual do Mundo, Code.org, Khan Academy
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-09 - Added new tracks: Why Learn Programming + History of Computing
  */
 
 import { KidsVideo } from '@/components/kids/kids-video-card'
 
-/**
- * Trilha de Programação para Crianças
- *
- * Videos organized in learning sequence:
- * 1. Introduction to programming concepts
- * 2. Computational thinking
- * 3. Algorithms basics
- * 4. Scratch projects
- * 5. Logic and problem solving
- * 6. Variables and data
- * 7. Loops and repetition
- * 8. Conditionals
- * 9. Animations
- * 10. Complete project
- */
 // Helper to generate YouTube thumbnail URL
 const ytThumb = (videoId: string) => `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
 
-export const KIDS_VIDEOS: KidsVideo[] = [
+/**
+ * Track Types
+ */
+export type KidsTrackId = 'programacao' | 'porque-programar' | 'historia-computacao'
+
+export interface KidsTrack {
+  id: KidsTrackId
+  name: string
+  description: string
+  emoji: string
+  color: string
+  videos: KidsVideo[]
+}
+
+/**
+ * ====================================
+ * TRILHA 1: Programação para Crianças
+ * ====================================
+ * Scratch and coding basics
+ */
+const PROGRAMACAO_VIDEOS: KidsVideo[] = [
   // Módulo 1: Introdução
   {
     id: 'intro-programacao',
@@ -52,7 +62,6 @@ export const KIDS_VIDEOS: KidsVideo[] = [
     thumbnail: ytThumb('oDsY_cKufMk'),
     order: 2,
   },
-
   // Módulo 2: Algoritmos
   {
     id: 'algoritmos-basicos',
@@ -74,7 +83,6 @@ export const KIDS_VIDEOS: KidsVideo[] = [
     thumbnail: ytThumb('vKwNP3b6kYk'),
     order: 4,
   },
-
   // Módulo 3: Scratch
   {
     id: 'scratch-primeiro-projeto',
@@ -96,7 +104,6 @@ export const KIDS_VIDEOS: KidsVideo[] = [
     thumbnail: ytThumb('hSgLSbQ_a9E'),
     order: 6,
   },
-
   // Módulo 4: Lógica
   {
     id: 'logica-programacao',
@@ -118,7 +125,6 @@ export const KIDS_VIDEOS: KidsVideo[] = [
     thumbnail: ytThumb('KNUbPRj9TGM'),
     order: 8,
   },
-
   // Módulo 5: Estruturas
   {
     id: 'loops-repeticao',
@@ -140,7 +146,6 @@ export const KIDS_VIDEOS: KidsVideo[] = [
     thumbnail: ytThumb('Rw0pZS4Wn8A'),
     order: 10,
   },
-
   // Módulo 6: Projetos
   {
     id: 'animacoes-scratch',
@@ -165,41 +170,243 @@ export const KIDS_VIDEOS: KidsVideo[] = [
 ]
 
 /**
- * Get video by ID
+ * ==========================================
+ * TRILHA 2: Por que Aprender a Programar?
+ * ==========================================
+ * Motivation, benefits, and inspiration for kids
+ * Videos from: Smile and Learn, Code.org, educational channels
+ */
+const PORQUE_PROGRAMAR_VIDEOS: KidsVideo[] = [
+  {
+    id: 'porque-aprender-codigo',
+    title: 'Por que Aprender a Programar?',
+    description: 'Descubra por que programação é um superpoder! Crie jogos, apps e muito mais.',
+    youtubeId: 'nKIu9yen5nc', // Code.org - What Most Schools Don't Teach (legendado)
+    duration: '5:44',
+    thumbnail: ytThumb('nKIu9yen5nc'),
+    order: 1,
+  },
+  {
+    id: 'criancas-programadoras',
+    title: 'Crianças que Programam',
+    description: 'Conheça crianças incríveis que já criam seus próprios jogos e aplicativos!',
+    youtubeId: 'OK405CFHgEQ', // Smile and Learn - Tecnologia para crianças
+    duration: '4:30',
+    thumbnail: ytThumb('OK405CFHgEQ'),
+    order: 2,
+  },
+  {
+    id: 'profissoes-futuro',
+    title: 'Profissões do Futuro',
+    description: 'Que profissões vão existir quando você crescer? A tecnologia vai estar em todas!',
+    youtubeId: '6-1MtfkWqQI', // Smile and Learn - Profissões
+    duration: '6:15',
+    thumbnail: ytThumb('6-1MtfkWqQI'),
+    order: 3,
+  },
+  {
+    id: 'criatividade-tecnologia',
+    title: 'Criatividade e Tecnologia',
+    description: 'Programar é ser criativo! Transforme suas ideias em realidade com código.',
+    youtubeId: 'fc5w4GsGfso', // Smile and Learn - Criatividade
+    duration: '5:00',
+    thumbnail: ytThumb('fc5w4GsGfso'),
+    order: 4,
+  },
+  {
+    id: 'resolver-problemas',
+    title: 'Aprendendo a Resolver Problemas',
+    description:
+      'Programadores são super-heróis que resolvem problemas! Aprenda como pensar assim.',
+    youtubeId: 'F_lByE6hPSE', // Smile and Learn - Resolução de problemas
+    duration: '4:45',
+    thumbnail: ytThumb('F_lByE6hPSE'),
+    order: 5,
+  },
+  {
+    id: 'hora-do-codigo',
+    title: 'A Hora do Código',
+    description:
+      'Milhões de crianças no mundo todo aprendem a programar em uma hora! Você também pode.',
+    youtubeId: 'FC5FbmsH4fw', // Hour of Code promotional
+    duration: '3:24',
+    thumbnail: ytThumb('FC5FbmsH4fw'),
+    order: 6,
+  },
+]
+
+/**
+ * ==========================================
+ * TRILHA 3: História da Computação
+ * ==========================================
+ * Evolution of computers from abacus to modern tech
+ * Videos from: Smile and Learn, educational channels
+ */
+const HISTORIA_COMPUTACAO_VIDEOS: KidsVideo[] = [
+  {
+    id: 'historia-computador',
+    title: 'A História do Computador',
+    description:
+      'Do ábaco ao computador! Viaje no tempo e descubra como surgiram essas máquinas incríveis.',
+    youtubeId: 'F3qWg1JBPZg', // Smile and Learn - História do computador
+    duration: '6:30',
+    thumbnail: ytThumb('F3qWg1JBPZg'),
+    order: 1,
+  },
+  {
+    id: 'abaco-calculadora',
+    title: 'Do Ábaco à Calculadora',
+    description:
+      'Há milhares de anos, as pessoas já queriam calcular! Conheça o ábaco e as primeiras máquinas.',
+    youtubeId: 'PvLaPKPzq2I', // História das calculadoras
+    duration: '5:45',
+    thumbnail: ytThumb('PvLaPKPzq2I'),
+    order: 2,
+  },
+  {
+    id: 'primeiros-computadores',
+    title: 'Os Primeiros Computadores',
+    description:
+      'O ENIAC era do tamanho de uma sala! Descubra como eram os computadores gigantes de antigamente.',
+    youtubeId: 'HLmcJJnVPxs', // Computadores antigos
+    duration: '7:00',
+    thumbnail: ytThumb('HLmcJJnVPxs'),
+    order: 3,
+  },
+  {
+    id: 'evolucao-tecnologia',
+    title: 'A Evolução da Tecnologia',
+    description:
+      'De válvulas a microchips! Veja como a tecnologia ficou cada vez menor e mais poderosa.',
+    youtubeId: 'Rj5Qdfge3U4', // Smile and Learn - Tecnologia
+    duration: '5:30',
+    thumbnail: ytThumb('Rj5Qdfge3U4'),
+    order: 4,
+  },
+  {
+    id: 'internet-criancas',
+    title: 'Como Surgiu a Internet?',
+    description: 'A internet conecta o mundo todo! Descubra como essa rede incrível foi criada.',
+    youtubeId: '21eFwbb48sE', // Smile and Learn - Internet
+    duration: '6:00',
+    thumbnail: ytThumb('21eFwbb48sE'),
+    order: 5,
+  },
+  {
+    id: 'robos-inteligencia-artificial',
+    title: 'Robôs e Inteligência Artificial',
+    description: 'Robôs que pensam? Conheça a inteligência artificial e o futuro da tecnologia!',
+    youtubeId: 'a0_lo_GDcFw', // Smile and Learn - IA para crianças
+    duration: '5:15',
+    thumbnail: ytThumb('a0_lo_GDcFw'),
+    order: 6,
+  },
+]
+
+/**
+ * All tracks definition
+ */
+export const KIDS_TRACKS: KidsTrack[] = [
+  {
+    id: 'programacao',
+    name: 'Programação para Crianças',
+    description: 'Aprenda a programar com Scratch e crie seus próprios jogos!',
+    emoji: '💻',
+    color: 'kids-coral',
+    videos: PROGRAMACAO_VIDEOS,
+  },
+  {
+    id: 'porque-programar',
+    name: 'Por que Aprender a Programar?',
+    description: 'Descubra os superpoderes que a programação pode te dar!',
+    emoji: '🚀',
+    color: 'kids-turquoise',
+    videos: PORQUE_PROGRAMAR_VIDEOS,
+  },
+  {
+    id: 'historia-computacao',
+    name: 'História da Computação',
+    description: 'Viaje no tempo e conheça a evolução dos computadores!',
+    emoji: '🕰️',
+    color: 'kids-purple',
+    videos: HISTORIA_COMPUTACAO_VIDEOS,
+  },
+]
+
+/**
+ * Legacy export - all videos from all tracks
+ * Maintains backward compatibility
+ */
+export const KIDS_VIDEOS: KidsVideo[] = KIDS_TRACKS.flatMap((track) => track.videos)
+
+/**
+ * Get track by ID
+ */
+export function getKidsTrackById(trackId: KidsTrackId): KidsTrack | undefined {
+  return KIDS_TRACKS.find((track) => track.id === trackId)
+}
+
+/**
+ * Get video by ID (searches all tracks)
  */
 export function getKidsVideoById(id: string): KidsVideo | undefined {
-  return KIDS_VIDEOS.find((video) => video.id === id)
+  for (const track of KIDS_TRACKS) {
+    const video = track.videos.find((v) => v.id === id)
+    if (video) return video
+  }
+  return undefined
 }
 
 /**
- * Get videos by order range
+ * Get video with track info
  */
-export function getKidsVideosByRange(start: number, end: number): KidsVideo[] {
-  return KIDS_VIDEOS.filter((video) => video.order >= start && video.order <= end)
+export function getKidsVideoWithTrack(
+  id: string
+): { video: KidsVideo; track: KidsTrack } | undefined {
+  for (const track of KIDS_TRACKS) {
+    const video = track.videos.find((v) => v.id === id)
+    if (video) return { video, track }
+  }
+  return undefined
 }
 
 /**
- * Get next video in sequence
+ * Get videos by order range within a specific track
+ */
+export function getKidsVideosByRange(
+  trackId: KidsTrackId,
+  start: number,
+  end: number
+): KidsVideo[] {
+  const track = getKidsTrackById(trackId)
+  if (!track) return []
+  return track.videos.filter((video) => video.order >= start && video.order <= end)
+}
+
+/**
+ * Get next video in sequence within the same track
  */
 export function getNextKidsVideo(currentId: string): KidsVideo | undefined {
-  const currentVideo = getKidsVideoById(currentId)
-  if (!currentVideo) return undefined
+  const result = getKidsVideoWithTrack(currentId)
+  if (!result) return undefined
 
-  return KIDS_VIDEOS.find((video) => video.order === currentVideo.order + 1)
+  const { video, track } = result
+  return track.videos.find((v) => v.order === video.order + 1)
 }
 
 /**
- * Get previous video in sequence
+ * Get previous video in sequence within the same track
  */
 export function getPreviousKidsVideo(currentId: string): KidsVideo | undefined {
-  const currentVideo = getKidsVideoById(currentId)
-  if (!currentVideo) return undefined
+  const result = getKidsVideoWithTrack(currentId)
+  if (!result) return undefined
 
-  return KIDS_VIDEOS.find((video) => video.order === currentVideo.order - 1)
+  const { video, track } = result
+  return track.videos.find((v) => v.order === video.order - 1)
 }
 
 /**
- * Get videos by module
+ * Get videos by module (legacy - only for programacao track)
  */
 export function getKidsVideosByModule(module: number): KidsVideo[] {
   const moduleRanges: Record<number, [number, number]> = {
@@ -214,11 +421,11 @@ export function getKidsVideosByModule(module: number): KidsVideo[] {
   const range = moduleRanges[module]
   if (!range) return []
 
-  return getKidsVideosByRange(range[0], range[1])
+  return getKidsVideosByRange('programacao', range[0], range[1])
 }
 
 /**
- * Module names for display
+ * Module names for display (legacy - programacao track)
  */
 export const KIDS_MODULES = [
   { id: 1, name: 'Introdução', emoji: '🌟', videos: [1, 2] },
@@ -230,6 +437,14 @@ export const KIDS_MODULES = [
 ]
 
 /**
- * Total number of videos
+ * Total number of videos across all tracks
  */
 export const TOTAL_KIDS_VIDEOS = KIDS_VIDEOS.length
+
+/**
+ * Get total videos per track
+ */
+export function getTrackVideoCount(trackId: KidsTrackId): number {
+  const track = getKidsTrackById(trackId)
+  return track?.videos.length || 0
+}
