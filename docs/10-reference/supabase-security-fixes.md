@@ -4,11 +4,13 @@ This document describes security fixes applied to the Cidadão.AI database based
 
 ## Issue 1: Function Search Path Mutable (FIXED)
 
-**Status**: ✅ Fixed via migration `20251209150000_fix_function_search_path.sql`
+**Status**: ✅ Fixed via migrations
 
 **Problem**: Functions without `SET search_path = ''` can be vulnerable to search path manipulation attacks.
 
-**Solution**: Added `SET search_path = ''` to all affected functions:
+**Solution**: Added `SET search_path = ''` to all affected functions via two migrations:
+
+### Migration 1: `20251209150000_fix_function_search_path.sql`
 
 | Function                         | Source Migration                          | Fixed |
 | -------------------------------- | ----------------------------------------- | ----- |
@@ -19,6 +21,16 @@ This document describes security fixes applied to the Cidadão.AI database based
 | `update_kids_profile_updated_at` | 20251209120000_agora_kids.sql             | ✅    |
 | `get_challenge_period`           | 20251208000000_add_challenge_progress.sql | ✅    |
 | `update_updated_at`              | Legacy (database-only)                    | ✅    |
+
+### Migration 2: `20251209160000_fix_remaining_search_path.sql`
+
+| Function                | Source Migration                  | Fixed |
+| ----------------------- | --------------------------------- | ----- |
+| `calculate_level`       | 00000000000000_initial_schema.sql | ✅    |
+| `calculate_rank`        | 00000000000000_initial_schema.sql | ✅    |
+| `update_rank_and_level` | 00000000000000_initial_schema.sql | ✅    |
+| `get_agora_leaderboard` | 00000000000000_initial_schema.sql | ✅    |
+| `get_user_rank`         | 00000000000000_initial_schema.sql | ✅    |
 
 **Reference**: https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable
 
