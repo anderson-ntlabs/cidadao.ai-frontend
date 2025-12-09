@@ -258,32 +258,57 @@ Gamified learning platform at `/pt/agora/*` with XP system, badges, and learning
 | Roadmap        | `08-roadmap/features-propostas.md`         | 2025-2026 roadmap, proposed features                        |
 | API            | `09-api/integracao-api.md`                 | Supabase, GitHub, PostHog, authentication                   |
 
-**Auth Architecture** (`app/pt/agora/layout.tsx`):
+**Auth Architecture (Simplified Dec 2025)**:
 
-```tsx
-<AgoraAuthProvider>
-  {' '}
-  {/* Real auth (Supabase OAuth) */}
-  <AgoraDemoProvider>
-    {' '}
-    {/* Demo mode (localStorage) */}
-    <UnifiedAgoraProvider>
-      {' '}
-      {/* Auto-selects real/demo based on auth */}
-      {children}
-    </UnifiedAgoraProvider>
-  </AgoraDemoProvider>
-</AgoraAuthProvider>
+The Ágora auth system has been refactored into focused, composable hooks:
+
+```
+lib/services/
+├── auth.service.ts              # Unified auth service (singleton)
+├── navigation-session.service.ts # Session hierarchy management
+
+hooks/
+├── use-unified-auth.tsx         # React wrapper for AuthService
+├── use-agora-gamification.tsx   # XP, badges, challenges, streaks
+├── use-agora-sessions.tsx       # Study sessions, diary entries
+├── use-agora-onboarding.tsx     # Onboarding, LGPD, terms, tracks
+├── use-agora.tsx                # Facade (backward compatible)
+└── agora/index.ts               # Barrel export
 ```
 
-**Hook Usage**:
+**Hook Usage (New)**:
 
 ```typescript
-import { useAgora } from '@/hooks/use-agora'
+// For simple auth needs
+import { useUnifiedAuth } from '@/hooks/use-unified-auth'
+const { user, login, logout, isAuthenticated } = useUnifiedAuth()
 
-const { user, addXp, startSession, badges, mode } = useAgora()
-// mode: 'real' (OAuth) or 'demo' (localStorage)
+// For gamification features
+import { useAgoraGamification } from '@/hooks/use-agora-gamification'
+const { totalXp, badges, addXp, checkAndAwardBadges } = useAgoraGamification()
+
+// For session tracking
+import { useAgoraSessions } from '@/hooks/use-agora-sessions'
+const { currentSession, startSession, endSession, addDiaryEntry } = useAgoraSessions()
+
+// For onboarding flow
+import { useAgoraOnboarding } from '@/hooks/use-agora-onboarding'
+const { onboardingStep, selectTracks, completeOnboarding } = useAgoraOnboarding()
+
+// Backward compatible (combines all)
+import { useAgora } from '@/hooks/use-agora'
+const { user, addXp, startSession, badges } = useAgora()
 ```
+
+**Session Hierarchy** (NavigationSessionService):
+
+```
+Auth Session (root)
+└── Ágora Session
+    └── Kids Session
+```
+
+Logout at any level cleans up all child sessions. See `docs/02-architecture/auth-simplification-plan.md`.
 
 **Database Tables** (Supabase):
 
