@@ -58,6 +58,7 @@ export default function KidsEntryPage() {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
   const [codeCopied, setCodeCopied] = useState(false)
   const [contractId, setContractId] = useState<string | null>(null)
+  const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
 
   const avatars = [
     {
@@ -72,12 +73,20 @@ export default function KidsEntryPage() {
     },
   ]
 
-  // If already in kids mode with profile, redirect to dashboard
+  // If already in kids mode with profile, redirect directly to dashboard
   useEffect(() => {
-    if (isKidsMode && kidsProfile && step === 'choice') {
-      setStep('child-access')
+    if (kidsLoading) return // Wait for profile to load
+
+    if (!hasCheckedProfile) {
+      setHasCheckedProfile(true)
+
+      // If Kids mode is active and we have a profile, go directly to dashboard
+      if (isKidsMode && kidsProfile) {
+        router.replace('/pt/agora/kids/dashboard')
+        return
+      }
     }
-  }, [isKidsMode, kidsProfile, step])
+  }, [isKidsMode, kidsProfile, kidsLoading, hasCheckedProfile, router])
 
   const handleParentSetup = async (e: React.FormEvent) => {
     e.preventDefault()
