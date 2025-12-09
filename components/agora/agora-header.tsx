@@ -61,6 +61,8 @@ interface AgoraHeaderProps {
   }
   onLogout?: () => void
   isDemoMode?: boolean
+  isKidsMode?: boolean
+  kidsChildName?: string
   className?: string
 }
 
@@ -90,9 +92,19 @@ const rankColors: Record<string, string> = {
   arquiteto: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
 }
 
-export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: AgoraHeaderProps) {
+export function AgoraHeader({
+  user,
+  onLogout,
+  isDemoMode = false,
+  isKidsMode = false,
+  kidsChildName,
+  className,
+}: AgoraHeaderProps) {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  // Kids mode display name
+  const displayName = isKidsMode && kidsChildName ? kidsChildName : user.name
 
   // Generate breadcrumb from current path
   const getBreadcrumb = () => {
@@ -164,21 +176,25 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
 
           {/* Right: User info + Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* XP Display - Desktop */}
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200/50 dark:border-yellow-700/30">
-              <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-              <span className="font-bold text-yellow-700 dark:text-yellow-400">
-                {user.totalXp.toLocaleString()} XP
-              </span>
-            </div>
+            {/* XP Display - Desktop (hidden in Kids mode) */}
+            {!isKidsMode && (
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200/50 dark:border-yellow-700/30">
+                <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                <span className="font-bold text-yellow-700 dark:text-yellow-400">
+                  {user.totalXp.toLocaleString()} XP
+                </span>
+              </div>
+            )}
 
-            {/* XP Display - Mobile (compact) */}
-            <div className="flex sm:hidden items-center gap-1 px-2 py-1 bg-yellow-100/80 dark:bg-yellow-900/30 rounded-lg">
-              <Sparkles className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
-              <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400">
-                {user.totalXp >= 1000 ? `${(user.totalXp / 1000).toFixed(1)}k` : user.totalXp}
-              </span>
-            </div>
+            {/* XP Display - Mobile (compact, hidden in Kids mode) */}
+            {!isKidsMode && (
+              <div className="flex sm:hidden items-center gap-1 px-2 py-1 bg-yellow-100/80 dark:bg-yellow-900/30 rounded-lg">
+                <Sparkles className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
+                <span className="text-xs font-bold text-yellow-700 dark:text-yellow-400">
+                  {user.totalXp >= 1000 ? `${(user.totalXp / 1000).toFixed(1)}k` : user.totalXp}
+                </span>
+              </div>
+            )}
 
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -197,20 +213,24 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                     size="sm"
                     showBadge={false}
                   />
-                  {/* Mobile: Show level badge */}
-                  <div className="flex sm:hidden items-center justify-center min-w-[24px] h-5 px-1 rounded bg-gray-100 dark:bg-gray-800">
-                    <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">
-                      {user.currentLevel}
-                    </span>
-                  </div>
-                  {/* Desktop: Show name and level */}
+                  {/* Mobile: Show level badge (hidden in Kids mode) */}
+                  {!isKidsMode && (
+                    <div className="flex sm:hidden items-center justify-center min-w-[24px] h-5 px-1 rounded bg-gray-100 dark:bg-gray-800">
+                      <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">
+                        {user.currentLevel}
+                      </span>
+                    </div>
+                  )}
+                  {/* Desktop: Show name and level (or just child name in Kids mode) */}
                   <div className="hidden sm:flex flex-col items-start">
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight">
-                      {user.name.split(' ')[0]}
+                      {displayName.split(' ')[0]}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-                      Lv.{user.currentLevel}
-                    </span>
+                    {!isKidsMode && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                        Lv.{user.currentLevel}
+                      </span>
+                    )}
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400 hidden sm:block" />
                 </Button>
@@ -220,75 +240,93 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                 {/* User Info Header */}
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" size="sm" className={cn('capitalize', rankColor)}>
-                        {user.currentRank}
-                      </Badge>
-                      <span className="text-xs text-gray-500">Lv.{user.currentLevel}</span>
-                    </div>
+                    <p className="text-sm font-medium">{isKidsMode ? displayName : user.name}</p>
+                    {!isKidsMode && (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" size="sm" className={cn('capitalize', rankColor)}>
+                          {user.currentRank}
+                        </Badge>
+                        <span className="text-xs text-gray-500">Lv.{user.currentLevel}</span>
+                      </div>
+                    )}
+                    {isKidsMode && <span className="text-xs text-gray-500">Área Kids</span>}
                   </div>
                 </DropdownMenuLabel>
 
                 <DropdownMenuSeparator />
 
-                {/* XP Display (mobile) */}
-                <div className="sm:hidden px-2 py-1.5">
-                  <div className="flex items-center gap-2 px-2 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                    <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                    <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                      {user.totalXp.toLocaleString()} XP
-                    </span>
+                {/* XP Display (mobile, hidden in Kids mode) */}
+                {!isKidsMode && (
+                  <div className="sm:hidden px-2 py-1.5">
+                    <div className="flex items-center gap-2 px-2 py-1.5 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                      <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                        {user.totalXp.toLocaleString()} XP
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <DropdownMenuSeparator className="sm:hidden" />
+                {!isKidsMode && <DropdownMenuSeparator className="sm:hidden" />}
 
-                {/* Menu Items */}
-                <DropdownMenuItem asChild>
-                  <Link href="/pt/agora/perfil" className="flex items-center gap-2 cursor-pointer">
-                    <User className="w-4 h-4" />
-                    <span>Meu Perfil</span>
-                  </Link>
-                </DropdownMenuItem>
+                {/* Menu Items - Standard mode only */}
+                {!isKidsMode && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/pt/agora/perfil"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>Meu Perfil</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link href="/pt/agora/ranking" className="flex items-center gap-2 cursor-pointer">
-                    <Trophy className="w-4 h-4" />
-                    <span>Ranking</span>
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/pt/agora/ranking"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Trophy className="w-4 h-4" />
+                        <span>Ranking</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/pt/agora/configuracoes"
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>Configuracoes</span>
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/pt/agora/configuracoes"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Configuracoes</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/pt/agora/atividades"
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Activity className="w-4 h-4" />
-                    <span>Atividades</span>
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/pt/agora/atividades"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Activity className="w-4 h-4" />
+                        <span>Atividades</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link href="/pt/agora/ajuda" className="flex items-center gap-2 cursor-pointer">
-                    <HelpCircle className="w-4 h-4" />
-                    <span>Ajuda</span>
-                  </Link>
-                </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/pt/agora/ajuda"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <HelpCircle className="w-4 h-4" />
+                        <span>Ajuda</span>
+                      </Link>
+                    </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
+                  </>
+                )}
 
                 {/* Logout/Reset */}
                 <DropdownMenuItem
@@ -308,7 +346,7 @@ export function AgoraHeader({ user, onLogout, isDemoMode = false, className }: A
                   ) : (
                     <>
                       <LogOut className="w-4 h-4" />
-                      <span>Sair</span>
+                      <span>{isKidsMode ? 'Sair da Área Kids' : 'Sair'}</span>
                     </>
                   )}
                 </DropdownMenuItem>

@@ -70,7 +70,7 @@ export function KidsVideoCard({
       {/* Thumbnail Container */}
       <div className="relative aspect-video bg-muted">
         <Image
-          src={video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
+          src={video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
           alt={video.title}
           fill
           className="object-cover"

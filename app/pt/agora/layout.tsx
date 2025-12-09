@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AgoraProvider, useAgora } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
+import { useKids } from '@/hooks/use-kids'
 import { AgoraHeader, CelebrationModal, SessionManager, LogoutModal } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
@@ -65,6 +66,9 @@ const noHeaderPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/con
 // Pages that can be accessed without completing onboarding
 const publicPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/contract']
 
+// Kids area pages (use simplified header)
+const kidsPages = ['/pt/agora/kids']
+
 function AgoraLoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center academy-bg">
@@ -81,8 +85,13 @@ function AgoraLoadingFallback() {
 // Header wrapper that uses the Agora hook with logout confirmation
 function AgoraHeaderWrapper() {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, isAuthenticated, logout, endSession, currentSession } = useAgora()
+  const { isKidsMode, childName, disableKidsMode } = useKids()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+
+  // Check if we're on a kids page
+  const isOnKidsPage = kidsPages.some((page) => pathname?.startsWith(page))
 
   const handleLogoutRequest = () => {
     setShowLogoutModal(true)
@@ -92,6 +101,12 @@ function AgoraHeaderWrapper() {
     // End active session if exists
     if (currentSession) {
       await endSession()
+    }
+    // If in kids mode, just disable kids mode and redirect to agora
+    if (isOnKidsPage && isKidsMode) {
+      await disableKidsMode()
+      router.push('/pt/agora')
+      return
     }
     await logout()
     router.push('/pt/agora/login')
@@ -119,6 +134,8 @@ function AgoraHeaderWrapper() {
         }}
         onLogout={handleLogoutRequest}
         isDemoMode={false}
+        isKidsMode={isOnKidsPage && isKidsMode}
+        kidsChildName={childName || undefined}
       />
       <LogoutModal
         isOpen={showLogoutModal}
