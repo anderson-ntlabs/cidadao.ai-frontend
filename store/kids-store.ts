@@ -264,6 +264,9 @@ export const useKidsStore = create<KidsState>()(
       // Load existing profile
       loadKidsProfile: async (parentUserId) => {
         const supabase = createClient()
+        set({ isLoading: true })
+
+        logger.info('[Kids Store] Loading kids profile', { parentUserId })
 
         try {
           // Use maybeSingle() instead of single() to avoid 406 error when no profile exists
@@ -275,14 +278,15 @@ export const useKidsStore = create<KidsState>()(
             .maybeSingle()
 
           if (error) {
-            logger.error('Error loading kids profile', { error })
-            set({ isKidsMode: false, kidsProfile: null })
+            logger.error('[Kids Store] Error loading kids profile', { error, parentUserId })
+            set({ isKidsMode: false, kidsProfile: null, isLoading: false })
             return null
           }
 
           if (!data) {
             // No profile exists - this is normal for new users
-            set({ isKidsMode: false, kidsProfile: null })
+            logger.info('[Kids Store] No kids profile found', { parentUserId })
+            set({ isKidsMode: false, kidsProfile: null, isLoading: false })
             return null
           }
 
@@ -300,10 +304,15 @@ export const useKidsStore = create<KidsState>()(
             isActive: data.is_active,
           }
 
-          set({ kidsProfile: profile, isKidsMode: true })
+          logger.info('[Kids Store] Kids profile loaded successfully', {
+            profileId: profile.id,
+            childName: profile.childName,
+          })
+          set({ kidsProfile: profile, isKidsMode: true, isLoading: false })
           return profile
         } catch (error) {
-          logger.error('Failed to load kids profile', { error })
+          logger.error('[Kids Store] Failed to load kids profile', { error })
+          set({ isLoading: false })
           return null
         }
       },

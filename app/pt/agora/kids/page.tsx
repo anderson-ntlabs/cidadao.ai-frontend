@@ -93,14 +93,15 @@ export default function KidsEntryPage() {
   useEffect(() => {
     if (kidsLoading) return // Wait for profile to load
 
+    // Mark that we've checked the profile
     if (!hasCheckedProfile) {
       setHasCheckedProfile(true)
+    }
 
-      // If Kids mode is active and we have a profile, go directly to dashboard
-      if (isKidsMode && kidsProfile) {
-        router.replace('/pt/agora/kids/dashboard')
-        return
-      }
+    // If Kids mode is active and we have a profile, redirect to dashboard
+    // This check runs whenever isKidsMode or kidsProfile changes
+    if (isKidsMode && kidsProfile) {
+      router.replace('/pt/agora/kids/dashboard')
     }
   }, [isKidsMode, kidsProfile, kidsLoading, hasCheckedProfile, router])
 
