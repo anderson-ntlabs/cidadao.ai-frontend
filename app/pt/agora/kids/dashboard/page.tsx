@@ -20,7 +20,7 @@ import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { getKidsAgents } from '@/data/agents'
 import { KIDS_VIDEOS } from '@/data/kids-videos'
 import { GlassCard } from '@/components/ui/glass-card'
-import { KidsCertificateDisplay, KidsLevelBadges } from '@/components/kids'
+import { KidsCertificateDisplay, KidsLevelBadges, KidsAvatarSelector } from '@/components/kids'
 import {
   Sparkles,
   PlayCircle,
@@ -45,27 +45,10 @@ import {
 import { calculateKidsLevel } from '@/lib/agora/kids-certificate-requirements'
 import type { KidsTelemetryData } from '@/lib/agora/kids-certificate-requirements'
 
-// Map avatar IDs to image paths (Brazilian cartoon characters)
-const AVATAR_IMAGES: Record<string, string> = {
-  monica: '/kids/monica.jpg',
-  cocorico: '/kids/cocorico.jpg',
-  ze_carioca: '/kids/ze_carioca.png',
-  jorel: '/kids/jorel.webp',
-  luluzinha: '/kids/luluzinha.webp',
-  // Fallback for legacy avatars
-  lobato: '/agents/monteiro-lobato.png',
-  tarsila: '/agents/tarsila-amaral.png',
-}
-
-function getAvatarImage(avatarId: string | null): string {
-  if (!avatarId) return AVATAR_IMAGES.monica
-  return AVATAR_IMAGES[avatarId] || AVATAR_IMAGES.monica
-}
-
 export default function KidsDashboardPage() {
   const router = useRouter()
   const { isReady, isLoading } = useRequireKidsMode()
-  const { childName, parentEmail, childAvatar, trackAgent, trackVideo } = useKids()
+  const { childName, parentEmail, childAvatar, trackAgent, trackVideo, updateAvatar } = useKids()
 
   const [showCertificate, setShowCertificate] = useState(false)
   const [telemetry, setTelemetry] = useState<KidsTelemetryData | null>(null)
@@ -154,22 +137,17 @@ export default function KidsDashboardPage() {
       <GlassCard className="overflow-hidden bg-gradient-to-br from-kids-coral/10 via-kids-yellow/10 to-kids-turquoise/10 dark:from-kids-coral/5 dark:via-kids-yellow/5 dark:to-kids-turquoise/5">
         <div className="p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            {/* Avatar */}
+            {/* Avatar with selector */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-kids-turquoise to-kids-coral p-1 shadow-lg">
-                <div className="w-full h-full rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                  <Image
-                    src={getAvatarImage(childAvatar)}
-                    alt="Avatar"
-                    width={80}
-                    height={80}
-                    className="object-cover"
-                  />
-                </div>
-              </div>
+              <KidsAvatarSelector
+                currentAvatar={childAvatar}
+                onAvatarChange={updateAvatar}
+                size="lg"
+                showEditButton={true}
+              />
               {certificateInfo?.currentLevel && (
                 <div
-                  className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-lg"
+                  className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-lg z-10"
                   style={{ backgroundColor: certificateInfo.currentLevel.color }}
                 >
                   {certificateInfo.currentLevel.emoji}

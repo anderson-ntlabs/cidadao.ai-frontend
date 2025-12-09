@@ -13,22 +13,7 @@
 import { useRouter } from 'next/navigation'
 import { AgoraHeader } from '@/components/agora/agora-header'
 import { useKids } from '@/hooks/use-kids'
-
-// Avatar images mapping for header display
-const AVATAR_IMAGES: Record<string, string> = {
-  monica: '/kids/monica.jpg',
-  cocorico: '/kids/cocorico.jpg',
-  ze_carioca: '/kids/ze_carioca.png',
-  jorel: '/kids/jorel.webp',
-  luluzinha: '/kids/luluzinha.webp',
-  lobato: '/agents/monteiro-lobato.png',
-  tarsila: '/agents/tarsila-amaral.png',
-}
-
-function getAvatarImage(avatarId: string | null): string {
-  if (!avatarId) return AVATAR_IMAGES.monica
-  return AVATAR_IMAGES[avatarId] || AVATAR_IMAGES.monica
-}
+import { getAvatarPath } from './kids-avatar-selector'
 
 export function KidsHeader() {
   const router = useRouter()
@@ -42,7 +27,7 @@ export function KidsHeader() {
   // Create user object for AgoraHeader
   const kidsUser = {
     name: childName || 'Amiguinho',
-    avatar: getAvatarImage(childAvatar),
+    avatar: getAvatarPath(childAvatar),
     totalXp: 0, // Hidden in Kids mode
     currentLevel: 1, // Hidden in Kids mode
     currentRank: 'novato', // Hidden in Kids mode

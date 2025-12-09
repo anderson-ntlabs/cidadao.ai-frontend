@@ -13,3 +13,9 @@ export { KidsContractModal } from './kids-contract-modal'
 export { KidsProgressTimeline, KidsLevelBadges } from './kids-progress-timeline'
 export { KidsCertificateDisplay } from './kids-certificate-display'
 export { KidsHeader } from './kids-header'
+export {
+  KidsAvatarSelector,
+  KIDS_AVATARS,
+  getAvatarPath,
+  getAvatarName,
+} from './kids-avatar-selector'

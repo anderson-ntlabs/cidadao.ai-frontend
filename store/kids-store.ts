@@ -78,6 +78,7 @@ interface KidsState {
   ) => Promise<boolean>
   disableKidsMode: (parentUserId: string) => Promise<boolean>
   loadKidsProfile: (parentUserId: string) => Promise<KidsProfile | null>
+  updateChildAvatar: (avatarId: KidsAvatarType) => Promise<boolean>
 
   // Session management
   startKidsSession: () => Promise<void>
@@ -304,6 +305,41 @@ export const useKidsStore = create<KidsState>()(
         } catch (error) {
           logger.error('Failed to load kids profile', { error })
           return null
+        }
+      },
+
+      // Update child avatar
+      updateChildAvatar: async (avatarId) => {
+        const { kidsProfile } = get()
+
+        if (!kidsProfile) {
+          logger.warn('Cannot update avatar without kids profile')
+          return false
+        }
+
+        const supabase = createClient()
+
+        try {
+          const { error } = await supabase
+            .from('agora_kids_profiles')
+            .update({ child_avatar: avatarId })
+            .eq('id', kidsProfile.id)
+
+          if (error) throw error
+
+          // Update local state
+          set({
+            kidsProfile: {
+              ...kidsProfile,
+              childAvatar: avatarId,
+            },
+          })
+
+          logger.info('Child avatar updated', { avatarId })
+          return true
+        } catch (error) {
+          logger.error('Failed to update child avatar', { error })
+          return false
         }
       },
 

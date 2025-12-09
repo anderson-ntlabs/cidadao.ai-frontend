@@ -41,6 +41,7 @@ export interface UseKidsReturn {
     contractId?: string
   ) => Promise<boolean>
   disableKidsMode: () => Promise<boolean>
+  updateAvatar: (avatarId: string) => Promise<boolean>
   startSession: () => Promise<void>
   endSession: () => Promise<void>
   trackVideo: (videoId: string) => void
@@ -93,6 +94,7 @@ export function useKids(): UseKidsReturn {
     enableKidsMode: storeEnableKidsMode,
     disableKidsMode: storeDisableKidsMode,
     loadKidsProfile,
+    updateChildAvatar,
     startKidsSession,
     endKidsSession,
     trackVideoWatched,
@@ -216,6 +218,7 @@ export function useKids(): UseKidsReturn {
     // Actions
     enableKidsMode,
     disableKidsMode,
+    updateAvatar: updateChildAvatar,
     startSession: startKidsSession,
     endSession: endKidsSession,
     trackVideo: trackVideoWatched,
