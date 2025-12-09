@@ -249,24 +249,24 @@ export function GamificationCard({ className }: GamificationCardProps) {
   return (
     <div className={cn('academy-card rounded-xl overflow-hidden', className)}>
       {/* Header */}
-      <div className="p-4 border-b border-[hsl(var(--academy-border))] bg-[hsl(var(--academy-accent)/0.1)]">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
-              <Target className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+              <Target className="w-4 h-4 text-slate-600 dark:text-slate-300" />
             </div>
             <div>
-              <h3 className="font-semibold academy-text">Desafios</h3>
-              <p className="text-xs academy-text-muted">Ganhe XP extra!</p>
+              <h3 className="font-medium text-sm academy-text">Desafios</h3>
+              <p className="text-[10px] academy-text-muted">Ganhe XP extra</p>
             </div>
           </div>
 
           {/* Streak Multiplier Badge */}
           {streakMultiplier > 1 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40">
-              <Flame className="w-3.5 h-3.5 text-orange-500" />
-              <span className="text-xs font-bold text-orange-600 dark:text-orange-400">
-                {Math.round((streakMultiplier - 1) * 100)}% bonus
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30">
+              <Flame className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+              <span className="text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                +{Math.round((streakMultiplier - 1) * 100)}%
               </span>
             </div>
           )}
@@ -276,30 +276,28 @@ export function GamificationCard({ className }: GamificationCardProps) {
       <div className="p-4 space-y-4">
         {/* Daily Bonus */}
         {hasDailyBonus && (
-          <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+          <div className="p-3 rounded-lg bg-emerald-600 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <Gift className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Gift className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="font-semibold">Bonus Diario</p>
-                  <p className="text-xs text-white/80">
-                    +{Math.round(5 * streakMultiplier)} XP disponivel!
-                  </p>
+                  <p className="font-medium text-sm">Bonus Diario</p>
+                  <p className="text-xs text-white/70">+{Math.round(5 * streakMultiplier)} XP</p>
                 </div>
               </div>
               <Button
                 onClick={handleClaimBonus}
                 disabled={isClaimingBonus}
-                className="bg-white/20 hover:bg-white/30 text-white border-0"
+                className="bg-white/20 hover:bg-white/30 text-white border-0 h-8 text-xs"
                 size="sm"
               >
                 {isClaimingBonus ? (
-                  <Sparkles className="w-4 h-4 animate-spin" />
+                  <Sparkles className="w-3.5 h-3.5 animate-spin" />
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-1" />
+                    <Sparkles className="w-3.5 h-3.5 mr-1" />
                     Coletar
                   </>
                 )}
@@ -389,16 +387,16 @@ export function GamificationCard({ className }: GamificationCardProps) {
 
         {/* Streak Info */}
         {user.currentStreak > 0 && (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+          <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-orange-500" />
-              <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                {user.currentStreak} dias consecutivos!
+              <Flame className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span className="text-xs font-medium academy-text">
+                {user.currentStreak} dias consecutivos
               </span>
             </div>
             {user.currentStreak >= 3 && (
-              <span className="text-xs text-orange-600 dark:text-orange-400">
-                Bonus {Math.round((streakMultiplier - 1) * 100)}% ativo
+              <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                +{Math.round((streakMultiplier - 1) * 100)}% bonus
               </span>
             )}
           </div>

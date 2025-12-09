@@ -49,7 +49,7 @@ import {
   Users,
 } from 'lucide-react'
 
-// Track definitions with modules
+// Track definitions with modules and prerequisites
 const TRACKS = [
   {
     id: 'introducao' as const,
@@ -73,13 +73,14 @@ const TRACKS = [
     duration: '1-2 horas',
     xpTotal: 500,
     isIntro: true,
+    prerequisite: null, // No prerequisite - entry point
     modules: [
       { id: 1, name: 'Bem-vindo ao Cidadao.AI', type: 'video', duration: '10min' },
       { id: 2, name: 'Como funciona a Agora', type: 'reading', duration: '15min' },
       { id: 3, name: 'Conheca os Agentes de IA', type: 'video', duration: '20min' },
-      { id: 4, name: 'Transparencia e Dados Abertos', type: 'reading', duration: '15min' },
+      { id: 4, name: 'Configurando seu GitHub', type: 'project', duration: '20min' },
       { id: 5, name: 'Converse com Abaporu', type: 'chat', duration: '10min' },
-      { id: 6, name: 'Configure seu Perfil', type: 'project', duration: '15min' },
+      { id: 6, name: 'Proximo Passo: Sua Trilha', type: 'reading', duration: '10min' },
     ],
   },
   {
@@ -102,6 +103,7 @@ const TRACKS = [
     },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    prerequisite: 'introducao', // Requires Introdução to be completed
     modules: [
       { id: 1, name: 'Fundamentos de APIs', type: 'video', duration: '45min' },
       { id: 2, name: 'FastAPI na pratica', type: 'reading', duration: '30min' },
@@ -131,6 +133,7 @@ const TRACKS = [
     },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    prerequisite: 'introducao', // Requires Introdução to be completed
     modules: [
       { id: 1, name: 'React fundamentals', type: 'video', duration: '50min' },
       { id: 2, name: 'Next.js App Router', type: 'reading', duration: '40min' },
@@ -160,6 +163,7 @@ const TRACKS = [
     },
     duration: '6-8 semanas',
     xpTotal: 2500,
+    prerequisite: 'introducao', // Requires Introdução to be completed
     modules: [
       { id: 1, name: 'Introducao a IA', type: 'video', duration: '40min' },
       { id: 2, name: 'LLMs e Prompts', type: 'reading', duration: '35min' },
@@ -190,6 +194,7 @@ const TRACKS = [
     },
     duration: '4-6 semanas',
     xpTotal: 2000,
+    prerequisite: 'introducao', // Requires Introdução to be completed
     modules: [
       { id: 1, name: 'Docker essencial', type: 'video', duration: '50min' },
       { id: 2, name: 'GitHub Actions', type: 'reading', duration: '35min' },
@@ -220,6 +225,8 @@ function TrackCard({
   onToggle,
   onStart,
   progress,
+  isLocked,
+  prerequisiteName,
 }: {
   track: (typeof TRACKS)[0]
   isEnrolled: boolean
@@ -227,6 +234,8 @@ function TrackCard({
   onToggle: () => void
   onStart: () => void
   progress: number
+  isLocked: boolean
+  prerequisiteName?: string
 }) {
   const Icon = track.icon
   const completedModules = Math.floor((progress / 100) * track.modules.length)
@@ -235,6 +244,7 @@ function TrackCard({
     <GlassCard
       className={cn(
         'transition-all duration-300 overflow-hidden',
+        isLocked && 'opacity-75',
         isExpanded && 'ring-2 ring-offset-2',
         isExpanded && track.color === 'blue' && 'ring-blue-500',
         isExpanded && track.color === 'purple' && 'ring-purple-500',
@@ -252,11 +262,15 @@ function TrackCard({
           {/* Icon */}
           <div
             className={cn(
-              'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-lg flex-shrink-0',
-              track.gradient
+              'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 relative',
+              isLocked ? 'bg-gray-400 dark:bg-gray-600' : cn('bg-gradient-to-br', track.gradient)
             )}
           >
-            <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            {isLocked ? (
+              <Lock className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            ) : (
+              <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+            )}
           </div>
 
           {/* Info */}
@@ -265,17 +279,30 @@ function TrackCard({
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                 {track.name}
               </h3>
-              {isEnrolled && (
+              {isLocked ? (
+                <Badge variant="secondary" size="sm">
+                  <Lock className="w-3 h-3" />
+                  Bloqueada
+                </Badge>
+              ) : isEnrolled ? (
                 <Badge variant="success" size="sm">
                   <CheckCircle2 className="w-3 h-3" />
                   Ativa
                 </Badge>
-              )}
+              ) : null}
             </div>
-            <p className={cn('text-sm font-medium', track.textColor)}>{track.subtitle}</p>
+            <p className={cn('text-sm font-medium', isLocked ? 'text-gray-400' : track.textColor)}>
+              {track.subtitle}
+            </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
               {track.description}
             </p>
+            {isLocked && prerequisiteName && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
+                <Lock className="w-3 h-3" />
+                Requer conclusao da trilha "{prerequisiteName}"
+              </p>
+            )}
 
             {/* Quick stats */}
             <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
@@ -431,7 +458,25 @@ function TrackCard({
               'bg-gray-50 dark:bg-gray-800/50'
             )}
           >
-            {isEnrolled ? (
+            {isLocked ? (
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <Lock className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Complete a trilha{' '}
+                    <strong className="text-emerald-600 dark:text-emerald-400">
+                      {prerequisiteName}
+                    </strong>{' '}
+                    para desbloquear
+                  </span>
+                </div>
+                <Link href="/pt/agora/trilhas/introducao/1">
+                  <Button variant="secondary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                    Ir para {prerequisiteName}
+                  </Button>
+                </Link>
+              </div>
+            ) : isEnrolled ? (
               <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   <span className="font-medium text-gray-900 dark:text-white">
@@ -493,6 +538,24 @@ export default function AgoraTrilhasPage() {
     if (!track) return 0
     const xpPerTrack = Math.floor((user?.totalXp || 0) / Math.max(enrolledTracks.length, 1))
     return Math.min(100, Math.floor((xpPerTrack / track.xpTotal) * 100))
+  }
+
+  // Check if a track is completed (100% progress or all modules done)
+  const isTrackCompleted = (trackId: string) => {
+    return getTrackProgress(trackId) >= 100
+  }
+
+  // Check if track is locked based on prerequisites
+  const isTrackLocked = (track: (typeof TRACKS)[0]) => {
+    if (!track.prerequisite) return false
+    return !isTrackCompleted(track.prerequisite)
+  }
+
+  // Get prerequisite track name
+  const getPrerequisiteName = (prerequisiteId: string | null) => {
+    if (!prerequisiteId) return undefined
+    const prereqTrack = TRACKS.find((t) => t.id === prerequisiteId)
+    return prereqTrack?.name
   }
 
   const handleStartTrack = (trackId: string) => {
@@ -591,19 +654,26 @@ export default function AgoraTrilhasPage() {
 
         {/* Empty State */}
         {enrolledTracks.length === 0 && (
-          <GlassCard className="mb-6 border-dashed border-2">
+          <GlassCard className="mb-6 border-dashed border-2 border-emerald-300 dark:border-emerald-700">
             <GlassCardContent className="p-6">
               <div className="text-center py-4">
-                <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                  <Target className="w-8 h-8 text-gray-400" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-4">
+                  <GraduationCap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">
-                  Escolha sua primeira trilha
+                  Comece pela Introducao
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                  Cada trilha te guia do basico ao avancado com mentores IA, videos, leituras e
-                  projetos praticos. Voce pode fazer varias trilhas!
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-4">
+                  A trilha de{' '}
+                  <strong className="text-emerald-600 dark:text-emerald-400">Introducao</strong> e
+                  obrigatoria para desbloquear as trilhas avancadas. Configure seu GitHub e conheca
+                  os agentes de IA!
                 </p>
+                <Link href="/pt/agora/trilhas/introducao/1">
+                  <Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                    Comecar Introducao
+                  </Button>
+                </Link>
               </div>
             </GlassCardContent>
           </GlassCard>
@@ -620,6 +690,8 @@ export default function AgoraTrilhasPage() {
               onToggle={() => handleToggleTrack(track.id)}
               onStart={() => handleStartTrack(track.id)}
               progress={getTrackProgress(track.id)}
+              isLocked={isTrackLocked(track)}
+              prerequisiteName={getPrerequisiteName(track.prerequisite)}
             />
           ))}
         </div>

@@ -141,14 +141,14 @@ function formatRelativeTime(timestamp: string): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
-// Get event icon color
+// Get event icon color - Sober palette
 function getEventColor(type: TimelineEvent['type']): string {
   const colors: Record<TimelineEvent['type'], string> = {
-    xp: 'from-yellow-500 to-amber-600',
-    diary: 'from-purple-500 to-violet-600',
-    session: 'from-green-500 to-emerald-600',
-    badge: 'from-blue-500 to-cyan-600',
-    milestone: 'from-pink-500 to-rose-600',
+    xp: 'from-amber-500 to-amber-600',
+    diary: 'from-slate-500 to-slate-600',
+    session: 'from-emerald-500 to-emerald-600',
+    badge: 'from-slate-600 to-slate-700',
+    milestone: 'from-emerald-600 to-emerald-700',
   }
   return colors[type]
 }
@@ -183,17 +183,19 @@ export function TimelineCard({
       <GlassCardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Clock className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-slate-600 dark:text-slate-300" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Linha do Tempo</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Atividade recente</p>
+              <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                Linha do Tempo
+              </h3>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400">Atividade recente</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs font-medium">
-              +{todayXp} XP hoje
+            <div className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+              +{todayXp} XP
             </div>
           </div>
         </div>
@@ -262,11 +264,11 @@ export function TimelineCard({
                 variant="ghost"
                 size="sm"
                 onClick={onOpenModal}
-                className="w-full mt-4 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                className="w-full mt-4 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-xs"
               >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Ver linha do tempo completa
-                <ChevronRight className="w-4 h-4 ml-1" />
+                <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
+                Ver tudo
+                <ChevronRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             )}
           </>
