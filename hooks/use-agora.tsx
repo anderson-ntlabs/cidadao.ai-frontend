@@ -620,19 +620,59 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      // Load profile
-      const { data: profile } = await supabase
+      // Load profile (use maybeSingle to handle case where profile doesn't exist)
+      let { data: profile } = await supabase
         .from('agora_profiles')
         .select('*')
         .eq('user_id', authUser.id)
-        .single()
+        .maybeSingle()
 
-      // Load consent
+      // Auto-create profile if it doesn't exist (first login)
+      if (!profile) {
+        const metadata = authUser.user_metadata || {}
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.full_name || metadata.name || 'User')}&background=16a34a&color=fff&size=128`
+
+        const { data: newProfile, error: createError } = await supabase
+          .from('agora_profiles')
+          .insert({
+            user_id: authUser.id,
+            email: authUser.email || '',
+            full_name: metadata.full_name || metadata.name || 'Estudante',
+            avatar_url: metadata.avatar_url || defaultAvatar,
+            github_username: metadata.user_name || null,
+            total_xp: 0,
+            current_level: 1,
+            current_rank: 'novato',
+            tracks: [],
+            current_streak: 0,
+            longest_streak: 0,
+            total_sessions: 0,
+            total_time_minutes: 0,
+            total_videos_completed: 0,
+            has_accepted_terms: false,
+            has_completed_onboarding: false,
+            onboarding_step: 0,
+            is_superuser: false,
+            is_active: true,
+            enrolled_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          logger.error('Failed to create Agora profile', { error: createError })
+        } else {
+          profile = newProfile
+          logger.info('Created new Agora profile', { userId: authUser.id })
+        }
+      }
+
+      // Load consent (use maybeSingle - consent may not exist yet)
       const { data: consent } = await supabase
         .from('agora_consent')
         .select('id')
         .eq('user_id', authUser.id)
-        .single()
+        .maybeSingle()
 
       // Build user object
       const metadata = authUser.user_metadata || {}
