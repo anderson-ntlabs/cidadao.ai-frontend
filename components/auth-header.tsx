@@ -1,13 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, Home, MessageSquare, LayoutDashboard, Bell, User, Settings, LogOut } from 'lucide-react'
+import {
+  Menu,
+  X,
+  Home,
+  MessageSquare,
+  LayoutDashboard,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+} from 'lucide-react'
 import Image from 'next/image'
 import { ThemeToggle } from './theme-toggle'
 import { Button, NotificationDropdown } from '@/components/ui'
 import { toast } from '@/hooks/use-toast'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 
 interface AuthHeaderProps {
   locale: 'pt' | 'en'
@@ -18,7 +29,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  
+
   // System is PT-only (English landing page doesn't use authenticated routes)
   // Phase 1: Only Home and Chat are active
   const navigation = [
@@ -27,10 +38,15 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
     { name: 'Investigações', href: '/pt/app/investigacoes', icon: LayoutDashboard, active: true },
     { name: 'Notificações', href: '/pt/app/notificacoes', icon: Bell, active: true },
   ]
-      
-  const handleLogout = () => {
+
+  const handleLogout = async () => {
+    // Use centralized navigation session service for complete cleanup
+    await navigationSessionService.logout()
+
+    // Legacy cleanup (for backwards compatibility)
     localStorage.removeItem('user')
     localStorage.removeItem('isAuthenticated')
+
     toast.success(
       locale === 'pt' ? 'Até logo!' : 'See you later!',
       locale === 'pt' ? 'Logout realizado com sucesso' : 'Logged out successfully'
@@ -84,7 +100,13 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                       ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                       : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
-                  data-tour={item.href.includes('chat') ? 'chat-button' : item.href.includes('notificacoes') ? 'notifications' : undefined}
+                  data-tour={
+                    item.href.includes('chat')
+                      ? 'chat-button'
+                      : item.href.includes('notificacoes')
+                        ? 'notifications'
+                        : undefined
+                  }
                 >
                   <item.icon className="w-4 h-4" />
                   {item.name}
@@ -97,10 +119,10 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
           <div className="flex items-center gap-3">
             {/* Notifications */}
             <NotificationDropdown locale={locale} />
-            
+
             {/* Theme Toggle */}
             <ThemeToggle />
-            
+
             {/* User Menu */}
             <div className="hidden md:flex items-center gap-3">
               <Link href={`/${locale}/app/perfil`}>
@@ -109,13 +131,8 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                   {user?.name || 'Perfil'}
                 </Button>
               </Link>
-              
-              <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={handleLogout}
-                className="gap-2"
-              >
+
+              <Button variant="secondary" size="sm" onClick={handleLogout} className="gap-2">
                 <LogOut className="w-4 h-4" />
                 {locale === 'pt' ? 'Sair' : 'Logout'}
               </Button>
@@ -169,7 +186,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                   </Link>
                 )
               })}
-              
+
               <div className="border-t border-gray-200 dark:border-gray-800 pt-3 mt-3">
                 <Link
                   href={`/${locale}/app/perfil`}
@@ -188,7 +205,7 @@ export function AuthHeader({ locale, user }: AuthHeaderProps) {
                   <Settings className="w-4 h-4" />
                   {locale === 'pt' ? 'Configurações' : 'Settings'}
                 </Link>
-                
+
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"

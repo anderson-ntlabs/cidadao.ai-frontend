@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/lib/api/auth.service'
 import { createLogger } from '@/lib/logger'
 import { toast } from './use-toast'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 
 const logger = createLogger('Auth')
 
@@ -171,19 +172,17 @@ export function useAuth(): UseAuthReturn {
     setIsLoading(true)
 
     try {
+      // Use centralized navigation session service for complete cleanup
+      await navigationSessionService.logout()
+
       // Try real logout if authenticated with backend
       if (authService.isAuthenticated()) {
         await authService.logout()
       }
-
-      // Also logout from Supabase
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      await supabase.auth.signOut()
     } catch (error) {
       logger.error('Logout error', { error })
     } finally {
-      // Always clear local state
+      // Always clear local state (legacy cleanup for backwards compatibility)
       localStorage.removeItem('user')
       localStorage.removeItem('isAuthenticated')
       localStorage.removeItem('redirectAfterLogin')

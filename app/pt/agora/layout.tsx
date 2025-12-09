@@ -10,6 +10,7 @@ import { useKids } from '@/hooks/use-kids'
 import { AgoraHeader, CelebrationModal, SessionManager, LogoutModal } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
 
 /**
@@ -83,30 +84,36 @@ function AgoraLoadingFallback() {
 }
 
 // Session cleanup on page close/refresh
+// Now uses centralized NavigationSessionService for consistent cleanup
 function useSessionCleanup() {
-  const { currentSession, endSession } = useAgora()
-  const { isKidsMode, endSession: endKidsSession, isSessionActive } = useKids()
+  const { currentSession, isAuthenticated, user } = useAgora()
+  const { isKidsMode, isSessionActive } = useKids()
 
+  // Sync navigation session service with current state
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      // Initialize auth session in the service
+      navigationSessionService.initAuthSession(user.id)
+      // Enter Agora mode
+      navigationSessionService.enterAgora()
+    }
+  }, [isAuthenticated, user?.id])
+
+  // Sync Kids mode state
+  useEffect(() => {
+    if (isKidsMode && isSessionActive) {
+      navigationSessionService.enterKidsMode()
+    }
+  }, [isKidsMode, isSessionActive])
+
+  // The NavigationSessionService already handles beforeunload events
+  // This effect is kept for backwards compatibility and logging
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // End Agora session
-      if (currentSession) {
-        // Use sendBeacon for reliable cleanup on page close
-        navigator.sendBeacon(
-          '/api/agora/end-session',
-          JSON.stringify({
-            sessionId: currentSession.id,
-          })
-        )
-      }
-      // End Kids session
-      if (isKidsMode && isSessionActive) {
-        navigator.sendBeacon(
-          '/api/kids/end-session',
-          JSON.stringify({
-            timestamp: Date.now(),
-          })
-        )
+      // NavigationSessionService handles the actual cleanup
+      // This is just for logging/debugging
+      if (currentSession || (isKidsMode && isSessionActive)) {
+        console.debug('[Agora Layout] Page unloading, NavigationSessionService will handle cleanup')
       }
     }
 
@@ -131,15 +138,18 @@ function AgoraHeaderWrapper() {
   }
 
   const handleLogoutConfirm = async () => {
-    // End active session if exists
-    if (currentSession) {
-      await endSession()
-    }
-    // If in kids mode, just disable kids mode and redirect to agora
+    // If in kids mode, just exit kids mode and redirect to agora
     if (isOnKidsPage && isKidsMode) {
+      await navigationSessionService.exitKidsMode()
       await disableKidsMode()
       router.push('/pt/agora')
       return
+    }
+
+    // Full logout - NavigationSessionService handles all cleanup
+    // End active session if exists
+    if (currentSession) {
+      await endSession()
     }
     await logout()
     router.push('/pt/agora/login')

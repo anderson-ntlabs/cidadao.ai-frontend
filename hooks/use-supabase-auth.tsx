@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import { toast } from './use-toast'
 import { createLogger } from '@/lib/logger'
+import { navigationSessionService } from '@/lib/services/navigation-session.service'
 
 const logger = createLogger('SupabaseAuth')
 
@@ -270,17 +271,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      // Use centralized navigation session service for complete cleanup
+      await navigationSessionService.logout()
 
       // Clear state
       setUser(null)
       setIsAuthenticated(false)
 
-      // Clear any auth-related local storage
+      // Clear any auth-related local storage (legacy cleanup)
       localStorage.removeItem('redirectAfterLogin')
-
-      // Clear Supabase session from storage
       localStorage.removeItem('supabase.auth.token')
       sessionStorage.clear()
 
@@ -290,13 +289,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Force redirect to landing page with full page reload
       // Using window.location instead of router to ensure clean state
       window.location.href = '/pt'
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Tente novamente'
       logger.error('Logout error', { error })
-      toast.error('Erro ao sair', error.message || 'Tente novamente')
+      toast.error('Erro ao sair', errorMessage)
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, router])
+  }, [])
 
   const refreshSession = useCallback(async () => {
     try {
