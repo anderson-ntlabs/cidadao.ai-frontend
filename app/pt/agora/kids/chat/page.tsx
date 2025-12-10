@@ -3,16 +3,16 @@
  *
  * Simplified chat interface for children to interact with
  * Monteiro Lobato and Tarsila do Amaral agents.
- * Uses Agora Design System with Kids theme.
+ * Uses SSE streaming for real-time responses.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-09 - Consolidated with Agora design system
+ * @updated 2025-12-10 - Fixed SSE streaming, added per-agent state
  */
 
 'use client'
 
-import { useState, useRef, useEffect, Suspense } from 'react'
+import { useState, useRef, useEffect, Suspense, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { getKidsAgents, getAgentById } from '@/data/agents'
@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Send, Loader2, ArrowLeft, Sparkles, Heart, ArrowRight } from 'lucide-react'
+import { Send, Loader2, ArrowLeft, Sparkles, Heart, ArrowRight, MessageCircle } from 'lucide-react'
 import { trackKidsChatMessage } from '@/lib/analytics/kids-tracker'
 
 interface Message {
@@ -29,7 +29,37 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   agentId?: string
+  isStreaming?: boolean
 }
+
+// Conversation starters for each agent
+const CONVERSATION_STARTERS: Record<string, { emoji: string; text: string }[]> = {
+  monteiro_lobato: [
+    { emoji: '📚', text: 'Me conta uma história sobre programação!' },
+    { emoji: '🔮', text: 'O que são variáveis mágicas?' },
+    { emoji: '🎭', text: 'Como a Emília aprenderia a programar?' },
+    { emoji: '🌟', text: 'Me explica loops de um jeito divertido!' },
+  ],
+  tarsila: [
+    { emoji: '🎨', text: 'Como posso criar arte com código?' },
+    { emoji: '🌈', text: 'Me ensina sobre cores no computador!' },
+    { emoji: '✨', text: 'O que é design de interface?' },
+    { emoji: '🖼️', text: 'Como fazer animações bonitas?' },
+  ],
+}
+
+// Thinking messages in Portuguese
+const THINKING_MESSAGES: Record<string, string> = {
+  default: 'Pensando...',
+  'Analisando sua mensagem...': 'Analisando sua mensagem...',
+  'Monteiro Lobato está consultando a base de conhecimento...':
+    'Monteiro Lobato está consultando a base de conhecimento...',
+  'Tarsila está consultando a base de conhecimento...':
+    'Tarsila está consultando a base de conhecimento...',
+}
+
+// Per-agent message storage
+type AgentMessages = Record<string, Message[]>
 
 function KidsChatContent() {
   const router = useRouter()
@@ -41,90 +71,196 @@ function KidsChatContent() {
   const agent = getAgentById(agentId)
   const kidsAgents = getKidsAgents()
 
-  const [messages, setMessages] = useState<Message[]>([])
+  // Per-agent message state - each agent has its own conversation
+  const [agentMessages, setAgentMessages] = useState<AgentMessages>({})
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [thinkingMessage, setThinkingMessage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const sessionIdRef = useRef<string>(crypto.randomUUID())
+
+  // Get messages for current agent
+  const messages = agentMessages[agentId] || []
 
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, thinkingMessage])
 
-  // Initial greeting
+  // Initialize greeting for each agent when first visited
   useEffect(() => {
-    if (agent && messages.length === 0) {
+    if (agent && !agentMessages[agentId]) {
       const name = childName || 'amiguinho'
       const greeting =
         agent.id === 'monteiro_lobato'
           ? `Olá, ${name}! Sou o Monteiro Lobato, criador do Sítio do Picapau Amarelo. Quer ouvir uma história enquanto aprendemos sobre programação? Posso te ensinar de um jeito bem divertido! 📚✨`
           : `Oi, ${name}! Sou a Tarsila do Amaral, pintora do Abaporu. Vou te ensinar que programar é como pintar: você cria algo novo do zero! O que quer aprender hoje? 🎨🌟`
 
-      setMessages([
-        {
-          id: 'greeting',
-          role: 'assistant',
-          content: greeting,
-          agentId: agent.id,
-        },
-      ])
+      setAgentMessages((prev) => ({
+        ...prev,
+        [agentId]: [
+          {
+            id: `greeting-${agentId}`,
+            role: 'assistant',
+            content: greeting,
+            agentId: agent.id,
+          },
+        ],
+      }))
     }
-  }, [agent, messages.length, childName])
+  }, [agent, agentId, agentMessages, childName])
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading || !agent) return
+  // Send message with SSE streaming
+  const handleSend = useCallback(
+    async (messageText?: string) => {
+      const text = messageText || input.trim()
+      if (!text || isLoading || !agent) return
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: input.trim(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput('')
-    setIsLoading(true)
-    trackAgent(agent.id)
-    trackKidsChatMessage(agent.id, input.trim().length)
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: input.trim(),
-          agent_id: agent.id,
-        }),
-      })
-
-      if (!response.ok) throw new Error('Failed to get response')
-
-      const data = await response.json()
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.response || 'Hmm, não consegui entender. Pode repetir de outra forma?',
-        agentId: agent.id,
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: text,
       }
 
-      setMessages((prev) => [...prev, assistantMessage])
-    } catch {
-      const fallbackMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content:
+      // Add user message to current agent's messages
+      setAgentMessages((prev) => ({
+        ...prev,
+        [agentId]: [...(prev[agentId] || []), userMessage],
+      }))
+      setInput('')
+      setIsLoading(true)
+      setThinkingMessage(null)
+      trackAgent(agent.id)
+      trackKidsChatMessage(agent.id, text.length)
+
+      // Create placeholder for assistant response
+      const assistantMessageId = `assistant-${Date.now()}`
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: text,
+            agent_id: agent.id,
+            session_id: sessionIdRef.current,
+          }),
+        })
+
+        if (!response.ok || !response.body) {
+          throw new Error('Failed to get response')
+        }
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let fullContent = ''
+        let isFirstChunk = true
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          const lines = chunk.split('\n')
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+
+                switch (data.type) {
+                  case 'thinking':
+                    setThinkingMessage(data.message)
+                    break
+
+                  case 'chunk':
+                    if (isFirstChunk) {
+                      // Create message on first chunk
+                      setAgentMessages((prev) => ({
+                        ...prev,
+                        [agentId]: [
+                          ...(prev[agentId] || []),
+                          {
+                            id: assistantMessageId,
+                            role: 'assistant',
+                            content: data.content + ' ',
+                            agentId: agent.id,
+                            isStreaming: true,
+                          },
+                        ],
+                      }))
+                      fullContent = data.content + ' '
+                      isFirstChunk = false
+                      setThinkingMessage(null)
+                    } else {
+                      // Append to existing message
+                      fullContent += data.content + ' '
+                      setAgentMessages((prev) => ({
+                        ...prev,
+                        [agentId]: prev[agentId].map((msg) =>
+                          msg.id === assistantMessageId ? { ...msg, content: fullContent } : msg
+                        ),
+                      }))
+                    }
+                    break
+
+                  case 'complete':
+                    // Mark message as complete (remove streaming flag)
+                    setAgentMessages((prev) => ({
+                      ...prev,
+                      [agentId]: prev[agentId].map((msg) =>
+                        msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg
+                      ),
+                    }))
+                    break
+                }
+              } catch {
+                // Ignore JSON parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+
+        // Ensure message is marked complete
+        if (fullContent) {
+          setAgentMessages((prev) => ({
+            ...prev,
+            [agentId]: prev[agentId].map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: fullContent.trim(), isStreaming: false }
+                : msg
+            ),
+          }))
+        }
+      } catch (error) {
+        console.error('Chat error:', error)
+        // Fallback message on error
+        const fallbackContent =
           agent.id === 'monteiro_lobato'
             ? 'Que legal sua pergunta! Programar é como escrever histórias: você conta para o computador o que ele deve fazer, passo a passo. É mágico! ✨📖'
-            : 'Que criativo você é! Sabia que programar usa muitas cores e formas? Podemos criar animações lindas com código! 🎨🖌️',
-        agentId: agent.id,
+            : 'Que criativo você é! Sabia que programar usa muitas cores e formas? Podemos criar animações lindas com código! 🎨🖌️'
+
+        setAgentMessages((prev) => ({
+          ...prev,
+          [agentId]: [
+            ...(prev[agentId] || []),
+            {
+              id: assistantMessageId,
+              role: 'assistant',
+              content: fallbackContent,
+              agentId: agent.id,
+            },
+          ],
+        }))
+      } finally {
+        setIsLoading(false)
+        setThinkingMessage(null)
       }
-      setMessages((prev) => [...prev, fallbackMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+    [input, isLoading, agent, agentId, trackAgent]
+  )
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -133,9 +269,14 @@ function KidsChatContent() {
     }
   }
 
+  // Handle clicking on a conversation starter
+  const handleStarterClick = (text: string) => {
+    handleSend(text)
+  }
+
   const handleAgentChange = (newAgentId: string) => {
     router.push(`/pt/agora/kids/chat?agent=${newAgentId}`)
-    setMessages([])
+    // Don't clear messages - each agent keeps its own conversation
   }
 
   // Loading state
@@ -263,12 +404,18 @@ function KidsChatContent() {
                     }
                   `}
                 >
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {message.content}
+                    {message.isStreaming && (
+                      <span className="inline-block w-2 h-4 ml-1 bg-kids-turquoise animate-pulse rounded-sm" />
+                    )}
+                  </p>
                 </div>
               </div>
             ))}
 
-            {isLoading && (
+            {/* Thinking indicator */}
+            {thinkingMessage && !messages.some((m) => m.isStreaming) && (
               <div className="flex gap-3 justify-start">
                 <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-kids-turquoise shrink-0 shadow-md">
                   <Image src={agent.image} alt={agent.name} fill className="object-cover" />
@@ -276,8 +423,38 @@ function KidsChatContent() {
                 <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl rounded-bl-md shadow-sm">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 animate-pulse text-kids-yellow" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Pensando...</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {THINKING_MESSAGES[thinkingMessage] || thinkingMessage}
+                    </span>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Conversation starters - show only after greeting */}
+            {messages.length === 1 && !isLoading && (
+              <div className="py-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-4 h-4 text-kids-turquoise" />
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Sugestões para começar:
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {CONVERSATION_STARTERS[agentId]?.map((starter, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleStarterClick(starter.text)}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-kids-turquoise/10 to-kids-coral/10 hover:from-kids-turquoise/20 hover:to-kids-coral/20 border border-kids-turquoise/20 transition-all text-left group"
+                    >
+                      <span className="text-2xl group-hover:scale-110 transition-transform">
+                        {starter.emoji}
+                      </span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {starter.text}
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -298,7 +475,7 @@ function KidsChatContent() {
               className="flex-1 text-lg h-14 rounded-full px-6 border-2 border-gray-200 dark:border-gray-700 focus:border-kids-turquoise dark:focus:border-kids-turquoise"
             />
             <Button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
               className="h-14 w-14 rounded-full bg-gradient-to-br from-kids-coral to-kids-orange hover:from-kids-coral/90 hover:to-kids-orange/90 shadow-lg"
             >
