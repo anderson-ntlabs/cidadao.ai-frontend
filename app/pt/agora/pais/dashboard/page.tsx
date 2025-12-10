@@ -1,11 +1,12 @@
 /**
  * Parental Dashboard Page
  *
- * Dashboard showing child's Kids mode activity and progress.
- * Accessible only with valid parental access code.
+ * Dashboard showing child's Kids mode activity, progress, and chat history.
+ * Accessible only with valid parental verification code.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-10 - Added chat history section
  */
 
 'use client'
@@ -24,16 +25,20 @@ import {
   ArrowLeft,
   Loader2,
   RefreshCw,
-  Download,
   Lock,
   Baby,
   TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Bot,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 interface ParentalAccess {
-  code: string
+  userId: string
+  kidsProfileId: string
   childName: string
   accessedAt: string
 }
@@ -46,15 +51,35 @@ interface DailyStats {
   agentsUsed: string[]
 }
 
+interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: string
+  agent_name?: string
+}
+
+interface ChatHistoryItem {
+  id: string
+  sessionId: string
+  agentId: string
+  agentName: string
+  messageCount: number
+  messages: ChatMessage[]
+  startedAt: string
+  childName: string
+}
+
 export default function ParentalDashboardPage() {
   const router = useRouter()
-  const { getTodayStats, disableKidsMode, generateAccessCode } = useKids()
+  const { getTodayStats, disableKidsMode } = useKids()
 
   const [access, setAccess] = useState<ParentalAccess | null>(null)
   const [todayStats, setTodayStats] = useState<DailyStats | null>(null)
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isGeneratingCode, setIsGeneratingCode] = useState(false)
-  const [newCode, setNewCode] = useState<string | null>(null)
+  const [isLoadingChats, setIsLoadingChats] = useState(false)
+  const [expandedChat, setExpandedChat] = useState<string | null>(null)
 
   // Check access on mount
   useEffect(() => {
@@ -68,6 +93,7 @@ export default function ParentalDashboardPage() {
       const parsed = JSON.parse(stored) as ParentalAccess
       setAccess(parsed)
       loadStats()
+      loadChatHistory(parsed.kidsProfileId)
     } catch {
       router.push('/pt/agora/pais')
     }
@@ -90,17 +116,21 @@ export default function ParentalDashboardPage() {
     }
   }
 
-  const handleGenerateNewCode = async () => {
-    setIsGeneratingCode(true)
+  const loadChatHistory = async (kidsProfileId: string) => {
+    setIsLoadingChats(true)
     try {
-      const code = await generateAccessCode()
-      if (code) {
-        setNewCode(code)
+      const response = await fetch(
+        `/api/parental/chat-history?kidsProfileId=${kidsProfileId}&limit=10`
+      )
+      const data = await response.json()
+
+      if (data.success) {
+        setChatHistory(data.chatHistory)
       }
     } catch (error) {
-      console.error('Failed to generate code:', error)
+      console.error('Failed to load chat history:', error)
     } finally {
-      setIsGeneratingCode(false)
+      setIsLoadingChats(false)
     }
   }
 
@@ -118,6 +148,17 @@ export default function ParentalDashboardPage() {
   const handleLogout = () => {
     sessionStorage.removeItem('parental_access')
     router.push('/pt/agora/pais')
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   // Loading state
@@ -208,19 +249,110 @@ export default function ParentalDashboardPage() {
             <p className="text-3xl font-bold text-foreground">
               {todayStats?.videosWatched?.length || 0}
             </p>
-            <p className="text-xs text-muted-foreground">videos assistidos</p>
+            <p className="text-xs text-muted-foreground">vídeos assistidos</p>
           </GlassCard>
 
           <GlassCard className="p-4 text-center">
             <div className="h-12 w-12 mx-auto rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-3">
               <MessageCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
-            <p className="text-3xl font-bold text-foreground">
-              {todayStats?.agentsUsed?.length || 0}
-            </p>
-            <p className="text-xs text-muted-foreground">mentores usados</p>
+            <p className="text-3xl font-bold text-foreground">{chatHistory.length}</p>
+            <p className="text-xs text-muted-foreground">conversas</p>
           </GlassCard>
         </div>
+
+        {/* Chat History Section */}
+        <GlassCard>
+          <GlassCardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-amber-600" />
+                <h3 className="font-semibold">Histórico de Conversas</h3>
+              </div>
+              {isLoadingChats && <Loader2 className="h-4 w-4 animate-spin" />}
+            </div>
+          </GlassCardHeader>
+          <GlassCardContent>
+            {chatHistory.length > 0 ? (
+              <div className="space-y-4">
+                {chatHistory.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className="border rounded-xl overflow-hidden dark:border-gray-700"
+                  >
+                    {/* Chat Header */}
+                    <button
+                      onClick={() => setExpandedChat(expandedChat === chat.id ? null : chat.id)}
+                      className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-kids-turquoise to-kids-coral flex items-center justify-center">
+                          {chat.agentId === 'monteiro_lobato' || chat.agentId === 'tarsila' ? (
+                            <Image
+                              src={`/agents/${chat.agentId}.png`}
+                              alt={chat.agentName}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <Bot className="h-5 w-5 text-white" />
+                          )}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{chat.agentName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(chat.startedAt)} • {chat.messageCount} mensagens
+                          </p>
+                        </div>
+                      </div>
+                      {expandedChat === chat.id ? (
+                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </button>
+
+                    {/* Chat Messages */}
+                    {expandedChat === chat.id && (
+                      <div className="border-t dark:border-gray-700 p-4 bg-muted/30 max-h-96 overflow-y-auto space-y-3">
+                        {chat.messages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            {msg.role === 'assistant' && (
+                              <div className="w-6 h-6 rounded-full bg-kids-turquoise/20 flex items-center justify-center flex-shrink-0">
+                                <Bot className="h-3 w-3 text-kids-turquoise" />
+                              </div>
+                            )}
+                            <div
+                              className={`max-w-[80%] p-3 rounded-xl text-sm ${
+                                msg.role === 'user'
+                                  ? 'bg-kids-coral text-white rounded-br-sm'
+                                  : 'bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-bl-sm'
+                              }`}
+                            >
+                              {msg.content}
+                            </div>
+                            {msg.role === 'user' && (
+                              <div className="w-6 h-6 rounded-full bg-kids-coral/20 flex items-center justify-center flex-shrink-0">
+                                <User className="h-3 w-3 text-kids-coral" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Nenhuma conversa encontrada ainda
+              </p>
+            )}
+          </GlassCardContent>
+        </GlassCard>
 
         {/* Activity Details */}
         <div className="grid md:grid-cols-2 gap-6">
@@ -229,7 +361,7 @@ export default function ParentalDashboardPage() {
             <GlassCardHeader>
               <div className="flex items-center gap-2">
                 <PlayCircle className="h-5 w-5 text-purple-600" />
-                <h3 className="font-semibold">Videos Assistidos Hoje</h3>
+                <h3 className="font-semibold">Vídeos Assistidos Hoje</h3>
               </div>
             </GlassCardHeader>
             <GlassCardContent>
@@ -246,7 +378,7 @@ export default function ParentalDashboardPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhum video assistido hoje
+                  Nenhum vídeo assistido hoje
                 </p>
               )}
             </GlassCardContent>
@@ -273,7 +405,7 @@ export default function ParentalDashboardPage() {
                           className="object-cover"
                         />
                       </div>
-                      <span className="text-sm capitalize">{agentId.replace('-', ' ')}</span>
+                      <span className="text-sm capitalize">{agentId.replace('_', ' ')}</span>
                     </li>
                   ))}
                 </ul>
@@ -286,53 +418,16 @@ export default function ParentalDashboardPage() {
           </GlassCard>
         </div>
 
-        {/* Actions */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Generate New Code */}
-          <GlassCard className="p-6">
-            <h3 className="font-semibold mb-2">Novo Codigo de Acesso</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Gere um novo codigo para acessar este dashboard de outro dispositivo
-            </p>
-
-            {newCode ? (
-              <div className="p-4 bg-muted rounded-xl text-center mb-4">
-                <p className="text-3xl font-mono font-bold tracking-widest">{newCode}</p>
-                <p className="text-xs text-muted-foreground mt-2">Valido por 24 horas</p>
-              </div>
-            ) : null}
-
-            <Button
-              onClick={handleGenerateNewCode}
-              disabled={isGeneratingCode}
-              className="w-full"
-              variant="secondary"
-            >
-              {isGeneratingCode ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Gerando...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Gerar Novo Codigo
-                </>
-              )}
-            </Button>
-          </GlassCard>
-
-          {/* Disable Kids Mode */}
-          <GlassCard className="p-6 border-destructive/20">
-            <h3 className="font-semibold mb-2 text-destructive">Desativar Modo Kids</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Isso remove o acesso da criança à área Kids e todos os dados de sessão
-            </p>
-            <Button onClick={handleDisableKidsMode} variant="destructive" className="w-full">
-              Desativar Modo Kids
-            </Button>
-          </GlassCard>
-        </div>
+        {/* Danger Zone */}
+        <GlassCard className="p-6 border-destructive/20">
+          <h3 className="font-semibold mb-2 text-destructive">Zona de Perigo</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Desativar o Modo Kids remove o acesso da criança à área infantil
+          </p>
+          <Button onClick={handleDisableKidsMode} variant="destructive">
+            Desativar Modo Kids
+          </Button>
+        </GlassCard>
 
         {/* Info Banner */}
         <GlassCard className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
@@ -340,11 +435,11 @@ export default function ParentalDashboardPage() {
             <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Relatórios Diários
+                Segurança e Privacidade
               </p>
               <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                Você receberá um resumo diário por email com as atividades do seu filho. Configure
-                suas preferencias de notificacao no painel principal da Agora.
+                Todas as conversas são armazenadas de forma segura e só podem ser acessadas por
+                você. Cada acesso ao dashboard requer verificação por email.
               </p>
             </div>
           </div>
