@@ -4,16 +4,18 @@
  * Dashboard showing child's Kids mode activity, progress, and chat history.
  * Accessible only with valid parental verification code.
  *
+ * IMPORTANT: This page does NOT use useKids() or useAgora() hooks
+ * to avoid loading overhead from parent layout. Uses direct API calls instead.
+ *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-10 - Added chat history section
+ * @updated 2025-12-10 - Removed hook dependencies, uses API directly
  */
 
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useKids } from '@/hooks/use-kids'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,7 +46,6 @@ interface ParentalAccess {
 }
 
 interface DailyStats {
-  date: string
   totalMinutes: number
   totalSessions: number
   videosWatched: string[]
@@ -72,7 +73,6 @@ interface ChatHistoryItem {
 
 export default function ParentalDashboardPage() {
   const router = useRouter()
-  const { getTodayStats, disableKidsMode } = useKids()
 
   const [access, setAccess] = useState<ParentalAccess | null>(null)
   const [todayStats, setTodayStats] = useState<DailyStats | null>(null)
@@ -92,22 +92,21 @@ export default function ParentalDashboardPage() {
     try {
       const parsed = JSON.parse(stored) as ParentalAccess
       setAccess(parsed)
-      loadStats()
+      loadStats(parsed.kidsProfileId)
       loadChatHistory(parsed.kidsProfileId)
     } catch {
       router.push('/pt/agora/pais')
     }
   }, [router])
 
-  const loadStats = async () => {
+  const loadStats = async (kidsProfileId: string) => {
     setIsLoading(true)
     try {
-      const stats = await getTodayStats()
-      if (stats) {
-        setTodayStats({
-          date: new Date().toISOString().split('T')[0],
-          ...stats,
-        })
+      const response = await fetch(`/api/parental/stats?kidsProfileId=${kidsProfileId}`)
+      const data = await response.json()
+
+      if (data.success) {
+        setTodayStats(data.stats)
       }
     } catch (error) {
       console.error('Failed to load stats:', error)
@@ -135,19 +134,40 @@ export default function ParentalDashboardPage() {
   }
 
   const handleDisableKidsMode = async () => {
+    if (!access) return
+
     const confirmed = window.confirm(
       'Tem certeza que deseja desativar o Modo Kids? A criança não terá mais acesso à área infantil.'
     )
+
     if (confirmed) {
-      await disableKidsMode()
-      sessionStorage.removeItem('parental_access')
-      router.push('/pt/agora')
+      try {
+        const response = await fetch('/api/parental/disable-kids', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kidsProfileId: access.kidsProfileId }),
+        })
+
+        if (response.ok) {
+          sessionStorage.removeItem('parental_access')
+          router.push('/pt/agora')
+        }
+      } catch (error) {
+        console.error('Failed to disable kids mode:', error)
+      }
     }
   }
 
   const handleLogout = () => {
     sessionStorage.removeItem('parental_access')
     router.push('/pt/agora/pais')
+  }
+
+  const handleRefresh = () => {
+    if (access) {
+      loadStats(access.kidsProfileId)
+      loadChatHistory(access.kidsProfileId)
+    }
   }
 
   const formatDate = (dateStr: string) => {
@@ -162,12 +182,12 @@ export default function ParentalDashboardPage() {
   }
 
   // Loading state
-  if (!access || isLoading) {
+  if (!access) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Carregando dados...</p>
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-emerald-600" />
+          <p className="text-muted-foreground">Verificando acesso...</p>
         </div>
       </div>
     )
@@ -217,7 +237,7 @@ export default function ParentalDashboardPage() {
               <h2 className="text-2xl font-bold text-foreground">{access.childName}</h2>
               <p className="text-sm text-muted-foreground">Modo Kids ativo</p>
             </div>
-            <Button variant="secondary" onClick={loadStats} className="gap-2">
+            <Button variant="secondary" onClick={handleRefresh} className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Atualizar
             </Button>
@@ -230,7 +250,9 @@ export default function ParentalDashboardPage() {
             <div className="h-12 w-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-3">
               <Clock className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <p className="text-3xl font-bold text-foreground">{todayStats?.totalMinutes || 0}</p>
+            <p className="text-3xl font-bold text-foreground">
+              {isLoading ? '-' : todayStats?.totalMinutes || 0}
+            </p>
             <p className="text-xs text-muted-foreground">minutos hoje</p>
           </GlassCard>
 
@@ -238,7 +260,9 @@ export default function ParentalDashboardPage() {
             <div className="h-12 w-12 mx-auto rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-3">
               <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-3xl font-bold text-foreground">{todayStats?.totalSessions || 0}</p>
+            <p className="text-3xl font-bold text-foreground">
+              {isLoading ? '-' : todayStats?.totalSessions || 0}
+            </p>
             <p className="text-xs text-muted-foreground">sessões hoje</p>
           </GlassCard>
 
@@ -247,7 +271,7 @@ export default function ParentalDashboardPage() {
               <PlayCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
             <p className="text-3xl font-bold text-foreground">
-              {todayStats?.videosWatched?.length || 0}
+              {isLoading ? '-' : todayStats?.videosWatched?.length || 0}
             </p>
             <p className="text-xs text-muted-foreground">vídeos assistidos</p>
           </GlassCard>
@@ -348,7 +372,7 @@ export default function ParentalDashboardPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
-                Nenhuma conversa encontrada ainda
+                {isLoadingChats ? 'Carregando conversas...' : 'Nenhuma conversa encontrada ainda'}
               </p>
             )}
           </GlassCardContent>
