@@ -23,7 +23,7 @@ export function HeaderUserMenu({ user, locale, onLogout }: HeaderUserMenuProps) 
       icon: UserIcon,
     },
     {
-      name: locale === 'pt' ? 'Configuracoes' : 'Settings',
+      name: locale === 'pt' ? 'Configurações' : 'Settings',
       href: `/${locale}/app/configuracoes`,
       icon: Settings,
     },
@@ -35,12 +35,12 @@ export function HeaderUserMenu({ user, locale, onLogout }: HeaderUserMenuProps) 
         <Button variant="ghost" size="sm" className="flex items-center gap-2">
           <AvatarWithBadge
             src={user?.avatar}
-            alt={user?.name || 'Usuario'}
+            alt={user?.name || 'Usuário'}
             fallbackInitial={user?.name?.charAt(0) || 'U'}
             size="sm"
             locale={locale}
           />
-          <span className="max-w-[150px] truncate">{user?.name || 'Usuario'}</span>
+          <span className="max-w-[150px] truncate">{user?.name || 'Usuário'}</span>
         </Button>
 
         {/* Dropdown Menu */}

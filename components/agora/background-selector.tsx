@@ -176,14 +176,14 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
             <div className="flex items-center gap-3">
               <Shuffle className={cn('w-5 h-5', randomMode && 'animate-pulse')} />
               <div className="text-left">
-                <p className="font-medium text-sm">Modo Aleatorio</p>
+                <p className="font-medium text-sm">Modo Aleatório</p>
                 <p
                   className={cn(
                     'text-xs',
                     randomMode ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
                   )}
                 >
-                  {randomMode ? 'Um novo fundo a cada sessao' : 'Desativado - escolha manual'}
+                  {randomMode ? 'Um novo fundo a cada sessão' : 'Desativado - escolha manual'}
                 </p>
               </div>
             </div>
@@ -239,7 +239,7 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
             <div className="space-y-4">
               <div>
                 <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">
-                  Cores Solidas e Gradientes
+                  Cores Sólidas e Gradientes
                 </h3>
                 <div className="flex flex-wrap gap-3">{colorOptions.map(renderColorOption)}</div>
               </div>
@@ -248,7 +248,7 @@ export function BackgroundSelector({ isOpen, onClose }: BackgroundSelectorProps)
             <div className="space-y-4">
               <div>
                 <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">
-                  Slides do TCC - Cidadao.AI
+                  Slides do TCC - Cidadão.AI
                 </h3>
                 <div className="grid grid-cols-2 gap-3">{imageOptions.map(renderImageOption)}</div>
               </div>

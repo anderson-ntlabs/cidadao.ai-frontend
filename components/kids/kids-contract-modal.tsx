@@ -109,8 +109,8 @@ export function KidsContractModal({
     // Object
     addWrappedText('2. OBJETO', 14, true)
     addWrappedText(
-      'O presente termo estabelece as condicoes para utilizacao da Area Kids do Cidadao.AI, ' +
-        'ambiente educacional projetado para criancas de 6 a 12 anos aprenderem conceitos basicos ' +
+      'O presente termo estabelece as condicoes para utilizacao da Área Kids do Cidadao.AI, ' +
+        'ambiente educacional projetado para crianças de 6 a 12 anos aprenderem conceitos básicos ' +
         'de programacao e tecnologia de forma ludica e segura.',
       11
     )
@@ -119,13 +119,13 @@ export function KidsContractModal({
     // Parental Consent
     addWrappedText('3. CONSENTIMENTO PARENTAL', 14, true)
     addWrappedText(
-      '3.1. Este termo constitui o consentimento parental expresso e informado para que a crianca ' +
-        'identificada acima utilize a Area Kids, conforme exigido pela LGPD (Art. 14) e pelo ' +
+      '3.1. Este termo constitui o consentimento parental expresso e informado para que a criança ' +
+        'identificada acima utilize a Área Kids, conforme exigido pela LGPD (Art. 14) e pelo ' +
         'Estatuto da Crianca e do Adolescente (ECA).',
       11
     )
     addWrappedText(
-      '3.2. O pai/responsavel declara ser o representante legal da crianca e estar ' +
+      '3.2. O pai/responsavel declara ser o representante legal da criança e estar ' +
         'plenamente ciente das funcionalidades e conteudos disponibilizados na plataforma.',
       11
     )
@@ -134,7 +134,7 @@ export function KidsContractModal({
     // Data Collection
     addWrappedText('4. COLETA E TRATAMENTO DE DADOS', 14, true)
     addWrappedText('4.1. Dados Coletados:', 12, true)
-    addWrappedText('- Nome da crianca (para personalizacao)', 11)
+    addWrappedText('- Nome da criança (para personalização)', 11)
     addWrappedText('- Avatar escolhido', 11)
     addWrappedText('- Videos assistidos e tempo de visualizacao', 11)
     addWrappedText('- Interacoes com os mentores de IA', 11)
@@ -142,23 +142,23 @@ export function KidsContractModal({
     yPos += 3
 
     addWrappedText('4.2. Dados NAO Coletados:', 12, true)
-    addWrappedText('- Dados senssiveis da crianca', 11)
-    addWrappedText('- Localizacao geografica', 11)
-    addWrappedText('- Fotos ou imagens da crianca', 11)
-    addWrappedText('- Informacoes de contato da crianca', 11)
+    addWrappedText('- Dados sensíveis da criança', 11)
+    addWrappedText('- Localizacao geográfica', 11)
+    addWrappedText('- Fotos ou imagens da criança', 11)
+    addWrappedText('- Informações de contato da criança', 11)
     yPos += 3
 
     addWrappedText('4.3. Finalidades do Tratamento:', 12, true)
     addWrappedText('- Personalizar a experiencia de aprendizado', 11)
-    addWrappedText('- Gerar relatorios de progresso para os pais', 11)
+    addWrappedText('- Gerar relatórios de progresso para os pais', 11)
     addWrappedText('- Melhorar o conteudo educacional oferecido', 11)
     yPos += 5
 
     // No Gamification
     addWrappedText('5. AUSENCIA DE GAMIFICACAO', 14, true)
     addWrappedText(
-      'A Area Kids NAO possui sistema de pontos (XP), badges, rankings ou qualquer mecanismo ' +
-        'de gamificacao competitiva, visando preservar o bem-estar psicologico da crianca e ' +
+      'A Área Kids NAO possui sistema de pontos (XP), badges, rankings ou qualquer mecanismo ' +
+        'de gamificação competitiva, visando preservar o bem-estar psicológico da criança e ' +
         'evitar dinamicas potencialmente viciantes.',
       11
     )
@@ -167,8 +167,8 @@ export function KidsContractModal({
     // AI Interaction
     addWrappedText('6. INTERACAO COM MENTORES DE IA', 14, true)
     addWrappedText(
-      '6.1. A Area Kids disponibiliza dois mentores de IA: Monteiro Lobato e Tarsila do Amaral, ' +
-        'configurados especificamente para interacoes educativas e apropriadas para criancas.',
+      '6.1. A Área Kids disponibiliza dois mentores de IA: Monteiro Lobato e Tarsila do Amaral, ' +
+        'configurados especificamente para interações educativas e apropriadas para crianças.',
       11
     )
     addWrappedText(
@@ -177,7 +177,7 @@ export function KidsContractModal({
       11
     )
     addWrappedText(
-      '6.3. Todas as interacoes sao registradas e disponibilizadas no dashboard parental.',
+      '6.3. Todas as interações sao registradas e disponibilizadas no dashboard parental.',
       11
     )
     yPos += 5
@@ -189,11 +189,11 @@ export function KidsContractModal({
     // Legal Basis
     addWrappedText('7. FUNDAMENTACAO LEGAL', 14, true)
     addWrappedText(
-      'O tratamento de dados pessoais de criancas nesta plataforma fundamenta-se em:',
+      'O tratamento de dados pessoais de crianças nesta plataforma fundamenta-se em:',
       11
     )
     yPos += 3
-    addWrappedText('- Lei 13.709/2018 (LGPD) - Art. 14 (tratamento de dados de criancas)', 11)
+    addWrappedText('- Lei 13.709/2018 (LGPD) - Art. 14 (tratamento de dados de crianças)', 11)
     addWrappedText('- Lei 8.069/1990 (ECA) - Estatuto da Crianca e do Adolescente', 11)
     addWrappedText(
       '- COPPA (Children Online Privacy Protection Act) - diretrizes internacionais',
@@ -204,7 +204,7 @@ export function KidsContractModal({
     // Rights
     addWrappedText('8. DIREITOS DO RESPONSAVEL', 14, true)
     addWrappedText('Conforme a LGPD (Art. 18), o pai/responsavel possui os seguintes direitos:', 11)
-    addWrappedText('- Acesso a todos os dados coletados sobre a crianca', 11)
+    addWrappedText('- Acesso a todos os dados coletados sobre a criança', 11)
     addWrappedText('- Correcao de dados incompletos ou desatualizados', 11)
     addWrappedText('- Exclusao completa do perfil e dados associados', 11)
     addWrappedText('- Portabilidade dos dados em formato legivel', 11)
@@ -216,20 +216,20 @@ export function KidsContractModal({
     // Parental Code
     addWrappedText('9. CODIGO DE ACESSO PARENTAL', 14, true)
     addWrappedText(
-      '9.1. Apos aceitar estes termos, um codigo unico de 6 caracteres sera gerado.',
+      '9.1. Após aceitar estes termos, um código único de 6 caracteres será gerado.',
       11
     )
     addWrappedText(
-      '9.2. Este codigo e a UNICA forma de acessar o dashboard parental com relatorios de uso.',
+      '9.2. Este código é a UNICA forma de acessar o dashboard parental com relatórios de uso.',
       11
     )
     addWrappedText(
-      '9.3. O codigo sera exibido apenas uma vez. O sistema nao armazena nem recupera ' +
-        'codigos perdidos por razoes de seguranca.',
+      '9.3. O código será exibido apenas uma vez. O sistema não armazena nem recupera ' +
+        'códigos perdidos por razões de segurança.',
       11
     )
     addWrappedText(
-      '9.4. O pai/responsavel e inteiramente responsavel por guardar o codigo com seguranca.',
+      '9.4. O pai/responsavel é inteiramente responsavel por guardar o código com segurança.',
       11
     )
     yPos += 10
@@ -238,13 +238,13 @@ export function KidsContractModal({
     addWrappedText('10. DECLARACAO DE ACEITE', 14, true)
     addWrappedText(`Eu, ${parentName}, na qualidade de pai/responsavel legal, DECLARO que:`, 11)
     yPos += 3
-    addWrappedText('[X] Sou o representante legal da crianca identificada neste termo', 11)
+    addWrappedText('[X] Sou o representante legal da criança identificada neste termo', 11)
     addWrappedText('[X] Li e compreendi integralmente estes Termos de Uso', 11)
     addWrappedText('[X] Autorizo a coleta e tratamento dos dados conforme descrito', 11)
-    addWrappedText('[X] Estou ciente de que a Area Kids nao possui gamificacao', 11)
+    addWrappedText('[X] Estou ciente de que a Área Kids não possui gamificação', 11)
     addWrappedText('[X] Compreendo que os mentores sao personagens de IA', 11)
     addWrappedText('[X] Estou ciente dos meus direitos e sei como exerce-los', 11)
-    addWrappedText('[X] Aceito a responsabilidade de guardar o codigo de acesso parental', 11)
+    addWrappedText('[X] Aceito a responsabilidade de guardar o código de acesso parental', 11)
     yPos += 10
 
     // Signature area
@@ -266,7 +266,7 @@ export function KidsContractModal({
     doc.rect(0, 277, pageWidth, 20, 'F')
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(9)
-    doc.text('Area Kids - Cidadao.AI - Agora Academy', pageWidth / 2, 285, {
+    doc.text('Área Kids - Cidadao.AI - Agora Academy', pageWidth / 2, 285, {
       align: 'center',
     })
     doc.text(
@@ -311,7 +311,7 @@ export function KidsContractModal({
               <Baby className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Termos de Uso - Area Kids</h2>
+              <h2 className="text-2xl font-bold">Termos de Uso - Área Kids</h2>
               <p className="text-white/80">Consentimento Parental Obrigatorio</p>
             </div>
           </div>
@@ -326,7 +326,7 @@ export function KidsContractModal({
 
             <p>
               Para que <strong className="text-kids-turquoise">{childName}</strong> possa utilizar a{' '}
-              <strong>Area Kids</strong>, e necessario seu consentimento como pai/responsavel legal.
+              <strong>Área Kids</strong>, e necessario seu consentimento como pai/responsavel legal.
               Este documento estabelece as condicoes de uso e tratamento de dados.
             </p>
 
@@ -337,7 +337,7 @@ export function KidsContractModal({
               </h3>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                 <li>
-                  <strong>LGPD Art. 14</strong> - Tratamento de dados de criancas
+                  <strong>LGPD Art. 14</strong> - Tratamento de dados de crianças
                 </li>
                 <li>
                   <strong>ECA</strong> - Estatuto da Crianca e do Adolescente
@@ -348,13 +348,13 @@ export function KidsContractModal({
               </ul>
             </div>
 
-            {/* What is Kids Area */}
+            {/* What is Kids Área */}
             <div className="bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-4">
               <h3 className="font-bold text-pink-800 dark:text-pink-200 mb-2 flex items-center gap-2">
-                <Baby className="w-5 h-5" /> O que e a Area Kids?
+                <Baby className="w-5 h-5" /> O que é a Área Kids?
               </h3>
               <p className="text-sm text-pink-700 dark:text-pink-300">
-                Um ambiente educacional <strong>seguro e ludico</strong> para criancas de 6-12 anos
+                Um ambiente educacional <strong>seguro e lúdico</strong> para crianças de 6-12 anos
                 aprenderem programacao com mentores de IA (Monteiro Lobato e Tarsila do Amaral) e
                 videos curados.
               </p>
@@ -366,8 +366,8 @@ export function KidsContractModal({
                 Sem Gamificacao Competitiva
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300">
-                A Area Kids <strong>NAO possui</strong> sistema de pontos (XP), badges, rankings ou
-                mecanismos competitivos. Isso protege o bem-estar psicologico da crianca.
+                A Área Kids <strong>NAO possui</strong> sistema de pontos (XP), badges, rankings ou
+                mecanismos competitivos. Isso protege o bem-estar psicológico da criança.
               </p>
             </div>
 
@@ -375,7 +375,7 @@ export function KidsContractModal({
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Dados coletados:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Nome da crianca (para personalizacao)</li>
+                <li>Nome da criança (para personalização)</li>
                 <li>Avatar escolhido</li>
                 <li>Videos assistidos e tempo de visualizacao</li>
                 <li>Interacoes com os mentores de IA</li>
@@ -385,10 +385,10 @@ export function KidsContractModal({
                 Dados NAO coletados:
               </h3>
               <ul className="list-disc list-inside space-y-1 text-sm text-green-700 dark:text-green-400">
-                <li>Dados senssiveis</li>
+                <li>Dados sensíveis</li>
                 <li>Localizacao</li>
                 <li>Fotos ou imagens</li>
-                <li>Informacoes de contato da crianca</li>
+                <li>Informações de contato da criança</li>
               </ul>
             </div>
 
@@ -398,9 +398,9 @@ export function KidsContractModal({
                 <FileText className="w-5 h-5" /> Codigo de Acesso Parental
               </h3>
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                Apos aceitar, voce recebera um <strong>codigo unico de 6 caracteres</strong>. Este
-                codigo e mostrado <strong>apenas uma vez</strong> e e a unica forma de acessar os
-                relatorios de uso. <strong>Anote-o com cuidado!</strong>
+                Após aceitar, você recebera um <strong>código único de 6 caracteres</strong>. Este
+                código é mostrado <strong>apenas uma vez</strong> e é a única forma de acessar os
+                relatórios de uso. <strong>Anote-o com cuidado!</strong>
               </p>
             </div>
 
@@ -428,7 +428,7 @@ export function KidsContractModal({
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-kids-coral focus:ring-kids-coral"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Declaro ser o pai/responsavel legal</strong> da crianca identificada e estar
+                <strong>Declaro ser o pai/responsavel legal</strong> da criança identificada e estar
                 autorizado a fornecer este consentimento.
               </span>
             </label>
@@ -454,7 +454,7 @@ export function KidsContractModal({
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-kids-coral focus:ring-kids-coral"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Estou ciente de que a Area Kids nao possui gamificacao</strong> competitiva
+                <strong>Estou ciente de que a Área Kids não possui gamificação</strong> competitiva
                 (XP, badges, rankings).
               </span>
             </label>
@@ -468,7 +468,7 @@ export function KidsContractModal({
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                 <strong>Compreendo que os mentores sao personagens de IA</strong> e que as
-                interacoes serao registradas para revisao parental.
+                interações serao registradas para revisao parental.
               </span>
             </label>
 
@@ -483,7 +483,7 @@ export function KidsContractModal({
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                 <strong>Estou ciente dos meus direitos</strong> como responsavel pelos dados da
-                crianca e sei como exerce-los.
+                criança e sei como exerce-los.
               </span>
             </label>
 
@@ -495,8 +495,8 @@ export function KidsContractModal({
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-kids-coral focus:ring-kids-coral"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Aceito os Termos de Uso da Area Kids</strong> e assumo a responsabilidade de
-                guardar o codigo de acesso parental.
+                <strong>Aceito os Termos de Uso da Área Kids</strong> e assumo a responsabilidade de
+                guardar o código de acesso parental.
               </span>
             </label>
           </div>
@@ -511,7 +511,7 @@ export function KidsContractModal({
               </p>
               <p className="text-kids-coral font-medium mt-1 flex items-center gap-1">
                 <Download className="w-3 h-3" />
-                Um PDF dos termos sera baixado automaticamente.
+                Um PDF dos termos será baixado automaticamente.
               </p>
             </div>
             <div className="flex gap-3">

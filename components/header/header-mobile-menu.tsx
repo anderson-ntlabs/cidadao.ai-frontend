@@ -39,7 +39,7 @@ export function HeaderMobileMenu({
       icon: UserIcon,
     },
     {
-      name: locale === 'pt' ? 'Configuracoes' : 'Settings',
+      name: locale === 'pt' ? 'Configurações' : 'Settings',
       href: `/${locale}/app/configuracoes`,
       icon: Settings,
     },
@@ -73,14 +73,14 @@ export function HeaderMobileMenu({
           <div className="flex items-center gap-3 mb-4">
             <AvatarWithBadge
               src={user?.avatar}
-              alt={user?.name || 'Usuario'}
+              alt={user?.name || 'Usuário'}
               fallbackInitial={user?.name?.charAt(0) || 'U'}
               size="lg"
               locale={locale}
             />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                {user?.name || 'Usuario'}
+                {user?.name || 'Usuário'}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                 {user?.email || 'email@example.com'}

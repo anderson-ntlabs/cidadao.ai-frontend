@@ -66,7 +66,7 @@ export function LogoutModal({
               <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
             </div>
             <h2 id="logout-title" className="text-lg font-bold text-gray-900 dark:text-white">
-              Sair da Agora
+              Sair da Ágora
             </h2>
           </div>
           <button
@@ -81,7 +81,7 @@ export function LogoutModal({
         {/* Content */}
         <div className="p-6">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Tem certeza que deseja sair? Seu progresso esta salvo automaticamente.
+            Tem certeza que deseja sair? Seu progresso está salvo automaticamente.
           </p>
 
           {/* Active session warning */}
@@ -90,11 +90,11 @@ export function LogoutModal({
               <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-yellow-800 dark:text-yellow-200 text-sm">
-                  Sessao de estudo ativa
+                  Sessão de estudo ativa
                 </p>
                 <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
-                  Voce tem uma sessao de {sessionDuration} minutos em andamento. Ao sair, a sessao
-                  sera finalizada e o XP sera calculado.
+                  Você tem uma sessão de {sessionDuration} minutos em andamento. Ao sair, a sessão
+                  será finalizada e o XP será calculado.
                 </p>
               </div>
             </div>
@@ -104,9 +104,9 @@ export function LogoutModal({
           <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
             <p>Ao sair:</p>
             <ul className="list-disc list-inside ml-2 space-y-1">
-              <li>Sua sessao atual sera encerrada</li>
-              <li>Seu progresso e XP estao salvos</li>
-              <li>Voce precisara fazer login novamente</li>
+              <li>Sua sessão atual será encerrada</li>
+              <li>Seu progresso e XP estão salvos</li>
+              <li>Você precisará fazer login novamente</li>
             </ul>
           </div>
         </div>

@@ -134,7 +134,7 @@ export function KidsCertificateDisplay({
               leftIcon={<FileText className="w-5 h-5" />}
               className="flex-1"
             >
-              {isGeneratingReport ? 'Gerando...' : 'Relatorio para Pais'}
+              {isGeneratingReport ? 'Gerando...' : 'Relatório para Pais'}
             </Button>
             {currentLevel && (
               <Button
@@ -153,7 +153,7 @@ export function KidsCertificateDisplay({
             )}
           </div>
           <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-            O relatorio completo e enviado apenas para os pais
+            O relatório completo é enviado apenas para os pais
           </p>
         </div>
       </ModalContent>
@@ -181,7 +181,7 @@ function CertificateView({ telemetry, childName, currentLevel, progress }: Certi
             Continue assim, {childName}!
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Voce esta no caminho certo para ganhar seu primeiro certificado!
+            Você está no caminho certo para ganhar seu primeiro certificado!
           </p>
         </div>
 
@@ -203,7 +203,7 @@ function CertificateView({ telemetry, childName, currentLevel, progress }: Certi
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-          <StatCard icon="🎬" value={telemetry.videosWatched} label="Videos" color="#FF6B6B" />
+          <StatCard icon="🎬" value={telemetry.videosWatched} label="Vídeos" color="#FF6B6B" />
           <StatCard
             icon="💬"
             value={telemetry.mentorConversations}
@@ -270,7 +270,7 @@ function CertificateView({ telemetry, childName, currentLevel, progress }: Certi
             style={{ backgroundColor: currentLevel.color }}
           >
             <Trophy className="w-4 h-4" />
-            Cidadaozinho {currentLevel.version}
+            Cidadãozinho {currentLevel.version}
           </span>
         </div>
 
@@ -289,7 +289,7 @@ function CertificateView({ telemetry, childName, currentLevel, progress }: Certi
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3 max-w-md mx-auto">
-        <StatCard icon="🎬" value={telemetry.videosWatched} label="Videos" color="#FF6B6B" />
+        <StatCard icon="🎬" value={telemetry.videosWatched} label="Vídeos" color="#FF6B6B" />
         <StatCard
           icon="💬"
           value={telemetry.mentorConversations}

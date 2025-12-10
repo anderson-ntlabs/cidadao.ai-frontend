@@ -71,13 +71,13 @@ const navItems = {
   '/pt/agora': { label: 'Dashboard', icon: Home },
   '/pt/agora/chat': { label: 'Chat com Agentes', icon: MessageSquare },
   '/pt/agora/agenda': { label: 'Agenda', icon: Calendar },
-  '/pt/agora/diario': { label: 'Diario de Bordo', icon: BookOpen },
-  '/pt/agora/videos': { label: 'Videos', icon: Video },
+  '/pt/agora/diario': { label: 'Diário de Bordo', icon: BookOpen },
+  '/pt/agora/videos': { label: 'Vídeos', icon: Video },
   '/pt/agora/leituras': { label: 'Leituras', icon: FileText },
   '/pt/agora/ranking': { label: 'Ranking', icon: Trophy },
   '/pt/agora/perfil': { label: 'Meu Perfil', icon: User },
   '/pt/agora/onboarding': { label: 'Onboarding', icon: Sparkles },
-  '/pt/agora/configuracoes': { label: 'Configuracoes', icon: Settings },
+  '/pt/agora/configuracoes': { label: 'Configurações', icon: Settings },
   '/pt/agora/trilhas': { label: 'Trilhas', icon: BookOpen },
   '/pt/agora/ajuda': { label: 'Central de Ajuda', icon: HelpCircle },
   '/pt/agora/atividades': { label: 'Atividades', icon: Activity },
@@ -156,7 +156,7 @@ export function AgoraHeader({
                 <h1 className="font-bold academy-text group-hover:text-tarsila-verde transition-colors">
                   Ágora
                 </h1>
-                <p className="text-xs academy-text-muted">Cidadao.AI</p>
+                <p className="text-xs academy-text-muted">Cidadão.AI</p>
               </div>
             </Link>
 
@@ -298,7 +298,7 @@ export function AgoraHeader({
                         className="flex items-center gap-2 cursor-pointer"
                       >
                         <Settings className="w-4 h-4" />
-                        <span>Configuracoes</span>
+                        <span>Configurações</span>
                       </Link>
                     </DropdownMenuItem>
 

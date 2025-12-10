@@ -384,7 +384,7 @@ export function AgoraAuthProvider({ children }: { children: React.ReactNode }) {
       // Legacy cleanup (kept for backwards compatibility)
       useKidsStore.getState().reset()
 
-      toast.success('Logout realizado', 'Ate a proxima sessao de estudos!')
+      toast.success('Logout realizado', 'Até a próxima sessão de estudos!')
       window.location.href = '/pt/agora/login'
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Tente novamente'

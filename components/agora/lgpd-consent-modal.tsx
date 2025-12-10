@@ -68,7 +68,7 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-bold">Termo de Consentimento LGPD</h2>
-              <p className="text-green-100">Academy Cidadao.AI</p>
+              <p className="text-green-100">Academy Cidadão.AI</p>
             </div>
           </div>
         </div>
@@ -77,12 +77,12 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
         <div className="p-6 overflow-y-auto max-h-[50vh]">
           <div className="space-y-4 text-gray-700 dark:text-gray-300">
             <p className="font-medium text-lg">
-              Ola, <span className="text-green-600 dark:text-green-400">{user?.name}</span>!
+              Olá, <span className="text-green-600 dark:text-green-400">{user?.name}</span>!
             </p>
 
             <p>
-              Antes de comecar sua jornada na <strong>Academy Cidadao.AI</strong>, precisamos do seu
-              consentimento para o tratamento de dados pessoais, conforme a Lei Geral de Protecao de
+              Antes de começar sua jornada na <strong>Academy Cidadão.AI</strong>, precisamos do seu
+              consentimento para o tratamento de dados pessoais, conforme a Lei Geral de Proteção de
               Dados (Lei 13.709/2018 - LGPD).
             </p>
 
@@ -91,8 +91,8 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                 Importante: Rastreamento de Tempo
               </h3>
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                Este programa requer o <strong>registro das horas de atividade</strong> para emissao
-                de certificados e relatorios. Seu tempo sera rastreado automaticamente enquanto
+                Este programa requer o <strong>registro das horas de atividade</strong> para emissão
+                de certificados e relatórios. Seu tempo será rastreado automaticamente enquanto
                 estiver logado e interagindo com o sistema.
               </p>
             </div>
@@ -101,26 +101,26 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Dados coletados:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Nome completo e email</li>
-                <li>Tempo de sessao e interacoes com o sistema</li>
-                <li>Progresso de aprendizado (videos, leituras, conversas com agentes)</li>
-                <li>Diario de aprendizado (reflexoes voluntarias)</li>
-                <li>Dados para gamificacao (XP, badges, ranking)</li>
+                <li>Tempo de sessão e interações com o sistema</li>
+                <li>Progresso de aprendizado (vídeos, leituras, conversas com agentes)</li>
+                <li>Diário de aprendizado (reflexões voluntárias)</li>
+                <li>Dados para gamificação (XP, badges, ranking)</li>
               </ul>
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
               <h3 className="font-bold text-gray-900 dark:text-gray-100">Finalidades:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Gerar certificado de conclusao com carga horaria</li>
-                <li>Produzir relatorio de progresso</li>
-                <li>Pesquisa academica sobre educacao em IA (dados anonimizados)</li>
-                <li>Melhoria continua da plataforma de aprendizado</li>
+                <li>Gerar certificado de conclusão com carga horária</li>
+                <li>Produzir relatório de progresso</li>
+                <li>Pesquisa acadêmica sobre educação em IA (dados anonimizados)</li>
+                <li>Melhoria contínua da plataforma de aprendizado</li>
               </ul>
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>Seus direitos:</strong> Voce pode solicitar acesso, correcao ou exclusao de
+                <strong>Seus direitos:</strong> Você pode solicitar acesso, correção ou exclusão de
                 seus dados a qualquer momento entrando em contato pelo email{' '}
                 <a
                   href="mailto:contato@cidadao.ai"
@@ -144,7 +144,7 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                 <strong>Autorizo o rastreamento do meu tempo de estudo</strong> para fins de
-                documentacao e emissao de certificados.
+                documentação e emissão de certificados.
               </span>
             </label>
 
@@ -156,8 +156,8 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Autorizo o processamento dos meus dados de aprendizado</strong> para analise
-                de progresso e pesquisa academica (dados anonimizados).
+                <strong>Autorizo o processamento dos meus dados de aprendizado</strong> para análise
+                de progresso e pesquisa acadêmica (dados anonimizados).
               </span>
             </label>
 
@@ -169,8 +169,8 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Autorizo a geracao automatica de certificado</strong> contendo meu nome,
-                email, carga horaria e metricas de desempenho ao final do programa.
+                <strong>Autorizo a geração automática de certificado</strong> contendo meu nome,
+                email, carga horária e métricas de desempenho ao final do programa.
               </span>
             </label>
 
@@ -182,8 +182,8 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                 className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
-                <strong>Li e concordo com os Termos de Uso</strong> e a Politica de Privacidade da
-                plataforma Academy Cidadao.AI.
+                <strong>Li e concordo com os Termos de Uso</strong> e a Política de Privacidade da
+                plataforma Academy Cidadão.AI.
               </span>
             </label>
           </div>
@@ -193,9 +193,9 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
         <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              <p>Versao do termo: v1.0 | Data: {new Date().toLocaleDateString('pt-BR')}</p>
+              <p>Versão do termo: v1.0 | Data: {new Date().toLocaleDateString('pt-BR')}</p>
               <p className="text-green-600 dark:text-green-400 font-medium mt-1">
-                +50 XP de bonus de boas-vindas!
+                +50 XP de bônus de boas-vindas!
               </p>
             </div>
             <button
@@ -213,7 +213,7 @@ export function LgpdConsentModal({ isOpen, onClose }: LgpdConsentModalProps) {
                   Salvando...
                 </span>
               ) : (
-                'Aceitar e Comecar (+50 XP)'
+                'Aceitar e Começar (+50 XP)'
               )}
             </button>
           </div>

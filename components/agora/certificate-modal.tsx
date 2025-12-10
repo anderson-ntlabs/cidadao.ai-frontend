@@ -618,7 +618,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(12)
     doc.setFont('helvetica', 'bold')
-    doc.text('HISTORICO DE XP', margin + 10, currentY + 16)
+    doc.text('HISTÓRICO DE XP', margin + 10, currentY + 16)
     doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
     doc.text('(Últimas 10 transações)', pageWidth - margin - 10, currentY + 16, { align: 'right' })
@@ -696,7 +696,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(30, 64, 175)
-      doc.text('Tempo de estudo por dia (ultimos 30 dias)', margin + 10, currentY + 8)
+      doc.text('Tempo de estudo por dia (últimos 30 dias)', margin + 10, currentY + 8)
       currentY += 25
 
       // Calculate chart dimensions
@@ -885,7 +885,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
           doc.setTextColor(168, 85, 247)
           doc.setFontSize(10)
           doc.setFont('helvetica', 'bold')
-          doc.text('DIARIO DE BORDO (continuacao)', margin + 10, margin + 12)
+          doc.text('DIÁRIO DE BORDO (continuação)', margin + 10, margin + 12)
           currentY = margin + 28
         }
 
@@ -948,7 +948,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       doc.setTextColor(107, 33, 168)
       doc.setFontSize(10)
       doc.setFont('helvetica', 'bold')
-      doc.text('Resumo do Diario de Bordo', margin + 10, currentY + 12)
+      doc.text('Resumo do Diário de Bordo', margin + 10, currentY + 12)
 
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
@@ -1006,7 +1006,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
       doc.setTextColor(107, 114, 128)
       doc.setFontSize(11)
       doc.setFont('helvetica', 'normal')
-      doc.text('Nenhuma entrada no diario registrada', pageWidth / 2, currentY + 30, {
+      doc.text('Nenhuma entrada no diário registrada', pageWidth / 2, currentY + 30, {
         align: 'center',
       })
 
@@ -1562,11 +1562,11 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
                 leftIcon={!isGeneratingReport ? <ScrollText className="w-5 h-5" /> : undefined}
                 className="flex-1"
               >
-                {isGeneratingReport ? 'Gerando...' : 'Baixar Relatorio'}
+                {isGeneratingReport ? 'Gerando...' : 'Baixar Relatório'}
               </Button>
             </div>
             <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-              Certificado: apenas carga horaria | Relatorio: telemetria completa
+              Certificado: apenas carga horária | Relatório: telemetria completa
             </p>
             <Button variant="ghost" onClick={onClose} className="w-full sm:w-auto sm:self-center">
               Fechar

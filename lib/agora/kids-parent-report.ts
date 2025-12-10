@@ -61,7 +61,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(24)
   doc.setFont('helvetica', 'bold')
-  doc.text('RELATORIO DE PROGRESSO', pageWidth / 2, 30, { align: 'center' })
+  doc.text('RELATÓRIO DE PROGRESSO', pageWidth / 2, 30, { align: 'center' })
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
   doc.text('Agora Kids - Cidadao.AI', pageWidth / 2, 42, { align: 'center' })
@@ -78,7 +78,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.setTextColor(78, 205, 196)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
-  doc.text('CRIANCA', margin + 10, currentY + 15)
+  doc.text('CRIANÇA', margin + 10, currentY + 15)
 
   doc.setTextColor(31, 41, 55)
   doc.setFontSize(22)
@@ -96,7 +96,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   // Parent info
   doc.setFontSize(10)
   doc.setTextColor(107, 114, 128)
-  doc.text(`Responsavel: ${parentName}`, margin, currentY)
+  doc.text(`Responsável: ${parentName}`, margin, currentY)
   doc.text(`Email: ${parentEmail}`, margin, currentY + 12)
 
   currentY += 30
@@ -128,7 +128,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   const statWidth = (pageWidth - margin * 2 - 10) / 3
   const stats = [
     {
-      label: 'Videos Assistidos',
+      label: 'Vídeos Assistidos',
       value: telemetry.videosWatched.toString(),
       color: [255, 107, 107],
     },
@@ -182,7 +182,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   })
   doc.setFontSize(10)
   doc.setTextColor(156, 163, 175)
-  doc.text(`Relatorio gerado em ${currentDate}`, pageWidth / 2, pageHeight - 20, {
+  doc.text(`Relatório gerado em ${currentDate}`, pageWidth / 2, pageHeight - 20, {
     align: 'center',
   })
 
@@ -238,7 +238,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
     doc.setFontSize(12)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(156, 163, 175)
-    doc.text(`Proximos desafios (${pendingMilestones.length})`, margin, currentY)
+    doc.text(`Próximos desafios (${pendingMilestones.length})`, margin, currentY)
     currentY += 10
 
     pendingMilestones.slice(0, 5).forEach((milestone) => {
@@ -270,7 +270,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(18)
   doc.setFont('helvetica', 'bold')
-  doc.text('ATIVIDADE DIARIA', pageWidth / 2, 25, { align: 'center' })
+  doc.text('ATIVIDADE DIÁRIA', pageWidth / 2, 25, { align: 'center' })
 
   currentY = 55
 
@@ -344,7 +344,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.setTextColor(75, 85, 99)
   doc.setFontSize(18)
   doc.setFont('helvetica', 'bold')
-  doc.text('RECOMENDACOES', pageWidth / 2, 25, { align: 'center' })
+  doc.text('RECOMENDAÇÕES', pageWidth / 2, 25, { align: 'center' })
 
   currentY = 55
 
@@ -388,7 +388,7 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.setTextColor(75, 85, 99)
   doc.setFontSize(9)
   const noteText =
-    'Este relatorio foi gerado automaticamente com base nas atividades registradas na plataforma Agora Kids. Incentive seu filho(a) a continuar explorando e aprendendo!'
+    'Este relatório foi gerado automaticamente com base nas atividades registradas na plataforma Agora Kids. Incentive seu filho(a) a continuar explorando e aprendendo!'
   const noteLines = doc.splitTextToSize(noteText, pageWidth - margin * 2 - 20)
   doc.text(noteLines, margin + 10, currentY + 25)
 
@@ -418,16 +418,16 @@ function generateRecommendations(
   if (telemetry.videosWatched < 5) {
     recommendations.push({
       icon: '🎬',
-      title: 'Explore mais videos',
+      title: 'Explore mais vídeos',
       description:
-        'Sua crianca assistiu poucos videos. Incentive-a a explorar diferentes topicos na trilha de videos.',
+        'Sua criança assistiu poucos vídeos. Incentive-a a explorar diferentes tópicos na trilha de videos.',
     })
   } else {
     recommendations.push({
       icon: '🎬',
-      title: 'Otimo progresso em videos!',
+      title: 'Ótimo progresso em vídeos!',
       description:
-        'Sua crianca esta assistindo os videos regularmente. Continue incentivando essa pratica.',
+        'Sua criança está assistindo os vídeos regularmente. Continue incentivando essa pratica.',
     })
   }
 
@@ -437,14 +437,14 @@ function generateRecommendations(
       icon: '💬',
       title: 'Converse com os mentores',
       description:
-        'Os mentores Lobato e Tarsila estao disponiveis para ajudar. Incentive sua crianca a fazer perguntas!',
+        'Os mentores Lobato e Tarsila estão disponíveis para ajudar. Incentive sua criança a fazer perguntas!',
     })
   } else {
     recommendations.push({
       icon: '💬',
       title: 'Excelente interacao!',
       description:
-        'Sua crianca esta conversando bastante com os mentores. Isso demonstra curiosidade e engajamento.',
+        'Sua criança está conversando bastante com os mentores. Isso demonstra curiosidade e engajamento.',
     })
   }
 
@@ -454,14 +454,14 @@ function generateRecommendations(
       icon: '📅',
       title: 'Estabeleca uma rotina',
       description:
-        'Estudar um pouquinho todos os dias e melhor do que estudar muito em um unico dia. Tente criar uma rotina.',
+        'Estudar um pouquinho todos os dias é melhor do que estudar muito em um unico dia. Tente criar uma rotina.',
     })
   } else {
     recommendations.push({
       icon: '📅',
       title: 'Consistencia e a chave!',
       description:
-        'Parabens pela consistencia! Manter uma rotina regular de estudos e muito importante.',
+        'Parabéns pela consistência! Manter uma rotina regular de estudos é muito importante.',
     })
   }
 
@@ -473,14 +473,14 @@ function generateRecommendations(
       icon: '⏱️',
       title: 'Aumente o tempo de estudo',
       description:
-        'Sessoes de 15-30 minutos sao ideais para criancas. Tente estabelecer um horario fixo de estudo.',
+        'Sessões de 15-30 minutos são ideais para crianças. Tente estabelecer um horario fixo de estudo.',
     })
   } else if (avgMinutesPerDay > 60) {
     recommendations.push({
       icon: '⏱️',
-      title: 'Equilibrio e importante',
+      title: 'Equilíbrio é importante',
       description:
-        'Sua crianca esta estudando bastante! Lembre-se de equilibrar com atividades fisicas e brincadeiras.',
+        'Sua criança está estudando bastante! Lembre-se de equilibrar com atividades fisicas e brincadeiras.',
     })
   }
 
@@ -490,12 +490,12 @@ function generateRecommendations(
       icon: '🌟',
       title: 'Primeiro certificado chegando!',
       description:
-        'Sua crianca esta proxima de conquistar o primeiro certificado Cidadaozinho. Continue incentivando!',
+        'Sua criança está próxima de conquistar o primeiro certificado Cidadaozinho. Continue incentivando!',
     })
   } else if (currentLevel.id === 'explorer') {
     recommendations.push({
       icon: '🎨',
-      title: 'Proximo nivel: Criador',
+      title: 'Próximo nível: Criador',
       description: 'O proximo passo e o certificado Criador! Continue acompanhando o progresso.',
     })
   } else if (currentLevel.id === 'creator') {
@@ -503,7 +503,7 @@ function generateRecommendations(
       icon: '🏆',
       title: 'Rumo ao nivel Mestre!',
       description:
-        'Sua crianca ja e uma Criadora! O proximo e ultimo nivel e o Mestre. Estamos na reta final!',
+        'Sua criança já é uma Criadora! O próximo e último nível é o Mestre. Estamos na reta final!',
     })
   }
 

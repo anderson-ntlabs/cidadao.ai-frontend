@@ -57,7 +57,7 @@ export async function verifyGitHubFork(username: string): Promise<VerifyForkResu
   if (!username || username.trim() === '') {
     return {
       success: false,
-      message: 'Nome de usuario do GitHub nao fornecido',
+      message: 'Nome de usuário do GitHub não fornecido',
     }
   }
 
@@ -111,7 +111,7 @@ export async function verifyGitHubFork(username: string): Promise<VerifyForkResu
       // User has a repo with the same name but it's not a fork
       return {
         success: false,
-        message: `Voce tem um repositorio ${REPO_NAME}, mas nao e um fork do projeto Cidadao.AI`,
+        message: `Você tem um repositório ${REPO_NAME}, mas não é um fork do projeto Cidadao.AI`,
       }
     }
 
@@ -143,7 +143,7 @@ export async function verifyGitHubFork(username: string): Promise<VerifyForkResu
     // User hasn't forked the repo
     return {
       success: false,
-      message: `Nao encontramos um fork do repositorio ${REPO_OWNER}/${REPO_NAME} na sua conta. Por favor, faca o fork primeiro.`,
+      message: `Não encontramos um fork do repositorio ${REPO_OWNER}/${REPO_NAME} na sua conta. Por favor, faça o fork primeiro.`,
     }
   } catch (error) {
     logger.error('GitHub API error', { error })
@@ -152,7 +152,7 @@ export async function verifyGitHubFork(username: string): Promise<VerifyForkResu
     // This prevents blocking users due to GitHub rate limits
     return {
       success: true,
-      message: 'Verificacao automatica indisponivel. Fork aceito provisoriamente.',
+      message: 'Verificação automática indisponível. Fork aceito provisoriamente.',
     }
   }
 }

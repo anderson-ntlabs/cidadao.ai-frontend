@@ -83,7 +83,7 @@ export const useCelebrationStore = create<CelebrationState>((set, get) => ({
       subtitle: badgeName,
       emoji: badgeEmoji,
       xpReward,
-      description: 'Continue assim! Voce esta no caminho certo.',
+      description: 'Continue assim! Você está no caminho certo.',
     })
   },
 
@@ -95,7 +95,7 @@ export const useCelebrationStore = create<CelebrationState>((set, get) => ({
       subtitle: `Nivel ${newLevel}`,
       emoji: '🚀',
       xpReward,
-      description: 'Seu conhecimento esta crescendo!',
+      description: 'Seu conhecimento está crescendo!',
     })
   },
 
@@ -113,7 +113,7 @@ export const useCelebrationStore = create<CelebrationState>((set, get) => ({
       subtitle: newRank.charAt(0).toUpperCase() + newRank.slice(1),
       emoji: rankEmojis[newRank.toLowerCase()] || '⭐',
       xpReward,
-      description: 'Sua dedicacao esta sendo reconhecida!',
+      description: 'Sua dedicação está sendo reconhecida!',
     })
   },
 
@@ -125,7 +125,7 @@ export const useCelebrationStore = create<CelebrationState>((set, get) => ({
       subtitle: `${days} dias consecutivos!`,
       emoji: '🔥',
       xpReward,
-      description: 'A consistencia e a chave do sucesso!',
+      description: 'A consistência é a chave do sucesso!',
     })
   },
 

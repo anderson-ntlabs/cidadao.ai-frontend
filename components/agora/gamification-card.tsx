@@ -284,7 +284,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
                   <Gift className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">Bonus Diario</p>
+                  <p className="font-medium text-sm">Bônus Diário</p>
                   <p className="text-xs text-white/70">+{Math.round(5 * streakMultiplier)} XP</p>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium academy-text">Desafios Diarios</span>
+              <span className="text-sm font-medium academy-text">Desafios Diários</span>
             </div>
             <div className="flex items-center gap-3">
               <ResetTimerDisplay isWeekly={false} />
@@ -326,7 +326,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
           {unclaimedDailyXp > 0 && (
             <div className="mb-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-md text-xs text-green-700 dark:text-green-300 flex items-center gap-1">
               <Gift className="w-3 h-3" />
-              <span>{unclaimedDailyXp} XP disponiveis para resgate!</span>
+              <span>{unclaimedDailyXp} XP disponíveis para resgate!</span>
             </div>
           )}
 
@@ -371,7 +371,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
         {showWeekly && (
           <div className="space-y-2 pt-2 border-t border-[hsl(var(--academy-border))]">
             <div className="flex items-center justify-between px-1">
-              <p className="text-xs academy-text-muted">Total disponivel: {totalWeeklyXp} XP</p>
+              <p className="text-xs academy-text-muted">Total disponível: {totalWeeklyXp} XP</p>
               <ResetTimerDisplay isWeekly={true} />
             </div>
             {weeklyChallenges.map((challenge) => (
@@ -397,7 +397,7 @@ export function GamificationCard({ className }: GamificationCardProps) {
             </div>
             {user.currentStreak >= 3 && (
               <span className="text-[10px] text-amber-600 dark:text-amber-400">
-                +{Math.round((streakMultiplier - 1) * 100)}% bonus
+                +{Math.round((streakMultiplier - 1) * 100)}% bônus
               </span>
             )}
           </div>

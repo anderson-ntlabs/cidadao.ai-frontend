@@ -66,7 +66,7 @@ export const KIDS_CERTIFICATE_LEVELS: KidsCertificateLevel[] = [
     id: 'creator',
     version: 'v2.0',
     label: 'Cidadaozinho Criador',
-    description: 'Aprendendo a criar coisas incriveis!',
+    description: 'Aprendendo a criar coisas incríveis!',
     emoji: '🎨',
     color: '#FF6B6B', // Coral
     mascotImage: '/kids/certificates/creator.png',
@@ -168,8 +168,8 @@ function generateMilestones(telemetry: KidsTelemetryData): KidsMilestone[] {
     {
       id: 'first_video',
       icon: '🎬',
-      label: 'Primeiro Video!',
-      description: 'Assistiu o primeiro video',
+      label: 'Primeiro Vídeo!',
+      description: 'Assistiu o primeiro vídeo',
       isCompleted: telemetry.videosWatched >= 1,
     },
     {
@@ -182,8 +182,8 @@ function generateMilestones(telemetry: KidsTelemetryData): KidsMilestone[] {
     {
       id: 'three_videos',
       icon: '🎥',
-      label: '3 Videos!',
-      description: 'Assistiu 3 videos',
+      label: '3 Vídeos!',
+      description: 'Assistiu 3 vídeos',
       isCompleted: telemetry.videosWatched >= 3,
     },
     {
@@ -223,8 +223,8 @@ function generateMilestones(telemetry: KidsTelemetryData): KidsMilestone[] {
     {
       id: 'ten_videos',
       icon: '🎞️',
-      label: '10 Videos!',
-      description: 'Assistiu 10 videos',
+      label: '10 Vídeos!',
+      description: 'Assistiu 10 vídeos',
       isCompleted: telemetry.videosWatched >= 10,
     },
     {
@@ -270,20 +270,20 @@ export function getEncouragementMessage(
   currentLevel: KidsCertificateLevel | null
 ): string {
   if (!currentLevel) {
-    if (progress < 25) return 'Voce esta comecando sua aventura! Continue assim! 🚀'
-    if (progress < 50) return 'Muito bem! Ja aprendeu muitas coisas! 🌈'
-    if (progress < 75) return 'Uau! Quase la! Voce e incrivel! ⭐'
-    return 'Falta pouquinho! Voce consegue! 💪'
+    if (progress < 25) return 'Você está começando sua aventura! Continue assim! 🚀'
+    if (progress < 50) return 'Muito bem! Já aprendeu muitas coisas! 🌈'
+    if (progress < 75) return 'Uau! Quase lá! Você é incrível! ⭐'
+    return 'Falta pouquinho! Você consegue! 💪'
   }
 
   switch (currentLevel.id) {
     case 'explorer':
-      return 'Parabens, Explorador! Continue descobrindo coisas novas! 🌟'
+      return 'Parabéns, Explorador! Continue descobrindo coisas novas! 🌟'
     case 'creator':
-      return 'Incrivel, Criador! Voce ja sabe criar coisas legais! 🎨'
+      return 'Incrível, Criador! Você já sabe criar coisas legais! 🎨'
     case 'master':
-      return 'Voce e um MESTRE! Que orgulho! 🏆'
+      return 'Você é um MESTRE! Que orgulho! 🏆'
     default:
-      return 'Continue aprendendo! Voce e demais! 💫'
+      return 'Continue aprendendo! Você é demais! 💫'
   }
 }

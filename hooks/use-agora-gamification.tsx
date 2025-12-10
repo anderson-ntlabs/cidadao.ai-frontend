@@ -111,7 +111,7 @@ const BADGE_DEFINITIONS = [
     id: 'pioneiro',
     type: 'pioneiro',
     name: 'Pioneiro',
-    description: 'Primeiro login na Agora',
+    description: 'Primeiro login na Ágora',
     emoji: '🚀',
     criteria: 'Primeiro login',
     xpReward: 25,
@@ -131,9 +131,9 @@ const BADGE_DEFINITIONS = [
     id: 'primeiro-passo',
     type: 'primeiro-passo',
     name: 'Primeiro Passo',
-    description: 'Completou a primeira sessao de estudo',
+    description: 'Completou a primeira sessão de estudo',
     emoji: '👣',
-    criteria: '1+ sessao',
+    criteria: '1+ sessão',
     xpReward: 20,
     check: (u: GamificationUser) => u.totalSessions >= 1,
   },
@@ -143,9 +143,9 @@ const BADGE_DEFINITIONS = [
     id: 'explorador',
     type: 'explorador',
     name: 'Explorador',
-    description: 'Completou 5 sessoes de estudo',
+    description: 'Completou 5 sessões de estudo',
     emoji: '🧭',
-    criteria: '5+ sessoes',
+    criteria: '5+ sessões',
     xpReward: 30,
     check: (u: GamificationUser) => u.totalSessions >= 5,
   },
@@ -153,9 +153,9 @@ const BADGE_DEFINITIONS = [
     id: 'japaguri',
     type: 'japaguri',
     name: 'Japaguri',
-    description: 'Assiduo: 3+ dias seguidos ou 5+ sessoes',
+    description: 'Assíduo: 3+ dias seguidos ou 5+ sessões',
     emoji: '🍜',
-    criteria: '3+ streak OU 5+ sessoes',
+    criteria: '3+ streak OU 5+ sessões',
     xpReward: 50,
     check: (u: GamificationUser) => u.currentStreak >= 3 || u.totalSessions >= 5,
   },
@@ -195,9 +195,9 @@ const BADGE_DEFINITIONS = [
     id: 'veterano',
     type: 'veterano',
     name: 'Veterano',
-    description: 'Completou 20 sessoes de estudo',
+    description: 'Completou 20 sessões de estudo',
     emoji: '🎖️',
-    criteria: '20+ sessoes',
+    criteria: '20+ sessões',
     xpReward: 60,
     check: (u: GamificationUser) => u.totalSessions >= 20,
   },
@@ -246,10 +246,10 @@ const BADGE_DEFINITIONS = [
   {
     id: 'centuriao',
     type: 'centuriao',
-    name: 'Centuriao',
-    description: '100 sessoes completadas',
+    name: 'Centurião',
+    description: '100 sessões completadas',
     emoji: '⚔️',
-    criteria: '100+ sessoes',
+    criteria: '100+ sessões',
     xpReward: 250,
     check: (u: GamificationUser) => u.totalSessions >= 100,
   },
@@ -269,8 +269,8 @@ const BADGE_DEFINITIONS = [
 const DAILY_CHALLENGE_TEMPLATES = [
   {
     id: 'daily-session',
-    name: 'Sessao Diaria',
-    description: 'Complete 1 sessao de estudo hoje',
+    name: 'Sessão Diária',
+    description: 'Complete 1 sessão de estudo hoje',
     emoji: '🎯',
     xpReward: 15,
     type: 'session' as const,
@@ -278,8 +278,8 @@ const DAILY_CHALLENGE_TEMPLATES = [
   },
   {
     id: 'daily-diary',
-    name: 'Reflexao Diaria',
-    description: 'Escreva uma entrada no diario',
+    name: 'Reflexão Diária',
+    description: 'Escreva uma entrada no diário',
     emoji: '📝',
     xpReward: 10,
     type: 'diary' as const,
@@ -300,7 +300,7 @@ const WEEKLY_CHALLENGE_TEMPLATES = [
   {
     id: 'weekly-sessions',
     name: 'Maratonista Semanal',
-    description: 'Complete 5 sessoes esta semana',
+    description: 'Complete 5 sessões esta semana',
     emoji: '🏃',
     xpReward: 100,
     type: 'sessions' as const,
@@ -308,7 +308,7 @@ const WEEKLY_CHALLENGE_TEMPLATES = [
   },
   {
     id: 'weekly-xp',
-    name: 'Cacador de XP',
+    name: 'Caçador de XP',
     description: 'Ganhe 200 XP esta semana',
     emoji: '⭐',
     xpReward: 75,
@@ -317,7 +317,7 @@ const WEEKLY_CHALLENGE_TEMPLATES = [
   },
   {
     id: 'weekly-streak',
-    name: 'Consistencia',
+    name: 'Consistência',
     description: 'Mantenha um streak de 5 dias',
     emoji: '🔥',
     xpReward: 150,
@@ -677,8 +677,8 @@ export function AgoraGamificationProvider({ children, userId }: AgoraGamificatio
 
       const bonusDescription =
         multiplier > 1
-          ? `Bonus diario de login (+${Math.round((multiplier - 1) * 100)}% streak bonus!)`
-          : 'Bonus diario de login'
+          ? `Bônus diário de login (+${Math.round((multiplier - 1) * 100)}% streak bonus!)`
+          : 'Bônus diário de login'
 
       await addXp(bonusAmount, 'daily_login', bonusDescription)
 
@@ -858,7 +858,7 @@ export function AgoraGamificationProvider({ children, userId }: AgoraGamificatio
         if (xpAwarded > 0) {
           useCelebrationStore
             .getState()
-            .celebrateMilestone('Desafio Concluido!', `+${xpAwarded} XP`, '🎯', xpAwarded)
+            .celebrateMilestone('Desafio Concluído!', `+${xpAwarded} XP`, '🎯', xpAwarded)
         }
 
         logger.info('Challenge claimed', { challengeId, xpAwarded })

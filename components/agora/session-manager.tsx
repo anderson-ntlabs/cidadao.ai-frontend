@@ -170,10 +170,10 @@ export function SessionManager({
               id="session-warning-title"
               className="text-lg font-bold text-yellow-800 dark:text-yellow-200"
             >
-              Sessao expirando
+              Sessão expirando
             </h2>
             <p className="text-sm text-yellow-700 dark:text-yellow-300">
-              Voce sera desconectado por inatividade
+              Você será desconectado por inatividade
             </p>
           </div>
         </div>
@@ -188,13 +188,13 @@ export function SessionManager({
               </span>
             </div>
             <p id="session-warning-desc" className="text-gray-600 dark:text-gray-400">
-              Sua sessao sera encerrada em {formatTime(remainingSeconds)} devido a inatividade.
+              Sua sessão será encerrada em {formatTime(remainingSeconds)} devido a inatividade.
             </p>
           </div>
 
           {/* Info */}
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Clique em &quot;Continuar&quot; para manter sua sessao ativa.
+            Clique em &quot;Continuar&quot; para manter sua sessão ativa.
           </p>
         </div>
 

@@ -84,7 +84,7 @@ export function createTimelineEvents(
     events.push({
       id: `diary-${entry.id}`,
       type: 'diary',
-      title: 'Entrada no Diario',
+      title: 'Entrada no Diário',
       description: entry.whatLearned || entry.content.slice(0, 100) + '...',
       emoji: moodEmojis[entry.mood] || '📝',
       timestamp: entry.createdAt,
@@ -98,7 +98,7 @@ export function createTimelineEvents(
       events.push({
         id: `session-${session.id}`,
         type: 'session',
-        title: 'Sessao Completada',
+        title: 'Sessão Completada',
         description: `${session.durationMinutes} min de estudo${session.xpEarned ? ` • +${session.xpEarned} XP` : ''}`,
         emoji: '📖',
         timestamp: session.endedAt,
@@ -134,9 +134,9 @@ function formatRelativeTime(timestamp: string): string {
   const diffDays = Math.floor(diffMs / 86400000)
 
   if (diffMins < 1) return 'Agora'
-  if (diffMins < 60) return `${diffMins}min atras`
-  if (diffHours < 24) return `${diffHours}h atras`
-  if (diffDays < 7) return `${diffDays}d atras`
+  if (diffMins < 60) return `${diffMins}min atrás`
+  if (diffHours < 24) return `${diffHours}h atrás`
+  if (diffDays < 7) return `${diffDays}d atrás`
 
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
@@ -209,7 +209,7 @@ export function TimelineCard({
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm">Nenhuma atividade ainda</p>
             <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
-              Comece uma sessao de estudo!
+              Comece uma sessão de estudo!
             </p>
           </div>
         ) : (

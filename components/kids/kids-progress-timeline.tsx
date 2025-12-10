@@ -49,7 +49,7 @@ export function KidsProgressTimeline({
       {/* Header with child name and encouragement */}
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Ola, {childName}! {currentLevel?.emoji || '🌟'}
+          Olá, {childName}! {currentLevel?.emoji || '🌟'}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">{encouragement}</p>
       </div>
@@ -86,7 +86,7 @@ export function KidsProgressTimeline({
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Proximo: {nextLevel.label}
+              Próximo: {nextLevel.label}
             </span>
             <span className="text-2xl">{nextLevel.emoji}</span>
           </div>
@@ -100,7 +100,7 @@ export function KidsProgressTimeline({
             />
           </div>
           <p className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
-            {progress < 100 ? 'Continue assim!' : 'Quase la!'}
+            {progress < 100 ? 'Continue assim!' : 'Quase lá!'}
           </p>
         </div>
       )}
@@ -137,7 +137,7 @@ export function KidsProgressTimeline({
             </div>
             <div>
               <div className="text-2xl font-bold text-[#FF6B6B]">{telemetry.videosWatched}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Videos</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Vídeos</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-[#FFE66D]">{telemetry.daysActive}</div>
@@ -149,7 +149,7 @@ export function KidsProgressTimeline({
 
       {/* Time spent (friendly format) */}
       <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-        Voce ja estudou por {formatKidsTime(telemetry.totalTimeMinutes)}! 🎉
+        Você já estudou por {formatKidsTime(telemetry.totalTimeMinutes)}! 🎉
       </div>
     </div>
   )

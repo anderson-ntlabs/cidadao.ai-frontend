@@ -183,7 +183,7 @@ const BADGE_DEFINITIONS = [
     id: 'primeiro-passo',
     type: 'primeiro-passo',
     name: 'Primeiro Passo',
-    description: 'Completou a primeira sessao de estudo',
+    description: 'Completou a primeira sessão de estudo',
     emoji: '👣',
     criteria: '1+ sessao',
     xpReward: 20,
@@ -195,7 +195,7 @@ const BADGE_DEFINITIONS = [
     id: 'explorador',
     type: 'explorador',
     name: 'Explorador',
-    description: 'Completou 5 sessoes de estudo',
+    description: 'Completou 5 sessões de estudo',
     emoji: '🧭',
     criteria: '5+ sessoes',
     xpReward: 30,
@@ -247,7 +247,7 @@ const BADGE_DEFINITIONS = [
     id: 'veterano',
     type: 'veterano',
     name: 'Veterano',
-    description: 'Completou 20 sessoes de estudo',
+    description: 'Completou 20 sessões de estudo',
     emoji: '🎖️',
     criteria: '20+ sessoes',
     xpReward: 60,
@@ -299,7 +299,7 @@ const BADGE_DEFINITIONS = [
     id: 'centuriao',
     type: 'centuriao',
     name: 'Centuriao',
-    description: '100 sessoes completadas',
+    description: '100 sessões completadas',
     emoji: '⚔️',
     criteria: '100+ sessoes',
     xpReward: 250,
@@ -370,7 +370,7 @@ export const DAILY_CHALLENGE_TEMPLATES: Array<{
   {
     id: 'daily-session',
     name: 'Sessao Diaria',
-    description: 'Complete 1 sessao de estudo hoje',
+    description: 'Complete 1 sessão de estudo hoje',
     emoji: '🎯',
     xpReward: 15,
     type: 'session',
@@ -409,7 +409,7 @@ export const WEEKLY_CHALLENGE_TEMPLATES: Array<{
   {
     id: 'weekly-sessions',
     name: 'Maratonista Semanal',
-    description: 'Complete 5 sessoes esta semana',
+    description: 'Complete 5 sessões esta semana',
     emoji: '🏃',
     xpReward: 100,
     type: 'sessions',
@@ -1178,7 +1178,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         ])
 
         // Award XP
-        await addXp(10, 'diary', 'Entrada no diario de aprendizado')
+        await addXp(10, 'diary', 'Entrada no diário de aprendizado')
 
         logger.info('Diary entry created', { entryId: data.id })
       } catch (error) {
@@ -1239,7 +1239,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         )
 
         // Award welcome bonus
-        await addXp(100, 'terms_accept', 'Bonus de boas-vindas - Aceite dos Termos de Uso')
+        await addXp(100, 'terms_accept', 'Bônus de boas-vindas - Aceite dos Termos de Uso')
 
         logger.info('Terms accepted')
       } catch (error) {
@@ -1616,7 +1616,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           })
           .eq('user_id', user.id)
 
-        await addXp(50, 'onboarding', 'Fork do repositorio verificado!')
+        await addXp(50, 'onboarding', 'Fork do repositório verificado!')
         await updateProfile({ onboardingStep: 4 })
       }
 
@@ -1643,7 +1643,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
   const completeOnboarding = useCallback(async () => {
     if (!user) return
     await updateProfile({ hasCompletedOnboarding: true, onboardingStep: 5 })
-    await addXp(100, 'onboarding', 'Onboarding concluido! Bem-vindo a Agora!')
+    await addXp(100, 'onboarding', 'Onboarding concluído! Bem-vindo à Ágora!')
     await checkAndAwardBadges()
   }, [user, updateProfile, addXp, checkAndAwardBadges])
 

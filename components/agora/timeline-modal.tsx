@@ -129,8 +129,8 @@ function getEventStyle(type: TimelineEvent['type']) {
 const filterButtons: { type: FilterType; label: string; icon: typeof Zap }[] = [
   { type: 'all', label: 'Todos', icon: Clock },
   { type: 'xp', label: 'XP', icon: Zap },
-  { type: 'session', label: 'Sessoes', icon: Play },
-  { type: 'diary', label: 'Diario', icon: FileText },
+  { type: 'session', label: 'Sessões', icon: Play },
+  { type: 'diary', label: 'Diário', icon: FileText },
   { type: 'badge', label: 'Badges', icon: Award },
 ]
 
@@ -234,7 +234,7 @@ export function TimelineModal({
                 {stats.totalSessions}
               </div>
               <div className="text-[10px] sm:text-xs text-green-600/70 dark:text-green-400/70">
-                Sessoes
+                Sessões
               </div>
             </div>
             <div className="p-2 sm:p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-center">
@@ -242,7 +242,7 @@ export function TimelineModal({
                 {stats.totalDiaryEntries}
               </div>
               <div className="text-[10px] sm:text-xs text-purple-600/70 dark:text-purple-400/70">
-                Anotacoes
+                Anotações
               </div>
             </div>
             <div className="p-2 sm:p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
