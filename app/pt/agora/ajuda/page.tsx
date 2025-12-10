@@ -34,7 +34,7 @@ const agoraHelpCategories = [
   {
     id: 'getting-started',
     name: 'Primeiros Passos',
-    description: 'Como comecar a usar a Agora',
+    description: 'Como começar a usar a Agora',
     icon: '🚀',
     articles: 3,
   },
@@ -68,7 +68,7 @@ const agoraHelpCategories = [
   },
   {
     id: 'account',
-    name: 'Conta e Configuracoes',
+    name: 'Conta e Configurações',
     description: 'Gerencie suas preferencias',
     icon: '⚙️',
     articles: 3,
@@ -91,9 +91,9 @@ interface HelpArticle {
 const agoraHelpArticles: HelpArticle[] = [
   {
     id: 'what-is-agora',
-    title: 'O que e a Agora?',
+    title: 'O que é a Ágora?',
     description: 'Conheca a plataforma de aprendizado do Cidadao.AI',
-    content: `# O que e a Agora?
+    content: `# O que é a Ágora?
 
 A **Agora** e a plataforma de aprendizado do Cidadao.AI, inspirada na agora grega - o espaco publico onde cidadaos se reuniam para discutir e aprender.
 
@@ -102,7 +102,7 @@ A **Agora** e a plataforma de aprendizado do Cidadao.AI, inspirada na agora greg
 - **Mentores IA**: Converse com especialistas virtuais sobre cidadania, politicas publicas e transparencia
 - **Trilhas de Aprendizado**: Percursos estruturados para desenvolver suas habilidades civicas
 - **Sistema de XP**: Ganhe pontos e suba de nivel conforme aprende
-- **Diario de Bordo**: Registre seus aprendizados e reflexoes
+- **Diário de Bordo**: Registre seus aprendizados e reflexões
 - **Ranking**: Compare seu progresso com outros cidadaos
 
 ## Comece Agora
@@ -256,11 +256,11 @@ Cada trilha contem:
   },
   {
     id: 'journal-usage',
-    title: 'Como usar o Diario de Bordo?',
+    title: 'Como usar o Diário de Bordo?',
     description: 'Registre e organize seus aprendizados',
-    content: `# Diario de Bordo
+    content: `# Diário de Bordo
 
-O diario e seu espaco pessoal para registrar reflexoes e aprendizados.
+O diario e seu espaco pessoal para registrar reflexões e aprendizados.
 
 ## Funcionalidades
 
@@ -280,7 +280,7 @@ O diario e seu espaco pessoal para registrar reflexoes e aprendizados.
 
 Cada anotacao rende 10 XP! Manter o habito de registrar e recompensado.`,
     category: 'content',
-    tags: ['diario', 'anotacoes', 'reflexoes'],
+    tags: ['diario', 'anotacoes', 'reflexões'],
     helpful: 32,
     notHelpful: 0,
   },
@@ -486,7 +486,7 @@ function AjudaContent() {
                 </h1>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Tire suas duvidas sobre a Agora
+                Tire suas dúvidas sobre a Ágora
               </p>
             </div>
           </div>
@@ -497,7 +497,7 @@ function AjudaContent() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-            Como podemos ajudar voce hoje?
+            Como podemos ajudar você hoje?
           </h2>
 
           <div className="relative max-w-2xl mx-auto">

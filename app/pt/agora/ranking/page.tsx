@@ -395,7 +395,7 @@ export default function AcademyRankingPage() {
                         </p>
                         {isCurrentUser && (
                           <Badge variant="success" size="sm">
-                            Voce
+                            Você
                           </Badge>
                         )}
                       </div>

@@ -44,7 +44,7 @@ export default function AgoraChatError({ error, reset }: ErrorProps) {
           </h1>
 
           <p className="text-center text-slate-600 dark:text-slate-400 mb-6">
-            Encontramos um problema inesperado no chat. Nao se preocupe, suas conversas estao
+            Encontramos um problema inesperado no chat. Não se preocupe, suas conversas estão
             salvas.
           </p>
 

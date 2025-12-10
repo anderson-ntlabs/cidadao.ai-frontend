@@ -371,7 +371,7 @@ export function DashboardClient({
                     </span>
                   </div>
                   <p className="text-white/80 text-sm mb-2">
-                    Conheca a plataforma Agora atraves da apresentacao interativa.
+                    Conheca a plataforma Agora através da apresentacao interativa.
                   </p>
                   <div className="flex items-center gap-4 text-xs text-white/70">
                     <span className="flex items-center gap-1.5">
@@ -413,7 +413,7 @@ export function DashboardClient({
                   {/* User Info */}
                   <div className="flex-1">
                     <h2 className="text-xl sm:text-2xl font-semibold academy-text">
-                      Ola, {user.name.split(' ')[0]}!
+                      Olá, {user.name.split(' ')[0]}!
                     </h2>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">

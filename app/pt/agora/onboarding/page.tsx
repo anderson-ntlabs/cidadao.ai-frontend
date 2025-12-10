@@ -68,7 +68,7 @@ const TOUR_FEATURES = [
   },
   {
     icon: BookOpen,
-    title: 'Diario de Bordo',
+    title: 'Diário de Bordo',
     description: 'Organize seus estudos e acompanhe seu progresso no calendario.',
     color: 'bg-[var(--cidadao-purple-600)]',
   },
@@ -206,7 +206,7 @@ function OnboardingContent() {
                   Bem-vindo a Agora!
                 </h2>
                 <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
-                  A plataforma de aprendizado do Cidadao.AI onde voce vai desenvolver habilidades
+                  A plataforma de aprendizado do Cidadao.AI onde você vai desenvolver habilidades
                   reais contribuindo com um projeto de impacto social.
                 </p>
               </div>
@@ -379,7 +379,7 @@ function OnboardingContent() {
                   Conheca a Plataforma
                 </h2>
                 <p className="text-sm text-[var(--color-text-secondary)]">
-                  Veja os principais recursos disponiveis para voce.
+                  Veja os principais recursos disponiveis para você.
                 </p>
               </div>
 
@@ -478,7 +478,7 @@ function OnboardingContent() {
                 Tudo Pronto!
               </h2>
               <p className="text-[var(--color-text-secondary)] mb-6 max-w-md mx-auto">
-                Voce completou o onboarding e esta pronto para comecar sua jornada na Agora Academy.
+                Voce completou o onboarding e está pronto para começar sua jornada na Agora Academy.
               </p>
 
               {/* XP reward */}
@@ -492,12 +492,12 @@ function OnboardingContent() {
               {/* Next steps */}
               <div className="text-left max-w-sm mx-auto mb-8">
                 <h3 className="font-semibold text-[var(--color-text-primary)] text-sm mb-3">
-                  Proximos passos:
+                  Próximos passos:
                 </h3>
                 <ul className="space-y-2">
                   {[
                     'Explore o dashboard e conheca as funcionalidades',
-                    'Escolha uma trilha de aprendizado para comecar',
+                    'Escolha uma trilha de aprendizado para começar',
                     'Converse com um mentor IA para tirar duvidas',
                   ].map((item, i) => (
                     <li

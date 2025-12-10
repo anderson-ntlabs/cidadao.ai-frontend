@@ -106,7 +106,7 @@ export default function ParentalDashboardPage() {
 
   const handleDisableKidsMode = async () => {
     const confirmed = window.confirm(
-      'Tem certeza que deseja desativar o Modo Kids? A crianca nao tera mais acesso a area infantil.'
+      'Tem certeza que deseja desativar o Modo Kids? A criança não terá mais acesso à área infantil.'
     )
     if (confirmed) {
       await disableKidsMode()
@@ -198,7 +198,7 @@ export default function ParentalDashboardPage() {
               <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <p className="text-3xl font-bold text-foreground">{todayStats?.totalSessions || 0}</p>
-            <p className="text-xs text-muted-foreground">sessoes hoje</p>
+            <p className="text-xs text-muted-foreground">sessões hoje</p>
           </GlassCard>
 
           <GlassCard className="p-4 text-center">
@@ -326,7 +326,7 @@ export default function ParentalDashboardPage() {
           <GlassCard className="p-6 border-destructive/20">
             <h3 className="font-semibold mb-2 text-destructive">Desativar Modo Kids</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Isso remove o acesso da crianca a area Kids e todos os dados de sessao
+              Isso remove o acesso da criança à área Kids e todos os dados de sessão
             </p>
             <Button onClick={handleDisableKidsMode} variant="destructive" className="w-full">
               Desativar Modo Kids
@@ -340,10 +340,10 @@ export default function ParentalDashboardPage() {
             <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Relatorios Diarios
+                Relatórios Diários
               </p>
               <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                Voce recebera um resumo diario por email com as atividades do seu filho. Configure
+                Você receberá um resumo diário por email com as atividades do seu filho. Configure
                 suas preferencias de notificacao no painel principal da Agora.
               </p>
             </div>

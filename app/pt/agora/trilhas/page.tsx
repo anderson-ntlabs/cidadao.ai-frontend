@@ -165,7 +165,7 @@ const TRACKS = [
     xpTotal: 2500,
     prerequisite: 'introducao', // Requires Introdução to be completed
     modules: [
-      { id: 1, name: 'Introducao a IA', type: 'video', duration: '40min' },
+      { id: 1, name: 'Introdução a IA', type: 'video', duration: '40min' },
       { id: 2, name: 'LLMs e Prompts', type: 'reading', duration: '35min' },
       { id: 3, name: 'Agentes de IA', type: 'chat', duration: '30min' },
       { id: 4, name: 'RAG e Vetores', type: 'video', duration: '55min' },
@@ -300,7 +300,7 @@ function TrackCard({
             {isLocked && prerequisiteName && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
                 <Lock className="w-3 h-3" />
-                Requer conclusao da trilha "{prerequisiteName}"
+                Requer conclusão da trilha "{prerequisiteName}"
               </p>
             )}
 
@@ -661,17 +661,17 @@ export default function AgoraTrilhasPage() {
                   <GraduationCap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="font-bold text-gray-900 dark:text-white mb-2">
-                  Comece pela Introducao
+                  Comece pela Introdução
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-4">
                   A trilha de{' '}
-                  <strong className="text-emerald-600 dark:text-emerald-400">Introducao</strong> e
+                  <strong className="text-emerald-600 dark:text-emerald-400">Introdução</strong> e
                   obrigatoria para desbloquear as trilhas avancadas. Configure seu GitHub e conheca
                   os agentes de IA!
                 </p>
                 <Link href="/pt/agora/trilhas/introducao/1">
                   <Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                    Comecar Introducao
+                    Comecar Introdução
                   </Button>
                 </Link>
               </div>
@@ -703,7 +703,7 @@ export default function AgoraTrilhasPage() {
               <Users className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 <p>
-                  <strong className="text-gray-900 dark:text-white">Multiplas trilhas:</strong> Voce
+                  <strong className="text-gray-900 dark:text-white">Múltiplas trilhas:</strong> Voce
                   pode se inscrever em quantas trilhas quiser e ganhar certificados em cada uma!
                 </p>
               </div>
