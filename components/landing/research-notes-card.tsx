@@ -29,7 +29,7 @@ const translations = {
   },
 }
 
-const PDF_PATH = '/docs/Anderson_Cidadao_AI_Notas de Pesquisa.pdf'
+const PDF_PATH = '/docs/Anderson_Cidadao_AI_Notas%20de%20Pesquisa.pdf'
 
 export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -104,12 +104,42 @@ export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
           </ModalHeader>
 
           {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden mt-4 rounded-lg bg-gray-100 dark:bg-gray-900">
-            <iframe
-              src={`${PDF_PATH}#toolbar=1&navpanes=1&scrollbar=1`}
+          <div className="flex-1 overflow-hidden mt-4 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+            <object
+              data={`${PDF_PATH}#toolbar=1&navpanes=1&scrollbar=1`}
+              type="application/pdf"
               className="w-full h-full rounded-lg"
               title={t.modalTitle}
-            />
+            >
+              {/* Fallback for browsers that can't display PDF */}
+              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+                <FileText className="w-16 h-16 text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-400">
+                  {locale === 'pt'
+                    ? 'Seu navegador não suporta visualização de PDF embutido.'
+                    : 'Your browser does not support embedded PDF viewing.'}
+                </p>
+                <div className="flex gap-3">
+                  <a
+                    href={PDF_PATH}
+                    download
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    {t.download}
+                  </a>
+                  <a
+                    href={PDF_PATH}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    {t.openNew}
+                  </a>
+                </div>
+              </div>
+            </object>
           </div>
 
           {/* Mobile action buttons */}
