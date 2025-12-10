@@ -122,57 +122,61 @@ export default function AcademyRankingPage() {
     setIsRefreshing(false)
   }
 
+  const isLoading = demoLoading || isLoadingData
+
   // Add current user to leaderboard (if using mock data or user not in DB)
-  const getLeaderboardWithUser = useCallback(() => {
+  // IMPORTANT: All hooks must be called before any early returns to prevent
+  // "Rendered more hooks than during the previous render" error
+  const sortedLeaderboard = useMemo(() => {
     const leaderboard = [...leaderboardData]
 
     // Skip if no user
-    if (!user) return leaderboard
+    if (user) {
+      // Only add user if not already in the list
+      const userInList = leaderboard.some((e) => e.user_id === user.id)
 
-    // Only add user if not already in the list
-    const userInList = leaderboard.some((e) => e.user_id === user.id)
+      if (!userInList) {
+        const currentUserEntry: LeaderboardEntry = {
+          id: 'current-user',
+          user_id: user.id,
+          full_name: user.name,
+          avatar_url: user.avatar,
+          total_xp: user.totalXp,
+          current_level: user.currentLevel,
+          current_rank: user.currentRank,
+          current_streak: user.currentStreak,
+          total_time_minutes: user.totalTimeMinutes,
+        }
 
-    if (!userInList) {
-      const currentUserEntry: LeaderboardEntry = {
-        id: 'current-user',
-        user_id: user.id,
-        full_name: user.name,
-        avatar_url: user.avatar,
-        total_xp: user.totalXp,
-        current_level: user.currentLevel,
-        current_rank: user.currentRank,
-        current_streak: user.currentStreak,
-        total_time_minutes: user.totalTimeMinutes,
-      }
+        // Check if user is already in the list (by similar XP)
+        const existingIndex = leaderboard.findIndex(
+          (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
+        )
 
-      // Check if user is already in the list (by similar XP)
-      const existingIndex = leaderboard.findIndex(
-        (e) => Math.abs(e.total_xp - user.totalXp) < 50 && e.user_id !== user.id
-      )
-
-      if (existingIndex === -1) {
-        leaderboard.push(currentUserEntry)
-      } else {
-        // Replace a similar entry with current user
-        leaderboard[existingIndex] = currentUserEntry
+        if (existingIndex === -1) {
+          leaderboard.push(currentUserEntry)
+        } else {
+          // Replace a similar entry with current user
+          leaderboard[existingIndex] = currentUserEntry
+        }
       }
     }
 
-    return leaderboard
-  }, [leaderboardData, user])
-
-  // Sort based on filter
-  const sortedLeaderboard = [...getLeaderboardWithUser()].sort((a, b) => {
-    if (filter === 'xp') return b.total_xp - a.total_xp
-    if (filter === 'time') return b.total_time_minutes - a.total_time_minutes
-    return b.current_streak - a.current_streak
-  })
+    // Sort based on filter
+    return leaderboard.sort((a, b) => {
+      if (filter === 'xp') return b.total_xp - a.total_xp
+      if (filter === 'time') return b.total_time_minutes - a.total_time_minutes
+      return b.current_streak - a.current_streak
+    })
+  }, [leaderboardData, user, filter])
 
   // Find user rank
-  const userRank = user ? sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1 : 0
+  const userRank = useMemo(
+    () => (user ? sortedLeaderboard.findIndex((e) => e.user_id === user.id) + 1 : 0),
+    [user, sortedLeaderboard]
+  )
 
-  const isLoading = demoLoading || isLoadingData
-
+  // Loading state - AFTER all hooks are called
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
