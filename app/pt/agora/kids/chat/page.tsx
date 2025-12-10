@@ -23,6 +23,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Send, Loader2, ArrowLeft, Sparkles, Heart, ArrowRight, MessageCircle } from 'lucide-react'
 import { trackKidsChatMessage } from '@/lib/analytics/kids-tracker'
+import { useChatPersistence } from '@/hooks/use-chat-persistence'
 
 interface Message {
   id: string
@@ -79,6 +80,14 @@ function KidsChatContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const sessionIdRef = useRef<string>(crypto.randomUUID())
 
+  // Chat persistence - saves conversations to database for reports
+  const { saveUserMessage, saveAssistantMessage, initSession } = useChatPersistence({
+    isKidsMode: true,
+    agentId,
+    agentName: agent?.name || 'Mentor',
+    childName,
+  })
+
   // Get messages for current agent
   const messages = agentMessages[agentId] || []
 
@@ -132,6 +141,11 @@ function KidsChatContent() {
       setThinkingMessage(null)
       trackAgent(agent.id)
       trackKidsChatMessage(agent.id, text.length)
+
+      // Save user message to database (async, don't await)
+      saveUserMessage(text).catch(() => {
+        // Silent fail - don't block chat for persistence errors
+      })
 
       // Create placeholder for assistant response
       const assistantMessageId = `assistant-${Date.now()}`
@@ -223,16 +237,22 @@ function KidsChatContent() {
           }
         }
 
-        // Ensure message is marked complete
+        // Ensure message is marked complete and save to database
         if (fullContent) {
+          const finalContent = fullContent.trim()
           setAgentMessages((prev) => ({
             ...prev,
             [agentId]: prev[agentId].map((msg) =>
               msg.id === assistantMessageId
-                ? { ...msg, content: fullContent.trim(), isStreaming: false }
+                ? { ...msg, content: finalContent, isStreaming: false }
                 : msg
             ),
           }))
+
+          // Save assistant message to database (async, don't await)
+          saveAssistantMessage(finalContent).catch(() => {
+            // Silent fail - don't block chat for persistence errors
+          })
         }
       } catch (error) {
         console.error('Chat error:', error)
@@ -254,12 +274,17 @@ function KidsChatContent() {
             },
           ],
         }))
+
+        // Save fallback message to database
+        saveAssistantMessage(fallbackContent).catch(() => {
+          // Silent fail
+        })
       } finally {
         setIsLoading(false)
         setThinkingMessage(null)
       }
     },
-    [input, isLoading, agent, agentId, trackAgent]
+    [input, isLoading, agent, agentId, trackAgent, saveUserMessage, saveAssistantMessage]
   )
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
