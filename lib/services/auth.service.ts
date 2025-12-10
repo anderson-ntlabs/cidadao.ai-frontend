@@ -20,9 +20,22 @@
 import { createClient } from '@/lib/supabase/client'
 import { User as SupabaseUser, Provider, AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { createLogger } from '@/lib/logger'
-import { navigationSessionService } from './navigation-session.service'
 
 const logger = createLogger('AuthService')
+
+// Lazy import to avoid circular dependency
+// navigation-session.service imports supabase/client which may import auth.service
+let _navigationSessionService:
+  | typeof import('./navigation-session.service').navigationSessionService
+  | null = null
+
+async function getNavigationSessionService() {
+  if (!_navigationSessionService) {
+    const module = await import('./navigation-session.service')
+    _navigationSessionService = module.navigationSessionService
+  }
+  return _navigationSessionService
+}
 
 // ============================================
 // Types
@@ -97,11 +110,11 @@ class AuthService {
         const previousUser = this.currentUser
         this.currentUser = user
 
-        // Sync with NavigationSessionService
+        // Sync with NavigationSessionService (async to avoid circular dependency)
         if (event === 'SIGNED_IN' && user) {
-          navigationSessionService.initAuthSession(user.id)
+          getNavigationSessionService().then((navService) => navService.initAuthSession(user.id))
         } else if (event === 'SIGNED_OUT') {
-          navigationSessionService.clearAllSessionStorage()
+          getNavigationSessionService().then((navService) => navService.clearAllSessionStorage())
         }
 
         // Mark as initialized on first auth state change
@@ -279,7 +292,8 @@ class AuthService {
       if (data.user) {
         const user = this.convertSupabaseUser(data.user)
         this.currentUser = user
-        await navigationSessionService.initAuthSession(user.id)
+        const navService = await getNavigationSessionService()
+        await navService.initAuthSession(user.id)
         logger.info('Login successful', { userId: user.id })
         return { user, error: null }
       }
@@ -379,7 +393,8 @@ class AuthService {
   async logout(redirectTo?: string): Promise<void> {
     try {
       // Use NavigationSessionService for complete cleanup
-      await navigationSessionService.logout()
+      const navService = await getNavigationSessionService()
+      await navService.logout()
 
       this.currentUser = null
       logger.info('Logout successful')
