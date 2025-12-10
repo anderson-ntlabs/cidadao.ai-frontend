@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import {
   FileText,
   Download,
@@ -10,14 +11,21 @@ import {
   ZoomOut,
   Loader2,
 } from 'lucide-react'
-import { Document, Page, pdfjs } from 'react-pdf'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
 
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+// Dynamically import react-pdf to avoid SSR issues with DOMMatrix
+const Document = dynamic(() => import('react-pdf').then((mod) => mod.Document), { ssr: false })
+const Page = dynamic(() => import('react-pdf').then((mod) => mod.Page), { ssr: false })
+
+// Configure PDF.js worker only on client side
+if (typeof window !== 'undefined') {
+  import('react-pdf').then((pdfModule) => {
+    pdfModule.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfModule.pdfjs.version}/build/pdf.worker.min.mjs`
+  })
+}
 
 interface ResearchNotesCardProps {
   locale?: 'pt' | 'en'

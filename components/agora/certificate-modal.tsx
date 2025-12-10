@@ -36,12 +36,10 @@ import {
 } from 'lucide-react'
 import { trackCertificateDownload, trackReportDownload } from '@/lib/analytics/agora-tracker'
 import { determineCertificateType } from '@/lib/agora/certificate-requirements'
-import {
-  generateCertificatePDF,
-  generateReportPDF,
-  UI_COLOR_CLASSES,
-  type UIMetric,
-} from '@/lib/agora/certificate'
+import { UI_COLOR_CLASSES, type UIMetric } from '@/lib/agora/certificate'
+// Import PDF generators directly to avoid bundling jsPDF on server
+import { generateCertificatePDF } from '@/lib/agora/certificate/generate-certificate-pdf'
+import { generateReportPDF } from '@/lib/agora/certificate/generate-report-pdf'
 
 interface CertificateModalProps {
   isOpen: boolean
