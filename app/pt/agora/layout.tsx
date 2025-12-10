@@ -62,11 +62,21 @@ const agoraNavItems = [
   },
 ]
 
-// Pages that should NOT show the header
-const noHeaderPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/contract']
+// Pages that should NOT show the header (they have their own custom UI)
+const noHeaderPages = [
+  '/pt/agora/login',
+  '/pt/agora/selecao',
+  '/pt/agora/onboarding',
+  '/pt/agora/contract',
+]
 
 // Pages that can be accessed without completing onboarding
-const publicPages = ['/pt/agora/login', '/pt/agora/onboarding', '/pt/agora/contract']
+const publicPages = [
+  '/pt/agora/login',
+  '/pt/agora/selecao',
+  '/pt/agora/onboarding',
+  '/pt/agora/contract',
+]
 
 // Kids area pages (use simplified header)
 const kidsPages = ['/pt/agora/kids']

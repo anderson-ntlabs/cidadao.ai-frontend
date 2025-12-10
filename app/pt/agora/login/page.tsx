@@ -10,8 +10,9 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
-import { Github, GraduationCap, Sparkles, Loader2, ChevronDown } from 'lucide-react'
+import { Github, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
 
 // Google icon SVG component (official colors)
 function GoogleIcon({ className }: { className?: string }) {
@@ -40,8 +41,9 @@ function GoogleIcon({ className }: { className?: string }) {
 /**
  * Ágora Login Page
  *
- * OAuth login with GitHub and Google
- * Kids section as accordion that expands login options
+ * OAuth login with GitHub and Google.
+ * After login, users are redirected to /pt/agora/selecao to choose
+ * between Ágora Aprendiz (adult) or Ágora Kids (children) modes.
  *
  * Note: Middleware handles redirecting authenticated users,
  * but we keep client-side check for auth state changes during login.
@@ -62,28 +64,15 @@ const BACKGROUND_IMAGES = [
   '/agora/cidadao-slide-06.png',
 ]
 
-// Kids mascot images for rotation
-const KIDS_IMAGES = [
-  '/kids/monica.jpg',
-  '/kids/cocorico.jpg',
-  '/kids/jorel.webp',
-  '/kids/luluzinha.webp',
-  '/kids/ze_carioca.png',
-]
-
 export default function AgoraLoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoggingIn, setIsLoggingIn] = useState<
-    'github' | 'google' | 'github-kids' | 'google-kids' | null
-  >(null)
+  const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [kidsExpanded, setKidsExpanded] = useState(false)
-  const [kidsImageIndex, setKidsImageIndex] = useState(0)
 
   // Get redirect URL from query params (set by middleware)
   const redirectUrl = searchParams.get('redirect')
@@ -106,7 +95,7 @@ export default function AgoraLoginPage() {
       setIsAuthenticated(!!session?.user)
       if (event === 'SIGNED_IN' && session?.user) {
         // Always redirect to selection page first
-        // User will choose Academy or Kids mode there
+        // User will choose Aprendiz or Kids mode there
         router.replace('/pt/agora/selecao')
       }
     })
@@ -120,15 +109,6 @@ export default function AgoraLoginPage() {
     setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
   }, [])
 
-  // Rotate kids images every 3 seconds when expanded
-  useEffect(() => {
-    if (!kidsExpanded) return
-    const interval = setInterval(() => {
-      setKidsImageIndex((prev) => (prev + 1) % KIDS_IMAGES.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [kidsExpanded])
-
   // Redirect authenticated users to selection page
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
@@ -136,13 +116,12 @@ export default function AgoraLoginPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  const handleLogin = async (provider: 'github' | 'google', isKids: boolean = false) => {
-    const loginKey = isKids ? `${provider}-kids` : provider
-    setIsLoggingIn(loginKey as typeof isLoggingIn)
+  const handleLogin = async (provider: 'github' | 'google') => {
+    setIsLoggingIn(provider)
 
     try {
       // Always redirect to selection page after OAuth
-      // User will choose Academy or Kids mode there
+      // User will choose Aprendiz or Kids mode there
       const nextPath = '/pt/agora/selecao'
 
       const redirectTo =
@@ -207,6 +186,13 @@ export default function AgoraLoginPage() {
         </div>
       )}
 
+      {/* Top bar with theme toggle */}
+      <div className="fixed top-4 right-4 z-20">
+        <div className="backdrop-blur-sm bg-background/50 rounded-full">
+          <ThemeToggle />
+        </div>
+      </div>
+
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
@@ -260,98 +246,6 @@ export default function AgoraLoginPage() {
             </Button>
           </GlassCardContent>
         </GlassCard>
-
-        {/* Kids Accordion */}
-        <div className="mb-6">
-          <button
-            onClick={() => setKidsExpanded(!kidsExpanded)}
-            className={cn(
-              'w-full p-4 rounded-xl border-2 transition-all',
-              'flex items-center gap-4',
-              kidsExpanded
-                ? 'border-[#FF6B6B] bg-[#FF6B6B]/10 rounded-b-none'
-                : 'border-border hover:border-[#FF6B6B]/50 academy-card'
-            )}
-          >
-            <div className="h-12 w-12 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] p-0.5">
-              <Image
-                src={KIDS_IMAGES[kidsImageIndex]}
-                alt="Área Kids"
-                width={48}
-                height={48}
-                className="rounded-lg object-cover w-full h-full"
-              />
-            </div>
-            <div className="flex-1 text-left">
-              <h3 className="font-bold academy-text">Área Kids</h3>
-              <p className="text-xs academy-text-muted">Aprendizado para crianças de 6-12 anos</p>
-            </div>
-            <ChevronDown
-              className={cn(
-                'h-5 w-5 academy-text-muted transition-transform',
-                kidsExpanded && 'rotate-180'
-              )}
-            />
-          </button>
-
-          {/* Accordion Content */}
-          <div
-            className={cn(
-              'overflow-hidden transition-all duration-300',
-              kidsExpanded ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-            )}
-          >
-            <div className="p-4 border-2 border-t-0 border-[#FF6B6B] rounded-b-xl bg-[#FF6B6B]/5 space-y-3">
-              <p className="text-sm text-center academy-text-muted mb-4">
-                Pais: façam login para configurar a Área Kids
-              </p>
-
-              {/* GitHub Kids */}
-              <Button
-                onClick={() => handleLogin('github', true)}
-                disabled={isLoggingIn !== null}
-                size="lg"
-                className={cn(
-                  'w-full justify-center gap-3 h-12 text-sm',
-                  'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
-                  'text-white dark:text-gray-900'
-                )}
-                aria-label="Entrar com GitHub para a Área Kids"
-              >
-                {isLoggingIn === 'github-kids' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Github className="w-4 h-4" />
-                )}
-                Entrar com GitHub
-              </Button>
-
-              {/* Google Kids */}
-              <Button
-                onClick={() => handleLogin('google', true)}
-                disabled={isLoggingIn !== null}
-                variant="secondary"
-                size="lg"
-                className="w-full justify-center gap-3 h-12 text-sm"
-                aria-label="Entrar com Google para a Área Kids"
-              >
-                {isLoggingIn === 'google-kids' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <GoogleIcon className="w-4 h-4" />
-                )}
-                Entrar com Google
-              </Button>
-
-              <Link
-                href="/pt/agora/kids/termos"
-                className="block text-center text-xs text-[#FF6B6B] hover:underline mt-2"
-              >
-                Termos de Uso da Área Kids
-              </Link>
-            </div>
-          </div>
-        </div>
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mb-6">
