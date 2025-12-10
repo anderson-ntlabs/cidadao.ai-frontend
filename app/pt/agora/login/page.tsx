@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -19,8 +19,11 @@ import { Github, Mail, GraduationCap, Sparkles, Loader2, ChevronDown } from 'luc
  * OAuth login with GitHub and Google
  * Kids section as accordion that expands login options
  *
+ * Note: Middleware handles redirecting authenticated users,
+ * but we keep client-side check for auth state changes during login.
+ *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-09
+ * Updated: 2025-12-10
  */
 
 // Available background images for random selection
@@ -46,6 +49,7 @@ const KIDS_IMAGES = [
 
 export default function AgoraLoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -56,6 +60,9 @@ export default function AgoraLoginPage() {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [kidsExpanded, setKidsExpanded] = useState(false)
   const [kidsImageIndex, setKidsImageIndex] = useState(0)
+
+  // Get redirect URL from query params (set by middleware)
+  const redirectUrl = searchParams.get('redirect')
 
   // Check auth status on mount
   useEffect(() => {
@@ -79,6 +86,9 @@ export default function AgoraLoginPage() {
         if (storedMode === 'kids') {
           sessionStorage.removeItem('login_mode')
           router.replace('/pt/agora/kids')
+        } else if (redirectUrl && redirectUrl.startsWith('/pt/agora')) {
+          // Use redirect from middleware if valid Agora path
+          router.replace(redirectUrl)
         } else {
           router.replace('/pt/agora')
         }
@@ -86,7 +96,7 @@ export default function AgoraLoginPage() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase, router])
+  }, [supabase, router, redirectUrl])
 
   // Select random background on mount
   useEffect(() => {
@@ -128,11 +138,18 @@ export default function AgoraLoginPage() {
     }
 
     try {
-      const nextPath = isKids ? '/pt/agora/kids' : '/pt/agora'
+      // Determine redirect path: kids > middleware redirect > default agora
+      let nextPath = '/pt/agora'
+      if (isKids) {
+        nextPath = '/pt/agora/kids'
+      } else if (redirectUrl && redirectUrl.startsWith('/pt/agora')) {
+        nextPath = redirectUrl
+      }
+
       const redirectTo =
         typeof window !== 'undefined'
-          ? `${window.location.origin}/auth/callback?next=${nextPath}`
-          : `/auth/callback?next=${nextPath}`
+          ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+          : `/auth/callback?next=${encodeURIComponent(nextPath)}`
 
       await supabase.auth.signInWithOAuth({
         provider,
