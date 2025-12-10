@@ -105,17 +105,9 @@ export default function AgoraLoginPage() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session?.user)
       if (event === 'SIGNED_IN' && session?.user) {
-        // Check if logging in for Kids
-        const storedMode = sessionStorage.getItem('login_mode')
-        if (storedMode === 'kids') {
-          sessionStorage.removeItem('login_mode')
-          router.replace('/pt/agora/kids')
-        } else if (redirectUrl && redirectUrl.startsWith('/pt/agora')) {
-          // Use redirect from middleware if valid Agora path
-          router.replace(redirectUrl)
-        } else {
-          router.replace('/pt/agora')
-        }
+        // Always redirect to selection page first
+        // User will choose Academy or Kids mode there
+        router.replace('/pt/agora/selecao')
       }
     })
 
@@ -137,16 +129,10 @@ export default function AgoraLoginPage() {
     return () => clearInterval(interval)
   }, [kidsExpanded])
 
-  // Redirect authenticated users
+  // Redirect authenticated users to selection page
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      const storedMode = sessionStorage.getItem('login_mode')
-      if (storedMode === 'kids') {
-        sessionStorage.removeItem('login_mode')
-        router.replace('/pt/agora/kids')
-      } else {
-        router.replace('/pt/agora')
-      }
+      router.replace('/pt/agora/selecao')
     }
   }, [isAuthenticated, isLoading, router])
 
@@ -154,21 +140,10 @@ export default function AgoraLoginPage() {
     const loginKey = isKids ? `${provider}-kids` : provider
     setIsLoggingIn(loginKey as typeof isLoggingIn)
 
-    // Store mode preference before OAuth redirect
-    if (isKids) {
-      sessionStorage.setItem('login_mode', 'kids')
-    } else {
-      sessionStorage.removeItem('login_mode')
-    }
-
     try {
-      // Determine redirect path: kids > middleware redirect > default agora
-      let nextPath = '/pt/agora'
-      if (isKids) {
-        nextPath = '/pt/agora/kids'
-      } else if (redirectUrl && redirectUrl.startsWith('/pt/agora')) {
-        nextPath = redirectUrl
-      }
+      // Always redirect to selection page after OAuth
+      // User will choose Academy or Kids mode there
+      const nextPath = '/pt/agora/selecao'
 
       const redirectTo =
         typeof window !== 'undefined'
@@ -206,7 +181,7 @@ export default function AgoraLoginPage() {
           <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Sparkles className="w-8 h-8 text-white animate-pulse" />
           </div>
-          <p className="academy-text-muted">Redirecionando para o dashboard...</p>
+          <p className="academy-text-muted">Redirecionando...</p>
         </div>
       </div>
     )
