@@ -7,7 +7,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-09 - Consolidated with Agora design system
+ * @updated 2025-12-10 - Add mode guard for Academy/Kids separation
  */
 
 'use client'
@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
+import { useRequireKidsModeSelected } from '@/hooks/use-agora-mode'
 import { getKidsAgents } from '@/data/agents'
 import { KIDS_VIDEOS, KIDS_TRACKS, TOTAL_KIDS_VIDEOS, KidsTrackId } from '@/data/kids-videos'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -54,6 +55,7 @@ import type { KidsTelemetryData } from '@/lib/agora/kids-certificate-requirement
 
 export default function KidsDashboardPage() {
   const router = useRouter()
+  const isModeSelected = useRequireKidsModeSelected()
   const { isReady, isLoading } = useRequireKidsMode()
   const { childName, parentEmail, childAvatar, trackAgent, trackVideo, updateAvatar } = useKids()
 
@@ -116,8 +118,8 @@ export default function KidsDashboardPage() {
     router.push(`/pt/agora/kids/videos/${video.id}`)
   }
 
-  // Loading state
-  if (isLoading) {
+  // Loading state or mode not selected yet
+  if (isLoading || !isModeSelected) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
@@ -130,7 +132,7 @@ export default function KidsDashboardPage() {
     )
   }
 
-  // Not in kids mode
+  // Not in kids mode (profile not set up)
   if (!isReady) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">

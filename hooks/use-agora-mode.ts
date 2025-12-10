@@ -113,10 +113,11 @@ export function useRequireAcademyMode(): boolean {
 }
 
 /**
- * Guard hook that requires Kids mode
- * Redirects to selection page if not in Kids mode
+ * Guard hook that requires Kids mode SELECTED
+ * Redirects to selection page if user hasn't selected Kids mode
+ * Note: This checks mode selection, NOT kids profile setup
  */
-export function useRequireKidsMode(): boolean {
+export function useRequireKidsModeSelected(): boolean {
   const router = useRouter()
   const { mode, isLoading } = useAgoraMode()
 
