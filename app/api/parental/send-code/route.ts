@@ -12,8 +12,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
-// Initialize Resend (uses RESEND_API_KEY env var)
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization of Resend (only when API key is available)
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    return null
+  }
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -66,7 +71,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Check if Resend is configured
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResendClient()
+    if (!resend) {
       // In development, just return the code directly
       console.log(`[DEV] Parental code for ${parentEmail}: ${code}`)
       return NextResponse.json({

@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { GovBrMockLogin, type GovBrUserData } from '@/components/auth'
 import { cn } from '@/lib/utils'
 import { Github, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
 
@@ -41,9 +42,12 @@ function GoogleIcon({ className }: { className?: string }) {
 /**
  * Ágora Login Page
  *
- * OAuth login with GitHub and Google.
+ * OAuth login with GitHub, Google, and Gov.br (mock).
  * After login, users are redirected to /pt/agora/selecao to choose
  * between Ágora Aprendiz (adult) or Ágora Kids (children) modes.
+ *
+ * Gov.br integration is currently mocked for demonstration.
+ * Real integration requires IFSULDEMINAS partnership.
  *
  * Note: Middleware handles redirecting authenticated users,
  * but we keep client-side check for auth state changes during login.
@@ -51,6 +55,16 @@ function GoogleIcon({ className }: { className?: string }) {
  * Author: Anderson Henrique da Silva
  * Updated: 2025-12-10
  */
+
+// Gov.br icon component (Brazilian government colors)
+function GovBrIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="4" fill="#1351B4" />
+      <path d="M6 8h12v2H6V8zm0 3h12v2H6v-2zm0 3h8v2H6v-2z" fill="white" />
+    </svg>
+  )
+}
 
 // Available background images for random selection
 const BACKGROUND_IMAGES = [
@@ -70,9 +84,10 @@ export default function AgoraLoginPage() {
   const supabase = createClient()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | null>(null)
+  const [isLoggingIn, setIsLoggingIn] = useState<'github' | 'google' | 'govbr' | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [showGovBrModal, setShowGovBrModal] = useState(false)
 
   // Get redirect URL from query params (set by middleware)
   const redirectUrl = searchParams.get('redirect')
@@ -138,6 +153,23 @@ export default function AgoraLoginPage() {
     } catch {
       setIsLoggingIn(null)
     }
+  }
+
+  // Handle Gov.br mock login success
+  const handleGovBrSuccess = async (userData: GovBrUserData) => {
+    setIsLoggingIn('govbr')
+    setShowGovBrModal(false)
+
+    // For now, we'll simulate a successful login by storing Gov.br data
+    // In production, this would create a Supabase session via Gov.br OAuth
+    console.log('[Gov.br Mock] User authenticated:', userData)
+
+    // Store Gov.br user data in sessionStorage for demo
+    sessionStorage.setItem('govbr_user', JSON.stringify(userData))
+
+    // Redirect to selection page
+    // In production, Supabase would handle the session
+    router.push('/pt/agora/selecao?govbr=demo')
   }
 
   if (isLoading) {
@@ -208,42 +240,77 @@ export default function AgoraLoginPage() {
         {/* Login Card */}
         <GlassCard className="mb-6">
           <GlassCardContent className="p-6 space-y-4">
-            {/* GitHub Login */}
+            {/* Gov.br Login - Featured */}
             <Button
-              onClick={() => handleLogin('github')}
+              onClick={() => setShowGovBrModal(true)}
               disabled={isLoggingIn !== null}
               size="lg"
               className={cn(
                 'w-full justify-center gap-3 h-14 text-base',
-                'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
-                'text-white dark:text-gray-900'
+                'bg-[#1351B4] hover:bg-[#0C4199]',
+                'text-white'
               )}
-              aria-label="Entrar com GitHub"
+              aria-label="Entrar com Gov.br"
             >
-              {isLoggingIn === 'github' ? (
+              {isLoggingIn === 'govbr' ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Github className="w-5 h-5" />
+                <GovBrIcon className="w-5 h-5" />
               )}
-              Entrar com GitHub
+              Entrar com Gov.br
             </Button>
 
-            {/* Google Login */}
-            <Button
-              onClick={() => handleLogin('google')}
-              disabled={isLoggingIn !== null}
-              variant="secondary"
-              size="lg"
-              className="w-full justify-center gap-3 h-14 text-base"
-              aria-label="Entrar com Google"
-            >
-              {isLoggingIn === 'google' ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <GoogleIcon className="w-5 h-5" />
-              )}
-              Entrar com Google
-            </Button>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-white/80 dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
+                  ou continue com
+                </span>
+              </div>
+            </div>
+
+            {/* Other providers row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* GitHub Login */}
+              <Button
+                onClick={() => handleLogin('github')}
+                disabled={isLoggingIn !== null}
+                size="lg"
+                className={cn(
+                  'w-full justify-center gap-2 h-12',
+                  'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
+                  'text-white dark:text-gray-900'
+                )}
+                aria-label="Entrar com GitHub"
+              >
+                {isLoggingIn === 'github' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Github className="w-4 h-4" />
+                )}
+                GitHub
+              </Button>
+
+              {/* Google Login */}
+              <Button
+                onClick={() => handleLogin('google')}
+                disabled={isLoggingIn !== null}
+                variant="secondary"
+                size="lg"
+                className="w-full justify-center gap-2 h-12"
+                aria-label="Entrar com Google"
+              >
+                {isLoggingIn === 'google' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <GoogleIcon className="w-4 h-4" />
+                )}
+                Google
+              </Button>
+            </div>
           </GlassCardContent>
         </GlassCard>
 
@@ -285,6 +352,13 @@ export default function AgoraLoginPage() {
           </Link>
         </div>
       </div>
+
+      {/* Gov.br Mock Login Modal */}
+      <GovBrMockLogin
+        isOpen={showGovBrModal}
+        onClose={() => setShowGovBrModal(false)}
+        onSuccess={handleGovBrSuccess}
+      />
     </div>
   )
 }
