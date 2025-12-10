@@ -370,10 +370,14 @@ export function useAgoraBackground() {
     getBackgroundStyle,
     getOverlayStyle,
 
-    // Data
+    // Data (pre-filtered at module level for performance)
     options: BACKGROUND_OPTIONS,
-    solidOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'solid'),
-    gradientOptions: BACKGROUND_OPTIONS.filter((bg) => bg.type === 'gradient'),
+    solidOptions: SOLID_OPTIONS,
+    gradientOptions: GRADIENT_OPTIONS,
     imageOptions: IMAGE_OPTIONS,
   }
 }
+
+// Pre-compute filtered arrays at module level (once, not on every render)
+const SOLID_OPTIONS = BACKGROUND_OPTIONS.filter((bg) => bg.type === 'solid')
+const GRADIENT_OPTIONS = BACKGROUND_OPTIONS.filter((bg) => bg.type === 'gradient')

@@ -13,6 +13,7 @@
 
 'use client'
 
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { LucideIcon } from 'lucide-react'
@@ -53,7 +54,7 @@ const progressColorClasses = {
   red: 'from-red-500 to-rose-500',
 }
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon: Icon,
   value,
   label,
@@ -63,7 +64,10 @@ export function StatCard({
   iconColor = 'green',
   className,
 }: StatCardProps) {
-  const progressPercent = progress ? Math.min((progress.current / progress.max) * 100, 100) : 0
+  const progressPercent = useMemo(
+    () => (progress ? Math.min((progress.current / progress.max) * 100, 100) : 0),
+    [progress?.current, progress?.max]
+  )
 
   return (
     <Card
@@ -150,4 +154,4 @@ export function StatCard({
       />
     </Card>
   )
-}
+})

@@ -13,6 +13,7 @@
 
 'use client'
 
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Trophy, Sparkles, Lock } from 'lucide-react'
@@ -71,10 +72,18 @@ const availableBadges: Omit<BadgeItem, 'earnedAt'>[] = [
   },
 ]
 
-export function BadgeShowcase({ badges, showLocked = true, className }: BadgeShowcaseProps) {
-  // Merge earned badges with available badges
-  const earnedIds = new Set(badges.map((b) => b.id))
-  const lockedBadges = availableBadges.filter((b) => !earnedIds.has(b.id))
+export const BadgeShowcase = memo(function BadgeShowcase({
+  badges,
+  showLocked = true,
+  className,
+}: BadgeShowcaseProps) {
+  // Memoize earned IDs Set and locked badges calculation
+  const earnedIds = useMemo(() => new Set(badges.map((b) => b.id)), [badges])
+  const lockedBadges = useMemo(
+    () => availableBadges.filter((b) => !earnedIds.has(b.id)),
+    [earnedIds]
+  )
+  const nextBadges = useMemo(() => lockedBadges.slice(0, 4), [lockedBadges])
 
   return (
     <Card variant="elevated" padding="md" className={className}>
@@ -135,7 +144,7 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
               Próximos badges
             </p>
             <div className="grid grid-cols-4 gap-2">
-              {lockedBadges.slice(0, 4).map((badge) => (
+              {nextBadges.map((badge) => (
                 <div
                   key={badge.id}
                   className="relative group"
@@ -155,4 +164,4 @@ export function BadgeShowcase({ badges, showLocked = true, className }: BadgeSho
       </CardContent>
     </Card>
   )
-}
+})

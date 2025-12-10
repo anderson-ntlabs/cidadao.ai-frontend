@@ -13,6 +13,7 @@
 
 'use client'
 
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Sparkles, Trophy, MessageSquare, BookOpen, Video, FileText } from 'lucide-react'
@@ -31,7 +32,8 @@ interface ActivityFeedProps {
   className?: string
 }
 
-const sourceIcons: Record<string, React.ReactNode> = {
+// Move outside component to prevent recreation on every render
+const SOURCE_ICONS: Record<string, React.ReactNode> = {
   conversation: <MessageSquare className="w-3 h-3" />,
   diary: <BookOpen className="w-3 h-3" />,
   video: <Video className="w-3 h-3" />,
@@ -40,8 +42,12 @@ const sourceIcons: Record<string, React.ReactNode> = {
   default: <Sparkles className="w-3 h-3" />,
 }
 
-export function ActivityFeed({ activities, maxItems = 5, className }: ActivityFeedProps) {
-  const displayedActivities = activities.slice(0, maxItems)
+export const ActivityFeed = memo(function ActivityFeed({
+  activities,
+  maxItems = 5,
+  className,
+}: ActivityFeedProps) {
+  const displayedActivities = useMemo(() => activities.slice(0, maxItems), [activities, maxItems])
 
   return (
     <Card variant="elevated" padding="md" className={className}>
@@ -56,7 +62,7 @@ export function ActivityFeed({ activities, maxItems = 5, className }: ActivityFe
         {displayedActivities.length > 0 ? (
           <div className="space-y-3">
             {displayedActivities.map((activity, index) => {
-              const icon = sourceIcons[activity.sourceType || 'default'] || sourceIcons.default
+              const icon = SOURCE_ICONS[activity.sourceType || 'default'] || SOURCE_ICONS.default
 
               return (
                 <div
@@ -105,4 +111,4 @@ export function ActivityFeed({ activities, maxItems = 5, className }: ActivityFe
       </CardContent>
     </Card>
   )
-}
+})
