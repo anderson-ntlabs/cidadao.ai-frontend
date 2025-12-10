@@ -93,6 +93,7 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 ### 06. Arquitetura Técnica
 
 - [Visão Geral da Arquitetura](./06-arquitetura/visao-geral.md) ✅
+- [Plano de Refatoração 2025-12](./06-arquitetura/plano-refatoracao-2025-12.md) ✅ **NOVO**
 - [Componentes e Hooks](./06-arquitetura/componentes.md)
 - [Estado e Store](./06-arquitetura/estado.md)
 - [Banco de Dados](./06-arquitetura/banco-dados.md)
@@ -198,7 +199,7 @@ Veja o [Guia do Desenvolvedor](./10-guias/guia-desenvolvedor.md) para informaç�
 
 **Autor**: Anderson Henrique da Silva
 **Parceria**: Neural Thinker AI Engineering + IFSULDEMINAS/LabSoft
-**Última atualização**: 2025-12-09
+**Última atualização**: 2025-12-10
 
 ## Licença
 
