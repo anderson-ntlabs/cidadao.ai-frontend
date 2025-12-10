@@ -90,6 +90,7 @@ export default function KidsEntryPage() {
   ]
 
   // If already in kids mode with profile, redirect directly to dashboard
+  // BUT only if we're not in the middle of setup/showing the code!
   useEffect(() => {
     if (kidsLoading) return // Wait for profile to load
 
@@ -98,12 +99,19 @@ export default function KidsEntryPage() {
       setHasCheckedProfile(true)
     }
 
+    // Don't redirect if we're showing the generated code - user needs to see it!
+    // Also don't redirect during setup steps
+    const isInSetupFlow = step === 'setup' || step === 'contract' || step === 'code-generated'
+    if (isInSetupFlow) {
+      return // Let the user complete the setup flow
+    }
+
     // If Kids mode is active and we have a profile, redirect to dashboard
     // This check runs whenever isKidsMode or kidsProfile changes
     if (isKidsMode && kidsProfile) {
       router.replace('/pt/agora/kids/dashboard')
     }
-  }, [isKidsMode, kidsProfile, kidsLoading, hasCheckedProfile, router])
+  }, [isKidsMode, kidsProfile, kidsLoading, hasCheckedProfile, router, step])
 
   const handleParentSetup = async (e: React.FormEvent) => {
     e.preventDefault()
