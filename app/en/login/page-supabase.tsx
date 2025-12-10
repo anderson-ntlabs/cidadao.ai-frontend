@@ -60,7 +60,7 @@ export default function LoginPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.03
+          opacity: 0.03,
         }}
       />
 
@@ -74,9 +74,7 @@ export default function LoginPage() {
             {view === 'sign_in' ? 'Welcome back!' : 'Create account'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {view === 'sign_in'
-              ? 'Sign in to access the system'
-              : 'Sign up to get started'}
+            {view === 'sign_in' ? 'Sign in to access the system' : 'Sign up to get started'}
           </p>
         </div>
 
@@ -144,7 +142,7 @@ export default function LoginPage() {
                 },
               },
             }}
-            providers={['google', 'github', 'spotify']}
+            providers={['google', 'github']}
             redirectTo={redirectTo}
             onlyThirdPartyProviders={false}
             magicLink={false}
