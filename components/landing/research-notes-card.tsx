@@ -1,8 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { FileText, Download, ExternalLink } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  FileText,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  Loader2,
+} from 'lucide-react'
+import { Document, Page, pdfjs } from 'react-pdf'
 import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
+
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 interface ResearchNotesCardProps {
   locale?: 'pt' | 'en'
@@ -11,21 +26,25 @@ interface ResearchNotesCardProps {
 const translations = {
   pt: {
     title: 'Notas',
-    description: 'Rabiscos e ideias originais',
     modalTitle: 'Notas de Pesquisa do Criador',
     modalSubtitle: 'Os rabiscos, ideias e anotações originais que deram origem ao Cidadão.AI',
     download: 'Baixar PDF',
-    openNew: 'Abrir em nova aba',
-    loading: 'Carregando documento...',
+    loading: 'Carregando...',
+    page: 'Página',
+    of: 'de',
+    error: 'Erro ao carregar PDF',
+    retry: 'Tentar novamente',
   },
   en: {
     title: 'Notes',
-    description: 'Original sketches and ideas',
     modalTitle: "Creator's Research Notes",
     modalSubtitle: 'The original sketches, ideas and notes that gave birth to Cidadão.AI',
     download: 'Download PDF',
-    openNew: 'Open in new tab',
-    loading: 'Loading document...',
+    loading: 'Loading...',
+    page: 'Page',
+    of: 'of',
+    error: 'Error loading PDF',
+    retry: 'Try again',
   },
 }
 
@@ -33,6 +52,11 @@ const PDF_PATH = '/docs/Anderson_Cidadao_AI_Notas%20de%20Pesquisa.pdf'
 
 export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [numPages, setNumPages] = useState<number>(0)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [scale, setScale] = useState(1.0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const t = translations[locale]
 
   // Handle ESC key to close modal
@@ -53,6 +77,32 @@ export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
       window.removeEventListener('modal-close', handleModalClose)
     }
   }, [isOpen])
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setPageNumber(1)
+      setScale(1.0)
+      setError(null)
+      setIsLoading(true)
+    }
+  }, [isOpen])
+
+  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    setNumPages(numPages)
+    setIsLoading(false)
+    setError(null)
+  }, [])
+
+  const onDocumentLoadError = useCallback(() => {
+    setError(t.error)
+    setIsLoading(false)
+  }, [t.error])
+
+  const goToPrevPage = () => setPageNumber((prev) => Math.max(prev - 1, 1))
+  const goToNextPage = () => setPageNumber((prev) => Math.min(prev + 1, numPages))
+  const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.5))
+  const zoomOut = () => setScale((prev) => Math.max(prev - 0.2, 0.5))
 
   return (
     <>
@@ -78,89 +128,118 @@ export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.modalSubtitle}</p>
               </div>
 
-              {/* Action buttons */}
-              <div className="hidden sm:flex items-center gap-2">
-                <a
-                  href={PDF_PATH}
-                  download
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Download className="w-4 h-4" />
-                  {t.download}
-                </a>
-                <a
-                  href={PDF_PATH}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {t.openNew}
-                </a>
-              </div>
+              {/* Download button */}
+              <a
+                href={PDF_PATH}
+                download
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Download className="w-4 h-4" />
+                {t.download}
+              </a>
             </div>
           </ModalHeader>
 
-          {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden mt-4 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-            <object
-              data={`${PDF_PATH}#toolbar=1&navpanes=1&scrollbar=1`}
-              type="application/pdf"
-              className="w-full h-full rounded-lg"
-              title={t.modalTitle}
-            >
-              {/* Fallback for browsers that can't display PDF */}
-              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-                <FileText className="w-16 h-16 text-gray-400" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  {locale === 'pt'
-                    ? 'Seu navegador não suporta visualização de PDF embutido.'
-                    : 'Your browser does not support embedded PDF viewing.'}
-                </p>
-                <div className="flex gap-3">
-                  <a
-                    href={PDF_PATH}
-                    download
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    {t.download}
-                  </a>
-                  <a
-                    href={PDF_PATH}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    {t.openNew}
-                  </a>
-                </div>
-              </div>
-            </object>
-          </div>
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-4 py-3 border-b bg-gray-50 dark:bg-gray-800/50">
+            {/* Pagination */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPrevPage}
+                disabled={pageNumber <= 1}
+                className="p-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[100px] text-center">
+                {t.page} {pageNumber} {t.of} {numPages || '?'}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={pageNumber >= numPages}
+                className="p-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                aria-label="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
 
-          {/* Mobile action buttons */}
-          <div className="flex sm:hidden items-center justify-center gap-3 mt-4 pt-4 border-t">
+            {/* Zoom */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={zoomOut}
+                disabled={scale <= 0.5}
+                className="p-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                aria-label="Zoom out"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400 min-w-[50px] text-center">
+                {Math.round(scale * 100)}%
+              </span>
+              <button
+                onClick={zoomIn}
+                disabled={scale >= 2.5}
+                className="p-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                aria-label="Zoom in"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Mobile download */}
             <a
               href={PDF_PATH}
               download
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="sm:hidden p-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+              aria-label={t.download}
             >
               <Download className="w-4 h-4" />
-              {t.download}
             </a>
-            <a
-              href={PDF_PATH}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              {t.openNew}
-            </a>
+          </div>
+
+          {/* PDF Viewer */}
+          <div className="flex-1 overflow-auto bg-gray-200 dark:bg-gray-900 flex justify-center">
+            {error ? (
+              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+                <FileText className="w-16 h-16 text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-400">{error}</p>
+                <button
+                  onClick={() => {
+                    setError(null)
+                    setIsLoading(true)
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  {t.retry}
+                </button>
+              </div>
+            ) : (
+              <Document
+                file={PDF_PATH}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={
+                  <div className="flex items-center justify-center h-full gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-green-600" />
+                    <span className="text-gray-600 dark:text-gray-400">{t.loading}</span>
+                  </div>
+                }
+                className="py-4"
+              >
+                {!isLoading && (
+                  <Page
+                    pageNumber={pageNumber}
+                    scale={scale}
+                    className="shadow-xl"
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                  />
+                )}
+              </Document>
+            )}
           </div>
         </ModalContent>
       </Modal>
