@@ -16,8 +16,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json()
     const { code, email } = body
 
-    if (!code || !email) {
-      return NextResponse.json({ error: 'Código e email são obrigatórios' }, { status: 400 })
+    if (!code) {
+      return NextResponse.json({ error: 'Código é obrigatório' }, { status: 400 })
     }
 
     // Validate code format
@@ -27,15 +27,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const supabase = await createClient()
 
-    // Verify code using database function
+    // Verify code using database function (email is optional)
     const { data, error } = await supabase.rpc('verify_parental_access_code', {
       p_code: code,
-      p_email: email,
+      p_email: email || null,
     })
 
     if (error) {
       console.error('Error verifying code:', error)
-      return NextResponse.json({ error: 'Erro ao verificar código' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Erro ao verificar código', details: error.message },
+        { status: 500 }
+      )
     }
 
     // Database function returns array with one row
@@ -60,6 +63,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
   } catch (error) {
     console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Erro interno do servidor', details: String(error) },
+      { status: 500 }
+    )
   }
 }
