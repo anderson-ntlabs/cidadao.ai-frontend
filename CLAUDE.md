@@ -4,18 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-12-09
+**Last Updated**: 2025-12-10
 
 ---
 
-## 🚨 Critical Implementation Patterns
+## Critical Patterns (Read Before Coding)
 
-### OAuth Authentication in Route Handlers
+| Pattern                | Rule                                                    | Why                                                              |
+| ---------------------- | ------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Route Handler Auth** | Use `createServerClient()` with explicit cookies        | `createClient()` silently fails to set cookies in Route Handlers |
+| **Commit Messages**    | Never include AI signatures or mentions                 | Project confidentiality requirement                              |
+| **Supabase Server**    | `const supabase = await createClient()`                 | Server components require async                                  |
+| **Supabase Client**    | `const supabase = createClient()` (no await)            | Client components are synchronous                                |
+| **Chat Mode**          | Check `localStorage.getItem('maritaca_selected_model')` | Determines backend vs direct LLM                                 |
 
-**CRITICAL**: Route Handlers require `createServerClient()` with explicit cookie handling. Never use the `createClient()` helper.
+### OAuth in Route Handlers (Critical)
 
 ```typescript
-// ✅ CORRECT (app/auth/callback/route.ts)
+// CORRECT (app/auth/callback/route.ts)
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -34,351 +40,182 @@ const supabase = createServerClient(url, key, {
 })
 ```
 
-**Why**: The `createClient()` helper silently fails to set cookies in Route Handler context.
+### Commit Message Format
 
-### Commit Message Standards
+```
+<type>(scope): <summary>
+```
 
-**CRITICAL**: Never include AI assistance signatures in commits.
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
-❌ NEVER include:
-
-- "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
-- "Co-Authored-By: Claude <noreply@anthropic.com>"
-
-✅ ALWAYS use: `<type>(scope): <summary>` in English (feat/fix/docs/refactor/test/chore/perf)
+**NEVER include**: AI signatures, "Generated with Claude Code", "Co-Authored-By: Claude"
 
 ---
 
 ## Project Overview
 
-Next.js 15 Progressive Web App for Brazilian government transparency using multi-agent AI. Features 17 specialized agents with Brazilian cultural identities, bilingual interface (PT/EN), comprehensive accessibility (WCAG AAA, VLibras).
+Next.js 15 PWA for Brazilian government transparency with multi-agent AI. 17 agents with Brazilian cultural identities, bilingual (PT/EN), WCAG AAA accessible.
 
-**Status**: 82% complete, production-ready infrastructure
-
-**Key Technologies**: Next.js 15, TypeScript, Tailwind CSS, Zustand, Supabase, Serwist (PWA), Vitest + Playwright
+**Stack**: Next.js 15, TypeScript, Tailwind CSS, Zustand, Supabase, Serwist (PWA), Vitest + Playwright
 
 ---
 
 ## Essential Commands
 
-### Development Workflow
+```bash
+# Development
+npm run dev                    # Dev server (localhost:3000)
+npm run build && npm run start # Production build
+
+# Quality (run before commit)
+npm run type-check             # TypeScript validation
+npm run lint                   # ESLint
+npm run test:coverage          # 60% coverage required
+
+# Testing - Unit (Vitest)
+npm run test                   # Watch mode
+npm run test:ui                # UI interface
+npx vitest run path/to/file.test.ts --config=config/vitest.config.mjs  # Single file
+npx vitest run -t "pattern" --config=config/vitest.config.mjs          # Pattern match
+
+# Testing - E2E (Playwright)
+npm run test:playwright        # All E2E tests
+npm run test:playwright:ui     # UI mode
+npm run test:mobile            # Mobile tests
+npx playwright test --headed   # Watch execution
+npx playwright test --debug    # Debug mode
+
+# Analysis
+npm run analyze                # Bundle analysis (ANALYZE=true)
+npm run lighthouse             # Lighthouse CI
+
+# Database (Supabase)
+supabase db push               # Apply all migrations
+supabase migration new <name>  # Create new migration
+node scripts/db/check-badges.js # Verify badge system
+```
+
+### Debugging Scripts
 
 ```bash
-# Start development
-npm run dev                                         # Dev server (localhost:3000)
-npm run build && npm run start                      # Production build + start
-
-# Quality checks (run before commit)
-npm run type-check && npm run lint                  # Must pass
-npm run test:coverage                               # 60% coverage required
-npm run test:playwright                             # E2E tests
-
-# Quick debugging
 node scripts/testing/test-backend-comprehensive.js  # Backend connectivity
 node scripts/testing/test-chat-live.js              # Chat integration
-node scripts/diagnostics/diagnose-vlibras.js        # VLibras troubleshooting
-```
-
-### Testing Commands
-
-```bash
-# Unit tests (Vitest)
-npm run test                  # Watch mode
-npm run test:ui               # UI interface
-npm run test:coverage         # Coverage report
-npx vitest run path/to/test   # Single test
-
-# E2E tests (Playwright)
-npm run test:playwright       # All E2E tests
-npm run test:playwright:ui    # UI mode
-npm run test:mobile           # Mobile-specific tests
-npx playwright test --headed  # Watch execution
-npx playwright test --debug   # Debug mode
-
-# Manual integration scripts (67 available)
-# Organized by category in scripts/:
-# - scripts/testing/         - Test scripts
-# - scripts/diagnostics/     - Troubleshooting
-# - scripts/monitoring/      - Performance monitoring
-# - scripts/analysis/        - Code analysis
-# - scripts/generation/      - Code generation
-# - scripts/utilities/       - Various utilities
-# - scripts/db/              - Database utilities
-# - scripts/admin/           - Admin utilities
-# - scripts/debug/           - Debug utilities
-```
-
-### Performance & Analysis
-
-```bash
-npm run analyze               # Bundle analysis
-npm run lighthouse            # Lighthouse CI
-node scripts/monitoring/monitor-backend.js
-node scripts/analysis/analyze-bundle.js
+node scripts/diagnostics/diagnose-vlibras.js        # VLibras issues
 ```
 
 ---
 
-## High-Level Architecture
+## Architecture
 
-### Application Structure
-
-Next.js 15 App Router with bilingual routing (`/pt/*`, `/en/*`):
+### Route Structure
 
 ```
 app/
 ├── pt/                      # Portuguese (default)
-│   ├── app/                 # Authenticated routes (no header)
-│   │   ├── dashboard/       # Investigations dashboard
-│   │   ├── chat/           # AI chat interface
-│   │   └── [other protected routes]
-│   ├── agora/              # Learning platform (Ágora Academy)
-│   │   ├── dashboard/      # XP, badges, progress
-│   │   ├── chat/           # Agora-specific chat
-│   │   ├── trilhas/        # Learning tracks
-│   │   ├── ranking/        # Leaderboards
-│   │   ├── perfil/         # User profile
-│   │   └── onboarding/     # User onboarding flow
-│   ├── login/              # Auth page (SimplifiedHeader)
-│   └── [public pages]      # Landing, about, agents (Full Header or SimplifiedHeader)
-├── en/                      # English (mirror structure)
+│   ├── app/                 # Authenticated (no header)
+│   │   ├── dashboard/       # Investigations
+│   │   └── chat/            # AI chat
+│   ├── agora/               # Learning platform
+│   │   ├── dashboard/       # XP, badges
+│   │   ├── trilhas/         # Learning tracks
+│   │   └── onboarding/      # User flow
+│   └── login/               # Auth (SimplifiedHeader)
+├── en/                      # English (mirror)
 └── api/                     # API routes
 ```
 
 **Header Logic** (`components/pt-layout-wrapper.tsx`):
 
-- **SimplifiedHeader**: Landing + login pages (logo, theme toggle, PT/EN, login button)
-- **Full Header**: Public content pages (includes navigation menu)
-- **No Header**: Authenticated `/app/*` routes
+- `SimplifiedHeader`: Landing + login pages
+- `Full Header`: Public content pages
+- `No Header`: Authenticated `/app/*` routes
 
-### Chat System Architecture (Simplified Jan 2025)
-
-**Evolution**: Consolidated from 6 adapters + SmartChatService → 2 adapters with simple failback.
-
-**Core Flow**:
+### Chat System
 
 ```
 User Message → ChatService
       ↓
-Check localStorage 'maritaca_selected_model'
+Check 'maritaca_selected_model' in localStorage
       ↓
 ┌─────┴─────┐
-│           │
 Maritaca?   No
-│           │
 ↓           ↓
-Fallback   Primary → Success? → Response
-Adapter    Adapter       ↓
-(LLM)      (Backend)  Failure? → Fallback
+Fallback   Primary → Fail? → Fallback
+(LLM)      (Backend)
 ```
 
-**Components**:
+**Files**:
 
-1. **ChatService** (`lib/chat/chat.service.ts`):
-   - Main orchestrator with automatic fallback
-   - 5-minute in-memory cache
-   - Exponential backoff (max 2 retries)
-   - Modes: Cidadão.AI (backend multi-agent) OR Maritaca Direct (LLM)
-
-2. **Primary Adapter** (`lib/chat/adapters/primary.adapter.ts`):
-   - Connects to Railway backend
-   - Multi-agent orchestration (Abaporu, Zumbi, Anita, etc.)
-   - SSE streaming support
-   - Investigation tracking
-
-3. **Fallback Adapter** (`lib/chat/adapters/fallback.adapter.ts`):
-   - Direct Maritaca AI integration
-   - Used when: backend down OR user selects Maritaca mode
-   - Models: Sabiazinho-3 (optimized) or Sabiá-3 (standard)
+- `lib/chat/chat.service.ts` - Orchestrator with fallback
+- `lib/chat/adapters/primary.adapter.ts` - Railway backend
+- `lib/chat/adapters/fallback.adapter.ts` - Maritaca LLM
 
 ### State Management (Zustand)
 
-Nine main stores in `store/`:
+| Store                   | Purpose                    |
+| ----------------------- | -------------------------- |
+| `chat-store.ts`         | Sessions, messages, agents |
+| `notification-store.ts` | Toast notifications        |
+| `badge-store.ts`        | Achievement badges         |
+| `agora-chat-store.ts`   | Agora platform chat        |
+| `kids-store.ts`         | Kids mode state            |
+| `celebration-store.ts`  | Achievement animations     |
 
-- `chat-store.ts`: Chat sessions, messages, agents, investigations
-  - Actions: `initializeChat()`, `sendMessage()`, `sendStreamingMessage()`, `createNewSession()`
-  - Persisted to localStorage
-- `notification-store.ts`: Toast notifications (success/error/warning/info)
-- `tooltip-store.ts`: Tooltip visibility state
-- `badge-store.ts`: User achievement badges (fetching, caching, animations)
-- `survey-store.ts`: UX survey state (progress, answers, completion)
-- `voice-settings-store.ts`: Voice/TTS settings
-- `agora-chat-store.ts`: Ágora platform chat state (separate from main chat)
-- `celebration-store.ts`: Achievement celebration animations and triggers
-- `kids-store.ts`: Kids mode state (profiles, sessions, parental tracking)
-
-**Pattern**: Stores use Zustand with persist middleware for localStorage persistence.
+All stores use persist middleware for localStorage.
 
 ### Agent System
 
-19 AI agents with Brazilian identities defined in `data/agents.ts`:
-
-**Tier 1 - Operational (10)**:
-
-- Abaporu (orchestrator)
-- Zumbi (anomaly detection)
-- Anita (pattern analysis)
-- Tiradentes (reports)
-- Senna (router)
-- Nanã (memory)
-- José Bonifácio (legal)
-- Machado de Assis (communication)
-- +2 more
-
-**Kids Mode Agents (2)**:
-
-- Monteiro Lobato (storytelling mentor for children)
-- Tarsila do Amaral (creative art mentor for children)
-
-**Tier 2-3**: Framework ready, implementation pending
-
-Each agent has:
+19 agents defined in `data/agents.ts`. Each has:
 
 - Unique ID, name, role (PT/EN)
-- Description (PT/EN)
-- Avatar image in `public/agents/`
+- Avatar in `public/agents/`
 - Wikipedia link for cultural context
 
-### Ágora Learning Platform
+**Tiers**:
 
-Gamified learning platform at `/pt/agora/*` with XP system, badges, and learning tracks.
+- Tier 1 (Operational): Abaporu, Zumbi, Anita, Tiradentes, Senna, Nana, Jose Bonifacio, Machado de Assis
+- Kids Mode: Monteiro Lobato (storytelling), Tarsila do Amaral (art)
 
-**Full Documentation**: See `docs/agora/README.md` for comprehensive documentation including:
+### Agora Learning Platform
 
-| Category       | Document                                   | Description                                                 |
-| -------------- | ------------------------------------------ | ----------------------------------------------------------- |
-| Fundamentos    | `01-fundamentos/visao-missao.md`           | Vision 2030, mission, values, personas                      |
-| Pedagogia      | `02-pedagogia/referencial-teorico.md`      | Learning theories (Piaget, Vygotsky, Kolb, Bloom)           |
-| Gamificação    | `03-gamificacao/xp-niveis.md`              | XP system, levels, ranks, formulas                          |
-| Gamificação    | `03-gamificacao/badges.md`                 | 13 implemented badges + proposals                           |
-| Trilhas        | `04-trilhas/sistema-trilhas.md`            | 5 learning tracks (Intro, Backend, Frontend, AI/ML, DevOps) |
-| Avaliação      | `05-avaliacao/sistema-avaliacao.md`        | Quizzes, exercises, code review, rubrics                    |
-| Arquitetura    | `06-arquitetura/visao-geral.md`            | Technical architecture, DB schema, Server Actions           |
-| Acessibilidade | `07-acessibilidade/guia-acessibilidade.md` | WCAG AAA, VLibras, checklists                               |
-| Roadmap        | `08-roadmap/features-propostas.md`         | 2025-2026 roadmap, proposed features                        |
-| API            | `09-api/integracao-api.md`                 | Supabase, GitHub, PostHog, authentication                   |
+Gamified learning at `/pt/agora/*` with XP, badges, and tracks.
 
-**Auth Architecture (Simplified Dec 2025)**:
-
-The Ágora auth system has been refactored into focused, composable hooks:
-
-```
-lib/services/
-├── auth.service.ts              # Unified auth service (singleton)
-├── navigation-session.service.ts # Session hierarchy management
-
-hooks/
-├── use-unified-auth.tsx         # React wrapper for AuthService
-├── use-agora-gamification.tsx   # XP, badges, challenges, streaks
-├── use-agora-sessions.tsx       # Study sessions, diary entries
-├── use-agora-onboarding.tsx     # Onboarding, LGPD, terms, tracks
-├── use-agora.tsx                # Facade (backward compatible)
-└── agora/index.ts               # Barrel export
-```
-
-**Hook Usage (New)**:
+**Auth hooks** (composable pattern):
 
 ```typescript
-// For simple auth needs
-import { useUnifiedAuth } from '@/hooks/use-unified-auth'
-const { user, login, logout, isAuthenticated } = useUnifiedAuth()
-
-// For gamification features
-import { useAgoraGamification } from '@/hooks/use-agora-gamification'
-const { totalXp, badges, addXp, checkAndAwardBadges } = useAgoraGamification()
-
-// For session tracking
-import { useAgoraSessions } from '@/hooks/use-agora-sessions'
-const { currentSession, startSession, endSession, addDiaryEntry } = useAgoraSessions()
-
-// For onboarding flow
-import { useAgoraOnboarding } from '@/hooks/use-agora-onboarding'
-const { onboardingStep, selectTracks, completeOnboarding } = useAgoraOnboarding()
-
-// Backward compatible (combines all)
-import { useAgora } from '@/hooks/use-agora'
-const { user, addXp, startSession, badges } = useAgora()
+import { useUnifiedAuth } from '@/hooks/use-unified-auth' // Auth only
+import { useAgoraGamification } from '@/hooks/use-agora-gamification' // XP, badges
+import { useAgoraSessions } from '@/hooks/use-agora-sessions' // Study sessions
+import { useAgora } from '@/hooks/use-agora' // Facade (all)
 ```
 
-**Session Hierarchy** (NavigationSessionService):
+**Database** (Supabase): `agora_profiles`, `agora_xp_transactions`, `agora_sessions`, `agora_diary_entries`
+
+**Docs**: See `docs/agora/README.md` for complete documentation.
+
+### Kids Mode
+
+Separate stores and agents for children:
+
+- Store: `store/kids-store.ts`
+- Agents: Monteiro Lobato (storytelling), Tarsila do Amaral (art)
+- Sessions: Nested under Agora sessions (NavigationSessionService)
+- Privacy: LGPD compliant with parental consent
+
+**Session hierarchy**:
 
 ```
 Auth Session (root)
-└── Ágora Session
+└── Agora Session
     └── Kids Session
 ```
 
-Logout at any level cleans up all child sessions. See `docs/02-architecture/auth-simplification-plan.md`.
-
-**Database Tables** (Supabase):
-
-- `agora_profiles`: XP, level, rank, streak, badges
-- `agora_xp_transactions`: XP history
-- `agora_sessions`: Study sessions
-- `agora_diary_entries`: Learning diary
-
-**Components** (`components/agora/`):
-
-- `agora-header.tsx`, `agora-sidebar.tsx`: Navigation
-- `stat-card.tsx`, `badge-showcase.tsx`: UI elements
-- `lgpd-consent-modal.tsx`, `internship-contract-modal.tsx`: Compliance
-
-### Progressive Web App (Serwist)
-
-**Migration** (Jan 2025): `@ducanh2912/next-pwa` → `@serwist/next` for Next.js 15 compatibility.
+### PWA (Serwist)
 
 - Service Worker: `app/sw.ts`
-- Disabled in dev (`DISABLE_PWA=true` or `NODE_ENV=development`)
+- Disabled in dev (`NODE_ENV=development`)
 - NetworkFirst caching strategy
 - Components: `InstallPrompt`, `UpdateNotification`, `OfflineBanner`
-
-### Performance Optimizations
-
-**Webpack** (`next.config.mjs`):
-
-- Custom chunk splitting: framework, charts, animations, pdf-export
-- `runtimeChunk: 'single'`
-- Package optimization: lucide-react, recharts, d3, jspdf
-- Optimized node_modules bundling by package name
-
-**Images**: AVIF + WebP formats, responsive sizes (640px → 3840px), 60s cache TTL
-
-**Code Splitting**: Dynamic imports for PDF export, charts, VLibras
-
-### Component Patterns
-
-**Responsive Components**:
-
-- Separate mobile/desktop components (`components/mobile/`)
-- Pattern: CSS `hidden md:block` / `block md:hidden`
-
-**Landing Components** (`components/landing/`):
-
-- `SimplifiedHeader`, `ContentCard`, `ExternalLinkCard`, `LandingModal`
-
-**Accessibility** (`components/a11y/`):
-
-- `vlibras-lazy.tsx`: LIBRAS widget (lazy loaded)
-- `accessibility-panel.tsx`: Unified controls (FAB button)
-- `announcer.tsx`: Screen reader support
-- `skip-links.tsx`: Keyboard navigation
-
-### Testing Infrastructure
-
-**Unit Tests** (Vitest + jsdom):
-
-- 80+ test files, 60% coverage target (thresholds in `config/vitest.config.mjs`)
-- Setup: `vitest.setup.ts`
-- Pattern: `*.test.ts` or `*.test.tsx` co-located with source files
-
-**E2E Tests** (Playwright):
-
-- 8 test files in `__tests__/e2e/`
-- Multi-browser: Chromium, Firefox, WebKit
-- Mobile configs: Pixel 5, iPhone 12 (`config/playwright.mobile.config.ts`)
-- Main config: `config/playwright.config.ts`
-
-**Manual Scripts**: 67 scripts organized in `/scripts` subdirectories
 
 ---
 
@@ -395,491 +232,156 @@ NEXT_PUBLIC_GA_ID=                    # Google Analytics
 NEXT_PUBLIC_POSTHOG_KEY=              # PostHog
 DISABLE_PWA=true                      # Dev only
 NEXT_PUBLIC_ENABLE_VLIBRAS=false      # LIBRAS widget
-
-# Production (auto-injected by Vercel)
-KV_URL=                               # Vercel KV cache
 ```
 
-**Setup**: `cp .env.example .env.local` → Fill Supabase credentials → Never commit `.env.local`
+**Setup**: `cp .env.example .env.local` → Fill credentials
 
 ---
 
-## Common Development Tasks
+## Common Tasks
 
 ### Debugging Chat
 
 ```bash
-node scripts/testing/test-backend.js              # Backend connectivity
-node scripts/testing/test-chat-live.js            # Chat integration
-node scripts/testing/test-chat-full-flow.js       # Full chat flow test
-# Check browser console for CORS errors
-# Verify NEXT_PUBLIC_API_URL in .env.local
-# Check localStorage 'maritaca_selected_model'
+node scripts/testing/test-backend.js        # Backend connectivity
+node scripts/testing/test-chat-live.js      # Chat integration
 ```
 
-**Common Issues**:
+Issues:
 
-- CORS errors → Check backend CORS config and API URL
-- Messages not sending → Check `lib/chat/chat.service.ts` logs
-- Agent not responding → Verify agent is registered in backend
+- CORS errors → Check backend CORS config
+- Messages not sending → Check `lib/chat/chat.service.ts`
+- Agent not responding → Verify agent registered in backend
 
 ### Debugging Auth
 
-```bash
-# 1. Verify Supabase credentials in .env.local
-# 2. Check OAuth redirect URLs in Supabase dashboard:
-#    - http://localhost:3000/auth/callback (dev)
-#    - https://your-domain.vercel.app/auth/callback (prod)
-# 3. Clear cookies + localStorage
-# 4. Verify Route Handler uses createServerClient (see Critical section)
-```
+1. Verify Supabase credentials in `.env.local`
+2. Check OAuth redirect URLs in Supabase dashboard
+3. Clear cookies + localStorage
+4. Verify Route Handler uses `createServerClient`
 
-**Files to check**:
-
-- `app/auth/callback/route.ts` - OAuth callback handler
-- `lib/supabase/middleware.ts` - Session refresh middleware
-- `lib/supabase/server.ts` - Server-side client creation
-- `lib/supabase/client.ts` - Client-side client creation
+Files: `app/auth/callback/route.ts`, `lib/supabase/middleware.ts`, `lib/supabase/server.ts`
 
 ### Build Failures
 
 ```bash
-rm -rf .next node_modules package-lock.json
-npm install
-npm run type-check                   # Check TypeScript errors
-npm run build 2>&1 | grep -i "circular"  # Check circular deps
+rm -rf .next node_modules package-lock.json && npm install
+npm run type-check  # Check TypeScript errors
 ```
 
-**Common causes**:
-
-- Circular dependencies → Check import chains
-- Missing environment variables → Verify .env.local
-- Type errors → Run `npm run type-check` for details
-
-### Playwright Issues
-
-```bash
-npx playwright install                   # Install/update browsers
-npx playwright test --headed             # Debug with UI
-npx playwright test --debug              # Debug mode with inspector
-rm -rf test-results/ playwright-report/  # Clear results
-```
-
-### VLibras Not Loading
-
-```bash
-node scripts/testing/test-vlibras.js
-node scripts/diagnostics/diagnose-vlibras.js
-# VLibras only loads on /pt/* routes
-# Check NEXT_PUBLIC_ENABLE_VLIBRAS=true in .env.local
-# Check browser console for script loading errors
-```
-
-**File**: `components/a11y/vlibras-lazy.tsx`
-
-### Debugging Ágora
-
-```bash
-# Check for demo mode: URL param ?demo=true forces demo mode
-# Real auth: Requires OAuth login, uses Supabase tables
-# Demo mode: Uses localStorage, no backend required
-```
-
-**Files to check**:
-
-- `hooks/use-agora.tsx` - Unified hook (determines real/demo mode)
-- `hooks/use-agora-auth.ts` - OAuth flow
-- `app/pt/agora/layout.tsx` - Provider hierarchy
+Causes: Circular dependencies, missing env vars, type errors
 
 ### Adding a New Agent
 
 1. Define in `data/agents.ts` with PT/EN translations
-2. Add avatar to `public/agents/` (PNG format recommended)
+2. Add avatar to `public/agents/`
 3. Update types in `types/chat.ts` if needed
-4. Implement backend logic in `cidadao.ai-backend` repository
+4. Implement backend logic in `cidadao.ai-backend`
 
 ---
 
-## Key Technical Patterns
+## Testing
 
-### 1. Supabase Client Creation
+### Unit Tests (Vitest)
 
-**Server Components** (`app/` directory):
+- Config: `config/vitest.config.mjs`
+- Setup: `vitest.setup.ts`
+- Coverage threshold: 60% (lines, functions, branches, statements)
+- Pattern: `*.test.ts` or `*.test.tsx` co-located with source
 
-```typescript
-import { createClient } from '@/lib/supabase/server'
-const supabase = await createClient() // ✅ OK
-```
+### E2E Tests (Playwright)
 
-**Client Components**:
-
-```typescript
-import { createClient } from '@/lib/supabase/client'
-const supabase = createClient() // ✅ OK (no await)
-```
-
-**Route Handlers** (see Critical section above): Use `createServerClient()` with explicit cookies.
-
-### 2. Chat Mode Detection
-
-```typescript
-// ChatService automatically detects Maritaca mode
-const maritacaModel = localStorage.getItem('maritaca_selected_model')
-if (maritacaModel) {
-  // Use Fallback Adapter (bypass backend, direct LLM)
-} else {
-  // Use Primary Adapter (backend multi-agent system)
-}
-```
-
-User can toggle between modes in chat settings.
-
-### 3. Internationalization
-
-Routes: `/pt/*` (Portuguese) and `/en/*` (English)
-
-**Messages**: `messages/pt.json` and `messages/en.json`
-
-**i18n utility**: `lib/i18n.ts` handles translations
-
-**Layout wrapper**: `components/pt-layout-wrapper.tsx` manages conditional headers based on route
-
-### 4. Accessibility
-
-**VLibras** (`components/a11y/vlibras-lazy.tsx`):
-
-- Lazy loaded to reduce initial bundle
-- PT pages only (`/pt/*` routes)
-- User preference stored in localStorage
-- Hook: `useVLibras()` in `hooks/use-vlibras.ts`
-
-**Accessibility Panel** (`components/a11y/accessibility-panel.tsx`):
-
-- FAB button (bottom-right, fixed position)
-- Keyboard shortcuts: Alt+A (panel), Alt+H (contrast), Alt+± (font size)
-- Features: High contrast, font size, VLibras toggle
-
-**WCAG AAA compliance**:
-
-- Touch targets ≥44px (mobile)
-- Contrast ratio >7:1 (high contrast mode)
-- Full keyboard navigation
-- Screen reader support (ARIA labels, announcements)
-
-### 5. Performance
-
-**Lazy Loading**:
-
-```typescript
-import { lazyLoad } from '@/lib/utils/code-splitting'
-const PDFExport = lazyLoad(() => import('@/lib/export-service'))
-```
-
-**Bundle Analysis**:
-
-```bash
-ANALYZE=true npm run build
-```
-
-Opens webpack bundle analyzer in browser.
-
-**Web Vitals**: Tracked via `lib/web-vitals.ts` → sent to Vercel Analytics
-
----
-
-## Critical Files Reference
-
-**Authentication**:
-
-- `app/auth/callback/route.ts` - OAuth callback (uses createServerClient)
-- `lib/supabase/client.ts` - Client-side Supabase client
-- `lib/supabase/server.ts` - Server-side Supabase client
-- `lib/supabase/middleware.ts` - Session refresh middleware
-
-**Chat System**:
-
-- `lib/chat/chat.service.ts` - Main orchestrator
-- `lib/chat/adapters/primary.adapter.ts` - Backend adapter
-- `lib/chat/adapters/fallback.adapter.ts` - Maritaca LLM adapter
-- `store/chat-store.ts` - Zustand state management
-- `lib/chat/types.ts` - TypeScript interfaces
-
-**Testing**:
-
-- `config/vitest.config.mjs` - Unit test configuration
-- `config/playwright.config.ts` - E2E test configuration
-- `config/playwright.mobile.config.ts` - Mobile E2E tests
-- `vitest.setup.ts` - Test environment setup
-
-**Performance**:
-
-- `next.config.mjs` - Next.js config + Serwist + bundle analyzer
-- `app/sw.ts` - Service Worker for PWA
-- `lib/web-vitals.ts` - Web Vitals tracking
-
-**Layout & Routing**:
-
-- `app/layout.tsx` - Root layout
-- `app/pt/layout.tsx` - Portuguese layout
-- `app/en/layout.tsx` - English layout
-- `components/pt-layout-wrapper.tsx` - Conditional header logic
-
-**State Management**:
-
-- `store/chat-store.ts` - Chat state (messages, sessions, agents)
-- `store/notification-store.ts` - Toast notifications
-- `store/tooltip-store.ts` - Tooltip state
-- `store/badge-store.ts` - Achievement badges
-- `store/survey-store.ts` - UX survey state
-- `store/voice-settings-store.ts` - Voice/TTS settings
-
-**Ágora Platform**:
-
-- `hooks/use-agora.tsx` - Unified Ágora hook (real/demo mode)
-- `hooks/use-agora-auth.ts` - OAuth authentication
-- `hooks/use-agora-demo.ts` - Demo mode with localStorage
-- `components/agora/` - Ágora-specific components
+- Config: `config/playwright.config.ts`
+- Mobile: `config/playwright.mobile.config.ts`
+- Tests: `__tests__/e2e/`
+- Browsers: Chromium, Firefox, WebKit
 
 ---
 
 ## Deployment (Vercel)
 
-**Build**: `npm run build` | **Output**: `.next` | **Node**: 18.x+
-
 ### Pre-Production Checklist
 
-1. ✅ `npm run test` passes (unit tests)
-2. ✅ `npm run test:playwright` passes (E2E tests)
-3. ✅ `npm run type-check` clean (no TypeScript errors)
-4. ✅ `npm run lint` clean (ESLint passes)
-5. ✅ Coverage >60% (`npm run test:coverage`)
-6. ✅ Lighthouse acceptable (`npm run lighthouse`)
-7. ✅ Bundle size acceptable (`npm run analyze` - should be <400KB)
-8. ✅ Backend integration (`node scripts/testing/test-backend-comprehensive.js`)
+1. `npm run type-check` - clean
+2. `npm run lint` - clean
+3. `npm run test:coverage` - >= 60%
+4. `npm run test:playwright` - passes
+5. `npm run analyze` - bundle < 400KB
 
-### Production Environment Variables
+### Production Environment
 
 Configure in Vercel dashboard:
 
-- `NEXT_PUBLIC_API_URL`: Railway backend URL
-- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase credentials
-- `NEXT_PUBLIC_ENABLE_VLIBRAS=true`: Enable VLibras widget
-- Remove `DISABLE_PWA` or set to `false`: Enable PWA
-- `NEXT_PUBLIC_GA_ID`: Google Analytics (optional)
-- `NEXT_PUBLIC_POSTHOG_KEY`: PostHog analytics (optional)
-- Vercel KV: Auto-injected (no manual config needed)
+- `NEXT_PUBLIC_API_URL`: Railway backend
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_ENABLE_VLIBRAS=true`
+- Remove `DISABLE_PWA`
 
 ---
 
-## Git Workflow
+## Key Files Reference
 
-### Commit Format
+**Authentication**:
 
-```
-<type>(scope): <summary>
+- `app/auth/callback/route.ts` - OAuth callback
+- `lib/supabase/client.ts` - Client-side
+- `lib/supabase/server.ts` - Server-side
+- `lib/supabase/middleware.ts` - Session refresh
 
-<optional body>
-```
+**Chat**:
 
-**Types**: feat, fix, docs, refactor, test, chore, perf
+- `lib/chat/chat.service.ts` - Main orchestrator
+- `lib/chat/adapters/primary.adapter.ts` - Backend
+- `lib/chat/adapters/fallback.adapter.ts` - Maritaca LLM
+- `store/chat-store.ts` - State
 
-**Examples**:
+**Layout**:
 
-```
-feat(chat): add SSE streaming support
-fix(auth): correct OAuth redirect handling
-refactor(chat): simplify adapter architecture
-test(chat): increase coverage to 85%
-docs(readme): update installation instructions
-```
+- `app/layout.tsx` - Root
+- `components/pt-layout-wrapper.tsx` - Header logic
 
-### Pre-commit Hooks (Husky)
+**Agora**:
 
-Automatically runs on `git commit`:
-
-1. ESLint (`npm run lint`)
-2. TypeScript validation (`npm run type-check`)
-3. Commitlint (validates conventional commit format)
-
-Bypass (not recommended): `git commit --no-verify`
-
-### Quality Gates
-
-Before pushing to main:
-
-```bash
-npm run type-check          # Must pass
-npm run lint                # Must pass
-npm run test:coverage       # Must be ≥60%
-npm run test:playwright     # All E2E tests must pass
-```
-
----
-
-## Dependency Management (Renovate)
-
-**Auto-updates**: 80+ dependencies, PRs auto-created Mon/Thu 5am BRT
-
-**Automerged**:
-
-- Patches (1.0.0 → 1.0.1)
-- devDependency minors
-
-**Manual review required**:
-
-- Major version bumps
-- Next.js, React, Supabase updates
-
-**Dashboard**: GitHub Issue "🤖 Renovate Dependency Dashboard" (should be pinned)
-
-**Commands** (comment on Renovate PR):
-
-```
-@renovate rebase      # Rebase PR with latest main
-@renovate retry       # Retry failed checks
-@renovate pause       # Pause this PR
-```
-
-**Config**: `renovate.json` in repository root
-**Docs**: `docs/10-reference/renovate-guide.md`
+- `hooks/use-agora.tsx` - Unified hook
+- `components/agora/` - Components
 
 ---
 
 ## Library Organization
 
-**Chat System**: `lib/chat/` - ChatService, adapters, types
-**State Management**: `store/` - Zustand stores (chat, notifications, badges, survey, voice)
-**Caching**: `lib/cache/` - in-memory, IndexedDB, Vercel KV
-**Security**: `lib/security/` - CSP config, rate limiting, OWASP protections
-**Monitoring**: `lib/monitoring/` - Sentry config, metrics service
-**Telemetry**: `lib/telemetry/` - Chat telemetry, cost metrics
-**Services**: `lib/export/`, `lib/analytics/`, `lib/websocket/`
-**Utilities**: `lib/utils/`, `lib/constants/`, `lib/api/`
-**Supabase**: `lib/supabase/` - Client, server, middleware, auth helpers
+| Directory       | Purpose                         |
+| --------------- | ------------------------------- |
+| `lib/chat/`     | ChatService, adapters           |
+| `lib/supabase/` | Client, server, middleware      |
+| `lib/cache/`    | In-memory, IndexedDB, Vercel KV |
+| `lib/security/` | CSP, rate limiting              |
+| `store/`        | Zustand stores                  |
+| `data/`         | Agent definitions               |
+| `types/`        | TypeScript interfaces           |
 
-**Data**: `data/agents.ts` - 17 agent definitions with PT/EN translations
-**Types**: `types/` - Global TypeScript interfaces
+---
+
+## Dependency Management (Renovate)
+
+- Auto-updates: Mon/Thu 5am BRT
+- Automerged: patches, devDependency minors
+- Manual review: major bumps, Next.js/React/Supabase
+- Dashboard: GitHub Issue "Renovate Dependency Dashboard"
+- Config: `renovate.json`
 
 ---
 
 ## Documentation
 
-Complete documentation in `/docs`:
+Entry points:
 
-- `01-getting-started/`: Installation, quick start, environment setup
-- `02-architecture/`: System design, patterns
-- `03-features/`: Feature-specific documentation
-- `04-api/`: API reference
-- `05-guides/`: Development guides
-- `06-development/`: Coding patterns, conventions
-- `07-design/`: Design system, components
-- `08-testing/`: Testing strategies, coverage
-- `09-deployment/`: Deployment guides
-- `10-reference/`: Migration guides, Renovate, tools
-- `agora/`: **Ágora Academy complete documentation** (11 docs, ~5.6k lines)
-  - Pedagogical foundations (Piaget, Vygotsky, Bloom)
-  - Gamification system (XP, levels, badges)
-  - Learning tracks and evaluation system
-  - Technical architecture and API integrations
-  - Accessibility guidelines and roadmap
-- `archive/`: Archived documentation
+- `/docs/README.md` - Main index
+- `/docs/agora/README.md` - Agora Academy docs
 
-**Entry points**:
+Organization:
 
-- `/docs/README.md` - Main project documentation index
-- `/docs/agora/README.md` - Ágora Academy documentation index
-
----
-
-## Quick Start for New Developers
-
-```bash
-# 1. Clone and setup
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
-cd cidadao.ai-frontend
-npm install
-
-# 2. Configure environment
-cp .env.example .env.local
-# Edit .env.local:
-# - Add Supabase credentials (required for auth)
-# - NEXT_PUBLIC_API_URL defaults to Railway production
-
-# 3. Start development server
-npm run dev          # http://localhost:3000
-
-# 4. Run tests (new terminal)
-npm run test:ui      # Unit tests with Vitest UI
-npm run storybook    # Component development (optional)
-
-# 5. Run quality checks before committing
-npm run type-check && npm run lint
-npm run test:coverage
-```
-
-**Notes**:
-
-- Supabase credentials required for OAuth authentication
-- Backend defaults to Railway production (no local backend needed)
-- PWA automatically disabled in development mode
-- VLibras disabled by default (set `NEXT_PUBLIC_ENABLE_VLIBRAS=true` to enable)
-
----
-
-## Common Script Categories
-
-The `scripts/` directory contains 67 utility scripts organized by purpose:
-
-**Testing** (`scripts/testing/`):
-
-- `test-backend-comprehensive.js` - Full backend integration test
-- `test-chat-live.js` - Live chat system test
-- `test-vlibras.js` - VLibras (LIBRAS) integration test
-- `test-maritaca-integration.js` - Maritaca LLM integration test
-- `test-drummond-*.js` - Drummond agent tests (legacy)
-
-**Diagnostics** (`scripts/diagnostics/`):
-
-- `diagnose-vlibras.js` - Troubleshoot VLibras issues
-
-**Monitoring** (`scripts/monitoring/`):
-
-- `monitor-backend.js` - Monitor backend health
-- `monitor-new-endpoints.js` - Check for new API endpoints
-
-**Analysis** (`scripts/analysis/`):
-
-- `analyze-bundle.js` - Analyze bundle size
-- `dependency-analyzer.js` - Analyze dependency tree
-- `analyze-ux-design.js` - UX design analysis
-
-**Generation** (`scripts/generation/`):
-
-- `generate-component.js` - Component scaffolding
-- `generate-api-types.js` - Generate API types
-- `generate-icons.js` - Icon generation
-- `generate-splash.js` - PWA splash screens
-
-**Utilities** (`scripts/utilities/`):
-
-- `check-backend-status.js` - Backend status check
-- `check-wcag-contrast.js` - WCAG contrast checker
-- `security-audit.js` - Security audit
-- `migrate-console-logs.js` - Replace console.log with logger
-
-**Database** (`scripts/db/`):
-
-- `apply-migration.js` - Apply database migrations
-- `check-badges.js` - Verify badge system
-- `diagnose-agora-persistence.js` - Debug Ágora data issues
-
-**Admin** (`scripts/admin/`):
-
-- `set-superuser.js` - Set superuser permissions
-
-**Debug** (`scripts/debug/`):
-
-- `debug-backend.js` - Backend debugging utilities
-- `debug-backend-response.js` - Response inspection
-
-Run any script: `node scripts/<category>/<script-name>.js`
+- `01-getting-started/` - Installation, setup
+- `02-architecture/` - System design
+- `03-features/` - Feature docs
+- `06-development/` - Coding patterns
+- `08-testing/` - Test strategies
