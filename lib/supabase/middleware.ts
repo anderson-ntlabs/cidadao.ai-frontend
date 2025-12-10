@@ -107,9 +107,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if route requires authentication
-  const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES)
+  // Check route types - AUTH_ROUTES must be checked FIRST to avoid loop
+  // (e.g., /pt/agora/login would match /pt/agora in PROTECTED_ROUTES)
   const isAuthRoute = matchesRoute(pathname, AUTH_ROUTES)
+
+  // If it's an auth route, only check if user is authenticated (redirect away)
+  if (isAuthRoute) {
+    if (user) {
+      // Redirect authenticated users from auth routes to their dashboard
+      const dashboardUrl = pathname.includes('/agora')
+        ? new URL('/pt/agora', request.url)
+        : new URL('/pt/app', request.url)
+
+      return NextResponse.redirect(dashboardUrl)
+    }
+    // Not authenticated on auth route = OK, let them see login page
+    return supabaseResponse
+  }
+
+  // Check protected routes (only if not an auth route)
+  const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES)
 
   // Redirect unauthenticated users from protected routes to login
   if (isProtectedRoute && !user) {
@@ -118,22 +135,12 @@ export async function updateSession(request: NextRequest) {
       ? new URL('/pt/agora/login', request.url)
       : new URL('/pt/login', request.url)
 
-    // Store the original URL for redirect after login (except landing pages)
-    if (pathname !== '/pt' && pathname !== '/en' && pathname !== '/') {
+    // Store the original URL for redirect after login (except login pages themselves)
+    if (!pathname.includes('/login')) {
       loginUrl.searchParams.set('redirect', pathname)
     }
 
     return NextResponse.redirect(loginUrl)
-  }
-
-  // Redirect authenticated users from auth routes to their dashboard
-  if (isAuthRoute && user) {
-    // Determine the appropriate dashboard
-    const dashboardUrl = pathname.includes('/agora')
-      ? new URL('/pt/agora', request.url)
-      : new URL('/pt/app', request.url)
-
-    return NextResponse.redirect(dashboardUrl)
   }
 
   return supabaseResponse
