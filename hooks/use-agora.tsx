@@ -8,6 +8,7 @@ import { trackBadgeEarned, trackLevelUp, trackRankUp } from '@/lib/analytics/ago
 import { useCelebrationStore } from '@/store/celebration-store'
 import { useKidsStore } from '@/store/kids-store'
 import { navigationSessionService } from '@/lib/services/navigation-session.service'
+import { authService } from '@/lib/services/auth.service'
 import {
   syncChallengeProgress,
   getChallengeProgress,
@@ -586,15 +587,31 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
     selectedTracks,
   ])
 
-  // Load user data on mount
+  // Load user data on mount - use authService for faster initialization
   useEffect(() => {
-    loadUserData()
+    let mounted = true
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+    const initialize = async () => {
+      // Wait for authService to be ready first (prevents race conditions)
+      const authUser = await authService.waitForInit()
+
+      if (!mounted) return
+
+      if (authUser) {
+        // Auth service has user, now load Agora profile data
+        await loadUserData()
+      } else {
+        setIsLoading(false)
+      }
+    }
+
+    initialize()
+
+    // Subscribe to auth changes via authService
+    const unsubscribe = authService.subscribe(async (event, authUser) => {
+      if (!mounted) return
+
+      if (event === 'SIGNED_IN' && authUser) {
         await loadUserData()
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
@@ -602,46 +619,65 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         setDiaryEntries([])
         setSessions([])
         setBadges([])
+        setIsLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      unsubscribe()
+    }
   }, [])
 
   // Load all user data from Supabase
   const loadUserData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser()
+      // Use authService cached user for faster start
+      let authUser = authService.getCurrentUser()
 
+      // If no cached user, fetch from Supabase
       if (!authUser) {
-        setUser(null)
-        setIsLoading(false)
-        return
+        const {
+          data: { user: supabaseUser },
+        } = await supabase.auth.getUser()
+
+        if (!supabaseUser) {
+          setUser(null)
+          setIsLoading(false)
+          return
+        }
+
+        // Convert to our format
+        authUser = {
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          name: supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || 'User',
+          avatar: supabaseUser.user_metadata?.avatar_url || '',
+          role: 'user',
+        }
       }
 
-      // Load profile (use maybeSingle to handle case where profile doesn't exist)
-      let { data: profile } = await supabase
-        .from('agora_profiles')
-        .select('*')
-        .eq('user_id', authUser.id)
-        .maybeSingle()
+      // OPTIMIZATION: Load profile and consent in parallel
+      const [profileResult, consentResult] = await Promise.all([
+        supabase.from('agora_profiles').select('*').eq('user_id', authUser.id).maybeSingle(),
+        supabase.from('agora_consent').select('id').eq('user_id', authUser.id).maybeSingle(),
+      ])
+
+      let profile = profileResult.data
 
       // Auto-create profile if it doesn't exist (first login)
       if (!profile) {
-        const metadata = authUser.user_metadata || {}
-        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.full_name || metadata.name || 'User')}&background=16a34a&color=fff&size=128`
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name || 'User')}&background=16a34a&color=fff&size=128`
 
         const { data: newProfile, error: createError } = await supabase
           .from('agora_profiles')
           .insert({
             user_id: authUser.id,
             email: authUser.email || '',
-            full_name: metadata.full_name || metadata.name || 'Estudante',
-            avatar_url: metadata.avatar_url || defaultAvatar,
-            github_username: metadata.user_name || null,
+            full_name: authUser.name || 'Estudante',
+            avatar_url: authUser.avatar || defaultAvatar,
+            github_username: authUser.githubUsername || null,
             total_xp: 0,
             current_level: 1,
             current_rank: 'novato',
@@ -669,24 +705,20 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Load consent (use maybeSingle - consent may not exist yet)
-      const { data: consent } = await supabase
-        .from('agora_consent')
-        .select('id')
-        .eq('user_id', authUser.id)
-        .maybeSingle()
+      const consent = consentResult.data
 
       // Build user object
-      const metadata = authUser.user_metadata || {}
-      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.full_name || metadata.name || 'User')}&background=16a34a&color=fff&size=128`
+      const defaultAvatar =
+        authUser.avatar ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name || 'User')}&background=16a34a&color=fff&size=128`
 
       const hasTerms = profile?.has_accepted_terms || false
       const userData: AgoraUser = {
         id: authUser.id,
-        name: profile?.full_name || metadata.full_name || metadata.name || 'Estudante',
+        name: profile?.full_name || authUser.name || 'Estudante',
         email: authUser.email || '',
-        avatar: profile?.avatar_url || metadata.avatar_url || defaultAvatar,
-        githubUsername: profile?.github_username || metadata.user_name,
+        avatar: profile?.avatar_url || defaultAvatar,
+        githubUsername: profile?.github_username || authUser.githubUsername,
         matricula: profile?.matricula,
         curso: profile?.curso,
         periodo: profile?.periodo,
@@ -705,7 +737,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         hasCompletedOnboarding: profile?.has_completed_onboarding || false,
         onboardingStep: profile?.onboarding_step || 0,
         isSuperuser: profile?.is_superuser || false,
-        enrolledAt: profile?.enrolled_at || authUser.created_at || new Date().toISOString(),
+        enrolledAt: profile?.enrolled_at || new Date().toISOString(),
         lastActivityDate: profile?.last_activity_date,
         lastDailyBonusDate: profile?.last_daily_bonus_date,
       }
