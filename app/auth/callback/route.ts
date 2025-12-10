@@ -6,12 +6,31 @@ import { getSafeOAuthRedirect } from '@/lib/constants/routes'
 
 const logger = createLogger('OAuthCallback')
 
+/**
+ * Determine the default redirect based on referer/origin
+ * This ensures users return to where they came from (Agora vs App)
+ */
+function getSmartDefaultRedirect(request: Request): string {
+  const referer = request.headers.get('referer') || ''
+
+  // If coming from Agora pages, redirect back to Agora
+  if (referer.includes('/agora')) {
+    return '/pt/agora'
+  }
+
+  // Default to main app
+  return '/pt/app'
+}
+
 export async function GET(request: Request): Promise<NextResponse> {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const rawNext = requestUrl.searchParams.get('next')
+
+  // Use smart default based on origin if next is not provided
+  const defaultRedirect = getSmartDefaultRedirect(request)
   // Validate redirect to prevent Open Redirect attacks
-  const next = getSafeOAuthRedirect(rawNext, '/pt/app')
+  const next = getSafeOAuthRedirect(rawNext, defaultRedirect)
 
   logger.info('OAuth callback received', {
     hasCode: !!code,

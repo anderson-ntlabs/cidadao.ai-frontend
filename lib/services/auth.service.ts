@@ -5,9 +5,16 @@
  * Handles Supabase OAuth, session management, and integrates with
  * NavigationSessionService for proper cleanup.
  *
+ * Key improvements (2025-12-10):
+ * - Added waitForInit() for async initialization
+ * - Added initPromise to prevent race conditions
+ * - Better error handling and logging
+ * - Cache user to avoid duplicate queries
+ *
  * @author Anderson Henrique da Silva
  * @location Minas Gerais, Brasil
  * @since 2025-12-09
+ * @updated 2025-12-10
  */
 
 import { createClient } from '@/lib/supabase/client'
@@ -40,6 +47,17 @@ export interface AuthState {
 
 export type AuthEventCallback = (event: AuthChangeEvent, user: AuthUser | null) => void
 
+// URLs that should never be saved as redirect targets
+const INVALID_REDIRECT_PATHS = [
+  '/',
+  '/pt',
+  '/en',
+  '/pt/login',
+  '/en/login',
+  '/pt/agora/login',
+  '/auth/callback',
+]
+
 // ============================================
 // Auth Service Class
 // ============================================
@@ -49,11 +67,13 @@ class AuthService {
   private listeners: Set<AuthEventCallback> = new Set()
   private currentUser: AuthUser | null = null
   private isInitialized = false
+  private initPromise: Promise<AuthUser | null> | null = null
+  private initResolvers: Array<(user: AuthUser | null) => void> = []
 
   constructor() {
-    // Initialize auth state listener
+    // Initialize auth state listener only on client
     if (typeof window !== 'undefined') {
-      this.initAuthListener()
+      this.initPromise = this.initialize()
     }
   }
 
@@ -61,25 +81,86 @@ class AuthService {
   // Initialization
   // ============================================
 
-  private initAuthListener(): void {
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      logger.debug('Auth state changed', { event, hasSession: !!session })
+  /**
+   * Initialize the auth service and check for existing session
+   * Returns a promise that resolves when initialization is complete
+   */
+  private async initialize(): Promise<AuthUser | null> {
+    try {
+      logger.debug('Initializing auth service...')
 
-      const user = session?.user ? this.convertSupabaseUser(session.user) : null
-      this.currentUser = user
+      // Set up auth state change listener FIRST
+      this.supabase.auth.onAuthStateChange((event, session) => {
+        logger.debug('Auth state changed', { event, hasSession: !!session })
 
-      // Sync with NavigationSessionService
-      if (event === 'SIGNED_IN' && user) {
-        navigationSessionService.initAuthSession(user.id)
-      } else if (event === 'SIGNED_OUT') {
-        navigationSessionService.clearAllSessionStorage()
+        const user = session?.user ? this.convertSupabaseUser(session.user) : null
+        const previousUser = this.currentUser
+        this.currentUser = user
+
+        // Sync with NavigationSessionService
+        if (event === 'SIGNED_IN' && user) {
+          navigationSessionService.initAuthSession(user.id)
+        } else if (event === 'SIGNED_OUT') {
+          navigationSessionService.clearAllSessionStorage()
+        }
+
+        // Mark as initialized on first auth state change
+        if (!this.isInitialized) {
+          this.isInitialized = true
+          // Resolve any pending waitForInit calls
+          this.initResolvers.forEach((resolve) => resolve(user))
+          this.initResolvers = []
+        }
+
+        // Notify listeners (skip duplicate SIGNED_IN if user didn't change)
+        if (event !== 'SIGNED_IN' || previousUser?.id !== user?.id) {
+          this.notifyListeners(event, user)
+        }
+      })
+
+      // Check for existing session
+      const {
+        data: { user },
+        error,
+      } = await this.supabase.auth.getUser()
+
+      if (error) {
+        logger.debug('No existing session', { error: error.message })
       }
 
-      // Notify listeners
-      this.notifyListeners(event, user)
-    })
+      if (user) {
+        this.currentUser = this.convertSupabaseUser(user)
+        logger.info('Existing session found', { userId: this.currentUser.id })
+      }
 
-    this.isInitialized = true
+      this.isInitialized = true
+      return this.currentUser
+    } catch (error) {
+      logger.error('Auth initialization failed', { error })
+      this.isInitialized = true
+      return null
+    }
+  }
+
+  /**
+   * Wait for the auth service to be fully initialized
+   * Use this when you need to know the auth state before proceeding
+   */
+  async waitForInit(): Promise<AuthUser | null> {
+    // If already initialized, return current user
+    if (this.isInitialized) {
+      return this.currentUser
+    }
+
+    // If init promise exists, wait for it
+    if (this.initPromise) {
+      return this.initPromise
+    }
+
+    // Create a new promise that will be resolved when init completes
+    return new Promise((resolve) => {
+      this.initResolvers.push(resolve)
+    })
   }
 
   // ============================================
@@ -98,11 +179,20 @@ class AuthService {
       supabaseUser.email?.split('@')[0] ||
       'User'
 
-    // Get avatar with fallback
-    const avatar =
-      metadata.avatar_url ||
-      metadata.picture ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff&size=128`
+    // Get avatar with fallback - check multiple sources
+    let avatar = metadata.avatar_url || metadata.picture || metadata.avatar || null
+
+    // Try identities array for raw OAuth data
+    if (!avatar && supabaseUser.identities && supabaseUser.identities.length > 0) {
+      const identity = supabaseUser.identities[0]
+      const identityData = identity.identity_data || {}
+      avatar = identityData.avatar_url || identityData.picture || identityData.avatar || null
+    }
+
+    // Fallback to UI Avatars
+    if (!avatar) {
+      avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=16a34a&color=fff&size=128`
+    }
 
     return {
       id: supabaseUser.id,
@@ -120,7 +210,7 @@ class AuthService {
   // ============================================
 
   /**
-   * Get current authenticated user
+   * Get current authenticated user (async, validates with server)
    */
   async getUser(): Promise<AuthUser | null> {
     try {
@@ -204,16 +294,30 @@ class AuthService {
 
   /**
    * Login with OAuth provider (Google, GitHub)
+   * @param provider - OAuth provider
+   * @param redirectTo - Full redirect URL after OAuth (defaults to /auth/callback)
+   * @param nextPath - Path to redirect to after auth callback (e.g., /pt/agora)
    */
   async loginWithProvider(
     provider: Provider,
-    redirectTo?: string
+    redirectTo?: string,
+    nextPath?: string
   ): Promise<{ error: string | null }> {
     try {
+      // Build redirect URL with next param if provided
+      let finalRedirectTo = redirectTo || `${window.location.origin}/auth/callback`
+
+      if (nextPath && !finalRedirectTo.includes('next=')) {
+        const url = new URL(finalRedirectTo)
+        url.searchParams.set('next', nextPath)
+        finalRedirectTo = url.toString()
+      }
+
       const { error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+          redirectTo: finalRedirectTo,
+          scopes: provider === 'github' ? 'read:user user:email' : undefined,
         },
       })
 
@@ -222,8 +326,7 @@ class AuthService {
         return { error: error.message }
       }
 
-      // OAuth will redirect, so we don't set user state here
-      logger.info('OAuth initiated', { provider })
+      logger.info('OAuth initiated', { provider, redirectTo: finalRedirectTo })
       return { error: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
@@ -271,14 +374,20 @@ class AuthService {
 
   /**
    * Logout - clears all sessions and state
+   * @param redirectTo - Optional path to redirect after logout
    */
-  async logout(): Promise<void> {
+  async logout(redirectTo?: string): Promise<void> {
     try {
       // Use NavigationSessionService for complete cleanup
       await navigationSessionService.logout()
 
       this.currentUser = null
       logger.info('Logout successful')
+
+      // Redirect if specified
+      if (redirectTo && typeof window !== 'undefined') {
+        window.location.href = redirectTo
+      }
     } catch (error) {
       logger.error('Logout error', { error })
       // Even on error, clear local state
@@ -313,17 +422,75 @@ class AuthService {
   }
 
   // ============================================
+  // Redirect URL Management
+  // ============================================
+
+  /**
+   * Save a URL to redirect to after login
+   * Validates that the URL is not a landing/login page
+   */
+  saveRedirectUrl(url: string): void {
+    if (typeof window === 'undefined') return
+
+    // Don't save invalid paths
+    if (INVALID_REDIRECT_PATHS.some((path) => url === path || url.startsWith(path + '?'))) {
+      logger.debug('Ignoring invalid redirect URL', { url })
+      return
+    }
+
+    localStorage.setItem('redirectAfterLogin', url)
+    logger.debug('Saved redirect URL', { url })
+  }
+
+  /**
+   * Get and clear the saved redirect URL
+   */
+  getAndClearRedirectUrl(): string | null {
+    if (typeof window === 'undefined') return null
+
+    const url = localStorage.getItem('redirectAfterLogin')
+    if (url) {
+      localStorage.removeItem('redirectAfterLogin')
+
+      // Validate the URL before returning
+      if (INVALID_REDIRECT_PATHS.some((path) => url === path || url.startsWith(path + '?'))) {
+        logger.debug('Cleared invalid redirect URL', { url })
+        return null
+      }
+
+      logger.debug('Retrieved redirect URL', { url })
+      return url
+    }
+
+    return null
+  }
+
+  /**
+   * Get the appropriate default redirect based on origin
+   */
+  getDefaultRedirect(origin?: string): string {
+    // If coming from Agora, go back to Agora
+    if (origin?.includes('/agora')) {
+      return '/pt/agora'
+    }
+
+    // Default to app
+    return '/pt/app'
+  }
+
+  // ============================================
   // Event Subscription
   // ============================================
 
   /**
    * Subscribe to auth state changes
+   * Returns unsubscribe function
    */
   subscribe(callback: AuthEventCallback): () => void {
     this.listeners.add(callback)
 
-    // Immediately notify with current state if we have a user
-    if (this.currentUser) {
+    // Immediately notify with current state if initialized
+    if (this.isInitialized && this.currentUser) {
       callback('SIGNED_IN', this.currentUser)
     }
 
@@ -347,9 +514,9 @@ class AuthService {
   // ============================================
 
   /**
-   * Check if user is currently authenticated
+   * Check if user is currently authenticated (sync)
    */
-  isAuthenticated(): boolean {
+  isAuthenticatedSync(): boolean {
     return this.currentUser !== null
   }
 
@@ -365,6 +532,13 @@ class AuthService {
    */
   isReady(): boolean {
     return this.isInitialized
+  }
+
+  /**
+   * Get Supabase client (for advanced use cases)
+   */
+  getSupabaseClient() {
+    return this.supabase
   }
 }
 
