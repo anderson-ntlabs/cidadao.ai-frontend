@@ -17,6 +17,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ContentCard, ExternalLinkCard, LandingModal, FAQSectionEN } from '@/components/landing'
+import { ResearchNotesCard } from '@/components/landing/research-notes-card'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { agents } from '@/data/agents'
 
@@ -189,7 +190,7 @@ export default function ENPage(): JSX.Element {
             For developers, researchers and those interested in technical details
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <ExternalLinkCard
               icon="🐙"
               title="GitHub"
@@ -208,6 +209,7 @@ export default function ENPage(): JSX.Element {
               description="Interactive documentation"
               href="https://cidadao-api-production.up.railway.app/docs"
             />
+            <ResearchNotesCard locale="en" />
           </div>
         </div>
       </section>

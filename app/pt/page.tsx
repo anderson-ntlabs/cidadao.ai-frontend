@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { LandingClientWrapper } from '@/components/landing/landing-client-wrapper'
 import { FAQSection } from '@/components/landing/faq-section'
+import { ResearchNotesCard } from '@/components/landing/research-notes-card'
 
 // Export metadata for better SEO
 export { metadata } from './metadata'
@@ -252,7 +253,7 @@ export default function PTPageOptimized(): JSX.Element {
               {/* Developer Links - Below Spotify */}
               <div className="mt-8">
                 <h3 className="text-xl font-bold text-center mb-4">Para Desenvolvedores</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <a
                     href="https://github.com/anderson-ufrj/cidadao.ai-backend"
                     target="_blank"
@@ -288,6 +289,8 @@ export default function PTPageOptimized(): JSX.Element {
                       API <ExternalLink className="w-3 h-3" />
                     </h4>
                   </a>
+
+                  <ResearchNotesCard locale="pt" />
                 </div>
               </div>
             </div>
