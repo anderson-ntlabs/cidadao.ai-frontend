@@ -32,8 +32,10 @@ import {
   BookOpen,
   Shield,
   ArrowRight,
+  FileSearch,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LGPDTermsModal } from '@/components/privacy'
 
 // Available background images for random selection (same as login)
 const BACKGROUND_IMAGES = [
@@ -68,6 +70,7 @@ export default function AgoraSelecaoPage() {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [kidsImageIndex, setKidsImageIndex] = useState(0)
   const [hasKidsProfile, setHasKidsProfile] = useState(false)
+  const [showLGPDModal, setShowLGPDModal] = useState(false)
 
   // Check auth and load user data
   useEffect(() => {
@@ -323,16 +326,31 @@ export default function AgoraSelecaoPage() {
           </GlassCard>
         </div>
 
-        {/* Info Banner */}
-        <div className="text-center">
+        {/* Info Banners */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm bg-background/50 border border-border">
             <Sparkles className="w-4 h-4 text-tarsila-amarelo" />
             <span className="text-sm academy-text-muted">
               Você pode trocar de modo a qualquer momento
             </span>
           </div>
+
+          <button
+            onClick={() => setShowLGPDModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm bg-tarsila-verde/10 border border-tarsila-verde/30 hover:bg-tarsila-verde/20 transition-colors cursor-pointer"
+          >
+            <FileSearch className="w-4 h-4 text-tarsila-verde" />
+            <span className="text-sm text-tarsila-verde font-medium">Entenda seus dados</span>
+          </button>
         </div>
       </div>
+
+      {/* LGPD Terms Modal */}
+      <LGPDTermsModal
+        isOpen={showLGPDModal}
+        onClose={() => setShowLGPDModal(false)}
+        userName={user?.name?.split(' ')[0]}
+      />
     </div>
   )
 }

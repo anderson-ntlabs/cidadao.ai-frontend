@@ -104,7 +104,7 @@ class AuthenticatedApiClient {
 
   private handleError(error: any): ApiResponse {
     if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError<any>
+      const axiosError = error
 
       if (axiosError.response) {
         // Server responded with error

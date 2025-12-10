@@ -92,9 +92,9 @@ function sendToAnalytics(metric: WebVitalsMetric) {
 export function reportWebVitals() {
   const handleMetric = (metric: Metric) => {
     const webVitalMetric: WebVitalsMetric = {
-      name: metric.name as WebVitalsMetric['name'],
+      name: metric.name,
       value: metric.value,
-      rating: getRating(metric.name as WebVitalsMetric['name'], metric.value),
+      rating: getRating(metric.name, metric.value),
       delta: metric.delta,
       entries: metric.entries,
     }

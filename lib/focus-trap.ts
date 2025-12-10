@@ -20,16 +20,13 @@ export class FocusTrap {
       'input[type="radio"]:not([disabled])',
       'input[type="checkbox"]:not([disabled])',
       'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])'
+      '[tabindex]:not([tabindex="-1"])',
     ]
 
-    this.focusableElements = Array.from(
-      this.element.querySelectorAll(focusableSelectors.join(','))
-    ) as HTMLElement[]
+    this.focusableElements = Array.from(this.element.querySelectorAll(focusableSelectors.join(',')))
 
     this.firstFocusableElement = this.focusableElements[0] || null
-    this.lastFocusableElement = 
-      this.focusableElements[this.focusableElements.length - 1] || null
+    this.lastFocusableElement = this.focusableElements[this.focusableElements.length - 1] || null
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
@@ -60,7 +57,7 @@ export class FocusTrap {
 
   activate() {
     this.updateFocusableElements()
-    
+
     if (this.firstFocusableElement) {
       this.firstFocusableElement.focus()
     }

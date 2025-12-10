@@ -102,7 +102,7 @@ export function getPerformanceSummary() {
     return null
   }
 
-  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+  const navigation = performance.getEntriesByType('navigation')[0]
   const paint = performance.getEntriesByType('paint')
 
   return {

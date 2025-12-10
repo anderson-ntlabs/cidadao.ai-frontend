@@ -89,7 +89,7 @@ class VoiceCache {
 
     // LRU eviction if cache full
     if (this.cache.size >= this.maxSize) {
-      const firstKey = this.cache.keys().next().value as string | undefined
+      const firstKey = this.cache.keys().next().value
       if (firstKey) {
         this.cache.delete(firstKey)
         logger.debug('VoiceCache: Evicted oldest entry', { evictedKey: firstKey })
