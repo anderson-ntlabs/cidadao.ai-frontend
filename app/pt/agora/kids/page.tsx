@@ -61,6 +61,7 @@ export default function KidsEntryPage() {
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
 
   // Kids avatar options - Brazilian characters from /public/kids
+  // Must match KIDS_AVATARS in components/kids/kids-avatar-selector.tsx
   const avatars = [
     {
       id: 'monica' as const,
@@ -80,12 +81,22 @@ export default function KidsEntryPage() {
     {
       id: 'jorel' as const,
       name: 'Irmão do Jorel',
-      image: '/kids/jorel.webp',
+      image: '/kids/jorel.png',
     },
     {
       id: 'luluzinha' as const,
       name: 'Luluzinha',
-      image: '/kids/luluzinha.webp',
+      image: '/kids/luluzinha.png',
+    },
+    {
+      id: 'luluzinha2' as const,
+      name: 'Luluzinha Rosa',
+      image: '/kids/luluzinha2.png',
+    },
+    {
+      id: 'menino_maluquinho' as const,
+      name: 'Menino Maluquinho',
+      image: '/kids/menino_maluquim.jpg',
     },
   ]
 
@@ -325,21 +336,21 @@ export default function KidsEntryPage() {
                 {/* Avatar Selection */}
                 <div className="space-y-3">
                   <Label>Escolha um Avatar</Label>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                     {avatars.map((avatar) => (
                       <button
                         key={avatar.id}
                         type="button"
                         onClick={() => setSelectedAvatar(avatar.id)}
                         className={cn(
-                          'relative p-4 rounded-xl border-3 transition-all',
+                          'relative p-2 sm:p-3 rounded-xl border-2 transition-all',
                           selectedAvatar === avatar.id
-                            ? 'border-kids-coral bg-kids-coral/10 shadow-lg'
-                            : 'border-border hover:border-kids-coral/50'
+                            ? 'border-kids-coral bg-kids-coral/10 shadow-lg scale-105'
+                            : 'border-border hover:border-kids-coral/50 hover:scale-102'
                         )}
                       >
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="relative h-16 w-16 rounded-full overflow-hidden">
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-full overflow-hidden">
                             <Image
                               src={avatar.image}
                               alt={avatar.name}
@@ -347,10 +358,12 @@ export default function KidsEntryPage() {
                               className="object-cover"
                             />
                           </div>
-                          <span className="text-sm font-medium text-center">{avatar.name}</span>
+                          <span className="text-xs font-medium text-center line-clamp-1">
+                            {avatar.name}
+                          </span>
                         </div>
                         {selectedAvatar === avatar.id && (
-                          <CheckCircle className="absolute top-2 right-2 h-5 w-5 text-kids-coral" />
+                          <CheckCircle className="absolute top-1 right-1 h-4 w-4 text-kids-coral" />
                         )}
                       </button>
                     ))}

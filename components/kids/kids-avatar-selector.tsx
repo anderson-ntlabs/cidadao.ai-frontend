@@ -11,21 +11,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
-import { Modal, ModalContent, ModalHeader, ModalTitle } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { Check, Pencil } from 'lucide-react'
+import { Check, Pencil, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Static list of available avatars in /public/kids folder
 // To add more avatars: just add images to /public/kids/ and update this list
 export const KIDS_AVATARS = [
-  { id: 'monica', name: 'Monica', file: 'monica.jpg' },
-  { id: 'cocorico', name: 'Cocorico', file: 'cocorico.jpg' },
-  { id: 'ze_carioca', name: 'Ze Carioca', file: 'ze_carioca.png' },
-  { id: 'jorel', name: 'Irmao do Jorel', file: 'jorel.png' },
+  { id: 'monica', name: 'Mônica', file: 'monica.jpg' },
+  { id: 'cocorico', name: 'Cocoricó', file: 'cocorico.jpg' },
+  { id: 'ze_carioca', name: 'Zé Carioca', file: 'ze_carioca.png' },
+  { id: 'jorel', name: 'Irmão do Jorel', file: 'jorel.png' },
   { id: 'luluzinha', name: 'Luluzinha', file: 'luluzinha.png' },
-  { id: 'luluzinha2', name: 'Luluzinha 2', file: 'luluzinha2.png' },
+  { id: 'luluzinha2', name: 'Luluzinha Rosa', file: 'luluzinha2.png' },
+  { id: 'menino_maluquinho', name: 'Menino Maluquinho', file: 'menino_maluquim.jpg' },
 ]
 
 // Helper to get avatar image path
@@ -120,67 +121,91 @@ export function KidsAvatarSelector({
         )}
       </div>
 
-      {/* Avatar Selection Modal */}
-      <Modal open={isOpen} onOpenChange={setIsOpen}>
-        <ModalContent size="sm" showCloseButton={true}>
-          <ModalHeader>
-            <ModalTitle className="text-center text-xl font-bold">Escolha seu Avatar!</ModalTitle>
-          </ModalHeader>
+      {/* Avatar Selection Modal - Using Portal to escape overflow:hidden containers */}
+      {isOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999]">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+              onClick={() => setIsOpen(false)}
+            />
 
-          <div className="py-4">
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
-              {KIDS_AVATARS.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  onClick={() => setSelectedAvatar(avatar.id)}
-                  className={cn(
-                    'relative flex flex-col items-center p-2 rounded-xl transition-all',
-                    selectedAvatar === avatar.id
-                      ? 'bg-kids-coral/20 ring-2 ring-kids-coral scale-105'
-                      : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                  )}
-                >
-                  <div className="relative w-14 h-14 rounded-xl overflow-hidden shadow-md">
-                    <Image
-                      src={`/kids/${avatar.file}`}
-                      alt={avatar.name}
-                      fill
-                      className="object-cover"
-                    />
-                    {selectedAvatar === avatar.id && (
-                      <div className="absolute inset-0 bg-kids-coral/30 flex items-center justify-center">
-                        <Check className="w-6 h-6 text-white drop-shadow-lg" />
-                      </div>
+            {/* Modal Content */}
+            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
+              {/* Close button */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="absolute right-4 top-4 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Escolha seu Avatar! 🎨
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Clique no personagem que você mais gosta
+                </p>
+              </div>
+
+              {/* Avatar Grid */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4">
+                {KIDS_AVATARS.map((avatar) => (
+                  <button
+                    key={avatar.id}
+                    onClick={() => setSelectedAvatar(avatar.id)}
+                    className={cn(
+                      'relative flex flex-col items-center p-2 sm:p-3 rounded-xl transition-all',
+                      selectedAvatar === avatar.id
+                        ? 'bg-kids-coral/20 ring-2 ring-kids-coral scale-105 shadow-lg'
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-102'
                     )}
-                  </div>
-                  <span className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1">
-                    {avatar.name}
-                  </span>
-                </button>
-              ))}
-            </div>
+                  >
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-md">
+                      <Image
+                        src={`/kids/${avatar.file}`}
+                        alt={avatar.name}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                      {selectedAvatar === avatar.id && (
+                        <div className="absolute inset-0 bg-kids-coral/40 flex items-center justify-center">
+                          <Check className="w-8 h-8 text-white drop-shadow-lg" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="mt-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1">
+                      {avatar.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-            {/* Info text */}
-            <div className="mt-4 p-3 rounded-xl bg-kids-yellow/20 text-center">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                Clique no avatar que voce mais gosta!
-              </p>
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-6">
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsOpen(false)}
+                  className="flex-1 h-12"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="flex-1 h-12 bg-kids-coral hover:bg-kids-coral/90 text-white font-bold"
+                >
+                  Salvar ✨
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div className="flex gap-3 mt-2">
-            <Button variant="secondary" onClick={() => setIsOpen(false)} className="flex-1">
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSave}
-              className="flex-1 bg-kids-coral hover:bg-kids-coral/90 text-white"
-            >
-              Salvar
-            </Button>
-          </div>
-        </ModalContent>
-      </Modal>
+          </div>,
+          document.body
+        )}
     </>
   )
 }
