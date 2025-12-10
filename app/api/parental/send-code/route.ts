@@ -79,7 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const { error: emailError } = await resend.emails.send({
-      from: 'Ágora Kids <noreply@cidadao.ai>',
+      from: 'Ágora Kids <onboarding@resend.dev>',
       to: parentEmail,
       subject: `Seu código de acesso parental: ${code}`,
       html: `
