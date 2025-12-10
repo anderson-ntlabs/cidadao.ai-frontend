@@ -501,6 +501,54 @@ interface AgoraContextType {
 
 const AgoraContext = createContext<AgoraContextType | undefined>(undefined)
 
+// Global cache for Agora data to survive component remounts during client-side navigation
+// This prevents the "Carregando Ágora..." delay when navigating between pages
+interface AgoraCache {
+  user: AgoraUser | null
+  xpTransactions: XpTransaction[]
+  diaryEntries: DiaryEntry[]
+  sessions: StudySession[]
+  badges: AgoraBadge[]
+  lastLoadedUserId: string | null
+  timestamp: number
+}
+
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+let agoraCache: AgoraCache = {
+  user: null,
+  xpTransactions: [],
+  diaryEntries: [],
+  sessions: [],
+  badges: [],
+  lastLoadedUserId: null,
+  timestamp: 0,
+}
+
+function isCacheValid(userId: string): boolean {
+  return (
+    agoraCache.lastLoadedUserId === userId &&
+    agoraCache.user !== null &&
+    Date.now() - agoraCache.timestamp < CACHE_TTL
+  )
+}
+
+function updateCache(data: Partial<AgoraCache>) {
+  agoraCache = { ...agoraCache, ...data, timestamp: Date.now() }
+}
+
+function clearCache() {
+  agoraCache = {
+    user: null,
+    xpTransactions: [],
+    diaryEntries: [],
+    sessions: [],
+    badges: [],
+    lastLoadedUserId: null,
+    timestamp: 0,
+  }
+}
+
 const DEFAULT_USER: AgoraUser = {
   id: '',
   name: '',
@@ -598,7 +646,19 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       if (!mounted) return
 
       if (authUser) {
-        // Auth service has user, now load Agora profile data
+        // Check if we have valid cached data (fast path for client-side navigation)
+        if (isCacheValid(authUser.id)) {
+          logger.debug('Using cached Agora data for instant load', { userId: authUser.id })
+          setUser(agoraCache.user)
+          setXpTransactions(agoraCache.xpTransactions)
+          setDiaryEntries(agoraCache.diaryEntries)
+          setSessions(agoraCache.sessions)
+          setBadges(agoraCache.badges)
+          setIsLoading(false)
+          return
+        }
+
+        // No cache or expired, load fresh data
         await loadUserData()
       } else {
         setIsLoading(false)
@@ -619,6 +679,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         setDiaryEntries([])
         setSessions([])
         setBadges([])
+        clearCache() // Clear cache on logout
         setIsLoading(false)
       }
     })
@@ -831,10 +892,11 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Load badges from profile
+      let loadedBadges: AgoraBadge[] = []
       if (profile?.badges) {
         const earnedBadgeIds = profile.badges as string[]
-        setBadges(
-          BADGE_DEFINITIONS.filter((b) => earnedBadgeIds.includes(b.id)).map((badge) => ({
+        loadedBadges = BADGE_DEFINITIONS.filter((b) => earnedBadgeIds.includes(b.id)).map(
+          (badge) => ({
             id: badge.id,
             type: badge.type,
             name: badge.name,
@@ -842,11 +904,49 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
             emoji: badge.emoji,
             earnedAt: new Date().toISOString(),
             criteria: badge.criteria,
-          }))
+          })
         )
+        setBadges(loadedBadges)
       }
 
-      logger.info('User data loaded', {
+      // Update global cache for fast client-side navigation
+      updateCache({
+        user: userData,
+        xpTransactions:
+          xpResult.data?.map((t) => ({
+            id: t.id,
+            amount: t.amount,
+            balanceAfter: t.balance_after,
+            sourceType: t.source_type,
+            description: t.description,
+            createdAt: t.created_at,
+          })) || [],
+        diaryEntries:
+          diaryResult.data?.map((d) => ({
+            id: d.id,
+            content: d.content,
+            mood: d.mood || 'neutral',
+            whatLearned: d.what_learned || '',
+            whatStruggled: d.what_struggled || '',
+            nextSteps: d.next_steps || '',
+            entryDate: d.entry_date || d.created_at?.split('T')[0] || '',
+            createdAt: d.created_at,
+          })) || [],
+        sessions:
+          sessionsResult.data?.map((s) => ({
+            id: s.id,
+            startedAt: s.started_at,
+            endedAt: s.ended_at,
+            durationMinutes: s.duration_minutes || 0,
+            xpEarned: s.xp_earned || 0,
+            agentsUsed: s.conversations?.map((c: { agent_name: string }) => c.agent_name) || [],
+            status: s.status || 'completed',
+          })) || [],
+        badges: loadedBadges,
+        lastLoadedUserId: authUser.id,
+      })
+
+      logger.info('User data loaded and cached', {
         userId: authUser.id,
         totalXp: userData.totalXp,
         isSuperuser: userData.isSuperuser,
