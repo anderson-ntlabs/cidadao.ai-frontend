@@ -9,14 +9,14 @@ import { DashboardClient } from './_components/dashboard-client'
 import { GraduationCap } from 'lucide-react'
 
 /**
- * Academy Dashboard Page
+ * Ágora Aprendiz Dashboard Page
  *
  * Real authentication only - no demo mode.
- * Requires Academy mode selection from /pt/agora/selecao.
+ * Requires Aprendiz mode selection from /pt/agora/selecao.
  * Uses unified useAgora hook for consistent data flow.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-10 - Add mode guard for Academy/Kids separation
+ * Updated: 2025-12-10 - Rename Academy to Aprendiz (Brazilian identity)
  */
 
 function LoadingFallback() {
@@ -76,14 +76,13 @@ function AcademyDashboardContent() {
     }
   }, [isModeLoading, mode, isAuthenticated, router])
 
-  // Auto-set Academy mode if accessing this page directly
-  // (user chose Academy from selection)
+  // Redirect to correct area based on mode
   useEffect(() => {
-    if (!isModeLoading && mode !== 'academy' && mode !== 'kids' && isAuthenticated) {
+    if (!isModeLoading && mode !== 'aprendiz' && mode !== 'kids' && isAuthenticated) {
       // If mode is null but user is authenticated, they came here directly
       // Don't auto-set, redirect to selection instead
     } else if (mode === 'kids' && isAuthenticated) {
-      // User is in Kids mode but trying to access Academy
+      // User is in Kids mode but trying to access Aprendiz
       router.replace('/pt/agora/kids/dashboard')
     }
   }, [isModeLoading, mode, isAuthenticated, router])

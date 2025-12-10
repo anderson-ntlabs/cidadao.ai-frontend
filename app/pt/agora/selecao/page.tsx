@@ -1,8 +1,8 @@
 /**
  * Agora Mode Selection Page
  *
- * Post-login page where users choose between Academy (adult learning)
- * and Kids (children 6-12 years) modes.
+ * Post-login page where users choose between Ágora Aprendiz (adult learning)
+ * and Ágora Kids (children 6-12 years) modes.
  *
  * Features:
  * - Random animated background (same as login)
@@ -63,7 +63,7 @@ export default function AgoraSelecaoPage() {
 
   const [user, setUser] = useState<{ email?: string; name?: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isNavigating, setIsNavigating] = useState<'academy' | 'kids' | null>(null)
+  const [isNavigating, setIsNavigating] = useState<'aprendiz' | 'kids' | null>(null)
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
   const [kidsImageIndex, setKidsImageIndex] = useState(0)
@@ -115,14 +115,14 @@ export default function AgoraSelecaoPage() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleSelectMode = async (mode: 'academy' | 'kids') => {
+  const handleSelectMode = async (mode: 'aprendiz' | 'kids') => {
     setIsNavigating(mode)
     setMode(mode)
 
     // Small delay for visual feedback
     await new Promise((resolve) => setTimeout(resolve, 300))
 
-    if (mode === 'academy') {
+    if (mode === 'aprendiz') {
       router.push('/pt/agora')
     } else {
       // If has active kids profile, go directly to dashboard
@@ -207,14 +207,14 @@ export default function AgoraSelecaoPage() {
 
         {/* Mode Selection Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Academy Card */}
+          {/* Aprendiz Card */}
           <GlassCard
             className={cn(
               'group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl',
               'border-2 hover:border-tarsila-verde',
-              isNavigating === 'academy' && 'scale-[1.02] border-tarsila-verde'
+              isNavigating === 'aprendiz' && 'scale-[1.02] border-tarsila-verde'
             )}
-            onClick={() => !isNavigating && handleSelectMode('academy')}
+            onClick={() => !isNavigating && handleSelectMode('aprendiz')}
           >
             <div className="p-6">
               {/* Icon */}
@@ -224,8 +224,8 @@ export default function AgoraSelecaoPage() {
 
               {/* Content */}
               <h2 className="text-xl font-bold academy-text mb-2 flex items-center gap-2">
-                Ágora Academy
-                {isNavigating === 'academy' && <Loader2 className="w-4 h-4 animate-spin" />}
+                Ágora Aprendiz
+                {isNavigating === 'aprendiz' && <Loader2 className="w-4 h-4 animate-spin" />}
               </h2>
               <p className="text-sm academy-text-muted mb-4">
                 Plataforma completa de aprendizado em IA, transparência pública e desenvolvimento de
@@ -272,7 +272,7 @@ export default function AgoraSelecaoPage() {
               <div className="w-16 h-16 rounded-2xl overflow-hidden mb-4 shadow-lg group-hover:scale-110 transition-transform bg-gradient-to-br from-[#FF6B6B] to-[#4ECDC4] p-0.5">
                 <Image
                   src={KIDS_IMAGES[kidsImageIndex]}
-                  alt="Área Kids"
+                  alt="Ágora Kids"
                   width={64}
                   height={64}
                   className="rounded-xl object-cover w-full h-full"
@@ -281,7 +281,7 @@ export default function AgoraSelecaoPage() {
 
               {/* Content */}
               <h2 className="text-xl font-bold academy-text mb-2 flex items-center gap-2">
-                Área Kids
+                Ágora Kids
                 {isNavigating === 'kids' && <Loader2 className="w-4 h-4 animate-spin" />}
                 {hasKidsProfile && (
                   <span className="text-xs bg-[#4ECDC4]/20 text-[#4ECDC4] px-2 py-0.5 rounded-full">

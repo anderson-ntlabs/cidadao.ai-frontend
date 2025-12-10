@@ -14,22 +14,22 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-export type AgoraMode = 'academy' | 'kids' | null
+export type AgoraMode = 'aprendiz' | 'kids' | null
 
 const STORAGE_KEY = 'agora_current_mode'
 const MODE_TIMESTAMP_KEY = 'agora_mode_timestamp'
 
 interface UseAgoraModeReturn {
-  /** Current mode: 'academy', 'kids', or null if not selected */
+  /** Current mode: 'aprendiz', 'kids', or null if not selected */
   mode: AgoraMode
   /** Whether mode is still loading from storage */
   isLoading: boolean
   /** Set the current mode */
-  setMode: (mode: 'academy' | 'kids') => void
+  setMode: (mode: 'aprendiz' | 'kids') => void
   /** Clear mode and return to selection */
   clearMode: () => void
-  /** Check if current mode is Academy */
-  isAcademy: boolean
+  /** Check if current mode is Aprendiz (adult learning) */
+  isAprendiz: boolean
   /** Check if current mode is Kids */
   isKids: boolean
   /** Navigate to mode selection page */
@@ -52,14 +52,14 @@ export function useAgoraMode(): UseAgoraModeReturn {
     if (typeof window === 'undefined') return
 
     const stored = sessionStorage.getItem(STORAGE_KEY) as AgoraMode
-    if (stored === 'academy' || stored === 'kids') {
+    if (stored === 'aprendiz' || stored === 'kids') {
       setModeState(stored)
     }
     setIsLoading(false)
   }, [])
 
   // Set mode and persist to sessionStorage
-  const setMode = useCallback((newMode: 'academy' | 'kids') => {
+  const setMode = useCallback((newMode: 'aprendiz' | 'kids') => {
     if (typeof window === 'undefined') return
 
     sessionStorage.setItem(STORAGE_KEY, newMode)
@@ -87,29 +87,29 @@ export function useAgoraMode(): UseAgoraModeReturn {
     isLoading,
     setMode,
     clearMode,
-    isAcademy: mode === 'academy',
+    isAprendiz: mode === 'aprendiz',
     isKids: mode === 'kids',
     goToSelection,
   }
 }
 
 /**
- * Guard hook that requires Academy mode
- * Redirects to selection page if not in Academy mode
+ * Guard hook that requires Aprendiz mode
+ * Redirects to selection page if not in Aprendiz mode
  */
-export function useRequireAcademyMode(): boolean {
+export function useRequireAprendizMode(): boolean {
   const router = useRouter()
   const { mode, isLoading } = useAgoraMode()
 
   useEffect(() => {
     if (isLoading) return
 
-    if (mode !== 'academy') {
+    if (mode !== 'aprendiz') {
       router.replace('/pt/agora/selecao')
     }
   }, [mode, isLoading, router])
 
-  return !isLoading && mode === 'academy'
+  return !isLoading && mode === 'aprendiz'
 }
 
 /**
