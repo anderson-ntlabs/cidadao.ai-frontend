@@ -7,8 +7,12 @@
  * - Time spent learning
  * - Recommendations
  *
+ * Note: jsPDF does not support emoji characters natively.
+ * We use colored shapes and text symbols instead.
+ *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-09
+ * Updated: 2025-12-10 - Fixed emoji rendering issues
  */
 
 import { jsPDF } from 'jspdf'
@@ -18,6 +22,78 @@ import type {
   KidsMilestone,
 } from './kids-certificate-requirements'
 import { getDailyActivitySummary } from '@/lib/analytics/kids-tracker'
+
+/**
+ * Draw a colored icon badge instead of emoji
+ */
+function drawIconBadge(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  icon: string,
+  color: readonly [number, number, number]
+) {
+  // Draw circular background
+  doc.setFillColor(color[0], color[1], color[2])
+  doc.circle(x + 6, y - 3, 8, 'F')
+
+  // Draw icon symbol in white
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text(icon, x + 6, y, { align: 'center' })
+}
+
+/**
+ * Map emoji to PDF-safe icon
+ */
+function getIconSymbol(emoji: string): {
+  symbol: string
+  color: readonly [number, number, number]
+} {
+  const emojiMap: Record<string, { symbol: string; color: readonly [number, number, number] }> = {
+    // Video related
+    '🎬': { symbol: '>', color: [255, 107, 107] },
+    '📹': { symbol: '>', color: [255, 107, 107] },
+    '🎥': { symbol: '>', color: [255, 107, 107] },
+
+    // Chat/conversation
+    '💬': { symbol: '...', color: [78, 205, 196] },
+    '🗣️': { symbol: '...', color: [78, 205, 196] },
+
+    // Calendar/time
+    '📅': { symbol: '#', color: [168, 85, 247] },
+    '⏱️': { symbol: 'o', color: [249, 115, 22] },
+    '⏰': { symbol: 'o', color: [249, 115, 22] },
+
+    // Achievement
+    '🌟': { symbol: '*', color: [255, 193, 7] },
+    '⭐': { symbol: '*', color: [255, 193, 7] },
+    '🏆': { symbol: 'T', color: [255, 193, 7] },
+    '🎖️': { symbol: 'M', color: [255, 193, 7] },
+    '🥇': { symbol: '1', color: [255, 193, 7] },
+
+    // Progress
+    '✅': { symbol: 'v', color: [34, 197, 94] },
+    '🎯': { symbol: 'O', color: [59, 130, 246] },
+
+    // Learning
+    '📚': { symbol: 'B', color: [59, 130, 246] },
+    '🎨': { symbol: '~', color: [236, 72, 153] },
+    '🚀': { symbol: '^', color: [168, 85, 247] },
+
+    // Kids specific
+    '👶': { symbol: 'K', color: [255, 107, 107] },
+    '🧒': { symbol: 'K', color: [255, 107, 107] },
+    '👧': { symbol: 'K', color: [236, 72, 153] },
+    '👦': { symbol: 'K', color: [59, 130, 246] },
+
+    // Default
+    default: { symbol: '*', color: [107, 114, 128] },
+  }
+
+  return emojiMap[emoji] || emojiMap['default']
+}
 
 interface ParentReportData {
   childName: string
@@ -86,9 +162,14 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   doc.text(childName, margin + 10, currentY + 35)
 
   if (currentLevel) {
+    // Draw level badge with icon (emoji not supported in jsPDF)
+    const levelIcon = getIconSymbol(currentLevel.emoji)
+    drawIconBadge(doc, margin + 10, currentY + 47, levelIcon.symbol, levelIcon.color)
+
     doc.setFontSize(12)
     doc.setFont('helvetica', 'normal')
-    doc.text(`${currentLevel.emoji} ${currentLevel.label}`, margin + 10, currentY + 50)
+    doc.setTextColor(75, 85, 99)
+    doc.text(currentLevel.label, margin + 28, currentY + 50)
   }
 
   currentY += 75
@@ -212,22 +293,24 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
     currentY += 10
 
     completedMilestones.forEach((milestone) => {
-      checkPageBreak(20)
+      checkPageBreak(25)
 
       doc.setFillColor(240, 253, 244)
-      doc.roundedRect(margin, currentY, pageWidth - margin * 2, 18, 2, 2, 'F')
+      doc.roundedRect(margin, currentY, pageWidth - margin * 2, 22, 2, 2, 'F')
 
-      doc.setFontSize(14)
-      doc.text(milestone.icon, margin + 8, currentY + 12)
+      // Draw icon badge instead of emoji
+      const iconInfo = getIconSymbol(milestone.icon)
+      drawIconBadge(doc, margin + 4, currentY + 13, iconInfo.symbol, [34, 197, 94])
+
       doc.setFontSize(10)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(34, 197, 94)
-      doc.text(milestone.label, margin + 25, currentY + 8)
+      doc.text(milestone.label, margin + 25, currentY + 10)
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(107, 114, 128)
-      doc.text(milestone.description, margin + 25, currentY + 15)
+      doc.text(milestone.description, margin + 25, currentY + 18)
 
-      currentY += 22
+      currentY += 26
     })
   }
 
@@ -242,21 +325,24 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
     currentY += 10
 
     pendingMilestones.slice(0, 5).forEach((milestone) => {
-      checkPageBreak(20)
+      checkPageBreak(25)
 
       doc.setFillColor(248, 250, 252)
-      doc.roundedRect(margin, currentY, pageWidth - margin * 2, 18, 2, 2, 'F')
+      doc.roundedRect(margin, currentY, pageWidth - margin * 2, 22, 2, 2, 'F')
 
-      doc.setFontSize(14)
-      doc.setTextColor(156, 163, 175)
-      doc.text(milestone.icon, margin + 8, currentY + 12)
+      // Draw icon badge instead of emoji
+      const iconInfo = getIconSymbol(milestone.icon)
+      drawIconBadge(doc, margin + 4, currentY + 13, iconInfo.symbol, [156, 163, 175])
+
       doc.setFontSize(10)
       doc.setFont('helvetica', 'bold')
-      doc.text(milestone.label, margin + 25, currentY + 8)
+      doc.setTextColor(75, 85, 99)
+      doc.text(milestone.label, margin + 25, currentY + 10)
       doc.setFont('helvetica', 'normal')
-      doc.text(milestone.description, margin + 25, currentY + 15)
+      doc.setTextColor(107, 114, 128)
+      doc.text(milestone.description, margin + 25, currentY + 18)
 
-      currentY += 22
+      currentY += 26
     })
   }
 
@@ -352,26 +438,27 @@ export function generateKidsParentReport(data: ParentReportData): jsPDF {
   const recommendations = generateRecommendations(telemetry, currentLevel)
 
   recommendations.forEach((rec) => {
-    checkPageBreak(50)
+    checkPageBreak(55)
 
     doc.setFillColor(248, 250, 252)
-    doc.roundedRect(margin, currentY, pageWidth - margin * 2, 40, 3, 3, 'F')
+    doc.roundedRect(margin, currentY, pageWidth - margin * 2, 45, 3, 3, 'F')
 
-    doc.setFontSize(20)
-    doc.text(rec.icon, margin + 10, currentY + 25)
+    // Draw icon badge instead of emoji
+    const iconInfo = getIconSymbol(rec.icon)
+    drawIconBadge(doc, margin + 8, currentY + 23, iconInfo.symbol, iconInfo.color)
 
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(31, 41, 55)
-    doc.text(rec.title, margin + 35, currentY + 15)
+    doc.text(rec.title, margin + 30, currentY + 15)
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(107, 114, 128)
-    const descLines = doc.splitTextToSize(rec.description, pageWidth - margin * 2 - 45)
-    doc.text(descLines, margin + 35, currentY + 25)
+    const descLines = doc.splitTextToSize(rec.description, pageWidth - margin * 2 - 40)
+    doc.text(descLines, margin + 30, currentY + 27)
 
-    currentY += 48
+    currentY += 52
   })
 
   // Footer note
