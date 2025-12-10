@@ -6,6 +6,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-10 - Support ending session without sessionId
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,11 +15,14 @@ import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { sessionId } = body
+    let sessionId: string | undefined
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
+    // Try to parse body (sendBeacon may send empty or minimal data)
+    try {
+      const body = await request.json()
+      sessionId = body.sessionId
+    } catch {
+      // Body parsing failed, continue without sessionId
     }
 
     const cookieStore = await cookies()
@@ -39,18 +43,39 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // End the session
-    const { error } = await supabase
-      .from('agora_sessions')
-      .update({
-        ended_at: new Date().toISOString(),
-      })
-      .eq('id', sessionId)
-      .is('ended_at', null)
+    // Get authenticated user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (error) {
-      console.error('[Agora End Session] Error:', error)
-      return NextResponse.json({ error: 'Failed to end session' }, { status: 500 })
+    if (!user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    // End session by ID or by user (most recent open session)
+    if (sessionId) {
+      // End specific session
+      const { error } = await supabase
+        .from('agora_sessions')
+        .update({ ended_at: new Date().toISOString() })
+        .eq('id', sessionId)
+        .eq('user_id', user.id) // Security: ensure user owns session
+        .is('ended_at', null)
+
+      if (error) {
+        console.error('[Agora End Session] Error ending specific session:', error)
+      }
+    } else {
+      // End all open sessions for user (cleanup on page close)
+      const { error } = await supabase
+        .from('agora_sessions')
+        .update({ ended_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .is('ended_at', null)
+
+      if (error) {
+        console.error('[Agora End Session] Error ending user sessions:', error)
+      }
     }
 
     return NextResponse.json({ success: true })
