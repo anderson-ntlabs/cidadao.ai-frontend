@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { AgoraProvider, useAgora } from '@/hooks/use-agora'
 import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
 import { useKids } from '@/hooks/use-kids'
+import { useAgoraMode } from '@/hooks/use-agora-mode'
 import { AgoraHeader, CelebrationModal, SessionManager, LogoutModal } from '@/components/agora'
 import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
@@ -128,6 +129,7 @@ function AgoraHeaderWrapper() {
   const pathname = usePathname()
   const { user, isAuthenticated, logout, endSession, currentSession } = useAgora()
   const { isKidsMode, childName, disableKidsMode } = useKids()
+  const { clearMode } = useAgoraMode()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   // Check if we're on a kids page
@@ -137,12 +139,29 @@ function AgoraHeaderWrapper() {
     setShowLogoutModal(true)
   }
 
+  // Handle switch mode - go back to selection page
+  const handleSwitchMode = async () => {
+    // End current session if exists
+    if (currentSession) {
+      await endSession()
+    }
+    // If in kids mode, exit it
+    if (isKidsMode) {
+      await navigationSessionService.exitKidsMode()
+      await disableKidsMode()
+    }
+    // Clear mode and go to selection
+    clearMode()
+    router.push('/pt/agora/selecao')
+  }
+
   const handleLogoutConfirm = async () => {
-    // If in kids mode, just exit kids mode and redirect to agora
+    // If in kids mode, just exit kids mode and redirect to selection
     if (isOnKidsPage && isKidsMode) {
       await navigationSessionService.exitKidsMode()
       await disableKidsMode()
-      router.push('/pt/agora')
+      clearMode()
+      router.push('/pt/agora/selecao')
       return
     }
 
@@ -151,6 +170,7 @@ function AgoraHeaderWrapper() {
     if (currentSession) {
       await endSession()
     }
+    clearMode()
     await logout()
     router.push('/pt/agora/login')
   }
@@ -176,6 +196,7 @@ function AgoraHeaderWrapper() {
           currentRank: user.currentRank,
         }}
         onLogout={handleLogoutRequest}
+        onSwitchMode={handleSwitchMode}
         isDemoMode={false}
         isKidsMode={isOnKidsPage && isKidsMode}
         kidsChildName={childName || undefined}

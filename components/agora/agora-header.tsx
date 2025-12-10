@@ -49,6 +49,7 @@ import {
   ChevronDown,
   HelpCircle,
   Activity,
+  RefreshCw,
 } from 'lucide-react'
 
 interface AgoraHeaderProps {
@@ -60,6 +61,7 @@ interface AgoraHeaderProps {
     currentRank: string
   }
   onLogout?: () => void
+  onSwitchMode?: () => void
   isDemoMode?: boolean
   isKidsMode?: boolean
   kidsChildName?: string
@@ -95,6 +97,7 @@ const rankColors: Record<string, string> = {
 export function AgoraHeader({
   user,
   onLogout,
+  onSwitchMode,
   isDemoMode = false,
   isKidsMode = false,
   kidsChildName,
@@ -105,6 +108,14 @@ export function AgoraHeader({
 
   // Kids mode display name
   const displayName = isKidsMode && kidsChildName ? kidsChildName : user.name
+
+  // Handle switch mode
+  const handleSwitchMode = () => {
+    setIsMenuOpen(false)
+    if (onSwitchMode) {
+      onSwitchMode()
+    }
+  }
 
   // Generate breadcrumb from current path
   const getBreadcrumb = () => {
@@ -268,6 +279,20 @@ export function AgoraHeader({
                 )}
 
                 {!isKidsMode && <DropdownMenuSeparator className="sm:hidden" />}
+
+                {/* Switch Mode Option */}
+                {onSwitchMode && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={handleSwitchMode}
+                      className="flex items-center gap-2 cursor-pointer text-tarsila-verde"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Trocar Modo</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
 
                 {/* Menu Items - Standard mode only */}
                 {!isKidsMode && (

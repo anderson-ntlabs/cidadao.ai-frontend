@@ -3,6 +3,7 @@
 import { useEffect, Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
+import { useAgoraMode } from '@/hooks/use-agora-mode'
 import { createClient } from '@/lib/supabase/client'
 import { DashboardClient } from './_components/dashboard-client'
 import { GraduationCap } from 'lucide-react'
@@ -11,10 +12,11 @@ import { GraduationCap } from 'lucide-react'
  * Academy Dashboard Page
  *
  * Real authentication only - no demo mode.
+ * Requires Academy mode selection from /pt/agora/selecao.
  * Uses unified useAgora hook for consistent data flow.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-09 - Fix OAuth redirect stuck on loading
+ * Updated: 2025-12-10 - Add mode guard for Academy/Kids separation
  */
 
 function LoadingFallback() {
@@ -37,6 +39,7 @@ function AcademyDashboardContent() {
 
   const { user, isAuthenticated, isLoading, badges, xpTransactions, logout, refreshUser } =
     useAgora()
+  const { mode, isLoading: isModeLoading, setMode } = useAgoraMode()
 
   // Handle OAuth completion - force session refresh
   useEffect(() => {
@@ -66,8 +69,27 @@ function AcademyDashboardContent() {
     }
   }, [isLoading, isAuthenticated, router])
 
+  // Redirect to selection if no mode selected
+  useEffect(() => {
+    if (!isModeLoading && !mode && isAuthenticated) {
+      router.replace('/pt/agora/selecao')
+    }
+  }, [isModeLoading, mode, isAuthenticated, router])
+
+  // Auto-set Academy mode if accessing this page directly
+  // (user chose Academy from selection)
+  useEffect(() => {
+    if (!isModeLoading && mode !== 'academy' && mode !== 'kids' && isAuthenticated) {
+      // If mode is null but user is authenticated, they came here directly
+      // Don't auto-set, redirect to selection instead
+    } else if (mode === 'kids' && isAuthenticated) {
+      // User is in Kids mode but trying to access Academy
+      router.replace('/pt/agora/kids/dashboard')
+    }
+  }, [isModeLoading, mode, isAuthenticated, router])
+
   // Loading state
-  if (isLoading) {
+  if (isLoading || isModeLoading) {
     return <LoadingFallback />
   }
 
@@ -80,6 +102,20 @@ function AcademyDashboardContent() {
             <GraduationCap className="w-8 h-8 text-white" />
           </div>
           <p className="academy-text-muted">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No mode selected - redirect to selection
+  if (!mode || mode === 'kids') {
+    return (
+      <div className="min-h-screen flex items-center justify-center academy-bg">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl academy-gradient flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
+            <GraduationCap className="w-8 h-8 text-white" />
+          </div>
+          <p className="academy-text-muted">Redirecionando...</p>
         </div>
       </div>
     )
