@@ -368,10 +368,8 @@ class NavigationSessionService {
   private attachCleanupHandler(): void {
     if (this.cleanupHandlerAttached) return
 
-    const handleBeforeUnload = () => {
-      logger.debug('Page unloading, cleaning up sessions')
-
-      // Use sendBeacon for reliable cleanup
+    const sendCleanupBeacon = () => {
+      // Use sendBeacon for reliable cleanup - works even when page is closing
       if (this.state.isInKidsMode) {
         try {
           navigator.sendBeacon('/api/kids/end-session', JSON.stringify({ timestamp: Date.now() }))
@@ -389,15 +387,27 @@ class NavigationSessionService {
       }
     }
 
+    const handleBeforeUnload = () => {
+      logger.debug('Page unloading, sending cleanup beacons')
+      sendCleanupBeacon()
+    }
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Page is being hidden (tab switch, minimize, close)
+        // Page is being hidden (tab close, browser close, navigate away)
+        // Send cleanup beacon immediately - this is our best chance
+        logger.debug('Page hidden, sending cleanup beacons')
+        sendCleanupBeacon()
         this.updateState({ lastActivity: Date.now() })
       }
     }
 
+    // Handle page close/refresh
     window.addEventListener('beforeunload', handleBeforeUnload)
+    // Handle tab close (more reliable than beforeunload on mobile)
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    // Handle page navigation away
+    window.addEventListener('pagehide', handleBeforeUnload)
 
     this.cleanupHandlerAttached = true
     logger.debug('Cleanup handlers attached')
