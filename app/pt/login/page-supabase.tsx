@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Auth } from '@supabase/auth-ui-react'
@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 // Available background images for random selection
 const BACKGROUND_IMAGES = [
@@ -30,11 +31,30 @@ export default function LoginPage() {
   const [redirectTo, setRedirectTo] = useState<string>('')
   const [backgroundImage, setBackgroundImage] = useState<string>('')
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false)
 
   // Select random background on mount (client-side only to avoid hydration mismatch)
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length)
     setBackgroundImage(BACKGROUND_IMAGES[randomIndex])
+  }, [])
+
+  // Listen for OAuth clicks to show loading state
+  useEffect(() => {
+    const handleOAuthClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      // Detect clicks on OAuth buttons (they have specific Supabase-generated classes)
+      if (
+        target.closest('[data-provider]') ||
+        target.closest('button')?.textContent?.includes('Entrar com') ||
+        target.closest('button')?.textContent?.includes('Criar conta com')
+      ) {
+        setIsOAuthLoading(true)
+      }
+    }
+
+    document.addEventListener('click', handleOAuthClick)
+    return () => document.removeEventListener('click', handleOAuthClick)
   }, [])
 
   useEffect(() => {
@@ -74,6 +94,19 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* OAuth Loading Overlay */}
+      {isOAuthLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+          <div className="text-center p-8 rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <Loader2 className="w-12 h-12 text-green-600 animate-spin mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">Conectando...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Aguarde enquanto redirecionamos para autenticação
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Background image using Next/Image for better loading */}
       {backgroundImage && (
         <div className="fixed inset-0 -z-10">

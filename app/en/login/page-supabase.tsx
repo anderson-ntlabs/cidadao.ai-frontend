@@ -7,6 +7,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-supabase-auth'
+import { Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth()
   const [view, setView] = useState<'sign_in' | 'sign_up'>('sign_in')
   const [redirectTo, setRedirectTo] = useState<string>('')
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false)
 
   useEffect(() => {
     // Redirect authenticated users to app (authenticated system)
@@ -25,6 +27,24 @@ export default function LoginPage() {
   useEffect(() => {
     // Callback redirects to /pt/app after successful login
     setRedirectTo(`${window.location.origin}/auth/callback?next=/pt/app`)
+  }, [])
+
+  // Listen for OAuth clicks to show loading state
+  useEffect(() => {
+    const handleOAuthClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      // Detect clicks on OAuth buttons
+      if (
+        target.closest('[data-provider]') ||
+        target.closest('button')?.textContent?.includes('Sign in with') ||
+        target.closest('button')?.textContent?.includes('Sign up with')
+      ) {
+        setIsOAuthLoading(true)
+      }
+    }
+
+    document.addEventListener('click', handleOAuthClick)
+    return () => document.removeEventListener('click', handleOAuthClick)
   }, [])
 
   // Show loading while checking auth status
@@ -52,6 +72,19 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-8 relative">
+      {/* OAuth Loading Overlay */}
+      {isOAuthLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+          <div className="text-center p-8 rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <Loader2 className="w-12 h-12 text-green-600 animate-spin mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">Connecting...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Please wait while we redirect you to authentication
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Background pattern matching site design */}
       <div
         className="fixed inset-0 -z-10"
