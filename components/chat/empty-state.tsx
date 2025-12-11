@@ -81,7 +81,7 @@ export function ChatEmptyState({
   // Get display info - use Maritaca logo for Maritaca mode
   const displayImage = isMaritacaMode
     ? '/logos/maritaca.png'
-    : selectedAgent?.image || '/agents/abaporu.png'
+    : selectedAgent?.image || '/agents/abaporu.webp'
 
   const displayName = isMaritacaMode ? maritacaConfig.name : selectedAgent?.name || 'Abaporu'
 
@@ -243,7 +243,7 @@ export function ChatEmptyState({
       <div className="mb-6 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-600 rounded-full blur-xl opacity-20 animate-pulse" />
         <OptimizedImage
-          src="/agents/abaporu.png"
+          src="/agents/abaporu.webp"
           alt="Abaporu"
           width={96}
           height={96}

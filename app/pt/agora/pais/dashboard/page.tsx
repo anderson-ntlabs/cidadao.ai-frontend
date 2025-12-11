@@ -318,7 +318,7 @@ export default function ParentalDashboardPage() {
                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-kids-turquoise to-kids-coral flex items-center justify-center">
                           {chat.agentId === 'monteiro_lobato' || chat.agentId === 'tarsila' ? (
                             <Image
-                              src={`/agents/${chat.agentId}.png`}
+                              src={`/agents/${chat.agentId}.webp`}
                               alt={chat.agentName}
                               fill
                               className="object-cover"
@@ -428,7 +428,7 @@ export default function ParentalDashboardPage() {
                     <li key={index} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
                       <div className="relative h-10 w-10 rounded-full overflow-hidden">
                         <Image
-                          src={`/agents/${agentId}.png`}
+                          src={`/agents/${agentId}.webp`}
                           alt={agentId}
                           fill
                           className="object-cover"

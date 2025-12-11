@@ -318,7 +318,7 @@ export default function ChatPage() {
                       ? selectedModel === 'sabia-3'
                         ? '/sabia3.1.png'
                         : '/sabiazinho.png'
-                      : selectedAgent?.image || '/agents/abaporu.png'
+                      : selectedAgent?.image || '/agents/abaporu.webp'
                   const displayName =
                     chatMode === 'maritaca'
                       ? selectedModel === 'sabia-3'

@@ -497,7 +497,7 @@ export function DashboardClient({
                     <div className="flex items-start gap-3">
                       <div className="relative flex-shrink-0">
                         <img
-                          src="/agents/santos-dumont.png"
+                          src="/agents/santos-dumont.webp"
                           alt="Santos-Dumont"
                           className="w-14 h-14 rounded-lg object-cover"
                         />

@@ -31,7 +31,7 @@ export function OptimizedAgentImage({
   className,
   priority = false,
   onLoad,
-  fallback = '/agents/system.png',
+  fallback = '/agents/system.webp',
 }: OptimizedAgentImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -68,7 +68,7 @@ export function OptimizedAgentImage({
   const imageSrc = error ? fallback : `/agents/optimized/${agentId}-${size}.webp`
 
   // Fallback to PNG if WebP is not supported
-  const fallbackSrc = `/agents/optimized/${agentId}-${size}.png`
+  const fallbackSrc = `/agents/optimized/${agentId}-${size}.webp`
 
   return (
     <div

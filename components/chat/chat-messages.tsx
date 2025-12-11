@@ -105,7 +105,7 @@ export function ChatMessages({
             {message.role === 'assistant' && (
               <AgentAvatar
                 agentId={message.agent_id}
-                agentImage={messageAgent?.image || '/agents/abaporu.png'}
+                agentImage={messageAgent?.image || '/agents/abaporu.webp'}
                 agentName={messageAgent?.name || 'Abaporu'}
                 isThinking={isLatest && isLoading}
                 showSparkle={index === 0}

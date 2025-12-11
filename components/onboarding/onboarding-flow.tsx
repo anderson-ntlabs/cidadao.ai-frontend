@@ -35,7 +35,7 @@ const onboardingSteps: OnboardingStep[] = [
     title: 'Conheça nossos Agentes de IA',
     description:
       'Temos 17 agentes especializados em análise de transparência. Cada um com habilidades únicas para detectar anomalias e gerar insights.',
-    image: '/agents/zumbi-dos-palmares.png',
+    image: '/agents/zumbi-dos-palmares.webp',
   },
   {
     id: 'dashboard',

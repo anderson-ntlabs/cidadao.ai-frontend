@@ -30,7 +30,7 @@ export const mockUser: TestUser = {
   id: 'test-user-123',
   email: 'test@cidadao.ai',
   name: 'Usuário de Teste',
-  avatar: '/agents/abaporu.png',
+  avatar: '/agents/abaporu.webp',
 }
 
 /**

@@ -263,7 +263,7 @@ export default function LearningModulePage() {
             <div className="flex items-start gap-4">
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-lg ring-2 ring-white dark:ring-gray-800 flex-shrink-0">
                 <Image
-                  src={`/agents/${track.mentor.id}.png`}
+                  src={`/agents/${track.mentor.id}.webp`}
                   alt={track.mentor.name}
                   fill
                   className="object-cover"
@@ -440,7 +440,7 @@ export default function LearningModulePage() {
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0">
                 <Image
-                  src={`/agents/${track.mentor.id}.png`}
+                  src={`/agents/${track.mentor.id}.webp`}
                   alt={track.mentor.name}
                   fill
                   className="object-cover"

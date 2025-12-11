@@ -235,7 +235,7 @@ export const AgentSelector = memo(function AgentSelector({
         {/* Agent Avatar */}
         <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
           <Image
-            src={selectedAgent?.image || '/agents/abaporu.png'}
+            src={selectedAgent?.image || '/agents/abaporu.webp'}
             alt={displayName}
             fill
             className="object-cover"

@@ -49,7 +49,7 @@ export function PresentationCarousel({
   autoplayDelay = 5000,
   showNarration = true,
   agentName = 'Santos-Dumont',
-  agentImage = '/agents/santos-dumont.png',
+  agentImage = '/agents/santos-dumont.webp',
   onSlideChange,
   className,
 }: PresentationCarouselProps) {
