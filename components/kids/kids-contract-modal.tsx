@@ -13,7 +13,7 @@
 'use client'
 
 import { useState } from 'react'
-import { jsPDF } from 'jspdf'
+// jsPDF is loaded dynamically when generating PDF to reduce bundle
 import { Baby, Shield, FileText, Download, Loader2 } from 'lucide-react'
 
 interface KidsContractModalProps {
@@ -52,7 +52,9 @@ export function KidsContractModal({
     year: 'numeric',
   })
 
-  const generateContractPDF = () => {
+  const generateContractPDF = async () => {
+    // Lazy load jsPDF only when user clicks download
+    const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.getWidth()
     const margin = 20
@@ -287,7 +289,7 @@ export function KidsContractModal({
     setIsAccepting(true)
     try {
       // Generate and download PDF
-      const { pdf, contractId } = generateContractPDF()
+      const { pdf, contractId } = await generateContractPDF()
       pdf.save(`termos-area-kids-${contractId}.pdf`)
 
       // Trigger callback with contract ID

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
-import { jsPDF } from 'jspdf'
+// jsPDF is loaded dynamically when generating PDF to reduce bundle
 
 interface InternshipContractModalProps {
   isOpen: boolean
@@ -44,7 +44,9 @@ export function InternshipContractModal({
     year: 'numeric',
   })
 
-  const generateContractPDF = () => {
+  const generateContractPDF = async () => {
+    // Lazy load jsPDF only when user clicks download
+    const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.getWidth()
     const margin = 20
@@ -243,7 +245,7 @@ export function InternshipContractModal({
       }
 
       // Generate and download PDF
-      const { pdf, contractId } = generateContractPDF()
+      const { pdf, contractId } = await generateContractPDF()
       pdf.save(`termos-uso-agora-${contractId}.pdf`)
 
       // Save acceptance

@@ -27,7 +27,7 @@ import {
   ArrowRight,
   ScrollText,
 } from 'lucide-react'
-import { jsPDF } from 'jspdf'
+// jsPDF is loaded dynamically when needed to reduce initial bundle
 
 const CONTRACT_VERSION = 'v2.0-2025'
 const CONTRACT_NUMBER_PREFIX = 'AGORA'
@@ -72,7 +72,9 @@ export default function AgoraContractPage() {
     }
   }, [])
 
-  const generateContractPDF = () => {
+  const generateContractPDF = async () => {
+    // Lazy load jsPDF only when user clicks download
+    const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.getWidth()
     const margin = 15
@@ -340,7 +342,7 @@ export default function AgoraContractPage() {
         ipAddress = '127.0.0.1'
       }
 
-      const { pdf, contractNumber: contractId } = generateContractPDF()
+      const { pdf, contractNumber: contractId } = await generateContractPDF()
       pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
 
       await acceptLgpdConsent(ipAddress, navigator.userAgent)
@@ -354,8 +356,8 @@ export default function AgoraContractPage() {
     }
   }
 
-  const handlePrint = () => {
-    const { pdf } = generateContractPDF()
+  const handlePrint = async () => {
+    const { pdf } = await generateContractPDF()
     window.open(pdf.output('bloburl'), '_blank')
   }
 
@@ -732,8 +734,8 @@ export default function AgoraContractPage() {
                       Visualizar PDF
                     </Button>
                     <Button
-                      onClick={() => {
-                        const { pdf, contractNumber: contractId } = generateContractPDF()
+                      onClick={async () => {
+                        const { pdf, contractNumber: contractId } = await generateContractPDF()
                         pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
                       }}
                       leftIcon={<Download className="w-4 h-4" />}

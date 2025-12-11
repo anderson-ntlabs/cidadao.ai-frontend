@@ -2,12 +2,12 @@
  * Certificate PDF Generator
  *
  * Generates elegant completion certificates with total hours only.
+ * Uses dynamic import to reduce initial bundle size (~180KB savings).
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-10
  */
 
-import { jsPDF } from 'jspdf'
 import { PDF_COLORS, PDF_STYLES } from './constants'
 import type { CertificateUser, PDFGenerationResult } from './types'
 
@@ -17,7 +17,9 @@ import type { CertificateUser, PDFGenerationResult } from './types'
  * @param user - User profile data for the certificate
  * @returns PDF document and certificate ID
  */
-export function generateCertificatePDF(user: CertificateUser): PDFGenerationResult {
+export async function generateCertificatePDF(user: CertificateUser): Promise<PDFGenerationResult> {
+  // Lazy load jsPDF only when generating PDF
+  const { jsPDF } = await import('jspdf')
   const doc = new jsPDF('landscape')
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()

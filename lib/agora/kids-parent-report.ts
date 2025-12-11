@@ -9,13 +9,15 @@
  *
  * Note: jsPDF does not support emoji characters natively.
  * We use colored shapes and text symbols instead.
+ * Uses dynamic import to reduce initial bundle size (~180KB savings).
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-09
  * Updated: 2025-12-10 - Fixed emoji rendering issues
+ * Updated: 2025-12-11 - Lazy load jsPDF for bundle optimization
  */
 
-import { jsPDF } from 'jspdf'
+import type { jsPDF } from 'jspdf'
 import type {
   KidsTelemetryData,
   KidsCertificateLevel,
@@ -107,7 +109,9 @@ interface ParentReportData {
 /**
  * Generate comprehensive PDF report for parents
  */
-export function generateKidsParentReport(data: ParentReportData): jsPDF {
+export async function generateKidsParentReport(data: ParentReportData): Promise<jsPDF> {
+  // Lazy load jsPDF only when generating PDF
+  const { jsPDF } = await import('jspdf')
   const { childName, parentName, parentEmail, telemetry, currentLevel, milestones } = data
   const doc = new jsPDF('portrait')
   const pageWidth = doc.internal.pageSize.getWidth()

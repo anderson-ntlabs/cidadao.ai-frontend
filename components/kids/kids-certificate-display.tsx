@@ -53,7 +53,7 @@ export function KidsCertificateDisplay({
   const handleDownloadReport = async () => {
     setIsGeneratingReport(true)
     try {
-      const pdf = generateKidsParentReport({
+      const pdf = await generateKidsParentReport({
         childName,
         parentName,
         parentEmail,

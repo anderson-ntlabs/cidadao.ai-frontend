@@ -66,7 +66,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     if (!user) return
     setIsGenerating(true)
     try {
-      const { pdf, id: certId } = generateCertificatePDF({
+      const { pdf, id: certId } = await generateCertificatePDF({
         id: user.id,
         name: user.name,
         email: user.email,
@@ -110,7 +110,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
     if (!user) return
     setIsGeneratingReport(true)
     try {
-      const { pdf, id: reportId } = generateReportPDF({
+      const { pdf, id: reportId } = await generateReportPDF({
         user: {
           id: user.id,
           name: user.name,

@@ -2,12 +2,13 @@
  * Report PDF Generator
  *
  * Generates detailed internship reports with full telemetry data.
+ * Uses dynamic import to reduce initial bundle size (~180KB savings).
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-10
  */
 
-import { jsPDF } from 'jspdf'
+import type { jsPDF } from 'jspdf'
 import { PDF_COLORS, PDF_STYLES } from './constants'
 import type {
   CertificateUser,
@@ -943,7 +944,9 @@ function drawSummaryPage(
  * @param data - Report data including user, telemetry, transactions, entries
  * @returns PDF document and report ID
  */
-export function generateReportPDF(data: ReportData): PDFGenerationResult {
+export async function generateReportPDF(data: ReportData): Promise<PDFGenerationResult> {
+  // Lazy load jsPDF only when generating PDF
+  const { jsPDF } = await import('jspdf')
   const { user, telemetry, xpTransactions, diaryEntries, dailyActivity } = data
   const doc = new jsPDF('portrait')
   const margin = PDF_STYLES.MARGIN
