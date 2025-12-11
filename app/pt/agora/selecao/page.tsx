@@ -74,34 +74,54 @@ export default function AgoraSelecaoPage() {
 
   // Check auth and load user data
   useEffect(() => {
+    let mounted = true
+
     const checkAuth = async () => {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser()
+      try {
+        const {
+          data: { user: authUser },
+          error,
+        } = await supabase.auth.getUser()
 
-      if (!authUser) {
-        router.replace('/pt/agora/login')
-        return
+        if (!mounted) return
+
+        if (error || !authUser) {
+          router.replace('/pt/agora/login')
+          return
+        }
+
+        setUser({
+          email: authUser.email,
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name,
+        })
+
+        // Check if user has an active kids profile
+        const { data: kidsProfile } = await supabase
+          .from('agora_kids_profiles')
+          .select('id')
+          .eq('parent_user_id', authUser.id)
+          .eq('is_active', true)
+          .maybeSingle()
+
+        if (mounted) {
+          setHasKidsProfile(!!kidsProfile)
+          setIsLoading(false)
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err)
+        if (mounted) {
+          router.replace('/pt/agora/login')
+        }
       }
-
-      setUser({
-        email: authUser.email,
-        name: authUser.user_metadata?.full_name || authUser.user_metadata?.name,
-      })
-
-      // Check if user has an active kids profile
-      const { data: kidsProfile } = await supabase
-        .from('agora_kids_profiles')
-        .select('id')
-        .eq('parent_user_id', authUser.id)
-        .eq('is_active', true)
-        .maybeSingle()
-
-      setHasKidsProfile(!!kidsProfile)
-      setIsLoading(false)
     }
 
-    checkAuth()
+    // Small delay to allow Supabase to process OAuth callback
+    const timeoutId = setTimeout(checkAuth, 100)
+
+    return () => {
+      mounted = false
+      clearTimeout(timeoutId)
+    }
   }, [supabase, router])
 
   // Select random background on mount

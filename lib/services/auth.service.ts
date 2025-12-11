@@ -158,6 +158,7 @@ class AuthService {
   /**
    * Wait for the auth service to be fully initialized
    * Use this when you need to know the auth state before proceeding
+   * Has a timeout to prevent indefinite waiting
    */
   async waitForInit(): Promise<AuthUser | null> {
     // If already initialized, return current user
@@ -165,14 +166,40 @@ class AuthService {
       return this.currentUser
     }
 
-    // If init promise exists, wait for it
+    // If init promise exists, wait for it with timeout
     if (this.initPromise) {
-      return this.initPromise
+      try {
+        return await Promise.race([
+          this.initPromise,
+          new Promise<AuthUser | null>((resolve) => {
+            setTimeout(() => {
+              logger.warn('waitForInit timeout, checking session directly')
+              // On timeout, try to get session directly
+              this.getUser().then((user) => {
+                this.isInitialized = true
+                this.currentUser = user
+                resolve(user)
+              })
+            }, 3000) // 3 second timeout
+          }),
+        ])
+      } catch {
+        return this.currentUser
+      }
     }
 
-    // Create a new promise that will be resolved when init completes
+    // Create a new promise with timeout
     return new Promise((resolve) => {
-      this.initResolvers.push(resolve)
+      const timeoutId = setTimeout(() => {
+        logger.warn('waitForInit resolver timeout')
+        this.isInitialized = true
+        resolve(this.currentUser)
+      }, 3000)
+
+      this.initResolvers.push((user) => {
+        clearTimeout(timeoutId)
+        resolve(user)
+      })
     })
   }
 
