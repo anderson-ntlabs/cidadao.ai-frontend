@@ -3,13 +3,27 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Settings, Type, Eye, Bell, Shield, Palette, Volume2, Save, Mic } from 'lucide-react'
+import {
+  Settings,
+  Type,
+  Eye,
+  Bell,
+  Shield,
+  Palette,
+  Volume2,
+  Save,
+  Mic,
+  Trash2,
+  Download,
+  FileSearch,
+} from 'lucide-react'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
 import { logger } from '@/lib/utils/logger'
+import { DeleteAccountModal } from '@/components/privacy/delete-account-modal'
 
 // Lazy load heavy panel components
 const ActionPanel = dynamic(
@@ -112,6 +126,7 @@ export default function ConfiguracoesPage() {
     notifications_enabled: true,
     email_notifications: false,
   })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -379,7 +394,7 @@ export default function ConfiguracoesPage() {
           {/* Privacy */}
           <ActionPanelSection
             title="Privacidade e Segurança"
-            description="Gerencie suas configurações de privacidade"
+            description="Gerencie suas configurações de privacidade e dados (LGPD)"
             icon={Shield}
           >
             <GlassCard>
@@ -410,6 +425,26 @@ export default function ConfiguracoesPage() {
                       showChevron: true,
                       onAction: () => router.push('/pt/app/atividades'),
                     },
+                    {
+                      title: 'Exportar Meus Dados',
+                      description:
+                        'Baixe uma cópia de todos os seus dados (Art. 18 LGPD - Portabilidade)',
+                      icon: Download,
+                      badge: 'JSON',
+                      badgeColor: 'blue',
+                      actionLabel: 'Exportar',
+                      onAction: () => window.open('/api/user/export-data', '_blank'),
+                    },
+                    {
+                      title: 'Excluir Minha Conta',
+                      description:
+                        'Exclua permanentemente sua conta e todos os dados (Art. 18 LGPD - Eliminação)',
+                      icon: Trash2,
+                      badge: 'Irreversível',
+                      badgeColor: 'red',
+                      actionLabel: 'Excluir',
+                      onAction: () => setShowDeleteModal(true),
+                    },
                   ]}
                   showDividers={true}
                 />
@@ -431,6 +466,9 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
     </div>
   )
 }

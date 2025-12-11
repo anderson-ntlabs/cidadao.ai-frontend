@@ -34,9 +34,13 @@ import {
   ChevronUp,
   User,
   Bot,
+  Trash2,
+  FileSearch,
+  Download,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { DeleteAccountModal } from '@/components/privacy/delete-account-modal'
 
 interface ParentalAccess {
   userId: string
@@ -80,6 +84,7 @@ export default function ParentalDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingChats, setIsLoadingChats] = useState(false)
   const [expandedChat, setExpandedChat] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Check access on mount
   useEffect(() => {
@@ -442,6 +447,35 @@ export default function ParentalDashboardPage() {
           </GlassCard>
         </div>
 
+        {/* Privacy & Data Section */}
+        <GlassCard className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold">Privacidade e Dados (LGPD)</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Seus direitos garantidos pela Lei Geral de Proteção de Dados
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Button
+              variant="secondary"
+              className="justify-start gap-2"
+              onClick={() => window.open('/api/user/export-data', '_blank')}
+            >
+              <Download className="h-4 w-4" />
+              Exportar Meus Dados
+            </Button>
+            <Button
+              variant="secondary"
+              className="justify-start gap-2 text-destructive hover:text-destructive"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Excluir Minha Conta
+            </Button>
+          </div>
+        </GlassCard>
+
         {/* Danger Zone */}
         <GlassCard className="p-6 border-destructive/20">
           <h3 className="font-semibold mb-2 text-destructive">Zona de Perigo</h3>
@@ -469,6 +503,9 @@ export default function ParentalDashboardPage() {
           </div>
         </GlassCard>
       </main>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
     </div>
   )
 }
