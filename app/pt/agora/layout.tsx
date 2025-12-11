@@ -68,6 +68,9 @@ const noHeaderPages = [
   '/pt/agora/selecao',
   '/pt/agora/onboarding',
   '/pt/agora/contract',
+  '/pt/agora/kids', // Kids area has its own KidsHeader
+  '/pt/agora/pais', // Parental dashboard has its own header
+  '/pt/agora/verificar', // Certificate verification is public
 ]
 
 // Pages that can be accessed without completing onboarding
@@ -76,6 +79,9 @@ const publicPages = [
   '/pt/agora/selecao',
   '/pt/agora/onboarding',
   '/pt/agora/contract',
+  '/pt/agora/kids', // Kids has own auth flow
+  '/pt/agora/pais', // Parental uses code auth
+  '/pt/agora/verificar', // Public certificate verification
 ]
 
 // Kids area pages (use simplified header)
