@@ -7,7 +7,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-11 - Migrate to database
+ * @updated 2025-12-11 - Standardized loading state with PageLoading variant='kids'
  */
 
 'use client'
@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useKids } from '@/hooks/use-kids'
 import useAgoraTracks, { KidsVideo } from '@/hooks/use-agora-tracks'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageLoading } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import {
   ArrowLeft,
@@ -28,7 +29,6 @@ import {
   Youtube,
   ExternalLink,
   Sparkles,
-  Loader2,
 } from 'lucide-react'
 
 export default function KidsVideoPlayerPage() {
@@ -71,14 +71,7 @@ export default function KidsVideoPlayerPage() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-kids-coral mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400">Carregando video...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando video..." variant="kids" icon={PlayCircle} />
   }
 
   // Video not found

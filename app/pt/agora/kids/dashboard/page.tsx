@@ -7,7 +7,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-10 - Add mode guard for Academy/Kids separation
+ * @updated 2025-12-11 - Standardized loading state with PageLoading variant='kids'
  */
 
 'use client'
@@ -21,6 +21,7 @@ import { useRequireKidsModeSelected } from '@/hooks/use-agora-mode'
 import { getKidsAgents } from '@/data/agents'
 import useAgoraTracks from '@/hooks/use-agora-tracks'
 import { GlassCard } from '@/components/ui/glass-card'
+import { PageLoading } from '@/components/agora'
 import {
   KidsCertificateDisplay,
   KidsLevelBadges,
@@ -31,7 +32,6 @@ import {
   Sparkles,
   PlayCircle,
   MessageCircle,
-  Loader2,
   Trophy,
   Star,
   Rocket,
@@ -136,16 +136,7 @@ export default function KidsDashboardPage() {
 
   // Loading state or mode not selected yet
   if (isLoading || !isModeSelected) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-kids-coral to-kids-yellow flex items-center justify-center animate-pulse">
-            <Rocket className="w-10 h-10 text-white" />
-          </div>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">Carregando...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando..." variant="kids" icon={Rocket} />
   }
 
   // Not in kids mode (profile not set up)

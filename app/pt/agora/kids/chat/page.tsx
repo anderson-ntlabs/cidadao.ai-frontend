@@ -7,7 +7,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-10 - Fixed SSE streaming, added per-agent state
+ * @updated 2025-12-11 - Standardized loading state with PageLoading variant='kids'
  */
 
 'use client'
@@ -17,6 +17,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { getKidsAgents, getAgentById } from '@/data/agents'
 import { GlassCard } from '@/components/ui/glass-card'
+import { PageLoading } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
@@ -306,16 +307,7 @@ function KidsChatContent() {
 
   // Loading state
   if (modeLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-kids-turquoise to-kids-coral flex items-center justify-center animate-pulse">
-            <Sparkles className="w-10 h-10 text-white" />
-          </div>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">Carregando...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando..." variant="kids" />
   }
 
   // Not in kids mode
@@ -522,18 +514,7 @@ function KidsChatContent() {
 
 export default function KidsChatPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center space-y-4">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-kids-turquoise to-kids-coral flex items-center justify-center animate-pulse">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
-            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">Carregando...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoading text="Carregando..." variant="kids" />}>
       <KidsChatContent />
     </Suspense>
   )

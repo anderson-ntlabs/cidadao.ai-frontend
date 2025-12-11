@@ -6,7 +6,7 @@
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-11 - Migrated to use database via useAgoraTracks hook
+ * @updated 2025-12-11 - Standardized loading state with PageLoading variant='kids'
  */
 
 'use client'
@@ -14,9 +14,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useRequireKidsMode, useKids } from '@/hooks/use-kids'
-import useAgoraTracks, { KidsTrack, KidsVideo as KidsVideoType } from '@/hooks/use-agora-tracks'
+import useAgoraTracks, { KidsVideo as KidsVideoType } from '@/hooks/use-agora-tracks'
 import { KidsTrackCard } from '@/components/kids'
 import { GlassCard } from '@/components/ui/glass-card'
+import { PageLoading } from '@/components/agora'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -98,18 +99,7 @@ export default function KidsVideosPage() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-kids-coral to-kids-yellow flex items-center justify-center animate-pulse">
-            <PlayCircle className="w-10 h-10 text-white" />
-          </div>
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
-            Carregando vídeos...
-          </p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando videos..." variant="kids" icon={PlayCircle} />
   }
 
   // Not in kids mode
