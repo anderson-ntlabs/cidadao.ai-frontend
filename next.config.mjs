@@ -142,6 +142,19 @@ const nextConfig = {
               reuseExistingChunk: true,
               enforce: true,
             },
+            sentry: {
+              name: 'sentry',
+              test: /[\\/]node_modules[\\/](@sentry)[\\/]/,
+              priority: 35,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+            icons: {
+              name: 'icons',
+              test: /[\\/]node_modules[\\/](lucide-react|@radix-ui[\\/]react-icons)[\\/]/,
+              priority: 20,
+              reuseExistingChunk: true,
+            },
           },
         },
       };
