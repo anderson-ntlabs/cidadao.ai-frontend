@@ -10,12 +10,12 @@
  * @date 2025-12-11 (Updated to use database)
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
-import useAgoraTracks, { Track, TRACK_COLORS, TrackModule } from '@/hooks/use-agora-tracks'
+import useAgoraTracks, { Track, TRACK_COLORS } from '@/hooks/use-agora-tracks'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
@@ -62,163 +62,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 function getTrackIcon(iconName: string): LucideIcon {
   return ICON_MAP[iconName] || GraduationCap
 }
-
-// Fallback tracks (used when database is empty or loading fails)
-const FALLBACK_TRACKS = [
-  {
-    id: 'introducao' as const,
-    name: 'Introdução',
-    subtitle: 'Conheça o Cidadão.AI',
-    description:
-      'Descubra a plataforma, conheça os agentes de IA e aprenda como aproveitar ao máximo a Ágora Academy',
-    icon: 'GraduationCap',
-    color: 'emerald',
-    gradient: 'from-emerald-500 to-teal-500',
-    bgLight: 'bg-emerald-50',
-    bgDark: 'dark:bg-emerald-950/30',
-    borderColor: 'border-emerald-200 dark:border-emerald-800',
-    textColor: 'text-emerald-600 dark:text-emerald-400',
-    mentor: {
-      id: 'abaporu',
-      name: 'Abaporu',
-      role: 'Agente Orquestrador',
-      image: '/agents/abaporu.webp',
-    },
-    duration: '1-2 horas',
-    xpTotal: 500,
-    isIntro: true,
-    prerequisite: null, // No prerequisite - entry point
-    modules: [
-      { id: 1, name: 'Bem-vindo ao Cidadao.AI', type: 'video', duration: '10min' },
-      { id: 2, name: 'Como funciona a Agora', type: 'reading', duration: '15min' },
-      { id: 3, name: 'Conheca os Agentes de IA', type: 'video', duration: '20min' },
-      { id: 4, name: 'Configurando seu GitHub', type: 'project', duration: '20min' },
-      { id: 5, name: 'Converse com Abaporu', type: 'chat', duration: '10min' },
-      { id: 6, name: 'Proximo Passo: Sua Trilha', type: 'reading', duration: '10min' },
-    ],
-  },
-  {
-    id: 'backend' as const,
-    name: 'Backend',
-    subtitle: 'APIs & Arquitetura',
-    description: 'Aprenda a construir APIs robustas, microservicos e arquiteturas escalaveis',
-    icon: Server,
-    color: 'blue',
-    gradient: 'from-blue-500 to-cyan-500',
-    bgLight: 'bg-blue-50',
-    bgDark: 'dark:bg-blue-950/30',
-    borderColor: 'border-blue-200 dark:border-blue-800',
-    textColor: 'text-blue-600 dark:text-blue-400',
-    mentor: {
-      id: 'santos-dumont',
-      name: 'Santos-Dumont',
-      role: 'Mentor de Engenharia',
-      image: '/agents/santos-dumont.webp',
-    },
-    duration: '4-6 semanas',
-    xpTotal: 2000,
-    prerequisite: 'introducao', // Requires Introdução to be completed
-    modules: [
-      { id: 1, name: 'Fundamentos de APIs', type: 'video', duration: '45min' },
-      { id: 2, name: 'FastAPI na pratica', type: 'reading', duration: '30min' },
-      { id: 3, name: 'Design de REST APIs', type: 'chat', duration: '20min' },
-      { id: 4, name: 'Bancos de dados', type: 'video', duration: '60min' },
-      { id: 5, name: 'Autenticacao JWT', type: 'reading', duration: '25min' },
-      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
-    ],
-  },
-  {
-    id: 'frontend' as const,
-    name: 'Frontend',
-    subtitle: 'UI/UX & React',
-    description: 'Crie interfaces incriveis com React, Next.js e design system profissional',
-    icon: Palette,
-    color: 'purple',
-    gradient: 'from-purple-500 to-pink-500',
-    bgLight: 'bg-purple-50',
-    bgDark: 'dark:bg-purple-950/30',
-    borderColor: 'border-purple-200 dark:border-purple-800',
-    textColor: 'text-purple-600 dark:text-purple-400',
-    mentor: {
-      id: 'bobardi',
-      name: 'Lina Bo Bardi',
-      role: 'Mentora de Design',
-      image: '/agents/bobardi.webp',
-    },
-    duration: '4-6 semanas',
-    xpTotal: 2000,
-    prerequisite: 'introducao', // Requires Introdução to be completed
-    modules: [
-      { id: 1, name: 'React fundamentals', type: 'video', duration: '50min' },
-      { id: 2, name: 'Next.js App Router', type: 'reading', duration: '40min' },
-      { id: 3, name: 'TypeScript essencial', type: 'video', duration: '45min' },
-      { id: 4, name: 'Design System', type: 'chat', duration: '25min' },
-      { id: 5, name: 'Acessibilidade (a11y)', type: 'reading', duration: '30min' },
-      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
-    ],
-  },
-  {
-    id: 'ia' as const,
-    name: 'IA/ML',
-    subtitle: 'Agentes & LLMs',
-    description: 'Domine inteligencia artificial, agentes autonomos e Large Language Models',
-    icon: Brain,
-    color: 'green',
-    gradient: 'from-green-500 to-emerald-500',
-    bgLight: 'bg-green-50',
-    bgDark: 'dark:bg-green-950/30',
-    borderColor: 'border-green-200 dark:border-green-800',
-    textColor: 'text-green-600 dark:text-green-400',
-    mentor: {
-      id: 'santos-dumont',
-      name: 'Santos-Dumont',
-      role: 'Mentor de Engenharia',
-      image: '/agents/santos-dumont.webp',
-    },
-    duration: '6-8 semanas',
-    xpTotal: 2500,
-    prerequisite: 'introducao', // Requires Introdução to be completed
-    modules: [
-      { id: 1, name: 'Introdução a IA', type: 'video', duration: '40min' },
-      { id: 2, name: 'LLMs e Prompts', type: 'reading', duration: '35min' },
-      { id: 3, name: 'Agentes de IA', type: 'chat', duration: '30min' },
-      { id: 4, name: 'RAG e Vetores', type: 'video', duration: '55min' },
-      { id: 5, name: 'Fine-tuning basico', type: 'reading', duration: '40min' },
-      { id: 6, name: 'Avaliacao de modelos', type: 'video', duration: '35min' },
-      { id: 7, name: 'Projeto final', type: 'project', duration: '3h' },
-    ],
-  },
-  {
-    id: 'devops' as const,
-    name: 'DevOps',
-    subtitle: 'Cloud & CI/CD',
-    description: 'Aprenda infraestrutura, containers, deploy automatizado e monitoramento',
-    icon: Code,
-    color: 'orange',
-    gradient: 'from-orange-500 to-amber-500',
-    bgLight: 'bg-orange-50',
-    bgDark: 'dark:bg-orange-950/30',
-    borderColor: 'border-orange-200 dark:border-orange-800',
-    textColor: 'text-orange-600 dark:text-orange-400',
-    mentor: {
-      id: 'santos-dumont',
-      name: 'Santos-Dumont',
-      role: 'Mentor de Engenharia',
-      image: '/agents/santos-dumont.webp',
-    },
-    duration: '4-6 semanas',
-    xpTotal: 2000,
-    prerequisite: 'introducao', // Requires Introdução to be completed
-    modules: [
-      { id: 1, name: 'Docker essencial', type: 'video', duration: '50min' },
-      { id: 2, name: 'GitHub Actions', type: 'reading', duration: '35min' },
-      { id: 3, name: 'Deploy na cloud', type: 'video', duration: '45min' },
-      { id: 4, name: 'Monitoramento', type: 'chat', duration: '25min' },
-      { id: 5, name: 'Scaling e performance', type: 'reading', duration: '30min' },
-      { id: 6, name: 'Projeto final', type: 'project', duration: '2h' },
-    ],
-  },
-]
 
 const MODULE_ICONS = {
   video: Video,
@@ -541,38 +384,8 @@ export default function AgoraTrilhasPage() {
   const { tracks, isLoading: tracksLoading, error: tracksError, getTrack } = useAgoraTracks()
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
 
-  // Use database tracks or fallback to hardcoded if empty
-  const displayTracks = useMemo(() => {
-    if (tracks.length > 0) return tracks
-    // Convert fallback to Track type
-    return FALLBACK_TRACKS.map((t) => ({
-      ...t,
-      icon:
-        t.icon === 'GraduationCap'
-          ? 'GraduationCap'
-          : typeof t.icon === 'function'
-            ? 'Server'
-            : t.icon,
-      xpTotal: t.xpTotal,
-      certificateHours: 4,
-      isIntro: t.isIntro || false,
-      prerequisiteId: t.prerequisite || undefined,
-      mentor: t.mentor,
-      displayOrder: 0,
-      isActive: true,
-      modules: t.modules.map((m, idx) => ({
-        id: m.id,
-        trackId: t.id,
-        moduleNumber: idx + 1,
-        title: m.name,
-        description: '',
-        objectives: [],
-        xpReward: Math.floor(t.xpTotal / t.modules.length),
-        videos: [],
-        exercises: [],
-      })),
-    })) as Track[]
-  }, [tracks])
+  // Use tracks directly from database
+  const displayTracks = tracks
 
   const isLoading = userLoading || tracksLoading
 

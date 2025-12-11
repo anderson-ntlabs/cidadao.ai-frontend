@@ -14,12 +14,12 @@
  * @date 2025-12-11 (Updated to use database)
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
-import useAgoraTracks, { Track, TrackModule, ModuleVideo } from '@/hooks/use-agora-tracks'
+import useAgoraTracks from '@/hooks/use-agora-tracks'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
@@ -29,7 +29,6 @@ import {
   XP_CONSTANTS,
   calculateDiaryXp,
   type VideoStyle,
-  getTrackContent,
 } from '@/data/tracks-content'
 import {
   ArrowLeft,
@@ -56,75 +55,14 @@ export default function LearningModulePage() {
   const params = useParams()
   const router = useRouter()
   const { user, isDemoMode } = useAgora()
-  const { tracks, isLoading: tracksLoading, getTrack, getModule } = useAgoraTracks()
+  const { isLoading: tracksLoading, getTrack, getModule } = useAgoraTracks()
 
   const trackId = params.trackId as string
   const moduleNumber = parseInt(params.moduleId as string, 10)
 
-  // Get track and module data from database or fallback
-  const dbTrack = getTrack(trackId)
-  const dbModule = getModule(trackId, moduleNumber)
-
-  // Fallback to hardcoded data if database is empty
-  const fallbackTrack = useMemo(() => getTrackContent(trackId), [trackId])
-  const fallbackModule = fallbackTrack?.modules.find((m) => m.id === moduleNumber)
-
-  // Use database data if available, otherwise fallback
-  const track =
-    dbTrack ||
-    (fallbackTrack
-      ? ({
-          id: fallbackTrack.id,
-          name: fallbackTrack.name,
-          subtitle: '',
-          description: '',
-          icon: 'GraduationCap',
-          color: 'emerald',
-          gradient: 'from-emerald-500 to-teal-500',
-          duration: '',
-          xpTotal: fallbackTrack.totalXp,
-          certificateHours: fallbackTrack.certificateHours,
-          isIntro: false,
-          prerequisiteId: undefined,
-          displayOrder: 0,
-          isActive: true,
-          mentor: {
-            id: fallbackTrack.mentor.id,
-            name: fallbackTrack.mentor.name,
-            role: 'Mentor',
-            image: `/agents/${fallbackTrack.mentor.id}.webp`,
-            greeting: fallbackTrack.mentor.greeting,
-            videoIntro: fallbackTrack.mentor.videoIntro,
-            diaryEncouragement: fallbackTrack.mentor.diaryEncouragement,
-            chatInvitation: fallbackTrack.mentor.chatInvitation,
-          },
-          modules: fallbackTrack.modules.map((m, idx) => ({
-            id: m.id,
-            trackId: fallbackTrack.id,
-            moduleNumber: idx + 1,
-            title: m.title,
-            description: m.description,
-            objectives: m.objectives,
-            xpReward: m.xpReward,
-            diaryPrompt: m.diaryPrompt,
-            chatPrompt: m.chatPrompt,
-            videos: m.videos.map((v, vidIdx) => ({
-              id: vidIdx,
-              moduleId: m.id,
-              style: v.style as 'academic' | 'didactic' | 'practical',
-              title: v.title,
-              channel: v.channel,
-              channelUrl: v.channelUrl,
-              youtubeId: v.videoId,
-              duration: v.duration,
-              description: v.description,
-            })),
-            exercises: [],
-          })),
-        } as Track)
-      : undefined)
-
-  const module = dbModule || track?.modules.find((m) => m.moduleNumber === moduleNumber)
+  // Get track and module data from database
+  const track = getTrack(trackId)
+  const module = getModule(trackId, moduleNumber)
   const currentModuleIndex = track?.modules.findIndex((m) => m.moduleNumber === moduleNumber) ?? -1
   const totalModules = track?.modules.length ?? 0
 
