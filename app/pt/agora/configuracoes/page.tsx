@@ -492,7 +492,6 @@ function ConfiguracoesContent() {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         userName={user?.name?.split(' ')[0]}
-        allowHardDelete={process.env.NODE_ENV === 'development'}
       />
     </div>
   )
