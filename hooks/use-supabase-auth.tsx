@@ -25,7 +25,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   loginWithProvider: (provider: 'google' | 'github') => Promise<void>
   signup: (email: string, password: string, name: string) => Promise<void>
-  logout: () => Promise<void>
+  logout: () => void
   refreshSession: () => Promise<void>
 }
 
@@ -267,36 +267,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase]
   )
 
-  const logout = useCallback(async () => {
-    setIsLoading(true)
-
-    try {
-      // Use centralized navigation session service for complete cleanup
-      await navigationSessionService.logout()
-
-      // Clear state
-      setUser(null)
-      setIsAuthenticated(false)
-
-      // Clear any auth-related local storage (legacy cleanup)
-      localStorage.removeItem('redirectAfterLogin')
-      localStorage.removeItem('supabase.auth.token')
-      sessionStorage.clear()
-
-      // Show success message
-      toast.success('Logout realizado com sucesso', 'Até logo!')
-
-      // Force redirect to landing page with full page reload
-      // Using window.location instead of router to ensure clean state
-      window.location.href = '/pt'
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Tente novamente'
-      logger.error('Logout error', { error })
-      toast.error('Erro ao sair', errorMessage)
-    } finally {
-      setIsLoading(false)
+  const logout = useCallback(() => {
+    // Send telemetry cleanup via beacon (non-blocking)
+    // This ensures data is sent even when navigating away
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/agora/end-session', JSON.stringify({ timestamp: Date.now() }))
     }
-  }, [])
+
+    // Clear state synchronously
+    setUser(null)
+    setIsAuthenticated(false)
+
+    // Clear any auth-related local storage (legacy cleanup)
+    localStorage.removeItem('redirectAfterLogin')
+    localStorage.removeItem('supabase.auth.token')
+    sessionStorage.clear()
+
+    // Sign out from Supabase (fire and forget - don't await)
+    supabase.auth.signOut().catch((error) => {
+      logger.warn('Supabase signOut error (non-blocking)', { error })
+    })
+
+    // Show success message
+    toast.success('Logout realizado com sucesso', 'Até logo!')
+
+    // Force redirect to landing page with full page reload
+    // Using window.location instead of router to ensure clean state
+    window.location.href = '/pt'
+  }, [supabase])
 
   const refreshSession = useCallback(async () => {
     try {
