@@ -11,10 +11,9 @@ import { createLogger } from '@/lib/logger'
 
 const logger = createLogger('ExportService')
 
-// Lazy load heavy dependencies
+// Lazy load heavy dependencies (PDF only - CSV is native)
 const loadJsPDF = () => import('jspdf').then((m) => m.default)
 const loadHtml2Canvas = () => import('html2canvas').then((m) => m.default)
-const loadPapaparse = () => import('papaparse').then((m) => m.default)
 
 interface ExportOptions {
   filename?: string
@@ -37,16 +36,34 @@ interface ChartExportData {
 }
 
 export class ExportService {
-  // Export data as CSV
-  static async exportToCSV(data: any[], filename: string = 'export.csv') {
-    const Papa = await loadPapaparse()
-    const csv = Papa.unparse(data, {
-      header: true,
-      delimiter: ',',
-      quotes: true,
-    })
+  // Export data as CSV - native implementation (no external deps)
+  static exportToCSV(data: any[], filename: string = 'export.csv') {
+    if (!data || data.length === 0) {
+      logger.warn('No data to export to CSV')
+      return
+    }
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const headers = Object.keys(data[0])
+
+    // Escape CSV values properly (handles commas, quotes, newlines)
+    const escapeCSV = (value: unknown): string => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      // Escape quotes and wrap if contains special chars
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...data.map((row) => headers.map((header) => escapeCSV(row[header])).join(',')),
+    ].join('\n')
+
+    // Add BOM for Excel compatibility with UTF-8
+    const BOM = '\uFEFF'
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
 
     const link = document.createElement('a')

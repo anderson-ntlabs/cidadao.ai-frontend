@@ -1,14 +1,13 @@
 /**
  * Lazy-loaded Export Service
  * Optimization: Load PDF/export libraries only when needed
+ * CSV export uses native implementation (no papaparse dependency)
  *
  * @author Anderson Henrique da Silva
  * @location Minas Gerais, Brasil
  * @date 2025-10-31
  */
 
-// @ts-ignore - papaparse types were removed
-import Papa from 'papaparse' // CSV is lightweight, keep it
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -33,15 +32,30 @@ interface ChartExportData {
 }
 
 export class LazyExportService {
-  // Export to CSV - no lazy loading needed (Papa is small)
+  // Export to CSV - native implementation (no external deps, ~35KB saved)
   static exportToCSV(data: any[], filename: string = 'export.csv') {
-    const csv = Papa.unparse(data, {
-      header: true,
-      delimiter: ',',
-      quotes: true,
-    })
+    if (!data || data.length === 0) return
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const headers = Object.keys(data[0])
+
+    // Escape CSV values properly (handles commas, quotes, newlines)
+    const escapeCSV = (value: unknown): string => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...data.map((row) => headers.map((header) => escapeCSV(row[header])).join(',')),
+    ].join('\n')
+
+    // Add BOM for Excel compatibility with UTF-8
+    const BOM = '\uFEFF'
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
 
     const link = document.createElement('a')

@@ -3,15 +3,13 @@ import { ExportService } from './export-service'
 import jsPDF from 'jspdf'
 // autoTable import removed - library removed for bundle optimization
 import html2canvas from 'html2canvas'
-import Papa from 'papaparse'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+// papaparse removed - using native CSV implementation
 
 // Mock dependencies
 vi.mock('jspdf')
 // jspdf-autotable mock removed - library removed for bundle optimization
 vi.mock('html2canvas')
-vi.mock('papaparse')
+// papaparse mock removed - native implementation used
 vi.mock('date-fns', () => ({
   format: vi.fn((date, formatStr) => '01 de janeiro de 2024'),
 }))
@@ -80,8 +78,7 @@ describe('ExportService', () => {
       height: 600,
     } as any)
 
-    // Mock Papa.unparse
-    vi.mocked(Papa.unparse).mockReturnValue('mock,csv,data')
+    // Native CSV implementation - no Papa mock needed
 
     // Mock Intl.NumberFormat
     global.Intl = {
@@ -95,23 +92,25 @@ describe('ExportService', () => {
   })
 
   describe('exportToCSV', () => {
-    it('should export data to CSV with default filename', async () => {
+    it('should export data to CSV with default filename', () => {
       const data = [
         { id: 1, name: 'Item 1', value: 100 },
         { id: 2, name: 'Item 2', value: 200 },
       ]
 
-      await ExportService.exportToCSV(data)
+      ExportService.exportToCSV(data)
 
-      expect(Papa.unparse).toHaveBeenCalledWith(data, {
-        header: true,
-        delimiter: ',',
-        quotes: true,
-      })
+      // Native implementation - check Blob was created with CSV content
+      expect(global.Blob).toHaveBeenCalled()
+      const blobCall = vi.mocked(global.Blob).mock.calls[0]
+      expect(blobCall[1]).toEqual({ type: 'text/csv;charset=utf-8;' })
 
-      expect(global.Blob).toHaveBeenCalledWith(['mock,csv,data'], {
-        type: 'text/csv;charset=utf-8;',
-      })
+      // Check BOM prefix for Excel compatibility
+      const content = blobCall[0][0] as string
+      expect(content.startsWith('\uFEFF')).toBe(true)
+      expect(content).toContain('id,name,value')
+      expect(content).toContain('1,Item 1,100')
+      expect(content).toContain('2,Item 2,200')
 
       expect(global.URL.createObjectURL).toHaveBeenCalled()
       expect(mockCreateElement).toHaveBeenCalledWith('a')
@@ -124,13 +123,32 @@ describe('ExportService', () => {
       expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
     })
 
-    it('should export data to CSV with custom filename', async () => {
+    it('should export data to CSV with custom filename', () => {
       const data = [{ test: 'data' }]
 
-      await ExportService.exportToCSV(data, 'custom-file.csv')
+      ExportService.exportToCSV(data, 'custom-file.csv')
 
       const link = mockCreateElement.mock.results[0].value
       expect(link.download).toBe('custom-file.csv')
+    })
+
+    it('should handle empty data gracefully', () => {
+      ExportService.exportToCSV([])
+
+      // Should not create blob for empty data
+      expect(global.Blob).not.toHaveBeenCalled()
+    })
+
+    it('should escape CSV special characters', () => {
+      const data = [{ name: 'Item, with comma', desc: 'Has "quotes"' }]
+
+      ExportService.exportToCSV(data)
+
+      const blobCall = vi.mocked(global.Blob).mock.calls[0]
+      const content = blobCall[0][0] as string
+      // Commas and quotes should be properly escaped
+      expect(content).toContain('"Item, with comma"')
+      expect(content).toContain('"Has ""quotes"""')
     })
   })
 
@@ -250,7 +268,8 @@ describe('ExportService', () => {
 
       await ExportService.exportDashboardToPDF(charts, metrics)
 
-      expect(console.error).toHaveBeenCalledWith('Error capturing chart:', expect.any(Error))
+      // Logger uses structured format, check that error was logged
+      expect(console.error).toHaveBeenCalled()
       expect(mockPdfInstance.save).toHaveBeenCalled() // Should still save the PDF
     })
 
