@@ -25,9 +25,17 @@ export function KidsHeader() {
   const { childName, childAvatar, disableKidsMode } = useKids()
   const { clearMode } = useAgoraMode()
 
-  const handleExitKidsMode = async () => {
-    await disableKidsMode()
+  const handleExitKidsMode = () => {
+    // Send telemetry cleanup via beacon (non-blocking)
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/kids/end-session', JSON.stringify({ timestamp: Date.now() }))
+    }
+
+    // Clear state synchronously
+    disableKidsMode()
     clearMode()
+
+    // Redirect immediately
     router.push('/pt/agora/selecao')
   }
 
