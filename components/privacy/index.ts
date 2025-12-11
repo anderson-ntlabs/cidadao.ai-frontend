@@ -8,3 +8,4 @@
  */
 
 export { LGPDTermsModal } from './lgpd-terms-modal'
+export { DeleteAccountModal } from './delete-account-modal'

@@ -15,6 +15,10 @@ import {
   Mic,
   ArrowLeft,
   GraduationCap,
+  Shield,
+  Trash2,
+  FileSearch,
+  Download,
 } from 'lucide-react'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
@@ -22,6 +26,7 @@ import { useAgora } from '@/hooks/use-agora'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
 import { toast } from '@/hooks/use-toast'
 import { logger } from '@/lib/utils/logger'
+import { DeleteAccountModal, LGPDTermsModal } from '@/components/privacy'
 
 /**
  * Agora Settings Page
@@ -126,6 +131,8 @@ function ConfiguracoesContent() {
   const { user, isAuthenticated, isLoading } = useAgora()
 
   const [isSaving, setIsSaving] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showLGPDModal, setShowLGPDModal] = useState(false)
   const [preferences, setPreferences] = useState<UserPreferences>({
     theme: 'system',
     language: 'pt',
@@ -414,6 +421,51 @@ function ConfiguracoesContent() {
             </GlassCard>
           </ActionPanelSection>
 
+          {/* Privacy & Data - LGPD */}
+          <ActionPanelSection
+            title="Privacidade e Dados"
+            description="Gerencie seus dados pessoais conforme a LGPD"
+            icon={Shield}
+          >
+            <GlassCard>
+              <GlassCardContent className="p-6">
+                <ActionPanel
+                  items={[
+                    {
+                      title: 'Entenda seus Dados',
+                      description: 'Veja como a Ágora coleta, usa e protege suas informações',
+                      icon: FileSearch,
+                      actionLabel: 'Ver Termos',
+                      onAction: () => setShowLGPDModal(true),
+                    },
+                    {
+                      title: 'Exportar Dados',
+                      description: 'Baixe uma cópia de todos os seus dados (LGPD Art. 18)',
+                      icon: Download,
+                      actionLabel: 'Exportar',
+                      onAction: () => {
+                        toast.info(
+                          'Em breve',
+                          'A exportação de dados será implementada em uma próxima atualização.'
+                        )
+                      },
+                    },
+                    {
+                      title: 'Excluir Minha Conta',
+                      description: 'Remova permanentemente seus dados do sistema (LGPD Art. 18)',
+                      icon: Trash2,
+                      badge: 'Irreversível',
+                      badgeColor: 'red',
+                      actionLabel: 'Excluir',
+                      onAction: () => setShowDeleteModal(true),
+                    },
+                  ]}
+                  showDividers={true}
+                />
+              </GlassCardContent>
+            </GlassCard>
+          </ActionPanelSection>
+
           {/* Save button (mobile) */}
           <div className="md:hidden">
             <Button
@@ -428,6 +480,20 @@ function ConfiguracoesContent() {
           </div>
         </div>
       </div>
+
+      {/* LGPD Modals */}
+      <LGPDTermsModal
+        isOpen={showLGPDModal}
+        onClose={() => setShowLGPDModal(false)}
+        userName={user?.name?.split(' ')[0]}
+      />
+
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        userName={user?.name?.split(' ')[0]}
+        allowHardDelete={process.env.NODE_ENV === 'development'}
+      />
     </div>
   )
 }
