@@ -44,6 +44,8 @@ const PUBLIC_ROUTES = [
   '/favicon.ico',
   '/manifest.json',
   '/sw.js',
+  '/pt/agora/verificar', // Public certificate verification page
+  '/en/agora/verificar',
 ]
 
 /**
