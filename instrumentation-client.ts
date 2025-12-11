@@ -1,14 +1,13 @@
 /**
- * Sentry Client Configuration
+ * Next.js Client Instrumentation
  *
  * This file configures Sentry for the client-side of the Next.js application.
  * It initializes error tracking, performance monitoring, and session replay.
  *
- * Optimized: Uses lazyLoadIntegration for Replay to reduce initial bundle (~80KB savings)
+ * @see https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
  *
  * Author: Anderson Henrique da Silva
- * Date: 2025-12-08
- * Updated: 2025-12-11 - Lazy load Replay integration
+ * Date: 2025-12-11
  */
 
 import * as Sentry from '@sentry/nextjs'

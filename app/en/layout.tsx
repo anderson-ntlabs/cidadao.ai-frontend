@@ -93,7 +93,7 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
           <LiveAnnouncerProvider>
             <Providers>
               <AnalyticsProvider>
-                {/* Note: Sentry is automatically initialized by @sentry/nextjs via sentry.client.config.ts */}
+                {/* Note: Sentry is automatically initialized by @sentry/nextjs via instrumentation-client.ts */}
                 {/* Fixed background layer with image */}
                 <div
                   className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0"

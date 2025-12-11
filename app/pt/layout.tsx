@@ -97,7 +97,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
           <LiveAnnouncerProvider>
             <Providers>
               <AnalyticsProvider>
-                {/* Note: Sentry is automatically initialized by @sentry/nextjs via sentry.client.config.ts */}
+                {/* Note: Sentry is automatically initialized by @sentry/nextjs via instrumentation-client.ts */}
                 {/* Conditional background - not applied on Agora routes */}
                 <ConditionalBackground />
 
