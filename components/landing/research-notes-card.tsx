@@ -20,10 +20,10 @@ import 'react-pdf/dist/Page/TextLayer.css'
 const Document = dynamic(() => import('react-pdf').then((mod) => mod.Document), { ssr: false })
 const Page = dynamic(() => import('react-pdf').then((mod) => mod.Page), { ssr: false })
 
-// Configure PDF.js worker only on client side
+// Configure PDF.js worker to use local file (avoids CSP issues with unpkg.com)
 if (typeof window !== 'undefined') {
   import('react-pdf').then((pdfModule) => {
-    pdfModule.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfModule.pdfjs.version}/build/pdf.worker.min.mjs`
+    pdfModule.pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
   })
 }
 

@@ -36,7 +36,8 @@
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server npm run build",
     "analyze:browser": "ANALYZE=true BUNDLE_ANALYZE=browser npm run build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/pdf.worker.min.mjs 2>/dev/null || true"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
