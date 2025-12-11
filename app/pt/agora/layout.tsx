@@ -143,7 +143,7 @@ function useSessionCleanup() {
 function AgoraHeaderWrapper() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isAuthenticated, logout, endSession, currentSession } = useAgora()
+  const { user, isAuthenticated, logout } = useAgora()
   const { isKidsMode, childName, disableKidsMode } = useKids()
   const { clearMode } = useAgoraMode()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
@@ -156,38 +156,44 @@ function AgoraHeaderWrapper() {
   }
 
   // Handle switch mode - go back to selection page
-  const handleSwitchMode = async () => {
-    // End current session if exists
-    if (currentSession) {
-      await endSession()
+  const handleSwitchMode = () => {
+    // Send telemetry cleanup via beacon (non-blocking)
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/agora/end-session', JSON.stringify({ timestamp: Date.now() }))
     }
+
     // If in kids mode, exit it
     if (isKidsMode) {
-      await navigationSessionService.exitKidsMode()
-      await disableKidsMode()
+      disableKidsMode()
     }
+
     // Clear mode and go to selection
     clearMode()
     router.push('/pt/agora/selecao')
   }
 
-  const handleLogoutConfirm = async () => {
-    // If in kids mode, just exit kids mode and redirect to selection
+  const handleLogoutConfirm = () => {
+    // Close modal first
+    setShowLogoutModal(false)
+
+    // Send telemetry cleanup via beacon (non-blocking)
+    // This ensures data is sent even if the page navigates away
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon('/api/agora/end-session', JSON.stringify({ timestamp: Date.now() }))
+    }
+
+    // Clear local state synchronously
+    clearMode()
+
+    // If in kids mode, redirect to selection
     if (isOnKidsPage && isKidsMode) {
-      await navigationSessionService.exitKidsMode()
-      await disableKidsMode()
-      clearMode()
+      disableKidsMode()
       router.push('/pt/agora/selecao')
       return
     }
 
-    // Full logout - NavigationSessionService handles all cleanup
-    // End active session if exists
-    if (currentSession) {
-      await endSession()
-    }
-    clearMode()
-    await logout()
+    // Full logout - redirect immediately, cleanup happens via beacon
+    logout()
     router.push('/pt/agora/login')
   }
 
@@ -195,11 +201,6 @@ function AgoraHeaderWrapper() {
   if (!isAuthenticated || !user) {
     return null
   }
-
-  // Calculate session duration in minutes
-  const sessionDuration = currentSession
-    ? Math.floor((Date.now() - new Date(currentSession.startedAt).getTime()) / 60000)
-    : 0
 
   return (
     <>
@@ -221,8 +222,6 @@ function AgoraHeaderWrapper() {
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogoutConfirm}
-        hasActiveSession={!!currentSession}
-        sessionDuration={sessionDuration}
       />
     </>
   )
