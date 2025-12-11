@@ -32,9 +32,11 @@ export { useOnboarding } from './use-onboarding'
 export { useContrastCheck } from './use-contrast-check'
 
 // ===== Data & State Hooks =====
-export { useAuth } from './use-auth'
+export { useAuth, AuthProvider } from './use-supabase-auth'
 export { useChat } from './use-chat'
-export { useChat as useChatHook, useAgentStatus, useSuggestedActions } from './use-chat-store'
+export { useAgentStatus, useSuggestedActions } from './use-chat-store'
+// Note: use-chat-store.ts also exports useChat but it's redundant with use-chat.ts
+// Use useChat from use-chat.ts as the primary chat hook
 export { useInvestigations } from './use-investigations'
 export { useBackendInvestigations } from './use-backend-investigations'
 export { useInvestigationNotifications } from './use-investigation-notifications'
