@@ -8,27 +8,28 @@
  * - Agent interaction (diary or chat)
  * - Progress tracking and XP rewards
  *
+ * Now fetches data from Supabase database.
+ *
  * @author Anderson Henrique da Silva
- * @date 2025-12-07
+ * @date 2025-12-11 (Updated to use database)
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
+import useAgoraTracks, { Track, TrackModule, ModuleVideo } from '@/hooks/use-agora-tracks'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { cn } from '@/lib/utils'
 import {
-  getTrackContent,
   VIDEO_STYLE_LABELS,
   XP_CONSTANTS,
   calculateDiaryXp,
   type VideoStyle,
-  type VideoOption,
-  type TrackModule,
+  getTrackContent,
 } from '@/data/tracks-content'
 import {
   ArrowLeft,
@@ -55,14 +56,76 @@ export default function LearningModulePage() {
   const params = useParams()
   const router = useRouter()
   const { user, isDemoMode } = useAgora()
+  const { tracks, isLoading: tracksLoading, getTrack, getModule } = useAgoraTracks()
 
   const trackId = params.trackId as string
-  const moduleId = parseInt(params.moduleId as string, 10)
+  const moduleNumber = parseInt(params.moduleId as string, 10)
 
-  // Get track and module data
-  const track = getTrackContent(trackId)
-  const currentModuleIndex = track?.modules.findIndex((m) => m.id === moduleId) ?? -1
-  const module = track?.modules[currentModuleIndex]
+  // Get track and module data from database or fallback
+  const dbTrack = getTrack(trackId)
+  const dbModule = getModule(trackId, moduleNumber)
+
+  // Fallback to hardcoded data if database is empty
+  const fallbackTrack = useMemo(() => getTrackContent(trackId), [trackId])
+  const fallbackModule = fallbackTrack?.modules.find((m) => m.id === moduleNumber)
+
+  // Use database data if available, otherwise fallback
+  const track =
+    dbTrack ||
+    (fallbackTrack
+      ? ({
+          id: fallbackTrack.id,
+          name: fallbackTrack.name,
+          subtitle: '',
+          description: '',
+          icon: 'GraduationCap',
+          color: 'emerald',
+          gradient: 'from-emerald-500 to-teal-500',
+          duration: '',
+          xpTotal: fallbackTrack.totalXp,
+          certificateHours: fallbackTrack.certificateHours,
+          isIntro: false,
+          prerequisiteId: undefined,
+          displayOrder: 0,
+          isActive: true,
+          mentor: {
+            id: fallbackTrack.mentor.id,
+            name: fallbackTrack.mentor.name,
+            role: 'Mentor',
+            image: `/agents/${fallbackTrack.mentor.id}.webp`,
+            greeting: fallbackTrack.mentor.greeting,
+            videoIntro: fallbackTrack.mentor.videoIntro,
+            diaryEncouragement: fallbackTrack.mentor.diaryEncouragement,
+            chatInvitation: fallbackTrack.mentor.chatInvitation,
+          },
+          modules: fallbackTrack.modules.map((m, idx) => ({
+            id: m.id,
+            trackId: fallbackTrack.id,
+            moduleNumber: idx + 1,
+            title: m.title,
+            description: m.description,
+            objectives: m.objectives,
+            xpReward: m.xpReward,
+            diaryPrompt: m.diaryPrompt,
+            chatPrompt: m.chatPrompt,
+            videos: m.videos.map((v, vidIdx) => ({
+              id: vidIdx,
+              moduleId: m.id,
+              style: v.style as 'academic' | 'didactic' | 'practical',
+              title: v.title,
+              channel: v.channel,
+              channelUrl: v.channelUrl,
+              youtubeId: v.videoId,
+              duration: v.duration,
+              description: v.description,
+            })),
+            exercises: [],
+          })),
+        } as Track)
+      : undefined)
+
+  const module = dbModule || track?.modules.find((m) => m.moduleNumber === moduleNumber)
+  const currentModuleIndex = track?.modules.findIndex((m) => m.moduleNumber === moduleNumber) ?? -1
   const totalModules = track?.modules.length ?? 0
 
   // State
@@ -79,18 +142,18 @@ export default function LearningModulePage() {
   const [showXpAnimation, setShowXpAnimation] = useState(false)
   const [moduleCompleted, setModuleCompleted] = useState(false)
 
-  // Get selected video
+  // Get selected video - now using youtubeId from database
   const selectedVideo = module?.videos.find((v) => v.style === selectedStyle)
 
   // Save last accessed track to localStorage for "Continue Track" card on dashboard
   useEffect(() => {
-    if (trackId && moduleId && track) {
+    if (trackId && moduleNumber && track) {
       try {
         localStorage.setItem(
           'agora_last_track',
           JSON.stringify({
             trackId,
-            moduleId,
+            moduleId: moduleNumber,
             timestamp: Date.now(),
           })
         )
@@ -98,7 +161,7 @@ export default function LearningModulePage() {
         // Ignore localStorage errors
       }
     }
-  }, [trackId, moduleId, track])
+  }, [trackId, moduleNumber, track])
 
   // Calculate diary XP
   const diaryWordCount = diaryText
@@ -172,7 +235,7 @@ export default function LearningModulePage() {
     if (newIndex >= 0 && newIndex < totalModules) {
       const newModule = track?.modules[newIndex]
       if (newModule) {
-        router.push(`/pt/agora/trilhas/${trackId}/${newModule.id}`)
+        router.push(`/pt/agora/trilhas/${trackId}/${newModule.moduleNumber}`)
       }
     }
   }
@@ -263,7 +326,7 @@ export default function LearningModulePage() {
             <div className="flex items-start gap-4">
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-lg ring-2 ring-white dark:ring-gray-800 flex-shrink-0">
                 <Image
-                  src={`/agents/${track.mentor.id}.webp`}
+                  src={track.mentor.image || `/agents/${track.mentor.id}.webp`}
                   alt={track.mentor.name}
                   fill
                   className="object-cover"
@@ -273,7 +336,9 @@ export default function LearningModulePage() {
                 <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wide font-medium">
                   {track.mentor.name} diz:
                 </p>
-                <p className="text-gray-700 dark:text-gray-300 mt-1">{track.mentor.videoIntro}</p>
+                <p className="text-gray-700 dark:text-gray-300 mt-1">
+                  {track.mentor.videoIntro || 'Escolha o estilo de vídeo que combina com você!'}
+                </p>
               </div>
             </div>
           </div>
@@ -332,7 +397,7 @@ export default function LearningModulePage() {
           <GlassCard className="overflow-hidden">
             <div className="aspect-video bg-black relative">
               <iframe
-                src={`https://www.youtube.com/embed/${selectedVideo.videoId}?rel=0`}
+                src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?rel=0`}
                 title={selectedVideo.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -440,7 +505,7 @@ export default function LearningModulePage() {
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0">
                 <Image
-                  src={`/agents/${track.mentor.id}.webp`}
+                  src={track.mentor.image || `/agents/${track.mentor.id}.webp`}
                   alt={track.mentor.name}
                   fill
                   className="object-cover"
