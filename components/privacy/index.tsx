@@ -19,3 +19,11 @@ export const DeleteAccountModal = dynamic(
     loading: () => null,
   }
 )
+
+export const LGPDTermsModal = dynamic(
+  () => import('./lgpd-terms-modal').then((mod) => mod.LGPDTermsModal),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+)

@@ -45,3 +45,8 @@ export const VoiceInputCard = dynamic(
     loading: () => null,
   }
 )
+
+export const VoicePlayer = dynamic(() => import('./voice-player').then((mod) => mod.VoicePlayer), {
+  ssr: false,
+  loading: () => null,
+})
