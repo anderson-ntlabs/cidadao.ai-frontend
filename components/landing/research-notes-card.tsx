@@ -56,7 +56,7 @@ const translations = {
   },
 }
 
-const PDF_PATH = '/docs/Anderson_Cidadao_AI_Notas%20de%20Pesquisa.pdf'
+const PDF_PATH = '/docs/notas-de-pesquisa.pdf'
 
 export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
   const [isOpen, setIsOpen] = useState(false)
