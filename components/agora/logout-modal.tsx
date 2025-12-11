@@ -1,47 +1,27 @@
 'use client'
 
-import { useState } from 'react'
-import { LogOut, X, AlertTriangle } from 'lucide-react'
+import { LogOut, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 /**
  * Logout Confirmation Modal
  *
- * Asks user to confirm logout action.
- * Optionally shows active session warning.
+ * Simple modal for logout confirmation.
+ * The actual logout is synchronous - just redirects.
+ * Telemetry cleanup is handled by beforeunload/visibilitychange.
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-12-08
+ * Updated: 2025-12-11 - Simplified to avoid async hanging
  */
 
 interface LogoutModalProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: () => Promise<void>
-  hasActiveSession?: boolean
-  sessionDuration?: number // in minutes
+  onConfirm: () => void
 }
 
-export function LogoutModal({
-  isOpen,
-  onClose,
-  onConfirm,
-  hasActiveSession = false,
-  sessionDuration = 0,
-}: LogoutModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
-
+export function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalProps) {
   if (!isOpen) return null
-
-  const handleConfirm = async () => {
-    setIsLoading(true)
-    try {
-      await onConfirm()
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -80,59 +60,23 @@ export function LogoutModal({
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-gray-400">
             Tem certeza que deseja sair? Seu progresso está salvo automaticamente.
           </p>
-
-          {/* Active session warning */}
-          {hasActiveSession && sessionDuration > 0 && (
-            <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 mb-4">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-yellow-800 dark:text-yellow-200 text-sm">
-                  Sessão de estudo ativa
-                </p>
-                <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
-                  Você tem uma sessão de {sessionDuration} minutos em andamento. Ao sair, a sessão
-                  será finalizada e o XP será calculado.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Info */}
-          <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-            <p>Ao sair:</p>
-            <ul className="list-disc list-inside ml-2 space-y-1">
-              <li>Sua sessão atual será encerrada</li>
-              <li>Seu progresso e XP estão salvos</li>
-              <li>Você precisará fazer login novamente</li>
-            </ul>
-          </div>
         </div>
 
         {/* Footer */}
         <div className="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-          <Button variant="secondary" className="flex-1" onClick={onClose} disabled={isLoading}>
+          <Button variant="secondary" className="flex-1" onClick={onClose}>
             Cancelar
           </Button>
           <Button
             variant="destructive"
             className="flex-1 bg-red-600 hover:bg-red-700"
-            onClick={handleConfirm}
-            disabled={isLoading}
+            onClick={onConfirm}
           >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Saindo...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <LogOut className="w-4 h-4" />
-                Sair
-              </span>
-            )}
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
           </Button>
         </div>
       </div>
