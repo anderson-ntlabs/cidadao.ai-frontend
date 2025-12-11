@@ -6,10 +6,25 @@
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
- * Updated: 2025-12-11 - Added lazy loading for heavy modals
+ * Updated: 2025-12-11 - Added standardized page layout components
  */
 
 import dynamic from 'next/dynamic'
+
+// Page Layout Components (standardized)
+export { PageHeader, type PageHeaderProps } from './page-header'
+export {
+  PageLoading,
+  InlineLoading,
+  type PageLoadingProps,
+  type InlineLoadingProps,
+} from './page-loading'
+export {
+  PageContainer,
+  ContentWrapper,
+  type PageContainerProps,
+  type ContentWrapperProps,
+} from './page-container'
 
 // Layout components
 export { AgoraHeader } from './agora-header'
