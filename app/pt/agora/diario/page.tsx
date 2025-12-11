@@ -1,5 +1,5 @@
 /**
- * Academy Diário de Bordo Page
+ * Academy Diario de Bordo Page
  *
  * Personal learning diary with calendar integration:
  * - Track study sessions, readings, and video completions
@@ -9,20 +9,19 @@
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
- * Updated: 2025-12-07
+ * Updated: 2025-12-11 - Standardized loading state with PageLoading
  */
 
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, Suspense, useRef } from 'react'
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useAgora } from '@/hooks/use-agora'
-import { AgoraSidebar } from '@/components/agora'
+import { AgoraSidebar, PageLoading } from '@/components/agora'
 import {
   getCalendarEvents,
   createCalendarEvent,
-  updateCalendarEvent,
   deleteCalendarEvent,
   completeCalendarEvent,
   type CalendarEvent,
@@ -34,7 +33,6 @@ import {
   trackAgendaEventCompleted,
   trackAgendaEventDeleted,
   trackGoogleCalendarExport,
-  trackAgendaViewChange,
   type AgendaEventType,
 } from '@/lib/analytics/agora-tracker'
 import { Card } from '@/components/ui/card'
@@ -104,16 +102,7 @@ const eventTypeConfig: Record<EventType, { color: string; icon: typeof Calendar;
 
 // Loading fallback
 function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-          <Calendar className="w-8 h-8 text-white" />
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando diário...</p>
-      </div>
-    </div>
-  )
+  return <PageLoading text="Carregando diario..." icon={Calendar} />
 }
 
 // Inner component
@@ -450,16 +439,7 @@ function AcademyAgendaContent() {
   }
 
   if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <Calendar className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Redirecionando para login..." icon={Calendar} />
   }
 
   return (

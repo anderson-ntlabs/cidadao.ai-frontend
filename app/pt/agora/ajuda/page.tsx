@@ -9,7 +9,6 @@ import {
   ThumbsDown,
   Clock,
   Tag,
-  GraduationCap,
   HelpCircle,
   MessageSquare,
 } from 'lucide-react'
@@ -17,6 +16,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { MarkdownRenderer } from '@/components/markdown/markdown-renderer'
 
 /**
@@ -27,6 +27,7 @@ import { MarkdownRenderer } from '@/components/markdown/markdown-renderer'
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-07
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 // Help categories specific to Agora
@@ -289,16 +290,7 @@ Cada anotacao rende 10 XP! Manter o habito de registrar e recompensado.`,
 const popularArticles = ['what-is-agora', 'how-xp-works', 'talking-to-mentors', 'learning-paths']
 
 function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-          <GraduationCap className="w-8 h-8 text-white" />
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando ajuda...</p>
-      </div>
-    </div>
-  )
+  return <PageLoading text="Carregando ajuda..." />
 }
 
 function AjudaContent() {
@@ -345,155 +337,105 @@ function AjudaContent() {
   // Article detail view
   if (selectedArticle) {
     return (
-      <div className="min-h-screen relative">
-        {/* Background */}
-        <div
-          className="fixed inset-0 z-0"
-          style={{
-            backgroundImage: `url('/operarios.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.03,
-          }}
-        />
-        <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
+      <PageContainer background="operarios" maxWidth="5xl" padding="normal">
+        <Button variant="ghost" size="sm" onClick={() => setSelectedArticle(null)} className="mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para a Central de Ajuda
+        </Button>
 
-        <div className="relative z-10 max-w-4xl mx-auto py-8 px-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelectedArticle(null)}
-            className="mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para a Central de Ajuda
-          </Button>
+        <GlassCard>
+          <GlassCardContent className="p-8">
+            <article className="prose dark:prose-invert max-w-none">
+              <h1 className="text-3xl font-bold mb-2">{selectedArticle.title}</h1>
 
-          <GlassCard>
-            <GlassCardContent className="p-8">
-              <article className="prose dark:prose-invert max-w-none">
-                <h1 className="text-3xl font-bold mb-2">{selectedArticle.title}</h1>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />5 min de leitura
+                </span>
+                <span className="flex items-center gap-1">
+                  <Tag className="h-4 w-4" />
+                  {selectedArticle.tags.join(', ')}
+                </span>
+              </div>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />5 min de leitura
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Tag className="h-4 w-4" />
-                    {selectedArticle.tags.join(', ')}
-                  </span>
+              <MarkdownRenderer content={selectedArticle.content} />
+
+              <div className="mt-12 pt-8 border-t">
+                <h3 className="text-lg font-semibold mb-4">Este artigo foi util?</h3>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant={
+                      articleFeedback[selectedArticle.id] === 'helpful' ? 'success' : 'secondary'
+                    }
+                    size="sm"
+                    onClick={() => handleArticleFeedback(selectedArticle.id, 'helpful')}
+                  >
+                    <ThumbsUp className="mr-2 h-4 w-4" />
+                    Sim (
+                    {(selectedArticle.helpful || 0) +
+                      (articleFeedback[selectedArticle.id] === 'helpful' ? 1 : 0)}
+                    )
+                  </Button>
+                  <Button
+                    variant={
+                      articleFeedback[selectedArticle.id] === 'not-helpful'
+                        ? 'destructive'
+                        : 'secondary'
+                    }
+                    size="sm"
+                    onClick={() => handleArticleFeedback(selectedArticle.id, 'not-helpful')}
+                  >
+                    <ThumbsDown className="mr-2 h-4 w-4" />
+                    Nao (
+                    {(selectedArticle.notHelpful || 0) +
+                      (articleFeedback[selectedArticle.id] === 'not-helpful' ? 1 : 0)}
+                    )
+                  </Button>
                 </div>
+              </div>
 
-                <MarkdownRenderer content={selectedArticle.content} />
-
-                <div className="mt-12 pt-8 border-t">
-                  <h3 className="text-lg font-semibold mb-4">Este artigo foi util?</h3>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant={
-                        articleFeedback[selectedArticle.id] === 'helpful' ? 'success' : 'secondary'
-                      }
-                      size="sm"
-                      onClick={() => handleArticleFeedback(selectedArticle.id, 'helpful')}
-                    >
-                      <ThumbsUp className="mr-2 h-4 w-4" />
-                      Sim (
-                      {(selectedArticle.helpful || 0) +
-                        (articleFeedback[selectedArticle.id] === 'helpful' ? 1 : 0)}
+              {selectedArticle.relatedArticles && selectedArticle.relatedArticles.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Artigos Relacionados</h3>
+                  <div className="grid gap-2">
+                    {selectedArticle.relatedArticles.map((articleId) => {
+                      const relatedArticle = agoraHelpArticles.find((a) => a.id === articleId)
+                      if (!relatedArticle) return null
+                      return (
+                        <GlassCard
+                          key={articleId}
+                          className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+                          onClick={() => setSelectedArticle(relatedArticle)}
+                        >
+                          <h4 className="font-medium">{relatedArticle.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {relatedArticle.description}
+                          </p>
+                        </GlassCard>
                       )
-                    </Button>
-                    <Button
-                      variant={
-                        articleFeedback[selectedArticle.id] === 'not-helpful'
-                          ? 'destructive'
-                          : 'secondary'
-                      }
-                      size="sm"
-                      onClick={() => handleArticleFeedback(selectedArticle.id, 'not-helpful')}
-                    >
-                      <ThumbsDown className="mr-2 h-4 w-4" />
-                      Nao (
-                      {(selectedArticle.notHelpful || 0) +
-                        (articleFeedback[selectedArticle.id] === 'not-helpful' ? 1 : 0)}
-                      )
-                    </Button>
+                    })}
                   </div>
                 </div>
-
-                {selectedArticle.relatedArticles && selectedArticle.relatedArticles.length > 0 && (
-                  <div className="mt-8">
-                    <h3 className="text-lg font-semibold mb-4">Artigos Relacionados</h3>
-                    <div className="grid gap-2">
-                      {selectedArticle.relatedArticles.map((articleId) => {
-                        const relatedArticle = agoraHelpArticles.find((a) => a.id === articleId)
-                        if (!relatedArticle) return null
-                        return (
-                          <GlassCard
-                            key={articleId}
-                            className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                            onClick={() => setSelectedArticle(relatedArticle)}
-                          >
-                            <h4 className="font-medium">{relatedArticle.title}</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {relatedArticle.description}
-                            </p>
-                          </GlassCard>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </article>
-            </GlassCardContent>
-          </GlassCard>
-        </div>
-      </div>
+              )}
+            </article>
+          </GlassCardContent>
+        </GlassCard>
+      </PageContainer>
     )
   }
 
   // Main help center view
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
+    <PageContainer background="operarios" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl={buildUrl('/pt/agora')}
+        title="Central de Ajuda"
+        subtitle="Tire suas duvidas sobre a Agora"
+        icon={HelpCircle}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
 
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href={buildUrl('/pt/agora')}
-              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Central de Ajuda
-                </h1>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Tire suas dúvidas sobre a Ágora
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="relative z-10 max-w-6xl mx-auto py-8 px-4">
+      <div className="py-6 px-4">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">
@@ -643,7 +585,7 @@ function AjudaContent() {
           </GlassCard>
         )}
       </div>
-    </div>
+    </PageContainer>
   )
 }
 

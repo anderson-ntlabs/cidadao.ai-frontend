@@ -8,6 +8,7 @@
  *
  * @author Anderson Henrique da Silva
  * @date 2025-12-07
+ * @updated 2025-12-11 - Standardized loading state with PageLoading
  */
 
 import { useEffect, useRef, useCallback, Suspense } from 'react'
@@ -17,6 +18,7 @@ import dynamic from 'next/dynamic'
 import { useAgora } from '@/hooks/use-agora'
 import { useAgoraChatStore } from '@/store/agora-chat-store'
 import { getEducationalAgents, isEducationalAgent } from '@/data/agents'
+import { PageLoading } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, Send, Sparkles, MessageSquare, Plus, GraduationCap } from 'lucide-react'
@@ -456,18 +458,7 @@ function ChatContent() {
 
 export default function AgoraChatPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <MessageSquare className="w-8 h-8 text-white" />
-            </div>
-            <p className="text-gray-600 dark:text-gray-400">Carregando chat...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoading text="Carregando chat..." icon={MessageSquare} />}>
       <ChatContent />
     </Suspense>
   )
