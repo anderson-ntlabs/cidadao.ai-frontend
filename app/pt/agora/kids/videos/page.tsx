@@ -2,11 +2,11 @@
  * Kids Videos Page
  *
  * Catalog of curated videos for children organized by learning tracks.
- * Uses Agora Design System with Kids theme.
+ * Now fetches data from Supabase database.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
- * @updated 2025-12-09 - Added multi-track support with track selection
+ * @updated 2025-12-11 - Migrated to use database via useAgoraTracks hook
  */
 
 'use client'
@@ -14,8 +14,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useRequireKidsMode, useKids } from '@/hooks/use-kids'
-import { KIDS_TRACKS, TOTAL_KIDS_VIDEOS, getKidsTrackById, KidsTrackId } from '@/data/kids-videos'
-import { KidsVideo, KidsTrackCard } from '@/components/kids'
+import useAgoraTracks, { KidsTrack, KidsVideo as KidsVideoType } from '@/hooks/use-agora-tracks'
+import { KidsTrackCard } from '@/components/kids'
 import { GlassCard } from '@/components/ui/glass-card'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -38,15 +38,28 @@ import {
 } from '@/lib/analytics/kids-tracker'
 import { cn } from '@/lib/utils'
 
+// Helper to generate YouTube thumbnail URL
+function ytThumb(videoId: string): string {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+}
+
 export default function KidsVideosPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isReady, isLoading } = useRequireKidsMode()
+  const { isReady, isLoading: kidsLoading } = useRequireKidsMode()
   const { trackVideo } = useKids()
+  const { kidsTracks, isLoading: tracksLoading, getKidsTrack } = useAgoraTracks()
 
   // Get selected track from URL params
-  const selectedTrackId = searchParams.get('trilha') as KidsTrackId | null
-  const selectedTrack = selectedTrackId ? getKidsTrackById(selectedTrackId) : null
+  const selectedTrackId = searchParams.get('trilha')
+  const selectedTrack = selectedTrackId ? getKidsTrack(selectedTrackId) : null
+
+  // Calculate total videos count
+  const totalKidsVideos = useMemo(() => {
+    return kidsTracks.reduce((sum, track) => sum + track.videos.length, 0)
+  }, [kidsTracks])
+
+  const isLoading = kidsLoading || tracksLoading
 
   const [telemetry, setTelemetry] = useState(() => calculateKidsTelemetry())
   const [watchedVideoIds, setWatchedVideoIds] = useState<string[]>(() => getWatchedVideoIds())
@@ -58,20 +71,16 @@ export default function KidsVideosPage() {
 
   // Calculate watched videos per track
   const watchedByTrack = useMemo(() => {
-    const result: Record<KidsTrackId, number> = {
-      programacao: 0,
-      'porque-programar': 0,
-      'historia-computacao': 0,
-    }
+    const result: Record<string, number> = {}
 
-    for (const track of KIDS_TRACKS) {
+    for (const track of kidsTracks) {
       result[track.id] = track.videos.filter((v) => watchedVideoIds.includes(v.id)).length
     }
 
     return result
-  }, [watchedVideoIds])
+  }, [watchedVideoIds, kidsTracks])
 
-  const handleVideoClick = (video: KidsVideo) => {
+  const handleVideoClick = (video: KidsVideoType) => {
     trackVideo(video.id)
     const [minutes, seconds] = video.duration.split(':').map(Number)
     const durationSeconds = (minutes || 0) * 60 + (seconds || 0)
@@ -84,7 +93,8 @@ export default function KidsVideosPage() {
   }
 
   // Calculate total progress
-  const totalProgress = Math.round((telemetry.videosWatched / TOTAL_KIDS_VIDEOS) * 100)
+  const totalProgress =
+    totalKidsVideos > 0 ? Math.round((telemetry.videosWatched / totalKidsVideos) * 100) : 0
 
   // Loading state
   if (isLoading) {
@@ -165,7 +175,7 @@ export default function KidsVideosPage() {
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Progresso Total</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {telemetry.videosWatched} de {TOTAL_KIDS_VIDEOS} videos
+                  {telemetry.videosWatched} de {totalKidsVideos} videos
                 </p>
               </div>
             </div>
@@ -199,8 +209,12 @@ export default function KidsVideosPage() {
 
         {/* Track Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {KIDS_TRACKS.map((track) => (
-            <KidsTrackCard key={track.id} track={track} watchedCount={watchedByTrack[track.id]} />
+          {kidsTracks.map((track) => (
+            <KidsTrackCard
+              key={track.id}
+              track={track}
+              watchedCount={watchedByTrack[track.id] || 0}
+            />
           ))}
         </div>
 
@@ -219,9 +233,44 @@ export default function KidsVideosPage() {
   }
 
   // Show videos for selected track
-  const trackProgress = Math.round(
-    (watchedByTrack[selectedTrack.id] / selectedTrack.videos.length) * 100
-  )
+  const trackProgress =
+    selectedTrack.videos.length > 0
+      ? Math.round(((watchedByTrack[selectedTrack.id] || 0) / selectedTrack.videos.length) * 100)
+      : 0
+
+  // Get track color classes based on track.color
+  const getTrackGradient = (color: string) => {
+    const colorMap: Record<string, string> = {
+      coral: 'bg-gradient-to-br from-kids-coral to-kids-orange',
+      turquoise: 'bg-gradient-to-br from-kids-turquoise to-kids-green',
+      purple: 'bg-gradient-to-br from-kids-purple to-kids-coral',
+      green: 'bg-gradient-to-br from-kids-green to-kids-turquoise',
+      orange: 'bg-gradient-to-br from-kids-orange to-kids-yellow',
+    }
+    return colorMap[color] || colorMap.coral
+  }
+
+  const getTrackBgGradient = (color: string) => {
+    const colorMap: Record<string, string> = {
+      coral: 'bg-gradient-to-br from-kids-coral/10 to-kids-orange/10',
+      turquoise: 'bg-gradient-to-br from-kids-turquoise/10 to-kids-green/10',
+      purple: 'bg-gradient-to-br from-kids-purple/10 to-kids-coral/10',
+      green: 'bg-gradient-to-br from-kids-green/10 to-kids-turquoise/10',
+      orange: 'bg-gradient-to-br from-kids-orange/10 to-kids-yellow/10',
+    }
+    return colorMap[color] || colorMap.coral
+  }
+
+  const getTrackBarGradient = (color: string) => {
+    const colorMap: Record<string, string> = {
+      coral: 'from-kids-coral to-kids-orange',
+      turquoise: 'from-kids-turquoise to-kids-green',
+      purple: 'from-kids-purple to-kids-coral',
+      green: 'from-kids-green to-kids-turquoise',
+      orange: 'from-kids-orange to-kids-yellow',
+    }
+    return colorMap[color] || colorMap.coral
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -238,12 +287,7 @@ export default function KidsVideosPage() {
             <div
               className={cn(
                 'w-12 h-12 rounded-xl flex items-center justify-center shadow-lg text-2xl',
-                selectedTrack.id === 'programacao' &&
-                  'bg-gradient-to-br from-kids-coral to-kids-orange',
-                selectedTrack.id === 'porque-programar' &&
-                  'bg-gradient-to-br from-kids-turquoise to-kids-green',
-                selectedTrack.id === 'historia-computacao' &&
-                  'bg-gradient-to-br from-kids-purple to-kids-coral'
+                getTrackGradient(selectedTrack.color)
               )}
             >
               {selectedTrack.emoji}
@@ -261,17 +305,7 @@ export default function KidsVideosPage() {
       </div>
 
       {/* Progress Card */}
-      <GlassCard
-        className={cn(
-          'p-6',
-          selectedTrack.id === 'programacao' &&
-            'bg-gradient-to-br from-kids-coral/10 to-kids-orange/10',
-          selectedTrack.id === 'porque-programar' &&
-            'bg-gradient-to-br from-kids-turquoise/10 to-kids-green/10',
-          selectedTrack.id === 'historia-computacao' &&
-            'bg-gradient-to-br from-kids-purple/10 to-kids-coral/10'
-        )}
-      >
+      <GlassCard className={cn('p-6', getTrackBgGradient(selectedTrack.color))}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-kids-yellow to-kids-orange flex items-center justify-center shadow-lg">
@@ -299,9 +333,7 @@ export default function KidsVideosPage() {
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-700 bg-gradient-to-r',
-                  selectedTrack.id === 'programacao' && 'from-kids-coral to-kids-orange',
-                  selectedTrack.id === 'porque-programar' && 'from-kids-turquoise to-kids-green',
-                  selectedTrack.id === 'historia-computacao' && 'from-kids-purple to-kids-coral'
+                  getTrackBarGradient(selectedTrack.color)
                 )}
                 style={{ width: `${trackProgress}%` }}
               />
@@ -321,6 +353,7 @@ export default function KidsVideosPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {selectedTrack.videos.map((video, index) => {
           const isWatched = watchedVideoIds.includes(video.id)
+          const thumbnailUrl = video.thumbnail || ytThumb(video.youtubeId)
           return (
             <button
               key={video.id}
@@ -331,7 +364,7 @@ export default function KidsVideosPage() {
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gray-100 dark:bg-gray-800">
                   <Image
-                    src={video.thumbnail}
+                    src={thumbnailUrl}
                     alt={video.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"

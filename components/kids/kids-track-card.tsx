@@ -2,9 +2,11 @@
  * Kids Track Card Component
  *
  * Displays a learning track with video count and progress.
+ * Now supports both database types and legacy hardcoded types.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-09
+ * @updated 2025-12-11 - Support database KidsTrack type
  */
 
 'use client'
@@ -12,30 +14,42 @@
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
 import { PlayCircle, ChevronRight, CheckCircle2 } from 'lucide-react'
-import { KidsTrack, KidsTrackId } from '@/data/kids-videos'
+import { KidsTrack as DBKidsTrack } from '@/hooks/use-agora-tracks'
 import { cn } from '@/lib/utils'
 
+// Accept database type
 interface KidsTrackCardProps {
-  track: KidsTrack
+  track: DBKidsTrack
   watchedCount: number
   className?: string
 }
 
-const trackColors: Record<KidsTrackId, string> = {
-  programacao: 'from-kids-coral to-kids-orange',
-  'porque-programar': 'from-kids-turquoise to-kids-green',
-  'historia-computacao': 'from-kids-purple to-kids-coral',
+// Dynamic color mapping based on track.color field
+const getTrackGradient = (color: string) => {
+  const colorMap: Record<string, string> = {
+    coral: 'from-kids-coral to-kids-orange',
+    turquoise: 'from-kids-turquoise to-kids-green',
+    purple: 'from-kids-purple to-kids-coral',
+    green: 'from-kids-green to-kids-turquoise',
+    orange: 'from-kids-orange to-kids-yellow',
+  }
+  return colorMap[color] || colorMap.coral
 }
 
-const trackBgColors: Record<KidsTrackId, string> = {
-  programacao: 'bg-kids-coral/10 dark:bg-kids-coral/20',
-  'porque-programar': 'bg-kids-turquoise/10 dark:bg-kids-turquoise/20',
-  'historia-computacao': 'bg-kids-purple/10 dark:bg-kids-purple/20',
+const getTrackBgColor = (color: string) => {
+  const colorMap: Record<string, string> = {
+    coral: 'bg-kids-coral/10 dark:bg-kids-coral/20',
+    turquoise: 'bg-kids-turquoise/10 dark:bg-kids-turquoise/20',
+    purple: 'bg-kids-purple/10 dark:bg-kids-purple/20',
+    green: 'bg-kids-green/10 dark:bg-kids-green/20',
+    orange: 'bg-kids-orange/10 dark:bg-kids-orange/20',
+  }
+  return colorMap[color] || colorMap.coral
 }
 
 export function KidsTrackCard({ track, watchedCount, className }: KidsTrackCardProps) {
   const totalVideos = track.videos.length
-  const progress = Math.round((watchedCount / totalVideos) * 100)
+  const progress = totalVideos > 0 ? Math.round((watchedCount / totalVideos) * 100) : 0
   const isComplete = progress >= 100
 
   return (
@@ -46,7 +60,7 @@ export function KidsTrackCard({ track, watchedCount, className }: KidsTrackCardP
       <GlassCard
         className={cn(
           'overflow-hidden hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02]',
-          trackBgColors[track.id]
+          getTrackBgColor(track.color)
         )}
       >
         <div className="p-6">
@@ -55,7 +69,7 @@ export function KidsTrackCard({ track, watchedCount, className }: KidsTrackCardP
             <div
               className={cn(
                 'w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg text-2xl',
-                trackColors[track.id]
+                getTrackGradient(track.color)
               )}
             >
               {track.emoji}
@@ -89,7 +103,7 @@ export function KidsTrackCard({ track, watchedCount, className }: KidsTrackCardP
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-500 bg-gradient-to-r',
-                  trackColors[track.id]
+                  getTrackGradient(track.color)
                 )}
                 style={{ width: `${progress}%` }}
               />

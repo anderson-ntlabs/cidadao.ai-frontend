@@ -19,7 +19,7 @@ import Image from 'next/image'
 import { useKids, useRequireKidsMode } from '@/hooks/use-kids'
 import { useRequireKidsModeSelected } from '@/hooks/use-agora-mode'
 import { getKidsAgents } from '@/data/agents'
-import { KIDS_VIDEOS, KIDS_TRACKS, TOTAL_KIDS_VIDEOS, KidsTrackId } from '@/data/kids-videos'
+import useAgoraTracks from '@/hooks/use-agora-tracks'
 import { GlassCard } from '@/components/ui/glass-card'
 import {
   KidsCertificateDisplay,
@@ -52,34 +52,50 @@ import {
 } from '@/lib/analytics/kids-tracker'
 import { calculateKidsLevel } from '@/lib/agora/kids-certificate-requirements'
 import type { KidsTelemetryData } from '@/lib/agora/kids-certificate-requirements'
+import type { KidsVideo as KidsVideoType } from '@/hooks/use-agora-tracks'
+
+// Helper to generate YouTube thumbnail URL
+function ytThumb(videoId: string): string {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+}
 
 export default function KidsDashboardPage() {
   const router = useRouter()
   const isModeSelected = useRequireKidsModeSelected()
-  const { isReady, isLoading } = useRequireKidsMode()
+  const { isReady, isLoading: kidsLoading } = useRequireKidsMode()
   const { childName, parentEmail, childAvatar, trackAgent, trackVideo, updateAvatar } = useKids()
+  const { kidsTracks, isLoading: tracksLoading } = useAgoraTracks()
 
   const [showCertificate, setShowCertificate] = useState(false)
   const [telemetry, setTelemetry] = useState<KidsTelemetryData | null>(null)
   const [watchedVideoIds, setWatchedVideoIds] = useState<string[]>([])
 
+  const isLoading = kidsLoading || tracksLoading
+
   const kidsAgents = getKidsAgents()
-  const featuredVideos = KIDS_VIDEOS.slice(0, 4)
+
+  // Get all videos from all tracks for featured section
+  const allKidsVideos = useMemo(() => {
+    return kidsTracks.flatMap((track) => track.videos)
+  }, [kidsTracks])
+
+  const featuredVideos = allKidsVideos.slice(0, 4)
+
+  // Calculate total kids videos
+  const totalKidsVideos = useMemo(() => {
+    return kidsTracks.reduce((sum, track) => sum + track.videos.length, 0)
+  }, [kidsTracks])
 
   // Calculate watched videos per track
   const watchedByTrack = useMemo(() => {
-    const result: Record<KidsTrackId, number> = {
-      programacao: 0,
-      'porque-programar': 0,
-      'historia-computacao': 0,
-    }
+    const result: Record<string, number> = {}
 
-    for (const track of KIDS_TRACKS) {
+    for (const track of kidsTracks) {
       result[track.id] = track.videos.filter((v) => watchedVideoIds.includes(v.id)).length
     }
 
     return result
-  }, [watchedVideoIds])
+  }, [watchedVideoIds, kidsTracks])
 
   // Start session and load telemetry on mount
   useEffect(() => {
@@ -108,7 +124,7 @@ export default function KidsDashboardPage() {
     router.push(`/pt/agora/kids/chat?agent=${agentId}`)
   }
 
-  const handleVideoClick = (video: (typeof KIDS_VIDEOS)[0]) => {
+  const handleVideoClick = (video: KidsVideoType) => {
     trackVideo(video.id)
     setTimeout(() => {
       setTelemetry(calculateKidsTelemetry())
@@ -312,7 +328,7 @@ export default function KidsDashboardPage() {
 
             {/* Track Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {KIDS_TRACKS.map((track) => (
+              {kidsTracks.map((track) => (
                 <KidsTrackCard
                   key={track.id}
                   track={track}
@@ -326,14 +342,14 @@ export default function KidsDashboardPage() {
               <div className="flex items-center justify-between text-sm mb-2">
                 <span className="text-gray-600 dark:text-gray-400">Progresso total</span>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {telemetry?.videosWatched || 0}/{TOTAL_KIDS_VIDEOS} videos
+                  {telemetry?.videosWatched || 0}/{totalKidsVideos} videos
                 </span>
               </div>
               <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-kids-coral via-kids-orange to-kids-yellow rounded-full transition-all duration-500"
                   style={{
-                    width: `${Math.round(((telemetry?.videosWatched || 0) / TOTAL_KIDS_VIDEOS) * 100)}%`,
+                    width: `${totalKidsVideos > 0 ? Math.round(((telemetry?.videosWatched || 0) / totalKidsVideos) * 100) : 0}%`,
                   }}
                 />
               </div>
@@ -369,7 +385,7 @@ export default function KidsDashboardPage() {
                 >
                   <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow">
                     <Image
-                      src={video.thumbnail}
+                      src={ytThumb(video.youtubeId)}
                       alt={video.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -377,9 +393,6 @@ export default function KidsDashboardPage() {
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                     <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-xs font-bold text-kids-coral">
                       #{index + 1}
-                    </div>
-                    <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-xs text-white">
-                      {video.duration}
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-12 h-12 rounded-full bg-kids-coral flex items-center justify-center shadow-lg">
@@ -547,7 +560,7 @@ export default function KidsDashboardPage() {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">Ver Vídeos</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {KIDS_VIDEOS.length} vídeos disponíveis
+                    {totalKidsVideos} vídeos disponíveis
                   </p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-kids-coral group-hover:translate-x-1 transition-all" />
