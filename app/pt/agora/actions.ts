@@ -502,6 +502,7 @@ export async function saveCertificate(certificateData: {
   articlesRead: number
   conversationsCount: number
   verificationHash: string
+  holderName: string // Name to appear on public certificate
 }) {
   const supabase = await createClient()
 
@@ -527,7 +528,7 @@ export async function saveCertificate(certificateData: {
       new Date().toISOString().split('T')[0]
     const programEndDate = new Date().toISOString().split('T')[0]
 
-    // Insert certificate
+    // Insert certificate (user's private copy - deleted with account)
     const { data, error } = await supabase
       .from('agora_certificates')
       .insert({
@@ -544,12 +545,37 @@ export async function saveCertificate(certificateData: {
         articles_read: certificateData.articlesRead,
         conversations_count: certificateData.conversationsCount,
         verification_hash: certificateData.verificationHash,
-        verification_url: `https://cidadao.ai/verify/${certificateData.certificateNumber}`,
+        verification_url: `https://cidadao.ai/pt/agora/verificar?code=${certificateData.certificateNumber}`,
       })
       .select()
       .single()
 
     if (error) throw error
+
+    // Save to public certificates table (survives account deletion)
+    // This requires service role - call via API
+    try {
+      await fetch('/api/certificate/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          verificationCode: certificateData.certificateNumber,
+          verificationHash: certificateData.verificationHash,
+          holderName: certificateData.holderName,
+          certificateType: certificateData.certificateType,
+          totalHours: certificateData.totalHours,
+          totalXp: certificateData.totalXp,
+          finalLevel: certificateData.finalLevel,
+          finalRank: certificateData.finalRank,
+          missionsCompleted: certificateData.missionsCompleted,
+          programStartDate,
+          programEndDate,
+        }),
+      })
+    } catch (publicError) {
+      // Log but don't fail - user still gets their certificate
+      console.error('Failed to register public certificate:', publicError)
+    }
 
     // Update profile status
     await supabase

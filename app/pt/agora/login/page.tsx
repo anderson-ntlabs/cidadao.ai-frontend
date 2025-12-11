@@ -13,7 +13,7 @@ import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { GovBrMockLogin, type GovBrUserData } from '@/components/auth'
 import { cn } from '@/lib/utils'
-import { Github, GraduationCap, Sparkles, Loader2 } from 'lucide-react'
+import { Github, GraduationCap, Sparkles, Loader2, Shield } from 'lucide-react'
 
 // Google icon SVG component (official colors)
 function GoogleIcon({ className }: { className?: string }) {
@@ -329,6 +329,27 @@ export default function AgoraLoginPage() {
               <span className="text-xs academy-text-muted">{feature.label}</span>
             </div>
           ))}
+        </div>
+
+        {/* Certificate Verification */}
+        <div className="mb-6">
+          <Link href="/pt/agora/verificar">
+            <GlassCard className="hover:border-emerald-500/50 transition-colors cursor-pointer">
+              <GlassCardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium academy-text">Validar Certificado</p>
+                    <p className="text-xs academy-text-muted">
+                      Verifique a autenticidade de um certificado
+                    </p>
+                  </div>
+                </div>
+              </GlassCardContent>
+            </GlassCard>
+          </Link>
         </div>
 
         {/* Footer */}

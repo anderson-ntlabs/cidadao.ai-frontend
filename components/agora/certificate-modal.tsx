@@ -96,6 +96,7 @@ export function CertificateModal({ isOpen, onClose }: CertificateModalProps) {
           articlesRead: telemetry.readingsCompleted,
           conversationsCount: telemetry.chatMessages,
           verificationHash: `${user.id}-${Date.now()}-${certId}`.slice(0, 64),
+          holderName: user.name, // Name for public verification
         })
       }
     } catch (error) {
