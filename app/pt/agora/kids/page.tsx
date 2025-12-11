@@ -26,16 +26,16 @@ import {
   ArrowRight,
   Loader2,
   CheckCircle,
-  Copy,
   AlertTriangle,
   User,
   Shield,
   KeyRound,
+  Mail,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { KidsContractModal } from '@/components/kids'
 
-type Step = 'choice' | 'setup' | 'contract' | 'code-generated' | 'child-access'
+type Step = 'choice' | 'setup' | 'contract' | 'success' | 'child-access'
 
 export default function KidsEntryPage() {
   const router = useRouter()
@@ -55,8 +55,6 @@ export default function KidsEntryPage() {
   const [selectedAvatar, setSelectedAvatar] = useState<string>('monica')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null)
-  const [codeCopied, setCodeCopied] = useState(false)
   const [contractId, setContractId] = useState<string | null>(null)
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
 
@@ -110,9 +108,8 @@ export default function KidsEntryPage() {
       setHasCheckedProfile(true)
     }
 
-    // Don't redirect if we're showing the generated code - user needs to see it!
-    // Also don't redirect during setup steps
-    const isInSetupFlow = step === 'setup' || step === 'contract' || step === 'code-generated'
+    // Don't redirect during setup steps
+    const isInSetupFlow = step === 'setup' || step === 'contract' || step === 'success'
     if (isInSetupFlow) {
       return // Let the user complete the setup flow
     }
@@ -144,7 +141,7 @@ export default function KidsEntryPage() {
     setError(null)
 
     try {
-      // Enable kids mode (this will create the profile)
+      // Enable kids mode (this will create the profile and send code via email)
       const success = await enableKidsMode(
         parentName,
         parentEmail,
@@ -154,15 +151,10 @@ export default function KidsEntryPage() {
       )
 
       if (success) {
-        // Generate unique parental code
-        const code = await generateAccessCode()
-        if (code) {
-          setGeneratedCode(code)
-          setStep('code-generated')
-        } else {
-          setError('Erro ao gerar código de acesso. Tente novamente.')
-          setStep('setup')
-        }
+        // Generate access code (sent via email automatically)
+        await generateAccessCode()
+        // Go to success screen
+        setStep('success')
       } else {
         setError('Erro ao configurar área Kids. Tente novamente.')
         setStep('setup')
@@ -177,14 +169,6 @@ export default function KidsEntryPage() {
 
   const handleContractClose = () => {
     setStep('setup')
-  }
-
-  const handleCopyCode = async () => {
-    if (generatedCode) {
-      await navigator.clipboard.writeText(generatedCode)
-      setCodeCopied(true)
-      setTimeout(() => setCodeCopied(false), 2000)
-    }
   }
 
   const handleEnterKidsArea = () => {
@@ -370,15 +354,17 @@ export default function KidsEntryPage() {
                   </div>
                 </div>
 
-                {/* Warning */}
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                {/* Info */}
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div className="flex gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <Mail className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
-                      <p className="font-medium text-amber-800 dark:text-amber-200">Importante!</p>
-                      <p className="text-amber-700 dark:text-amber-300 mt-1">
-                        Após configurar, você receberá um código único. Anote-o! Este código é a
-                        única forma de acessar os relatórios de uso da criança.
+                      <p className="font-medium text-blue-800 dark:text-blue-200">
+                        Código por Email
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300 mt-1">
+                        Após configurar, você receberá um código de acesso parental por email. Use-o
+                        para acessar os relatórios de uso da criança.
                       </p>
                     </div>
                   </div>
@@ -424,8 +410,8 @@ export default function KidsEntryPage() {
           </>
         )}
 
-        {/* Step: Code Generated */}
-        {step === 'code-generated' && generatedCode && (
+        {/* Step: Success - Email Sent */}
+        {step === 'success' && (
           <GlassCard>
             <GlassCardContent className="p-6 text-center space-y-6">
               <div className="h-20 w-20 mx-auto rounded-full bg-kids-green flex items-center justify-center">
@@ -439,42 +425,26 @@ export default function KidsEntryPage() {
                 </p>
               </div>
 
-              {/* Code Display */}
-              <div className="p-6 bg-slate-100 dark:bg-slate-800 rounded-xl space-y-3">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                  Seu Código de Acesso Parental
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <code className="text-3xl font-mono font-bold tracking-widest text-kids-coral">
-                    {generatedCode}
-                  </code>
-                  <button
-                    onClick={handleCopyCode}
-                    className="h-10 w-10 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
-                  >
-                    {codeCopied ? (
-                      <CheckCircle className="h-5 w-5 text-kids-green" />
-                    ) : (
-                      <Copy className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </button>
+              {/* Email Sent Info */}
+              <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl space-y-3">
+                <div className="h-12 w-12 mx-auto rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-blue-600 dark:text-blue-300" />
                 </div>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Código enviado por email!
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Enviamos o código de acesso parental para{' '}
+                  <strong className="font-semibold">{parentEmail}</strong>
+                </p>
               </div>
 
-              {/* Warning */}
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="flex gap-3 text-left">
-                  <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-bold text-red-800 dark:text-red-200">
-                      ANOTE ESTE CÓDIGO AGORA!
-                    </p>
-                    <p className="text-red-700 dark:text-red-300 mt-1">
-                      Este código será mostrado apenas uma vez. Você precisará dele para acessar os
-                      relatórios de uso em /pt/agora/pais
-                    </p>
-                  </div>
-                </div>
+              {/* Info */}
+              <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Use o código recebido por email para acessar o <strong>Dashboard dos Pais</strong>{' '}
+                  e acompanhar o progresso de {childName}.
+                </p>
               </div>
 
               {/* Continue Button */}
