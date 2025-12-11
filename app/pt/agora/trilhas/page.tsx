@@ -3,22 +3,19 @@
 /**
  * Agora Trilhas (Learning Tracks) Page
  *
- * Redesigned with improved UX:
- * - Hero section with current track progress
- * - Interactive track cards with expansion
- * - Visual journey representation
- * - Mentor connection per track
- * - Mobile-first responsive design
+ * Now fetches track data from Supabase database.
+ * Supports dynamic content updates without code changes.
  *
  * @author Anderson Henrique da Silva
- * @date 2025-12-07
+ * @date 2025-12-11 (Updated to use database)
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAgora } from '@/hooks/use-agora'
+import useAgoraTracks, { Track, TRACK_COLORS, TrackModule } from '@/hooks/use-agora-tracks'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
@@ -47,17 +44,34 @@ import {
   Zap,
   Target,
   Users,
+  AlertCircle,
+  type LucideIcon,
 } from 'lucide-react'
 
-// Track definitions with modules and prerequisites
-const TRACKS = [
+// Icon mapping from database string to component
+const ICON_MAP: Record<string, LucideIcon> = {
+  GraduationCap,
+  Server,
+  Palette,
+  Brain,
+  Code,
+  BookOpen,
+}
+
+// Helper to get icon component from string
+function getTrackIcon(iconName: string): LucideIcon {
+  return ICON_MAP[iconName] || GraduationCap
+}
+
+// Fallback tracks (used when database is empty or loading fails)
+const FALLBACK_TRACKS = [
   {
     id: 'introducao' as const,
     name: 'Introdução',
     subtitle: 'Conheça o Cidadão.AI',
     description:
       'Descubra a plataforma, conheça os agentes de IA e aprenda como aproveitar ao máximo a Ágora Academy',
-    icon: GraduationCap,
+    icon: 'GraduationCap',
     color: 'emerald',
     gradient: 'from-emerald-500 to-teal-500',
     bgLight: 'bg-emerald-50',
@@ -218,6 +232,11 @@ function ModuleIcon({ type }: { type: string }) {
   return <Icon className="w-4 h-4" />
 }
 
+// Helper to get color classes from track color string
+function getTrackColors(color: string) {
+  return TRACK_COLORS[color] || TRACK_COLORS.emerald
+}
+
 function TrackCard({
   track,
   isEnrolled,
@@ -228,7 +247,7 @@ function TrackCard({
   isLocked,
   prerequisiteName,
 }: {
-  track: (typeof TRACKS)[0]
+  track: Track
   isEnrolled: boolean
   isExpanded: boolean
   onToggle: () => void
@@ -237,7 +256,8 @@ function TrackCard({
   isLocked: boolean
   prerequisiteName?: string
 }) {
-  const Icon = track.icon
+  const Icon = getTrackIcon(track.icon)
+  const colors = getTrackColors(track.color)
   const completedModules = Math.floor((progress / 100) * track.modules.length)
 
   return (
@@ -263,7 +283,7 @@ function TrackCard({
           <div
             className={cn(
               'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 relative',
-              isLocked ? 'bg-gray-400 dark:bg-gray-600' : cn('bg-gradient-to-br', track.gradient)
+              isLocked ? 'bg-gray-400 dark:bg-gray-600' : cn('bg-gradient-to-br', colors.gradient)
             )}
           >
             {isLocked ? (
@@ -291,7 +311,7 @@ function TrackCard({
                 </Badge>
               ) : null}
             </div>
-            <p className={cn('text-sm font-medium', isLocked ? 'text-gray-400' : track.textColor)}>
+            <p className={cn('text-sm font-medium', isLocked ? 'text-gray-400' : colors.textColor)}>
               {track.subtitle}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
@@ -325,13 +345,13 @@ function TrackCard({
               <div className="mt-3">
                 <div className="flex items-center justify-between text-xs mb-1">
                   <span className="text-gray-600 dark:text-gray-400">Progresso</span>
-                  <span className={cn('font-medium', track.textColor)}>{progress}%</span>
+                  <span className={cn('font-medium', colors.textColor)}>{progress}%</span>
                 </div>
                 <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
                     className={cn(
                       'h-full bg-gradient-to-r transition-all duration-500',
-                      track.gradient
+                      colors.gradient
                     )}
                     style={{ width: `${progress}%` }}
                   />
@@ -353,9 +373,9 @@ function TrackCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className={cn('border-t', track.borderColor)}>
+        <div className={cn('border-t', colors.borderColor)}>
           {/* Mentor Section */}
-          <div className={cn('p-4 sm:p-6', track.bgLight, track.bgDark)}>
+          <div className={cn('p-4 sm:p-6', colors.bgLight, colors.bgDark)}>
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-lg ring-2 ring-white dark:ring-gray-800">
                 <Image
@@ -370,7 +390,7 @@ function TrackCard({
                   Seu mentor
                 </p>
                 <p className="font-bold text-gray-900 dark:text-white">{track.mentor.name}</p>
-                <p className={cn('text-sm', track.textColor)}>{track.mentor.role}</p>
+                <p className={cn('text-sm', colors.textColor)}>{track.mentor.role}</p>
               </div>
             </div>
           </div>
@@ -393,7 +413,7 @@ function TrackCard({
                     className={cn(
                       'flex items-center gap-3 p-3 rounded-xl transition-colors',
                       isCompleted && 'bg-green-50 dark:bg-green-900/20',
-                      isCurrent && cn(track.bgLight, track.bgDark, 'ring-2', track.borderColor),
+                      isCurrent && cn(colors.bgLight, colors.bgDark, 'ring-2', colors.borderColor),
                       !isCompleted && !isCurrent && 'bg-gray-50 dark:bg-gray-800/50'
                     )}
                   >
@@ -402,7 +422,7 @@ function TrackCard({
                       className={cn(
                         'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                         isCompleted && 'bg-green-500 text-white',
-                        isCurrent && cn('bg-gradient-to-br', track.gradient, 'text-white'),
+                        isCurrent && cn('bg-gradient-to-br', colors.gradient, 'text-white'),
                         !isCompleted && !isCurrent && 'bg-gray-200 dark:bg-gray-700 text-gray-400'
                       )}
                     >
@@ -425,19 +445,19 @@ function TrackCard({
                             : 'text-gray-900 dark:text-white'
                         )}
                       >
-                        {module.name}
+                        {module.title}
                       </p>
                       <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <ModuleIcon type={module.type} />
-                        <span className="capitalize">{module.type}</span>
+                        <Video className="w-4 h-4" />
+                        <span>{module.videos.length} vídeos</span>
                         <span>•</span>
-                        <span>{module.duration}</span>
+                        <span>{module.xpReward} XP</span>
                       </div>
                     </div>
 
                     {/* Action */}
                     {isCurrent && (
-                      <Link href={`/pt/agora/trilhas/${track.id}/${module.id}`}>
+                      <Link href={`/pt/agora/trilhas/${track.id}/${module.moduleNumber}`}>
                         <Button size="sm" variant="primary" className="flex-shrink-0">
                           <Play className="w-3 h-3 mr-1" />
                           Iniciar
@@ -454,7 +474,7 @@ function TrackCard({
           <div
             className={cn(
               'p-4 sm:p-6 border-t',
-              track.borderColor,
+              colors.borderColor,
               'bg-gray-50 dark:bg-gray-800/50'
             )}
           >
@@ -495,7 +515,7 @@ function TrackCard({
                 <div className="flex items-center gap-2 text-sm">
                   <Star className="w-4 h-4 text-yellow-500" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    Ganhe ate <strong className={track.textColor}>{track.xpTotal} XP</strong> e
+                    Ganhe ate <strong className={colors.textColor}>{track.xpTotal} XP</strong> e
                     certificado
                   </span>
                 </div>
@@ -517,8 +537,44 @@ function TrackCard({
 
 export default function AgoraTrilhasPage() {
   const router = useRouter()
-  const { user, isLoading, isDemoMode } = useAgora()
+  const { user, isLoading: userLoading, isDemoMode } = useAgora()
+  const { tracks, isLoading: tracksLoading, error: tracksError, getTrack } = useAgoraTracks()
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
+
+  // Use database tracks or fallback to hardcoded if empty
+  const displayTracks = useMemo(() => {
+    if (tracks.length > 0) return tracks
+    // Convert fallback to Track type
+    return FALLBACK_TRACKS.map((t) => ({
+      ...t,
+      icon:
+        t.icon === 'GraduationCap'
+          ? 'GraduationCap'
+          : typeof t.icon === 'function'
+            ? 'Server'
+            : t.icon,
+      xpTotal: t.xpTotal,
+      certificateHours: 4,
+      isIntro: t.isIntro || false,
+      prerequisiteId: t.prerequisite || undefined,
+      mentor: t.mentor,
+      displayOrder: 0,
+      isActive: true,
+      modules: t.modules.map((m, idx) => ({
+        id: m.id,
+        trackId: t.id,
+        moduleNumber: idx + 1,
+        title: m.name,
+        description: '',
+        objectives: [],
+        xpReward: Math.floor(t.xpTotal / t.modules.length),
+        videos: [],
+        exercises: [],
+      })),
+    })) as Track[]
+  }, [tracks])
+
+  const isLoading = userLoading || tracksLoading
 
   // Redirect to onboarding if not completed - required for trilhas
   useEffect(() => {
@@ -534,7 +590,7 @@ export default function AgoraTrilhasPage() {
   const getTrackProgress = (trackId: string) => {
     if (!enrolledTracks.includes(trackId as any)) return 0
     // Mock progress based on XP
-    const track = TRACKS.find((t) => t.id === trackId)
+    const track = displayTracks.find((t) => t.id === trackId)
     if (!track) return 0
     const xpPerTrack = Math.floor((user?.totalXp || 0) / Math.max(enrolledTracks.length, 1))
     return Math.min(100, Math.floor((xpPerTrack / track.xpTotal) * 100))
@@ -546,15 +602,15 @@ export default function AgoraTrilhasPage() {
   }
 
   // Check if track is locked based on prerequisites
-  const isTrackLocked = (track: (typeof TRACKS)[0]) => {
-    if (!track.prerequisite) return false
-    return !isTrackCompleted(track.prerequisite)
+  const isTrackLocked = (track: Track) => {
+    if (!track.prerequisiteId) return false
+    return !isTrackCompleted(track.prerequisiteId)
   }
 
   // Get prerequisite track name
-  const getPrerequisiteName = (prerequisiteId: string | null) => {
+  const getPrerequisiteName = (prerequisiteId: string | undefined) => {
     if (!prerequisiteId) return undefined
-    const prereqTrack = TRACKS.find((t) => t.id === prerequisiteId)
+    const prereqTrack = displayTracks.find((t) => t.id === prerequisiteId)
     return prereqTrack?.name
   }
 
@@ -568,11 +624,11 @@ export default function AgoraTrilhasPage() {
   }
 
   // Auto-expand first enrolled track or first track
-  useState(() => {
-    if (enrolledTracks.length > 0) {
+  useEffect(() => {
+    if (enrolledTracks.length > 0 && !expandedTrack) {
       setExpandedTrack(enrolledTracks[0])
     }
-  })
+  }, [enrolledTracks, expandedTrack])
 
   // Show loading or redirect if onboarding not completed
   if (isLoading || (user && !user.hasCompletedOnboarding)) {
@@ -587,6 +643,23 @@ export default function AgoraTrilhasPage() {
               ? 'Redirecionando para onboarding...'
               : 'Carregando trilhas...'}
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (tracksError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Erro ao carregar trilhas</p>
+          <Button onClick={() => window.location.reload()} variant="secondary">
+            Tentar novamente
+          </Button>
         </div>
       </div>
     )
@@ -681,7 +754,7 @@ export default function AgoraTrilhasPage() {
 
         {/* Track Cards */}
         <div className="space-y-4">
-          {TRACKS.map((track) => (
+          {displayTracks.map((track) => (
             <TrackCard
               key={track.id}
               track={track}
@@ -691,7 +764,7 @@ export default function AgoraTrilhasPage() {
               onStart={() => handleStartTrack(track.id)}
               progress={getTrackProgress(track.id)}
               isLocked={isTrackLocked(track)}
-              prerequisiteName={getPrerequisiteName(track.prerequisite)}
+              prerequisiteName={getPrerequisiteName(track.prerequisiteId)}
             />
           ))}
         </div>
