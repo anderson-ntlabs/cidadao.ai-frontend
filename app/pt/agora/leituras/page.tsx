@@ -8,20 +8,20 @@
  *
  * Author: Anderson Henrique da Silva
  * Refactored: 2025-12-06 - Design System integration
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
   BookOpen,
   Check,
   Clock,
@@ -284,44 +284,20 @@ export default function AcademyReadingsPage() {
   }).length
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando leituras...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando leituras..." />
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/pt/agora"
-              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Leituras Obrigatórias
-                </h1>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {completedCount} de {readings.length} concluídas
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+    <PageContainer background="gradient" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl="/pt/agora"
+        title="Leituras Obrigatorias"
+        subtitle={`${completedCount} de ${readings.length} concluidas`}
+        icon={BookOpen}
+      />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="px-4 py-6">
         {/* Progress card */}
         <Card
           variant="filled"
@@ -510,6 +486,6 @@ export default function AcademyReadingsPage() {
           )}
         </div>
       </main>
-    </div>
+    </PageContainer>
   )
 }

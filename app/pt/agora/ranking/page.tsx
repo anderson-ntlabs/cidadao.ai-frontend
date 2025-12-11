@@ -9,27 +9,25 @@
  *
  * Author: Anderson Henrique da Silva
  * Refactored: 2025-12-06 - Design System integration
- * Updated: 2025-12-06 - Supabase integration
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { VirtualizedList } from '@/components/ui/virtualized-list'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  ArrowLeft,
   Trophy,
   Zap,
   Clock,
   Flame,
   Crown,
-  Medal,
   Star,
   Sparkles,
   RefreshCw,
@@ -178,14 +176,7 @@ export default function AcademyRankingPage() {
 
   // Loading state - AFTER all hooks are called
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando ranking...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando ranking..." />
   }
 
   const getMedalIcon = (position: number) => {
@@ -200,58 +191,26 @@ export default function AcademyRankingPage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
-      />
-      {/* Gradient Overlay */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
-
-      {/* Header */}
-      <header className="relative z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/pt/agora"
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div>
-                <div className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-yellow-500" />
-                  <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                    Ranking da Academy
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Veja quem está liderando
-                  </p>
-                  {isUsingSupabase ? (
-                    <Badge variant="success" size="sm" className="flex items-center gap-1">
-                      <Database className="w-3 h-3" />
-                      Ao vivo
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary" size="sm" className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      Demo
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-
+    <PageContainer background="operarios" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl="/pt/agora"
+        title="Ranking da Academy"
+        subtitle="Veja quem esta liderando"
+        icon={Trophy}
+        actions={
+          <div className="flex items-center gap-2">
+            {isUsingSupabase ? (
+              <Badge variant="success" size="sm" className="flex items-center gap-1">
+                <Database className="w-3 h-3" />
+                Ao vivo
+              </Badge>
+            ) : (
+              <Badge variant="secondary" size="sm" className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                Demo
+              </Badge>
+            )}
             <Button
               onClick={handleRefresh}
               variant="ghost"
@@ -263,10 +222,10 @@ export default function AcademyRankingPage() {
               <span className="hidden sm:inline">Atualizar</span>
             </Button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
-      <main className="relative z-10 max-w-4xl mx-auto px-4 py-8">
+      <main className="px-4 py-6">
         {/* User position card */}
         {userRank > 0 && (
           <GlassCard className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 border-0 overflow-hidden relative">
@@ -459,9 +418,9 @@ export default function AcademyRankingPage() {
 
         {/* Footer note */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-          O ranking é atualizado em tempo real. Continue estudando para subir!
+          O ranking e atualizado em tempo real. Continue estudando para subir!
         </p>
       </main>
-    </div>
+    </PageContainer>
   )
 }

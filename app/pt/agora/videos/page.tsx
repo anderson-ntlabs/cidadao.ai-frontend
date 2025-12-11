@@ -8,15 +8,16 @@
  *
  * Author: Anderson Henrique da Silva
  * Refactored: 2025-12-06 - Design System integration
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useAgora } from '@/hooks/use-agora'
-import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
@@ -390,56 +391,26 @@ export default function AcademyVideosPage() {
   const totalRequired = videos.filter((v) => v.is_required).length
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando vídeos...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Carregando videos..." />
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
-      />
-      {/* Gradient Overlay */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
-
-      {/* Page Title Section */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center shadow-lg">
-              <Video className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="font-bold text-2xl text-gray-900 dark:text-gray-100">
-                Vídeos do Programa
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {completedCount} de {videos.length} assistidos
-              </p>
-            </div>
-          </div>
+    <PageContainer background="operarios" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl="/pt/agora"
+        title="Videos do Programa"
+        subtitle={`${completedCount} de ${videos.length} assistidos`}
+        icon={Video}
+        actions={
           <Badge variant="warning" size="default">
             <Star className="w-3 h-3" />
-            {totalRequired} obrigatórios
+            {totalRequired} obrigatorios
           </Badge>
-        </div>
-      </section>
+        }
+      />
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 pb-8 pt-4">
+      <main className="px-4 pb-8 pt-6">
         {/* Category filter */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
@@ -571,7 +542,7 @@ export default function AcademyVideosPage() {
         )}
       </main>
 
-      {/* Video modal */}
+      {/* Video Modal */}
       <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
         <ModalContent size="xl" className="bg-white dark:bg-gray-900">
           {selectedVideo && (
@@ -667,6 +638,6 @@ export default function AcademyVideosPage() {
           )}
         </ModalContent>
       </Modal>
-    </div>
+    </PageContainer>
   )
 }

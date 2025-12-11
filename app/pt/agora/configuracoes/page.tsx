@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
   Settings,
@@ -13,14 +12,13 @@ import {
   Volume2,
   Save,
   Mic,
-  ArrowLeft,
-  GraduationCap,
   Shield,
   Trash2,
   FileSearch,
   Download,
 } from 'lucide-react'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { useAgora } from '@/hooks/use-agora'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'
@@ -34,7 +32,7 @@ import { DeleteAccountModal, LGPDTermsModal } from '@/components/privacy'
  * Real auth only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Removed demo mode
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 // Lazy load heavy panel components
@@ -114,16 +112,7 @@ const VoiceSettings = dynamic(
 )
 
 function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-          <GraduationCap className="w-8 h-8 text-white" />
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando configurações...</p>
-      </div>
-    </div>
-  )
+  return <PageLoading text="Carregando configuracoes..." />
 }
 
 function ConfiguracoesContent() {
@@ -195,67 +184,30 @@ function ConfiguracoesContent() {
   }
 
   if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Redirecionando para login..." />
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
+    <PageContainer background="operarios" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl="/pt/agora"
+        title="Configuracoes"
+        subtitle="Personalize sua experiencia na Agora"
+        icon={Settings}
+        actions={
+          <Button
+            variant="primary"
+            leftIcon={<Save className="w-4 h-4" />}
+            onClick={handleSavePreferences}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Salvando...' : 'Salvar'}
+          </Button>
+        }
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
 
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/pt/agora"
-              className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Settings className="w-5 h-5 text-green-600 dark:text-green-400" />
-                <h1 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                  Configurações
-                </h1>
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Personalize sua experiência na Ágora
-              </p>
-            </div>
-            <Button
-              variant="primary"
-              leftIcon={<Save className="w-4 h-4" />}
-              onClick={handleSavePreferences}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <div className="relative z-10 max-w-4xl mx-auto py-8 px-4">
+      <div className="py-6 px-4">
         <div className="space-y-6">
           {/* Accessibility Settings */}
           <ActionPanelSection
@@ -493,7 +445,7 @@ function ConfiguracoesContent() {
         onClose={() => setShowDeleteModal(false)}
         userName={user?.name?.split(' ')[0]}
       />
-    </div>
+    </PageContainer>
   )
 }
 

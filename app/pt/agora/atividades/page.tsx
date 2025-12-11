@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
   Activity,
@@ -11,10 +10,10 @@ import {
   Download,
   RefreshCw,
   GraduationCap,
-  ArrowLeft,
   MessageSquare,
 } from 'lucide-react'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { useAgora } from '@/hooks/use-agora'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
@@ -28,7 +27,7 @@ import { format, subDays } from 'date-fns'
  * Real auth only - no demo mode.
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Removed demo mode
+ * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
  */
 
 // Lazy load the heavy ActivityTimeline component
@@ -66,16 +65,7 @@ const timeRanges = [
 ]
 
 function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-          <GraduationCap className="w-8 h-8 text-white" />
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">Carregando atividades...</p>
-      </div>
-    </div>
-  )
+  return <PageLoading text="Carregando atividades..." />
 }
 
 function AtividadesContent() {
@@ -183,85 +173,42 @@ function AtividadesContent() {
   }
 
   if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">Redirecionando para login...</p>
-        </div>
-      </div>
-    )
+    return <PageLoading text="Redirecionando para login..." />
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: `url('/operarios.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.03,
-        }}
-      />
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-green-50/50 via-transparent to-blue-50/50 dark:from-green-900/20 dark:to-blue-900/20" />
-
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/pt/agora"
-                className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                  <Activity className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Histórico de Atividades
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    {filteredActivities.length}{' '}
-                    {filteredActivities.length === 1 ? 'atividade' : 'atividades'} encontradas
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoadingActivities}
-              >
-                <RefreshCw className={cn('w-4 h-4 mr-2', isLoadingActivities && 'animate-spin')} />
-                Atualizar
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleExport}
-                disabled={filteredActivities.length === 0}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Exportar
-              </Button>
-            </div>
+    <PageContainer background="operarios" maxWidth="5xl" padding="none">
+      {/* Page Header */}
+      <PageHeader
+        backUrl="/pt/agora"
+        title="Historico de Atividades"
+        subtitle={`${filteredActivities.length} ${filteredActivities.length === 1 ? 'atividade' : 'atividades'} encontradas`}
+        icon={Activity}
+        actions={
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoadingActivities}
+            >
+              <RefreshCw className={cn('w-4 h-4 mr-2', isLoadingActivities && 'animate-spin')} />
+              Atualizar
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleExport}
+              disabled={filteredActivities.length === 0}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Exportar
+            </Button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
-      <div className="relative z-10 max-w-6xl mx-auto py-8 px-4">
+      <div className="py-6 px-4">
         {/* Filters */}
         <div className="space-y-4 mb-8">
           {/* Search */}
@@ -344,7 +291,7 @@ function AtividadesContent() {
           </GlassCardContent>
         </GlassCard>
       </div>
-    </div>
+    </PageContainer>
   )
 }
 
