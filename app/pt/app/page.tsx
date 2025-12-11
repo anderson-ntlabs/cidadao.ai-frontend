@@ -1,7 +1,7 @@
 'use client'
 
 import '@/styles/design-system/tokens/index.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -59,100 +59,105 @@ export default function HomePage() {
   const notificationStats = getStats()
   const unreadCount = getUnreadCount()
 
-  // Simulate loading state to show skeletons and prevent CLS
+  // Initialize loading state immediately (no artificial delay)
   useEffect(() => {
-    // Show skeletons for 500ms to reserve space and prevent layout shift
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false)
+    // Content is ready immediately - no need for artificial delay
+    setIsLoading(false)
+  }, [])
 
-      // Show welcome message after content loads
-      if (user) {
-        const hasSeenWelcome = localStorage.getItem('hasSeenWelcome')
-        if (!hasSeenWelcome) {
-          toast.success(
-            `Bem-vindo ao Cidadão.AI, ${user.name?.split(' ')[0]}!`,
-            'Explore as ferramentas de transparência pública.'
-          )
-          localStorage.setItem('hasSeenWelcome', 'true')
-        }
-      }
-    }, 500) // 500ms skeleton display to prevent CLS
+  // Handle welcome message separately (client-side only)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !user) return
 
-    return () => clearTimeout(loadingTimer)
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome')
+    if (!hasSeenWelcome) {
+      toast.success(
+        `Bem-vindo ao Cidadão.AI, ${user.name?.split(' ')[0]}!`,
+        'Explore as ferramentas de transparência pública.'
+      )
+      localStorage.setItem('hasSeenWelcome', 'true')
+    }
   }, [user])
 
   // Auth loading is handled by AuthLayout
 
   // Phase 1: Only Home and Chat are active
-  const navigationCards = [
-    {
-      title: 'Chat com IAs',
-      description: 'Converse com nossos agentes especializados em transparência pública',
-      icon: MessageSquare,
-      href: '/pt/app/chat',
-      gradient: 'from-blue-500 to-purple-600',
-      stats: '17 agentes disponíveis',
-      badge: null,
-      active: true,
-    },
-    {
-      title: 'Dashboard',
-      description: 'Acompanhe investigações e análises em tempo real',
-      icon: LayoutDashboard,
-      href: '/pt/app/dashboard',
-      gradient: 'from-green-500 to-emerald-600',
-      stats: 'Em desenvolvimento',
-      badge: 'Em Breve',
-      active: false,
-    },
-    {
-      title: 'Notificações',
-      description: 'Central de alertas e atualizações do sistema',
-      icon: Bell,
-      href: '/pt/app/notificacoes',
-      gradient: 'from-orange-500 to-red-600',
-      stats: 'Em desenvolvimento',
-      badge: 'Em Breve',
-      active: false,
-    },
-    {
-      title: 'Investigações',
-      description: 'Detalhes completos das análises realizadas',
-      icon: FileSearch,
-      href: '/pt/app/investigacoes',
-      gradient: 'from-purple-500 to-pink-600',
-      stats: 'Em desenvolvimento',
-      badge: 'Em Breve',
-      active: false,
-    },
-  ]
+  // Memoize static arrays to prevent unnecessary re-renders
+  const navigationCards = useMemo(
+    () => [
+      {
+        title: 'Chat com IAs',
+        description: 'Converse com nossos agentes especializados em transparência pública',
+        icon: MessageSquare,
+        href: '/pt/app/chat',
+        gradient: 'from-blue-500 to-purple-600',
+        stats: '17 agentes disponíveis',
+        badge: null,
+        active: true,
+      },
+      {
+        title: 'Dashboard',
+        description: 'Acompanhe investigações e análises em tempo real',
+        icon: LayoutDashboard,
+        href: '/pt/app/dashboard',
+        gradient: 'from-green-500 to-emerald-600',
+        stats: 'Em desenvolvimento',
+        badge: 'Em Breve',
+        active: false,
+      },
+      {
+        title: 'Notificações',
+        description: 'Central de alertas e atualizações do sistema',
+        icon: Bell,
+        href: '/pt/app/notificacoes',
+        gradient: 'from-orange-500 to-red-600',
+        stats: 'Em desenvolvimento',
+        badge: 'Em Breve',
+        active: false,
+      },
+      {
+        title: 'Investigações',
+        description: 'Detalhes completos das análises realizadas',
+        icon: FileSearch,
+        href: '/pt/app/investigacoes',
+        gradient: 'from-purple-500 to-pink-600',
+        stats: 'Em desenvolvimento',
+        badge: 'Em Breve',
+        active: false,
+      },
+    ],
+    []
+  )
 
-  const quickStats: QuickStat[] = [
-    {
-      label: 'Contratos Analisados',
-      value: '2,847',
-      icon: <FileSearch className="w-5 h-5" />,
-      trend: { value: 12, isPositive: true },
-    },
-    {
-      label: 'Anomalias Detectadas',
-      value: '23',
-      icon: <AlertTriangle className="w-5 h-5" />,
-      trend: { value: 5, isPositive: false },
-    },
-    {
-      label: 'Economia Identificada',
-      value: 'R$ 1.2M',
-      icon: <TrendingUp className="w-5 h-5" />,
-      trend: { value: 18, isPositive: true },
-    },
-    {
-      label: 'Agentes Ativos',
-      value: '8/17',
-      icon: <Brain className="w-5 h-5" />,
-      trend: { value: 2, isPositive: true },
-    },
-  ]
+  const quickStats: QuickStat[] = useMemo(
+    () => [
+      {
+        label: 'Contratos Analisados',
+        value: '2,847',
+        icon: <FileSearch className="w-5 h-5" />,
+        trend: { value: 12, isPositive: true },
+      },
+      {
+        label: 'Anomalias Detectadas',
+        value: '23',
+        icon: <AlertTriangle className="w-5 h-5" />,
+        trend: { value: 5, isPositive: false },
+      },
+      {
+        label: 'Economia Identificada',
+        value: 'R$ 1.2M',
+        icon: <TrendingUp className="w-5 h-5" />,
+        trend: { value: 18, isPositive: true },
+      },
+      {
+        label: 'Agentes Ativos',
+        value: '8/17',
+        icon: <Brain className="w-5 h-5" />,
+        trend: { value: 2, isPositive: true },
+      },
+    ],
+    []
+  )
 
   return (
     <div className="min-h-screen relative">
