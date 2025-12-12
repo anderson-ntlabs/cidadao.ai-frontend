@@ -404,4 +404,124 @@ describe('Agora Chat Store', () => {
       expect(useAgoraChatStore.getState().isLoading).toBe(false)
     })
   })
+
+  describe('sendMessage', () => {
+    it('should reject non-educational agents', async () => {
+      useAgoraChatStore.setState({
+        sessionId: 'test-session',
+        selectedAgentId: 'invalid-agent',
+      })
+
+      await useAgoraChatStore.getState().sendMessage('Test')
+
+      expect(useAgoraChatStore.getState().error).toBe('Agente não disponível na Academy')
+    })
+
+    it('should initialize session if not exists before sending', async () => {
+      expect(useAgoraChatStore.getState().sessionId).toBeNull()
+
+      // Start the message - the session should be initialized
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Test message')
+
+      // Session should be set immediately
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      expect(useAgoraChatStore.getState().sessionId).not.toBeNull()
+
+      // Wait for completion (may error due to network, but session is set)
+      await sendPromise.catch(() => {})
+    })
+
+    it('should add user message to messages array', async () => {
+      useAgoraChatStore.setState({ sessionId: 'test-session' })
+
+      // Start send - don't await as it may fail due to network
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Hello mentor')
+
+      // Message should be added immediately
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      const messages = useAgoraChatStore.getState().messages
+      expect(messages.length).toBeGreaterThanOrEqual(1)
+      expect(messages[0].role).toBe('user')
+      expect(messages[0].content).toBe('Hello mentor')
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should set loading state when sending', async () => {
+      useAgoraChatStore.setState({ sessionId: 'test-session' })
+
+      // Start send
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Test')
+
+      // Should be loading
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      expect(useAgoraChatStore.getState().isLoading).toBe(true)
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should add placeholder assistant message', async () => {
+      useAgoraChatStore.setState({ sessionId: 'test-session' })
+
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Test')
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      const messages = useAgoraChatStore.getState().messages
+      const assistantMsg = messages.find((m) => m.role === 'assistant')
+      expect(assistantMsg).toBeDefined()
+      expect(assistantMsg?.agentId).toBe('santos-dumont')
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should allow selection of monteiro_lobato as educational agent', () => {
+      useAgoraChatStore.setState({ selectedAgentId: 'monteiro_lobato' })
+      expect(useAgoraChatStore.getState().selectedAgentId).toBe('monteiro_lobato')
+    })
+
+    it('should set streaming state to connecting', async () => {
+      useAgoraChatStore.setState({ sessionId: 'test-session' })
+
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Test')
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      expect(useAgoraChatStore.getState().streaming.isStreaming).toBe(true)
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should clear error before sending', async () => {
+      useAgoraChatStore.setState({
+        sessionId: 'test-session',
+        error: 'Previous error',
+      })
+
+      const sendPromise = useAgoraChatStore.getState().sendMessage('Test')
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      // Error should be cleared at start of send
+      expect(useAgoraChatStore.getState().error).toBeNull()
+
+      await sendPromise.catch(() => {})
+    })
+  })
+
+  describe('Streaming phases', () => {
+    it('should track all streaming phases correctly', () => {
+      // Test all phase values
+      const phases: Array<
+        'idle' | 'connecting' | 'thinking' | 'responding' | 'complete' | 'error'
+      > = ['idle', 'connecting', 'thinking', 'responding', 'complete', 'error']
+
+      phases.forEach((phase) => {
+        useAgoraChatStore.setState({
+          streaming: {
+            ...useAgoraChatStore.getState().streaming,
+            phase,
+          },
+        })
+        expect(useAgoraChatStore.getState().streaming.phase).toBe(phase)
+      })
+    })
+  })
 })
