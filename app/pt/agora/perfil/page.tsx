@@ -2,6 +2,7 @@
 
 import { useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -158,13 +159,16 @@ function ProfileContent() {
             <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Avatar */}
               <div className="relative">
-                <img
+                <Image
                   src={
                     user.avatar ||
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=16a34a&color=fff`
                   }
                   alt={user.name}
+                  width={112}
+                  height={112}
                   className="w-28 h-28 rounded-3xl shadow-xl ring-4 ring-white dark:ring-gray-800"
+                  unoptimized
                 />
                 <div
                   className={cn(
