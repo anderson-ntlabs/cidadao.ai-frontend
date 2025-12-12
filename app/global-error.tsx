@@ -10,6 +10,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs'
+import Link from 'next/link'
 import { useEffect } from 'react'
 
 interface GlobalErrorProps {
@@ -67,12 +68,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               Tentar novamente
             </button>
 
-            <a
+            <Link
               href="/"
               className="block w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
             >
               Voltar ao inicio
-            </a>
+            </Link>
           </div>
 
           <p className="mt-8 text-sm text-gray-500">

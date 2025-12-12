@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useAgoraBackground } from '@/hooks/use-agora-background'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
@@ -64,12 +65,15 @@ function Avatar({
   const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(fallbackName)}&background=f59e0b&color=fff&size=256`
 
   return (
-    <img
+    <Image
       src={error || !src ? fallbackUrl : src}
       alt={alt}
+      width={64}
+      height={64}
       className={className}
       onError={() => setError(true)}
       referrerPolicy="no-referrer"
+      unoptimized
     />
   )
 }
@@ -496,9 +500,11 @@ export function DashboardClient({
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="relative flex-shrink-0">
-                        <img
+                        <Image
                           src="/agents/santos-dumont.webp"
                           alt="Santos-Dumont"
+                          width={56}
+                          height={56}
                           className="w-14 h-14 rounded-lg object-cover"
                         />
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-xs">
@@ -538,9 +544,11 @@ export function DashboardClient({
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="relative flex-shrink-0">
-                        <img
+                        <Image
                           src="/agents/Lina_Bo_Bardi.jpg"
                           alt="Lina Bo Bardi"
+                          width={56}
+                          height={56}
                           className="w-14 h-14 rounded-lg object-cover"
                         />
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-xs">
