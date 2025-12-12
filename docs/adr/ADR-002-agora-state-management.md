@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposto (Em Avaliacao)
+Aceito (Em Implementacao)
 
 ## Data
 
@@ -10,7 +10,7 @@ Proposto (Em Avaliacao)
 
 ## Contexto
 
-A plataforma Agora tem uma estrutura de providers aninhados no layout:
+A plataforma Agora tinha uma estrutura de providers aninhados no layout:
 
 ```
 AgoraAuthProvider (autenticacao Supabase)
@@ -23,138 +23,179 @@ AgoraAuthProvider (autenticacao Supabase)
 ### Problemas Identificados
 
 1. **Sobreposicao de responsabilidades**: Ambos `AgoraAuthProvider` e `AgoraProvider` gerenciam user state
-2. **Provider muito grande**: `AgoraProvider` tem ~1900 linhas com multiplas responsabilidades:
-   - User state
-   - Sessions management
-   - XP transactions
-   - Diary entries
-   - Badges
-   - Gamification (challenges)
-   - Onboarding flow
-   - Cache management
-3. **Acoplamento**: Dificil testar componentes isoladamente
+2. **Tipos duplicados**: 3 definicoes diferentes de `AgoraUser` em arquivos distintos
+3. **Conversao duplicada**: `convertToAgoraUser()` implementado em 3 lugares (~300 linhas duplicadas)
+4. **Logout em 3 lugares**: `use-agora-auth.tsx`, `use-agora.tsx`, `auth.service.ts`
+5. **Race conditions**: Auth inicializa em paralelo nos dois providers
+6. **Provider muito grande**: `AgoraProvider` tem ~1900 linhas com multiplas responsabilidades
 
-### Analise de Impacto
+### Impacto Real
 
-**Pros de refatorar agora:**
-
-- Codigo mais limpo e modular
-- Testes mais faceis
-- Menos re-renders desnecessarios
-
-**Contras de refatorar agora:**
-
-- O codigo atual funciona bem em producao
-- Alto risco de introducao de bugs
-- ~1900 linhas para reescrever
-- Muitos componentes dependem da API atual
-- Tempo significativo de desenvolvimento
+- Bugs de auth dificeis de debugar (qual provider esta desatualizado?)
+- Logout inconsistente (as vezes falha em limpar tudo)
+- Manutencao custosa (mudar algo requer alterar 3 arquivos)
+- Novos desenvolvedores confusos com a arquitetura
 
 ## Decisao
 
-**Adiar a refatoracao completa** e adotar uma estrategia incremental:
+**Implementar refatoracao progressiva** com os seguintes artefatos:
 
-### Fase 1 - Documentacao (Sprint 3 - Atual)
+### 1. Tipos Unificados (`types/agora.ts`)
 
-- Documentar a arquitetura atual neste ADR
-- Nao fazer mudancas estruturais ainda
+```typescript
+// SINGLE SOURCE OF TRUTH para tipos Agora
+export interface AgoraUser {
+  // Core identity (required)
+  id: string
+  email: string
+  name: string
+  avatar: string
 
-### Fase 2 - Melhorias Incrementais (Sprints Futuros)
+  // OAuth metadata (optional)
+  githubUsername?: string
+  provider?: string
 
-- Extrair hooks menores do `AgoraProvider` (ex: `useAgoraSessions`, `useAgoraGamification`)
-- Manter backward compatibility com a API existente
-- Migrar componentes gradualmente
+  // Gamification, academic, consent, etc.
+  // ... todos os campos em um unico lugar
+}
+```
 
-### Fase 3 - Unificacao (Quando Houver Necessidade)
+### 2. Conversor Unificado (`lib/agora/user-converter.ts`)
 
-- Criar `UnifiedAgoraContext` com reducer pattern
-- Consolidar `AgoraAuthProvider` dentro do provider unificado
-- Implementar apenas quando houver problemas reais de performance ou manutenibilidade
+```typescript
+// UNICA funcao de conversao
+export function convertToAgoraUser(
+  supabaseUser: SupabaseUser,
+  profile?: AgoraProfileRow | null,
+  hasConsent?: boolean
+): AgoraUser
+```
+
+### 3. Reducer Pattern (`hooks/agora/agora-reducer.ts`)
+
+```typescript
+// Estado centralizado com acoes tipadas
+export interface AgoraState {
+  user: AgoraUser | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  sessions: StudySession[]
+  badges: AgoraBadge[]
+  // ... todo o estado em um lugar
+}
+
+export type AgoraAction =
+  | { type: 'SET_USER'; payload: AgoraUser | null }
+  | { type: 'LOGOUT' }
+  | { type: 'ADD_XP_TRANSACTION'; payload: XpTransaction }
+// ... acoes tipadas
+```
+
+### 4. Provider Unificado (`hooks/use-unified-auth.tsx`)
+
+```typescript
+// Combina AgoraAuthProvider + auth.service.ts
+export function UnifiedAuthProvider({ children }: Props) {
+  // Single implementation of:
+  // - Auth state management
+  // - Profile loading
+  // - Logout (SINGLE implementation)
+  // - LGPD consent
+}
+```
+
+### Plano de Migracao
+
+**Fase 1 (Sprint 3 - ATUAL)**:
+
+- [x] Criar `types/agora.ts` com tipos unificados
+- [x] Criar `lib/agora/user-converter.ts`
+- [x] Criar `hooks/agora/agora-reducer.ts`
+- [x] Atualizar `hooks/use-unified-auth.tsx` com AgoraUser
+- [ ] Migrar `app/pt/agora/layout.tsx` para usar UnifiedAuthProvider
+- [ ] Deprecar `use-agora-auth.tsx` (mantendo backward compat)
+
+**Fase 2 (Sprint 4)**:
+
+- [ ] Migrar componentes para usar `useUnifiedAuth`
+- [ ] Remover `AgoraAuthProvider` do layout
+- [ ] Simplificar `use-agora.tsx` (remover auth duplicado)
+
+**Fase 3 (Sprint 5)**:
+
+- [ ] Migrar `use-agora.tsx` para usar reducer
+- [ ] Remover duplicacoes restantes
+- [ ] Cleanup final
 
 ## Consequencias
 
 ### Positivas
 
-- Evita introducao de bugs em codigo funcionando
-- Permite focar em testes e qualidade (maior impacto imediato)
-- Mantem velocidade de desenvolvimento
-- Decisao pode ser revista quando houver dados reais de performance
+- Single source of truth para tipos e conversao
+- Logout funcionando consistentemente
+- Menos re-renders (reducer pattern)
+- Mais facil de testar (estado isolado)
+- ~1300 linhas removidas (estimativa)
+- Novos devs entendem a arquitetura mais rapido
 
 ### Negativas
 
-- Debt tecnico permanece por mais tempo
-- Novos desenvolvedores podem ter dificuldade com o codigo atual
-- Algumas oportunidades de otimizacao nao serao aproveitadas
+- Risco de quebrar funcionalidades durante migracao
+- Periodo de transicao com dois sistemas (backward compat)
+- Necessita testes extensivos para validar
 
 ### Neutras
 
-- A API publica dos hooks (`useAgora()`, `useAgoraAuth()`) permanece estavel
-- Componentes existentes continuam funcionando sem mudancas
+- API publica (`useAgora`, `useUnifiedAuth`) mantem mesma interface
+- Componentes existentes continuam funcionando
 
 ## Alternativas Consideradas
 
-### Alternativa 1: Refatoracao Completa Agora
+### Alternativa 1: Adiar Refatoracao
 
-**Pros:**
+**Por que foi rejeitada:** O custo de manutencao atual e muito alto. Bugs de auth estavam consumindo tempo significativo. A decisao de adiar foi reconsiderada apos feedback do desenvolvedor principal.
 
-- Codigo limpo de uma vez
-- Sem debt tecnico
+### Alternativa 2: Zustand Global Store
 
-**Contras:**
+**Por que nao escolhemos:**
 
-- Alto risco
-- Tempo significativo
-- Pode atrasar outras features
+- Requer reescrita de todos os componentes que usam contexto
+- Perdemos React DevTools para estado
+- Zustand ja e usado para stores menores (chat, notifications)
+- Manter consistencia com o resto do codebase
 
-**Por que foi rejeitada:** Risco muito alto para o beneficio neste momento
+## Arquivos Criados/Modificados
 
-### Alternativa 2: Usar Zustand para Tudo
+### Novos Arquivos
 
-**Pros:**
+```
+types/agora.ts                    # Tipos unificados (novo)
+lib/agora/user-converter.ts       # Conversor unico (novo)
+hooks/agora/agora-reducer.ts      # Reducer centralizado (novo)
+```
 
-- API mais simples
-- Melhor devtools
-- Menos boilerplate
+### Arquivos Modificados
 
-**Contras:**
+```
+hooks/use-unified-auth.tsx        # Atualizado para usar AgoraUser
+hooks/agora/index.ts              # Exporta novos modulos
+```
 
-- Reescrita completa necessaria
-- Perda de compatibilidade com contextos React existentes
-- Muitos componentes precisariam ser atualizados
+### Arquivos a Deprecar (Fase 2)
 
-**Por que foi rejeitada:** Mesmo risco da Alternativa 1
+```
+hooks/use-agora-auth.tsx          # Substituido por use-unified-auth
+```
 
-## Monitoramento
+## Metricas de Sucesso
 
-Indicadores para reavaliar esta decisao:
-
-1. **Performance**: Se re-renders desnecessarios causarem lentidao perceptivel
-2. **Bugs recorrentes**: Se bugs relacionados a state management aumentarem
-3. **Developer feedback**: Se equipe reportar dificuldade significativa
-4. **Cobertura de testes**: Se baixa testabilidade impedir aumento de cobertura
+1. **Linhas de codigo**: Reducao de ~30% (2500 -> ~1700)
+2. **Bugs de auth**: Zero bugs de logout inconsistente
+3. **Cobertura de testes**: Possivel testar auth isoladamente
+4. **Developer experience**: Novos devs conseguem entender arquitetura em <30min
 
 ## Referencias
 
 - [React Context Best Practices](https://react.dev/learn/passing-data-deeply-with-context)
-- [Zustand Documentation](https://docs.pmnd.rs/zustand)
-- [Kent C. Dodds - Application State Management with React](https://kentcdodds.com/blog/application-state-management-with-react)
-
-## Notas
-
-### Estrutura Atual de Arquivos
-
-```
-hooks/
-├── use-agora.tsx            # Provider principal (~1900 linhas)
-├── use-agora-auth.tsx       # Provider de autenticacao (~530 linhas)
-├── use-agora-gamification.tsx  # Hook para gamificacao (ja extraido)
-├── use-agora-sessions.tsx   # Hook para sessoes (ja extraido)
-├── use-agora-mode.tsx       # Hook para modo (aprendiz/kids)
-└── use-kids.tsx             # Hook para modo kids
-```
-
-### Proximos Passos Recomendados
-
-1. Aumentar cobertura de testes nos hooks existentes (Sprint 4)
-2. Monitorar metricas de performance em producao
-3. Reavaliar esta decisao em 2-3 sprints
+- [useReducer Pattern](https://react.dev/reference/react/useReducer)
+- [ADR-001: Result Type Pattern](./ADR-001-result-type-pattern.md)

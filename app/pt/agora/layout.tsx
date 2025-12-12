@@ -5,7 +5,7 @@ import '@/styles/design-system/tokens/index.css'
 import { Suspense, useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AgoraProvider, useAgora } from '@/hooks/use-agora'
-import { AgoraAuthProvider } from '@/hooks/use-agora-auth'
+import { UnifiedAuthProvider } from '@/hooks/use-unified-auth'
 import { useKids } from '@/hooks/use-kids'
 import { useAgoraMode } from '@/hooks/use-agora-mode'
 import { AgoraHeader, CelebrationModal, SessionManager, LogoutModal } from '@/components/agora'
@@ -17,15 +17,17 @@ import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'luci
 /**
  * Agora Layout
  *
- * Provides auth context for all Agora pages via AgoraProvider + AgoraAuthProvider.
- * Includes AgoraHeader for consistent navigation across all pages.
- * Real authentication only - no demo mode.
+ * Provides auth context for all Agora pages.
+ *
+ * Architecture (Sprint 3 refactoring):
+ * - UnifiedAuthProvider: Single auth source (replaces AgoraAuthProvider)
+ * - AgoraProvider: Platform state (sessions, gamification, etc.)
  *
  * Use `useAgora()` hook in pages for user data and actions.
- * Use `useAgoraAuth()` hook for auth-specific operations (login, logout).
+ * Use `useUnifiedAuth()` hook for auth-specific operations (login, logout).
  *
  * Author: Anderson Henrique da Silva
- * Updated: 2025-12-08 - Added AgoraHeader to layout for consistency
+ * Updated: 2025-12-12 - Sprint 3: UnifiedAuthProvider replaces AgoraAuthProvider
  */
 
 // Agora navigation items for mobile bottom nav
@@ -323,11 +325,11 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AgoraLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<AgoraLoadingFallback />}>
-      <AgoraAuthProvider>
+      <UnifiedAuthProvider redirectOnLogout="/pt/agora/login">
         <AgoraProvider>
           <AgoraLayoutContent>{children}</AgoraLayoutContent>
         </AgoraProvider>
-      </AgoraAuthProvider>
+      </UnifiedAuthProvider>
     </Suspense>
   )
 }
