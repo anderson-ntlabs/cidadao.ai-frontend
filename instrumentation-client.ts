@@ -12,6 +12,9 @@
 
 import * as Sentry from '@sentry/nextjs'
 
+// Export the router transition hook for Sentry navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
+
 // Only initialize Sentry in production to reduce dev bundle
 const isProduction = process.env.NODE_ENV === 'production'
 
