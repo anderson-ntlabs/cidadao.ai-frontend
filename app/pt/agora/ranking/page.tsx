@@ -22,6 +22,7 @@ import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { VirtualizedList } from '@/components/ui/virtualized-list'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import Image from 'next/image'
 import {
   Trophy,
   Zap,
@@ -317,17 +318,20 @@ export default function AcademyRankingPage() {
 
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
-                      <img
+                      <Image
                         src={
                           entry.avatar_url ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(entry.full_name)}&background=16a34a&color=fff`
                         }
                         alt={entry.full_name}
+                        width={48}
+                        height={48}
                         className={cn(
                           'w-12 h-12 rounded-xl object-cover',
                           isCurrentUser &&
                             'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-900'
                         )}
+                        unoptimized
                       />
                       {position <= 3 && (
                         <div
