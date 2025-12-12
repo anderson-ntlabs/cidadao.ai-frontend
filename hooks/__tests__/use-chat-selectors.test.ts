@@ -45,9 +45,7 @@ vi.mock('@/lib/services/chat-session.service', () => ({
   },
 }))
 
-vi.mock('@/lib/websocket/chat-websocket', () => ({
-  closeChatWebSocket: vi.fn(),
-}))
+// WebSocket mock removed - no longer used in store
 
 vi.mock('@/lib/logger', () => ({
   createLogger: vi.fn(() => ({

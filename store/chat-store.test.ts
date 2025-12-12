@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { useChatStore } from './chat-store'
 import { chatService } from '@/lib/api/chat.service'
 import { chatSessionService } from '@/lib/services/chat-session.service'
-import { getChatWebSocket, closeChatWebSocket } from '@/lib/websocket/chat-websocket'
+// WebSocket functions are no longer used - backend doesn't support WebSocket
 import type { ChatMessage, ChatResponse } from '@/types/chat'
 import * as chatServiceModule from '@/lib/api/chat.service'
 
@@ -14,7 +14,7 @@ vi.spyOn(chatServiceModule, 'generateSessionId').mockImplementation(
 // Mock dependencies
 vi.mock('@/lib/api/chat.service')
 vi.mock('@/lib/services/chat-session.service')
-vi.mock('@/lib/websocket/chat-websocket')
+// WebSocket mock removed - no longer used in store
 
 // Mock Supabase client
 vi.mock('@/lib/supabase/client', () => ({
@@ -418,19 +418,18 @@ describe('ChatStore', () => {
 
   describe('WebSocket Actions', () => {
     it('should not connect WebSocket (backend does not support)', () => {
-      // Test the actual behavior, not the logging (which is an implementation detail)
+      // Test the actual behavior - WebSocket is not supported by backend
       useChatStore.getState().connectWebSocket()
 
-      // Verify the connection status remains disconnected (WebSocket not supported)
+      // Verify the connection status remains disconnected
       expect(useChatStore.getState().connectionStatus).toBe('disconnected')
-      expect(useChatStore.getState().ws).toBeNull()
     })
 
-    it('should disconnect WebSocket', () => {
+    it('should handle disconnect gracefully (no-op)', () => {
+      // WebSocket is never instantiated, so disconnect is a no-op
       useChatStore.getState().disconnectWebSocket()
 
-      expect(closeChatWebSocket).toHaveBeenCalled()
-      expect(useChatStore.getState().ws).toBeNull()
+      // Should just set status to disconnected
       expect(useChatStore.getState().connectionStatus).toBe('disconnected')
     })
   })

@@ -10,7 +10,8 @@ import type {
 } from '@/types/chat'
 import type { ChatSession as SupabaseChatSession } from '@/types/supabase'
 import { chatService, generateSessionId } from '@/lib/api/chat.service'
-import { closeChatWebSocket } from '@/lib/websocket/chat-websocket'
+// WebSocket infrastructure exists in lib/websocket/ but is not used
+// Backend (Railway) does not support WebSocket connections yet
 import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
 import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
@@ -86,10 +87,6 @@ interface ChatStore {
   // Agent actions
   loadAgents: () => Promise<void>
   loadSuggestions: () => Promise<void>
-
-  // Investigation actions
-  subscribeToInvestigation: (investigationId: string) => void
-  unsubscribeFromInvestigation: (investigationId: string) => void
 
   // Message actions
   addMessage: (message: ChatMessage) => void
@@ -707,7 +704,8 @@ export const useChatStore = create<ChatStore>()(
 
         // Disconnect WebSocket (no-op - WebSocket not supported by backend)
         disconnectWebSocket: () => {
-          closeChatWebSocket()
+          // No-op: WebSocket is not instantiated (backend doesn't support it)
+          // Infrastructure exists in lib/websocket/ for future use
           set({ connectionStatus: 'disconnected' })
         },
 
@@ -735,17 +733,6 @@ export const useChatStore = create<ChatStore>()(
           } catch (error) {
             logger.error('Failed to load suggestions', { error })
           }
-        },
-
-        // Investigation subscriptions (no-op - WebSocket not supported by backend)
-        subscribeToInvestigation: (_investigationId) => {
-          // WebSocket not supported by current backend
-          logger.debug('subscribeToInvestigation called but WebSocket not supported')
-        },
-
-        unsubscribeFromInvestigation: (_investigationId) => {
-          // WebSocket not supported by current backend
-          logger.debug('unsubscribeFromInvestigation called but WebSocket not supported')
         },
 
         // Message actions - optimized with O(1) index lookup
