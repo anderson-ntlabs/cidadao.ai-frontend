@@ -28,3 +28,8 @@ coverage/
 components/privacy/index.tsx
 components/tour/index.tsx
 components/voice/index.tsx
+
+# Config and setup files
+vitest.setup.ts
+*.config.*
+config/

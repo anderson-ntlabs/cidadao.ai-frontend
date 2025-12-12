@@ -55,6 +55,7 @@
     "@typescript-eslint/only-throw-error": "warn",
     "@typescript-eslint/no-require-imports": "warn",
     "@next/next/no-assign-module-variable": "warn",
+    "@typescript-eslint/no-namespace": "warn",
     "react-hooks/rules-of-hooks": "warn"
   },
   "overrides": [
