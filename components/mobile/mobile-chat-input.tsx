@@ -35,13 +35,23 @@ import { useVirtualKeyboard, useKeyboardAwareInput } from '@/hooks/use-virtual-k
 import { touchFeedback, tapTarget, safeArea } from '@/lib/mobile-touch'
 import { useHaptic } from '@/hooks/use-haptic'
 
-// Lazy load voice input button
+// Lazy load voice input button with error handling
+const VoiceInputButtonFallback = () => null
 const VoiceInputButton = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
-  {
-    loading: () => null,
-    ssr: false,
-  }
+  () =>
+    import('@/components/voice/voice-input-button')
+      .then((mod) => {
+        if (!mod.VoiceInputButton) {
+          console.warn('VoiceInputButton not found, using fallback')
+          return { default: VoiceInputButtonFallback }
+        }
+        return { default: mod.VoiceInputButton }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceInputButton:', err)
+        return { default: VoiceInputButtonFallback }
+      }),
+  { loading: () => null, ssr: false }
 )
 
 export interface MobileChatInputProps {

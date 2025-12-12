@@ -17,20 +17,41 @@ import { Button } from '@/components/ui/button'
 import { StreamingStatus } from '@/components/chat/streaming-status'
 import type { StreamingState } from '@/store/chat-store'
 
+// Voice components with proper error handling to prevent lazy loading crashes
+const VoiceRecorderFallback = () => null
 const VoiceRecorder = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
-  {
-    loading: () => null,
-    ssr: false,
-  }
+  () =>
+    import('@/components/voice/voice-recorder')
+      .then((mod) => {
+        if (!mod.VoiceRecorder) {
+          console.warn('VoiceRecorder not found, using fallback')
+          return { default: VoiceRecorderFallback }
+        }
+        return { default: mod.VoiceRecorder }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceRecorder:', err)
+        return { default: VoiceRecorderFallback }
+      }),
+  { loading: () => null, ssr: false }
 )
 
+const VoiceInputButtonFallback = () => null
 const VoiceInputButton = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
-  {
-    loading: () => null,
-    ssr: false,
-  }
+  () =>
+    import('@/components/voice/voice-input-button')
+      .then((mod) => {
+        if (!mod.VoiceInputButton) {
+          console.warn('VoiceInputButton not found, using fallback')
+          return { default: VoiceInputButtonFallback }
+        }
+        return { default: mod.VoiceInputButton }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceInputButton:', err)
+        return { default: VoiceInputButtonFallback }
+      }),
+  { loading: () => null, ssr: false }
 )
 
 export interface ChatInputAreaProps {

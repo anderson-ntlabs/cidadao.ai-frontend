@@ -28,25 +28,55 @@ import { trackMentorChat, trackStudySession } from '@/lib/analytics/agora-tracke
 import { MessageBubble } from '@/components/chat/message-bubble'
 import { StreamingStatus } from '@/components/chat/streaming-status'
 
-// Lazy load heavy components
+// Lazy load heavy components with proper error handling
 const AgoraAgentSelector = dynamic(
   () =>
-    import('@/components/agora/agora-agent-selector').then((mod) => ({
-      default: mod.AgoraAgentSelector,
-    })),
+    import('@/components/agora/agora-agent-selector').then((mod) => {
+      if (!mod.AgoraAgentSelector) {
+        throw new Error('AgoraAgentSelector not found in module')
+      }
+      return { default: mod.AgoraAgentSelector }
+    }),
   {
     loading: () => <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />,
     ssr: false,
   }
 )
 
+// Voice components - wrapped with fallback to prevent crash if not available
+const VoiceRecorderFallback = () => null
 const VoiceRecorder = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceRecorder })),
+  () =>
+    import('@/components/voice/voice-recorder')
+      .then((mod) => {
+        if (!mod.VoiceRecorder) {
+          console.warn('VoiceRecorder not found, using fallback')
+          return { default: VoiceRecorderFallback }
+        }
+        return { default: mod.VoiceRecorder }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceRecorder:', err)
+        return { default: VoiceRecorderFallback }
+      }),
   { loading: () => null, ssr: false }
 )
 
+const VoiceInputButtonFallback = () => null
 const VoiceInputButton = dynamic(
-  () => import('@/components/voice').then((mod) => ({ default: mod.VoiceInputButton })),
+  () =>
+    import('@/components/voice/voice-input-button')
+      .then((mod) => {
+        if (!mod.VoiceInputButton) {
+          console.warn('VoiceInputButton not found, using fallback')
+          return { default: VoiceInputButtonFallback }
+        }
+        return { default: mod.VoiceInputButton }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceInputButton:', err)
+        return { default: VoiceInputButtonFallback }
+      }),
   { loading: () => null, ssr: false }
 )
 
