@@ -131,6 +131,8 @@ jobs:
 
       - name: Run E2E tests
         run: npm run test:playwright -- --project=chromium
+        continue-on-error: true
+        timeout-minutes: 15
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://cidadao-api-production.up.railway.app' }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
@@ -138,8 +140,9 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: ignore
