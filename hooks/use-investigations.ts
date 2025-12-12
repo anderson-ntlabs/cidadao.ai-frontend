@@ -1,31 +1,30 @@
-import { useState, useCallback, useEffect } from 'react'
-import { investigationService } from '@/lib/services/investigation.service'
+/**
+ * useInvestigations Hook
+ *
+ * Hook for managing user investigations with Result type pattern.
+ *
+ * @author Anderson Henrique da Silva
+ * @since 2025-12-12 - Updated to use Result<T> pattern
+ */
+
+import { useState, useCallback } from 'react'
+import {
+  investigationService,
+  type CreateInvestigationData,
+  type InvestigationFilters,
+} from '@/lib/services/investigation.service'
+import { isSuccess, isFailure } from '@/lib/types/result'
 import { createLogger } from '@/lib/logger'
 import type { Investigation } from '@/types/supabase'
 
 const logger = createLogger('Investigations')
 
 /**
- * Data for creating a new investigation
- *
- * @interface CreateInvestigationData
- */
-interface CreateInvestigationData {
-  /** Investigation title (required) */
-  title: string
-  /** Optional description */
-  description?: string
-  /** List of agent IDs used in the investigation */
-  agents_used?: string[]
-  /** Additional metadata */
-  metadata?: Record<string, any>
-}
-
-/**
  * useInvestigations - Hook for managing user investigations
  *
  * Provides CRUD operations for investigations with automatic loading
- * states and error handling. Integrates with Supabase backend.
+ * states and error handling. Uses Result type pattern for type-safe
+ * error handling.
  *
  * @hook
  * @example
@@ -59,18 +58,6 @@ interface CreateInvestigationData {
  * ```
  *
  * @returns {Object} Investigation methods and state
- * @returns {Investigation[]} returns.investigations - List of user investigations
- * @returns {Function} returns.loadInvestigations - Load investigations (with optional status filter)
- * @returns {Function} returns.loadInvestigation - Load single investigation by ID
- * @returns {Function} returns.createInvestigation - Create new investigation
- * @returns {Function} returns.updateInvestigation - Update investigation
- * @returns {Function} returns.deleteInvestigation - Delete investigation
- * @returns {Function} returns.archiveInvestigation - Archive investigation
- * @returns {Function} returns.completeInvestigation - Mark investigation as completed
- * @returns {boolean} returns.isLoading - Loading state
- * @returns {string|null} returns.error - Error message if any
- *
- * @since 1.0.0
  */
 export function useInvestigations() {
   const [investigations, setInvestigations] = useState<Investigation[]>([])
@@ -80,22 +67,25 @@ export function useInvestigations() {
   /**
    * Load all investigations for the current user
    *
-   * @param {string} [status] - Optional status filter ('active' | 'completed' | 'archived')
+   * @param {InvestigationFilters} [filters] - Optional filters
    */
-  const loadInvestigations = useCallback(async (status?: 'active' | 'completed' | 'archived') => {
+  const loadInvestigations = useCallback(async (filters?: InvestigationFilters) => {
     setIsLoading(true)
     setError(null)
 
-    try {
-      const data = await investigationService.getUserInvestigations(status)
-      setInvestigations(data)
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao carregar investigações'
-      setError(errorMessage)
-      logger.error('Error loading investigations', { error: err })
-    } finally {
-      setIsLoading(false)
+    const result = await investigationService.getUserInvestigations(filters)
+
+    if (isSuccess(result)) {
+      setInvestigations(result.data)
+    } else {
+      setError(result.error.message)
+      logger.error('Error loading investigations', {
+        code: result.error.code,
+        message: result.error.message,
+      })
     }
+
+    setIsLoading(false)
   }, [])
 
   /**
@@ -108,16 +98,19 @@ export function useInvestigations() {
     setIsLoading(true)
     setError(null)
 
-    try {
-      const investigation = await investigationService.getInvestigation(id)
-      return investigation
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao carregar investigação'
-      setError(errorMessage)
-      logger.error('Error loading investigation', { error: err })
+    const result = await investigationService.getInvestigation(id)
+
+    setIsLoading(false)
+
+    if (isSuccess(result)) {
+      return result.data
+    } else {
+      setError(result.error.message)
+      logger.error('Error loading investigation', {
+        code: result.error.code,
+        message: result.error.message,
+      })
       return null
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 
@@ -132,22 +125,21 @@ export function useInvestigations() {
       setIsLoading(true)
       setError(null)
 
-      try {
-        const investigation = await investigationService.createInvestigation(data)
+      const result = await investigationService.createInvestigation(data)
 
-        if (investigation) {
-          // Add to local state
-          setInvestigations((prev) => [investigation, ...prev])
-        }
+      setIsLoading(false)
 
-        return investigation
-      } catch (err: any) {
-        const errorMessage = err.message || 'Erro ao criar investigação'
-        setError(errorMessage)
-        logger.error('Error creating investigation', { error: err })
+      if (isSuccess(result)) {
+        // Add to local state
+        setInvestigations((prev) => [result.data, ...prev])
+        return result.data
+      } else {
+        setError(result.error.message)
+        logger.error('Error creating investigation', {
+          code: result.error.code,
+          message: result.error.message,
+        })
         return null
-      } finally {
-        setIsLoading(false)
       }
     },
     []
@@ -165,22 +157,21 @@ export function useInvestigations() {
       setIsLoading(true)
       setError(null)
 
-      try {
-        const investigation = await investigationService.updateInvestigation(id, updates)
+      const result = await investigationService.updateInvestigation(id, updates)
 
-        if (investigation) {
-          // Update local state
-          setInvestigations((prev) => prev.map((inv) => (inv.id === id ? investigation : inv)))
-        }
+      setIsLoading(false)
 
-        return investigation
-      } catch (err: any) {
-        const errorMessage = err.message || 'Erro ao atualizar investigação'
-        setError(errorMessage)
-        logger.error('Error updating investigation', { error: err })
+      if (isSuccess(result)) {
+        // Update local state
+        setInvestigations((prev) => prev.map((inv) => (inv.id === id ? result.data : inv)))
+        return result.data
+      } else {
+        setError(result.error.message)
+        logger.error('Error updating investigation', {
+          code: result.error.code,
+          message: result.error.message,
+        })
         return null
-      } finally {
-        setIsLoading(false)
       }
     },
     []
@@ -196,22 +187,21 @@ export function useInvestigations() {
     setIsLoading(true)
     setError(null)
 
-    try {
-      const success = await investigationService.deleteInvestigation(id)
+    const result = await investigationService.deleteInvestigation(id)
 
-      if (success) {
-        // Remove from local state
-        setInvestigations((prev) => prev.filter((inv) => inv.id !== id))
-      }
+    setIsLoading(false)
 
-      return success
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao deletar investigação'
-      setError(errorMessage)
-      logger.error('Error deleting investigation', { error: err })
+    if (isSuccess(result)) {
+      // Remove from local state
+      setInvestigations((prev) => prev.filter((inv) => inv.id !== id))
+      return true
+    } else {
+      setError(result.error.message)
+      logger.error('Error deleting investigation', {
+        code: result.error.code,
+        message: result.error.message,
+      })
       return false
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 
