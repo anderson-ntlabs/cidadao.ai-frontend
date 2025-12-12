@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Silva"
+    given-names: "Anderson Henrique da"
+    orcid: "https://orcid.org/0009-0001-7144-4974"
+    email: "andersonhs27@gmail.com"
+    affiliation: "Instituto Federal de Educação, Ciência e Tecnologia do Sul de Minas Gerais - Campus Muzambinho"
+title: "Cidadão.AI Frontend: Progressive Web App for Brazilian Government Transparency"
+version: 1.0.0
+doi: 10.5281/zenodo.XXXXXXX
+date-released: 2025-01-20
+url: "https://github.com/anderson-ufrj/cidadao.ai-frontend"
+repository-code: "https://github.com/anderson-ufrj/cidadao.ai-frontend"
+license: MIT
+type: software
+keywords:
+  - next.js
+  - react
+  - typescript
+  - pwa
+  - accessibility
+  - wcag
+  - transparency
+  - government
+  - brazil
+  - civic-tech
+  - multi-agent
+  - bilingual
+  - gamification
+abstract: |
+  Cidadão.AI Frontend is a Next.js 15 Progressive Web App providing an accessible,
+  bilingual (Portuguese/English) interface for Brazilian government transparency analysis.
+  Features include WCAG AAA accessibility, interaction with 19 AI agents with Brazilian
+  cultural identities, gamified learning platform (Agora Academy), kids mode with parental
+  controls, and offline-first capabilities. Built with TypeScript, Tailwind CSS, and Zustand
+  for state management.
+preferred-citation:
+  type: software
+  authors:
+    - family-names: "Silva"
+      given-names: "Anderson Henrique da"
+      orcid: "https://orcid.org/0009-0001-7144-4974"
+  title: "Cidadão.AI: Multi-Agent AI System for Brazilian Government Transparency Analysis"
+  year: 2025
+  doi: 10.5281/zenodo.XXXXXXX
+  url: "https://github.com/anderson-ufrj/cidadao.ai-frontend"
