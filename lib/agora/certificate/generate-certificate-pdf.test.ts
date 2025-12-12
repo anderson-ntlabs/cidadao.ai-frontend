@@ -5,6 +5,7 @@
  *
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-10
+ * Updated: 2025-12-12 - Fixed async tests
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -63,8 +64,8 @@ describe('generateCertificatePDF', () => {
     mockJsPDF.mockImplementation(() => createMockDoc())
   })
 
-  it('should return a PDF document and certificate ID', () => {
-    const result = generateCertificatePDF(mockUser)
+  it('should return a PDF document and certificate ID', async () => {
+    const result = await generateCertificatePDF(mockUser)
 
     expect(result).toHaveProperty('pdf')
     expect(result).toHaveProperty('id')
@@ -72,33 +73,33 @@ describe('generateCertificatePDF', () => {
   })
 
   it('should generate unique certificate IDs with different timestamps', async () => {
-    const result1 = generateCertificatePDF(mockUser)
+    const result1 = await generateCertificatePDF(mockUser)
     // Wait a tiny bit to ensure different timestamp
     await new Promise((resolve) => setTimeout(resolve, 5))
-    const result2 = generateCertificatePDF(mockUser)
+    const result2 = await generateCertificatePDF(mockUser)
 
     // Both should have valid format
     expect(result1.id).toMatch(/^CERT-/)
     expect(result2.id).toMatch(/^CERT-/)
   })
 
-  it('should include user ID suffix in certificate ID', () => {
-    const result = generateCertificatePDF(mockUser)
+  it('should include user ID suffix in certificate ID', async () => {
+    const result = await generateCertificatePDF(mockUser)
 
     // User ID ends with 'test-user-123', so last 6 chars are 'r-123'
     expect(result.id).toContain('ER-123')
   })
 
-  it('should create landscape PDF', () => {
-    generateCertificatePDF(mockUser)
+  it('should create landscape PDF', async () => {
+    await generateCertificatePDF(mockUser)
 
     expect(mockJsPDF).toHaveBeenCalledWith('landscape')
   })
 
-  it('should set user name in certificate', () => {
-    const { pdf } = generateCertificatePDF(mockUser)
+  it('should set user name in certificate', async () => {
+    const result = await generateCertificatePDF(mockUser)
 
-    expect(pdf.text).toHaveBeenCalledWith(
+    expect(result.pdf.text).toHaveBeenCalledWith(
       mockUser.name.toUpperCase(),
       expect.any(Number),
       expect.any(Number),
@@ -106,36 +107,36 @@ describe('generateCertificatePDF', () => {
     )
   })
 
-  it('should format hours and minutes correctly', () => {
-    const { pdf } = generateCertificatePDF(mockUser)
+  it('should format hours and minutes correctly', async () => {
+    const result = await generateCertificatePDF(mockUser)
 
     // 125 minutes = 2h 5min
-    const textCalls = (pdf.text as ReturnType<typeof vi.fn>).mock.calls
+    const textCalls = (result.pdf.text as ReturnType<typeof vi.fn>).mock.calls
     const timeText = textCalls.find(
       (call) => typeof call[0] === 'string' && call[0].includes('hora')
     )
     expect(timeText).toBeDefined()
   })
 
-  it('should handle zero time minutes', () => {
+  it('should handle zero time minutes', async () => {
     const userWithZeroTime = { ...mockUser, totalTimeMinutes: 0 }
-    const result = generateCertificatePDF(userWithZeroTime)
+    const result = await generateCertificatePDF(userWithZeroTime)
 
     expect(result).toHaveProperty('pdf')
     expect(result).toHaveProperty('id')
   })
 
-  it('should handle large time values', () => {
+  it('should handle large time values', async () => {
     const userWithLargeTime = { ...mockUser, totalTimeMinutes: 10000 }
-    const result = generateCertificatePDF(userWithLargeTime)
+    const result = await generateCertificatePDF(userWithLargeTime)
 
     expect(result).toHaveProperty('pdf')
     expect(result).toHaveProperty('id')
   })
 
-  it('should handle special characters in name', () => {
+  it('should handle special characters in name', async () => {
     const userWithSpecialName = { ...mockUser, name: 'Jose Bonifacio de Andrada' }
-    const result = generateCertificatePDF(userWithSpecialName)
+    const result = await generateCertificatePDF(userWithSpecialName)
 
     expect(result).toHaveProperty('pdf')
     const textCalls = (result.pdf.text as ReturnType<typeof vi.fn>).mock.calls
