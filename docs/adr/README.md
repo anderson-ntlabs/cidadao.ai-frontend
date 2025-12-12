@@ -18,12 +18,12 @@ Cada ADR segue o template em `template.md` e inclui:
 
 ## Lista de ADRs
 
-| ID                                          | Titulo                                  | Status   | Data       |
-| ------------------------------------------- | --------------------------------------- | -------- | ---------- |
-| [ADR-001](./ADR-001-result-type-pattern.md) | Result Type Pattern para Error Handling | Aceito   | 2025-12-12 |
-| ADR-002                                     | Unified Agora State Management          | Pendente | -          |
-| ADR-003                                     | Service to Hook Migration Strategy      | Pendente | -          |
-| ADR-004                                     | Test Coverage Strategy                  | Pendente | -          |
+| ID                                             | Titulo                                  | Status   | Data       |
+| ---------------------------------------------- | --------------------------------------- | -------- | ---------- |
+| [ADR-001](./ADR-001-result-type-pattern.md)    | Result Type Pattern para Error Handling | Aceito   | 2025-12-12 |
+| [ADR-002](./ADR-002-agora-state-management.md) | Agora State Management Architecture     | Proposto | 2025-12-12 |
+| ADR-003                                        | Service to Hook Migration Strategy      | Pendente | -          |
+| ADR-004                                        | Test Coverage Strategy                  | Pendente | -          |
 
 ## Como criar um novo ADR
 
