@@ -8,9 +8,15 @@
  * @since 2025-12-10
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
+
+interface KidsProfile {
+  id: string
+  child_name: string
+  parent_email: string | null
+}
 
 // Lazy initialization of Resend (only when API key is available)
 function getResendClient(): Resend | null {
@@ -20,7 +26,7 @@ function getResendClient(): Resend | null {
   return new Resend(process.env.RESEND_API_KEY)
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -40,7 +46,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .select('id, child_name, parent_email')
       .eq('parent_user_id', user.id)
       .eq('is_active', true)
-      .maybeSingle()
+      .maybeSingle<KidsProfile>()
 
     if (profileError) {
       console.error('Error fetching kids profile:', profileError)
@@ -52,11 +58,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Generate code using database function
-    const { data: code, error: codeError } = await supabase.rpc('generate_parental_access_code', {
-      p_user_id: user.id,
-      p_kids_profile_id: kidsProfile.id,
-      p_email: kidsProfile.parent_email || user.email,
-    })
+    const { data: codeData, error: codeError } = await supabase.rpc(
+      'generate_parental_access_code',
+      {
+        p_user_id: user.id,
+        p_kids_profile_id: kidsProfile.id,
+        p_email: kidsProfile.parent_email || user.email,
+      }
+    )
+    const code = codeData as string | null
 
     if (codeError || !code) {
       console.error('Error generating code:', codeError)
@@ -145,7 +155,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       message: 'Código enviado por email',
-      email: parentEmail.replace(/(.{2})(.*)(@.*)/, '$1***$3'), // Mask email
+      email: parentEmail.replace(/^(.{2})(.*)(@.*)$/, '$1***$3'), // Mask email
     })
   } catch (error) {
     console.error('Unexpected error:', error)

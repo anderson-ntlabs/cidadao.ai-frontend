@@ -10,6 +10,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+interface KidsProfile {
+  id: string
+  child_name: string
+}
+
+interface SessionMetadata {
+  videos_watched?: string[]
+  agents_used?: string[]
+}
+
+interface KidsSession {
+  id: string
+  started_at: string
+  ended_at: string | null
+  session_metadata: SessionMetadata | null
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
@@ -38,7 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .select('id, child_name')
       .eq('id', kidsProfileId)
       .eq('parent_user_id', user.id)
-      .maybeSingle()
+      .maybeSingle<KidsProfile>()
 
     if (profileError || !kidsProfile) {
       return NextResponse.json({ error: 'Perfil não encontrado ou acesso negado' }, { status: 403 })
@@ -53,17 +70,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get today's sessions
     const { data: sessions } = await supabase
       .from('agora_kids_sessions')
-      .select('*')
+      .select('id, started_at, ended_at, session_metadata')
       .eq('kids_profile_id', kidsProfileId)
       .gte('started_at', today.toISOString())
       .lt('started_at', tomorrow.toISOString())
+      .returns<KidsSession[]>()
 
     // Calculate stats
     let totalMinutes = 0
     const videosWatched: string[] = []
     const agentsUsed: string[] = []
 
-    sessions?.forEach((session) => {
+    sessions?.forEach((session: KidsSession) => {
       // Calculate duration
       if (session.started_at) {
         const start = new Date(session.started_at)
@@ -73,7 +91,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       // Collect videos and agents from session metadata
       if (session.session_metadata) {
-        const meta = session.session_metadata as Record<string, unknown>
+        const meta = session.session_metadata
         if (Array.isArray(meta.videos_watched)) {
           videosWatched.push(...meta.videos_watched)
         }

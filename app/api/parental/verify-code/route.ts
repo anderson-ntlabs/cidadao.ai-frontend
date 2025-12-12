@@ -11,9 +11,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+interface VerifyCodeRequest {
+  code: string
+  email?: string
+}
+
+interface VerifyCodeResult {
+  is_valid: boolean
+  user_id: string
+  kids_profile_id: string
+  child_name: string
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json()
+    const body = (await request.json()) as VerifyCodeRequest
     const { code, email } = body
 
     if (!code) {
@@ -42,7 +54,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Database function returns array with one row
-    const result = data?.[0]
+    const results = data as VerifyCodeResult[] | null
+    const result = results?.[0]
 
     if (!result || !result.is_valid) {
       return NextResponse.json(

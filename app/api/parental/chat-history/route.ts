@@ -20,19 +20,26 @@ interface ChatMessage {
   agent_name?: string
 }
 
+interface SessionMetadata {
+  is_kids_mode?: boolean
+  child_name?: string
+  platform?: string
+  started_at?: string
+}
+
 interface ChatSession {
   id: string
   session_id: string
   agent_id: string
   messages: ChatMessage[]
-  session_metadata: {
-    is_kids_mode?: boolean
-    child_name?: string
-    platform?: string
-    started_at?: string
-  }
+  session_metadata: SessionMetadata | null
   created_at: string
   updated_at: string
+}
+
+interface KidsProfile {
+  id: string
+  child_name: string
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -61,7 +68,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .select('id, child_name')
       .eq('id', kidsProfileId)
       .eq('parent_user_id', user.id)
-      .maybeSingle()
+      .maybeSingle<KidsProfile>()
 
     if (profileError || !kidsProfile) {
       return NextResponse.json({ error: 'Perfil não encontrado ou acesso negado' }, { status: 403 })
@@ -70,11 +77,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Fetch chat sessions with kids mode metadata
     const { data: sessions, error: sessionsError } = await supabase
       .from('chat_sessions')
-      .select('*')
+      .select('id, session_id, agent_id, messages, session_metadata, created_at, updated_at')
       .eq('user_id', user.id)
       .contains('session_metadata', { is_kids_mode: true })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
+      .returns<ChatSession[]>()
 
     if (sessionsError) {
       console.error('Error fetching sessions:', sessionsError)
@@ -82,7 +90,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Format response
-    const chatHistory = (sessions as ChatSession[]).map((session) => ({
+    const chatHistory = (sessions ?? []).map((session: ChatSession) => ({
       id: session.id,
       sessionId: session.session_id,
       agentId: session.agent_id,
