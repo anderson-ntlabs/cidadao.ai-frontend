@@ -11,6 +11,7 @@
 'use client'
 
 import { useState, useEffect, useRef, lazy, Suspense, memo } from 'react'
+import Image from 'next/image'
 import { Copy, Share2, Download, ThumbsUp, ThumbsDown, Check, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
@@ -171,10 +172,13 @@ export const MessageBubble = memo(function MessageBubble({
 
         {/* User Avatar */}
         {userAvatar && (
-          <img
+          <Image
             src={userAvatar}
             alt={userName || 'Você'}
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full ring-2 ring-green-500/50 flex-shrink-0"
+            unoptimized
           />
         )}
       </div>

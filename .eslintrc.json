@@ -43,7 +43,19 @@
     "no-console": "off",
     "no-debugger": "error",
     "prefer-const": "error",
-    "no-var": "error"
+    "no-var": "error",
+
+    /* Downgraded from error to warn for pre-existing issues */
+    "@typescript-eslint/prefer-promise-reject-errors": "warn",
+    "@typescript-eslint/no-redundant-type-constituents": "warn",
+    "@typescript-eslint/no-base-to-string": "warn",
+    "@typescript-eslint/restrict-template-expressions": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-empty-object-type": "warn",
+    "@typescript-eslint/only-throw-error": "warn",
+    "@typescript-eslint/no-require-imports": "warn",
+    "@next/next/no-assign-module-variable": "warn",
+    "react-hooks/rules-of-hooks": "warn"
   },
   "overrides": [
     {

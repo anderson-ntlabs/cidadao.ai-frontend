@@ -100,7 +100,11 @@ export function Tooltip({
       element.addEventListener('blur', hideTooltip)
     } else if (trigger === 'click') {
       element.addEventListener('click', () => {
-        isVisible ? hideTooltip() : showTooltip()
+        if (isVisible) {
+          hideTooltip()
+        } else {
+          showTooltip()
+        }
       })
     } else if (trigger === 'focus') {
       element.addEventListener('focus', showTooltip)

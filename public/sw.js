@@ -1844,6 +1844,14 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
     ],
     eS = new ef({
       precacheEntries: [
+        {
+          revision: 'b263f957f162d9cd200889900a32b2fe',
+          url: '/_next/static/CwLIedM9K-9ABn8zfSWgZ/_buildManifest.js',
+        },
+        {
+          revision: 'b6652df95db52feb4daf4eca35380933',
+          url: '/_next/static/CwLIedM9K-9ABn8zfSWgZ/_ssgManifest.js',
+        },
         { revision: null, url: '/_next/static/chunks/1091.964b9007c9e17c9f.js' },
         { revision: null, url: '/_next/static/chunks/1352.8bb71ae257167ff9.js' },
         { revision: null, url: '/_next/static/chunks/1401.418b83c388aa83e2.js' },
@@ -2011,7 +2019,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           revision: null,
           url: '/_next/static/chunks/app/pt/agora/kids/videos/page-fbe1d8429ddf3a91.js',
         },
-        { revision: null, url: '/_next/static/chunks/app/pt/agora/layout-f89ed6af6a200956.js' },
+        { revision: null, url: '/_next/static/chunks/app/pt/agora/layout-009984c535658ffa.js' },
         {
           revision: null,
           url: '/_next/static/chunks/app/pt/agora/leituras/error-4266457dfc7d7f50.js',
@@ -2133,8 +2141,8 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         { revision: null, url: '/_next/static/chunks/app/pt/test-voice/page-86d748030f99eb2c.js' },
         { revision: null, url: '/_next/static/chunks/commons-72282db3c22cd0cc.js' },
         { revision: null, url: '/_next/static/chunks/framework-db72fdb039ef37b3.js' },
-        { revision: null, url: '/_next/static/chunks/main-08a1320682328fab.js' },
-        { revision: null, url: '/_next/static/chunks/main-app-a83510ac80c69d30.js' },
+        { revision: null, url: '/_next/static/chunks/main-app-3972160f7cead119.js' },
+        { revision: null, url: '/_next/static/chunks/main-e23b1d4f47742653.js' },
         { revision: null, url: '/_next/static/chunks/npm.axios-acc15ae70b142bea.js' },
         { revision: null, url: '/_next/static/chunks/npm.buffer-3ff11ee7d4a27c44.js' },
         { revision: null, url: '/_next/static/chunks/npm.canvg.599854ef87135832.js' },
@@ -2165,7 +2173,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         },
         { revision: null, url: '/_next/static/chunks/npm.micromark.667e1ea8a287983e.js' },
         { revision: null, url: '/_next/static/chunks/npm.motion-dom-79e757f9ff8ec94f.js' },
-        { revision: null, url: '/_next/static/chunks/npm.next-49091f2991c796fb.js' },
+        { revision: null, url: '/_next/static/chunks/npm.next-0b0054de5401cca6.js' },
         { revision: null, url: '/_next/static/chunks/npm.pako.280a8ef5de42c99e.js' },
         { revision: null, url: '/_next/static/chunks/npm.pdfjs-dist.0cbbaaed470838df.js' },
         { revision: null, url: '/_next/static/chunks/npm.posthog-js-e196f39791429ec0.js' },
@@ -2193,7 +2201,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
         },
         { revision: null, url: '/_next/static/chunks/runtime-182c5576505f843d.js' },
-        { revision: null, url: '/_next/static/chunks/sentry-da252317e75f3e0b.js' },
+        { revision: null, url: '/_next/static/chunks/sentry-fb8a11f5afe55ee0.js' },
         { revision: null, url: '/_next/static/css/322042cc7fc4fb42.css' },
         { revision: null, url: '/_next/static/css/59e882a6b4251a5a.css' },
         { revision: null, url: '/_next/static/css/8a38bb2669d7ed47.css' },
@@ -2226,14 +2234,6 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         {
           revision: '65850a373e258f1c897a2b3d75eb74de',
           url: '/_next/static/media/e4af272ccee01ff0-s.p.woff2',
-        },
-        {
-          revision: 'b263f957f162d9cd200889900a32b2fe',
-          url: '/_next/static/uuwuUysp48jkJjm9dtEWV/_buildManifest.js',
-        },
-        {
-          revision: 'b6652df95db52feb4daf4eca35380933',
-          url: '/_next/static/uuwuUysp48jkJjm9dtEWV/_ssgManifest.js',
         },
         { revision: '7af88b226ac614dfdff6612ff4c4b23f', url: '/agents/Lina_Bo_Bardi.jpg' },
         { revision: '98a90691b0d5f6737dd29d641468c1d6', url: '/agents/abaporu.webp' },

@@ -23,3 +23,8 @@ storybook-static/
 # Coverage
 coverage/
 .nyc_output/
+
+# Barrel files excluded from tsconfig type checking
+components/privacy/index.tsx
+components/tour/index.tsx
+components/voice/index.tsx

@@ -21,6 +21,7 @@ import { PageHeader, PageLoading, PageContainer } from '@/components/agora'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
+import Image from 'next/image'
 import { Play, Video, Check, Clock, Star } from 'lucide-react'
 import { trackVideoCompleted } from '@/lib/analytics/agora-tracker'
 import { useCelebrationStore } from '@/store/celebration-store'
@@ -447,10 +448,12 @@ export default function AcademyVideosPage() {
                 {/* Thumbnail */}
                 <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
                   {video.thumbnail_url && (
-                    <img
+                    <Image
                       src={video.thumbnail_url}
                       alt={video.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized
                     />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
