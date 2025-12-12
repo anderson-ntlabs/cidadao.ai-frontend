@@ -152,14 +152,14 @@ export function BottomNavigation({
         'bg-white dark:bg-gray-900',
         'border-t border-gray-200 dark:border-gray-800',
         'shadow-lg',
-        'w-full max-w-full overflow-hidden', // Prevent horizontal overflow
+        'w-[100vw] max-w-[100vw] overflow-x-hidden box-border', // Prevent horizontal overflow
         safeArea.bottom, // Safe area for home indicator
         className
       )}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around px-1 sm:px-2 max-w-full overflow-hidden">
+      <div className="flex items-center justify-around w-full max-w-full px-0 overflow-hidden box-border">
         {itemsWithBadge.map((item) => {
           const isActive = item.active !== undefined ? item.active : currentPath === item.path
           const Icon = item.icon

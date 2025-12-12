@@ -65,7 +65,14 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
+
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
@@ -76,6 +83,8 @@
       system-ui,
       -apple-system,
       sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   /* Accessibility: Respect user's motion preferences (WCAG 2.1 Level AAA - 2.3.3 Animation from Interactions) */

@@ -337,7 +337,7 @@ export function DashboardClient({
         {/* Header is now provided by the layout */}
 
         {/* Main Content */}
-        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-3xl my-4 shadow-xl">
+        <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl mx-2 sm:mx-auto my-2 sm:my-4 shadow-xl overflow-x-hidden">
           {/* Demo Banner */}
           {isDemoMode && (
             <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg">
@@ -395,8 +395,8 @@ export function DashboardClient({
           <div className="mb-8">
             <GlassCard className="overflow-hidden bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
               {/* Profile Content */}
-              <div className="p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
+              <div className="p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 sm:gap-6">
                   {/* Avatar */}
                   <div className="relative">
                     <Avatar
@@ -441,7 +441,7 @@ export function DashboardClient({
                   </div>
 
                   {/* Stats Mini - Now with unified colors */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full sm:w-auto">
                     <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                       <div className="w-10 h-10 mx-auto rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-1.5">
                         <Flame className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -653,7 +653,7 @@ export function DashboardClient({
               </Link>
 
               {/* Quick Actions Grid */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                 {[
                   {
                     icon: Target,

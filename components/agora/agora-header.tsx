@@ -146,21 +146,21 @@ export function AgoraHeader({
         className
       )}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 overflow-x-hidden">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
           {/* Left: Logo + Breadcrumb */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-shrink">
             <Link
               href="/pt/agora"
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-2 sm:gap-3 group flex-shrink-0"
               aria-label="Agora Dashboard"
             >
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 via-green-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <GraduationCap className="w-6 h-6 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 via-green-600 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
-                  <Sparkles className="w-2.5 h-2.5 text-yellow-800" />
+                <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
+                  <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-yellow-800" />
                 </div>
               </div>
               <div className="hidden sm:block">
@@ -186,7 +186,7 @@ export function AgoraHeader({
           </div>
 
           {/* Right: User info + Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
             {/* XP Display - Desktop (hidden in Kids mode) */}
             {!isKidsMode && (
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200/50 dark:border-yellow-700/30">

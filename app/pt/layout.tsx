@@ -92,7 +92,7 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
         <link rel="prefetch" href="/agents/optimized/zumbi-128.webp" as="image" />
         <link rel="prefetch" href="/agents/optimized/anita-128.webp" as="image" />
       </head>
-      <body className="min-h-screen font-sans">
+      <body className="min-h-screen font-sans overflow-x-hidden">
         <WebVitalsProvider>
           <LiveAnnouncerProvider>
             <Providers>

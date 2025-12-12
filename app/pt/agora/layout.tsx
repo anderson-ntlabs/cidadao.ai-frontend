@@ -297,13 +297,15 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
   const showCelebration = !isKidsPage
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden">
       {/* Global Header - NOT shown on Kids pages */}
       {shouldShowHeader && <AgoraHeaderWrapper />}
 
       {/* Main content with auth protection (onboarding is optional) */}
       <AuthGuard>
-        <div className={showBottomNav ? 'pb-20' : ''}>{children}</div>
+        <div className={`w-full max-w-[100vw] overflow-x-hidden ${showBottomNav ? 'pb-20' : ''}`}>
+          {children}
+        </div>
       </AuthGuard>
 
       {/* Mobile Bottom Navigation - NOT shown on Kids pages */}
