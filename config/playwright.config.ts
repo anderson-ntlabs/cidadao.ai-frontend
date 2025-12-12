@@ -25,8 +25,6 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
     ['list'],
   ],
-  /* Global setup for authentication */
-  globalSetup: require.resolve('../playwright/auth.setup.ts'),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -44,14 +42,22 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    /* Setup project for authentication */
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+      testDir: '../playwright',
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
     },
 
     // SKIPPED: Webkit browser has platform-specific libicu symbol errors
@@ -67,6 +73,7 @@ export default defineConfig({
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
+      dependencies: ['setup'],
     },
     // SKIPPED: Mobile Safari uses webkit engine - same libicu symbol issue as desktop webkit
     // {
@@ -77,7 +84,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run build && npm run start',
+    command: process.env.CI ? 'npm run start' : 'npm run build && npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
