@@ -62,7 +62,7 @@ export default function LearningModulePage() {
 
   // Get track and module data from database
   const track = getTrack(trackId)
-  const module = getModule(trackId, moduleNumber)
+  const currentModule = getModule(trackId, moduleNumber)
   const currentModuleIndex = track?.modules.findIndex((m) => m.moduleNumber === moduleNumber) ?? -1
   const totalModules = track?.modules.length ?? 0
 
@@ -81,7 +81,7 @@ export default function LearningModulePage() {
   const [moduleCompleted, setModuleCompleted] = useState(false)
 
   // Get selected video - now using youtubeId from database
-  const selectedVideo = module?.videos.find((v) => v.style === selectedStyle)
+  const selectedVideo = currentModule?.videos.find((v) => v.style === selectedStyle)
 
   // Save last accessed track to localStorage for "Continue Track" card on dashboard
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function LearningModulePage() {
     // Simulate agent response (in production, this would call the backend)
     setTimeout(() => {
       const responses = [
-        `Ótima pergunta! ${module?.title} é fundamental para sua jornada. Vamos explorar mais?`,
+        `Ótima pergunta! ${currentModule?.title} é fundamental para sua jornada. Vamos explorar mais?`,
         `Interessante sua perspectiva! No contexto de ${track?.name}, isso se conecta com...`,
         `Excelente reflexão! Isso me lembra como eu abordava problemas de engenharia...`,
         `Você está no caminho certo! Continue praticando e as peças vão se encaixar.`,
@@ -179,7 +179,7 @@ export default function LearningModulePage() {
   }
 
   // Error state
-  if (!track || !module) {
+  if (!track || !currentModule) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <GlassCard className="max-w-md mx-4">
@@ -229,7 +229,7 @@ export default function LearningModulePage() {
                   {track.name} • Módulo {currentModuleIndex + 1}/{totalModules}
                 </p>
                 <h1 className="font-bold text-gray-900 dark:text-white line-clamp-1">
-                  {module.title}
+                  {currentModule.title}
                 </h1>
               </div>
             </div>
@@ -293,7 +293,7 @@ export default function LearningModulePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {(Object.keys(VIDEO_STYLE_LABELS) as VideoStyle[]).map((style) => {
                 const styleInfo = VIDEO_STYLE_LABELS[style]
-                const video = module.videos.find((v) => v.style === style)
+                const video = currentModule.videos.find((v) => v.style === style)
                 const isSelected = selectedStyle === style
 
                 return (
@@ -386,7 +386,7 @@ export default function LearningModulePage() {
               Objetivos de aprendizado
             </h2>
             <ul className="space-y-2">
-              {module.objectives.map((objective, i) => (
+              {currentModule.objectives.map((objective, i) => (
                 <li key={i} className="flex items-start gap-2 text-gray-600 dark:text-gray-400">
                   <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                   {objective}
@@ -495,7 +495,7 @@ export default function LearningModulePage() {
               </div>
 
               <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                "{module.diaryPrompt}"
+                "{currentModule.diaryPrompt}"
               </p>
 
               <div className="relative">
@@ -552,7 +552,7 @@ export default function LearningModulePage() {
               <div className="max-h-40 overflow-y-auto space-y-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
                 {chatMessages.length === 0 && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                    "{module.chatPrompt}"
+                    "{currentModule.chatPrompt}"
                   </p>
                 )}
                 {chatMessages.map((msg, i) => (
