@@ -237,7 +237,11 @@ export default function AgoraSelecaoPage() {
               'border-2 hover:border-tarsila-verde',
               isNavigating === 'aprendiz' && 'scale-[1.02] border-tarsila-verde'
             )}
-            onClick={() => !isNavigating && handleSelectMode('aprendiz')}
+            onClick={() => {
+              if (!isNavigating) {
+                void handleSelectMode('aprendiz')
+              }
+            }}
           >
             <div className="p-6">
               {/* Icon */}
@@ -288,7 +292,11 @@ export default function AgoraSelecaoPage() {
               'border-2 hover:border-[#FF6B6B]',
               isNavigating === 'kids' && 'scale-[1.02] border-[#FF6B6B]'
             )}
-            onClick={() => !isNavigating && handleSelectMode('kids')}
+            onClick={() => {
+              if (!isNavigating) {
+                void handleSelectMode('kids')
+              }
+            }}
           >
             <div className="p-6">
               {/* Icon with rotating mascot */}
