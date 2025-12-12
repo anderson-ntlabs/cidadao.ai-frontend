@@ -562,5 +562,338 @@ describe('ChatStore', () => {
       expect(messages[0].id).toBe('msg1') // Existing message first
       expect(messages[1].id).toBe('msg2') // Newer message second
     })
+
+    it('should not load more messages without session', async () => {
+      useChatStore.setState({ session: null })
+
+      await useChatStore.getState().loadMoreMessages('cursor1', 'prev')
+
+      // Should not call the service
+      expect(chatService.getHistoryPaginated).not.toHaveBeenCalled()
+    })
+
+    it('should handle error when loading more messages', async () => {
+      useChatStore.setState({
+        session: {
+          session_id: 'session1',
+          created_at: new Date().toISOString(),
+          metadata: {},
+        },
+        messages: [],
+      })
+
+      vi.mocked(chatService.getHistoryPaginated).mockRejectedValue(new Error('Network error'))
+
+      await useChatStore.getState().loadMoreMessages('cursor1', 'prev')
+
+      expect(useChatStore.getState().error).toBe('Network error')
+    })
+  })
+
+  describe('Streaming State', () => {
+    it('should have correct initial streaming state', () => {
+      const state = useChatStore.getState()
+      expect(state.streaming.isStreaming).toBe(false)
+      expect(state.streaming.phase).toBe('idle')
+      expect(state.streaming.statusMessage).toBe('')
+      expect(state.streaming.currentAgentId).toBeNull()
+      expect(state.streaming.currentAgentName).toBeNull()
+      expect(state.streaming.streamingMessageId).toBeNull()
+      expect(state.streaming.accumulatedContent).toBe('')
+    })
+
+    it('should reset streaming state', () => {
+      useChatStore.setState({
+        streaming: {
+          isStreaming: true,
+          phase: 'responding',
+          statusMessage: 'Processing...',
+          currentAgentId: 'agent1',
+          currentAgentName: 'Agent 1',
+          streamingMessageId: 'msg_123',
+          accumulatedContent: 'Some content',
+        },
+      })
+
+      useChatStore.getState().resetStreamingState()
+
+      const state = useChatStore.getState()
+      expect(state.streaming.isStreaming).toBe(false)
+      expect(state.streaming.phase).toBe('idle')
+      expect(state.streaming.accumulatedContent).toBe('')
+    })
+  })
+
+  describe('Selected Agent', () => {
+    it('should set selected agent', () => {
+      useChatStore.getState().setSelectedAgent('agent1')
+      expect(useChatStore.getState().selectedAgentId).toBe('agent1')
+    })
+
+    it('should clear selected agent', () => {
+      useChatStore.setState({ selectedAgentId: 'agent1' })
+      useChatStore.getState().setSelectedAgent(null)
+      expect(useChatStore.getState().selectedAgentId).toBeNull()
+    })
+  })
+
+  describe('initializeChat with existing session', () => {
+    it('should load existing session when sessionId provided', async () => {
+      const mockSession = {
+        id: 'supabase-id',
+        session_id: 'test-session-123',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T01:00:00Z',
+        session_metadata: { test: true },
+        messages: [
+          {
+            id: 'msg1',
+            role: 'user' as const,
+            content: 'Hello',
+            timestamp: '2025-01-01T00:30:00Z',
+            agent_id: '',
+            agent_name: '',
+          },
+        ],
+      }
+
+      vi.mocked(chatSessionService.getSession).mockResolvedValue(mockSession as any)
+      vi.mocked(chatService.getAgents).mockResolvedValue([])
+      vi.mocked(chatService.getSuggestions).mockResolvedValue([])
+
+      await useChatStore.getState().initializeChat('test-session-123')
+
+      const state = useChatStore.getState()
+      expect(state.session?.session_id).toBe('test-session-123')
+      expect(state.messages).toHaveLength(1)
+      expect(state.messages[0].content).toBe('Hello')
+    })
+
+    it('should create new session when provided sessionId not found', async () => {
+      vi.mocked(chatSessionService.getSession).mockResolvedValue(null)
+      vi.mocked(chatService.getAgents).mockResolvedValue([])
+      vi.mocked(chatService.getSuggestions).mockResolvedValue([])
+
+      await useChatStore.getState().initializeChat('non-existent-session')
+
+      const state = useChatStore.getState()
+      expect(state.session).toBeTruthy()
+      expect(state.session?.session_id).not.toBe('non-existent-session')
+    })
+
+    it('should create new session when loading existing session fails', async () => {
+      vi.mocked(chatSessionService.getSession).mockRejectedValue(new Error('Database error'))
+      vi.mocked(chatService.getAgents).mockResolvedValue([])
+      vi.mocked(chatService.getSuggestions).mockResolvedValue([])
+
+      await useChatStore.getState().initializeChat('failing-session')
+
+      const state = useChatStore.getState()
+      expect(state.session).toBeTruthy()
+    })
+  })
+
+  describe('loadSession', () => {
+    it('should load session from Supabase', async () => {
+      const mockSession = {
+        id: 'supabase-id',
+        session_id: 'test-session-456',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T01:00:00Z',
+        session_metadata: { source: 'test' },
+        messages: [
+          {
+            id: 'msg1',
+            role: 'user' as const,
+            content: 'Test message',
+            timestamp: '2025-01-01T00:30:00Z',
+            agent_id: 'agent1',
+            agent_name: 'Agent 1',
+            metadata: {},
+          },
+        ],
+      }
+
+      vi.mocked(chatSessionService.getSession).mockResolvedValue(mockSession as any)
+
+      await useChatStore.getState().loadSession('test-session-456')
+
+      const state = useChatStore.getState()
+      expect(state.session?.session_id).toBe('test-session-456')
+      expect(state.messages).toHaveLength(1)
+      expect(state.isLoading).toBe(false)
+      expect(state.error).toBeNull()
+    })
+
+    it('should handle session not found', async () => {
+      vi.mocked(chatSessionService.getSession).mockResolvedValue(null)
+
+      await useChatStore.getState().loadSession('non-existent')
+
+      const state = useChatStore.getState()
+      expect(state.error).toBe('Failed to load chat session')
+      expect(state.isLoading).toBe(false)
+    })
+
+    it('should handle error when loading session', async () => {
+      vi.mocked(chatSessionService.getSession).mockRejectedValue(new Error('DB error'))
+
+      await useChatStore.getState().loadSession('error-session')
+
+      const state = useChatStore.getState()
+      expect(state.error).toBe('Failed to load chat session')
+      expect(state.isLoading).toBe(false)
+    })
+  })
+
+  describe('clearChat', () => {
+    it('should not clear chat without session', async () => {
+      useChatStore.setState({ session: null, messages: [] })
+
+      await useChatStore.getState().clearChat()
+
+      // Should not call the service
+      expect(chatService.clearHistory).not.toHaveBeenCalled()
+    })
+
+    it('should handle error when clearing chat', async () => {
+      useChatStore.setState({
+        session: {
+          session_id: 'test-session',
+          created_at: new Date().toISOString(),
+          metadata: {},
+        },
+        messages: [
+          {
+            id: 'msg1',
+            session_id: 'test-session',
+            role: 'user',
+            content: 'Test',
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      })
+
+      vi.mocked(chatService.clearHistory).mockRejectedValue(new Error('Clear failed'))
+
+      await useChatStore.getState().clearChat()
+
+      expect(useChatStore.getState().error).toBe('Clear failed')
+    })
+  })
+
+  describe('sendStreamingMessage', () => {
+    it('should create session if none exists before streaming', async () => {
+      useChatStore.setState({ session: null, messageIndex: {} })
+
+      // Start sending - the session should be created synchronously
+      const sendPromise = useChatStore.getState().sendStreamingMessage('Test message')
+
+      // Wait for async operations to start
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Session should have been created
+      expect(useChatStore.getState().session).toBeTruthy()
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should add user message to store before network request', async () => {
+      useChatStore.setState({
+        session: {
+          session_id: 'test-session',
+          created_at: new Date().toISOString(),
+          metadata: {},
+        },
+        messageIndex: {},
+      })
+
+      // Start streaming
+      const sendPromise = useChatStore.getState().sendStreamingMessage('Hello streaming')
+
+      // Wait for synchronous operations
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      const messages = useChatStore.getState().messages
+      // Should have at least the user message
+      expect(messages.length).toBeGreaterThanOrEqual(1)
+      const userMsg = messages.find((m) => m.role === 'user')
+      expect(userMsg).toBeDefined()
+      expect(userMsg?.content).toBe('Hello streaming')
+
+      await sendPromise.catch(() => {})
+    })
+
+    it('should preserve selectedAgentId during streaming', async () => {
+      useChatStore.setState({
+        session: {
+          session_id: 'test-session',
+          created_at: new Date().toISOString(),
+          metadata: {},
+        },
+        selectedAgentId: 'zumbi',
+        messageIndex: {},
+      })
+
+      // Start streaming
+      const sendPromise = useChatStore.getState().sendStreamingMessage('Test')
+
+      // Wait for operations
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // selectedAgentId should still be set
+      expect(useChatStore.getState().selectedAgentId).toBe('zumbi')
+
+      await sendPromise.catch(() => {})
+    })
+  })
+
+  describe('Message Index', () => {
+    it('should build message index when adding messages', () => {
+      const message1: ChatMessage = {
+        id: 'msg1',
+        session_id: 'session1',
+        role: 'user',
+        content: 'First message',
+        timestamp: new Date().toISOString(),
+      }
+
+      const message2: ChatMessage = {
+        id: 'msg2',
+        session_id: 'session1',
+        role: 'assistant',
+        content: 'Second message',
+        timestamp: new Date().toISOString(),
+      }
+
+      useChatStore.getState().addMessage(message1)
+      useChatStore.getState().addMessage(message2)
+
+      const state = useChatStore.getState()
+      expect(state.messageIndex['msg1']).toBe(0)
+      expect(state.messageIndex['msg2']).toBe(1)
+    })
+
+    it('should use message index for O(1) updates', () => {
+      const messages: ChatMessage[] = [
+        { id: 'msg1', session_id: 's', role: 'user', content: 'Original 1', timestamp: '' },
+        { id: 'msg2', session_id: 's', role: 'user', content: 'Original 2', timestamp: '' },
+        { id: 'msg3', session_id: 's', role: 'user', content: 'Original 3', timestamp: '' },
+      ]
+
+      const messageIndex: Record<string, number> = {}
+      messages.forEach((m, idx) => (messageIndex[m.id] = idx))
+
+      useChatStore.setState({ messages, messageIndex })
+
+      // Update middle message
+      useChatStore.getState().updateMessage('msg2', { content: 'Updated 2' })
+
+      const state = useChatStore.getState()
+      expect(state.messages[1].content).toBe('Updated 2')
+      // Other messages unchanged
+      expect(state.messages[0].content).toBe('Original 1')
+      expect(state.messages[2].content).toBe('Original 3')
+    })
   })
 })
