@@ -16,6 +16,7 @@
   </p>
   
   <p>
+    <a href="https://doi.org/10.5281/zenodo.17911818"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17911818.svg" alt="DOI"></a>
     <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js">
     <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript" alt="TypeScript">
     <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css" alt="Tailwind">
