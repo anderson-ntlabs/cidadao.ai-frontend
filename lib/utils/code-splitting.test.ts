@@ -4,7 +4,7 @@ import {
   loadComponents,
   routeModules,
   preloadRouteModules,
-  createRouteComponent
+  createRouteComponent,
 } from './code-splitting'
 
 // Mock console.error to test error handling
@@ -31,9 +31,10 @@ describe('code-splitting', () => {
       await prefetchComponent(mockImport)
 
       expect(mockImport).toHaveBeenCalledTimes(1)
+      // Uses structured logging via createLogger
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to prefetch component:',
-        expect.any(Error)
+        expect.stringContaining('[ERROR] [CodeSplitting] Failed to prefetch component'),
+        expect.objectContaining({ error: expect.any(Error) })
       )
     })
 

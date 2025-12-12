@@ -17,23 +17,24 @@ CREATE TABLE IF NOT EXISTS public.parental_access_codes (
 );
 
 -- Index for fast code lookup
-CREATE INDEX idx_parental_codes_lookup
+CREATE INDEX IF NOT EXISTS idx_parental_codes_lookup
 ON public.parental_access_codes(code, email, expires_at)
 WHERE used_at IS NULL;
 
 -- Index for cleanup of expired codes
-CREATE INDEX idx_parental_codes_expires
+CREATE INDEX IF NOT EXISTS idx_parental_codes_expires
 ON public.parental_access_codes(expires_at)
 WHERE used_at IS NULL;
 
 -- Index for user's codes
-CREATE INDEX idx_parental_codes_user
+CREATE INDEX IF NOT EXISTS idx_parental_codes_user
 ON public.parental_access_codes(user_id, created_at DESC);
 
 -- RLS Policies
 ALTER TABLE public.parental_access_codes ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see their own codes
+DROP POLICY IF EXISTS "Users can view own parental codes" ON public.parental_access_codes;
 CREATE POLICY "Users can view own parental codes"
 ON public.parental_access_codes
 FOR SELECT
@@ -41,6 +42,7 @@ TO authenticated
 USING (auth.uid() = user_id);
 
 -- Function to generate and store a new parental access code
+DROP FUNCTION IF EXISTS public.generate_parental_access_code(UUID, UUID, VARCHAR);
 CREATE OR REPLACE FUNCTION public.generate_parental_access_code(
     p_user_id UUID,
     p_kids_profile_id UUID,
@@ -87,6 +89,7 @@ END;
 $$;
 
 -- Function to verify a parental access code
+DROP FUNCTION IF EXISTS public.verify_parental_access_code(VARCHAR, VARCHAR);
 CREATE OR REPLACE FUNCTION public.verify_parental_access_code(
     p_code VARCHAR(6),
     p_email VARCHAR(255)
@@ -144,6 +147,7 @@ GRANT EXECUTE ON FUNCTION public.verify_parental_access_code TO authenticated, a
 
 -- Cleanup job (run periodically to delete old codes)
 -- This can be triggered by a cron job or Supabase Edge Function
+DROP FUNCTION IF EXISTS public.cleanup_expired_parental_codes();
 CREATE OR REPLACE FUNCTION public.cleanup_expired_parental_codes()
 RETURNS INTEGER
 LANGUAGE plpgsql

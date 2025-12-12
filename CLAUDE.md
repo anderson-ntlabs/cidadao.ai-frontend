@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-12-10
+**Last Updated**: 2025-12-12
 
 ---
 
@@ -54,9 +54,9 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
 
 ## Project Overview
 
-Next.js 15 PWA for Brazilian government transparency with multi-agent AI. 17 agents with Brazilian cultural identities, bilingual (PT/EN), WCAG AAA accessible.
+Next.js 15 PWA for Brazilian government transparency with multi-agent AI. 19 agents with Brazilian cultural identities, bilingual (PT/EN), WCAG AAA accessible.
 
-**Stack**: Next.js 15, TypeScript, Tailwind CSS, Zustand, Supabase, Serwist (PWA), Vitest + Playwright
+**Stack**: Next.js 15, TypeScript, Tailwind CSS, Zustand, Supabase, Serwist (PWA), Vitest + Playwright, Sentry, PostHog
 
 ---
 
@@ -65,6 +65,7 @@ Next.js 15 PWA for Brazilian government transparency with multi-agent AI. 17 age
 ```bash
 # Development
 npm run dev                    # Dev server (localhost:3000)
+npm run dev:test               # Dev server on port 3001
 npm run build && npm run start # Production build
 
 # Quality (run before commit)
@@ -85,6 +86,10 @@ npm run test:mobile            # Mobile tests
 npx playwright test --headed   # Watch execution
 npx playwright test --debug    # Debug mode
 
+# Storybook
+npm run storybook              # Dev mode (localhost:6006)
+npm run build-storybook        # Build static
+
 # Analysis
 npm run analyze                # Bundle analysis (ANALYZE=true)
 npm run lighthouse             # Lighthouse CI
@@ -101,6 +106,7 @@ node scripts/db/check-badges.js # Verify badge system
 node scripts/testing/test-backend-comprehensive.js  # Backend connectivity
 node scripts/testing/test-chat-live.js              # Chat integration
 node scripts/diagnostics/diagnose-vlibras.js        # VLibras issues
+node scripts/testing/test-posthog.js                # PostHog analytics
 ```
 
 ---
@@ -152,14 +158,17 @@ Fallback   Primary → Fail? → Fallback
 
 ### State Management (Zustand)
 
-| Store                   | Purpose                    |
-| ----------------------- | -------------------------- |
-| `chat-store.ts`         | Sessions, messages, agents |
-| `notification-store.ts` | Toast notifications        |
-| `badge-store.ts`        | Achievement badges         |
-| `agora-chat-store.ts`   | Agora platform chat        |
-| `kids-store.ts`         | Kids mode state            |
-| `celebration-store.ts`  | Achievement animations     |
+| Store                     | Purpose                    |
+| ------------------------- | -------------------------- |
+| `chat-store.ts`           | Sessions, messages, agents |
+| `notification-store.ts`   | Toast notifications        |
+| `badge-store.ts`          | Achievement badges         |
+| `agora-chat-store.ts`     | Agora platform chat        |
+| `kids-store.ts`           | Kids mode state            |
+| `celebration-store.ts`    | Achievement animations     |
+| `voice-settings-store.ts` | TTS voice preferences      |
+| `survey-store.ts`         | User feedback surveys      |
+| `tooltip-store.ts`        | Tooltip state management   |
 
 All stores use persist middleware for localStorage.
 
@@ -180,13 +189,16 @@ All stores use persist middleware for localStorage.
 
 Gamified learning at `/pt/agora/*` with XP, badges, and tracks.
 
-**Auth hooks** (composable pattern):
+**Agora hooks** (in `hooks/agora/` subdirectory):
 
 ```typescript
-import { useUnifiedAuth } from '@/hooks/use-unified-auth' // Auth only
-import { useAgoraGamification } from '@/hooks/use-agora-gamification' // XP, badges
-import { useAgoraSessions } from '@/hooks/use-agora-sessions' // Study sessions
-import { useAgora } from '@/hooks/use-agora' // Facade (all)
+// Barrel export from hooks/agora/index.ts
+import { useAgoraGamification, AgoraGamificationProvider } from '@/hooks/agora'
+import { useAgoraSessions, AgoraSessionsProvider } from '@/hooks/agora'
+import { useAgoraOnboarding, AgoraOnboardingProvider } from '@/hooks/agora'
+
+// Auth hook (separate file)
+import { useUnifiedAuth } from '@/hooks/use-unified-auth'
 ```
 
 **Database** (Supabase): `agora_profiles`, `agora_xp_transactions`, `agora_sessions`, `agora_diary_entries`
@@ -216,6 +228,17 @@ Auth Session (root)
 - Disabled in dev (`NODE_ENV=development`)
 - NetworkFirst caching strategy
 - Components: `InstallPrompt`, `UpdateNotification`, `OfflineBanner`
+
+### Middleware (`middleware.ts`)
+
+The middleware handles:
+
+1. **Rate limiting** - Per-endpoint limits (chat, auth, export, api)
+2. **Geo detection** - Adds `X-User-Region` and `X-User-Country` headers
+3. **Supabase session** - Refreshes auth via `updateSession()`
+4. **Security headers** - CSP, HSTS, XSS protection, clickjacking prevention
+
+CSP is configured in `lib/security/csp.config.ts` with VLibras exceptions for accessibility.
 
 ---
 
@@ -342,22 +365,36 @@ Configure in Vercel dashboard:
 
 **Agora**:
 
-- `hooks/use-agora.tsx` - Unified hook
+- `hooks/agora/index.ts` - Barrel export for Agora hooks
+- `hooks/use-unified-auth.tsx` - Auth hook
 - `components/agora/` - Components
+
+**Config files** (in `config/` directory):
+
+- `vitest.config.mjs` - Unit test config
+- `playwright.config.ts` - E2E test config
+- `playwright.mobile.config.ts` - Mobile E2E config
+- `tailwind.config.js` - Tailwind CSS
+- `commitlint.config.js` - Commit message rules
 
 ---
 
 ## Library Organization
 
-| Directory       | Purpose                         |
-| --------------- | ------------------------------- |
-| `lib/chat/`     | ChatService, adapters           |
-| `lib/supabase/` | Client, server, middleware      |
-| `lib/cache/`    | In-memory, IndexedDB, Vercel KV |
-| `lib/security/` | CSP, rate limiting              |
-| `store/`        | Zustand stores                  |
-| `data/`         | Agent definitions               |
-| `types/`        | TypeScript interfaces           |
+| Directory         | Purpose                              |
+| ----------------- | ------------------------------------ |
+| `lib/chat/`       | ChatService, adapters                |
+| `lib/supabase/`   | Client, server, middleware           |
+| `lib/cache/`      | In-memory, IndexedDB, Vercel KV      |
+| `lib/security/`   | CSP, rate limiting, input validation |
+| `lib/monitoring/` | Sentry, metrics, AI telemetry        |
+| `lib/analytics/`  | PostHog, usability tracking          |
+| `lib/edge/`       | Geo detection, request validation    |
+| `lib/speech/`     | TTS service                          |
+| `store/`          | Zustand stores                       |
+| `data/`           | Agent definitions                    |
+| `types/`          | TypeScript interfaces                |
+| `hooks/agora/`    | Agora-specific hooks (gamification)  |
 
 ---
 

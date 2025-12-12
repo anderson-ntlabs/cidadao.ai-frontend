@@ -454,7 +454,11 @@ describe('ChatStore', () => {
 
       await useChatStore.getState().loadAgents()
 
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to load agents:', expect.any(Error))
+      // Uses structured logging via createLogger
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[ERROR] [ChatStore] Failed to load agents'),
+        expect.objectContaining({ error: expect.any(Error) })
+      )
       consoleSpy.mockRestore()
     })
 
