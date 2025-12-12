@@ -10,15 +10,30 @@ vi.mock('@supabase/ssr', () => ({
   createServerClient: vi.fn(),
 }))
 
-// Mock NextResponse
+// Mock NextResponse with all required methods
+const createMockResponse = () => ({
+  cookies: {
+    set: vi.fn(),
+    get: vi.fn(),
+    delete: vi.fn(),
+    getAll: vi.fn(() => []),
+  },
+  headers: new Headers(),
+})
+
 vi.mock('next/server', () => ({
   NextResponse: {
-    next: vi.fn(() => ({
-      cookies: {
-        set: vi.fn(),
-        get: vi.fn(),
-        delete: vi.fn(),
-      },
+    next: vi.fn(() => createMockResponse()),
+    redirect: vi.fn((url: URL) => ({
+      ...createMockResponse(),
+      status: 307,
+      url: url.toString(),
+      type: 'redirect',
+    })),
+    rewrite: vi.fn((url: URL) => ({
+      ...createMockResponse(),
+      url: url.toString(),
+      type: 'rewrite',
     })),
   },
 }))
