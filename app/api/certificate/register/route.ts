@@ -10,11 +10,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js'
 import { createClient as createAuthClient } from '@/lib/supabase/server'
 
 // Service role client for public_certificates inserts
-function getServiceClient(): SupabaseClient {
+function getServiceClient(): ReturnType<typeof createClient> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -39,6 +39,20 @@ interface RegisterRequest {
   programEndDate: string
 }
 
+interface PublicCertificateInsert {
+  verification_code: string
+  verification_hash: string
+  holder_name: string
+  certificate_type: string
+  total_hours: number
+  total_xp: number
+  final_level: number
+  final_rank: string
+  missions_completed: number
+  program_start_date: string
+  program_end_date: string
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Verify the request is from an authenticated user
@@ -61,7 +75,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Use service role to insert into public_certificates
     const supabase = getServiceClient()
 
-    const { error } = await supabase.from('public_certificates').insert({
+    const insertData: PublicCertificateInsert = {
       verification_code: body.verificationCode,
       verification_hash: body.verificationHash,
       holder_name: body.holderName,
@@ -73,7 +87,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       missions_completed: body.missionsCompleted || 0,
       program_start_date: body.programStartDate,
       program_end_date: body.programEndDate,
-    })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from('public_certificates') as any).insert(insertData)
 
     if (error) {
       // Check if it's a duplicate (certificate already registered)

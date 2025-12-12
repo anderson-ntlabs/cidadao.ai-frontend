@@ -16,6 +16,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+interface DeleteAccountRequest {
+  mode?: 'soft' | 'hard'
+  confirmation: string
+}
+
+interface KidsProfile {
+  id: string
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const cookieStore = await cookies()
@@ -47,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body: DeleteAccountRequest = await request.json()
     const { mode = 'soft', confirmation } = body
 
     // Require explicit confirmation
@@ -66,7 +75,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .from('agora_kids_profiles')
       .select('id')
       .eq('parent_user_id', userId)
-      .maybeSingle()
+      .maybeSingle<KidsProfile>()
 
     if (mode === 'hard') {
       // Immediate deletion (for testing or explicit request)

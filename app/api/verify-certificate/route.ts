@@ -11,6 +11,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+interface CertificateData {
+  holder_name: string
+  certificate_type: string
+  total_hours: string | number
+  final_rank: string
+  issued_at: string
+  program_name: string
+  is_valid: boolean
+}
+
 // Use service role for public certificate access
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,7 +71,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<Verificati
     }
 
     // Check if certificate was found
-    if (!data || data.length === 0 || !data[0].holder_name) {
+    const results = data as CertificateData[] | null
+    if (!results || results.length === 0 || !results[0].holder_name) {
       return NextResponse.json({
         success: true,
         valid: false,
@@ -69,7 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<Verificati
       })
     }
 
-    const cert = data[0]
+    const cert = results[0]
 
     // Return verification result
     return NextResponse.json({
@@ -78,7 +89,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<Verificati
       certificate: {
         holderName: cert.holder_name,
         certificateType: cert.certificate_type,
-        totalHours: parseFloat(cert.total_hours),
+        totalHours: parseFloat(String(cert.total_hours)),
         finalRank: cert.final_rank,
         issuedAt: cert.issued_at,
         programName: cert.program_name,

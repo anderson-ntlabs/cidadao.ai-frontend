@@ -12,6 +12,21 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+interface XpTransaction {
+  amount: number
+  [key: string]: unknown
+}
+
+interface Session {
+  duration_minutes: number
+  [key: string]: unknown
+}
+
+interface KidsProfile {
+  id: string
+  [key: string]: unknown
+}
+
 export async function GET(): Promise<NextResponse> {
   try {
     const cookieStore = await cookies()
@@ -77,12 +92,13 @@ export async function GET(): Promise<NextResponse> {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
+      .returns<XpTransaction[]>()
 
     if (xpTransactions?.length) {
       exportData.xpTransactions = xpTransactions
       exportData.xpSummary = {
         totalTransactions: xpTransactions.length,
-        totalXP: xpTransactions.reduce((sum, t) => sum + (t.amount || 0), 0),
+        totalXP: xpTransactions.reduce((sum: number, t: XpTransaction) => sum + (t.amount || 0), 0),
       }
     }
 
@@ -92,12 +108,16 @@ export async function GET(): Promise<NextResponse> {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
+      .returns<Session[]>()
 
     if (sessions?.length) {
       exportData.studySessions = sessions
       exportData.sessionsSummary = {
         totalSessions: sessions.length,
-        totalMinutes: sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0),
+        totalMinutes: sessions.reduce(
+          (sum: number, s: Session) => sum + (s.duration_minutes || 0),
+          0
+        ),
       }
     }
 
@@ -154,7 +174,7 @@ export async function GET(): Promise<NextResponse> {
       .from('agora_kids_profiles')
       .select('*')
       .eq('parent_user_id', userId)
-      .maybeSingle()
+      .maybeSingle<KidsProfile>()
 
     if (kidsProfile) {
       exportData.kidsProfile = {
