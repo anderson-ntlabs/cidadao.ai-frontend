@@ -13,13 +13,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function POST(request: NextRequest) {
+interface EndSessionBody {
+  sessionId?: string
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     let sessionId: string | undefined
 
     // Try to parse body (sendBeacon may send empty or minimal data)
     try {
-      const body = await request.json()
+      const body = (await request.json()) as EndSessionBody
       sessionId = body.sessionId
     } catch {
       // Body parsing failed, continue without sessionId

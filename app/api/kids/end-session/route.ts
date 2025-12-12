@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest): Promise<NextResponse> {
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(

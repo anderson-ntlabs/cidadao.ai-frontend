@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   // Only allow in development
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
