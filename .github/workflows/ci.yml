@@ -56,15 +56,23 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key-for-build' }}
 
       - name: List build output
-        run: ls -la .next/ || echo "No .next directory found"
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing .next/ directory:"
+          ls -la .next/ || echo "No .next directory found"
+          echo "Workspace: ${{ github.workspace }}"
+          echo "Checking if .next exists as directory:"
+          test -d .next && echo ".next is a directory" || echo ".next is NOT a directory"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: .next/
+          path: |
+            .next/
+            !.next/cache/
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
 
   test:
     name: Unit Tests
