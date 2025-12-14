@@ -1,5 +1,9 @@
 /**
  * Tests for Certificate Requirements Validation
+ *
+ * @author Anderson Henrique da Silva
+ * @location Minas Gerais, Brasil
+ * @date 2025-12-14
  */
 
 import { describe, it, expect } from 'vitest'
