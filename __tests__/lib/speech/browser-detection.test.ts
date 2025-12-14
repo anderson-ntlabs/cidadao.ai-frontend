@@ -222,21 +222,24 @@ describe('Browser Detection', () => {
       const message = getUnsupportedBrowserMessage()
       expect(message).toContain('🎤 Entrada de voz não disponível')
       expect(message).toContain('Firefox')
-      expect(message).toContain('Google Chrome ou Microsoft Edge')
+      expect(message).toContain('Google Chrome')
+      expect(message).toContain('Microsoft Edge')
     })
 
     it('should return Portuguese message when specified', () => {
       const message = getUnsupportedBrowserMessage('pt')
       expect(message).toContain('🎤 Entrada de voz não disponível')
       expect(message).toContain('Firefox')
-      expect(message).toContain('Google Chrome ou Microsoft Edge')
+      expect(message).toContain('Google Chrome')
+      expect(message).toContain('Safari')
     })
 
     it('should return English message when specified', () => {
       const message = getUnsupportedBrowserMessage('en')
       expect(message).toContain('🎤 Voice input not available')
       expect(message).toContain('Firefox')
-      expect(message).toContain('Google Chrome or Microsoft Edge')
+      expect(message).toContain('Google Chrome')
+      expect(message).toContain('Safari')
     })
   })
 })
