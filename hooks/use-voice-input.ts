@@ -11,7 +11,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/lib/speech/speech-recognition.service'
-import { isSpeechRecognitionSupported, getBrowserInfo } from '@/lib/speech/browser-detection'
+import {
+  isSpeechRecognitionSupported,
+  getBrowserInfo,
+  isMobileBrowser,
+  checkMicrophonePermission,
+  requestMicrophonePermission,
+} from '@/lib/speech/browser-detection'
 import { createLogger } from '@/lib/logger'
 import type {
   VoiceInputConfig,
@@ -213,7 +219,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     if (!isSupported) {
       const error: SpeechRecognitionError = {
         code: 'not-allowed',
-        message: 'Speech recognition not supported in this browser',
+        message: browserInfo.isMobile
+          ? 'Reconhecimento de voz não suportado. Use Chrome (Android) ou Safari (iOS 14.5+).'
+          : 'Speech recognition not supported in this browser',
       }
       setError(error)
       onError?.(error)
@@ -223,6 +231,36 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     try {
       // Clear previous error
       setError(null)
+
+      // On mobile, check and request microphone permission first
+      if (isMobileBrowser()) {
+        const permissionStatus = await checkMicrophonePermission()
+        logger.debug('Mobile microphone permission status', { permissionStatus })
+
+        if (permissionStatus === 'denied') {
+          const error: SpeechRecognitionError = {
+            code: 'not-allowed',
+            message: 'Permissão de microfone negada. Verifique as configurações do navegador.',
+          }
+          setError(error)
+          onError?.(error)
+          return
+        }
+
+        if (permissionStatus === 'prompt') {
+          // Request permission explicitly on mobile
+          const granted = await requestMicrophonePermission()
+          if (!granted) {
+            const error: SpeechRecognitionError = {
+              code: 'not-allowed',
+              message: 'Permissão de microfone necessária para usar entrada de voz.',
+            }
+            setError(error)
+            onError?.(error)
+            return
+          }
+        }
+      }
 
       // Clear transcripts if starting fresh
       if (!continuous) {
@@ -234,8 +272,16 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       await serviceRef.current.start()
     } catch (err) {
       logger.error('Failed to start voice input', { error: err })
+      const error: SpeechRecognitionError = {
+        code: 'audio-capture',
+        message: browserInfo.isMobile
+          ? 'Erro ao iniciar microfone. Verifique as permissões do navegador.'
+          : 'Failed to start voice recognition',
+      }
+      setError(error)
+      onError?.(error)
     }
-  }, [isSupported, continuous, onError])
+  }, [isSupported, continuous, onError, browserInfo.isMobile])
 
   // Stop listening
   const stop = useCallback(() => {

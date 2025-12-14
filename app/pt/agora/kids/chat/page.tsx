@@ -25,6 +25,26 @@ import Link from 'next/link'
 import { Send, Loader2, ArrowLeft, Sparkles, Heart, ArrowRight, MessageCircle } from 'lucide-react'
 import { trackKidsChatMessage } from '@/lib/analytics/kids-tracker'
 import { useChatPersistence } from '@/hooks/use-chat-persistence'
+import dynamic from 'next/dynamic'
+
+// Voice input button - wrapped with fallback to prevent crash if not available
+const VoiceInputButtonFallback = () => null
+const VoiceInputButton = dynamic(
+  () =>
+    import('@/components/voice/voice-input-button')
+      .then((mod) => {
+        if (!mod.VoiceInputButton) {
+          console.warn('VoiceInputButton not found, using fallback')
+          return { default: VoiceInputButtonFallback }
+        }
+        return { default: mod.VoiceInputButton }
+      })
+      .catch((err) => {
+        console.error('Failed to load VoiceInputButton:', err)
+        return { default: VoiceInputButtonFallback }
+      }),
+  { loading: () => null, ssr: false }
+)
 
 interface Message {
   id: string
@@ -482,12 +502,25 @@ function KidsChatContent() {
 
         {/* Input */}
         <GlassCard className="p-4 mt-4">
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-end">
+            {/* Voice Input Button */}
+            <VoiceInputButton
+              onTranscript={(transcript) => {
+                setInput((prev) => (prev ? prev + ' ' + transcript : transcript))
+              }}
+              disabled={isLoading}
+              size="lg"
+              variant="secondary"
+              lang="pt-BR"
+              showTooltip={true}
+              tooltipContent="Fale sua pergunta! 🎤"
+              className="h-14 w-14 rounded-full border-2 border-kids-turquoise bg-white dark:bg-gray-800 hover:bg-kids-turquoise/10 shadow-md"
+            />
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Digite sua pergunta..."
+              placeholder="Digite ou fale sua pergunta..."
               disabled={isLoading}
               className="flex-1 text-lg h-14 rounded-full px-6 border-2 border-gray-200 dark:border-gray-700 focus:border-kids-turquoise dark:focus:border-kids-turquoise"
             />
@@ -504,7 +537,7 @@ function KidsChatContent() {
             </Button>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-            Aperte Enter para enviar • Converse sobre programação! 🚀
+            Aperte Enter para enviar • Use o microfone para falar! 🎤🚀
           </p>
         </GlassCard>
       </div>

@@ -18,11 +18,16 @@ const logger = createLogger('BrowserDetection')
  * Check if the browser supports Web Speech API (SpeechRecognition)
  *
  * Browser Support (2025):
- * - ✅ Chrome/Chromium: Full support
- * - ✅ Edge: Full support
- * - ❌ Firefox: No support
- * - ❌ Safari: No support
- * - ❌ Opera, Brave, Vivaldi: No support
+ * - ✅ Chrome/Chromium (Desktop & Android): Full support
+ * - ✅ Edge (Desktop & Mobile): Full support
+ * - ✅ Safari (iOS 14.5+ & macOS 14.1+): Full support with webkitSpeechRecognition
+ * - ⚠️ Firefox: Limited support (behind flag)
+ * - ⚠️ Opera, Brave, Vivaldi: Chromium-based, usually works
+ *
+ * Mobile Notes:
+ * - iOS Safari requires user gesture to start recognition
+ * - Android Chrome works well, may need microphone permission
+ * - PWA context may have different permission handling
  *
  * @returns {boolean} True if SpeechRecognition is supported
  */
@@ -31,7 +36,52 @@ export function isSpeechRecognitionSupported(): boolean {
     return false // Server-side rendering
   }
 
-  return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+  // Check for both standard and webkit-prefixed API
+  const hasAPI = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+
+  // Additional check for iOS Safari which may have the API but not work in certain contexts
+  if (hasAPI && isIOSSafari()) {
+    // iOS Safari supports from 14.5+, check if we can create an instance
+    try {
+      const SpeechRecognition = getSpeechRecognition()
+      if (SpeechRecognition) {
+        // Try to instantiate to verify it's actually available
+        const test = new SpeechRecognition()
+        test.abort()
+        return true
+      }
+    } catch {
+      // If instantiation fails, API is not truly supported
+      return false
+    }
+  }
+
+  return hasAPI
+}
+
+/**
+ * Check if running on iOS Safari
+ */
+export function isIOSSafari(): boolean {
+  if (typeof window === 'undefined') return false
+
+  const ua = navigator.userAgent
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS/.test(ua)
+
+  return isIOS && isSafari
+}
+
+/**
+ * Check if running on Android Chrome
+ */
+export function isAndroidChrome(): boolean {
+  if (typeof window === 'undefined') return false
+
+  const ua = navigator.userAgent
+  return /Android/.test(ua) && /Chrome/.test(ua)
 }
 
 /**
@@ -175,18 +225,23 @@ export function getBrowserInfo(): BrowserInfo {
  */
 export function getUnsupportedBrowserMessage(lang: 'pt' | 'en' = 'pt'): string {
   const browserName = getBrowserName()
+  const isMobile = isMobileBrowser()
 
   const messages = {
     pt: {
       title: '🎤 Entrada de voz não disponível',
       message: `Seu navegador (${browserName}) não suporta entrada de voz.`,
-      recommendation: 'Por favor, use Google Chrome ou Microsoft Edge para usar este recurso.',
+      recommendation: isMobile
+        ? 'Por favor, use Chrome (Android) ou Safari (iOS 14.5+) para usar este recurso.'
+        : 'Por favor, use Google Chrome, Microsoft Edge ou Safari para usar este recurso.',
       alternative: 'Você pode continuar digitando sua mensagem normalmente.',
     },
     en: {
       title: '🎤 Voice input not available',
       message: `Your browser (${browserName}) does not support voice input.`,
-      recommendation: 'Please use Google Chrome or Microsoft Edge to use this feature.',
+      recommendation: isMobile
+        ? 'Please use Chrome (Android) or Safari (iOS 14.5+) to use this feature.'
+        : 'Please use Google Chrome, Microsoft Edge, or Safari to use this feature.',
       alternative: 'You can continue typing your message normally.',
     },
   }
@@ -204,10 +259,14 @@ export function logBrowserCompatibility(): void {
   }
 
   const info = getBrowserInfo()
+  const iosSafari = isIOSSafari()
+  const androidChrome = isAndroidChrome()
 
   logger.debug('Voice Input Browser Compatibility', {
     browser: `${info.name} ${info.version}`,
     mobile: info.isMobile,
+    iosSafari,
+    androidChrome,
     speechRecognition: info.supportsSpeechRecognition,
     api: info.supportsSpeechRecognition
       ? getSpeechRecognition()
@@ -215,7 +274,54 @@ export function logBrowserCompatibility(): void {
         : 'Not Available'
       : 'N/A',
     recommendation: !info.supportsSpeechRecognition
-      ? 'Use Chrome or Edge for voice input'
+      ? info.isMobile
+        ? 'Use Chrome (Android) or Safari iOS 14.5+ for voice input'
+        : 'Use Chrome, Edge or Safari for voice input'
       : undefined,
   })
+}
+
+/**
+ * Check if microphone permission can be requested
+ * Useful for mobile browsers that require user gesture
+ */
+export async function checkMicrophonePermission(): Promise<
+  'granted' | 'denied' | 'prompt' | 'unsupported'
+> {
+  if (typeof window === 'undefined') return 'unsupported'
+
+  // Check if permissions API is available
+  if ('permissions' in navigator) {
+    try {
+      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+      return result.state as 'granted' | 'denied' | 'prompt'
+    } catch {
+      // Permissions API doesn't support microphone query in some browsers
+    }
+  }
+
+  // Fallback: check if getUserMedia is available
+  if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+    return 'prompt'
+  }
+
+  return 'unsupported'
+}
+
+/**
+ * Request microphone permission explicitly
+ * Useful for mobile browsers that need a user gesture
+ */
+export async function requestMicrophonePermission(): Promise<boolean> {
+  if (typeof window === 'undefined') return false
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    // Stop all tracks immediately - we just needed to trigger permission
+    stream.getTracks().forEach((track) => track.stop())
+    return true
+  } catch (error) {
+    logger.warn('Microphone permission denied or unavailable', { error })
+    return false
+  }
 }
