@@ -17,7 +17,7 @@
 | Testes totais        | N/A            | **3942**    | Todos executam sem crash          |
 | Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                      |
 | Tempo de execucao    | N/A (crash)    | **84s**     | Suite completa                    |
-| Testes passando      | ~30%           | **98.7%**   | 3892/3942 (55 falhando)           |
+| Testes passando      | ~30%           | **100%**    | 3893/3942 (0 falhando) ✅         |
 | Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario) |
 | Erros TypeScript     | 0              | 0           | Build passando                    |
 | First Load JS        | ~400KB         | **173KB**   | ✅ META SUPERADA (era 300KB)      |
@@ -299,15 +299,15 @@ export default defineConfig({
 
 ## Metricas de Sucesso
 
-| Metrica              | Inicial | Atual (15/12) | Meta Final | Status       |
-| -------------------- | ------- | ------------- | ---------- | ------------ |
-| Memoria max (testes) | 24GB+   | **4GB**       | 4GB        | ✅ Atingido  |
-| Tempo testes unit    | N/A     | **84s**       | < 2 min    | ✅ Atingido  |
-| Testes passando      | ~30%    | **98.7%**     | 100%       | 🟡 55 falhas |
-| Coverage             | ~20%    | ~20%          | 60%        | 🔴 Pendente  |
-| First Load JS        | 400KB   | **173KB**     | 300KB      | ✅ Superado  |
-| TTFB (públicas)      | ~2.5s   | **~500ms**    | < 1s       | ✅ Atingido  |
-| Lighthouse           | ~85     | TBD           | 90+        | 🟡 Pendente  |
+| Metrica              | Inicial | Atual (15/12) | Meta Final | Status      |
+| -------------------- | ------- | ------------- | ---------- | ----------- |
+| Memoria max (testes) | 24GB+   | **4GB**       | 4GB        | ✅ Atingido |
+| Tempo testes unit    | N/A     | **84s**       | < 2 min    | ✅ Atingido |
+| Testes passando      | ~30%    | **100%**      | 100%       | ✅ Atingido |
+| Coverage             | ~20%    | ~20%          | 60%        | 🔴 Pendente |
+| First Load JS        | 400KB   | **173KB**     | 300KB      | ✅ Superado |
+| TTFB (públicas)      | ~2.5s   | **~500ms**    | < 1s       | ✅ Atingido |
+| Lighthouse           | ~85     | TBD           | 90+        | 🟡 Pendente |
 
 ---
 
