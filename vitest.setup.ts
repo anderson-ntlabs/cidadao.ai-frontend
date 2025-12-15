@@ -105,18 +105,8 @@ Object.defineProperty(window, 'webkitSpeechRecognition', {
   value: MockSpeechRecognition,
 })
 
-// Mock fetch for tests that don't provide their own
-const originalFetch = global.fetch
-global.fetch = vi.fn().mockImplementation((url) => {
-  // Return mock responses for common endpoints
-  return Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({}),
-    text: () => Promise.resolve(''),
-    headers: new Headers(),
-  })
-})
+// Note: fetch is NOT mocked globally to avoid test interference
+// Tests that need fetch mocking should do it locally with vi.spyOn(global, 'fetch')
 
 // Mock localStorage with actual storage behavior
 const createStorageMock = () => {
