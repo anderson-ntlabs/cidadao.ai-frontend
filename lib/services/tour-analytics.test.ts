@@ -1,34 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { TourAnalytics, type TourSession } from './tour-analytics'
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} }
-  }
-})()
+// Note: localStorage is mocked globally in vitest.setup.ts
 
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-})
-
-// Mock window.gtag
+// Mock window.gtag using vi.stubGlobal
 const mockGtag = vi.fn()
-Object.defineProperty(window, 'gtag', {
-  value: mockGtag,
-  writable: true
-})
 
 describe('TourAnalytics', () => {
   let analytics: TourAnalytics
 
   beforeEach(() => {
+    vi.stubGlobal('gtag', mockGtag)
     analytics = new TourAnalytics()
-    localStorageMock.clear()
+    localStorage.clear()
     mockGtag.mockClear()
   })
 
@@ -81,7 +65,7 @@ describe('TourAnalytics', () => {
         'tour_button_clicked',
         expect.objectContaining({
           button: 'next',
-          elapsed_time: expect.any(Number)
+          elapsed_time: expect.any(Number),
         })
       )
     })
@@ -93,7 +77,7 @@ describe('TourAnalytics', () => {
         'event',
         'tour_tour_started',
         expect.objectContaining({
-          elapsed_time: expect.any(Number)
+          elapsed_time: expect.any(Number),
         })
       )
     })
@@ -208,8 +192,8 @@ describe('TourAnalytics', () => {
           mode: 'quick',
           completed: true,
           stepsViewed: [1, 2],
-          interactions: []
-        }
+          interactions: [],
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -250,7 +234,7 @@ describe('TourAnalytics', () => {
         most_common_exit_point: null,
         total_sessions: 0,
         quick_mode_preference: 0,
-        complete_mode_preference: 0
+        complete_mode_preference: 0,
       })
     })
 
@@ -280,7 +264,7 @@ describe('TourAnalytics', () => {
           completed: true,
           stepsViewed: [],
           interactions: [],
-          timeSpent: 5000 // 5 seconds
+          timeSpent: 5000, // 5 seconds
         },
         {
           id: '2',
@@ -289,8 +273,8 @@ describe('TourAnalytics', () => {
           completed: true,
           stepsViewed: [],
           interactions: [],
-          timeSpent: 15000 // 15 seconds
-        }
+          timeSpent: 15000, // 15 seconds
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -302,10 +286,41 @@ describe('TourAnalytics', () => {
 
     it('should find most common exit point', () => {
       const mockSessions: TourSession[] = [
-        { id: '1', startTime: Date.now(), mode: 'quick', completed: false, stepsViewed: [], interactions: [], exitPoint: 'step-2' },
-        { id: '2', startTime: Date.now(), mode: 'quick', completed: false, stepsViewed: [], interactions: [], exitPoint: 'step-2' },
-        { id: '3', startTime: Date.now(), mode: 'quick', completed: false, stepsViewed: [], interactions: [], exitPoint: 'step-3' },
-        { id: '4', startTime: Date.now(), mode: 'quick', completed: true, stepsViewed: [], interactions: [] }
+        {
+          id: '1',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: false,
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: 'step-2',
+        },
+        {
+          id: '2',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: false,
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: 'step-2',
+        },
+        {
+          id: '3',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: false,
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: 'step-3',
+        },
+        {
+          id: '4',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -317,10 +332,38 @@ describe('TourAnalytics', () => {
 
     it('should calculate mode preferences', () => {
       const mockSessions: TourSession[] = [
-        { id: '1', startTime: Date.now(), mode: 'quick', completed: true, stepsViewed: [], interactions: [] },
-        { id: '2', startTime: Date.now(), mode: 'quick', completed: true, stepsViewed: [], interactions: [] },
-        { id: '3', startTime: Date.now(), mode: 'quick', completed: true, stepsViewed: [], interactions: [] },
-        { id: '4', startTime: Date.now(), mode: 'complete', completed: true, stepsViewed: [], interactions: [] }
+        {
+          id: '1',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
+        {
+          id: '2',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
+        {
+          id: '3',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
+        {
+          id: '4',
+          startTime: Date.now(),
+          mode: 'complete',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -335,9 +378,32 @@ describe('TourAnalytics', () => {
   describe('needsImprovement', () => {
     it('should return true when completion rate is low', () => {
       const mockSessions: TourSession[] = [
-        { id: '1', startTime: Date.now(), mode: 'quick', completed: false, stepsViewed: [], interactions: [], exitPoint: 'step-1' },
-        { id: '2', startTime: Date.now(), mode: 'quick', completed: false, stepsViewed: [], interactions: [], exitPoint: 'step-1' },
-        { id: '3', startTime: Date.now(), mode: 'quick', completed: true, stepsViewed: [], interactions: [] }
+        {
+          id: '1',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: false,
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: 'step-1',
+        },
+        {
+          id: '2',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: false,
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: 'step-1',
+        },
+        {
+          id: '3',
+          startTime: Date.now(),
+          mode: 'quick',
+          completed: true,
+          stepsViewed: [],
+          interactions: [],
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -354,8 +420,8 @@ describe('TourAnalytics', () => {
           completed: true,
           stepsViewed: [],
           interactions: [],
-          timeSpent: 400000 // 400 seconds
-        }
+          timeSpent: 400000, // 400 seconds
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
@@ -364,15 +430,17 @@ describe('TourAnalytics', () => {
     })
 
     it('should return true when completion rate is low with many sessions', () => {
-      const mockSessions: TourSession[] = Array(6).fill(null).map((_, i) => ({
-        id: `${i}`,
-        startTime: Date.now(),
-        mode: 'quick' as const,
-        completed: i < 4, // 4 completed, 2 not
-        stepsViewed: [],
-        interactions: [],
-        exitPoint: i >= 4 ? 'step-1' : undefined
-      }))
+      const mockSessions: TourSession[] = Array(6)
+        .fill(null)
+        .map((_, i) => ({
+          id: `${i}`,
+          startTime: Date.now(),
+          mode: 'quick' as const,
+          completed: i < 4, // 4 completed, 2 not
+          stepsViewed: [],
+          interactions: [],
+          exitPoint: i >= 4 ? 'step-1' : undefined,
+        }))
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))
 
@@ -388,7 +456,7 @@ describe('TourAnalytics', () => {
           completed: true,
           stepsViewed: [],
           interactions: [],
-          timeSpent: 30000 // 30 seconds
+          timeSpent: 30000, // 30 seconds
         },
         {
           id: '2',
@@ -397,8 +465,8 @@ describe('TourAnalytics', () => {
           completed: true,
           stepsViewed: [],
           interactions: [],
-          timeSpent: 45000 // 45 seconds
-        }
+          timeSpent: 45000, // 45 seconds
+        },
       ]
 
       localStorage.setItem('tour-sessions', JSON.stringify(mockSessions))

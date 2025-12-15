@@ -10,27 +10,13 @@ import {
   getAPIStatusEmoji,
   getStateStatusEmoji,
   type BackendTransparencyMapData,
-  type TransparencyMapData
+  type TransparencyMapData,
 } from './transparency-map.service'
 
-// Mock fetch
+// Note: localStorage is mocked globally in vitest.setup.ts
+
+// Mock fetch using vi.spyOn
 const mockFetch = vi.fn()
-global.fetch = mockFetch as any
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} }
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-})
 
 // Mock console
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -45,7 +31,7 @@ describe('transparency-map.service', () => {
       states_working: 3,
       overall_coverage_percentage: 18.5,
       total_apis: 8,
-      total_endpoints: 45
+      total_endpoints: 45,
     },
     states: {
       SP: {
@@ -58,7 +44,7 @@ describe('transparency-map.service', () => {
             endpoints: 10,
             status: 'operational',
             response_time_ms: 250,
-            error: null
+            error: null,
           },
           {
             name: 'Despesas SP',
@@ -66,9 +52,9 @@ describe('transparency-map.service', () => {
             endpoints: 8,
             status: 'partial',
             response_time_ms: 500,
-            error: null
-          }
-        ]
+            error: null,
+          },
+        ],
       },
       RJ: {
         name: 'Rio de Janeiro',
@@ -80,21 +66,22 @@ describe('transparency-map.service', () => {
             endpoints: 5,
             status: 'timeout',
             response_time_ms: null,
-            error: 'Connection timeout'
-          }
-        ]
-      }
+            error: 'Connection timeout',
+          },
+        ],
+      },
     },
     cache_info: {
       cached: false,
       last_update: '2025-10-25T12:00:00Z',
-      age_minutes: 0
-    }
+      age_minutes: 0,
+    },
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
-    localStorageMock.clear()
+    vi.stubGlobal('fetch', mockFetch)
+    localStorage.clear()
     consoleErrorSpy.mockClear()
     consoleWarnSpy.mockClear()
   })
@@ -107,7 +94,7 @@ describe('transparency-map.service', () => {
     it('should fetch and normalize transparency map data', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockBackendData
+        json: async () => mockBackendData,
       })
 
       const result = await fetchTransparencyMap()
@@ -116,7 +103,7 @@ describe('transparency-map.service', () => {
         expect.stringContaining('/api/v1/transparency/coverage/map'),
         expect.objectContaining({
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         })
       )
 
@@ -129,7 +116,7 @@ describe('transparency-map.service', () => {
     it('should normalize state data correctly', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockBackendData
+        json: async () => mockBackendData,
       })
 
       const result = await fetchTransparencyMap()
@@ -140,7 +127,7 @@ describe('transparency-map.service', () => {
         status: 'healthy',
         apiCount: 2,
         endpointCount: 18,
-        color: '#22c55e'
+        color: '#22c55e',
       })
 
       // Check API normalization
@@ -148,14 +135,14 @@ describe('transparency-map.service', () => {
         id: 'SP-0',
         name: 'Contratos SP',
         endpoints: 10,
-        status: 'operational'
+        status: 'operational',
       })
     })
 
     it('should cache data in localStorage after successful fetch', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockBackendData
+        json: async () => mockBackendData,
       })
 
       await fetchTransparencyMap()
@@ -172,7 +159,7 @@ describe('transparency-map.service', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
-        statusText: 'Internal Server Error'
+        statusText: 'Internal Server Error',
       })
 
       await expect(fetchTransparencyMap()).rejects.toThrow('HTTP 500: Internal Server Error')
@@ -191,14 +178,17 @@ describe('transparency-map.service', () => {
           overall_coverage_percentage: 0,
           total_apis: 0,
           total_endpoints: 0,
-          states_no_api: 27
-        }
+          states_no_api: 27,
+        },
       }
 
-      localStorage.setItem('transparencyMapCache', JSON.stringify({
-        data: cachedData,
-        timestamp: Date.now()
-      }))
+      localStorage.setItem(
+        'transparencyMapCache',
+        JSON.stringify({
+          data: cachedData,
+          timestamp: Date.now(),
+        })
+      )
 
       // Then, make fetch fail
       mockFetch.mockRejectedValue(new Error('Network error'))
@@ -218,7 +208,7 @@ describe('transparency-map.service', () => {
     it('should use 65 second timeout', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockBackendData
+        json: async () => mockBackendData,
       })
 
       await fetchTransparencyMap()
@@ -230,7 +220,7 @@ describe('transparency-map.service', () => {
     it('should calculate states_no_api correctly', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockBackendData
+        json: async () => mockBackendData,
       })
 
       const result = await fetchTransparencyMap()
@@ -252,14 +242,17 @@ describe('transparency-map.service', () => {
           overall_coverage_percentage: 0,
           total_apis: 0,
           total_endpoints: 0,
-          states_no_api: 27
-        }
+          states_no_api: 27,
+        },
       }
 
-      localStorage.setItem('transparencyMapCache', JSON.stringify({
-        data: cachedData,
-        timestamp: Date.now()
-      }))
+      localStorage.setItem(
+        'transparencyMapCache',
+        JSON.stringify({
+          data: cachedData,
+          timestamp: Date.now(),
+        })
+      )
 
       const result = getCachedMapData()
 
@@ -278,16 +271,19 @@ describe('transparency-map.service', () => {
           overall_coverage_percentage: 0,
           total_apis: 0,
           total_endpoints: 0,
-          states_no_api: 27
-        }
+          states_no_api: 27,
+        },
       }
 
       // Cache from 7 hours ago (stale)
-      const staleTimestamp = Date.now() - (7 * 60 * 60 * 1000)
-      localStorage.setItem('transparencyMapCache', JSON.stringify({
-        data: cachedData,
-        timestamp: staleTimestamp
-      }))
+      const staleTimestamp = Date.now() - 7 * 60 * 60 * 1000
+      localStorage.setItem(
+        'transparencyMapCache',
+        JSON.stringify({
+          data: cachedData,
+          timestamp: staleTimestamp,
+        })
+      )
 
       const result = getCachedMapData()
 
@@ -313,20 +309,26 @@ describe('transparency-map.service', () => {
 
   describe('isCacheFresh', () => {
     it('should return true when cache is fresh', () => {
-      localStorage.setItem('transparencyMapCache', JSON.stringify({
-        data: {},
-        timestamp: Date.now()
-      }))
+      localStorage.setItem(
+        'transparencyMapCache',
+        JSON.stringify({
+          data: {},
+          timestamp: Date.now(),
+        })
+      )
 
       expect(isCacheFresh()).toBe(true)
     })
 
     it('should return false when cache is stale', () => {
-      const staleTimestamp = Date.now() - (7 * 60 * 60 * 1000) // 7 hours ago
-      localStorage.setItem('transparencyMapCache', JSON.stringify({
-        data: {},
-        timestamp: staleTimestamp
-      }))
+      const staleTimestamp = Date.now() - 7 * 60 * 60 * 1000 // 7 hours ago
+      localStorage.setItem(
+        'transparencyMapCache',
+        JSON.stringify({
+          data: {},
+          timestamp: staleTimestamp,
+        })
+      )
 
       expect(isCacheFresh()).toBe(false)
     })
