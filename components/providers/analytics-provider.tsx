@@ -20,11 +20,12 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const pathname = usePathname()
 
   // Initialize PostHog after a delay to improve initial page load
+  // PostHog is now lazy-loaded, so this is doubly optimized
   useEffect(() => {
     // Delay analytics initialization to prioritize critical rendering
     const timer = setTimeout(() => {
-      initPostHog()
-      updateConsentStatus()
+      // initPostHog is now async and handles lazy loading internally
+      void initPostHog()
     }, 2000) // 2 second delay
 
     return () => clearTimeout(timer)

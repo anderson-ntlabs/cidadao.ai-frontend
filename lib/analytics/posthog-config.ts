@@ -8,12 +8,34 @@
  * - Single cookie consent banner covers both cookies and analytics
  * - Accepting cookies = consent for PostHog analytics
  * - Rejecting cookies = only essential cookies, no analytics
+ *
+ * Bundle Optimization:
+ * - PostHog is lazy-loaded only when needed (saves ~156KB from initial bundle)
+ * - Dynamic import ensures the library is loaded on demand
  */
 
-import posthog from 'posthog-js'
 import { logger } from '@/lib/logger'
+import type { PostHog } from 'posthog-js'
 
+let posthogInstance: PostHog | null = null
 let isInitialized = false
+let isInitializing = false
+
+/**
+ * Lazy load PostHog library
+ * Only loads the 156KB library when actually needed
+ */
+async function getPostHogLib(): Promise<(typeof import('posthog-js'))['default'] | null> {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const { default: posthog } = await import('posthog-js')
+    return posthog
+  } catch (error) {
+    logger.error('Failed to load PostHog library', error, { context: 'PostHogConfig' })
+    return null
+  }
+}
 
 /**
  * Initialize PostHog with privacy-first configuration
@@ -22,12 +44,14 @@ let isInitialized = false
  * - With consent: full analytics + session recording
  * - Without consent: opt-out mode (no data collection)
  */
-export function initPostHog() {
+export async function initPostHog(): Promise<void> {
   // Only initialize in browser
   if (typeof window === 'undefined') return
 
   // Only initialize once
-  if (isInitialized) return
+  if (isInitialized || isInitializing) return
+
+  isInitializing = true
 
   // Require API key
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
@@ -37,10 +61,18 @@ export function initPostHog() {
         context: 'PostHogConfig',
       })
     }
+    isInitializing = false
     return
   }
 
   try {
+    // Lazy load PostHog
+    const posthog = await getPostHogLib()
+    if (!posthog) {
+      isInitializing = false
+      return
+    }
+
     posthog.init(apiKey, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
 
@@ -62,7 +94,7 @@ export function initPostHog() {
       capture_pageleave: true, // Track when users leave
 
       // Debugging
-      loaded: (ph) => {
+      loaded: () => {
         if (process.env.NODE_ENV === 'development') {
           logger.debug('PostHog initialized successfully', {
             context: 'PostHogConfig',
@@ -75,9 +107,12 @@ export function initPostHog() {
       },
     })
 
+    posthogInstance = posthog
     isInitialized = true
   } catch (error) {
     logger.error('PostHog initialization failed', error, { context: 'PostHogConfig' })
+  } finally {
+    isInitializing = false
   }
 }
 
@@ -103,8 +138,8 @@ export function hasUserConsent(): boolean {
  * Called when user accepts/rejects cookie consent
  * or when consent status changes
  */
-export function updateConsentStatus() {
-  if (!isInitialized) {
+export function updateConsentStatus(): void {
+  if (!isInitialized || !posthogInstance) {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('PostHog not initialized yet - skipping consent update', {
         context: 'PostHogConfig',
@@ -123,15 +158,15 @@ export function updateConsentStatus() {
   }
 
   if (hasConsent) {
-    posthog.opt_in_capturing()
-    posthog.startSessionRecording()
+    posthogInstance.opt_in_capturing()
+    posthogInstance.startSessionRecording()
 
     if (process.env.NODE_ENV === 'development') {
       logger.info('PostHog analytics enabled - collecting data', { context: 'PostHogConfig' })
     }
   } else {
-    posthog.opt_out_capturing()
-    posthog.stopSessionRecording()
+    posthogInstance.opt_out_capturing()
+    posthogInstance.stopSessionRecording()
 
     if (process.env.NODE_ENV === 'development') {
       logger.info('PostHog analytics disabled - not collecting data', { context: 'PostHogConfig' })
@@ -142,17 +177,17 @@ export function updateConsentStatus() {
 /**
  * Identify user (anonymously with hash)
  */
-export async function identifyUser(userId: string | null) {
-  if (!isInitialized || !hasUserConsent()) return
+export async function identifyUser(userId: string | null): Promise<void> {
+  if (!isInitialized || !posthogInstance || !hasUserConsent()) return
 
   if (userId) {
     // Use SHA-256 hash of user ID for anonymization
     const userHash = await hashUserId(userId)
-    posthog.identify(userHash, {
+    posthogInstance.identify(userHash, {
       anonymized: true,
     })
   } else {
-    posthog.reset() // Anonymous user
+    posthogInstance.reset() // Anonymous user
   }
 }
 
@@ -178,10 +213,10 @@ async function hashUserId(userId: string): Promise<string> {
 /**
  * Track custom event
  */
-export function trackEvent(eventName: string, properties?: Record<string, any>) {
-  if (!isInitialized || !hasUserConsent()) return
+export function trackEvent(eventName: string, properties?: Record<string, unknown>): void {
+  if (!isInitialized || !posthogInstance || !hasUserConsent()) return
 
-  posthog.capture(eventName, {
+  posthogInstance.capture(eventName, {
     ...properties,
     timestamp: Date.now(),
   })
@@ -190,10 +225,10 @@ export function trackEvent(eventName: string, properties?: Record<string, any>) 
 /**
  * Track page view
  */
-export function trackPageView(pagePath: string) {
-  if (!isInitialized || !hasUserConsent()) return
+export function trackPageView(pagePath: string): void {
+  if (!isInitialized || !posthogInstance || !hasUserConsent()) return
 
-  posthog.capture('$pageview', {
+  posthogInstance.capture('$pageview', {
     $current_url: window.location.href,
     page_path: pagePath,
   })
@@ -202,17 +237,14 @@ export function trackPageView(pagePath: string) {
 /**
  * Get PostHog instance (for advanced usage)
  */
-export function getPostHog() {
-  return isInitialized ? posthog : null
+export function getPostHog(): PostHog | null {
+  return isInitialized ? posthogInstance : null
 }
 
 /**
  * Reset PostHog (logout)
  */
-export function resetPostHog() {
-  if (!isInitialized) return
-  posthog.reset()
+export function resetPostHog(): void {
+  if (!isInitialized || !posthogInstance) return
+  posthogInstance.reset()
 }
-
-// Export PostHog instance for advanced usage
-export { posthog }
