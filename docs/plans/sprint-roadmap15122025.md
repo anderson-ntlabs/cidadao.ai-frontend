@@ -11,54 +11,85 @@
 
 ### Metricas do Projeto
 
-| Metrica               | Valor        | Observacao                        |
-| --------------------- | ------------ | --------------------------------- |
-| Arquivos de teste     | **551**      | Quantidade massiva                |
-| Commits recentes (20) | 18 de testes | Foco em cobertura                 |
-| Cobertura alvo        | 60%          | Threshold atual: 20% (temporario) |
-| Erros TypeScript      | 0            | Build passando                    |
-| Bundle size           | ~400KB       | Meta: 250KB                       |
+| Metrica              | Valor Anterior | Valor Atual | Observacao                            |
+| -------------------- | -------------- | ----------- | ------------------------------------- |
+| Arquivos de teste    | 551 (errado)   | **166**     | Contagem corrigida                    |
+| Testes totais        | N/A            | **3793**    | Todos executam sem crash              |
+| Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                          |
+| Tempo de execucao    | N/A (crash)    | **47s**     | Suite completa                        |
+| Testes passando      | N/A            | **~30%**    | Muitos testes com problemas de window |
+| Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario)     |
+| Erros TypeScript     | 0              | 0           | Build passando                        |
+| Bundle size          | ~400KB         | ~400KB      | Meta: 250KB                           |
 
 ### Problema Critico Descoberto
 
-**Testes consumindo toda memoria RAM (24GB)** - PC trava ao rodar `npm run test:coverage`
+~~**Testes consumindo toda memoria RAM (24GB)** - PC trava ao rodar `npm run test:coverage`~~
 
-**Causa provavel**:
+**✅ RESOLVIDO em 15/12/2025** - Configuração de paralelismo corrigida.
 
-- 551 arquivos de teste rodando simultaneamente
-- Memory leaks em mocks ou setup
-- Falta de isolamento entre testes
-- Configuracao do Vitest inadequada para escala
+**Causa identificada**:
+
+- ~~551 arquivos de teste rodando simultaneamente~~ → Eram 166 arquivos
+- ~~Memory leaks em mocks ou setup~~ → Problema era paralelismo sem limites
+- ✅ Falta de isolamento entre testes → Resolvido com pool: forks
+- ✅ Configuracao do Vitest inadequada para escala → Corrigida
+
+### Novo Problema Identificado (15/12/2025)
+
+**~70% dos testes estão falhando** - Problemas de qualidade nos testes, não de memória
+
+**Causas principais**:
+
+- Testes manipulando `window` incorretamente (TypeError: window is not defined)
+- Mocks de fetch/AbortSignal não compatíveis com jsdom
+- Testes com assertions desatualizadas
+
+**Impacto**: Testes executam sem crash, mas muitos falham. Isso precisa ser corrigido na Semana 2.
 
 ---
 
-## Semana 1 (15-21 Dez): Estabilizacao de Testes
+## Semana 1 (15-21 Dez): Estabilizacao de Testes ✅ COMPLETO
 
 ### P0 - CRITICO: Resolver Memory Leak nos Testes
 
 **Objetivo**: Testes devem rodar sem consumir mais de 4GB de RAM
 
-#### Dia 1-2: Diagnostico
+#### Dia 1-2: Diagnostico ✅ COMPLETO (15/12/2025)
 
-- [ ] Identificar arquivos de teste que consomem mais memoria
-- [ ] Analisar `vitest.setup.ts` para memory leaks
-- [ ] Verificar mocks globais que acumulam estado
-- [ ] Revisar `config/vitest.config.mjs` para otimizacoes
+- [x] Identificar arquivos de teste que consomem mais memoria
+  - Descoberto: 166 arquivos de teste no projeto (não 551 - contagem incluía node_modules)
+  - Problema real: paralelismo excessivo sem limites
+- [x] Analisar `vitest.setup.ts` para memory leaks
+  - Adicionado beforeEach/afterEach com cleanup completo
+- [x] Verificar mocks globais que acumulam estado
+  - Configurado clearMocks, restoreMocks, clearAllTimers
+- [x] Revisar `config/vitest.config.mjs` para otimizacoes
+  - Configuração completamente reescrita
 
-#### Dia 3-4: Implementacao
+#### Dia 3-4: Implementacao ✅ COMPLETO (15/12/2025)
 
-- [ ] Configurar `maxWorkers` no Vitest (limitar paralelismo)
-- [ ] Adicionar `--pool=forks` ou `--pool=vmThreads`
-- [ ] Implementar `afterEach` com cleanup em mocks pesados
-- [ ] Criar script para rodar testes em batches
-- [ ] Configurar `--maxConcurrency` para limitar testes simultaneos
+- [x] Configurar `maxWorkers` no Vitest (limitar paralelismo)
+  - maxWorkers: 1, maxConcurrency: 1 (execução sequencial)
+- [x] Adicionar `--pool=forks` ou `--pool=vmThreads`
+  - pool: forks com singleFork: true para isolamento
+- [x] Implementar `afterEach` com cleanup em mocks pesados
+  - vi.clearAllMocks(), vi.clearAllTimers(), vi.restoreAllMocks()
+- [x] Criar script para rodar testes em batches
+  - scripts/testing/run-tests-batch.sh
+- [x] Configurar `--maxConcurrency` para limitar testes simultaneos
+  - sequence.concurrent: false
 
-#### Dia 5-6: Validacao
+#### Dia 5-6: Validacao ✅ COMPLETO (15/12/2025)
 
-- [ ] Testar com `NODE_OPTIONS="--max-old-space-size=4096"`
-- [ ] Monitorar memoria durante execucao
-- [ ] Documentar configuracao otimizada
-- [ ] Criar comando `npm run test:safe` com limites de memoria
+- [x] Testar com `NODE_OPTIONS="--max-old-space-size=4096"`
+  - 3793 testes em 47s sem crash (antes: travava PC)
+- [x] Monitorar memoria durante execucao
+  - Máximo ~4GB usado vs 24GB+ antes
+- [x] Documentar configuracao otimizada
+  - Commit: perf(test): optimize vitest configuration for memory efficiency
+- [x] Criar comando `npm run test:safe` com limites de memoria
+  - Novos comandos: test:safe, test:safe:coverage, test:lib, test:hooks, etc.
 
 **Entregaveis**:
 
