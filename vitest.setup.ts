@@ -48,6 +48,76 @@ Object.defineProperty(window, 'scrollTo', {
   value: vi.fn(),
 })
 
+// Mock Audio API
+class MockAudio {
+  src = ''
+  volume = 1
+  play = vi.fn().mockResolvedValue(undefined)
+  pause = vi.fn()
+  load = vi.fn()
+  addEventListener = vi.fn()
+  removeEventListener = vi.fn()
+}
+Object.defineProperty(window, 'Audio', {
+  writable: true,
+  value: MockAudio,
+})
+
+// Mock SpeechSynthesis
+Object.defineProperty(window, 'speechSynthesis', {
+  writable: true,
+  value: {
+    speak: vi.fn(),
+    cancel: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    getVoices: vi.fn().mockReturnValue([]),
+    speaking: false,
+    pending: false,
+    paused: false,
+    onvoiceschanged: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  },
+})
+
+// Mock SpeechRecognition
+class MockSpeechRecognition {
+  continuous = false
+  interimResults = false
+  lang = 'pt-BR'
+  start = vi.fn()
+  stop = vi.fn()
+  abort = vi.fn()
+  onstart = null
+  onend = null
+  onresult = null
+  onerror = null
+  addEventListener = vi.fn()
+  removeEventListener = vi.fn()
+}
+Object.defineProperty(window, 'SpeechRecognition', {
+  writable: true,
+  value: MockSpeechRecognition,
+})
+Object.defineProperty(window, 'webkitSpeechRecognition', {
+  writable: true,
+  value: MockSpeechRecognition,
+})
+
+// Mock fetch for tests that don't provide their own
+const originalFetch = global.fetch
+global.fetch = vi.fn().mockImplementation((url) => {
+  // Return mock responses for common endpoints
+  return Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+    headers: new Headers(),
+  })
+})
+
 // Mock localStorage with actual storage behavior
 const createStorageMock = () => {
   let store: Record<string, string> = {}
