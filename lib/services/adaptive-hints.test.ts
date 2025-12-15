@@ -1,24 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AdaptiveHintSystem, type PageContext, type UserProfile } from './adaptive-hints'
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value },
-    removeItem: (key: string) => { delete store[key] },
-    clear: () => { store = {} }
-  }
-})()
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-})
+// Note: localStorage is mocked globally in vitest.setup.ts
 
 describe('AdaptiveHintSystem', () => {
   beforeEach(() => {
-    localStorageMock.clear()
+    localStorage.clear()
   })
 
   describe('constructor', () => {
@@ -34,8 +21,8 @@ describe('AdaptiveHintSystem', () => {
         experience: 'advanced',
         preferences: {
           hintsEnabled: false,
-          hintLevel: 'minimal'
-        }
+          hintLevel: 'minimal',
+        },
       }
 
       const system = new AdaptiveHintSystem(customProfile)
@@ -64,7 +51,7 @@ describe('AdaptiveHintSystem', () => {
   describe('getRelevantHints', () => {
     it('should return empty array when hints disabled', () => {
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: false, hintLevel: 'standard' }
+        preferences: { hintsEnabled: false, hintLevel: 'standard' },
       })
 
       const context: PageContext = { page: 'chat' }
@@ -76,7 +63,12 @@ describe('AdaptiveHintSystem', () => {
     it('should show chat start hint for new users', () => {
       const system = new AdaptiveHintSystem({
         experience: 'new',
-        interactions: { messagessSent: 0, documentsUploaded: 0, hintsDissmissed: 0, errorsEncountered: 0 }
+        interactions: {
+          messagessSent: 0,
+          documentsUploaded: 0,
+          hintsDissmissed: 0,
+          errorsEncountered: 0,
+        },
       })
 
       const context: PageContext = { page: 'chat', hasMessages: false }
@@ -94,14 +86,14 @@ describe('AdaptiveHintSystem', () => {
 
       // First time - should show
       let hints = system.getRelevantHints(context)
-      expect(hints.some(h => h.key === 'chat-start')).toBe(true)
+      expect(hints.some((h) => h.key === 'chat-start')).toBe(true)
 
       // Mark as shown
       system.markHintShown('chat-start')
 
       // Second time - should not show
       hints = system.getRelevantHints(context)
-      expect(hints.some(h => h.key === 'chat-start')).toBe(false)
+      expect(hints.some((h) => h.key === 'chat-start')).toBe(false)
     })
 
     it('should show keyboard hint when send button not found', () => {
@@ -109,12 +101,12 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        errors: ['send-button-not-found']
+        errors: ['send-button-not-found'],
       }
 
       const hints = system.getRelevantHints(context)
 
-      const keyboardHint = hints.find(h => h.key === 'send-keyboard')
+      const keyboardHint = hints.find((h) => h.key === 'send-keyboard')
       expect(keyboardHint).toBeDefined()
       expect(keyboardHint?.priority).toBe('critical')
       expect(keyboardHint?.showAfter).toBe(0)
@@ -125,12 +117,12 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        errors: ['error1', 'error2', 'error3']
+        errors: ['error1', 'error2', 'error3'],
       }
 
       const hints = system.getRelevantHints(context)
 
-      const helpHint = hints.find(h => h.key === 'need-help')
+      const helpHint = hints.find((h) => h.key === 'need-help')
       expect(helpHint).toBeDefined()
       expect(helpHint?.priority).toBe('high')
     })
@@ -140,12 +132,12 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        contrastRatio: 3.0 // Below WCAG 4.5:1
+        contrastRatio: 3.0, // Below WCAG 4.5:1
       }
 
       const hints = system.getRelevantHints(context)
 
-      const contrastHint = hints.find(h => h.key === 'contrast-fix')
+      const contrastHint = hints.find((h) => h.key === 'contrast-fix')
       expect(contrastHint).toBeDefined()
       expect(contrastHint?.priority).toBe('high')
       expect(contrastHint?.content.description).toContain('3.00:1')
@@ -156,29 +148,29 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        contrastRatio: 7.0 // Above WCAG 4.5:1
+        contrastRatio: 7.0, // Above WCAG 4.5:1
       }
 
       const hints = system.getRelevantHints(context)
 
-      expect(hints.some(h => h.key === 'contrast-fix')).toBe(false)
+      expect(hints.some((h) => h.key === 'contrast-fix')).toBe(false)
     })
 
     it('should show mobile touch target hint', () => {
       // Need 'detailed' level to see medium priority hints
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'detailed' }
+        preferences: { hintsEnabled: true, hintLevel: 'detailed' },
       })
 
       const context: PageContext = {
         page: 'chat',
         isMobile: true,
-        touchTargetSize: 30 // Below 44px minimum
+        touchTargetSize: 30, // Below 44px minimum
       }
 
       const hints = system.getRelevantHints(context)
 
-      const touchHint = hints.find(h => h.key === 'mobile-targets')
+      const touchHint = hints.find((h) => h.key === 'mobile-targets')
       expect(touchHint).toBeDefined()
       expect(touchHint?.priority).toBe('medium')
     })
@@ -187,17 +179,17 @@ describe('AdaptiveHintSystem', () => {
       // Need 'detailed' level to see low priority hints
       const system = new AdaptiveHintSystem({
         experience: 'new',
-        preferences: { hintsEnabled: true, hintLevel: 'detailed' }
+        preferences: { hintsEnabled: true, hintLevel: 'detailed' },
       })
 
       const context: PageContext = {
         page: 'chat',
-        isMobile: true
+        isMobile: true,
       }
 
       const hints = system.getRelevantHints(context)
 
-      const orientationHint = hints.find(h => h.key === 'mobile-orientation')
+      const orientationHint = hints.find((h) => h.key === 'mobile-orientation')
       expect(orientationHint).toBeDefined()
       expect(orientationHint?.priority).toBe('low')
       expect(orientationHint?.showAfter).toBe(10000)
@@ -206,13 +198,13 @@ describe('AdaptiveHintSystem', () => {
     it('should show navigation hint on non-home pages', () => {
       // Need 'detailed' level to see low priority hints
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'detailed' }
+        preferences: { hintsEnabled: true, hintLevel: 'detailed' },
       })
 
       const context: PageContext = { page: 'settings' }
       const hints = system.getRelevantHints(context)
 
-      const navHint = hints.find(h => h.key === 'navigation')
+      const navHint = hints.find((h) => h.key === 'navigation')
       expect(navHint).toBeDefined()
     })
 
@@ -222,7 +214,7 @@ describe('AdaptiveHintSystem', () => {
       const context: PageContext = { page: 'home' }
       const hints = system.getRelevantHints(context)
 
-      expect(hints.some(h => h.key === 'navigation')).toBe(false)
+      expect(hints.some((h) => h.key === 'navigation')).toBe(false)
     })
   })
 
@@ -233,36 +225,36 @@ describe('AdaptiveHintSystem', () => {
       const context: PageContext = {
         page: 'chat',
         errors: ['error1', 'error2', 'error3'], // Creates 'high' priority hint
-        contrastRatio: 3.0 // Creates 'high' priority hint
+        contrastRatio: 3.0, // Creates 'high' priority hint
       }
 
       const hints = system.getRelevantHints(context)
 
       // Critical hints should come first
-      const priorities = hints.map(h => h.priority)
+      const priorities = hints.map((h) => h.priority)
       expect(priorities[0]).toBe('critical')
     })
 
     it('should filter to critical only for minimal level', () => {
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'minimal' }
+        preferences: { hintsEnabled: true, hintLevel: 'minimal' },
       })
 
       const context: PageContext = {
         page: 'chat',
         errors: ['send-button-not-found'], // Critical
-        contrastRatio: 3.0 // High priority
+        contrastRatio: 3.0, // High priority
       }
 
       const hints = system.getRelevantHints(context)
 
       // Only critical hints
-      expect(hints.every(h => h.priority === 'critical')).toBe(true)
+      expect(hints.every((h) => h.priority === 'critical')).toBe(true)
     })
 
     it('should filter to critical and high for standard level', () => {
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'standard' }
+        preferences: { hintsEnabled: true, hintLevel: 'standard' },
       })
 
       const context: PageContext = {
@@ -270,21 +262,19 @@ describe('AdaptiveHintSystem', () => {
         errors: ['send-button-not-found'], // Critical
         contrastRatio: 3.0, // High
         isMobile: true,
-        touchTargetSize: 30 // Medium
+        touchTargetSize: 30, // Medium
       }
 
       const hints = system.getRelevantHints(context)
 
       // No medium or low priority hints
-      expect(hints.every(h =>
-        h.priority === 'critical' || h.priority === 'high'
-      )).toBe(true)
+      expect(hints.every((h) => h.priority === 'critical' || h.priority === 'high')).toBe(true)
     })
 
     it('should show all hints for detailed level', () => {
       const system = new AdaptiveHintSystem({
         preferences: { hintsEnabled: true, hintLevel: 'detailed' },
-        experience: 'new'
+        experience: 'new',
       })
 
       const context: PageContext = {
@@ -292,7 +282,7 @@ describe('AdaptiveHintSystem', () => {
         errors: ['send-button-not-found'], // Critical
         contrastRatio: 3.0, // High
         isMobile: true,
-        touchTargetSize: 30 // Medium
+        touchTargetSize: 30, // Medium
       }
 
       const hints = system.getRelevantHints(context)
@@ -304,7 +294,7 @@ describe('AdaptiveHintSystem', () => {
     it('should limit to maximum 3 hints', () => {
       const system = new AdaptiveHintSystem({
         preferences: { hintLevel: 'detailed' },
-        experience: 'new'
+        experience: 'new',
       })
 
       const context: PageContext = {
@@ -313,7 +303,7 @@ describe('AdaptiveHintSystem', () => {
         errors: ['error1', 'error2', 'error3'],
         contrastRatio: 3.0,
         isMobile: true,
-        touchTargetSize: 30
+        touchTargetSize: 30,
       }
 
       const hints = system.getRelevantHints(context)
@@ -369,7 +359,7 @@ describe('AdaptiveHintSystem', () => {
 
     it('should reduce hint level after 5 dismissals', () => {
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'detailed' }
+        preferences: { hintsEnabled: true, hintLevel: 'detailed' },
       })
 
       // Dismiss 6 hints
@@ -380,13 +370,13 @@ describe('AdaptiveHintSystem', () => {
       const context: PageContext = {
         page: 'chat',
         isMobile: true,
-        touchTargetSize: 30 // Medium priority
+        touchTargetSize: 30, // Medium priority
       }
 
       const hints = system.getRelevantHints(context)
 
       // Should only show critical hints now
-      expect(hints.every(h => h.priority === 'critical')).toBe(true)
+      expect(hints.every((h) => h.priority === 'critical')).toBe(true)
     })
   })
 
@@ -395,7 +385,7 @@ describe('AdaptiveHintSystem', () => {
       const system = new AdaptiveHintSystem()
 
       system.updateUserProfile({
-        preferences: { hintsEnabled: false, hintLevel: 'minimal' }
+        preferences: { hintsEnabled: false, hintLevel: 'minimal' },
       })
 
       const context: PageContext = { page: 'chat' }
@@ -412,8 +402,8 @@ describe('AdaptiveHintSystem', () => {
           messagessSent: 4,
           documentsUploaded: 2,
           hintsDissmissed: 0,
-          errorsEncountered: 0
-        }
+          errorsEncountered: 0,
+        },
       })
 
       const metrics = system.getHintMetrics()
@@ -428,8 +418,8 @@ describe('AdaptiveHintSystem', () => {
           messagessSent: 15,
           documentsUploaded: 6,
           hintsDissmissed: 0,
-          errorsEncountered: 0
-        }
+          errorsEncountered: 0,
+        },
       })
 
       const metrics = system.getHintMetrics()
@@ -444,8 +434,8 @@ describe('AdaptiveHintSystem', () => {
           messagessSent: 2,
           documentsUploaded: 1,
           hintsDissmissed: 0,
-          errorsEncountered: 0
-        }
+          errorsEncountered: 0,
+        },
       })
 
       const metrics = system.getHintMetrics()
@@ -475,8 +465,8 @@ describe('AdaptiveHintSystem', () => {
           messagessSent: 10,
           documentsUploaded: 0,
           hintsDissmissed: 2,
-          errorsEncountered: 1
-        }
+          errorsEncountered: 1,
+        },
       })
 
       // Show 10 hints, dismiss 2
@@ -507,7 +497,7 @@ describe('AdaptiveHintSystem', () => {
       const context: PageContext = { page: 'chat', hasMessages: false }
       const hints = system.getRelevantHints(context)
 
-      const chatHint = hints.find(h => h.key === 'chat-start')
+      const chatHint = hints.find((h) => h.key === 'chat-start')
       expect(chatHint?.content.title).toContain('ajudar')
       expect(chatHint?.content.examples).toBeDefined()
       expect(chatHint?.content.examples?.length).toBeGreaterThan(0)
@@ -518,11 +508,11 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        errors: ['send-button-not-found']
+        errors: ['send-button-not-found'],
       }
       const hints = system.getRelevantHints(context)
 
-      const keyboardHint = hints.find(h => h.key === 'send-keyboard')
+      const keyboardHint = hints.find((h) => h.key === 'send-keyboard')
       expect(keyboardHint?.content.description).toContain('Enter')
       expect(keyboardHint?.content.note).toContain('Shift+Enter')
     })
@@ -532,11 +522,11 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        contrastRatio: 3.5
+        contrastRatio: 3.5,
       }
       const hints = system.getRelevantHints(context)
 
-      const contrastHint = hints.find(h => h.key === 'contrast-fix')
+      const contrastHint = hints.find((h) => h.key === 'contrast-fix')
       expect(contrastHint?.content.description).toContain('3.50')
       expect(contrastHint?.content.onClick).toBeDefined()
     })
@@ -544,17 +534,17 @@ describe('AdaptiveHintSystem', () => {
     it('should generate mobile touch hint with suggestions', () => {
       // Need 'detailed' level to see medium priority hints
       const system = new AdaptiveHintSystem({
-        preferences: { hintsEnabled: true, hintLevel: 'detailed' }
+        preferences: { hintsEnabled: true, hintLevel: 'detailed' },
       })
 
       const context: PageContext = {
         page: 'chat',
         isMobile: true,
-        touchTargetSize: 30
+        touchTargetSize: 30,
       }
       const hints = system.getRelevantHints(context)
 
-      const touchHint = hints.find(h => h.key === 'mobile-targets')
+      const touchHint = hints.find((h) => h.key === 'mobile-targets')
       expect(touchHint?.content.suggestions).toBeDefined()
       expect(touchHint?.content.suggestions?.length).toBeGreaterThan(0)
     })
@@ -564,11 +554,11 @@ describe('AdaptiveHintSystem', () => {
 
       const context: PageContext = {
         page: 'chat',
-        errors: ['e1', 'e2', 'e3']
+        errors: ['e1', 'e2', 'e3'],
       }
       const hints = system.getRelevantHints(context)
 
-      const helpHint = hints.find(h => h.key === 'need-help')
+      const helpHint = hints.find((h) => h.key === 'need-help')
       expect(helpHint?.content.actions).toBeDefined()
       expect(helpHint?.content.actions?.length).toBe(2)
       expect(helpHint?.content.actions?.[0].action).toBe('start-tour')
