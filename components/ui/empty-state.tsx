@@ -1,6 +1,6 @@
 'use client'
 
-import { type LucideIcon } from 'lucide-react'
+import { type LucideIcon, Search, AlertCircle, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 
@@ -194,8 +194,6 @@ export function EmptyStateSearch({
   onClear?: () => void
   className?: string
 }) {
-  const { Search } = require('lucide-react')
-
   return (
     <EmptyState
       icon={Search}
@@ -222,8 +220,6 @@ export function EmptyStateError({
   message?: string
   className?: string
 }) {
-  const { AlertCircle, RefreshCw } = require('lucide-react')
-
   return (
     <EmptyState
       icon={AlertCircle}
