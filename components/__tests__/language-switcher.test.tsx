@@ -1,206 +1,152 @@
+/**
+ * Tests for LanguageSwitcher components
+ *
+ * @author Anderson Henrique da Silva
+ * @date 2025-12-15
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { LanguageSwitcherV2, LanguageSwitcher } from '../language-switcher-v2'
+import { LanguageSwitcherOriginal } from '../language-switcher'
 
-// Mock Next.js modules
+// Mock dependencies
+const { mockUsePathname } = vi.hoisted(() => ({
+  mockUsePathname: vi.fn(() => '/pt'),
+}))
+
+vi.mock('next/navigation', () => ({
+  usePathname: mockUsePathname,
+}))
+
 vi.mock('next/link', () => ({
-  default: ({ href, children, className }: any) => (
+  default: ({ children, href, className }: any) => (
     <a href={href} className={className}>
       {children}
     </a>
   ),
 }))
 
-const mockUsePathname = vi.fn()
-vi.mock('next/navigation', () => ({
-  usePathname: () => mockUsePathname(),
-}))
-
-describe('LanguageSwitcherV2', () => {
+describe('LanguageSwitcherOriginal', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     mockUsePathname.mockReturnValue('/pt')
   })
 
-  describe('default variant', () => {
-    it('renders PT and EN links', () => {
-      render(<LanguageSwitcherV2 />)
+  describe('Rendering', () => {
+    it('renders both language links', () => {
+      render(<LanguageSwitcherOriginal />)
+
       expect(screen.getByText('PT')).toBeInTheDocument()
       expect(screen.getByText('EN')).toBeInTheDocument()
     })
 
-    it('highlights PT when on Portuguese page', () => {
-      mockUsePathname.mockReturnValue('/pt')
-      render(<LanguageSwitcherV2 />)
-
-      const ptLink = screen.getByText('PT')
-      expect(ptLink).toHaveClass('bg-green-600', 'text-white')
-    })
-
-    it('highlights EN when on English page', () => {
-      mockUsePathname.mockReturnValue('/en')
-      render(<LanguageSwitcherV2 />)
-
-      const enLink = screen.getByText('EN')
-      expect(enLink).toHaveClass('bg-green-600', 'text-white')
-    })
-
-    it('does not highlight EN on Portuguese page', () => {
-      mockUsePathname.mockReturnValue('/pt')
-      render(<LanguageSwitcherV2 />)
-
-      const enLink = screen.getByText('EN')
-      expect(enLink).not.toHaveClass('bg-green-600')
-    })
-  })
-
-  describe('mobile variant', () => {
-    it('renders full language names', () => {
-      render(<LanguageSwitcherV2 variant="mobile" />)
-      expect(screen.getByText('Português')).toBeInTheDocument()
-      expect(screen.getByText('English')).toBeInTheDocument()
-    })
-
-    it('highlights Português when on Portuguese page', () => {
-      mockUsePathname.mockReturnValue('/pt')
-      render(<LanguageSwitcherV2 variant="mobile" />)
-
-      const ptLink = screen.getByText('Português')
-      expect(ptLink).toHaveClass('bg-green-600', 'text-white')
-    })
-
-    it('highlights English when on English page', () => {
-      mockUsePathname.mockReturnValue('/en')
-      render(<LanguageSwitcherV2 variant="mobile" />)
-
-      const enLink = screen.getByText('English')
-      expect(enLink).toHaveClass('bg-green-600', 'text-white')
-    })
-  })
-
-  describe('localized paths', () => {
-    it('generates correct PT path from home', () => {
-      mockUsePathname.mockReturnValue('/en')
-      render(<LanguageSwitcherV2 />)
+    it('has correct href for PT link', () => {
+      render(<LanguageSwitcherOriginal />)
 
       const ptLink = screen.getByText('PT')
       expect(ptLink).toHaveAttribute('href', '/pt')
     })
 
-    it('generates correct EN path from home', () => {
+    it('has correct href for EN link', () => {
+      render(<LanguageSwitcherOriginal />)
+
+      const enLink = screen.getByText('EN')
+      expect(enLink).toHaveAttribute('href', '/en')
+    })
+  })
+
+  describe('Active State - PT', () => {
+    it('shows PT as active when on PT path', () => {
       mockUsePathname.mockReturnValue('/pt')
-      render(<LanguageSwitcherV2 />)
 
-      const enLink = screen.getByText('EN')
-      expect(enLink).toHaveAttribute('href', '/en')
+      render(<LanguageSwitcherOriginal />)
+
+      const ptLink = screen.getByText('PT')
+      expect(ptLink.className).toContain('bg-green-600')
+      expect(ptLink.className).toContain('text-white')
     })
 
-    it('preserves path when switching from PT to EN', () => {
+    it('shows EN as inactive when on PT path', () => {
+      mockUsePathname.mockReturnValue('/pt')
+
+      render(<LanguageSwitcherOriginal />)
+
+      const enLink = screen.getByText('EN')
+      expect(enLink.className).toContain('bg-gray-200')
+      expect(enLink.className).toContain('text-gray-700')
+    })
+
+    it('detects PT from nested path', () => {
       mockUsePathname.mockReturnValue('/pt/app/dashboard')
-      render(<LanguageSwitcherV2 />)
+
+      render(<LanguageSwitcherOriginal />)
+
+      const ptLink = screen.getByText('PT')
+      expect(ptLink.className).toContain('bg-green-600')
+    })
+  })
+
+  describe('Active State - EN', () => {
+    it('shows EN as active when on EN path', () => {
+      mockUsePathname.mockReturnValue('/en')
+
+      render(<LanguageSwitcherOriginal />)
 
       const enLink = screen.getByText('EN')
-      expect(enLink).toHaveAttribute('href', '/en/app/dashboard')
+      expect(enLink.className).toContain('bg-green-600')
+      expect(enLink.className).toContain('text-white')
     })
 
-    it('preserves path when switching from EN to PT', () => {
+    it('shows PT as inactive when on EN path', () => {
+      mockUsePathname.mockReturnValue('/en')
+
+      render(<LanguageSwitcherOriginal />)
+
+      const ptLink = screen.getByText('PT')
+      expect(ptLink.className).toContain('bg-gray-200')
+      expect(ptLink.className).toContain('text-gray-700')
+    })
+
+    it('detects EN from nested path', () => {
       mockUsePathname.mockReturnValue('/en/app/chat')
-      render(<LanguageSwitcherV2 />)
 
-      const ptLink = screen.getByText('PT')
-      expect(ptLink).toHaveAttribute('href', '/pt/app/chat')
-    })
-
-    it('handles nested paths correctly', () => {
-      mockUsePathname.mockReturnValue('/pt/agora/trilhas/cidadania')
-      render(<LanguageSwitcherV2 />)
+      render(<LanguageSwitcherOriginal />)
 
       const enLink = screen.getByText('EN')
-      expect(enLink).toHaveAttribute('href', '/en/agora/trilhas/cidadania')
-    })
-
-    it('handles root path with trailing slash', () => {
-      mockUsePathname.mockReturnValue('/pt/')
-      render(<LanguageSwitcherV2 />)
-
-      const enLink = screen.getByText('EN')
-      expect(enLink).toHaveAttribute('href', '/en')
+      expect(enLink.className).toContain('bg-green-600')
     })
   })
 
-  describe('className prop', () => {
-    it('applies custom className in default variant', () => {
-      const { container } = render(<LanguageSwitcherV2 className="custom-class" />)
-      expect(container.firstChild).toHaveClass('custom-class')
+  describe('Styling', () => {
+    it('has fixed positioning', () => {
+      const { container } = render(<LanguageSwitcherOriginal />)
+
+      const wrapper = container.firstChild
+      expect((wrapper as HTMLElement).className).toContain('fixed')
     })
 
-    it('applies custom className in mobile variant', () => {
-      const { container } = render(
-        <LanguageSwitcherV2 variant="mobile" className="mobile-custom" />
-      )
-      expect(container.firstChild).toHaveClass('mobile-custom')
-    })
-  })
+    it('has top-right positioning', () => {
+      const { container } = render(<LanguageSwitcherOriginal />)
 
-  describe('styling', () => {
-    it('has flex container', () => {
-      const { container } = render(<LanguageSwitcherV2 />)
-      expect(container.firstChild).toHaveClass('flex', 'gap-2')
-    })
-
-    it('links have font-medium class', () => {
-      render(<LanguageSwitcherV2 />)
-
-      const ptLink = screen.getByText('PT')
-      const enLink = screen.getByText('EN')
-
-      expect(ptLink).toHaveClass('font-medium')
-      expect(enLink).toHaveClass('font-medium')
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper.className).toContain('top-4')
+      expect(wrapper.className).toContain('right-4')
     })
 
     it('links have rounded corners', () => {
-      render(<LanguageSwitcherV2 />)
+      render(<LanguageSwitcherOriginal />)
 
       const ptLink = screen.getByText('PT')
-      expect(ptLink).toHaveClass('rounded')
-    })
-  })
-
-  describe('accessibility', () => {
-    it('renders as anchor elements', () => {
-      render(<LanguageSwitcherV2 />)
-
-      const links = screen.getAllByRole('link')
-      expect(links).toHaveLength(2)
+      expect(ptLink.className).toContain('rounded-md')
     })
 
-    it('links have accessible text', () => {
-      render(<LanguageSwitcherV2 />)
+    it('inactive links have hover effect', () => {
+      mockUsePathname.mockReturnValue('/pt')
 
-      expect(screen.getByText('PT')).toBeInTheDocument()
-      expect(screen.getByText('EN')).toBeInTheDocument()
+      render(<LanguageSwitcherOriginal />)
+
+      const enLink = screen.getByText('EN')
+      expect(enLink.className).toContain('hover:bg-gray-300')
     })
-
-    it('mobile variant has full language names for clarity', () => {
-      render(<LanguageSwitcherV2 variant="mobile" />)
-
-      expect(screen.getByText('Português')).toBeInTheDocument()
-      expect(screen.getByText('English')).toBeInTheDocument()
-    })
-  })
-})
-
-describe('LanguageSwitcher (alias)', () => {
-  beforeEach(() => {
-    mockUsePathname.mockReturnValue('/pt')
-  })
-
-  it('is exported as alias', () => {
-    expect(LanguageSwitcher).toBe(LanguageSwitcherV2)
-  })
-
-  it('renders correctly via alias', () => {
-    render(<LanguageSwitcher />)
-    expect(screen.getByText('PT')).toBeInTheDocument()
-    expect(screen.getByText('EN')).toBeInTheDocument()
   })
 })
