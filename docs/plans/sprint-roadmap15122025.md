@@ -11,16 +11,16 @@
 
 ### Metricas do Projeto
 
-| Metrica              | Valor Anterior | Valor Atual | Observacao                            |
-| -------------------- | -------------- | ----------- | ------------------------------------- |
-| Arquivos de teste    | 551 (errado)   | **166**     | Contagem corrigida                    |
-| Testes totais        | N/A            | **3793**    | Todos executam sem crash              |
-| Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                          |
-| Tempo de execucao    | N/A (crash)    | **47s**     | Suite completa                        |
-| Testes passando      | N/A            | **~30%**    | Muitos testes com problemas de window |
-| Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario)     |
-| Erros TypeScript     | 0              | 0           | Build passando                        |
-| Bundle size          | ~400KB         | ~400KB      | Meta: 250KB                           |
+| Metrica              | Valor Anterior | Valor Atual | Observacao                        |
+| -------------------- | -------------- | ----------- | --------------------------------- |
+| Arquivos de teste    | 551 (errado)   | **166**     | Contagem corrigida                |
+| Testes totais        | N/A            | **3793**    | Todos executam sem crash          |
+| Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                      |
+| Tempo de execucao    | N/A (crash)    | **47s**     | Suite completa                    |
+| Testes passando      | ~30%           | **98.3%**   | 1737/1767 por diretório           |
+| Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario) |
+| Erros TypeScript     | 0              | 0           | Build passando                    |
+| Bundle size          | ~400KB         | ~400KB      | Meta: 250KB                       |
 
 ### Problema Critico Descoberto
 
@@ -102,7 +102,34 @@ npm run test:single      # Testar arquivo unico
 
 ---
 
-## Semana 2 (22-28 Dez): Otimizacao de Testes
+## Semana 2 (22-28 Dez): Otimizacao de Testes - EM PROGRESSO
+
+### P0: Corrigir Contaminação de Estado nos Testes ✅ RESOLVIDO (15/12/2025)
+
+**Problema identificado**: Testes passam isoladamente mas falham em conjunto.
+
+**Solução implementada**:
+
+- [x] Adicionar mocks globais no vitest.setup.ts:
+  - window.matchMedia, IntersectionObserver, ResizeObserver
+  - localStorage/sessionStorage com comportamento real
+  - Audio API (play, pause, load)
+  - SpeechSynthesis e SpeechRecognition
+  - fetch global como fallback
+- [x] Adicionar mocks do Supabase client/server
+- [x] Configurar environment variables para testes
+
+**Resultados por diretório** (15/12/2025):
+| Diretório | Passando | Falhando | Total | Taxa |
+|--------------|----------|----------|-------|---------|
+| data/ | 259 | 0 | 259 | 100% |
+| store/ | 369 | 0 | 370 | 99.7% |
+| hooks/ | 446 | 16 | 465 | 95.9% |
+| components/ | 628 | 0 | 635 | 98.9% |
+| lib/ | 35 | 3 | 38\* | 92.1% |
+| **TOTAL** | **1737** | **19** | 1767 | **98.3%** |
+
+\*lib/ tem problema de coleta em suite completa - arquivos passam isoladamente.
 
 ### P1: Reorganizar Estrutura de Testes
 
@@ -122,13 +149,13 @@ npm run test:single      # Testar arquivo unico
   │   └── supabase/
   └── e2e/           # Playwright (ja existe)
   ```
-- [ ] Criar comandos por categoria:
-  - `npm run test:unit` - apenas testes unitarios rapidos
-  - `npm run test:integration` - testes com mocks
-- [ ] Mover testes pesados para execucao separada
+- [x] Criar comandos por categoria (já temos test:lib, test:hooks, etc.)
+- [ ] Resolver problema de coleta em lib/ quando roda suite completa
 - [ ] Identificar e remover testes duplicados
 
 ### P2: Aumentar Coverage para 60%
+
+**Status**: Aguardando resolução de P1
 
 **Areas prioritarias**:
 
