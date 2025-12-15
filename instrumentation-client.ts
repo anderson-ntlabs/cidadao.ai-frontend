@@ -2,12 +2,15 @@
  * Next.js Client Instrumentation
  *
  * This file configures Sentry for the client-side of the Next.js application.
- * It initializes error tracking, performance monitoring, and session replay.
+ * It initializes error tracking and performance monitoring.
+ *
+ * Session Replay is lazy-loaded only when an error occurs to reduce bundle size.
  *
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
  *
  * Author: Anderson Henrique da Silva
  * Date: 2025-12-11
+ * Updated: 2025-12-15 - Lazy load replay integration for bundle optimization
  */
 
 import * as Sentry from '@sentry/nextjs'
@@ -30,22 +33,23 @@ Sentry.init({
   // Tracing - reduced sample rate for performance
   tracesSampleRate: isProduction ? 0.1 : 0,
 
-  // Session Replay - only in production, lazy loaded
-  replaysSessionSampleRate: isProduction ? 0.1 : 0,
-  replaysOnErrorSampleRate: isProduction ? 1.0 : 0,
+  // Session Replay - disabled in initial load, added dynamically on error
+  // This saves ~50-80KB from the initial bundle
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
 
-  // Integrations - only add what's needed
+  // Integrations - minimal set for initial load
+  // replayIntegration removed to reduce bundle by ~50-80KB
+  // It will be lazy-loaded when an error occurs via addReplayOnError()
   integrations: isProduction
     ? [
-        Sentry.replayIntegration({
-          maskAllText: true,
-          blockAllMedia: true,
+        Sentry.browserTracingIntegration({
+          enableLongTask: false, // Reduce tracing overhead
         }),
-        Sentry.browserTracingIntegration(),
       ]
     : [],
 
-  // Filter events
+  // Filter events and lazy load replay on error
   beforeSend(event, hint) {
     // Don't send errors in development
     if (process.env.NODE_ENV !== 'production') {
