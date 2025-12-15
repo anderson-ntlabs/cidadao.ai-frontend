@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import * as Sentry from '@sentry/nextjs'
 import { measureAsync, measureSync, logger } from './logger'
 
 // Mock console methods
@@ -372,5 +373,408 @@ describe('Logger class methods', () => {
       logger.timeEnd('timer-label')
       expect(consoleTimeEndSpy).not.toHaveBeenCalled()
     })
+  })
+})
+
+describe('Logger - Development Mode', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    originalEnv = process.env.NODE_ENV
+    // Set to development mode
+    process.env.NODE_ENV = 'development'
+    // Force module reload to pick up new env
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv
+    vi.resetModules()
+  })
+
+  it('should log debug messages in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.debug('Debug message', { key: 'value' })
+    expect(consoleLogSpy).toHaveBeenCalledWith('[DEBUG] Debug message', { key: 'value' })
+  })
+
+  it('should log debug without context in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.debug('Debug only')
+    expect(consoleLogSpy).toHaveBeenCalledWith('[DEBUG] Debug only', '')
+  })
+
+  it('should log info messages in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.info('Info message', { data: 123 })
+    expect(consoleInfoSpy).toHaveBeenCalledWith('[INFO] Info message', { data: 123 })
+  })
+
+  it('should log info without context in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.info('Info only')
+    expect(consoleInfoSpy).toHaveBeenCalledWith('[INFO] Info only', '')
+  })
+
+  it('should use console.warn in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.warn('Warning in dev', { warning: true })
+    expect(consoleWarnSpy).toHaveBeenCalledWith('[WARN] Warning in dev', { warning: true })
+    expect(Sentry.captureMessage).not.toHaveBeenCalled()
+  })
+
+  it('should use console.error in development mode for Error objects', async () => {
+    const { logger } = await import('./logger')
+    const error = new Error('Dev error')
+    logger.error(error, { context: 'dev' })
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR]', 'Dev error', expect.any(String), {
+      context: 'dev',
+    })
+    expect(Sentry.captureException).not.toHaveBeenCalled()
+  })
+
+  it('should use console.error in development mode for string errors', async () => {
+    const { logger } = await import('./logger')
+    logger.error('Dev string error', { reason: 'test' })
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR] Dev string error', { reason: 'test' })
+    expect(Sentry.captureMessage).not.toHaveBeenCalled()
+  })
+
+  it('should call console.group in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.group('Test Group')
+    expect(consoleGroupSpy).toHaveBeenCalledWith('Test Group')
+  })
+
+  it('should call console.groupEnd in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.groupEnd()
+    expect(consoleGroupEndSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('should call console.time in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.time('test-timer')
+    expect(consoleTimeSpy).toHaveBeenCalledWith('test-timer')
+  })
+
+  it('should call console.timeEnd in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.timeEnd('test-timer')
+    expect(consoleTimeEndSpy).toHaveBeenCalledWith('test-timer')
+  })
+
+  it('should use console.log for performance in development mode', async () => {
+    const { logger } = await import('./logger')
+    logger.performance('operation', 100, { extra: 'data' })
+    expect(consoleLogSpy).toHaveBeenCalledWith('[PERF] operation took 100ms', { extra: 'data' })
+    expect(Sentry.addBreadcrumb).not.toHaveBeenCalled()
+  })
+})
+
+describe('Logger - Production Mode', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    originalEnv = process.env.NODE_ENV
+    // Set to production mode
+    process.env.NODE_ENV = 'production'
+    // Force module reload to pick up new env
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv
+    vi.resetModules()
+  })
+
+  it('should not log debug in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.debug('Debug message', { key: 'value' })
+    expect(consoleLogSpy).not.toHaveBeenCalled()
+  })
+
+  it('should not log info in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.info('Info message', { data: 123 })
+    expect(consoleInfoSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send warnings to Sentry in production mode with context', async () => {
+    const { logger } = await import('./logger')
+    logger.warn('Production warning', { userId: '123' })
+    expect(Sentry.captureMessage).toHaveBeenCalledWith('Production warning', {
+      level: 'warning',
+      contexts: { custom: { userId: '123' } },
+    })
+    expect(consoleWarnSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send warnings to Sentry in production mode without context', async () => {
+    const { logger } = await import('./logger')
+    logger.warn('Production warning')
+    expect(Sentry.captureMessage).toHaveBeenCalledWith('Production warning', {
+      level: 'warning',
+      contexts: undefined,
+    })
+  })
+
+  it('should send Error objects to Sentry in production mode with context', async () => {
+    const { logger } = await import('./logger')
+    const error = new Error('Production error')
+    logger.error(error, { userId: '456' })
+    expect(Sentry.captureException).toHaveBeenCalledWith(error, {
+      contexts: { custom: { userId: '456' } },
+    })
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send Error objects to Sentry in production mode without context', async () => {
+    const { logger } = await import('./logger')
+    const error = new Error('Production error')
+    logger.error(error)
+    expect(Sentry.captureException).toHaveBeenCalledWith(error, {
+      contexts: undefined,
+    })
+  })
+
+  it('should send string errors to Sentry in production mode with context', async () => {
+    const { logger } = await import('./logger')
+    logger.error('String error', { reason: 'unknown' })
+    expect(Sentry.captureMessage).toHaveBeenCalledWith('String error', {
+      level: 'error',
+      contexts: { custom: { reason: 'unknown' } },
+    })
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send string errors to Sentry in production mode without context', async () => {
+    const { logger } = await import('./logger')
+    logger.error('String error')
+    expect(Sentry.captureMessage).toHaveBeenCalledWith('String error', {
+      level: 'error',
+      contexts: undefined,
+    })
+  })
+
+  it('should send performance metrics to Sentry as breadcrumbs in production with context', async () => {
+    const { logger } = await import('./logger')
+    logger.performance('api-call', 250, { endpoint: '/api/test' })
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: 'performance',
+      message: 'api-call took 250ms',
+      level: 'info',
+      data: { durationMs: 250, endpoint: '/api/test' },
+    })
+    expect(consoleLogSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send performance metrics to Sentry as breadcrumbs in production without context', async () => {
+    const { logger } = await import('./logger')
+    logger.performance('render', 50)
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: 'performance',
+      message: 'render took 50ms',
+      level: 'info',
+      data: { durationMs: 50 },
+    })
+  })
+
+  it('should not call console.group in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.group('Test Group')
+    expect(consoleGroupSpy).not.toHaveBeenCalled()
+  })
+
+  it('should not call console.groupEnd in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.groupEnd()
+    expect(consoleGroupEndSpy).not.toHaveBeenCalled()
+  })
+
+  it('should not call console.time in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.time('test-timer')
+    expect(consoleTimeSpy).not.toHaveBeenCalled()
+  })
+
+  it('should not call console.timeEnd in production mode', async () => {
+    const { logger } = await import('./logger')
+    logger.timeEnd('test-timer')
+    expect(consoleTimeEndSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('createLogger factory', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    originalEnv = process.env.NODE_ENV
+  })
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv
+    vi.resetModules()
+  })
+
+  it('should export createLogger function', async () => {
+    const loggerModule = await import('./logger')
+    expect(loggerModule).toHaveProperty('createLogger')
+    expect(typeof loggerModule.createLogger).toBe('function')
+  })
+
+  it('should create a new logger instance', async () => {
+    const { createLogger } = await import('./logger')
+    const customLogger = createLogger()
+    expect(customLogger).toBeDefined()
+    expect(customLogger).toHaveProperty('debug')
+    expect(customLogger).toHaveProperty('info')
+    expect(customLogger).toHaveProperty('warn')
+    expect(customLogger).toHaveProperty('error')
+    expect(customLogger).toHaveProperty('performance')
+    expect(customLogger).toHaveProperty('group')
+    expect(customLogger).toHaveProperty('groupEnd')
+    expect(customLogger).toHaveProperty('time')
+    expect(customLogger).toHaveProperty('timeEnd')
+  })
+
+  it('should create independent logger instances', async () => {
+    const { createLogger } = await import('./logger')
+    const logger1 = createLogger()
+    const logger2 = createLogger()
+    expect(logger1).not.toBe(logger2)
+  })
+
+  it('should create logger with development behavior when NODE_ENV is development', async () => {
+    process.env.NODE_ENV = 'development'
+    vi.resetModules()
+    const { createLogger } = await import('./logger')
+    const customLogger = createLogger()
+
+    customLogger.debug('Test debug')
+    expect(consoleLogSpy).toHaveBeenCalledWith('[DEBUG] Test debug', '')
+  })
+
+  it('should create logger with production behavior when NODE_ENV is production', async () => {
+    process.env.NODE_ENV = 'production'
+    vi.resetModules()
+    const { createLogger } = await import('./logger')
+    const customLogger = createLogger()
+
+    customLogger.warn('Test warning')
+    expect(Sentry.captureMessage).toHaveBeenCalledWith('Test warning', {
+      level: 'warning',
+      contexts: undefined,
+    })
+    expect(consoleWarnSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('measureAsync - Production Mode', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv
+    vi.resetModules()
+  })
+
+  it('should send performance metrics to Sentry in production', async () => {
+    const { measureAsync } = await import('./logger')
+    const operation = vi.fn().mockResolvedValue('success')
+
+    await measureAsync('prod-operation', operation, { env: 'prod' })
+
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: 'performance',
+      message: expect.stringContaining('prod-operation took'),
+      level: 'info',
+      data: expect.objectContaining({
+        durationMs: expect.any(Number),
+        env: 'prod',
+      }),
+    })
+    expect(consoleLogSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send errors to Sentry in production', async () => {
+    const { measureAsync } = await import('./logger')
+    const error = new Error('Production async error')
+    const operation = vi.fn().mockRejectedValue(error)
+
+    await expect(measureAsync('prod-error', operation)).rejects.toThrow('Production async error')
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(error, {
+      contexts: expect.objectContaining({
+        custom: expect.objectContaining({
+          operation: 'prod-error',
+          duration: expect.any(Number),
+        }),
+      }),
+    })
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+  })
+})
+
+describe('measureSync - Production Mode', () => {
+  let originalEnv: string | undefined
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    originalEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv
+    vi.resetModules()
+  })
+
+  it('should send performance metrics to Sentry in production', async () => {
+    const { measureSync } = await import('./logger')
+    const operation = vi.fn().mockReturnValue('success')
+
+    measureSync('prod-sync-operation', operation, { type: 'compute' })
+
+    expect(Sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: 'performance',
+      message: expect.stringContaining('prod-sync-operation took'),
+      level: 'info',
+      data: expect.objectContaining({
+        durationMs: expect.any(Number),
+        type: 'compute',
+      }),
+    })
+    expect(consoleLogSpy).not.toHaveBeenCalled()
+  })
+
+  it('should send errors to Sentry in production', async () => {
+    const { measureSync } = await import('./logger')
+    const error = new Error('Production sync error')
+    const operation = vi.fn().mockImplementation(() => {
+      throw error
+    })
+
+    expect(() => measureSync('prod-sync-error', operation)).toThrow('Production sync error')
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(error, {
+      contexts: expect.objectContaining({
+        custom: expect.objectContaining({
+          operation: 'prod-sync-error',
+          duration: expect.any(Number),
+        }),
+      }),
+    })
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
   })
 })

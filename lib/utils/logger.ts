@@ -147,6 +147,14 @@ class Logger {
 export const logger = new Logger()
 
 /**
+ * Factory function to create new logger instances
+ * Useful for creating isolated loggers with custom configurations
+ */
+export function createLogger(): Logger {
+  return new Logger()
+}
+
+/**
  * Helper to measure async operations
  */
 export async function measureAsync<T>(
@@ -163,10 +171,11 @@ export async function measureAsync<T>(
     return result
   } catch (error) {
     const duration = Date.now() - start
-    logger.error(
-      error instanceof Error ? error : new Error(String(error)),
-      { operation, duration, ...context }
-    )
+    logger.error(error instanceof Error ? error : new Error(String(error)), {
+      operation,
+      duration,
+      ...context,
+    })
     throw error
   }
 }
@@ -174,11 +183,7 @@ export async function measureAsync<T>(
 /**
  * Helper to measure sync operations
  */
-export function measureSync<T>(
-  operation: string,
-  fn: () => T,
-  context?: LogContext
-): T {
+export function measureSync<T>(operation: string, fn: () => T, context?: LogContext): T {
   const start = Date.now()
 
   try {
@@ -188,10 +193,11 @@ export function measureSync<T>(
     return result
   } catch (error) {
     const duration = Date.now() - start
-    logger.error(
-      error instanceof Error ? error : new Error(String(error)),
-      { operation, duration, ...context }
-    )
+    logger.error(error instanceof Error ? error : new Error(String(error)), {
+      operation,
+      duration,
+      ...context,
+    })
     throw error
   }
 }
