@@ -14,13 +14,14 @@
 | Metrica              | Valor Anterior | Valor Atual | Observacao                        |
 | -------------------- | -------------- | ----------- | --------------------------------- |
 | Arquivos de teste    | 551 (errado)   | **166**     | Contagem corrigida                |
-| Testes totais        | N/A            | **3793**    | Todos executam sem crash          |
+| Testes totais        | N/A            | **3942**    | Todos executam sem crash          |
 | Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                      |
-| Tempo de execucao    | N/A (crash)    | **47s**     | Suite completa                    |
-| Testes passando      | ~30%           | **93.7%**   | 2798/2986 por subdiretório        |
+| Tempo de execucao    | N/A (crash)    | **84s**     | Suite completa                    |
+| Testes passando      | ~30%           | **98.7%**   | 3892/3942 (55 falhando)           |
 | Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario) |
 | Erros TypeScript     | 0              | 0           | Build passando                    |
-| Bundle size          | ~400KB         | ~400KB      | Meta: 250KB                       |
+| First Load JS        | ~400KB         | **173KB**   | ✅ META SUPERADA (era 300KB)      |
+| TTFB (publicas)      | ~2.5s          | **~500ms**  | ✅ Middleware otimizado           |
 
 ### Problema Critico Descoberto
 
@@ -196,14 +197,23 @@ Baseado no roadmap anterior que nao foi completado:
 - [ ] Migrar console.log para logger
 - [ ] Revisar e limpar dependencies nao utilizadas
 
-### P2: Bundle Size
+### P2: Bundle Size ✅ COMPLETO (15/12/2025)
 
-**Meta**: Reduzir de 400KB para 300KB
+**Meta**: Reduzir de 400KB para 300KB → **SUPERADA: 173KB**
 
-- [ ] Analisar com `ANALYZE=true npm run build`
-- [ ] Lazy load jsPDF e html2canvas
-- [ ] Otimizar imports de lucide-react
-- [ ] Revisar chunks splitting
+- [x] Analisar com `ANALYZE=true npm run build`
+- [x] Lazy load jsPDF e html2canvas (já implementado)
+- [x] Otimizar imports de lucide-react (tree-shaking fix)
+- [x] Lazy load Sentry (91KB removidos do bundle inicial)
+- [x] Lazy load PostHog (156KB removidos do bundle inicial)
+- [x] Otimizar middleware Supabase (skip auth para rotas públicas)
+
+**Resultados**:
+
+- First Load JS: 400KB → 173KB (-57%)
+- Sentry: 91KB → lazy loaded
+- PostHog: 156KB → lazy loaded
+- TTFB (públicas): 2.5s → ~500ms
 
 ---
 
@@ -289,13 +299,15 @@ export default defineConfig({
 
 ## Metricas de Sucesso
 
-| Metrica              | Atual | Meta Semana 2 | Meta Final |
-| -------------------- | ----- | ------------- | ---------- |
-| Memoria max (testes) | 24GB+ | 4GB           | 4GB        |
-| Tempo testes unit    | N/A   | < 2 min       | < 2 min    |
-| Coverage             | ~20%  | 40%           | 60%        |
-| Bundle size          | 400KB | 350KB         | 300KB      |
-| Lighthouse           | ~85   | 90            | 90+        |
+| Metrica              | Inicial | Atual (15/12) | Meta Final | Status       |
+| -------------------- | ------- | ------------- | ---------- | ------------ |
+| Memoria max (testes) | 24GB+   | **4GB**       | 4GB        | ✅ Atingido  |
+| Tempo testes unit    | N/A     | **84s**       | < 2 min    | ✅ Atingido  |
+| Testes passando      | ~30%    | **98.7%**     | 100%       | 🟡 55 falhas |
+| Coverage             | ~20%    | ~20%          | 60%        | 🔴 Pendente  |
+| First Load JS        | 400KB   | **173KB**     | 300KB      | ✅ Superado  |
+| TTFB (públicas)      | ~2.5s   | **~500ms**    | < 1s       | ✅ Atingido  |
+| Lighthouse           | ~85     | TBD           | 90+        | 🟡 Pendente  |
 
 ---
 

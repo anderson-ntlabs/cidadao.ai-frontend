@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Author**: Anderson Henrique da Silva
 **Location**: Minas Gerais, Brasil
-**Last Updated**: 2025-12-12
+**Last Updated**: 2025-12-15
 
 ---
 
@@ -235,10 +235,32 @@ The middleware handles:
 
 1. **Rate limiting** - Per-endpoint limits (chat, auth, export, api)
 2. **Geo detection** - Adds `X-User-Region` and `X-User-Country` headers
-3. **Supabase session** - Refreshes auth via `updateSession()`
+3. **Supabase session** - Refreshes auth via `updateSession()` (optimized - see below)
 4. **Security headers** - CSP, HSTS, XSS protection, clickjacking prevention
 
+**Performance Optimization (2025-12-15)**: Supabase `getUser()` is only called for protected routes (`/pt/app/*`, `/pt/agora/*`) and auth routes (`/pt/login`). Public pages skip Supabase entirely for faster TTFB.
+
 CSP is configured in `lib/security/csp.config.ts` with VLibras exceptions for accessibility.
+
+### Performance Architecture
+
+**Bundle Optimizations**:
+
+- First Load JS: **173 KB** (optimized from 400KB)
+- Sentry: Lazy-loaded after page interactive via `requestIdleCallback`
+- PostHog: Lazy-loaded 2 seconds after mount
+- jsPDF/html2canvas: Dynamic imports on demand
+
+**TTFB Optimizations**:
+
+- Public pages: No Supabase network calls (~500ms TTFB)
+- Protected pages: Auth check via middleware (~2s TTFB)
+
+**Key files**:
+
+- `instrumentation-client.ts` - Sentry lazy loading
+- `lib/analytics/posthog-config.ts` - PostHog lazy loading
+- `lib/supabase/middleware.ts` - Optimized auth checks
 
 ---
 
@@ -311,6 +333,16 @@ Causes: Circular dependencies, missing env vars, type errors
 - Setup: `vitest.setup.ts`
 - Coverage threshold: 60% (lines, functions, branches, statements)
 - Pattern: `*.test.ts` or `*.test.tsx` co-located with source
+- Memory optimized: `pool: forks`, `singleFork: false` for isolation
+
+**Optimized Commands** (use these for large test runs):
+
+```bash
+npm run test:safe              # Memory-limited execution
+npm run test:lib               # lib/ tests by subdirectory
+npm run test:hooks             # hooks/ tests
+npm run test:lib:services      # lib/services/ only
+```
 
 ### E2E Tests (Playwright)
 
@@ -329,7 +361,7 @@ Causes: Circular dependencies, missing env vars, type errors
 2. `npm run lint` - clean
 3. `npm run test:coverage` - >= 60%
 4. `npm run test:playwright` - passes
-5. `npm run analyze` - bundle < 400KB
+5. `npm run analyze` - First Load JS < 200KB (current: 173KB)
 
 ### Production Environment
 
