@@ -191,7 +191,7 @@ export default function AgoraSelecaoPage() {
             )}
             onLoad={() => setImageLoaded(true)}
             priority
-            unoptimized
+            quality={60}
           />
         </div>
       )}
