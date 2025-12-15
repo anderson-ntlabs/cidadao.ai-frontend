@@ -52,13 +52,19 @@ vi.mock('@/data/survey-questions', () => ({
 // Mock badge service
 vi.mock('./badge.service', () => ({
   badgeService: {
-    awardBadge: vi.fn().mockResolvedValue(true),
+    awardBadge: vi.fn(),
   },
 }))
+
+// Import the mocked badge service
+import { badgeService } from './badge.service'
 
 describe('SurveyService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // Re-setup badge service mock after clearAllMocks
+    vi.mocked(badgeService.awardBadge).mockResolvedValue(true)
 
     // Default chain setup
     mockEq.mockReturnValue({ eq: mockEq, single: mockSingle, not: mockNot })
