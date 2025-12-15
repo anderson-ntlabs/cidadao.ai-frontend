@@ -57,20 +57,10 @@ describe('ProfileService', () => {
     // Mock console methods
     vi.spyOn(console, 'error').mockImplementation(() => {})
 
-    // Mock document and window
-    global.document = {
-      documentElement: {
-        classList: {
-          toggle: vi.fn(),
-        },
-      },
-    } as any
+    // Mock document.documentElement.classList.toggle (don't override global.document)
+    vi.spyOn(document.documentElement.classList, 'toggle').mockImplementation(() => false)
 
-    global.window = {
-      matchMedia: vi.fn().mockReturnValue({
-        matches: false,
-      }),
-    } as any
+    // Note: window.matchMedia is mocked globally in vitest.setup.ts
   })
 
   describe('getProfile', () => {
@@ -384,7 +374,6 @@ describe('ProfileService', () => {
 
     it('should apply auto theme based on system preference - light mode', () => {
       ;(window.matchMedia as any).mockReturnValue({ matches: false })
-
       ;(service as any).applyTheme('auto')
 
       expect(window.matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)')
@@ -393,7 +382,6 @@ describe('ProfileService', () => {
 
     it('should apply auto theme based on system preference - dark mode', () => {
       ;(window.matchMedia as any).mockReturnValue({ matches: true })
-
       ;(service as any).applyTheme('auto')
 
       expect(window.matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)')
