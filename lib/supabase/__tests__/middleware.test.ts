@@ -719,8 +719,9 @@ describe('middleware - updateSession', () => {
 
       await updateSession(request as any)
 
-      // Should call createServerClient but not match /pt/app
-      expect(createServerClient).toHaveBeenCalled()
+      // /pt/application is NOT a protected route, so we skip Supabase entirely
+      // This is the performance optimization - only call Supabase for protected/auth routes
+      expect(createServerClient).not.toHaveBeenCalled()
     })
 
     it('should prioritize auth route check over protected route check', async () => {
