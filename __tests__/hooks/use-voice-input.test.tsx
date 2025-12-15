@@ -10,37 +10,78 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useVoiceInput } from '@/hooks/use-voice-input'
 
-// Mock the speech recognition service
-vi.mock('@/lib/speech/speech-recognition.service', () => ({
-  SpeechRecognitionService: vi.fn().mockImplementation(() => ({
+// Hoisted mocks - these survive vi.clearAllMocks()
+const {
+  mockServiceInstance,
+  MockSpeechRecognitionService,
+  mockIsSpeechRecognitionSupported,
+  mockGetBrowserInfo,
+} = vi.hoisted(() => {
+  const mockServiceInstance = {
     isSupported: vi.fn(() => true),
-    start: vi.fn(),
+    start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn(),
-    toggle: vi.fn(),
+    toggle: vi.fn().mockResolvedValue(undefined),
     destroy: vi.fn(),
     updateConfig: vi.fn(),
     updateCallbacks: vi.fn(),
     clearTranscripts: vi.fn(),
-  })),
+  }
+
+  return {
+    mockServiceInstance,
+    MockSpeechRecognitionService: vi.fn(() => mockServiceInstance),
+    mockIsSpeechRecognitionSupported: vi.fn(() => true),
+    mockGetBrowserInfo: vi.fn(() => ({
+      name: 'Chrome',
+      version: '120.0',
+      isMobile: false,
+      supportsSpeechRecognition: true,
+      userAgent: 'Chrome/120.0',
+    })),
+  }
+})
+
+// Mock the speech recognition service
+vi.mock('@/lib/speech/speech-recognition.service', () => ({
+  SpeechRecognitionService: MockSpeechRecognitionService,
 }))
 
 // Mock browser detection
 vi.mock('@/lib/speech/browser-detection', () => ({
-  isSpeechRecognitionSupported: vi.fn(() => true),
-  getBrowserInfo: vi.fn(() => ({
-    name: 'Chrome',
-    version: '120.0',
-    isMobile: false,
-    supportsSpeechRecognition: true,
-    userAgent: 'Chrome/120.0',
-  })),
+  isSpeechRecognitionSupported: mockIsSpeechRecognitionSupported,
+  getBrowserInfo: mockGetBrowserInfo,
+  isMobileBrowser: vi.fn(() => false),
+  checkMicrophonePermission: vi.fn().mockResolvedValue('granted'),
+  requestMicrophonePermission: vi.fn().mockResolvedValue(true),
 }))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  createLogger: () => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  }),
+}))
+
+// Import after mocks
+import { useVoiceInput } from '@/hooks/use-voice-input'
 
 describe('useVoiceInput', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Re-setup mock implementations after clearAllMocks
+    mockIsSpeechRecognitionSupported.mockReturnValue(true)
+    mockGetBrowserInfo.mockReturnValue({
+      name: 'Chrome',
+      version: '120.0',
+      isMobile: false,
+      supportsSpeechRecognition: true,
+      userAgent: 'Chrome/120.0',
+    })
   })
 
   describe('Initial state', () => {
@@ -157,8 +198,7 @@ describe('useVoiceInput', () => {
 
     it('should handle unsupported browser gracefully', async () => {
       // Mock unsupported browser
-      const { isSpeechRecognitionSupported } = await import('@/lib/speech/browser-detection')
-      vi.mocked(isSpeechRecognitionSupported).mockReturnValue(false)
+      mockIsSpeechRecognitionSupported.mockReturnValue(false)
 
       const onError = vi.fn()
       const { result } = renderHook(() =>

@@ -5,25 +5,33 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createMockSupabaseClient } from '../../__tests__/fixtures/supabase-mock'
 
-// Mock @supabase/ssr
-vi.mock('@supabase/ssr', () => ({
-  createServerClient: vi.fn(),
+// Unmock the global mock from vitest.setup.ts - we want to test the real module
+vi.unmock('@/lib/supabase/server')
+
+// Create hoisted mocks to survive vi.clearAllMocks()
+const { mockCookieStore, mockCreateServerClient } = vi.hoisted(() => ({
+  mockCookieStore: {
+    getAll: vi.fn(() => []),
+    set: vi.fn(),
+    get: vi.fn(),
+    delete: vi.fn(),
+  },
+  mockCreateServerClient: vi.fn(),
 }))
 
-// Mock next/headers with async cookies
-const mockCookieStore = {
-  getAll: vi.fn(() => []),
-  set: vi.fn(),
-  get: vi.fn(),
-  delete: vi.fn(),
-}
+// Mock @supabase/ssr
+vi.mock('@supabase/ssr', () => ({
+  createServerClient: mockCreateServerClient,
+}))
 
+// Mock next/headers
 vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => mockCookieStore),
 }))
 
 import { createClient } from './server'
 import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 describe('lib/supabase/server', () => {
   let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>
@@ -38,12 +46,14 @@ describe('lib/supabase/server', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
     process.env.NODE_ENV = 'production'
 
-    // Setup default mock
+    // Setup default mock using hoisted mock
     mockSupabaseClient = createMockSupabaseClient()
-    vi.mocked(createServerClient).mockReturnValue(mockSupabaseClient as any)
+    mockCreateServerClient.mockReturnValue(mockSupabaseClient as any)
 
-    // Reset cookie store
+    // Reset cookie store functions (hoisted mocks survive clearAllMocks)
     mockCookieStore.getAll.mockReturnValue([])
+    mockCookieStore.set.mockClear()
+    vi.mocked(cookies).mockResolvedValue(mockCookieStore as any)
   })
 
   afterEach(() => {
@@ -54,7 +64,7 @@ describe('lib/supabase/server', () => {
     it('should create server client with correct credentials', async () => {
       await createClient()
 
-      expect(createServerClient).toHaveBeenCalledWith(
+      expect(mockCreateServerClient).toHaveBeenCalledWith(
         'https://test.supabase.co',
         'test-anon-key',
         expect.objectContaining({
@@ -66,18 +76,16 @@ describe('lib/supabase/server', () => {
     it('should configure cookie handlers', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       expect(config.cookies).toBeDefined()
       expect(typeof config.cookies.getAll).toBe('function')
       expect(typeof config.cookies.setAll).toBe('function')
     })
 
     it('should call cookies() from next/headers', async () => {
-      const { cookies } = await import('next/headers')
-
       await createClient()
 
-      expect(cookies).toHaveBeenCalled()
+      expect(vi.mocked(cookies)).toHaveBeenCalled()
     })
 
     it('should use secure cookie options in production', async () => {
@@ -85,7 +93,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
 
       // Call setAll to verify secure options are applied
       const testCookies = [
@@ -112,7 +120,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
 
       // Call setAll to verify secure:false in dev
       const testCookies = [{ name: 'sb-access-token', value: 'test-token', options: {} }]
@@ -132,25 +140,25 @@ describe('lib/supabase/server', () => {
     })
 
     it('should retrieve all cookies via getAll', async () => {
-      const mockCookies = [
+      const testCookies = [
         { name: 'sb-access-token', value: 'access-123' },
         { name: 'sb-refresh-token', value: 'refresh-456' },
       ]
-      mockCookieStore.getAll.mockReturnValue(mockCookies)
+      mockCookieStore.getAll.mockReturnValue(testCookies)
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
-      const cookies = config.cookies.getAll()
+      const config = mockCreateServerClient.mock.calls[0][2]
+      const returnedCookies = config.cookies.getAll()
 
-      expect(cookies).toEqual(mockCookies)
+      expect(returnedCookies).toEqual(testCookies)
       expect(mockCookieStore.getAll).toHaveBeenCalled()
     })
 
     it('should handle multiple cookies in setAll', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
 
       const testCookies = [
         { name: 'cookie1', value: 'value1', options: { maxAge: 100 } },
@@ -184,7 +192,7 @@ describe('lib/supabase/server', () => {
     it('should merge Supabase options with secure defaults', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
 
       const testCookies = [
         {
@@ -221,7 +229,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
 
       // Should not throw
       expect(() => {
@@ -242,7 +250,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       const cookies = config.cookies.getAll()
 
       expect(cookies).toEqual([])
@@ -251,7 +259,7 @@ describe('lib/supabase/server', () => {
     it('should configure httpOnly to prevent XSS', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -266,7 +274,7 @@ describe('lib/supabase/server', () => {
     it('should configure sameSite to prevent CSRF', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -281,7 +289,7 @@ describe('lib/supabase/server', () => {
     it('should set cookie path to root', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -298,7 +306,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -315,7 +323,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -330,7 +338,7 @@ describe('lib/supabase/server', () => {
     it('should allow Supabase to override maxAge', async () => {
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: { maxAge: 9999 } }])
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -350,7 +358,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       // Should not log errors
@@ -366,7 +374,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       const callArgs = mockCookieStore.set.mock.calls[0][2]
@@ -384,7 +392,7 @@ describe('lib/supabase/server', () => {
 
       await createClient()
 
-      const config = vi.mocked(createServerClient).mock.calls[0][2]
+      const config = mockCreateServerClient.mock.calls[0][2]
       config.cookies.setAll([{ name: 'test', value: 'value', options: {} }])
 
       const callArgs = mockCookieStore.set.mock.calls[0][2]

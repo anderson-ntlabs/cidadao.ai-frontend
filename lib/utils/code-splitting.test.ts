@@ -1,4 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// Create mock for console.error before importing the module
+// Using vi.fn() directly instead of vi.spyOn for reliable call tracking
+const originalConsoleError = console.error
+const consoleErrorSpy = vi.fn()
+console.error = consoleErrorSpy
+
 import {
   prefetchComponent,
   loadComponents,
@@ -6,9 +13,6 @@ import {
   preloadRouteModules,
   createRouteComponent,
 } from './code-splitting'
-
-// Mock console.error to test error handling
-const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
 describe('code-splitting', () => {
   beforeEach(() => {

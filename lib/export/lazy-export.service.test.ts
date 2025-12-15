@@ -9,39 +9,51 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { LazyExportService } from './lazy-export.service'
 
-// Mock URL.createObjectURL and URL.revokeObjectURL
-const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
-const mockRevokeObjectURL = vi.fn()
+// Use hoisted mocks to survive vi.clearAllMocks()
+const { mockCreateObjectURL, mockRevokeObjectURL, mockClick, mockLink, mockBlob } = vi.hoisted(
+  () => {
+    const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
+    const mockRevokeObjectURL = vi.fn()
+    const mockClick = vi.fn()
+    const mockLink = {
+      href: '',
+      download: '',
+      click: mockClick,
+    }
+    const mockBlob = vi.fn((content, options) => ({
+      content,
+      options,
+      size: content?.[0]?.length || 0,
+      type: options?.type || '',
+    }))
+    return { mockCreateObjectURL, mockRevokeObjectURL, mockClick, mockLink, mockBlob }
+  }
+)
+
+// Apply URL mocks
 global.URL.createObjectURL = mockCreateObjectURL
 global.URL.revokeObjectURL = mockRevokeObjectURL
 
-// Mock document.createElement for link element
-const mockClick = vi.fn()
-const mockLink = {
-  href: '',
-  download: '',
-  click: mockClick,
-}
-vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-  if (tag === 'a') {
-    return mockLink as unknown as HTMLElement
-  }
-  return document.createElement(tag)
-})
-
-// Mock Blob
-global.Blob = vi.fn((content, options) => ({
-  content,
-  options,
-  size: content?.[0]?.length || 0,
-  type: options?.type || '',
-})) as unknown as typeof Blob
+// Apply Blob mock
+global.Blob = mockBlob as unknown as typeof Blob
 
 describe('LazyExportService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset link state
     mockLink.href = ''
     mockLink.download = ''
+    // Re-setup mocks after clearAllMocks
+    mockCreateObjectURL.mockReturnValue('blob:mock-url')
+    // Re-mock document.createElement
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      if (tag === 'a') {
+        return mockLink as unknown as HTMLElement
+      }
+      // Return a real element for other tags
+      const realElement = Object.getPrototypeOf(document).createElement.call(document, tag)
+      return realElement
+    })
   })
 
   describe('exportToCSV', () => {
@@ -71,7 +83,7 @@ describe('LazyExportService', () => {
       LazyExportService.exportToCSV(data)
 
       // Blob was called with escaped content
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       expect(content).toContain('"hello, world"')
@@ -82,7 +94,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToCSV(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       expect(content).toContain('"say ""hello"""')
@@ -93,7 +105,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToCSV(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       expect(content).toContain('"line1\nline2"')
@@ -104,7 +116,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToCSV(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       // Should have empty values for null/undefined
@@ -124,7 +136,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToCSV(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       // UTF-8 BOM is \uFEFF
@@ -154,7 +166,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToJSON(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       // Check for indentation (2 spaces)
@@ -166,7 +178,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToJSON(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       expect(content).toContain('[')
@@ -178,7 +190,7 @@ describe('LazyExportService', () => {
 
       LazyExportService.exportToJSON(data)
 
-      const blobCall = (global.Blob as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0]
 
       expect(content).toContain('"child": "value"')

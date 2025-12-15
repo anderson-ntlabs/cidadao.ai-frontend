@@ -106,10 +106,12 @@ class MockSpeechRecognition {
 }
 Object.defineProperty(window, 'SpeechRecognition', {
   writable: true,
+  configurable: true,
   value: MockSpeechRecognition,
 })
 Object.defineProperty(window, 'webkitSpeechRecognition', {
   writable: true,
+  configurable: true,
   value: MockSpeechRecognition,
 })
 

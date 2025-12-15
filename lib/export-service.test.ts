@@ -14,13 +14,38 @@ vi.mock('date-fns', () => ({
   format: vi.fn((date, formatStr) => '01 de janeiro de 2024'),
 }))
 
+// Hoisted mocks to survive vi.clearAllMocks()
+const { mockClick, mockLink, mockCreateObjectURL, mockRevokeObjectURL, mockBlob } = vi.hoisted(
+  () => {
+    const mockClick = vi.fn()
+    const mockLink = {
+      href: '',
+      download: '',
+      click: mockClick,
+      style: {},
+      setAttribute: vi.fn(),
+      remove: vi.fn(),
+    }
+    const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
+    const mockRevokeObjectURL = vi.fn()
+    const mockBlob = vi.fn((content, options) => ({
+      content,
+      type: options?.type,
+    }))
+    return { mockClick, mockLink, mockCreateObjectURL, mockRevokeObjectURL, mockBlob }
+  }
+)
+
 describe('ExportService', () => {
   let mockPdfInstance: any
-  let mockCreateElement: any
-  let mockClick: any
 
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // Reset link state
+    mockLink.href = ''
+    mockLink.download = ''
+    mockCreateObjectURL.mockReturnValue('blob:mock-url')
 
     // Mock jsPDF instance
     mockPdfInstance = {
@@ -45,31 +70,21 @@ describe('ExportService', () => {
 
     vi.mocked(jsPDF).mockImplementation(() => mockPdfInstance)
 
-    // autoTable mock removed - library removed for bundle optimization
-
-    // Mock document methods
-    mockClick = vi.fn()
-    mockCreateElement = vi.fn().mockReturnValue({
-      href: '',
-      download: '',
-      click: mockClick,
+    // Mock document.createElement for anchor elements only
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      if (tagName === 'a') {
+        return mockLink as unknown as HTMLElement
+      }
+      // Return a real element for other tags
+      return Object.getPrototypeOf(document).createElement.call(document, tagName)
     })
 
-    global.document = {
-      createElement: mockCreateElement,
-    } as any
-
     // Mock URL methods
-    global.URL = {
-      createObjectURL: vi.fn().mockReturnValue('blob:mock-url'),
-      revokeObjectURL: vi.fn(),
-    } as any
+    global.URL.createObjectURL = mockCreateObjectURL
+    global.URL.revokeObjectURL = mockRevokeObjectURL
 
     // Mock Blob
-    global.Blob = vi.fn().mockImplementation((content, options) => ({
-      content,
-      type: options?.type,
-    })) as any
+    global.Blob = mockBlob as unknown as typeof Blob
 
     // Mock html2canvas
     vi.mocked(html2canvas).mockResolvedValue({
@@ -101,8 +116,8 @@ describe('ExportService', () => {
       ExportService.exportToCSV(data)
 
       // Native implementation - check Blob was created with CSV content
-      expect(global.Blob).toHaveBeenCalled()
-      const blobCall = vi.mocked(global.Blob).mock.calls[0]
+      expect(mockBlob).toHaveBeenCalled()
+      const blobCall = mockBlob.mock.calls[0]
       expect(blobCall[1]).toEqual({ type: 'text/csv;charset=utf-8;' })
 
       // Check BOM prefix for Excel compatibility
@@ -113,11 +128,11 @@ describe('ExportService', () => {
       expect(content).toContain('2,Item 2,200')
 
       expect(global.URL.createObjectURL).toHaveBeenCalled()
-      expect(mockCreateElement).toHaveBeenCalledWith('a')
+      expect(document.createElement).toHaveBeenCalledWith('a')
 
-      const link = mockCreateElement.mock.results[0].value
-      expect(link.href).toBe('blob:mock-url')
-      expect(link.download).toBe('export.csv')
+      // mockLink is the mock anchor element
+      expect(mockLink.href).toBe('blob:mock-url')
+      expect(mockLink.download).toBe('export.csv')
       expect(mockClick).toHaveBeenCalled()
 
       expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
@@ -128,15 +143,14 @@ describe('ExportService', () => {
 
       ExportService.exportToCSV(data, 'custom-file.csv')
 
-      const link = mockCreateElement.mock.results[0].value
-      expect(link.download).toBe('custom-file.csv')
+      expect(mockLink.download).toBe('custom-file.csv')
     })
 
     it('should handle empty data gracefully', () => {
       ExportService.exportToCSV([])
 
       // Should not create blob for empty data
-      expect(global.Blob).not.toHaveBeenCalled()
+      expect(mockBlob).not.toHaveBeenCalled()
     })
 
     it('should escape CSV special characters', () => {
@@ -144,7 +158,7 @@ describe('ExportService', () => {
 
       ExportService.exportToCSV(data)
 
-      const blobCall = vi.mocked(global.Blob).mock.calls[0]
+      const blobCall = mockBlob.mock.calls[0]
       const content = blobCall[0][0] as string
       // Commas and quotes should be properly escaped
       expect(content).toContain('"Item, with comma"')

@@ -43,23 +43,14 @@ import { useCertificateData } from './use-certificate-data'
 import { useAgora } from '@/hooks/use-agora'
 
 describe('useCertificateData', () => {
-  const mockLocalStorage: Record<string, string> = {}
-
   beforeEach(() => {
     vi.clearAllMocks()
-
-    // Mock localStorage
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(
-      (key) => mockLocalStorage[key] || null
-    )
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation((key, value) => {
-      mockLocalStorage[key] = value
-    })
+    // Note: localStorage is mocked globally in vitest.setup.ts
+    localStorage.clear()
   })
 
   afterEach(() => {
-    Object.keys(mockLocalStorage).forEach((key) => delete mockLocalStorage[key])
-    vi.restoreAllMocks()
+    localStorage.clear()
   })
 
   describe('Initial State', () => {
@@ -149,13 +140,19 @@ describe('useCertificateData', () => {
     })
 
     it('should load data when modal opens with user present', async () => {
-      mockLocalStorage['agora_demo_video_progress'] = JSON.stringify({
-        '1': { status: 'completed', watched_seconds: 720 },
-        '2': { status: 'watching', watched_seconds: 500 },
-      })
-      mockLocalStorage['agora_demo_reading_progress'] = JSON.stringify({
-        '1': { status: 'completed' },
-      })
+      localStorage.setItem(
+        'agora_demo_video_progress',
+        JSON.stringify({
+          '1': { status: 'completed', watched_seconds: 720 },
+          '2': { status: 'watching', watched_seconds: 500 },
+        })
+      )
+      localStorage.setItem(
+        'agora_demo_reading_progress',
+        JSON.stringify({
+          '1': { status: 'completed' },
+        })
+      )
 
       const { result } = renderHook(() => useCertificateData(true))
 

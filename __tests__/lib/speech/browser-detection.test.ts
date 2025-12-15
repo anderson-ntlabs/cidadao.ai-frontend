@@ -49,7 +49,7 @@ describe('Browser Detection', () => {
     })
 
     it('should return true when webkitSpeechRecognition is available', () => {
-      // @ts-ignore
+      // @ts-ignore - Now configurable: true in vitest.setup.ts
       delete global.window.SpeechRecognition
       // @ts-ignore
       global.window.webkitSpeechRecognition = vi.fn()
@@ -57,7 +57,7 @@ describe('Browser Detection', () => {
     })
 
     it('should return false when neither API is available', () => {
-      // @ts-ignore
+      // @ts-ignore - Now configurable: true in vitest.setup.ts
       delete global.window.SpeechRecognition
       // @ts-ignore
       delete global.window.webkitSpeechRecognition
@@ -114,7 +114,7 @@ describe('Browser Detection', () => {
 
     it('should return webkitSpeechRecognition when available', () => {
       const mockWebkitSpeechRecognition = vi.fn()
-      // @ts-ignore
+      // @ts-ignore - Now configurable: true in vitest.setup.ts
       delete global.window.SpeechRecognition
       // @ts-ignore
       global.window.webkitSpeechRecognition = mockWebkitSpeechRecognition
@@ -428,7 +428,7 @@ describe('Browser Detection', () => {
         value: 'Mozilla/5.0 Firefox/120.0',
         configurable: true,
       })
-      // @ts-ignore
+      // @ts-ignore - Now configurable: true in vitest.setup.ts
       delete global.window.SpeechRecognition
       // @ts-ignore
       delete global.window.webkitSpeechRecognition
@@ -441,7 +441,7 @@ describe('Browser Detection', () => {
         value: 'Mozilla/5.0 (Linux; Android 13) Firefox/120.0',
         configurable: true,
       })
-      // @ts-ignore
+      // @ts-ignore - Now configurable: true in vitest.setup.ts
       delete global.window.SpeechRecognition
       // @ts-ignore
       delete global.window.webkitSpeechRecognition
