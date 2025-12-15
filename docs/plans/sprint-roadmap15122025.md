@@ -119,22 +119,35 @@ npm run test:single      # Testar arquivo unico
 - [x] Adicionar mocks do Supabase client/server
 - [x] Configurar environment variables para testes
 
-**Resultados por diretório** (15/12/2025 - atualizado):
-| Diretório | Passando | Falhando | Total | Taxa |
-|--------------|----------|----------|-------|---------|
-| data/ | 259 | 0 | 259 | 100% |
-| store/ | 369 | 0 | 370 | 99.7% |
-| hooks/ | 446 | 16 | 465 | 95.9% |
-| components/ | 628 | 0 | 635 | 98.9% |
-| lib/utils/ | 224 | 38 | 262 | 85.5% |
-| lib/api/ | 142 | 1 | 170 | 83.5% |
-| lib/chat/ | 111 | 0 | 114 | 97.4% |
-| lib/agora/ | 131 | 0 | 131 | 100% |
-| lib/analytics/ | 77 | 0 | 77 | 100% |
-| lib/cache/ | 97 | 0 | 97 | 100% |
-| lib/security/ | 152 | 0 | 152 | 100% |
-| lib/services/ | 162 | 92 | 254 | 63.8% |
-| **TOTAL** | **2798** | **147** | 2986 | **93.7%** |
+**Resultados por diretório** (15/12/2025 - atualizado após correções):
+| Diretório | Passando | Falhando | Total | Taxa | Mudança |
+|--------------|----------|----------|-------|---------|---------|
+| data/ | 259 | 0 | 259 | 100% | - |
+| store/ | 369 | 0 | 370 | 99.7% | - |
+| hooks/ | 446 | 16 | 465 | 95.9% | - |
+| components/ | 628 | 0 | 635 | 98.9% | - |
+| lib/utils/ | 224 | 38 | 262 | 85.5% | - |
+| lib/api/ | 142 | 1 | 170 | 83.5% | - |
+| lib/chat/ | 111 | 0 | 114 | 100% | +2.6% |
+| lib/agora/ | 131 | 0 | 131 | 100% | - |
+| lib/analytics/ | 77 | 0 | 77 | 100% | - |
+| lib/cache/ | 97 | 0 | 97 | 100% | - |
+| lib/security/ | 192 | 0 | 192 | 100% | +40 tests |
+| lib/services/ | **350** | **0** | 351 | **100%** | ✅ +36.2% |
+| **TOTAL** | **3026** | **55** | 3123 | **96.9%** | +3.2% |
+
+**Correções aplicadas em 15/12/2025**:
+
+1. **vitest.config.mjs**: `singleFork: false` para isolamento entre arquivos de teste
+2. **vitest.setup.ts**: Safety check para window undefined
+3. **lib/services/\*.test.ts**: Removidos overrides de localStorage/window que contaminavam outros testes
+4. **survey.service.test.ts**: Re-setup de badgeService mock após clearAllMocks
+
+**Problemas pendentes**:
+
+- lib/utils/logger.test.ts: 35 falhas por NODE_ENV != 'development'
+- lib/utils/code-splitting.test.ts: 3 falhas em prefetch
+- hooks/: 16 falhas pendentes de investigação
 
 **Solução**: lib/ roda por subdiretório (`npm run test:lib`) para evitar contaminação.
 
