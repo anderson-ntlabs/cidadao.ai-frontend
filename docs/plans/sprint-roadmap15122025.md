@@ -17,7 +17,7 @@
 | Testes totais        | N/A            | **3793**    | Todos executam sem crash          |
 | Memoria max (testes) | 24GB+ (crash)  | **~4GB**    | ✅ RESOLVIDO                      |
 | Tempo de execucao    | N/A (crash)    | **47s**     | Suite completa                    |
-| Testes passando      | ~30%           | **98.3%**   | 1737/1767 por diretório           |
+| Testes passando      | ~30%           | **93.7%**   | 2798/2986 por subdiretório        |
 | Cobertura alvo       | 60%            | 20%         | Threshold atual: 20% (temporario) |
 | Erros TypeScript     | 0              | 0           | Build passando                    |
 | Bundle size          | ~400KB         | ~400KB      | Meta: 250KB                       |
@@ -119,17 +119,24 @@ npm run test:single      # Testar arquivo unico
 - [x] Adicionar mocks do Supabase client/server
 - [x] Configurar environment variables para testes
 
-**Resultados por diretório** (15/12/2025):
+**Resultados por diretório** (15/12/2025 - atualizado):
 | Diretório | Passando | Falhando | Total | Taxa |
 |--------------|----------|----------|-------|---------|
 | data/ | 259 | 0 | 259 | 100% |
 | store/ | 369 | 0 | 370 | 99.7% |
 | hooks/ | 446 | 16 | 465 | 95.9% |
 | components/ | 628 | 0 | 635 | 98.9% |
-| lib/ | 35 | 3 | 38\* | 92.1% |
-| **TOTAL** | **1737** | **19** | 1767 | **98.3%** |
+| lib/utils/ | 224 | 38 | 262 | 85.5% |
+| lib/api/ | 142 | 1 | 170 | 83.5% |
+| lib/chat/ | 111 | 0 | 114 | 97.4% |
+| lib/agora/ | 131 | 0 | 131 | 100% |
+| lib/analytics/ | 77 | 0 | 77 | 100% |
+| lib/cache/ | 97 | 0 | 97 | 100% |
+| lib/security/ | 152 | 0 | 152 | 100% |
+| lib/services/ | 162 | 92 | 254 | 63.8% |
+| **TOTAL** | **2798** | **147** | 2986 | **93.7%** |
 
-\*lib/ tem problema de coleta em suite completa - arquivos passam isoladamente.
+**Solução**: lib/ roda por subdiretório (`npm run test:lib`) para evitar contaminação.
 
 ### P1: Reorganizar Estrutura de Testes
 
