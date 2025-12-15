@@ -62,7 +62,7 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
-  // Skip auth check for public routes
+  // Skip auth check for public routes (static assets)
   if (matchesRoute(pathname, PUBLIC_ROUTES)) {
     return supabaseResponse
   }
@@ -75,6 +75,20 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
+  // PERFORMANCE OPTIMIZATION: Check if route needs auth BEFORE calling Supabase
+  // This avoids network calls to Supabase for public pages like /pt, /about, etc.
+  // AUTH_ROUTES must be checked FIRST to avoid loop
+  // (e.g., /pt/agora/login would match /pt/agora in PROTECTED_ROUTES)
+  const isAuthRoute = matchesRoute(pathname, AUTH_ROUTES)
+  const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES)
+
+  // If route doesn't need auth verification, skip Supabase entirely
+  // This is the key TTFB optimization - no network call for public pages
+  if (!isAuthRoute && !isProtectedRoute) {
+    return supabaseResponse
+  }
+
+  // Only routes that NEED auth verification reach this point
   const secureCookieOptions = getSecureCookieOptions()
 
   const supabase = createServerClient(
@@ -109,10 +123,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check route types - AUTH_ROUTES must be checked FIRST to avoid loop
-  // (e.g., /pt/agora/login would match /pt/agora in PROTECTED_ROUTES)
-  const isAuthRoute = matchesRoute(pathname, AUTH_ROUTES)
-
   // If it's an auth route, only check if user is authenticated (redirect away)
   if (isAuthRoute) {
     if (user) {
@@ -126,9 +136,6 @@ export async function updateSession(request: NextRequest) {
     // Not authenticated on auth route = OK, let them see login page
     return supabaseResponse
   }
-
-  // Check protected routes (only if not an auth route)
-  const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES)
 
   // Redirect unauthenticated users from protected routes to login
   if (isProtectedRoute && !user) {
