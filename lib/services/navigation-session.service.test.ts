@@ -49,10 +49,6 @@ import {
 } from './navigation-session.service'
 
 describe('NavigationSessionService', () => {
-  // Store reference to original window/document
-  let originalWindow: typeof window
-  let originalDocument: typeof document
-
   beforeEach(() => {
     vi.clearAllMocks()
 
@@ -66,20 +62,8 @@ describe('NavigationSessionService', () => {
       lastActivity: Date.now(),
     }
 
-    // Mock localStorage
-    const mockStorage: Record<string, string> = {}
-    vi.stubGlobal('localStorage', {
-      getItem: (key: string) => mockStorage[key] || null,
-      setItem: (key: string, value: string) => {
-        mockStorage[key] = value
-      },
-      removeItem: (key: string) => {
-        delete mockStorage[key]
-      },
-      clear: () => {
-        Object.keys(mockStorage).forEach((key) => delete mockStorage[key])
-      },
-    })
+    // Note: localStorage is mocked globally in vitest.setup.ts
+    localStorage.clear()
 
     // Mock navigator.sendBeacon
     vi.stubGlobal('navigator', {
@@ -88,7 +72,7 @@ describe('NavigationSessionService', () => {
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
+    // Note: Don't use vi.unstubAllGlobals() as it removes global mocks from vitest.setup.ts
     vi.resetAllMocks()
   })
 

@@ -406,98 +406,42 @@ describe('AuthService', () => {
       })
     })
 
+    // Note: localStorage is mocked globally in vitest.setup.ts with functional behavior
+
     it('should save valid redirect URL', () => {
-      const mockStorage: Record<string, string> = {}
-      vi.stubGlobal('localStorage', {
-        getItem: (key: string) => mockStorage[key] || null,
-        setItem: (key: string, value: string) => {
-          mockStorage[key] = value
-        },
-        removeItem: (key: string) => {
-          delete mockStorage[key]
-        },
-        clear: () => {
-          Object.keys(mockStorage).forEach((key) => delete mockStorage[key])
-        },
-      })
+      localStorage.clear()
 
       authService.saveRedirectUrl('/pt/app/dashboard')
 
-      expect(mockStorage['redirectAfterLogin']).toBe('/pt/app/dashboard')
-
-      vi.unstubAllGlobals()
+      expect(localStorage.getItem('redirectAfterLogin')).toBe('/pt/app/dashboard')
     })
 
     it('should not save invalid redirect URLs', () => {
-      const mockStorage: Record<string, string> = {}
-      vi.stubGlobal('localStorage', {
-        getItem: (key: string) => mockStorage[key] || null,
-        setItem: (key: string, value: string) => {
-          mockStorage[key] = value
-        },
-        removeItem: (key: string) => {
-          delete mockStorage[key]
-        },
-        clear: () => {
-          Object.keys(mockStorage).forEach((key) => delete mockStorage[key])
-        },
-      })
+      localStorage.clear()
 
       authService.saveRedirectUrl('/pt/login')
 
-      expect(mockStorage['redirectAfterLogin']).toBeUndefined()
-
-      vi.unstubAllGlobals()
+      expect(localStorage.getItem('redirectAfterLogin')).toBeNull()
     })
 
     it('should get and clear redirect URL', () => {
-      const mockStorage: Record<string, string> = {
-        redirectAfterLogin: '/pt/app/chat',
-      }
-      vi.stubGlobal('localStorage', {
-        getItem: (key: string) => mockStorage[key] || null,
-        setItem: (key: string, value: string) => {
-          mockStorage[key] = value
-        },
-        removeItem: (key: string) => {
-          delete mockStorage[key]
-        },
-        clear: () => {
-          Object.keys(mockStorage).forEach((key) => delete mockStorage[key])
-        },
-      })
+      localStorage.clear()
+      localStorage.setItem('redirectAfterLogin', '/pt/app/chat')
 
       const url = authService.getAndClearRedirectUrl()
 
       expect(url).toBe('/pt/app/chat')
-      expect(mockStorage['redirectAfterLogin']).toBeUndefined()
-
-      vi.unstubAllGlobals()
+      expect(localStorage.getItem('redirectAfterLogin')).toBeNull()
     })
 
     it('should return null and clear invalid stored URL', () => {
-      const mockStorage: Record<string, string> = {
-        redirectAfterLogin: '/pt/login',
-      }
-      vi.stubGlobal('localStorage', {
-        getItem: (key: string) => mockStorage[key] || null,
-        setItem: (key: string, value: string) => {
-          mockStorage[key] = value
-        },
-        removeItem: (key: string) => {
-          delete mockStorage[key]
-        },
-        clear: () => {
-          Object.keys(mockStorage).forEach((key) => delete mockStorage[key])
-        },
-      })
+      localStorage.clear()
+      localStorage.setItem('redirectAfterLogin', '/pt/login')
 
       const url = authService.getAndClearRedirectUrl()
 
       expect(url).toBeNull()
-      expect(mockStorage['redirectAfterLogin']).toBeUndefined()
-
-      vi.unstubAllGlobals()
+      expect(localStorage.getItem('redirectAfterLogin')).toBeNull()
     })
   })
 
