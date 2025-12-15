@@ -13,6 +13,27 @@ export default defineConfig({
       '__tests__/e2e/**',
       '**/*.spec.ts',
     ],
+    // Memory optimization - prevent RAM exhaustion
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        maxForks: 1,
+        minForks: 1,
+        singleFork: true,
+      },
+    },
+    maxWorkers: 1,
+    maxConcurrency: 1,
+    testTimeout: 15000,
+    // Force sequential execution for memory safety
+    sequence: {
+      concurrent: false,
+    },
+    // Isolate tests
+    isolate: true,
+    // Cleanup between tests
+    clearMocks: true,
+    restoreMocks: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

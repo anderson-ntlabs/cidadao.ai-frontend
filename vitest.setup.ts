@@ -1,10 +1,20 @@
 import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 
-// Cleanup after each test
+// Memory cleanup before each test
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
+// Comprehensive cleanup after each test
 afterEach(() => {
   cleanup()
+  vi.clearAllMocks()
+  vi.clearAllTimers()
+  vi.restoreAllMocks()
+  // Clear any lingering promises
+  vi.useRealTimers()
 })
 
 // Mock Next.js router
