@@ -2,6 +2,14 @@ import '@testing-library/jest-dom'
 import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, vi } from 'vitest'
 
+// Safety check: ensure jsdom environment is properly set up
+// This can fail if a previous test file destroyed the window object
+if (typeof window === 'undefined') {
+  throw new Error(
+    'vitest.setup.ts: window is undefined. Check if a previous test file destroyed the global window object.'
+  )
+}
+
 // Mock window.matchMedia (required for many UI components)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

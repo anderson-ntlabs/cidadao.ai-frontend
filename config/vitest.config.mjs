@@ -14,12 +14,14 @@ export default defineConfig({
       '**/*.spec.ts',
     ],
     // Memory optimization - prevent RAM exhaustion
+    // Use multiple forks for isolation between test files (prevents window contamination)
     pool: 'forks',
     poolOptions: {
       forks: {
-        maxForks: 1,
+        maxForks: 2,
         minForks: 1,
-        singleFork: true,
+        singleFork: false,
+        isolate: true,
       },
     },
     maxWorkers: 1,
