@@ -5,15 +5,17 @@
  * - Category filtering
  * - Progress tracking
  * - XP rewards
+ * - Database-driven content (no hardcoded videos)
  *
  * Author: Anderson Henrique da Silva
  * Refactored: 2025-12-06 - Design System integration
  * Updated: 2025-12-11 - Standardized layout with PageHeader/PageContainer
+ * Updated: 2025-12-16 - Migrated to database-driven videos
  */
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAgora } from '@/hooks/use-agora'
 import { cn } from '@/lib/utils'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
@@ -22,25 +24,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from '@/components/ui/modal'
 import Image from 'next/image'
-import { Play, Video, Check, Clock, Star } from 'lucide-react'
+import { Play, Video, Check, Clock, Star, RefreshCw, Database, Users } from 'lucide-react'
 import { trackVideoCompleted } from '@/lib/analytics/agora-tracker'
 import { useCelebrationStore } from '@/store/celebration-store'
 import { updateVideoProgress, getVideoProgress } from '../actions'
-
-interface VideoItem {
-  id: string
-  title: string
-  description: string
-  url: string
-  thumbnail_url: string
-  duration_seconds: number
-  category: string
-  track: string
-  difficulty: string
-  order_index: number
-  agent_name: string
-  is_required: boolean
-}
+import { fetchVideos, demoVideos, type VideoItem } from '@/lib/agora/videos'
 
 const categories = [
   { id: 'all', name: 'Todos', emoji: '📺' },
@@ -50,230 +38,6 @@ const categories = [
   { id: 'ia', name: 'IA/ML', emoji: '🤖' },
   { id: 'devops', name: 'DevOps', emoji: '🔧' },
   { id: 'agents', name: 'Agentes', emoji: '🎭' },
-]
-
-// YouTube thumbnail helper
-const ytThumb = (videoId: string) => `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-
-// Real YouTube videos - curated PT-BR educational content from Brazilian channels
-const placeholderVideos: VideoItem[] = [
-  // Onboarding - Required videos (PT-BR)
-  {
-    id: '1',
-    title: 'O que é Inteligência Artificial?',
-    description:
-      'Filipe Deschamps explica IA de forma simples e divertida - essencial para começar',
-    url: 'https://www.youtube.com/watch?v=Lhu2QZbLxBI',
-    thumbnail_url: ytThumb('Lhu2QZbLxBI'),
-    duration_seconds: 720,
-    category: 'onboarding',
-    track: 'all',
-    difficulty: 'beginner',
-    order_index: 1,
-    agent_name: '',
-    is_required: true,
-  },
-  {
-    id: '2',
-    title: 'Git e GitHub para Iniciantes',
-    description: 'Rafaella Ballerini ensina controle de versão do zero - essencial para contribuir',
-    url: 'https://www.youtube.com/watch?v=DqTITcMq68k',
-    thumbnail_url: ytThumb('DqTITcMq68k'),
-    duration_seconds: 2100,
-    category: 'onboarding',
-    track: 'all',
-    difficulty: 'beginner',
-    order_index: 2,
-    agent_name: '',
-    is_required: true,
-  },
-  {
-    id: '3',
-    title: 'Python para Iniciantes - Curso Completo',
-    description: 'Curso Em Vídeo - Gustavo Guanabara - A melhor introdução ao Python em português',
-    url: 'https://www.youtube.com/watch?v=S9uPNppGsGo',
-    thumbnail_url: ytThumb('S9uPNppGsGo'),
-    duration_seconds: 7200,
-    category: 'onboarding',
-    track: 'all',
-    difficulty: 'beginner',
-    order_index: 3,
-    agent_name: '',
-    is_required: true,
-  },
-  // Backend (PT-BR)
-  {
-    id: '4',
-    title: 'FastAPI do Zero - Curso Completo',
-    description: 'Eduardo Mendes (Dunossauro) - O melhor curso de FastAPI em português',
-    url: 'https://www.youtube.com/watch?v=MxlS5_MI_WY',
-    thumbnail_url: ytThumb('MxlS5_MI_WY'),
-    duration_seconds: 10800,
-    category: 'backend',
-    track: 'backend',
-    difficulty: 'beginner',
-    order_index: 1,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '5',
-    title: 'APIs REST - Melhores Práticas',
-    description: 'Código Fonte TV - Como projetar APIs profissionais e escaláveis',
-    url: 'https://www.youtube.com/watch?v=ghTrp1x_1As',
-    thumbnail_url: ytThumb('ghTrp1x_1As'),
-    duration_seconds: 900,
-    category: 'backend',
-    track: 'backend',
-    difficulty: 'intermediate',
-    order_index: 2,
-    agent_name: '',
-    is_required: false,
-  },
-  // Frontend (PT-BR - Rocketseat)
-  {
-    id: '6',
-    title: 'Next.js na Prática - Rocketseat',
-    description: 'Rocketseat - App Router, Server Components e o Next.js moderno',
-    url: 'https://www.youtube.com/watch?v=pUGjjVYBXkE',
-    thumbnail_url: ytThumb('pUGjjVYBXkE'),
-    duration_seconds: 5400,
-    category: 'frontend',
-    track: 'frontend',
-    difficulty: 'beginner',
-    order_index: 1,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '7',
-    title: 'Tailwind CSS na Prática',
-    description: 'Rocketseat - Domine o framework CSS mais popular da atualidade',
-    url: 'https://www.youtube.com/watch?v=1eLaBow7Zbo',
-    thumbnail_url: ytThumb('1eLaBow7Zbo'),
-    duration_seconds: 3600,
-    category: 'frontend',
-    track: 'frontend',
-    difficulty: 'beginner',
-    order_index: 2,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '8',
-    title: 'TypeScript para Iniciantes',
-    description: 'Rocketseat - Aprenda TypeScript e escreva código mais seguro',
-    url: 'https://www.youtube.com/watch?v=mRixno_uE2o',
-    thumbnail_url: ytThumb('mRixno_uE2o'),
-    duration_seconds: 3000,
-    category: 'frontend',
-    track: 'frontend',
-    difficulty: 'beginner',
-    order_index: 3,
-    agent_name: '',
-    is_required: false,
-  },
-  // IA/ML (PT-BR)
-  {
-    id: '9',
-    title: 'LangChain em Português - Criando Agentes',
-    description: 'Sandeco - Como criar agentes inteligentes com LangChain e Python',
-    url: 'https://www.youtube.com/watch?v=1dTq_g8YS2g',
-    thumbnail_url: ytThumb('1dTq_g8YS2g'),
-    duration_seconds: 4800,
-    category: 'ia',
-    track: 'ia',
-    difficulty: 'intermediate',
-    order_index: 1,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '10',
-    title: 'Prompt Engineering - Guia Completo',
-    description: 'Código Fonte TV - Técnicas avançadas para trabalhar com ChatGPT e LLMs',
-    url: 'https://www.youtube.com/watch?v=7kf3MfItXY0',
-    thumbnail_url: ytThumb('7kf3MfItXY0'),
-    duration_seconds: 1200,
-    category: 'ia',
-    track: 'ia',
-    difficulty: 'intermediate',
-    order_index: 2,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '11',
-    title: 'RAG - Retrieval Augmented Generation',
-    description: 'Programação Dinâmica - Como criar sistemas de IA com memória e documentos',
-    url: 'https://www.youtube.com/watch?v=lhby7Ql7hbk',
-    thumbnail_url: ytThumb('lhby7Ql7hbk'),
-    duration_seconds: 2400,
-    category: 'ia',
-    track: 'ia',
-    difficulty: 'advanced',
-    order_index: 3,
-    agent_name: '',
-    is_required: false,
-  },
-  // DevOps (PT-BR)
-  {
-    id: '12',
-    title: 'Docker - Curso Completo',
-    description: 'LINUXtips - Containerização do zero ao deploy em produção',
-    url: 'https://www.youtube.com/watch?v=MeFyp4VnNx0',
-    thumbnail_url: ytThumb('MeFyp4VnNx0'),
-    duration_seconds: 7200,
-    category: 'devops',
-    track: 'devops',
-    difficulty: 'beginner',
-    order_index: 1,
-    agent_name: '',
-    is_required: false,
-  },
-  {
-    id: '13',
-    title: 'GitHub Actions - CI/CD na Prática',
-    description: 'Código Fonte TV - Automatize deploys e testes com GitHub Actions',
-    url: 'https://www.youtube.com/watch?v=7-4yOo1CnV8',
-    thumbnail_url: ytThumb('7-4yOo1CnV8'),
-    duration_seconds: 1200,
-    category: 'devops',
-    track: 'devops',
-    difficulty: 'intermediate',
-    order_index: 2,
-    agent_name: '',
-    is_required: false,
-  },
-  // Agents (PT-BR)
-  {
-    id: '14',
-    title: 'Sistemas Multi-Agentes com IA',
-    description: 'Sandeco - Como criar sistemas de múltiplos agentes de IA com Python',
-    url: 'https://www.youtube.com/watch?v=EAT2bWXMgQY',
-    thumbnail_url: ytThumb('EAT2bWXMgQY'),
-    duration_seconds: 3600,
-    category: 'agents',
-    track: 'all',
-    difficulty: 'advanced',
-    order_index: 1,
-    agent_name: 'abaporu',
-    is_required: false,
-  },
-  {
-    id: '15',
-    title: 'Detecção de Anomalias com Python',
-    description: 'Programação Dinâmica - Técnicas para identificar padrões suspeitos em dados',
-    url: 'https://www.youtube.com/watch?v=s3ypP6yRNhI',
-    thumbnail_url: ytThumb('s3ypP6yRNhI'),
-    duration_seconds: 2700,
-    category: 'agents',
-    track: 'ia',
-    difficulty: 'advanced',
-    order_index: 2,
-    agent_name: 'zumbi',
-    is_required: false,
-  },
 ]
 
 // Demo mode: video progress stored in localStorage
@@ -288,9 +52,44 @@ interface VideoProgress {
 }
 
 export default function AcademyVideosPage() {
-  const { user, isLoading, addXp } = useAgora()
+  const { user, isLoading: userLoading, addXp } = useAgora()
 
-  const [videos] = useState<VideoItem[]>(placeholderVideos)
+  const [videos, setVideos] = useState<VideoItem[]>([])
+  const [isLoadingVideos, setIsLoadingVideos] = useState(true)
+  const [isUsingSupabase, setIsUsingSupabase] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Fetch videos from database
+  const loadVideos = useCallback(async () => {
+    setIsLoadingVideos(true)
+
+    const { data, error } = await fetchVideos()
+
+    if (data && data.length > 0 && !error) {
+      setVideos(data)
+      setIsUsingSupabase(true)
+    } else {
+      // Fallback to demo videos
+      setVideos(demoVideos)
+      setIsUsingSupabase(false)
+    }
+
+    setIsLoadingVideos(false)
+  }, [])
+
+  // Load videos on mount
+  useEffect(() => {
+    void loadVideos()
+  }, [loadVideos])
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await loadVideos()
+    setIsRefreshing(false)
+  }
+
+  const isLoading = userLoading || isLoadingVideos
   const [progress, setProgress] = useState<Record<string, VideoProgress>>({})
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null)
@@ -404,10 +203,33 @@ export default function AcademyVideosPage() {
         subtitle={`${completedCount} de ${videos.length} assistidos`}
         icon={Video}
         actions={
-          <Badge variant="warning" size="default">
-            <Star className="w-3 h-3" />
-            {totalRequired} obrigatorios
-          </Badge>
+          <div className="flex items-center gap-2">
+            {isUsingSupabase ? (
+              <Badge variant="success" size="sm" className="flex items-center gap-1">
+                <Database className="w-3 h-3" />
+                Ao vivo
+              </Badge>
+            ) : (
+              <Badge variant="secondary" size="sm" className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                Demo
+              </Badge>
+            )}
+            <Badge variant="warning" size="default">
+              <Star className="w-3 h-3" />
+              {totalRequired} obrigatorios
+            </Badge>
+            <Button
+              onClick={() => void handleRefresh()}
+              variant="ghost"
+              size="sm"
+              disabled={isRefreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+              <span className="hidden sm:inline">Atualizar</span>
+            </Button>
+          </div>
         }
       />
 
@@ -552,9 +374,9 @@ export default function AcademyVideosPage() {
             <>
               {/* YouTube Video Player */}
               <div className="relative aspect-video bg-gray-900 rounded-t-lg -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 overflow-hidden">
-                {selectedVideo.url ? (
+                {selectedVideo.youtube_id ? (
                   <iframe
-                    src={`https://www.youtube.com/embed/${selectedVideo.url.split('v=')[1]?.split('&')[0]}?rel=0&modestbranding=1`}
+                    src={`https://www.youtube.com/embed/${selectedVideo.youtube_id}?rel=0&modestbranding=1`}
                     title={selectedVideo.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

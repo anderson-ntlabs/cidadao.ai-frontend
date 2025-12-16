@@ -86,7 +86,8 @@ function TrackCard({
 }) {
   const Icon = getTrackIcon(track.icon)
   const colors = getTrackColors(track.color)
-  const completedModules = Math.floor((progress / 100) * track.modules.length)
+  const modules = track.modules || []
+  const completedModules = Math.floor((progress / 100) * modules.length)
 
   return (
     <GlassCard
@@ -164,7 +165,7 @@ function TrackCard({
               </span>
               <span className="flex items-center gap-1">
                 <BookOpen className="w-3.5 h-3.5" />
-                {track.modules.length} modulos
+                {modules.length} modulos
               </span>
             </div>
 
@@ -230,7 +231,7 @@ function TrackCard({
               Modulos do curso
             </h4>
             <div className="space-y-2">
-              {track.modules.map((module, index) => {
+              {modules.map((module, index) => {
                 const isCompleted = index < completedModules
                 const isCurrent = index === completedModules && isEnrolled
                 const isLocked = index > completedModules && isEnrolled
@@ -328,7 +329,7 @@ function TrackCard({
               <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {completedModules}/{track.modules.length}
+                    {completedModules}/{modules.length}
                   </span>{' '}
                   modulos concluidos
                 </div>
@@ -389,7 +390,7 @@ export default function AgoraTrilhasPage() {
     if (!enrolledTracks.includes(trackId as any)) return 0
     // Mock progress based on XP
     const track = displayTracks.find((t) => t.id === trackId)
-    if (!track) return 0
+    if (!track || !track.xpTotal) return 0
     const xpPerTrack = Math.floor((user?.totalXp || 0) / Math.max(enrolledTracks.length, 1))
     return Math.min(100, Math.floor((xpPerTrack / track.xpTotal) * 100))
   }
