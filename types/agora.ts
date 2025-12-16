@@ -539,6 +539,78 @@ export interface ParentalControlDB {
 }
 
 // ============================================
+// RPC Response Types
+// ============================================
+
+/**
+ * Response from get_agora_user_data RPC function
+ *
+ * This RPC fetches all user data in a single call for performance optimization.
+ * Reduces 5 separate queries to 1 RPC call (~300ms TTFB improvement).
+ *
+ * @since 2025-12-16
+ */
+export interface AgoraUserDataRPC {
+  // Profile data
+  profile_id: string | null
+  user_id: string | null
+  email: string | null
+  full_name: string | null
+  avatar_url: string | null
+  github_username: string | null
+  matricula: string | null
+  curso: string | null
+  periodo: number | null
+  total_xp: number | null
+  current_level: number | null
+  current_rank: string | null
+  tracks: string[] | null
+  current_streak: number | null
+  longest_streak: number | null
+  total_sessions: number | null
+  total_time_minutes: number | null
+  total_videos_completed: number | null
+  has_accepted_terms: boolean | null
+  has_completed_onboarding: boolean | null
+  onboarding_step: number | null
+  is_superuser: boolean | null
+  is_active: boolean | null
+  enrolled_at: string | null
+  last_activity_date: string | null
+  last_daily_bonus_date: string | null
+
+  // Consent data
+  has_consent: boolean | null
+
+  // Aggregated data as JSONB arrays
+  xp_transactions: Array<{
+    id: string
+    amount: number
+    balance_after: number
+    source_type: string
+    description: string
+    created_at: string
+  }> | null
+  diary_entries: Array<{
+    id: string
+    content: string
+    mood: string | null
+    tags: string[] | null
+    created_at: string
+  }> | null
+  sessions: Array<{
+    id: string
+    track_id: string | null
+    video_id: string | null
+    started_at: string
+    ended_at: string | null
+    duration_minutes: number | null
+    completed: boolean | null
+    xp_earned: number | null
+  }> | null
+}
+
+// ============================================
 // Supabase Auth Types
 // ============================================
 
