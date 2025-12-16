@@ -53,6 +53,7 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { SurveyProvider } from '@/components/survey'
+import { RoutePrefetcher } from '@/components/route-prefetcher'
 
 export default function ENLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
@@ -104,6 +105,9 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
 
                 {/* Semi-transparent overlay */}
                 <div className="fixed inset-0 bg-white/80 dark:bg-gray-900/80 z-[5] pointer-events-none" />
+
+                {/* Route Prefetcher - Prefetches likely navigation targets */}
+                <RoutePrefetcher />
 
                 {/* Main content */}
                 <div className="relative z-20 min-h-screen flex flex-col">

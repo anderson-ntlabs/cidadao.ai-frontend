@@ -55,6 +55,7 @@ import { LiveAnnouncerProvider } from '@/components/a11y'
 import { OfflineBanner } from '@/components/mobile'
 import { SurveyProvider } from '@/components/survey'
 import { ConditionalBackground } from '@/components/conditional-background'
+import { RoutePrefetcher } from '@/components/route-prefetcher'
 
 export default function PTLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
@@ -100,6 +101,9 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
                 {/* Note: Sentry is automatically initialized by @sentry/nextjs via instrumentation-client.ts */}
                 {/* Conditional background - not applied on Agora routes */}
                 <ConditionalBackground />
+
+                {/* Route Prefetcher - Prefetches likely navigation targets */}
+                <RoutePrefetcher />
 
                 {/* Conteúdo principal */}
                 <div className="relative z-20 min-h-screen flex flex-col">

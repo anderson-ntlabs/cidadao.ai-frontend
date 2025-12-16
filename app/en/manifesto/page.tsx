@@ -1,4 +1,14 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
+
+// ISR: Revalidate every hour (static content)
+export const revalidate = 3600
+
+export const metadata: Metadata = {
+  title: 'Manifesto | Cidadão.AI',
+  description:
+    'For an Artificial Intelligence that serves the people and illuminates the State. Cidadão.AI project manifesto.',
+}
 
 export default function ManifestoPage(): JSX.Element {
   return (

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { ProjectTimeline } from '@/components/timeline'
 
+// ISR: Revalidate every hour (static content)
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'About Cidadão.AI | Public Transparency with Artificial Intelligence',
   description:

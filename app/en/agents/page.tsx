@@ -1,11 +1,19 @@
-'use client'
-
+import type { Metadata } from 'next'
 import { agents } from '@/data/agents'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
 import { Card, CardHeader, CardTitle, CardContent, Button } from '@/components/ui'
+
+// ISR: Revalidate every hour (static content)
+export const revalidate = 3600
+
+export const metadata: Metadata = {
+  title: 'AI Agents | Cidadão.AI',
+  description:
+    '17 Brazilian artificial intelligences working to democratize access to public data and strengthen government transparency.',
+}
 
 export default function AgentsPage(): JSX.Element {
   return (
