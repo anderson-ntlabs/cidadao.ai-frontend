@@ -60,7 +60,9 @@ class WebSpeechTTSService {
 
     return new Promise((resolve) => {
       const loadVoices = () => {
-        this.voices = this.synth!.getVoices()
+        // Defensive: getVoices() may return undefined in test environments
+        const voiceList = this.synth?.getVoices()
+        this.voices = voiceList ?? []
         if (this.voices.length > 0) {
           this.isInitialized = true
           logger.debug('Voices loaded', { count: this.voices.length })
