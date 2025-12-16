@@ -647,34 +647,37 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
       let hasConsent = false
 
       if (rpcError || !rpcData?.profile_id) {
-        // Profile doesn't exist - create it
+        // Profile doesn't exist - create it using upsert to avoid 409 conflict
         logger.info('Profile not found, creating new profile', { userId: authUser.id })
         const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name || 'User')}&background=16a34a&color=fff&size=128`
 
         const { data: newProfile, error: createError } = await supabase
           .from('agora_profiles')
-          .insert({
-            user_id: authUser.id,
-            email: authUser.email || '',
-            full_name: authUser.name || 'Estudante',
-            avatar_url: authUser.avatar || defaultAvatar,
-            github_username: authUser.githubUsername || null,
-            total_xp: 0,
-            current_level: 1,
-            current_rank: 'novato',
-            tracks: [],
-            current_streak: 0,
-            longest_streak: 0,
-            total_sessions: 0,
-            total_time_minutes: 0,
-            total_videos_completed: 0,
-            has_accepted_terms: false,
-            has_completed_onboarding: false,
-            onboarding_step: 0,
-            is_superuser: false,
-            is_active: true,
-            enrolled_at: new Date().toISOString(),
-          })
+          .upsert(
+            {
+              user_id: authUser.id,
+              email: authUser.email || '',
+              full_name: authUser.name || 'Estudante',
+              avatar_url: authUser.avatar || defaultAvatar,
+              github_username: authUser.githubUsername || null,
+              total_xp: 0,
+              current_level: 1,
+              current_rank: 'novato',
+              tracks: [],
+              current_streak: 0,
+              longest_streak: 0,
+              total_sessions: 0,
+              total_time_minutes: 0,
+              total_videos_completed: 0,
+              has_accepted_terms: false,
+              has_completed_onboarding: false,
+              onboarding_step: 0,
+              is_superuser: false,
+              is_active: true,
+              enrolled_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id', ignoreDuplicates: false }
+          )
           .select()
           .single<AgoraProfileDB>()
 
