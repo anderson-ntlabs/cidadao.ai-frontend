@@ -10,7 +10,7 @@
  * @date 2025-12-07
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAgora } from '@/hooks/use-agora'
@@ -32,12 +32,22 @@ import {
 const CONTRACT_VERSION = 'v2.0-2025'
 const CONTRACT_NUMBER_PREFIX = 'AGORA'
 
+// Generate a stable contract number based on user ID
+function generateContractNumber(userId?: string): string {
+  // Use user ID hash for consistent number, or random for anonymous
+  const hash = userId
+    ? userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 99999
+    : Math.floor(Math.random() * 99999)
+  return `${CONTRACT_NUMBER_PREFIX}-${new Date().getFullYear()}-${String(hash).padStart(5, '0')}`
+}
+
 export default function AgoraContractPage() {
   const router = useRouter()
   const { user, isLoading, acceptLgpdConsent, acceptInternshipContract } = useAgora()
   const [isAccepting, setIsAccepting] = useState(false)
   const [hasReadContract, setHasReadContract] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [acceptError, setAcceptError] = useState<string | null>(null)
   const contractRef = useRef<HTMLDivElement>(null)
 
   const currentDate = new Date().toLocaleDateString('pt-BR', {
@@ -46,7 +56,8 @@ export default function AgoraContractPage() {
     year: 'numeric',
   })
 
-  const contractNumber = `${CONTRACT_NUMBER_PREFIX}-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`
+  // Stable contract number based on user ID (memoized to prevent re-generation on re-render)
+  const contractNumber = useMemo(() => generateContractNumber(user?.id), [user?.id])
 
   // Check if user has already accepted (view mode)
   const hasAccepted = user?.hasAcceptedLgpd && user?.hasAcceptedInternshipContract
@@ -330,30 +341,53 @@ export default function AgoraContractPage() {
 
   const handleAccept = async () => {
     if (!acceptTerms || !hasReadContract) return
+    if (!user) {
+      setAcceptError('Usuário não autenticado. Por favor, faça login novamente.')
+      return
+    }
 
     setIsAccepting(true)
+    setAcceptError(null)
+
     try {
-      let ipAddress: string | undefined
+      // Get IP address (non-blocking, fallback to localhost)
+      let ipAddress = '127.0.0.1'
       try {
-        const response = await fetch('https://api.ipify.org?format=json')
+        const response = await fetch('https://api.ipify.org?format=json', {
+          signal: AbortSignal.timeout(3000), // 3 second timeout
+        })
         const data = await response.json()
         ipAddress = data.ip
       } catch {
-        ipAddress = '127.0.0.1'
+        // Ignore IP fetch errors, use fallback
       }
 
-      const { pdf, contractNumber: contractId } = await generateContractPDF()
-      pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
-
+      // Accept LGPD consent first
       await acceptLgpdConsent(ipAddress, navigator.userAgent)
-      await acceptInternshipContract(ipAddress, navigator.userAgent, contractId)
 
+      // Accept internship contract
+      await acceptInternshipContract(ipAddress, navigator.userAgent, contractNumber)
+
+      // Generate and download PDF after acceptance (non-blocking)
+      try {
+        const { pdf, contractNumber: contractId } = await generateContractPDF()
+        pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
+      } catch (pdfError) {
+        console.warn('PDF generation failed, but terms accepted:', pdfError)
+        // Don't block navigation if PDF fails
+      }
+
+      // Navigate to onboarding
       router.push('/pt/agora/onboarding')
     } catch (error) {
       console.error('Failed to accept terms:', error)
-    } finally {
+      setAcceptError(
+        'Erro ao salvar aceite. Por favor, tente novamente. ' +
+          (error instanceof Error ? error.message : '')
+      )
       setIsAccepting(false)
     }
+    // Note: Don't setIsAccepting(false) on success - we're navigating away
   }
 
   const handlePrint = async () => {
@@ -781,6 +815,13 @@ export default function AgoraContractPage() {
                       incluindo a coleta e tratamento dos meus dados pessoais conforme a LGPD.
                     </span>
                   </label>
+
+                  {/* Error message */}
+                  {acceptError && (
+                    <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-sm text-red-700 dark:text-red-300">{acceptError}</p>
+                    </div>
+                  )}
 
                   <div className="mt-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">

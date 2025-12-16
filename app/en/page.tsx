@@ -42,15 +42,14 @@ export default function ENPage(): JSX.Element {
   const [manifestoModalOpen, setManifestoModalOpen] = useState(false)
 
   // Check auth status without AuthProvider (performance optimization)
+  // Note: Authenticated users go to /pt/app since system is PT-only
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       setIsAuthenticated(!!user)
-      if (user) {
-        router.replace('/en/app')
-      }
+      // Don't auto-redirect - let user choose to access system
     }
     void checkAuth()
   }, [supabase, router])
@@ -58,7 +57,7 @@ export default function ENPage(): JSX.Element {
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isAuthenticated) {
-      router.push('/en/app')
+      router.push('/pt/app') // System is PT-only
     } else {
       router.push('/pt/login')
     }

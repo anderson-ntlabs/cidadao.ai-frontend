@@ -31,11 +31,20 @@ export function SimplifiedHeader({ locale, className }: SimplifiedHeaderProps) {
 
   const toggleLanguage = () => {
     const newLocale = locale === 'pt' ? 'en' : 'pt'
-    // Replace only the first occurrence of the locale in the path
     const currentPath = pathname || `/${locale}`
-    const newPath = currentPath.replace(new RegExp(`^/${locale}`), `/${newLocale}`)
 
-    // console.log('Language toggle:', { currentPath, newPath, locale, newLocale })
+    // EN version only has landing, about, agents, manifesto pages
+    // For /app/* routes, stay on PT (system is PT-only)
+    if (currentPath.includes('/app') || currentPath.includes('/agora')) {
+      // Can't switch to EN for app/agora routes - redirect to EN landing
+      if (newLocale === 'en') {
+        router.push('/en')
+        return
+      }
+    }
+
+    // Replace only the first occurrence of the locale in the path
+    const newPath = currentPath.replace(new RegExp(`^/${locale}`), `/${newLocale}`)
     router.push(newPath)
   }
 
