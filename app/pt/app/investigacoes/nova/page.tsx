@@ -17,30 +17,85 @@ import type { DataSource, AnomalyType } from '@/lib/api/investigation-adapter'
  * @date 2025-10-30
  */
 
-const dataSourceOptions: Array<{ value: DataSource; label: string; description: string; icon: string }> = [
-  { value: 'contracts', label: 'Contratos', description: 'Contratos públicos e licitações', icon: '📄' },
-  { value: 'expenses', label: 'Despesas', description: 'Despesas e pagamentos governamentais', icon: '💰' },
-  { value: 'agreements', label: 'Convênios', description: 'Convênios e acordos administrativos', icon: '🤝' },
+const dataSourceOptions: Array<{
+  value: DataSource
+  label: string
+  description: string
+  icon: string
+}> = [
+  {
+    value: 'contracts',
+    label: 'Contratos',
+    description: 'Contratos públicos e licitações',
+    icon: '📄',
+  },
+  {
+    value: 'expenses',
+    label: 'Despesas',
+    description: 'Despesas e pagamentos governamentais',
+    icon: '💰',
+  },
+  {
+    value: 'agreements',
+    label: 'Convênios',
+    description: 'Convênios e acordos administrativos',
+    icon: '🤝',
+  },
   { value: 'biddings', label: 'Licitações', description: 'Processos licitatórios', icon: '⚖️' },
-  { value: 'servants', label: 'Servidores', description: 'Folha de pagamento e servidores', icon: '👥' }
+  {
+    value: 'servants',
+    label: 'Servidores',
+    description: 'Folha de pagamento e servidores',
+    icon: '👥',
+  },
 ]
 
-const anomalyTypeOptions: Array<{ value: AnomalyType; label: string; description: string; icon: string }> = [
+const anomalyTypeOptions: Array<{
+  value: AnomalyType
+  label: string
+  description: string
+  icon: string
+}> = [
   { value: 'price', label: 'Preço', description: 'Superfaturamento e subvalorização', icon: '💵' },
-  { value: 'vendor', label: 'Fornecedor', description: 'Padrões suspeitos em fornecedores', icon: '🏢' },
-  { value: 'temporal', label: 'Temporal', description: 'Anomalias em períodos de tempo', icon: '⏰' },
-  { value: 'payment', label: 'Pagamento', description: 'Irregularidades em pagamentos', icon: '💳' },
-  { value: 'duplicate', label: 'Duplicação', description: 'Registros duplicados ou similares', icon: '📋' },
-  { value: 'pattern', label: 'Padrão', description: 'Padrões estatísticos anormais', icon: '📊' }
+  {
+    value: 'vendor',
+    label: 'Fornecedor',
+    description: 'Padrões suspeitos em fornecedores',
+    icon: '🏢',
+  },
+  {
+    value: 'temporal',
+    label: 'Temporal',
+    description: 'Anomalias em períodos de tempo',
+    icon: '⏰',
+  },
+  {
+    value: 'payment',
+    label: 'Pagamento',
+    description: 'Irregularidades em pagamentos',
+    icon: '💳',
+  },
+  {
+    value: 'duplicate',
+    label: 'Duplicação',
+    description: 'Registros duplicados ou similares',
+    icon: '📋',
+  },
+  { value: 'pattern', label: 'Padrão', description: 'Padrões estatísticos anormais', icon: '📊' },
 ]
 
 export default function NovaInvestigacaoPage() {
   const router = useRouter()
-  const { createAndTrack, investigation, isCreating, isPolling, error } = useCreateBackendInvestigation()
+  const { createAndTrack, investigation, isCreating, isPolling, error } =
+    useCreateBackendInvestigation()
 
   const [query, setQuery] = useState('')
   const [dataSource, setDataSource] = useState<DataSource>('contracts')
-  const [selectedAnomalyTypes, setSelectedAnomalyTypes] = useState<AnomalyType[]>(['price', 'vendor', 'temporal'])
+  const [selectedAnomalyTypes, setSelectedAnomalyTypes] = useState<AnomalyType[]>([
+    'price',
+    'vendor',
+    'temporal',
+  ])
   const [organization, setOrganization] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -61,10 +116,10 @@ export default function NovaInvestigacaoPage() {
         filters: {
           organization: organization || undefined,
           start_date: startDate || undefined,
-          end_date: endDate || undefined
+          end_date: endDate || undefined,
         },
         include_explanations: includeExplanations,
-        stream_results: false
+        stream_results: false,
       })
 
       // Success - redirect to investigation detail
@@ -77,10 +132,8 @@ export default function NovaInvestigacaoPage() {
   }
 
   const toggleAnomalyType = (type: AnomalyType) => {
-    setSelectedAnomalyTypes(prev =>
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
+    setSelectedAnomalyTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     )
   }
 
@@ -95,10 +148,7 @@ export default function NovaInvestigacaoPage() {
             Sua investigação foi criada e está sendo processada por nossos agentes de IA.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button
-              variant="secondary"
-              onClick={() => router.push('/pt/app/investigacoes')}
-            >
+            <Button variant="secondary" onClick={() => router.push('/pt/app/investigacoes')}>
               Ver Todas
             </Button>
             <Button
@@ -143,8 +193,7 @@ export default function NovaInvestigacaoPage() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-8">
-
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-8">
         {/* Query Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
           <h2 className="text-xl font-bold mb-4">O que você quer investigar?</h2>
@@ -161,7 +210,8 @@ export default function NovaInvestigacaoPage() {
             />
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            💡 Dica: Seja específico! Mencione período, localização e tipo de irregularidade que busca.
+            💡 Dica: Seja específico! Mencione período, localização e tipo de irregularidade que
+            busca.
           </p>
         </div>
 
@@ -183,9 +233,7 @@ export default function NovaInvestigacaoPage() {
               >
                 <div className="text-3xl mb-2">{option.icon}</div>
                 <div className="font-semibold text-lg mb-1">{option.label}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {option.description}
-                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{option.description}</div>
               </button>
             ))}
           </div>
@@ -228,9 +276,7 @@ export default function NovaInvestigacaoPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Organization */}
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Organização
-              </label>
+              <label className="block text-sm font-medium mb-2">Organização</label>
               <input
                 type="text"
                 value={organization}
@@ -243,9 +289,7 @@ export default function NovaInvestigacaoPage() {
 
             {/* Start Date */}
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Data Inicial
-              </label>
+              <label className="block text-sm font-medium mb-2">Data Inicial</label>
               <input
                 type="date"
                 value={startDate}
@@ -257,9 +301,7 @@ export default function NovaInvestigacaoPage() {
 
             {/* End Date */}
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Data Final
-              </label>
+              <label className="block text-sm font-medium mb-2">Data Final</label>
               <input
                 type="date"
                 value={endDate}
@@ -280,7 +322,10 @@ export default function NovaInvestigacaoPage() {
               disabled={isCreating || isPolling}
               className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
             />
-            <label htmlFor="include-explanations" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="include-explanations"
+              className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Incluir explicações detalhadas das anomalias (recomendado)
             </label>
           </div>
@@ -294,9 +339,7 @@ export default function NovaInvestigacaoPage() {
               <p className="font-medium text-red-800 dark:text-red-200">
                 Erro ao criar investigação
               </p>
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                {error.message}
-              </p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{error.message}</p>
             </div>
           </div>
         )}

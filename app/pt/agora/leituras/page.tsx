@@ -452,7 +452,7 @@ export default function AcademyReadingsPage() {
                       </Button>
                       {!isConfirmed && (
                         <Button
-                          onClick={() => handleConfirmRead(reading)}
+                          onClick={() => void handleConfirmRead(reading)}
                           disabled={confirmingId === reading.id}
                           variant="primary"
                           size="sm"

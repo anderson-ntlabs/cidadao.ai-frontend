@@ -227,7 +227,7 @@ export default function InvestigacoesPage() {
               <Button
                 variant="ghost"
                 leftIcon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-                onClick={handleRefresh}
+                onClick={() => void handleRefresh()}
                 disabled={isLoading}
               >
                 Atualizar

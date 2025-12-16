@@ -525,7 +525,7 @@ function KidsChatContent() {
               className="flex-1 text-lg h-14 rounded-full px-6 border-2 border-gray-200 dark:border-gray-700 focus:border-kids-turquoise dark:focus:border-kids-turquoise"
             />
             <Button
-              onClick={() => handleSend()}
+              onClick={() => void handleSend()}
               disabled={!input.trim() || isLoading}
               className="h-14 w-14 rounded-full bg-gradient-to-br from-kids-coral to-kids-orange hover:from-kids-coral/90 hover:to-kids-orange/90 shadow-lg"
             >

@@ -427,7 +427,7 @@ function ProfileContent() {
               <Button
                 variant="ghost"
                 size="md"
-                onClick={handleLogout}
+                onClick={() => void handleLogout()}
                 className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <LogOut className="w-4 h-4" />

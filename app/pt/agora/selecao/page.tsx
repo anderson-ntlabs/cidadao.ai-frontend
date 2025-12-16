@@ -116,7 +116,7 @@ export default function AgoraSelecaoPage() {
     }
 
     // Small delay to allow Supabase to process OAuth callback
-    const timeoutId = setTimeout(checkAuth, 100)
+    const timeoutId = setTimeout(() => void checkAuth(), 100)
 
     return () => {
       mounted = false
@@ -204,7 +204,7 @@ export default function AgoraSelecaoPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
           className="rounded-full backdrop-blur-sm bg-background/50 gap-2"
         >
           <LogOut className="h-4 w-4" />

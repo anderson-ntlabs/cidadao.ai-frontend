@@ -514,7 +514,7 @@ function OnboardingContent() {
               </div>
 
               <Button
-                onClick={handleComplete}
+                onClick={() => void handleComplete()}
                 size="lg"
                 className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white"
               >

@@ -481,7 +481,7 @@ export default function ParentalDashboardPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Desativar o Modo Kids remove o acesso da criança à área infantil
           </p>
-          <Button onClick={handleDisableKidsMode} variant="destructive">
+          <Button onClick={() => void handleDisableKidsMode()} variant="destructive">
             Desativar Modo Kids
           </Button>
         </GlassCard>

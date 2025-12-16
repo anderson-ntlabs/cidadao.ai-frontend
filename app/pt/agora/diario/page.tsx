@@ -636,7 +636,7 @@ function AcademyAgendaContent() {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => handleCompleteEvent(selectedEvent.id)}
+                    onClick={() => void handleCompleteEvent(selectedEvent.id)}
                   >
                     <Sparkles className="w-4 h-4" />
                     Marcar Completo
@@ -657,7 +657,7 @@ function AcademyAgendaContent() {
                   variant="ghost"
                   size="sm"
                   className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  onClick={() => handleDeleteEvent(selectedEvent.id)}
+                  onClick={() => void handleDeleteEvent(selectedEvent.id)}
                 >
                   <Trash2 className="w-4 h-4" />
                   Excluir
@@ -771,7 +771,11 @@ function AcademyAgendaContent() {
             <Button variant="ghost" onClick={() => setShowCreateModal(false)}>
               Cancelar
             </Button>
-            <Button variant="primary" onClick={handleCreateEvent} disabled={!newEvent.title}>
+            <Button
+              variant="primary"
+              onClick={() => void handleCreateEvent()}
+              disabled={!newEvent.title}
+            >
               <Plus className="w-4 h-4" />
               Criar Evento
             </Button>

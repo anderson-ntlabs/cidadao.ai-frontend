@@ -187,7 +187,7 @@ export default function ChatPage() {
           chatMode={chatMode}
           onBack={() => (window.location.href = '/pt/app/home')}
           onAgentClick={() => setIsAgentSelectorOpen(true)}
-          onNewChat={() => createNewSession()}
+          onNewChat={() => void createNewSession()}
           onSettings={() => setIsHistoryOpen(true)}
         />
 
@@ -200,14 +200,14 @@ export default function ChatPage() {
           }}
           chatMode={chatMode}
           maritacaModel={selectedModel}
-          onModeChange={handleModeChange}
+          onModeChange={(mode) => void handleModeChange(mode)}
           onMaritacaModelChange={setSelectedModel}
         />
 
         <ChatHistorySidebar
           isOpen={isHistoryOpen}
           onClose={() => setIsHistoryOpen(false)}
-          onSelectSession={handleSelectSession}
+          onSelectSession={(sessionId) => void handleSelectSession(sessionId)}
           currentSessionId={session?.session_id}
         />
 
@@ -266,7 +266,7 @@ export default function ChatPage() {
           <MobileChatInput
             value={inputMessage}
             onChange={setInputMessage}
-            onSend={handleSendMessage}
+            onSend={() => void handleSendMessage()}
             loading={isLoading}
             placeholder="Digite sua mensagem..."
             maxLength={2000}
@@ -291,7 +291,7 @@ export default function ChatPage() {
         <ChatHistorySidebar
           isOpen={isHistoryOpen}
           onClose={() => setIsHistoryOpen(false)}
-          onSelectSession={handleSelectSession}
+          onSelectSession={(sessionId) => void handleSelectSession(sessionId)}
           currentSessionId={session?.session_id}
         />
 
@@ -343,7 +343,10 @@ export default function ChatPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <ChatModeToggle mode={chatMode} onModeChange={handleModeChange} />
+                <ChatModeToggle
+                  mode={chatMode}
+                  onModeChange={(mode) => void handleModeChange(mode)}
+                />
                 {chatMode === 'maritaca' ? (
                   <MaritacaModelSelector
                     selectedModel={selectedModel}
@@ -359,7 +362,7 @@ export default function ChatPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => createNewSession()}
+                  onClick={() => void createNewSession()}
                   leftIcon={<Plus className="w-4 h-4" />}
                   title="Nova conversa"
                 >
@@ -438,7 +441,7 @@ export default function ChatPage() {
         <ChatInputArea
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
-          onSendMessage={handleSendMessage}
+          onSendMessage={() => void handleSendMessage()}
           onKeyDown={handleKeyDown}
           isLoading={isLoading}
           canSendMessage={canSendMessage}

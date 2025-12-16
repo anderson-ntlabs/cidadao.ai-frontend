@@ -175,7 +175,7 @@ export default function KidsDashboardPage() {
             <div className="relative">
               <KidsAvatarSelector
                 currentAvatar={childAvatar}
-                onAvatarChange={updateAvatar}
+                onAvatarChange={(avatar) => void updateAvatar(avatar)}
                 size="lg"
                 showEditButton={true}
               />

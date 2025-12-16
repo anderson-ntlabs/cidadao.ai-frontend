@@ -264,7 +264,7 @@ export default function KidsEntryPage() {
                 <h2 className="text-xl font-bold">Configurar Área Kids</h2>
               </div>
 
-              <form onSubmit={handleParentSetup} className="space-y-6">
+              <form onSubmit={(e) => void handleParentSetup(e)} className="space-y-6">
                 {/* Parent Name */}
                 <div className="space-y-2">
                   <Label htmlFor="parentName" className="flex items-center gap-2">
@@ -389,7 +389,7 @@ export default function KidsEntryPage() {
           <>
             <KidsContractModal
               isOpen={true}
-              onAccept={handleContractAccept}
+              onAccept={(contractId) => void handleContractAccept(contractId)}
               onClose={handleContractClose}
               parentName={parentName}
               parentEmail={parentEmail}

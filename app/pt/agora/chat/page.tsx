@@ -462,7 +462,7 @@ function ChatContent() {
 
             {/* Send Button */}
             <Button
-              onClick={handleSend}
+              onClick={() => void handleSend()}
               disabled={isLoading || streaming.isStreaming}
               loading={isLoading && !streaming.isStreaming}
               className="px-5 py-3 h-auto rounded-2xl shadow-md hover:shadow-lg"

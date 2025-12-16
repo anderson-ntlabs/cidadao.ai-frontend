@@ -213,7 +213,7 @@ export default function AcademyRankingPage() {
               </Badge>
             )}
             <Button
-              onClick={handleRefresh}
+              onClick={() => void handleRefresh()}
               variant="ghost"
               size="sm"
               disabled={isRefreshing}

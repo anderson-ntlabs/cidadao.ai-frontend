@@ -588,11 +588,15 @@ export default function LearningModulePage() {
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+                  onKeyDown={(e) => e.key === 'Enter' && void handleChatSend()}
                   placeholder="Digite sua mensagem..."
                   className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <Button onClick={handleChatSend} variant="primary" disabled={!chatInput.trim()}>
+                <Button
+                  onClick={() => void handleChatSend()}
+                  variant="primary"
+                  disabled={!chatInput.trim()}
+                >
                   <Send className="w-4 h-4" />
                 </Button>
               </div>

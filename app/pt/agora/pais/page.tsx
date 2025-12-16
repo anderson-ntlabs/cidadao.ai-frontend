@@ -154,7 +154,7 @@ export default function ParentalAccessPage() {
 
             {/* Step 1: Request Code */}
             {step === 'request' && (
-              <form onSubmit={handleRequestCode} className="space-y-6">
+              <form onSubmit={(e) => void handleRequestCode(e)} className="space-y-6">
                 <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                   <div className="flex items-start gap-3">
                     <Mail className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -200,7 +200,7 @@ export default function ParentalAccessPage() {
 
             {/* Step 2: Verify Code */}
             {step === 'verify' && (
-              <form onSubmit={handleVerifyCode} className="space-y-6">
+              <form onSubmit={(e) => void handleVerifyCode(e)} className="space-y-6">
                 {/* Success Message */}
                 {success && (
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-sm">
@@ -260,7 +260,7 @@ export default function ParentalAccessPage() {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={handleResendCode}
+                    onClick={() => void handleResendCode()}
                     disabled={isLoading}
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                   >

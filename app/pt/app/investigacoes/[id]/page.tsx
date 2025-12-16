@@ -248,7 +248,12 @@ export default function InvestigationDetailPage() {
           </Button>
 
           <div className="flex gap-2">
-            <Button variant="secondary" size="sm" onClick={() => refresh()} disabled={isLoading}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void refresh()}
+              disabled={isLoading}
+            >
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>

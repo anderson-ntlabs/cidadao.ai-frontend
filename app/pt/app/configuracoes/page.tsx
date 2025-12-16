@@ -215,7 +215,7 @@ export default function ConfiguracoesPage() {
             <Button
               variant="primary"
               leftIcon={<Save className="w-4 h-4" />}
-              onClick={handleSavePreferences}
+              onClick={() => void handleSavePreferences()}
               disabled={isSaving}
             >
               {isSaving ? 'Salvando...' : 'Salvar Alterações'}
@@ -456,7 +456,7 @@ export default function ConfiguracoesPage() {
             <Button
               variant="primary"
               leftIcon={<Save className="w-4 h-4" />}
-              onClick={handleSavePreferences}
+              onClick={() => void handleSavePreferences()}
               disabled={isSaving}
               className="w-full"
             >

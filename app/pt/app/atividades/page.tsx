@@ -186,7 +186,7 @@ export default function AtividadesPage() {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={handleExport}
+                onClick={() => void handleExport()}
                 disabled={filteredActivities.length === 0}
               >
                 <Download className="w-4 h-4 mr-2" />

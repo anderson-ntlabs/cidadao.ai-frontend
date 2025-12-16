@@ -401,7 +401,7 @@ export default function AgoraContractPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handlePrint}
+                onClick={() => void handlePrint()}
                 className="text-white hover:bg-white/10"
               >
                 <Printer className="w-4 h-4 mr-2" />
@@ -728,15 +728,17 @@ export default function AgoraContractPage() {
                   <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                     <Button
                       variant="secondary"
-                      onClick={handlePrint}
+                      onClick={() => void handlePrint()}
                       leftIcon={<Printer className="w-4 h-4" />}
                     >
                       Visualizar PDF
                     </Button>
                     <Button
-                      onClick={async () => {
-                        const { pdf, contractNumber: contractId } = await generateContractPDF()
-                        pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
+                      onClick={() => {
+                        void (async () => {
+                          const { pdf, contractNumber: contractId } = await generateContractPDF()
+                          pdf.save(`termo-compromisso-agora-${contractId}.pdf`)
+                        })()
                       }}
                       leftIcon={<Download className="w-4 h-4" />}
                     >
@@ -789,7 +791,7 @@ export default function AgoraContractPage() {
                       </p>
                     </div>
                     <Button
-                      onClick={handleAccept}
+                      onClick={() => void handleAccept()}
                       disabled={!acceptTerms || !hasReadContract || isAccepting}
                       loading={isAccepting}
                       size="lg"

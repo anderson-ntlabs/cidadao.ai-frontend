@@ -107,11 +107,11 @@ export default function VerificarCertificadoPage() {
                   placeholder="Ex: CERT-A1B2C3-XYZ123"
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+                  onKeyDown={(e) => e.key === 'Enter' && void handleVerify()}
                   className="font-mono uppercase"
                 />
                 <Button
-                  onClick={handleVerify}
+                  onClick={() => void handleVerify()}
                   disabled={!code.trim() || isVerifying}
                   className="academy-gradient text-white shrink-0"
                 >

@@ -276,7 +276,7 @@ export default function AgoraLoginPage() {
             <div className="grid grid-cols-2 gap-3">
               {/* GitHub Login */}
               <Button
-                onClick={() => handleLogin('github')}
+                onClick={() => void handleLogin('github')}
                 disabled={isLoggingIn !== null}
                 size="lg"
                 className={cn(
@@ -296,7 +296,7 @@ export default function AgoraLoginPage() {
 
               {/* Google Login */}
               <Button
-                onClick={() => handleLogin('google')}
+                onClick={() => void handleLogin('google')}
                 disabled={isLoggingIn !== null}
                 variant="secondary"
                 size="lg"
@@ -378,7 +378,7 @@ export default function AgoraLoginPage() {
       <GovBrMockLogin
         isOpen={showGovBrModal}
         onClose={() => setShowGovBrModal(false)}
-        onSuccess={handleGovBrSuccess}
+        onSuccess={(userData) => void handleGovBrSuccess(userData)}
       />
     </div>
   )
