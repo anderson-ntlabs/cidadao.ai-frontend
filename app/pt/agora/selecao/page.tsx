@@ -115,12 +115,11 @@ export default function AgoraSelecaoPage() {
       }
     }
 
-    // Small delay to allow Supabase to process OAuth callback
-    const timeoutId = setTimeout(() => void checkAuth(), 100)
+    // Call immediately - OAuth is handled by middleware
+    void checkAuth()
 
     return () => {
       mounted = false
-      clearTimeout(timeoutId)
     }
   }, [supabase, router])
 
