@@ -13,12 +13,11 @@ import { useMemo } from 'react'
  * Routes requiring auth:
  * - /pt/app/* - Main authenticated app
  * - /pt/agora/* - Agora academy (needs auth for progress tracking)
- * - /en/app/*, /en/agora/* - English versions
+ * - /pt/login - Login page (uses useAuth for redirect logic)
  *
  * Public routes (skip AuthProvider):
  * - /pt, /en - Landing pages
  * - /pt/about, /pt/agents, /pt/manifesto, etc.
- * - /pt/login, /en/login - Login pages (auth checked separately)
  */
 function ConditionalAuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -26,10 +25,10 @@ function ConditionalAuthProvider({ children }: { children: React.ReactNode }) {
   const needsAuth = useMemo(() => {
     if (!pathname) return false
 
-    // Routes that need authentication
-    const authRoutes = ['/app', '/agora']
+    // Routes that need authentication context
+    const authRoutes = ['/app', '/agora', '/pt/login']
 
-    return authRoutes.some((route) => pathname.includes(route) && !pathname.includes('/login'))
+    return authRoutes.some((route) => pathname.includes(route))
   }, [pathname])
 
   // Skip AuthProvider for public routes - saves ~300-500ms TTFB
