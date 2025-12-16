@@ -34,7 +34,7 @@ const CONTRACT_NUMBER_PREFIX = 'AGORA'
 
 export default function AgoraContractPage() {
   const router = useRouter()
-  const { user, isLoading, isDemoMode, acceptLgpdConsent, acceptInternshipContract } = useAgora()
+  const { user, isLoading, acceptLgpdConsent, acceptInternshipContract } = useAgora()
   const [isAccepting, setIsAccepting] = useState(false)
   const [hasReadContract, setHasReadContract] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)

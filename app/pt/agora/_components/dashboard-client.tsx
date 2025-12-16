@@ -207,7 +207,7 @@ export function DashboardClient({
   diaryEntries = [],
   sessions = [],
   isDemoMode,
-  onLogout,
+  onLogout: _onLogout,
 }: DashboardClientProps) {
   const router = useRouter()
   const [isDark, setIsDark] = useState(false)
@@ -233,7 +233,7 @@ export function DashboardClient({
   }, [])
 
   // Background customization
-  const { currentBackground, getBackgroundStyle, getOverlayStyle } = useAgoraBackground()
+  const { getBackgroundStyle, getOverlayStyle } = useAgoraBackground()
   const bgStyle = getBackgroundStyle()
   const overlayStyle = getOverlayStyle(isDark)
 
@@ -320,10 +320,6 @@ export function DashboardClient({
   const xpProgress = nextRank
     ? ((user.totalXp - rankInfo.minXp) / (nextRank.minXp - rankInfo.minXp)) * 100
     : 100
-
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark')
-  }
 
   return (
     <ErrorBoundary

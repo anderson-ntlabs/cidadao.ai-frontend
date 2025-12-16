@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft,
@@ -63,9 +63,6 @@ export default function InvestigationDetailPage() {
     investigation: backendInvestigation,
     results: backendResults,
     isLoading,
-    error,
-    startPolling,
-    stopPolling,
     refresh,
   } = useBackendInvestigation({
     investigationId,

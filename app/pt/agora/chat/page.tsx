@@ -155,7 +155,7 @@ function ChatEmptyState({
 
 function ChatContent() {
   const searchParams = useSearchParams()
-  const { user, addXp, startSession, endSession, currentSession, mode } = useAgora()
+  const { user, addXp, startSession, endSession, currentSession } = useAgora()
 
   // Chat store
   const {

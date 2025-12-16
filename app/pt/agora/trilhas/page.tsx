@@ -28,14 +28,11 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Circle,
   Clock,
   Trophy,
-  Sparkles,
   GraduationCap,
   BookOpen,
   Video,
-  MessageSquare,
   Star,
   ChevronDown,
   ChevronUp,
@@ -61,18 +58,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 // Helper to get icon component from string
 function getTrackIcon(iconName: string): LucideIcon {
   return ICON_MAP[iconName] || GraduationCap
-}
-
-const MODULE_ICONS = {
-  video: Video,
-  reading: BookOpen,
-  chat: MessageSquare,
-  project: Target,
-}
-
-function ModuleIcon({ type }: { type: string }) {
-  const Icon = MODULE_ICONS[type as keyof typeof MODULE_ICONS] || Circle
-  return <Icon className="w-4 h-4" />
 }
 
 // Helper to get color classes from track color string
@@ -381,7 +366,7 @@ function TrackCard({
 export default function AgoraTrilhasPage() {
   const router = useRouter()
   const { user, isLoading: userLoading, isDemoMode } = useAgora()
-  const { tracks, isLoading: tracksLoading, error: tracksError, getTrack } = useAgoraTracks()
+  const { tracks, isLoading: tracksLoading, error: tracksError } = useAgoraTracks()
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
 
   // Use tracks directly from database

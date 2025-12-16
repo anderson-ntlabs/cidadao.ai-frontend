@@ -39,7 +39,7 @@ function AcademyDashboardContent() {
 
   const { user, isAuthenticated, isLoading, badges, xpTransactions, logout, refreshUser } =
     useAgora()
-  const { mode, isLoading: isModeLoading, setMode } = useAgoraMode()
+  const { mode, isLoading: isModeLoading } = useAgoraMode()
 
   // Handle OAuth completion - force session refresh
   useEffect(() => {

@@ -5,16 +5,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import {
-  TrendingUp,
   AlertTriangle,
   FileSearch,
-  BarChart3,
   Shield,
   Activity,
   Users,
   Eye,
   DollarSign,
-  Clock,
   ChevronRight,
   ArrowUpRight,
   ArrowDownRight,
@@ -23,7 +20,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import { StatCard, StatsGrid } from '@/components/stats'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { format } from 'date-fns'
@@ -151,34 +147,14 @@ const recentInvestigations = [
   },
 ]
 
-// Atividades dos agentes mock
-const agentActivity = [
-  {
-    agent: 'Zumbi dos Palmares',
-    action: 'Detectou anomalia em licitação',
-    time: new Date('2024-01-20T14:30:00'),
-    type: 'anomaly',
-  },
-  {
-    agent: 'Anita Garibaldi',
-    action: 'Analisou padrões de contratos',
-    time: new Date('2024-01-20T13:45:00'),
-    type: 'analysis',
-  },
-  {
-    agent: 'Tiradentes',
-    action: 'Gerou relatório de investigação',
-    time: new Date('2024-01-20T12:15:00'),
-    type: 'report',
-  },
-]
-
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d')
   const [activities, setActivities] = useState<UserActivity[]>([])
   const [isLoadingActivities, setIsLoadingActivities] = useState(true)
+  // Stats are loaded but UI uses statsCards mock data for now
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [stats, setStats] = useState({
     total_sessions: 0,
     total_messages: 0,

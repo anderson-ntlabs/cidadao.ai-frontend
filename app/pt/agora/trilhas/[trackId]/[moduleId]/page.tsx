@@ -32,7 +32,6 @@ import {
 } from '@/data/tracks-content'
 import {
   ArrowLeft,
-  ArrowRight,
   Play,
   CheckCircle2,
   BookOpen,
@@ -54,8 +53,8 @@ type InteractionMode = 'idle' | 'diary' | 'chat'
 export default function LearningModulePage() {
   const params = useParams()
   const router = useRouter()
-  const { user, isDemoMode } = useAgora()
-  const { isLoading: tracksLoading, getTrack, getModule } = useAgoraTracks()
+  const { isDemoMode } = useAgora()
+  const { getTrack, getModule } = useAgoraTracks()
 
   const trackId = params.trackId as string
   const moduleNumber = parseInt(params.moduleId as string, 10)

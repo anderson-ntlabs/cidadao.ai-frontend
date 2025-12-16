@@ -26,7 +26,6 @@ import {
   ArrowRight,
   Loader2,
   CheckCircle,
-  AlertTriangle,
   User,
   Shield,
   KeyRound,
@@ -55,7 +54,6 @@ export default function KidsEntryPage() {
   const [selectedAvatar, setSelectedAvatar] = useState<string>('monica')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [contractId, setContractId] = useState<string | null>(null)
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
 
   // Kids avatar options - Brazilian characters from /public/kids
@@ -136,7 +134,6 @@ export default function KidsEntryPage() {
   }
 
   const handleContractAccept = async (acceptedContractId: string) => {
-    setContractId(acceptedContractId)
     setIsLoading(true)
     setError(null)
 

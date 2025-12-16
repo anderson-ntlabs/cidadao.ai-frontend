@@ -6,14 +6,12 @@ import { useChatPage } from '@/hooks/use-chat-page'
 import { OptimizedImage } from '@/components/ui/optimized-image'
 import { Button } from '@/components/ui/button'
 import { History, Plus } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { ErrorBanner } from '@/components/ui/error-banner'
 import { toast } from '@/hooks/use-toast'
 import { logger } from '@/lib/utils/logger'
 
 // Import core chat components
-import { MessageBubble } from '@/components/chat/message-bubble'
 import { ChatEmptyState } from '@/components/chat/empty-state'
 import { AgentSelector } from '@/components/chat/agent-selector'
 import { ChatMessages } from '@/components/chat/chat-messages'
@@ -26,15 +24,6 @@ const ChatHistorySidebar = dynamic(
       default: mod.ChatHistorySidebar,
     })),
   { loading: () => null, ssr: false }
-)
-
-const AgentAvatar = dynamic(
-  () => import('@/components/chat/agent-avatar').then((mod) => ({ default: mod.AgentAvatar })),
-  {
-    loading: () => (
-      <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-    ),
-  }
 )
 
 const MaritacaModelSelector = dynamic(

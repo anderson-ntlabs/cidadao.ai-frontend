@@ -112,7 +112,7 @@ function AcademyAgendaContent() {
   const isDemoParam = searchParams.get('demo') === 'true'
 
   // Unified Agora hook
-  const { user, isAuthenticated, isLoading, logout, addXp } = useAgora()
+  const { user, isAuthenticated, isLoading, addXp } = useAgora()
 
   // State
   const [events, setEvents] = useState<AcademyEvent[]>([])

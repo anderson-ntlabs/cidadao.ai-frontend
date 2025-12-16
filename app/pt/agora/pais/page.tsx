@@ -35,7 +35,7 @@ export default function ParentalAccessPage() {
   const router = useRouter()
 
   const [step, setStep] = useState<Step>('request')
-  const [email, setEmail] = useState('')
+  const [email] = useState('')
   const [maskedEmail, setMaskedEmail] = useState('')
   const [code, setCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)

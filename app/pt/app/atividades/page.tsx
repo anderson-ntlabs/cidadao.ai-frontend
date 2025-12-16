@@ -2,19 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { Activity, Filter, Calendar, Search, Download, RefreshCw } from 'lucide-react'
-import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
+import { Activity, Search, Download, RefreshCw } from 'lucide-react'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
-import {
-  userProfileService,
-  type UserActivity,
-  type ActivityFilters,
-} from '@/lib/services/user-profile.service'
+import { userProfileService, type UserActivity } from '@/lib/services/user-profile.service'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { format, subDays } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 
 // Lazy load the heavy ActivityTimeline component
 const ActivityTimeline = dynamic(
@@ -63,7 +58,6 @@ export default function AtividadesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedType, setSelectedType] = useState<UserActivity['type'] | 'all'>('all')
   const [selectedTimeRange, setSelectedTimeRange] = useState('30d')
-  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     if (user) {

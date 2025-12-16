@@ -15,9 +15,8 @@ import {
   Mic,
   Trash2,
   Download,
-  FileSearch,
 } from 'lucide-react'
-import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { userProfileService, type UserPreferences } from '@/lib/services/user-profile.service'

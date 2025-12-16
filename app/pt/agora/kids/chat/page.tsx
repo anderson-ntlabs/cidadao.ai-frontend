@@ -102,7 +102,7 @@ function KidsChatContent() {
   const sessionIdRef = useRef<string>(crypto.randomUUID())
 
   // Chat persistence - saves conversations to database for reports
-  const { saveUserMessage, saveAssistantMessage, initSession } = useChatPersistence({
+  const { saveUserMessage, saveAssistantMessage } = useChatPersistence({
     isKidsMode: true,
     agentId,
     agentName: agent?.name || 'Mentor',

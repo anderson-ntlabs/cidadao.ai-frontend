@@ -35,7 +35,6 @@ import {
   User,
   Bot,
   Trash2,
-  FileSearch,
   Download,
 } from 'lucide-react'
 import Link from 'next/link'

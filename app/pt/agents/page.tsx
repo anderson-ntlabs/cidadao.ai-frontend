@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { getWikipediaLink } from '@/lib/wikipedia-links'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button } from '@/components/ui'
 
 export default function AgentsPage(): JSX.Element {
   return (
