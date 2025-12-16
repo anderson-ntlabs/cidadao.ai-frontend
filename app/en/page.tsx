@@ -17,7 +17,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ContentCard, ExternalLinkCard, LandingModal, FAQSectionEN } from '@/components/landing'
 import { ResearchNotesCard } from '@/components/landing/research-notes-card'
-import { useAuth } from '@/hooks/use-supabase-auth'
+import { createClient } from '@/lib/supabase/client'
 import { agents } from '@/data/agents'
 
 // Lazy load heavy components for better performance
@@ -33,26 +33,34 @@ const ProjectTimeline = dynamic(
 
 export default function ENPage(): JSX.Element {
   const router = useRouter()
-  const { isAuthenticated, isLoading } = useAuth()
+  const supabase = createClient()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Modal states
   const [aboutModalOpen, setAboutModalOpen] = useState(false)
   const [agentsModalOpen, setAgentsModalOpen] = useState(false)
   const [manifestoModalOpen, setManifestoModalOpen] = useState(false)
 
-  // Redirect authenticated users directly to app
+  // Check auth status without AuthProvider (performance optimization)
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      router.replace('/en/app')
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setIsAuthenticated(!!user)
+      if (user) {
+        router.replace('/en/app')
+      }
     }
-  }, [isAuthenticated, isLoading, router])
+    void checkAuth()
+  }, [supabase, router])
 
   const handleAccessSystem = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isAuthenticated) {
       router.push('/en/app')
     } else {
-      router.push('/en/login')
+      router.push('/pt/login')
     }
   }
 
