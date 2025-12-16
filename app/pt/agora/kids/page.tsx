@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useKids } from '@/hooks/use-kids'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,7 +33,22 @@ import {
   Mail,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { KidsContractModal } from '@/components/kids'
+
+// Lazy load heavy components only when needed
+const KidsContractModal = dynamic(
+  () => import('@/components/kids/kids-contract-modal').then((mod) => mod.KidsContractModal),
+  {
+    loading: () => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-kids-coral" />
+          <p className="text-lg font-medium">Carregando contrato...</p>
+        </div>
+      </div>
+    ),
+    ssr: false,
+  }
+)
 
 type Step = 'choice' | 'setup' | 'contract' | 'success' | 'child-access'
 

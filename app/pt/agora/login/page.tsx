@@ -7,13 +7,30 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamicImport from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { GovBrMockLogin, type GovBrUserData } from '@/components/auth'
+import type { GovBrUserData } from '@/components/auth'
 import { cn } from '@/lib/utils'
 import { Github, GraduationCap, Sparkles, Loader2, Shield } from 'lucide-react'
+
+// Lazy load GovBr modal only when needed
+const GovBrMockLogin = dynamicImport(
+  () => import('@/components/auth/govbr-mock-login').then((mod) => mod.GovBrMockLogin),
+  {
+    loading: () => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-[#1351B4]" />
+          <p className="text-lg font-medium">Carregando...</p>
+        </div>
+      </div>
+    ),
+    ssr: false,
+  }
+)
 
 // Google icon SVG component (official colors)
 function GoogleIcon({ className }: { className?: string }) {
@@ -213,7 +230,7 @@ export default function AgoraLoginPage() {
             )}
             onLoad={() => setImageLoaded(true)}
             priority
-            unoptimized
+            quality={60}
           />
         </div>
       )}
