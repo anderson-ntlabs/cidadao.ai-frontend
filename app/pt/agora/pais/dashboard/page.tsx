@@ -96,8 +96,8 @@ export default function ParentalDashboardPage() {
     try {
       const parsed = JSON.parse(stored) as ParentalAccess
       setAccess(parsed)
-      loadStats(parsed.kidsProfileId)
-      loadChatHistory(parsed.kidsProfileId)
+      void loadStats(parsed.kidsProfileId)
+      void loadChatHistory(parsed.kidsProfileId)
     } catch {
       router.push('/pt/agora/pais')
     }
@@ -169,8 +169,8 @@ export default function ParentalDashboardPage() {
 
   const handleRefresh = () => {
     if (access) {
-      loadStats(access.kidsProfileId)
-      loadChatHistory(access.kidsProfileId)
+      void loadStats(access.kidsProfileId)
+      void loadChatHistory(access.kidsProfileId)
     }
   }
 

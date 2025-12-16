@@ -111,7 +111,7 @@ export default function AcademyRankingPage() {
 
   // Load on mount and when filter changes
   useEffect(() => {
-    loadLeaderboard()
+    void loadLeaderboard()
   }, [loadLeaderboard])
 
   // Refresh handler

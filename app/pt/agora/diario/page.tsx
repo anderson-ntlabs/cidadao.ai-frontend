@@ -152,7 +152,7 @@ function AcademyAgendaContent() {
       ])
       setCalendarPlugins([dayGrid.default, timeGrid.default, interaction.default, list.default])
     }
-    loadPlugins()
+    void loadPlugins()
   }, [])
 
   // Load events from Supabase (real auth) or localStorage (demo)
@@ -226,7 +226,7 @@ function AcademyAgendaContent() {
       }
     }
 
-    loadEvents()
+    void loadEvents()
   }, [isAuthenticated])
 
   // Save events to localStorage (and Supabase will be synced separately)
@@ -390,7 +390,7 @@ function AcademyAgendaContent() {
       })
 
       if (event.xpReward) {
-        addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
+        void addXp(event.xpReward, 'agenda', `Completou: ${event.title}`)
       }
     }
 

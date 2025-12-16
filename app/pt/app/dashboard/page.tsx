@@ -164,7 +164,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      loadDashboardData()
+      void loadDashboardData()
     }
   }, [user])
 

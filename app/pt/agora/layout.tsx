@@ -112,9 +112,9 @@ function useSessionCleanup() {
   useEffect(() => {
     if (isAuthenticated && user?.id) {
       // Initialize auth session in the service
-      navigationSessionService.initAuthSession(user.id)
+      void navigationSessionService.initAuthSession(user.id)
       // Enter Agora mode
-      navigationSessionService.enterAgora()
+      void navigationSessionService.enterAgora()
     }
   }, [isAuthenticated, user?.id])
 
@@ -166,7 +166,7 @@ function AgoraHeaderWrapper() {
 
     // If in kids mode, exit it
     if (isKidsMode) {
-      disableKidsMode()
+      void disableKidsMode()
     }
 
     // Clear mode and go to selection
@@ -189,13 +189,13 @@ function AgoraHeaderWrapper() {
 
     // If in kids mode, redirect to selection
     if (isOnKidsPage && isKidsMode) {
-      disableKidsMode()
+      void disableKidsMode()
       router.push('/pt/agora/selecao')
       return
     }
 
     // Full logout - redirect immediately, cleanup happens via beacon
-    logout()
+    void logout()
     router.push('/pt/agora/login')
   }
 

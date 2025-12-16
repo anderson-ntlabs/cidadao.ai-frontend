@@ -101,7 +101,7 @@ export default function AgoraLoginPage() {
       setIsAuthenticated(!!user)
       setIsLoading(false)
     }
-    checkAuth()
+    void checkAuth()
 
     // Listen for auth changes
     const {

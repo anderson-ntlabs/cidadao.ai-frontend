@@ -48,10 +48,10 @@ function AcademyDashboardContent() {
       setIsRefreshing(true)
       // Force refresh after OAuth redirect to ensure session is synced
       const supabase = createClient()
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      void supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
           // Session exists, refresh user data
-          refreshUser?.()
+          void refreshUser?.()
         }
         // Clean URL by removing oauth_complete param
         const url = new URL(window.location.href)

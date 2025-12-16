@@ -142,7 +142,7 @@ function ConfiguracoesContent() {
   // Load preferences when user is authenticated
   useEffect(() => {
     if (user && isAuthenticated) {
-      loadPreferences()
+      void loadPreferences()
     }
   }, [user, isAuthenticated])
 

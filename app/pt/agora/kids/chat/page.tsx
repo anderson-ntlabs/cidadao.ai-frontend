@@ -311,13 +311,13 @@ function KidsChatContent() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      void handleSend()
     }
   }
 
   // Handle clicking on a conversation starter
   const handleStarterClick = (text: string) => {
-    handleSend(text)
+    void handleSend(text)
   }
 
   const handleAgentChange = (newAgentId: string) => {

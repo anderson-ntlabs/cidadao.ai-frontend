@@ -89,7 +89,7 @@ function AtividadesContent() {
   // Load activities
   useEffect(() => {
     if (user) {
-      loadActivities()
+      void loadActivities()
     }
   }, [user])
 
@@ -165,7 +165,7 @@ function AtividadesContent() {
   }
 
   const handleRefresh = () => {
-    loadActivities()
+    void loadActivities()
   }
 
   if (isLoading) {

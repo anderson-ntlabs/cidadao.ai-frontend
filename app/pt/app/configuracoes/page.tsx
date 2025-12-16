@@ -129,7 +129,7 @@ export default function ConfiguracoesPage() {
 
   useEffect(() => {
     if (user) {
-      loadPreferences()
+      void loadPreferences()
     }
   }, [user])
 

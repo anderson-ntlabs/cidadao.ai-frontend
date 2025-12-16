@@ -315,7 +315,7 @@ export default function AcademyVideosPage() {
         }
       }
     }
-    loadProgress()
+    void loadProgress()
   }, [user])
 
   // Handle modal close events
@@ -361,12 +361,12 @@ export default function AcademyVideosPage() {
         useCelebrationStore.getState().celebrateVideo(video.title, result.xpAwarded || xpAmount)
       } else {
         // Fallback to demo mode XP if server action fails
-        addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
+        void addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
         useCelebrationStore.getState().celebrateVideo(video.title, xpAmount)
       }
     } else {
       // Demo mode: use local XP
-      addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
+      void addXp(xpAmount, 'video', `Video assistido: ${video.title}`)
       useCelebrationStore.getState().celebrateVideo(video.title, xpAmount)
     }
 
@@ -618,7 +618,7 @@ export default function AcademyVideosPage() {
                   {!progress[selectedVideo.id]?.status ? (
                     <Button
                       onClick={() => {
-                        markAsWatched(selectedVideo)
+                        void markAsWatched(selectedVideo)
                         setIsModalOpen(false)
                         setSelectedVideo(null)
                       }}

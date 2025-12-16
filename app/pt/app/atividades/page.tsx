@@ -61,7 +61,7 @@ export default function AtividadesPage() {
 
   useEffect(() => {
     if (user) {
-      loadActivities()
+      void loadActivities()
     }
   }, [user])
 
@@ -137,7 +137,7 @@ export default function AtividadesPage() {
   }
 
   const handleRefresh = () => {
-    loadActivities()
+    void loadActivities()
   }
 
   if (!user) {

@@ -224,7 +224,7 @@ export default function AcademyReadingsPage() {
         }
       }
     }
-    loadProgress()
+    void loadProgress()
   }, [user])
 
   const saveProgress = (newProgress: Record<string, ReadingProgress>) => {
@@ -255,12 +255,12 @@ export default function AcademyReadingsPage() {
         toast.success('Leitura confirmada!', `+${result.xpAwarded || xpAmount} XP`)
       } else {
         // Fallback to demo mode XP if server action fails
-        addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
+        void addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
         toast.success('Leitura confirmada!', `+${xpAmount} XP`)
       }
     } else {
       // Demo mode: use local XP
-      addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
+      void addXp(xpAmount, 'article', `Leitura concluída: ${reading.title}`)
       toast.success('Leitura confirmada!', `+${xpAmount} XP`)
     }
 

@@ -185,7 +185,7 @@ function ChatContent() {
   useEffect(() => {
     initializeChat()
     setXpCallback((amount, type, description) => {
-      addXp(amount, type, description)
+      void addXp(amount, type, description)
     })
   }, [initializeChat, setXpCallback, addXp])
 
@@ -200,7 +200,7 @@ function ChatContent() {
   // Start session on mount
   useEffect(() => {
     if (!currentSession) {
-      startSession()
+      void startSession()
     }
   }, [currentSession, startSession])
 
@@ -230,7 +230,7 @@ function ChatContent() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      void handleSend()
     }
   }
 
@@ -248,7 +248,7 @@ function ChatContent() {
       const sessionDuration = Math.floor(
         (Date.now() - new Date(currentSession.startedAt).getTime()) / 60000
       )
-      endSession(messages.length, [selectedAgentId])
+      void endSession(messages.length, [selectedAgentId])
       trackStudySession({
         duration: sessionDuration,
         activities: ['chat', selectedAgentId],
@@ -256,7 +256,7 @@ function ChatContent() {
       })
     }
     clearChat()
-    startSession()
+    void startSession()
   }
 
   // Handle agent change
