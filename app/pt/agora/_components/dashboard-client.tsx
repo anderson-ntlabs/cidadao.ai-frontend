@@ -4,17 +4,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { useAgoraBackground } from '@/hooks/use-agora-background'
 import { Button } from '@/components/ui/button'
 import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
-import {
-  CertificateModal,
-  LgpdConsentModal,
-  BackgroundSelector,
-  TimelineCard,
-  TimelineModal,
-  GamificationCard,
-} from '@/components/agora'
+import { BackgroundSelector, TimelineCard, GamificationCard } from '@/components/agora'
 import { ErrorBoundary } from '@/components/error-boundary'
 import {
   Trophy,
@@ -33,9 +27,24 @@ import {
   ArrowUpRight,
   Users,
   TrendingUp,
+  Loader2,
 } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { toast } from '@/hooks/use-toast'
+
+// Lazy load heavy modals (CertificateModal uses jsPDF ~500KB)
+const CertificateModal = dynamic(
+  () => import('@/components/agora/certificate-modal').then((mod) => mod.CertificateModal),
+  { ssr: false }
+)
+const LgpdConsentModal = dynamic(
+  () => import('@/components/agora/lgpd-consent-modal').then((mod) => mod.LgpdConsentModal),
+  { ssr: false }
+)
+const TimelineModal = dynamic(
+  () => import('@/components/agora/timeline-modal').then((mod) => mod.TimelineModal),
+  { ssr: false }
+)
 
 /**
  * Academy Dashboard Client Component
