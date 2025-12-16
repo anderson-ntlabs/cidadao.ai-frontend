@@ -41,6 +41,7 @@ import {
   NavigationCardSkeleton,
   ActivityFeedSkeleton,
 } from '@/components/dashboard'
+import { AppTour, dashboardTourSteps } from '@/components/onboarding'
 
 interface QuickStat {
   label: string
@@ -94,6 +95,7 @@ export default function HomePage() {
         stats: '17 agentes disponíveis',
         badge: null,
         active: true,
+        tourId: 'nav-chat',
       },
       {
         title: 'Dashboard',
@@ -104,6 +106,7 @@ export default function HomePage() {
         stats: 'Análises e métricas',
         badge: null,
         active: true,
+        tourId: 'nav-dashboard',
       },
       {
         title: 'Notificações',
@@ -114,6 +117,7 @@ export default function HomePage() {
         stats: unreadCount > 0 ? `${unreadCount} não lidas` : 'Tudo em dia',
         badge: unreadCount > 0 ? String(unreadCount) : null,
         active: true,
+        tourId: 'nav-notifications',
       },
       {
         title: 'Investigações',
@@ -124,6 +128,7 @@ export default function HomePage() {
         stats: 'Histórico completo',
         badge: null,
         active: true,
+        tourId: 'nav-investigations',
       },
     ],
     [unreadCount]
@@ -178,7 +183,7 @@ export default function HomePage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
+        <div className="mb-8" data-tour="welcome">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Olá, {user?.name?.split(' ')[0] || 'Cidadão'} 👋
           </h1>
@@ -191,7 +196,10 @@ export default function HomePage() {
         {isLoading ? (
           <QuickStatsSkeleton count={4} />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+            data-tour="quick-stats"
+          >
             {quickStats.map((stat, index) => (
               <GlassCard key={index} className="p-6">
                 <div className="flex items-center justify-between mb-2">
@@ -228,7 +236,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {navigationCards.map((card, index) => {
               return card.active ? (
-                <Link key={index} href={card.href}>
+                <Link key={index} href={card.href} data-tour={card.tourId}>
                   <GlassCard
                     className={cn(
                       'h-full transition-all duration-300',
@@ -352,7 +360,7 @@ export default function HomePage() {
         {isLoading ? (
           <ActivityFeedSkeleton items={4} />
         ) : (
-          <GlassCard className="mb-8">
+          <GlassCard className="mb-8" data-tour="activity">
             <GlassCardHeader>
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -424,7 +432,10 @@ export default function HomePage() {
         )}
 
         {/* Quick Actions */}
-        <GlassCard className="bg-gradient-to-r from-green-600/10 to-blue-600/10">
+        <GlassCard
+          className="bg-gradient-to-r from-green-600/10 to-blue-600/10"
+          data-tour="quick-actions"
+        >
           <GlassCardContent className="p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Ações Rápidas</h3>
             <div className="flex flex-wrap gap-3">
@@ -453,6 +464,15 @@ export default function HomePage() {
           </GlassCardContent>
         </GlassCard>
       </div>
+
+      {/* Onboarding Tour */}
+      <AppTour
+        steps={dashboardTourSteps}
+        tourId="dashboard-home"
+        onComplete={() => {
+          toast.success('Tour concluído!', 'Você já pode explorar o sistema.')
+        }}
+      />
     </div>
   )
 }
