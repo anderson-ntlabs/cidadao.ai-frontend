@@ -5,30 +5,22 @@ import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search,
-  Filter,
   TrendingUp,
   AlertTriangle,
   FileSearch,
-  Calendar,
-  ChevronRight,
   Download,
   Eye,
   Clock,
-  BarChart3,
   Shield,
-  Zap,
   Target,
   Activity,
-  Users,
   CheckCircle,
   XCircle,
-  AlertCircle,
   RefreshCw,
-  Loader2,
   Plus,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { GlassCard, GlassCardHeader, GlassCardContent } from '@/components/ui/glass-card'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -104,7 +96,6 @@ export default function InvestigacoesPage() {
   const {
     investigations: backendInvestigations,
     isLoading,
-    error: backendError,
     refreshInvestigations,
   } = useBackendInvestigations({ autoRefresh: true, refreshInterval: 5000 })
 
@@ -116,15 +107,6 @@ export default function InvestigacoesPage() {
   const handleSearchChange = (value: string) => {
     const sanitized = sanitizeSearchQuery(value)
     setSearchTerm(sanitized)
-  }
-
-  // Validate filter values to prevent manipulation
-  const isValidType = (type: string): boolean => {
-    return type === 'all' || ['anomaly', 'pattern', 'fraud', 'overpricing'].includes(type)
-  }
-
-  const isValidStatus = (status: string): boolean => {
-    return status === 'all' || ['active', 'completed', 'pending', 'critical'].includes(status)
   }
 
   // Filtrar investigações (works with both backend and mock data)
