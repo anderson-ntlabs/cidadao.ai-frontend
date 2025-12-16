@@ -2,6 +2,13 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import type {
+  AgoraProfile,
+  AgoraVideoProgress,
+  AgoraReadingProgress,
+  AgoraXpTransaction,
+  AgoraSession,
+} from '@/types/supabase'
 
 /**
  * Academy Server Actions
@@ -12,6 +19,99 @@ import { createClient } from '@/lib/supabase/server'
  * Author: Anderson Henrique da Silva
  * Created: 2025-12-06
  */
+
+// Type for user metadata from Supabase auth
+interface UserMetadata {
+  full_name?: string
+  name?: string
+  avatar_url?: string
+  user_name?: string
+}
+
+// Partial types for specific queries
+type ProfileXpQuery = Pick<AgoraProfile, 'total_xp' | 'current_level'>
+type ProfileSessionQuery = Pick<
+  AgoraProfile,
+  'total_time_minutes' | 'total_sessions' | 'current_streak' | 'last_activity_date'
+>
+type ProfileBadgesQuery = Pick<AgoraProfile, 'badges'>
+type ProfileDatesQuery = Pick<AgoraProfile, 'program_start_date'> & { enrolled_at?: string }
+type ProfileTelemetryQuery = Pick<
+  AgoraProfile,
+  'total_xp' | 'total_time_minutes' | 'current_streak'
+>
+
+// Video progress query types
+type VideoProgressExistingQuery = Pick<AgoraVideoProgress, 'id' | 'status'> & {
+  xp_awarded?: number
+}
+type VideoProgressTelemetryQuery = Pick<AgoraVideoProgress, 'status' | 'watched_seconds'> & {
+  total_seconds?: number
+}
+
+// Reading progress query types
+type ReadingProgressExistingQuery = Pick<AgoraReadingProgress, 'id' | 'status'>
+type ReadingProgressTelemetryQuery = Pick<AgoraReadingProgress, 'status'>
+
+// Session query types
+type SessionDailyQuery = Pick<AgoraSession, 'started_at' | 'duration_minutes'> & {
+  xp_earned?: number
+}
+
+// Certificate types
+interface AgoraCertificate {
+  id: string
+  user_id: string
+  certificate_number: string
+  certificate_type: 'completion' | 'distinction' | 'excellence'
+  program_start_date: string
+  program_end_date: string
+  total_hours: number
+  total_xp: number
+  final_rank: string
+  final_level: number
+  missions_completed: number
+  articles_read: number
+  conversations_count: number
+  verification_hash: string
+  verification_url: string
+  issued_at: string
+}
+
+// Calendar event types from database
+interface AgoraCalendarEventDB {
+  id: string
+  user_id: string
+  title: string
+  start_time: string
+  end_time?: string
+  event_type: 'study' | 'reading' | 'video' | 'chat' | 'deadline'
+  description?: string
+  xp_reward?: number
+  completed: boolean
+  completed_at?: string
+  url?: string
+  created_at: string
+}
+
+// Challenge progress from database
+interface AgoraChallengeProgressDB {
+  id: string
+  user_id: string
+  challenge_id: string
+  challenge_type: 'daily' | 'weekly'
+  current_progress: number
+  target_value: number
+  is_completed: boolean
+  completed_at: string | null
+  xp_reward: number
+  xp_claimed: boolean
+  xp_claimed_at?: string
+  period_start: string
+  period_end: string
+  created_at: string
+  updated_at: string
+}
 
 // ============================================
 // XP & Progress Actions
@@ -34,9 +134,9 @@ export async function addXp(amount: number, description: string, sourceType?: st
       .from('agora_profiles')
       .select('total_xp, current_level')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileXpQuery>()
 
-    const currentXp = profile?.total_xp || 0
+    const currentXp = profile?.total_xp ?? 0
     const newXp = currentXp + amount
 
     // Calculate new level (100 XP per level)
@@ -85,11 +185,11 @@ export async function recordSession(durationMinutes: number) {
       .from('agora_profiles')
       .select('total_time_minutes, total_sessions, current_streak, last_activity_date')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileSessionQuery>()
 
     const today = new Date().toISOString().split('T')[0]
-    const lastSession = profile?.last_activity_date
-    let newStreak = profile?.current_streak || 0
+    const lastSession = profile?.last_activity_date ?? null
+    let newStreak = profile?.current_streak ?? 0
 
     // Calculate streak
     if (lastSession) {
@@ -113,8 +213,8 @@ export async function recordSession(durationMinutes: number) {
     await supabase
       .from('agora_profiles')
       .update({
-        total_time_minutes: (profile?.total_time_minutes || 0) + durationMinutes,
-        total_sessions: (profile?.total_sessions || 0) + 1,
+        total_time_minutes: (profile?.total_time_minutes ?? 0) + durationMinutes,
+        total_sessions: (profile?.total_sessions ?? 0) + 1,
         current_streak: newStreak,
         last_activity_date: today,
         updated_at: new Date().toISOString(),
@@ -150,7 +250,7 @@ export async function acceptLgpdConsent() {
       .from('agora_consent')
       .select('id')
       .eq('user_id', user.id)
-      .single()
+      .single<{ id: string }>()
 
     if (existing) {
       return { success: true, alreadyAccepted: true }
@@ -166,13 +266,14 @@ export async function acceptLgpdConsent() {
     })
 
     // Create profile if not exists
+    const metadata = (user.user_metadata ?? {}) as UserMetadata
     await supabase.from('agora_profiles').upsert(
       {
         user_id: user.id,
         email: user.email,
-        full_name: user.user_metadata?.full_name || user.user_metadata?.name || 'Estudante',
-        avatar_url: user.user_metadata?.avatar_url,
-        github_username: user.user_metadata?.user_name,
+        full_name: metadata.full_name ?? metadata.name ?? 'Estudante',
+        avatar_url: metadata.avatar_url,
+        github_username: metadata.user_name,
         main_track: 'backend',
         program_start_date: new Date().toISOString().split('T')[0],
       },
@@ -213,9 +314,9 @@ export async function awardBadge(badgeId: string, badgeName: string) {
       .from('agora_profiles')
       .select('badges')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileBadgesQuery>()
 
-    const currentBadges: string[] = profile?.badges || []
+    const currentBadges: string[] = profile?.badges ?? []
 
     // Check if already has badge
     if (currentBadges.includes(badgeId)) {
@@ -274,7 +375,7 @@ export async function updateVideoProgress(
       .select('id, status, xp_awarded')
       .eq('user_id', user.id)
       .eq('video_id', videoId)
-      .single()
+      .single<VideoProgressExistingQuery>()
 
     const alreadyCompleted = existing?.status === 'completed'
 
@@ -288,7 +389,7 @@ export async function updateVideoProgress(
         progress_percentage: progressPercentage,
         status,
         completed_at: completed ? new Date().toISOString() : null,
-        xp_awarded: completed && !alreadyCompleted ? 25 : existing?.xp_awarded || 0,
+        xp_awarded: completed && !alreadyCompleted ? 25 : (existing?.xp_awarded ?? 0),
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,video_id' }
@@ -315,11 +416,11 @@ export async function updateVideoProgress(
             .from('agora_profiles')
             .select('total_videos_completed')
             .eq('user_id', user.id)
-            .single()
+            .single<{ total_videos_completed?: number }>()
           await supabase
             .from('agora_profiles')
             .update({
-              total_videos_completed: (profile?.total_videos_completed || 0) + 1,
+              total_videos_completed: (profile?.total_videos_completed ?? 0) + 1,
             })
             .eq('user_id', user.id)
         }
@@ -350,24 +451,23 @@ export async function getVideoProgress() {
   try {
     const { data, error } = await supabase
       .from('agora_video_progress')
-      .select('*')
+      .select('video_id, watched_seconds, progress_percentage, status, completed_at')
       .eq('user_id', user.id)
 
     if (error) throw error
 
     // Convert to lookup object
-    const progressMap: Record<
-      string,
-      {
-        video_id: string
-        watched_seconds: number
-        progress_percentage: number
-        status: string
-        completed_at: string | null
-      }
-    > = {}
+    type VideoProgressMapEntry = {
+      video_id: string
+      watched_seconds: number
+      progress_percentage: number
+      status: string
+      completed_at: string | null
+    }
+    const progressMap: Record<string, VideoProgressMapEntry> = {}
 
-    data?.forEach((p) => {
+    const typedData = (data ?? []) as VideoProgressMapEntry[]
+    typedData.forEach((p) => {
       progressMap[p.video_id] = p
     })
 
@@ -407,7 +507,7 @@ export async function updateReadingProgress(
       .select('id, status')
       .eq('user_id', user.id)
       .eq('reading_id', readingId)
-      .single()
+      .single<ReadingProgressExistingQuery>()
 
     const alreadyCompleted = existing?.status === 'completed'
 
@@ -459,24 +559,23 @@ export async function getReadingProgress() {
   try {
     const { data, error } = await supabase
       .from('agora_reading_progress')
-      .select('*')
+      .select('reading_id, status, completed_at, notes, rating')
       .eq('user_id', user.id)
 
     if (error) throw error
 
     // Convert to lookup object
-    const progressMap: Record<
-      string,
-      {
-        reading_id: string
-        status: string
-        completed_at: string | null
-        notes: string | null
-        rating: number | null
-      }
-    > = {}
+    type ReadingProgressMapEntry = {
+      reading_id: string
+      status: string
+      completed_at: string | null
+      notes: string | null
+      rating: number | null
+    }
+    const progressMap: Record<string, ReadingProgressMapEntry> = {}
 
-    data?.forEach((p) => {
+    const typedData = (data ?? []) as ReadingProgressMapEntry[]
+    typedData.forEach((p) => {
       progressMap[p.reading_id] = p
     })
 
@@ -520,12 +619,11 @@ export async function saveCertificate(certificateData: {
       .from('agora_profiles')
       .select('program_start_date, enrolled_at')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileDatesQuery>()
 
+    const enrolledDate = profile?.enrolled_at ? profile.enrolled_at.split('T')[0] : null
     const programStartDate =
-      profile?.program_start_date ||
-      profile?.enrolled_at?.split('T')[0] ||
-      new Date().toISOString().split('T')[0]
+      profile?.program_start_date ?? enrolledDate ?? new Date().toISOString().split('T')[0]
     const programEndDate = new Date().toISOString().split('T')[0]
 
     // Insert certificate (user's private copy - deleted with account)
@@ -548,7 +646,7 @@ export async function saveCertificate(certificateData: {
         verification_url: `https://cidadao.ai/pt/agora/verificar?code=${certificateData.certificateNumber}`,
       })
       .select()
-      .single()
+      .single<AgoraCertificate>()
 
     if (error) throw error
 
@@ -614,7 +712,7 @@ export async function getCertificates() {
 
     if (error) throw error
 
-    return { success: true, data }
+    return { success: true, data: data as AgoraCertificate[] }
   } catch (error) {
     console.error('Failed to get certificates:', error)
     return { error: 'Failed to get certificates', data: null }
@@ -643,9 +741,12 @@ export async function getTelemetryData() {
       .select('status, watched_seconds, total_seconds')
       .eq('user_id', user.id)
 
-    const videosCompleted = videoProgress?.filter((v) => v.status === 'completed').length || 0
-    const totalVideoWatchTime =
-      videoProgress?.reduce((sum, v) => sum + (v.watched_seconds || 0), 0) || 0
+    const typedVideoProgress = (videoProgress ?? []) as VideoProgressTelemetryQuery[]
+    const videosCompleted = typedVideoProgress.filter((v) => v.status === 'completed').length
+    const totalVideoWatchTime = typedVideoProgress.reduce(
+      (sum, v) => sum + (v.watched_seconds ?? 0),
+      0
+    )
 
     // Get reading progress
     const { data: readingProgress } = await supabase
@@ -653,7 +754,8 @@ export async function getTelemetryData() {
       .select('status')
       .eq('user_id', user.id)
 
-    const readingsCompleted = readingProgress?.filter((r) => r.status === 'completed').length || 0
+    const typedReadingProgress = (readingProgress ?? []) as ReadingProgressTelemetryQuery[]
+    const readingsCompleted = typedReadingProgress.filter((r) => r.status === 'completed').length
 
     // Get diary entries count
     const { count: diaryCount } = await supabase
@@ -674,14 +776,15 @@ export async function getTelemetryData() {
       .eq('user_id', user.id)
       .in('source_type', ['chat', 'agent_chat'])
 
-    const chatMessages = (chatXp?.length || 0) * 5
+    const typedChatXp = (chatXp ?? []) as Array<{ id: string }>
+    const chatMessages = typedChatXp.length * 5
 
     // Get profile data
     const { data: profile } = await supabase
       .from('agora_profiles')
       .select('total_xp, total_time_minutes, current_streak')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileTelemetryQuery>()
 
     return {
       success: true,
@@ -696,12 +799,12 @@ export async function getTelemetryData() {
         totalReadings: 8,
         requiredReadingsCompleted: readingsCompleted,
         totalRequiredReadings: 2,
-        totalXp: profile?.total_xp || 0,
-        totalTimeMinutes: profile?.total_time_minutes || 0,
-        totalSessions: sessionsCount || 0,
-        diaryEntries: diaryCount || 0,
+        totalXp: profile?.total_xp ?? 0,
+        totalTimeMinutes: profile?.total_time_minutes ?? 0,
+        totalSessions: sessionsCount ?? 0,
+        diaryEntries: diaryCount ?? 0,
         chatMessages,
-        currentStreak: profile?.current_streak || 0,
+        currentStreak: profile?.current_streak ?? 0,
       },
     }
   } catch (error) {
@@ -745,13 +848,14 @@ export async function getDailyActivityData() {
       { date: string; minutes: number; xp: number; sessions: number }
     > = {}
 
-    sessions?.forEach((session) => {
+    const typedSessions = (sessions ?? []) as SessionDailyQuery[]
+    typedSessions.forEach((session) => {
       const date = session.started_at.split('T')[0]
       if (!dailyData[date]) {
         dailyData[date] = { date, minutes: 0, xp: 0, sessions: 0 }
       }
-      dailyData[date].minutes += session.duration_minutes || 0
-      dailyData[date].xp += session.xp_earned || 0
+      dailyData[date].minutes += session.duration_minutes ?? 0
+      dailyData[date].xp += session.xp_earned ?? 0
       dailyData[date].sessions += 1
     })
 
@@ -786,18 +890,18 @@ export async function getAcademyUserData() {
       .from('agora_profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .single<AgoraProfile>()
 
     // Fetch consent
     const { data: consent } = await supabase
       .from('agora_consent')
       .select('id')
       .eq('user_id', user.id)
-      .single()
+      .single<{ id: string }>()
 
     // Badges are stored as JSONB array in profile
     // We'll return the array of badge IDs from the profile
-    const badges = profile?.badges || []
+    const badges: string[] = profile?.badges ?? []
 
     // Fetch recent XP transactions
     const { data: xpTransactions } = await supabase
@@ -807,27 +911,28 @@ export async function getAcademyUserData() {
       .order('created_at', { ascending: false })
       .limit(10)
 
-    const metadata = user.user_metadata || {}
+    const metadata = (user.user_metadata ?? {}) as UserMetadata
+    const typedXpTransactions = (xpTransactions ?? []) as AgoraXpTransaction[]
 
     return {
       id: user.id,
-      email: user.email || '',
-      name: profile?.full_name || metadata.full_name || metadata.name || 'Estudante',
+      email: user.email ?? '',
+      name: profile?.full_name ?? metadata.full_name ?? metadata.name ?? 'Estudante',
       avatar:
-        profile?.avatar_url ||
-        metadata.avatar_url ||
+        profile?.avatar_url ??
+        metadata.avatar_url ??
         `https://ui-avatars.com/api/?name=Estudante&background=f59e0b&color=fff`,
-      githubUsername: profile?.github_username || metadata.user_name,
-      totalXp: profile?.total_xp || 0,
-      currentLevel: profile?.current_level || 1,
-      currentRank: profile?.current_rank || 'novato',
-      currentStreak: profile?.current_streak || 0,
-      longestStreak: profile?.longest_streak || 0,
-      totalTimeMinutes: profile?.total_time_minutes || 0,
-      totalSessions: profile?.total_sessions || 0,
+      githubUsername: profile?.github_username ?? metadata.user_name,
+      totalXp: profile?.total_xp ?? 0,
+      currentLevel: profile?.current_level ?? 1,
+      currentRank: profile?.current_rank ?? 'novato',
+      currentStreak: profile?.current_streak ?? 0,
+      longestStreak: profile?.longest_streak ?? 0,
+      totalTimeMinutes: profile?.total_time_minutes ?? 0,
+      totalSessions: profile?.total_sessions ?? 0,
       hasAcceptedLgpd: !!consent,
-      badges: badges || [],
-      xpTransactions: xpTransactions || [],
+      badges,
+      xpTransactions: typedXpTransactions,
     }
   } catch (error) {
     console.error('Failed to fetch user data:', error)
@@ -875,7 +980,7 @@ export async function getCalendarEvents() {
 
     if (error) throw error
 
-    return { success: true, data: events }
+    return { success: true, data: (events ?? []) as AgoraCalendarEventDB[] }
   } catch (error) {
     console.error('Failed to get calendar events:', error)
     return { error: 'Failed to get calendar events', data: null }
@@ -906,12 +1011,12 @@ export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'cre
         end_time: event.end_time,
         event_type: event.event_type,
         description: event.description,
-        xp_reward: event.xp_reward || 10,
+        xp_reward: event.xp_reward ?? 10,
         completed: false,
         url: event.url,
       })
       .select()
-      .single()
+      .single<AgoraCalendarEventDB>()
 
     if (error) throw error
 
@@ -946,7 +1051,7 @@ export async function updateCalendarEvent(
       .eq('id', eventId)
       .eq('user_id', user.id) // Security: only update own events
       .select()
-      .single()
+      .single<AgoraCalendarEventDB>()
 
     if (error) throw error
 
@@ -1008,7 +1113,7 @@ export async function completeCalendarEvent(eventId: string) {
       .select('*')
       .eq('id', eventId)
       .eq('user_id', user.id)
-      .single()
+      .single<AgoraCalendarEventDB>()
 
     if (fetchError) throw fetchError
     if (!event) return { error: 'Event not found', data: null }
@@ -1023,16 +1128,16 @@ export async function completeCalendarEvent(eventId: string) {
     if (updateError) throw updateError
 
     // Award XP
-    const xpReward = event.xp_reward || 10
+    const xpReward = event.xp_reward ?? 10
 
     // Get current profile for balance
     const { data: profile } = await supabase
       .from('agora_profiles')
       .select('total_xp, current_level')
       .eq('user_id', user.id)
-      .single()
+      .single<ProfileXpQuery>()
 
-    const currentXp = profile?.total_xp || 0
+    const currentXp = profile?.total_xp ?? 0
     const newXp = currentXp + xpReward
     const newLevel = Math.floor(newXp / 100) + 1
 
@@ -1140,7 +1245,7 @@ export async function getChallengeProgress() {
 
     if (error) throw error
 
-    return { success: true, data: data || [] }
+    return { success: true, data: (data ?? []) as AgoraChallengeProgressDB[] }
   } catch (error) {
     console.error('Failed to get challenge progress:', error)
     return { error: 'Failed to get challenge progress', data: null }
@@ -1190,7 +1295,7 @@ export async function updateChallengeProgress(
         { onConflict: 'user_id,challenge_id,period_start' }
       )
       .select()
-      .single()
+      .single<AgoraChallengeProgressDB>()
 
     if (error) throw error
 
@@ -1223,7 +1328,7 @@ export async function claimChallengeReward(challengeId: string, periodStart: str
       .eq('user_id', user.id)
       .eq('challenge_id', challengeId)
       .eq('period_start', periodStart)
-      .single()
+      .single<AgoraChallengeProgressDB>()
 
     if (fetchError) throw fetchError
     if (!challenge) return { error: 'Challenge not found' }
@@ -1242,7 +1347,7 @@ export async function claimChallengeReward(challengeId: string, periodStart: str
     if (updateError) throw updateError
 
     // Award XP
-    const xpReward = challenge.xp_reward || 0
+    const xpReward = challenge.xp_reward ?? 0
     if (xpReward > 0) {
       await addXp(xpReward, `Desafio concluído: ${challengeId}`, 'challenge')
     }
