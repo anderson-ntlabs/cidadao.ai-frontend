@@ -96,7 +96,8 @@ describe('AgoraHeader', () => {
       render(<AgoraHeader {...defaultProps} />)
 
       // Multiple XP displays (desktop and mobile), use getAllByText
-      const xpElements = screen.getAllByText(/1\.500 XP/i)
+      // Accept both 1.500 (pt-BR) and 1,500 (en-US) locale formats
+      const xpElements = screen.getAllByText(/1[.,]500 XP/i)
       expect(xpElements.length).toBeGreaterThan(0)
     })
 
@@ -141,7 +142,8 @@ describe('AgoraHeader', () => {
       render(<AgoraHeader {...defaultProps} />)
 
       // Multiple XP displays (desktop and mobile)
-      const xpElements = screen.getAllByText(/1\.500 XP/i)
+      // Accept both 1.500 (pt-BR) and 1,500 (en-US) locale formats
+      const xpElements = screen.getAllByText(/1[.,]500 XP/i)
       expect(xpElements.length).toBeGreaterThan(0)
     })
 
