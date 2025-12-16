@@ -50,11 +50,18 @@ export default function AgoraContractPage() {
   const [acceptError, setAcceptError] = useState<string | null>(null)
   const contractRef = useRef<HTMLDivElement>(null)
 
-  const currentDate = new Date().toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  })
+  // Use state for date to avoid hydration mismatch (server/client may differ)
+  const [currentDate, setCurrentDate] = useState('')
+
+  useEffect(() => {
+    setCurrentDate(
+      new Date().toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    )
+  }, [])
 
   // Stable contract number based on user ID (memoized to prevent re-generation on re-render)
   const contractNumber = useMemo(() => generateContractNumber(user?.id), [user?.id])
