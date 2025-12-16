@@ -14,6 +14,31 @@ import {
   getChallengeProgress,
   claimChallengeReward,
 } from '@/app/pt/agora/actions'
+import type {
+  AgoraTrack,
+  AgoraUser,
+  XpTransaction,
+  DiaryEntry,
+  StudySession,
+  AgoraBadge,
+  DailyChallenge,
+  WeeklyChallenge,
+  OnboardingData,
+  GitHubContribution,
+  BadgeDefinition,
+  DailyChallengeType,
+  WeeklyChallengeType,
+  AgoraProfileDB,
+  AgoraConsentDB,
+  AgoraXpTransactionDB,
+  AgoraSessionDB,
+  AgoraDiaryEntryDB,
+  AgoraChallengeProgressDB,
+  SupabaseUserMetadata,
+  transformXpTransaction,
+  transformDiaryEntry,
+  transformSession,
+} from '@/types/agora'
 
 const logger = createLogger('Agora')
 
@@ -33,128 +58,23 @@ const logger = createLogger('Agora')
  *
  * Author: Anderson Henrique da Silva
  * Date: 2025-12-08
+ *
+ * Types imported from @/types/agora
  */
 
-export type AgoraTrack = 'backend' | 'frontend' | 'ia' | 'devops'
-
-export interface AgoraUser {
-  id: string
-  name: string
-  email: string
-  avatar: string
-  githubUsername?: string
-  matricula?: string
-  curso?: string
-  periodo?: number
-  totalXp: number
-  currentLevel: number
-  currentRank: string
-  tracks: AgoraTrack[]
-  currentStreak: number
-  longestStreak: number
-  totalSessions: number
-  totalTimeMinutes: number
-  totalVideosCompleted: number
-  hasAcceptedLgpd: boolean
-  hasAcceptedTerms: boolean
-  hasAcceptedInternshipContract: boolean // Alias for hasAcceptedTerms (backwards compat)
-  hasCompletedOnboarding: boolean
-  onboardingStep: number
-  isSuperuser: boolean
-  enrolledAt: string
-  lastActivityDate?: string
-  lastDailyBonusDate?: string // Track daily login bonus
-}
-
-// Daily challenges configuration
-export interface DailyChallenge {
-  id: string
-  name: string
-  description: string
-  emoji: string
-  xpReward: number
-  type: 'session' | 'diary' | 'time'
-  target: number
-  progress: number
-  completed: boolean
-  claimed: boolean
-  periodStart: string // For server sync
-}
-
-// Weekly challenges configuration
-export interface WeeklyChallenge {
-  id: string
-  name: string
-  description: string
-  emoji: string
-  xpReward: number
-  type: 'sessions' | 'xp' | 'streak'
-  target: number
-  progress: number
-  completed: boolean
-  claimed: boolean
-  periodStart: string // For server sync
-  expiresAt: string
-}
-
-export interface XpTransaction {
-  id: string
-  amount: number
-  balanceAfter: number
-  sourceType: string
-  description: string
-  createdAt: string
-}
-
-export interface DiaryEntry {
-  id: string
-  content: string
-  mood: 'great' | 'good' | 'neutral' | 'struggling'
-  whatLearned: string
-  whatStruggled: string
-  nextSteps: string
-  entryDate: string
-  createdAt: string
-}
-
-export interface StudySession {
-  id: string
-  startedAt: string
-  endedAt?: string
-  durationMinutes: number
-  xpEarned: number
-  agentsUsed: string[]
-  status: 'active' | 'completed' | 'abandoned'
-}
-
-export interface AgoraBadge {
-  id: string
-  type: string
-  name: string
-  description: string
-  emoji: string
-  earnedAt: string
-  criteria: string
-}
-
-export interface GitHubContribution {
-  username: string
-  hasForked: boolean
-  forkUrl?: string
-  commitCount: number
-  lastCommitDate?: string
-  lastChecked: string
-}
-
-export interface OnboardingData {
-  currentStep: number
-  completedSteps: number[]
-  selectedTracks: AgoraTrack[]
-  githubUsername?: string
-  githubForkVerified: boolean
-  completedAt?: string
-  github: GitHubContribution | null
-}
+// Re-export types for backwards compatibility
+export type {
+  AgoraTrack,
+  AgoraUser,
+  DailyChallenge,
+  WeeklyChallenge,
+  XpTransaction,
+  DiaryEntry,
+  StudySession,
+  AgoraBadge,
+  GitHubContribution,
+  OnboardingData,
+} from '@/types/agora'
 
 // Badge definitions
 const BADGE_DEFINITIONS = [
@@ -350,12 +270,6 @@ export function getStreakMultiplier(streak: number): number {
   }
   return 1.0 // No multiplier
 }
-
-// Daily challenge types
-type DailyChallengeType = 'session' | 'diary' | 'time'
-
-// Weekly challenge types
-type WeeklyChallengeType = 'sessions' | 'xp' | 'streak'
 
 // Daily challenges templates
 export const DAILY_CHALLENGE_TEMPLATES: Array<{
@@ -721,8 +635,16 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
 
       // OPTIMIZATION: Load profile and consent in parallel
       const [profileResult, consentResult] = await Promise.all([
-        supabase.from('agora_profiles').select('*').eq('user_id', authUser.id).maybeSingle(),
-        supabase.from('agora_consent').select('id').eq('user_id', authUser.id).maybeSingle(),
+        supabase
+          .from('agora_profiles')
+          .select('*')
+          .eq('user_id', authUser.id)
+          .maybeSingle<AgoraProfileDB>(),
+        supabase
+          .from('agora_consent')
+          .select('id')
+          .eq('user_id', authUser.id)
+          .maybeSingle<{ id: string }>(),
       ])
 
       let profile = profileResult.data
@@ -756,7 +678,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
             enrolled_at: new Date().toISOString(),
           })
           .select()
-          .single()
+          .single<AgoraProfileDB>()
 
         if (createError) {
           logger.error('Failed to create Agora profile', { error: createError })
@@ -773,34 +695,34 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         authUser.avatar ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(authUser.name || 'User')}&background=16a34a&color=fff&size=128`
 
-      const hasTerms = profile?.has_accepted_terms || false
+      const hasTerms = profile?.has_accepted_terms ?? false
       const userData: AgoraUser = {
         id: authUser.id,
-        name: profile?.full_name || authUser.name || 'Estudante',
-        email: authUser.email || '',
-        avatar: profile?.avatar_url || defaultAvatar,
-        githubUsername: profile?.github_username || authUser.githubUsername,
-        matricula: profile?.matricula,
-        curso: profile?.curso,
-        periodo: profile?.periodo,
-        totalXp: profile?.total_xp || 0,
-        currentLevel: profile?.current_level || 1,
-        currentRank: profile?.current_rank || 'novato',
-        tracks: profile?.tracks || [],
-        currentStreak: profile?.current_streak || 0,
-        longestStreak: profile?.longest_streak || 0,
-        totalSessions: profile?.total_sessions || 0,
-        totalTimeMinutes: profile?.total_time_minutes || 0,
-        totalVideosCompleted: profile?.total_videos_completed || 0,
+        name: profile?.full_name ?? authUser.name ?? 'Estudante',
+        email: authUser.email ?? '',
+        avatar: profile?.avatar_url ?? defaultAvatar,
+        githubUsername: profile?.github_username ?? authUser.githubUsername,
+        matricula: profile?.matricula ?? undefined,
+        curso: profile?.curso ?? undefined,
+        periodo: profile?.periodo ?? undefined,
+        totalXp: profile?.total_xp ?? 0,
+        currentLevel: profile?.current_level ?? 1,
+        currentRank: profile?.current_rank ?? 'novato',
+        tracks: (profile?.tracks ?? []) as AgoraTrack[],
+        currentStreak: profile?.current_streak ?? 0,
+        longestStreak: profile?.longest_streak ?? 0,
+        totalSessions: profile?.total_sessions ?? 0,
+        totalTimeMinutes: profile?.total_time_minutes ?? 0,
+        totalVideosCompleted: profile?.total_videos_completed ?? 0,
         hasAcceptedLgpd: !!consent,
         hasAcceptedTerms: hasTerms,
         hasAcceptedInternshipContract: hasTerms, // Alias
-        hasCompletedOnboarding: profile?.has_completed_onboarding || false,
-        onboardingStep: profile?.onboarding_step || 0,
-        isSuperuser: profile?.is_superuser || false,
-        enrolledAt: profile?.enrolled_at || new Date().toISOString(),
-        lastActivityDate: profile?.last_activity_date,
-        lastDailyBonusDate: profile?.last_daily_bonus_date,
+        hasCompletedOnboarding: profile?.has_completed_onboarding ?? false,
+        onboardingStep: profile?.onboarding_step ?? 0,
+        isSuperuser: profile?.is_superuser ?? false,
+        enrolledAt: profile?.enrolled_at ?? new Date().toISOString(),
+        lastActivityDate: profile?.last_activity_date ?? undefined,
+        lastDailyBonusDate: profile?.last_daily_bonus_date ?? undefined,
       }
 
       setUser(userData)
@@ -817,19 +739,22 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           .select('*')
           .eq('user_id', authUser.id)
           .order('created_at', { ascending: false })
-          .limit(50),
+          .limit(50)
+          .returns<AgoraXpTransactionDB[]>(),
         supabase
           .from('agora_diary_entries')
           .select('*')
           .eq('user_id', authUser.id)
           .order('created_at', { ascending: false })
-          .limit(50),
+          .limit(50)
+          .returns<AgoraDiaryEntryDB[]>(),
         supabase
           .from('agora_sessions')
           .select('*')
           .eq('user_id', authUser.id)
           .order('started_at', { ascending: false })
-          .limit(50),
+          .limit(50)
+          .returns<AgoraSessionDB[]>(),
       ])
 
       // Process XP transactions
@@ -868,11 +793,11 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           sessionsResult.data.map((s) => ({
             id: s.id,
             startedAt: s.started_at,
-            endedAt: s.ended_at,
-            durationMinutes: s.duration_minutes || 0,
-            xpEarned: s.xp_earned || 0,
-            agentsUsed: s.conversations?.map((c: { agent_name: string }) => c.agent_name) || [],
-            status: s.status || 'completed',
+            endedAt: s.ended_at ?? undefined,
+            durationMinutes: s.duration_minutes ?? 0,
+            xpEarned: s.xp_earned ?? 0,
+            agentsUsed: s.conversations?.map((c) => c.agent_name) ?? [],
+            status: s.status,
           }))
         )
 
@@ -936,12 +861,12 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           sessionsResult.data?.map((s) => ({
             id: s.id,
             startedAt: s.started_at,
-            endedAt: s.ended_at,
-            durationMinutes: s.duration_minutes || 0,
-            xpEarned: s.xp_earned || 0,
-            agentsUsed: s.conversations?.map((c: { agent_name: string }) => c.agent_name) || [],
-            status: s.status || 'completed',
-          })) || [],
+            endedAt: s.ended_at ?? undefined,
+            durationMinutes: s.duration_minutes ?? 0,
+            xpEarned: s.xp_earned ?? 0,
+            agentsUsed: s.conversations?.map((c) => c.agent_name) ?? [],
+            status: s.status,
+          })) ?? [],
         badges: loadedBadges,
         lastLoadedUserId: authUser.id,
       })
@@ -1034,7 +959,7 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
             description,
           })
           .select()
-          .single()
+          .single<AgoraXpTransactionDB>()
 
         if (txData) {
           setXpTransactions((prev) => [
@@ -1094,9 +1019,10 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
           status: 'active',
         })
         .select()
-        .single()
+        .single<AgoraSessionDB>()
 
       if (error) throw error
+      if (!data) throw new Error('No session data returned')
 
       currentSessionIdRef.current = data.id
       setCurrentSession({
@@ -1259,19 +1185,20 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
             entry_date: entry.entryDate,
           })
           .select()
-          .single()
+          .single<AgoraDiaryEntryDB>()
 
         if (error) throw error
+        if (!data) throw new Error('No diary entry data returned')
 
         setDiaryEntries((prev) => [
           {
             id: data.id,
             content: data.content,
-            mood: data.mood || 'neutral',
-            whatLearned: data.what_learned || '',
-            whatStruggled: data.what_struggled || '',
-            nextSteps: data.next_steps || '',
-            entryDate: data.entry_date || '',
+            mood: data.mood ?? 'neutral',
+            whatLearned: data.what_learned ?? '',
+            whatStruggled: data.what_struggled ?? '',
+            nextSteps: data.next_steps ?? '',
+            entryDate: data.entry_date ?? '',
             createdAt: data.created_at,
           },
           ...prev,
@@ -1358,9 +1285,9 @@ export function AgoraProvider({ children }: { children: React.ReactNode }) {
         .from('agora_profiles')
         .select('badges')
         .eq('user_id', user.id)
-        .single()
+        .single<Pick<AgoraProfileDB, 'badges'>>()
 
-      const currentBadges: string[] = (profile?.badges as string[]) || []
+      const currentBadges: string[] = profile?.badges ?? []
       const newBadgeIds: string[] = []
       let bonusXp = 0
 
