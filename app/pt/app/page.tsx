@@ -81,8 +81,8 @@ export default function HomePage() {
 
   // Auth loading is handled by AuthLayout
 
-  // Phase 1: Only Home and Chat are active
-  // Memoize static arrays to prevent unnecessary re-renders
+  // All navigation cards are now active
+  // Memoize arrays to prevent unnecessary re-renders
   const navigationCards = useMemo(
     () => [
       {
@@ -101,9 +101,9 @@ export default function HomePage() {
         icon: LayoutDashboard,
         href: '/pt/app/dashboard',
         gradient: 'from-green-500 to-emerald-600',
-        stats: 'Em desenvolvimento',
-        badge: 'Em Breve',
-        active: false,
+        stats: 'Análises e métricas',
+        badge: null,
+        active: true,
       },
       {
         title: 'Notificações',
@@ -111,9 +111,9 @@ export default function HomePage() {
         icon: Bell,
         href: '/pt/app/notificacoes',
         gradient: 'from-orange-500 to-red-600',
-        stats: 'Em desenvolvimento',
-        badge: 'Em Breve',
-        active: false,
+        stats: unreadCount > 0 ? `${unreadCount} não lidas` : 'Tudo em dia',
+        badge: unreadCount > 0 ? String(unreadCount) : null,
+        active: true,
       },
       {
         title: 'Investigações',
@@ -121,12 +121,12 @@ export default function HomePage() {
         icon: FileSearch,
         href: '/pt/app/investigacoes',
         gradient: 'from-purple-500 to-pink-600',
-        stats: 'Em desenvolvimento',
-        badge: 'Em Breve',
-        active: false,
+        stats: 'Histórico completo',
+        badge: null,
+        active: true,
       },
     ],
-    []
+    [unreadCount]
   )
 
   const quickStats: QuickStat[] = useMemo(

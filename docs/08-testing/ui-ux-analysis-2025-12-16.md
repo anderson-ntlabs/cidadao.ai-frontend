@@ -87,13 +87,13 @@ Esta análise avalia a UI/UX do Cidadão.AI comparando com padrões da indústri
 
 #### Problemas Identificados
 
-| Problema                    | Impacto                                                     | Severidade |
-| --------------------------- | ----------------------------------------------------------- | ---------- |
-| **Sem onboarding guiado**   | Usuário não sabe por onde começar                           | 🔴 Alta    |
-| **Stats mockados**          | Dados não são reais, quebra confiança                       | 🔴 Alta    |
-| **"Em Breve" excessivo**    | 3 cards de 4 desabilitados = sensação de produto incompleto | 🟡 Média   |
-| **17 agentes sem contexto** | Qual agente usar? Paralisia de escolha                      | 🟡 Média   |
-| **Header do AuthLayout**    | Diferente demais da landing                                 | 🟢 Baixa   |
+| Problema                    | Impacto                                      | Severidade   | Status     |
+| --------------------------- | -------------------------------------------- | ------------ | ---------- |
+| **Sem onboarding guiado**   | Usuário não sabe por onde começar            | 🔴 Alta      | Pendente   |
+| **Stats mockados**          | Dados não são reais, quebra confiança        | 🔴 Alta      | Pendente   |
+| **17 agentes sem contexto** | Qual agente usar? Paralisia de escolha       | 🟡 Média     | Pendente   |
+| **Header do AuthLayout**    | Diferente demais da landing                  | 🟢 Baixa     | OK         |
+| **Cards "Em Breve"**        | ~~Páginas desabilitadas~~ Agora todas ativas | ✅ Corrigido | 2025-12-16 |
 
 #### Comparação com Padrões da Indústria
 
@@ -260,12 +260,17 @@ Esta análise avalia a UI/UX do Cidadão.AI comparando com padrões da indústri
 
 ### 3.3 Breadcrumbs
 
-| Rota                         | Breadcrumb                    | Status          |
-| ---------------------------- | ----------------------------- | --------------- |
-| `/pt/app/chat`               | `Home > Chat`                 | ✅ Implementado |
-| `/pt/app/investigacoes/[id]` | `Home > Investigações > [id]` | ✅ Implementado |
-| `/pt/about`                  | Ausente                       | ❌ Faltando     |
-| `/pt/agora/trilhas/[id]`     | Ausente                       | ❌ Faltando     |
+> **Nota:** Breadcrumbs são gerados automaticamente pelo `AuthLayout` baseado na rota atual. O componente `BreadcrumbsV2` suporta desktop (linear) e mobile (colapsável).
+
+| Rota                    | Breadcrumb             | Status          |
+| ----------------------- | ---------------------- | --------------- |
+| `/pt/app/chat`          | `Home > Chat`          | ✅ Implementado |
+| `/pt/app/dashboard`     | `Home > Dashboard`     | ✅ Implementado |
+| `/pt/app/investigacoes` | `Home > Investigações` | ✅ Implementado |
+| `/pt/app/notificacoes`  | `Home > Notificações`  | ✅ Implementado |
+| `/pt/app/*`             | Auto-gerado            | ✅ Implementado |
+| `/pt/about`             | Ausente (content page) | ⚠️ Considerar   |
+| `/pt/agora/*`           | Sistema separado       | ⚠️ Avaliar      |
 
 ---
 
@@ -352,13 +357,14 @@ Problemas:
 
 ### Alta Prioridade (Impacto Alto, Esforço Baixo/Médio)
 
-| Item                         | Impacto | Esforço | Ação                           |
-| ---------------------------- | ------- | ------- | ------------------------------ |
-| Remover/ocultar "Em Breve"   | Alto    | Baixo   | Mostrar só features funcionais |
-| Onboarding tour              | Alto    | Médio   | Guiar primeiro uso             |
-| Unificar login App/Ágora     | Alto    | Médio   | Single auth context            |
-| Breadcrumbs em content pages | Médio   | Baixo   | Adicionar componente           |
-| Progress bar XP visível      | Médio   | Baixo   | Mover para header              |
+| Item                         | Impacto | Esforço | Ação                           | Status   |
+| ---------------------------- | ------- | ------- | ------------------------------ | -------- |
+| ~~Habilitar cards~~          | Alto    | Baixo   | Mostrar todas features         | ✅ Feito |
+| ~~Breadcrumbs no App~~       | Médio   | Baixo   | Já implementado via AuthLayout | ✅ Feito |
+| Onboarding tour              | Alto    | Médio   | Guiar primeiro uso             | Pendente |
+| Unificar login App/Ágora     | Alto    | Médio   | Single auth context            | Pendente |
+| Breadcrumbs em content pages | Médio   | Baixo   | Adicionar componente           | Pendente |
+| Progress bar XP visível      | Médio   | Baixo   | Mover para header              | Pendente |
 
 ### Média Prioridade (Impacto Médio, Esforço Médio)
 
@@ -385,10 +391,11 @@ Problemas:
 
 ### 7.1 Quick Wins (Implementar Imediatamente)
 
-1. **Ocultar cards "Em Breve"** no dashboard do App
-2. **Adicionar breadcrumbs** nas páginas `/about`, `/agents`, `/manifesto`
+1. ~~**Ocultar cards "Em Breve"** no dashboard do App~~ ✅ **Corrigido 2025-12-16** - Todas as páginas agora estão ativas
+2. ~~**Adicionar breadcrumbs** no app~~ ✅ **Já implementado** - AuthLayout gera automaticamente
 3. **Destacar Abaporu** como agente inicial recomendado
 4. **Progress bar XP** sempre visível no header do Ágora
+5. **Adicionar breadcrumbs** nas páginas de conteúdo (`/about`, `/agents`, `/manifesto`)
 
 ### 7.2 Melhorias de Curto Prazo (1-2 sprints)
 
