@@ -85,9 +85,10 @@ export default function KidsTermsPage() {
                 </p>
 
                 <p>
-                  <strong className="text-foreground">1.3 Sem Gamificação:</strong> A Área Kids não
-                  possui sistema de pontos (XP), badges ou ranking para evitar dinâmicas
-                  competitivas ou viciantes.
+                  <strong className="text-foreground">1.3 Gamificação Leve:</strong> A Área Kids
+                  possui um sistema de níveis e badges de progresso para motivar o aprendizado,
+                  porém sem elementos competitivos (ranking), pontuação numérica (XP) ou pressão de
+                  tempo (streaks) para evitar dinâmicas viciantes.
                 </p>
               </div>
             </GlassCardContent>
