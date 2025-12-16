@@ -198,27 +198,271 @@ describe('LazyExportService', () => {
   })
 
   describe('exportToPDF', () => {
+    const mockDocSave = vi.fn()
+    const mockDocText = vi.fn()
+    const mockDocSetFontSize = vi.fn()
+    const mockDocSetProperties = vi.fn()
+    const mockDocAutoTable = vi.fn()
+
+    beforeEach(() => {
+      vi.doMock('jspdf', () => ({
+        default: vi.fn().mockImplementation(() => ({
+          save: mockDocSave,
+          text: mockDocText,
+          setFontSize: mockDocSetFontSize,
+          setProperties: mockDocSetProperties,
+          autoTable: mockDocAutoTable,
+        })),
+      }))
+    })
+
     it('should be a function', () => {
       expect(typeof LazyExportService.exportToPDF).toBe('function')
     })
 
-    // PDF tests would require mocking jsPDF which is complex
-    // In a real scenario, these would be integration tests
+    it('should export PDF with default options', async () => {
+      const tableData = {
+        headers: ['Name', 'Age'],
+        rows: [
+          ['John', '30'],
+          ['Jane', '25'],
+        ],
+      }
+
+      // Import the mocked version
+      const { default: jsPDF } = await import('jspdf')
+      const mockInstance = {
+        save: mockDocSave,
+        text: mockDocText,
+        setFontSize: mockDocSetFontSize,
+        setProperties: mockDocSetProperties,
+        autoTable: mockDocAutoTable,
+      }
+      ;(jsPDF as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockInstance)
+
+      await LazyExportService.exportToPDF(tableData)
+
+      expect(jsPDF).toHaveBeenCalled()
+    })
+
+    it('should use provided options', async () => {
+      const tableData = {
+        headers: ['Name'],
+        rows: [['Test']],
+      }
+
+      const options = {
+        filename: 'custom.pdf',
+        title: 'Custom Title',
+        subtitle: 'Custom Subtitle',
+        author: 'Test Author',
+        orientation: 'landscape' as const,
+        pageFormat: 'letter' as const,
+      }
+
+      const { default: jsPDF } = await import('jspdf')
+      const mockInstance = {
+        save: mockDocSave,
+        text: mockDocText,
+        setFontSize: mockDocSetFontSize,
+        setProperties: mockDocSetProperties,
+        autoTable: mockDocAutoTable,
+      }
+      ;(jsPDF as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockInstance)
+
+      await LazyExportService.exportToPDF(tableData, options)
+
+      expect(jsPDF).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orientation: 'landscape',
+          format: 'letter',
+        })
+      )
+    })
   })
 
   describe('exportChartAsImage', () => {
+    const mockToBlob = vi.fn()
+    const mockCanvas = {
+      toBlob: mockToBlob,
+    }
+
+    beforeEach(() => {
+      vi.doMock('html2canvas', () => ({
+        default: vi.fn().mockResolvedValue(mockCanvas),
+      }))
+    })
+
     it('should be a function', () => {
       expect(typeof LazyExportService.exportChartAsImage).toBe('function')
     })
 
-    // Chart export tests would require mocking html2canvas
+    it('should export chart element as PNG', async () => {
+      const mockElement = document.createElement('div')
+
+      const { default: html2canvas } = await import('html2canvas')
+      ;(html2canvas as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        toBlob: (callback: (blob: Blob | null) => void) => {
+          callback(new Blob(['test'], { type: 'image/png' }) as unknown as Blob)
+        },
+      })
+
+      await LazyExportService.exportChartAsImage(mockElement, 'chart.png')
+
+      expect(html2canvas).toHaveBeenCalledWith(mockElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      })
+    })
+
+    it('should use default filename when not provided', async () => {
+      const mockElement = document.createElement('div')
+
+      const { default: html2canvas } = await import('html2canvas')
+      ;(html2canvas as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        toBlob: (callback: (blob: Blob | null) => void) => {
+          callback(new Blob(['test'], { type: 'image/png' }) as unknown as Blob)
+        },
+      })
+
+      await LazyExportService.exportChartAsImage(mockElement)
+
+      expect(html2canvas).toHaveBeenCalled()
+    })
   })
 
   describe('exportFullReport', () => {
+    const mockDocSave = vi.fn()
+    const mockDocText = vi.fn()
+    const mockDocSetFontSize = vi.fn()
+    const mockDocAddPage = vi.fn()
+    const mockDocAddImage = vi.fn()
+    const mockDocAutoTable = vi.fn()
+
+    beforeEach(() => {
+      vi.doMock('jspdf', () => ({
+        default: vi.fn().mockImplementation(() => ({
+          save: mockDocSave,
+          text: mockDocText,
+          setFontSize: mockDocSetFontSize,
+          addPage: mockDocAddPage,
+          addImage: mockDocAddImage,
+          autoTable: mockDocAutoTable,
+        })),
+      }))
+    })
+
     it('should be a function', () => {
       expect(typeof LazyExportService.exportFullReport).toBe('function')
     })
 
-    // Full report tests would require mocking both jsPDF and html2canvas
+    it('should export full report with table and charts', async () => {
+      const tableData = {
+        headers: ['Name'],
+        rows: [['Test']],
+      }
+
+      const chartElement = document.createElement('div')
+      const charts = [
+        {
+          chartElement,
+          title: 'Chart 1',
+          description: 'Description 1',
+        },
+      ]
+
+      const { default: jsPDF } = await import('jspdf')
+      const { default: html2canvas } = await import('html2canvas')
+
+      const mockInstance = {
+        save: mockDocSave,
+        text: mockDocText,
+        setFontSize: mockDocSetFontSize,
+        addPage: mockDocAddPage,
+        addImage: mockDocAddImage,
+        autoTable: mockDocAutoTable,
+      }
+      ;(jsPDF as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockInstance)
+      ;(html2canvas as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        toDataURL: vi.fn().mockReturnValue('data:image/png;base64,test'),
+      })
+
+      await LazyExportService.exportFullReport(tableData, charts)
+
+      expect(jsPDF).toHaveBeenCalled()
+      expect(html2canvas).toHaveBeenCalledWith(chartElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+      })
+    })
+
+    it('should handle charts without description', async () => {
+      const tableData = {
+        headers: ['Name'],
+        rows: [['Test']],
+      }
+
+      const chartElement = document.createElement('div')
+      const charts = [
+        {
+          chartElement,
+          title: 'Chart 1',
+        },
+      ]
+
+      const { default: jsPDF } = await import('jspdf')
+      const { default: html2canvas } = await import('html2canvas')
+
+      const mockInstance = {
+        save: mockDocSave,
+        text: mockDocText,
+        setFontSize: mockDocSetFontSize,
+        addPage: mockDocAddPage,
+        addImage: mockDocAddImage,
+        autoTable: mockDocAutoTable,
+      }
+      ;(jsPDF as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockInstance)
+      ;(html2canvas as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        toDataURL: vi.fn().mockReturnValue('data:image/png;base64,test'),
+      })
+
+      await LazyExportService.exportFullReport(tableData, charts)
+
+      expect(jsPDF).toHaveBeenCalled()
+    })
+
+    it('should use provided options', async () => {
+      const tableData = {
+        headers: ['Name'],
+        rows: [['Test']],
+      }
+
+      const options = {
+        title: 'Custom Report',
+        filename: 'custom_report.pdf',
+        orientation: 'landscape' as const,
+        pageFormat: 'letter' as const,
+      }
+
+      const { default: jsPDF } = await import('jspdf')
+      const mockInstance = {
+        save: mockDocSave,
+        text: mockDocText,
+        setFontSize: mockDocSetFontSize,
+        addPage: mockDocAddPage,
+        addImage: mockDocAddImage,
+        autoTable: mockDocAutoTable,
+      }
+      ;(jsPDF as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => mockInstance)
+
+      await LazyExportService.exportFullReport(tableData, [], options)
+
+      expect(jsPDF).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orientation: 'landscape',
+          format: 'letter',
+        })
+      )
+    })
   })
 })
