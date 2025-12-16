@@ -16,7 +16,7 @@ import { createClient } from '@/lib/supabase/server'
  */
 
 // ============================================
-// Types
+// Action Result Types (returned to client)
 // ============================================
 
 interface AddXpResult {
@@ -61,6 +61,56 @@ interface BadgeAwardResult {
   xpAwarded?: number
 }
 
+interface SoftDeleteResult {
+  success: boolean
+  error?: string
+  tablesAffected?: number
+  recordsDeleted?: number
+}
+
+// ============================================
+// RPC Response Types (from Supabase functions)
+// ============================================
+
+interface RpcAddXpResponse {
+  new_total_xp: number
+  new_level: number
+  new_rank: string
+  level_up: boolean
+  rank_up: boolean
+}
+
+interface RpcStreakResponse {
+  new_streak: number
+  longest_streak: number
+  streak_multiplier: number
+  streak_broken: boolean
+}
+
+interface RpcEndSessionResponse {
+  duration_minutes: number
+  new_total_sessions: number
+  new_total_time: number
+}
+
+interface RpcDailyBonusResponse {
+  success: boolean
+  already_claimed: boolean
+  xp_awarded: number
+  streak_multiplier: number
+}
+
+interface RpcBadgeResponse {
+  success: boolean
+  already_had: boolean
+  xp_awarded: number
+}
+
+interface RpcSoftDeleteResponse {
+  tables_affected: number
+  records_deleted: number
+}
+
 // ============================================
 // Atomic XP Action
 // ============================================
@@ -85,19 +135,20 @@ export async function addXpAtomic(
   }
 
   try {
-    const { data, error } = await supabase.rpc('add_xp_atomic', {
+    const response = await supabase.rpc('add_xp_atomic', {
       p_user_id: user.id,
       p_amount: amount,
       p_source_type: sourceType,
-      p_description: description || sourceType,
+      p_description: description ?? sourceType,
     })
 
-    if (error) {
-      console.error('Atomic XP error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Atomic XP error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcAddXpResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -112,8 +163,8 @@ export async function addXpAtomic(
       levelUp: result.level_up,
       rankUp: result.rank_up,
     }
-  } catch (error) {
-    console.error('Failed to add XP atomically:', error)
+  } catch (err) {
+    console.error('Failed to add XP atomically:', err)
     return { success: false, error: 'Failed to add XP' }
   }
 }
@@ -138,16 +189,17 @@ export async function updateStreakAtomic(): Promise<StreakResult> {
   }
 
   try {
-    const { data, error } = await supabase.rpc('update_streak_atomic', {
+    const response = await supabase.rpc('update_streak_atomic', {
       p_user_id: user.id,
     })
 
-    if (error) {
-      console.error('Atomic streak error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Atomic streak error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcStreakResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -161,8 +213,8 @@ export async function updateStreakAtomic(): Promise<StreakResult> {
       streakMultiplier: result.streak_multiplier,
       streakBroken: result.streak_broken,
     }
-  } catch (error) {
-    console.error('Failed to update streak atomically:', error)
+  } catch (err) {
+    console.error('Failed to update streak atomically:', err)
     return { success: false, error: 'Failed to update streak' }
   }
 }
@@ -191,19 +243,20 @@ export async function endSessionAtomic(
   }
 
   try {
-    const { data, error } = await supabase.rpc('end_session_atomic', {
+    const response = await supabase.rpc('end_session_atomic', {
       p_session_id: sessionId,
       p_user_id: user.id,
       p_xp_earned: xpEarned,
       p_agents_used: agentsUsed,
     })
 
-    if (error) {
-      console.error('Atomic end session error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Atomic end session error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcEndSessionResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -216,8 +269,8 @@ export async function endSessionAtomic(
       newTotalSessions: result.new_total_sessions,
       newTotalTime: result.new_total_time,
     }
-  } catch (error) {
-    console.error('Failed to end session atomically:', error)
+  } catch (err) {
+    console.error('Failed to end session atomically:', err)
     return { success: false, error: 'Failed to end session' }
   }
 }
@@ -242,16 +295,17 @@ export async function claimDailyBonusAtomic(): Promise<DailyBonusResult> {
   }
 
   try {
-    const { data, error } = await supabase.rpc('claim_daily_bonus_atomic', {
+    const response = await supabase.rpc('claim_daily_bonus_atomic', {
       p_user_id: user.id,
     })
 
-    if (error) {
-      console.error('Atomic daily bonus error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Atomic daily bonus error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcDailyBonusResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -271,8 +325,8 @@ export async function claimDailyBonusAtomic(): Promise<DailyBonusResult> {
       xpAwarded: result.xp_awarded,
       streakMultiplier: result.streak_multiplier,
     }
-  } catch (error) {
-    console.error('Failed to claim daily bonus atomically:', error)
+  } catch (err) {
+    console.error('Failed to claim daily bonus atomically:', err)
     return { success: false, error: 'Failed to claim bonus' }
   }
 }
@@ -305,7 +359,7 @@ export async function awardBadgeAtomic(
   }
 
   try {
-    const { data, error } = await supabase.rpc('award_badge', {
+    const response = await supabase.rpc('award_badge', {
       p_user_id: user.id,
       p_badge_id: badgeId,
       p_badge_name: badgeName,
@@ -316,12 +370,13 @@ export async function awardBadgeAtomic(
       p_trigger_value: triggerValue,
     })
 
-    if (error) {
-      console.error('Atomic badge award error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Atomic badge award error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcBadgeResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -337,8 +392,8 @@ export async function awardBadgeAtomic(
       alreadyHad: false,
       xpAwarded: result.xp_awarded,
     }
-  } catch (error) {
-    console.error('Failed to award badge atomically:', error)
+  } catch (err) {
+    console.error('Failed to award badge atomically:', err)
     return { success: false, error: 'Failed to award badge' }
   }
 }
@@ -351,12 +406,7 @@ export async function awardBadgeAtomic(
  * Soft delete all user data for LGPD compliance.
  * Marks all records as deleted without physically removing them.
  */
-export async function softDeleteUserData(): Promise<{
-  success: boolean
-  error?: string
-  tablesAffected?: number
-  recordsDeleted?: number
-}> {
+export async function softDeleteUserData(): Promise<SoftDeleteResult> {
   const supabase = await createClient()
 
   const {
@@ -368,16 +418,17 @@ export async function softDeleteUserData(): Promise<{
   }
 
   try {
-    const { data, error } = await supabase.rpc('soft_delete_user_data', {
+    const response = await supabase.rpc('soft_delete_user_data', {
       p_user_id: user.id,
     })
 
-    if (error) {
-      console.error('Soft delete error:', error)
-      return { success: false, error: error.message }
+    if (response.error) {
+      console.error('Soft delete error:', response.error)
+      return { success: false, error: response.error.message }
     }
 
-    const result = data?.[0]
+    const results = response.data as RpcSoftDeleteResponse[] | null
+    const result = results?.[0]
     if (!result) {
       return { success: false, error: 'No result returned' }
     }
@@ -387,8 +438,8 @@ export async function softDeleteUserData(): Promise<{
       tablesAffected: result.tables_affected,
       recordsDeleted: result.records_deleted,
     }
-  } catch (error) {
-    console.error('Failed to soft delete user data:', error)
+  } catch (err) {
+    console.error('Failed to soft delete user data:', err)
     return { success: false, error: 'Failed to delete data' }
   }
 }

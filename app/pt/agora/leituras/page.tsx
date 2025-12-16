@@ -212,7 +212,7 @@ export default function AcademyReadingsPage() {
         // Load from Supabase for authenticated users
         const result = await getReadingProgress()
         if (result.success && result.data && Object.keys(result.data).length > 0) {
-          setProgress(result.data)
+          setProgress(result.data as Record<string, ReadingProgress>)
           // Also save to localStorage as backup
           localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(result.data))
         }

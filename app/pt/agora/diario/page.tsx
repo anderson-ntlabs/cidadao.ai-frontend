@@ -287,16 +287,16 @@ function AcademyAgendaContent() {
         xp_reward: newEvent.xpReward,
       })
 
-      if (result.success && result.data) {
+      if (result.success && result.event) {
         const event: AcademyEvent = {
-          id: result.data.id,
-          title: result.data.title,
-          start: result.data.start_time,
-          end: result.data.end_time,
-          type: result.data.event_type as EventType,
-          description: result.data.description,
-          xpReward: result.data.xp_reward,
-          completed: result.data.completed,
+          id: result.event.id,
+          title: result.event.title,
+          start: result.event.start_time,
+          end: result.event.end_time,
+          type: result.event.event_type as EventType,
+          description: result.event.description,
+          xpReward: result.event.xp_reward,
+          completed: result.event.completed,
         }
         saveEvents([...events, event])
         toast.success('Evento criado!', 'Evento adicionado ao calendario')

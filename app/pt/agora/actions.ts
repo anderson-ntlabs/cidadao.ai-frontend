@@ -114,10 +114,162 @@ interface AgoraChallengeProgressDB {
 }
 
 // ============================================
+// Common Result Types
+// ============================================
+
+interface ActionResult {
+  success?: boolean
+  error?: string
+}
+
+interface ConsentActionResult extends ActionResult {
+  alreadyAccepted?: boolean
+}
+
+interface BadgeActionResult extends ActionResult {
+  alreadyHas?: boolean
+  badges?: string[]
+}
+
+interface XpActionResult extends ActionResult {
+  newXp?: number
+  newLevel?: number
+}
+
+interface SessionActionResult extends ActionResult {
+  newTotalTime?: number
+  newTotalSessions?: number
+  newStreak?: number
+}
+
+interface VideoProgressResult extends ActionResult {
+  xpAwarded?: number
+  alreadyCompleted?: boolean
+  progressPercentage?: number
+  status?: string
+}
+
+// Video progress query result type
+interface VideoProgressMapEntry {
+  video_id: string
+  watched_seconds: number
+  progress_percentage: number
+  status: string
+  completed_at: string | null
+}
+
+interface VideoProgressMapResult extends ActionResult {
+  data?: Record<string, VideoProgressMapEntry>
+}
+
+interface ReadingProgressResult extends ActionResult {
+  xpAwarded?: number
+  alreadyCompleted?: boolean
+  status?: string
+}
+
+// Reading progress map entry type
+interface ReadingProgressMapEntry {
+  reading_id: string
+  status: string
+  completed_at: string | null
+  notes: string | null
+  rating: number | null
+}
+
+interface ReadingProgressMapResult extends ActionResult {
+  data?: Record<string, ReadingProgressMapEntry>
+}
+
+interface ChallengeProgressResult extends ActionResult {
+  data?: AgoraChallengeProgressDB[]
+}
+
+interface ChallengeRewardResult extends ActionResult {
+  xpAwarded?: number
+  alreadyClaimed?: boolean
+}
+
+interface SyncChallengeResult extends ActionResult {
+  syncedCount?: number
+}
+
+interface TelemetryResult extends ActionResult {
+  data?: {
+    videosCompleted: number
+    totalVideos: number
+    requiredVideosCompleted: number
+    totalRequiredVideos: number
+    totalVideoWatchTimeSeconds: number
+    requiredVideoWatchTimeSeconds: number
+    readingsCompleted: number
+    totalReadings: number
+    requiredReadingsCompleted: number
+    totalRequiredReadings: number
+    totalXp: number
+    totalTimeMinutes: number
+    totalSessions: number
+    diaryEntries: number
+    chatMessages: number
+    currentStreak: number
+  }
+}
+
+interface CalendarEventResult extends ActionResult {
+  data?: AgoraCalendarEventDB[]
+  event?: AgoraCalendarEventDB
+}
+
+interface CompleteCalendarEventResult extends ActionResult {
+  xpAwarded?: number
+  event?: AgoraCalendarEventDB
+}
+
+interface CertificateResult extends ActionResult {
+  certificate?: AgoraCertificate
+  alreadyExists?: boolean
+}
+
+interface AcademyUserData {
+  id: string
+  email: string
+  name: string
+  avatar: string
+  githubUsername?: string
+  totalXp: number
+  currentLevel: number
+  currentRank: string
+  currentStreak: number
+  longestStreak: number
+  totalTimeMinutes: number
+  totalSessions: number
+  hasAcceptedLgpd: boolean
+  badges: string[]
+  xpTransactions: AgoraXpTransaction[]
+}
+
+interface AcademyUserDataResult extends ActionResult {
+  data?: AcademyUserData
+}
+
+interface DailyActivityResult extends ActionResult {
+  data?: Array<{ date: string; minutes: number; sessions: number; xp: number }>
+}
+
+interface VerifyCertificateResult extends ActionResult {
+  valid?: boolean
+  certificate?: AgoraCertificate
+}
+
+// ============================================
 // XP & Progress Actions
 // ============================================
 
-export async function addXp(amount: number, description: string, sourceType?: string) {
+export async function addXp(
+  amount: number,
+  description: string,
+  sourceType?: string
+): Promise<XpActionResult> {
   const supabase = await createClient()
 
   const {
@@ -168,7 +320,7 @@ export async function addXp(amount: number, description: string, sourceType?: st
   }
 }
 
-export async function recordSession(durationMinutes: number) {
+export async function recordSession(durationMinutes: number): Promise<SessionActionResult> {
   const supabase = await createClient()
 
   const {
@@ -233,7 +385,7 @@ export async function recordSession(durationMinutes: number) {
 // LGPD & Consent Actions
 // ============================================
 
-export async function acceptLgpdConsent() {
+export async function acceptLgpdConsent(): Promise<ConsentActionResult> {
   const supabase = await createClient()
 
   const {
@@ -297,7 +449,7 @@ export async function acceptLgpdConsent() {
  * Badges are stored as JSONB array in agora_profiles.badges
  * Each badge is stored as its ID string
  */
-export async function awardBadge(badgeId: string, badgeName: string) {
+export async function awardBadge(badgeId: string, badgeName: string): Promise<BadgeActionResult> {
   const supabase = await createClient()
 
   const {
@@ -354,7 +506,7 @@ export async function updateVideoProgress(
   watchedSeconds: number,
   totalSeconds: number,
   completed: boolean = false
-) {
+): Promise<VideoProgressResult> {
   const supabase = await createClient()
 
   const {
@@ -437,7 +589,7 @@ export async function updateVideoProgress(
   }
 }
 
-export async function getVideoProgress() {
+export async function getVideoProgress(): Promise<VideoProgressMapResult> {
   const supabase = await createClient()
 
   const {
@@ -445,7 +597,7 @@ export async function getVideoProgress() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -456,14 +608,6 @@ export async function getVideoProgress() {
 
     if (error) throw error
 
-    // Convert to lookup object
-    type VideoProgressMapEntry = {
-      video_id: string
-      watched_seconds: number
-      progress_percentage: number
-      status: string
-      completed_at: string | null
-    }
     const progressMap: Record<string, VideoProgressMapEntry> = {}
 
     const typedData = (data ?? []) as VideoProgressMapEntry[]
@@ -474,7 +618,7 @@ export async function getVideoProgress() {
     return { success: true, data: progressMap }
   } catch (error) {
     console.error('Failed to get video progress:', error)
-    return { error: 'Failed to get video progress', data: null }
+    return { error: 'Failed to get video progress' }
   }
 }
 
@@ -487,7 +631,7 @@ export async function updateReadingProgress(
   completed: boolean = false,
   notes?: string,
   rating?: number
-) {
+): Promise<ReadingProgressResult> {
   const supabase = await createClient()
 
   const {
@@ -545,7 +689,7 @@ export async function updateReadingProgress(
   }
 }
 
-export async function getReadingProgress() {
+export async function getReadingProgress(): Promise<ReadingProgressMapResult> {
   const supabase = await createClient()
 
   const {
@@ -553,7 +697,7 @@ export async function getReadingProgress() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -564,14 +708,6 @@ export async function getReadingProgress() {
 
     if (error) throw error
 
-    // Convert to lookup object
-    type ReadingProgressMapEntry = {
-      reading_id: string
-      status: string
-      completed_at: string | null
-      notes: string | null
-      rating: number | null
-    }
     const progressMap: Record<string, ReadingProgressMapEntry> = {}
 
     const typedData = (data ?? []) as ReadingProgressMapEntry[]
@@ -582,7 +718,7 @@ export async function getReadingProgress() {
     return { success: true, data: progressMap }
   } catch (error) {
     console.error('Failed to get reading progress:', error)
-    return { error: 'Failed to get reading progress', data: null }
+    return { error: 'Failed to get reading progress' }
   }
 }
 
@@ -602,7 +738,7 @@ export async function saveCertificate(certificateData: {
   conversationsCount: number
   verificationHash: string
   holderName: string // Name to appear on public certificate
-}) {
+}): Promise<CertificateResult> {
   const supabase = await createClient()
 
   const {
@@ -692,7 +828,7 @@ export async function saveCertificate(certificateData: {
   }
 }
 
-export async function getCertificates() {
+export async function getCertificates(): Promise<ActionResult & { data?: AgoraCertificate[] }> {
   const supabase = await createClient()
 
   const {
@@ -700,7 +836,7 @@ export async function getCertificates() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -715,7 +851,7 @@ export async function getCertificates() {
     return { success: true, data: data as AgoraCertificate[] }
   } catch (error) {
     console.error('Failed to get certificates:', error)
-    return { error: 'Failed to get certificates', data: null }
+    return { error: 'Failed to get certificates' }
   }
 }
 
@@ -723,7 +859,7 @@ export async function getCertificates() {
 // Telemetry Actions (for certificate validation)
 // ============================================
 
-export async function getTelemetryData() {
+export async function getTelemetryData(): Promise<TelemetryResult> {
   const supabase = await createClient()
 
   const {
@@ -731,7 +867,7 @@ export async function getTelemetryData() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -809,7 +945,7 @@ export async function getTelemetryData() {
     }
   } catch (error) {
     console.error('Failed to get telemetry data:', error)
-    return { error: 'Failed to get telemetry data', data: null }
+    return { error: 'Failed to get telemetry data' }
   }
 }
 
@@ -817,7 +953,7 @@ export async function getTelemetryData() {
  * Get daily activity data for charts
  * Returns sessions grouped by date with total time
  */
-export async function getDailyActivityData() {
+export async function getDailyActivityData(): Promise<DailyActivityResult> {
   const supabase = await createClient()
 
   const {
@@ -825,7 +961,7 @@ export async function getDailyActivityData() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -865,7 +1001,7 @@ export async function getDailyActivityData() {
     return { success: true, data: chartData }
   } catch (error) {
     console.error('Failed to get daily activity data:', error)
-    return { error: 'Failed to get daily activity data', data: null }
+    return { error: 'Failed to get daily activity data' }
   }
 }
 
@@ -873,7 +1009,7 @@ export async function getDailyActivityData() {
 // Data Fetching (for Server Components)
 // ============================================
 
-export async function getAcademyUserData() {
+export async function getAcademyUserData(): Promise<AcademyUserDataResult> {
   const supabase = await createClient()
 
   const {
@@ -881,7 +1017,7 @@ export async function getAcademyUserData() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return null
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -915,28 +1051,31 @@ export async function getAcademyUserData() {
     const typedXpTransactions = (xpTransactions ?? []) as AgoraXpTransaction[]
 
     return {
-      id: user.id,
-      email: user.email ?? '',
-      name: profile?.full_name ?? metadata.full_name ?? metadata.name ?? 'Estudante',
-      avatar:
-        profile?.avatar_url ??
-        metadata.avatar_url ??
-        `https://ui-avatars.com/api/?name=Estudante&background=f59e0b&color=fff`,
-      githubUsername: profile?.github_username ?? metadata.user_name,
-      totalXp: profile?.total_xp ?? 0,
-      currentLevel: profile?.current_level ?? 1,
-      currentRank: profile?.current_rank ?? 'novato',
-      currentStreak: profile?.current_streak ?? 0,
-      longestStreak: profile?.longest_streak ?? 0,
-      totalTimeMinutes: profile?.total_time_minutes ?? 0,
-      totalSessions: profile?.total_sessions ?? 0,
-      hasAcceptedLgpd: !!consent,
-      badges,
-      xpTransactions: typedXpTransactions,
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email ?? '',
+        name: profile?.full_name ?? metadata.full_name ?? metadata.name ?? 'Estudante',
+        avatar:
+          profile?.avatar_url ??
+          metadata.avatar_url ??
+          `https://ui-avatars.com/api/?name=Estudante&background=f59e0b&color=fff`,
+        githubUsername: profile?.github_username ?? metadata.user_name,
+        totalXp: profile?.total_xp ?? 0,
+        currentLevel: profile?.current_level ?? 1,
+        currentRank: profile?.current_rank ?? 'novato',
+        currentStreak: profile?.current_streak ?? 0,
+        longestStreak: profile?.longest_streak ?? 0,
+        totalTimeMinutes: profile?.total_time_minutes ?? 0,
+        totalSessions: profile?.total_sessions ?? 0,
+        hasAcceptedLgpd: !!consent,
+        badges,
+        xpTransactions: typedXpTransactions,
+      },
     }
   } catch (error) {
     console.error('Failed to fetch user data:', error)
-    return null
+    return { error: 'Failed to fetch user data' }
   }
 }
 
@@ -960,7 +1099,7 @@ export interface CalendarEvent {
 /**
  * Get all calendar events for the authenticated user
  */
-export async function getCalendarEvents() {
+export async function getCalendarEvents(): Promise<CalendarEventResult> {
   const supabase = await createClient()
 
   const {
@@ -968,7 +1107,7 @@ export async function getCalendarEvents() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -983,14 +1122,16 @@ export async function getCalendarEvents() {
     return { success: true, data: (events ?? []) as AgoraCalendarEventDB[] }
   } catch (error) {
     console.error('Failed to get calendar events:', error)
-    return { error: 'Failed to get calendar events', data: null }
+    return { error: 'Failed to get calendar events' }
   }
 }
 
 /**
  * Create a new calendar event
  */
-export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'created_at'>) {
+export async function createCalendarEvent(
+  event: Omit<CalendarEvent, 'id' | 'created_at'>
+): Promise<CalendarEventResult> {
   const supabase = await createClient()
 
   const {
@@ -998,7 +1139,7 @@ export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'cre
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -1020,10 +1161,10 @@ export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'cre
 
     if (error) throw error
 
-    return { success: true, data }
+    return { success: true, event: data }
   } catch (error) {
     console.error('Failed to create calendar event:', error)
-    return { error: 'Failed to create calendar event', data: null }
+    return { error: 'Failed to create calendar event' }
   }
 }
 
@@ -1033,7 +1174,7 @@ export async function createCalendarEvent(event: Omit<CalendarEvent, 'id' | 'cre
 export async function updateCalendarEvent(
   eventId: string,
   updates: Partial<Omit<CalendarEvent, 'id' | 'created_at'>>
-) {
+): Promise<CalendarEventResult> {
   const supabase = await createClient()
 
   const {
@@ -1041,7 +1182,7 @@ export async function updateCalendarEvent(
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -1055,17 +1196,17 @@ export async function updateCalendarEvent(
 
     if (error) throw error
 
-    return { success: true, data }
+    return { success: true, event: data }
   } catch (error) {
     console.error('Failed to update calendar event:', error)
-    return { error: 'Failed to update calendar event', data: null }
+    return { error: 'Failed to update calendar event' }
   }
 }
 
 /**
  * Delete a calendar event
  */
-export async function deleteCalendarEvent(eventId: string) {
+export async function deleteCalendarEvent(eventId: string): Promise<ActionResult> {
   const supabase = await createClient()
 
   const {
@@ -1073,7 +1214,7 @@ export async function deleteCalendarEvent(eventId: string) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -1095,7 +1236,7 @@ export async function deleteCalendarEvent(eventId: string) {
 /**
  * Mark a calendar event as completed and award XP
  */
-export async function completeCalendarEvent(eventId: string) {
+export async function completeCalendarEvent(eventId: string): Promise<CompleteCalendarEventResult> {
   const supabase = await createClient()
 
   const {
@@ -1103,7 +1244,7 @@ export async function completeCalendarEvent(eventId: string) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -1116,8 +1257,8 @@ export async function completeCalendarEvent(eventId: string) {
       .single<AgoraCalendarEventDB>()
 
     if (fetchError) throw fetchError
-    if (!event) return { error: 'Event not found', data: null }
-    if (event.completed) return { error: 'Event already completed', data: null }
+    if (!event) return { error: 'Event not found' }
+    if (event.completed) return { error: 'Event already completed' }
 
     // Mark as completed
     const { error: updateError } = await supabase
@@ -1167,10 +1308,10 @@ export async function completeCalendarEvent(eventId: string) {
       description: `Evento concluido: ${event.title}`,
     })
 
-    return { success: true, xpAwarded: xpReward, data: { ...event, completed: true } }
+    return { success: true, xpAwarded: xpReward, event: { ...event, completed: true } }
   } catch (error) {
     console.error('Failed to complete calendar event:', error)
-    return { error: 'Failed to complete calendar event', data: null }
+    return { error: 'Failed to complete calendar event' }
   }
 }
 
@@ -1220,7 +1361,7 @@ function getChallengePeriod(type: 'daily' | 'weekly'): { start: string; end: str
 /**
  * Get all active challenges for the current period
  */
-export async function getChallengeProgress() {
+export async function getChallengeProgress(): Promise<ChallengeProgressResult> {
   const supabase = await createClient()
 
   const {
@@ -1228,7 +1369,7 @@ export async function getChallengeProgress() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'Not authenticated', data: null }
+    return { error: 'Not authenticated' }
   }
 
   try {
@@ -1248,7 +1389,7 @@ export async function getChallengeProgress() {
     return { success: true, data: (data ?? []) as AgoraChallengeProgressDB[] }
   } catch (error) {
     console.error('Failed to get challenge progress:', error)
-    return { error: 'Failed to get challenge progress', data: null }
+    return { error: 'Failed to get challenge progress' }
   }
 }
 
@@ -1261,7 +1402,7 @@ export async function updateChallengeProgress(
   currentProgress: number,
   targetValue: number,
   xpReward: number
-) {
+): Promise<ActionResult & { data?: AgoraChallengeProgressDB; isCompleted?: boolean }> {
   const supabase = await createClient()
 
   const {
@@ -1309,7 +1450,10 @@ export async function updateChallengeProgress(
 /**
  * Claim XP reward for a completed challenge
  */
-export async function claimChallengeReward(challengeId: string, periodStart: string) {
+export async function claimChallengeReward(
+  challengeId: string,
+  periodStart: string
+): Promise<ChallengeRewardResult> {
   const supabase = await createClient()
 
   const {
@@ -1372,7 +1516,7 @@ export async function syncChallengeProgress(
     targetValue: number
     xpReward: number
   }>
-) {
+): Promise<SyncChallengeResult> {
   const supabase = await createClient()
 
   const {
