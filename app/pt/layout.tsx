@@ -84,6 +84,9 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
         <link rel="dns-prefetch" href="https://vlibras.gov.br" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
+        {/* Preload LCP image for landing page - Critical for performance */}
+        <link rel="preload" href="/forum-icon.png" as="image" type="image/png" />
+
         {/* Prefetch assets for future navigation (non-blocking) */}
         <link rel="prefetch" href="/operarios.png" as="image" />
         <link rel="prefetch" href="/images/Tarsila_Antropofagia.jpg" as="image" />

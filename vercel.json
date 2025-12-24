@@ -77,6 +77,10 @@
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://vercel.live https://www.googletagmanager.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.vercel.app https://*.vercel-insights.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://*.googleusercontent.com https://avatars.githubusercontent.com https://ui-avatars.com https://img.youtube.com https://i.ytimg.com; font-src 'self' data: https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br; connect-src 'self' https://cidadao-api-production.up.railway.app https://pbsiyuattnwgohvkkkks.supabase.co https://vercel.live https://*.vercel-insights.com https://www.google-analytics.com https://*.sentry.io https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us.i.posthog.com https://us-assets.i.posthog.com https://app.posthog.com https://api.ipify.org; media-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://open.spotify.com https://vlibras.gov.br https://*.vlibras.gov.br https://vercel.live https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; worker-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br; upgrade-insecure-requests"
         }
       ]
     },
@@ -86,6 +90,23 @@
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://vercel.live https://www.googletagmanager.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.vercel.app https://*.vercel-insights.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://*.googleusercontent.com https://avatars.githubusercontent.com https://ui-avatars.com https://img.youtube.com https://i.ytimg.com; font-src 'self' data: https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br; connect-src 'self' https://cidadao-api-production.up.railway.app https://pbsiyuattnwgohvkkkks.supabase.co https://vercel.live https://*.vercel-insights.com https://www.google-analytics.com https://*.sentry.io https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us.i.posthog.com https://us-assets.i.posthog.com https://app.posthog.com https://api.ipify.org; media-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://open.spotify.com https://vlibras.gov.br https://*.vlibras.gov.br https://vercel.live https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; worker-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br; upgrade-insecure-requests"
+        }
+      ]
+    },
+    {
+      "source": "/:locale(pt|en)/(about|agents|manifesto|cookies|privacy|terms)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://vercel.live https://www.googletagmanager.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us-assets.i.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.vercel.app https://*.vercel-insights.com https://www.google-analytics.com https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://*.googleusercontent.com https://avatars.githubusercontent.com https://ui-avatars.com https://img.youtube.com https://i.ytimg.com; font-src 'self' data: https://cdn.jsdelivr.net https://vlibras.gov.br https://*.vlibras.gov.br; connect-src 'self' https://cidadao-api-production.up.railway.app https://pbsiyuattnwgohvkkkks.supabase.co https://vercel.live https://*.vercel-insights.com https://www.google-analytics.com https://*.sentry.io https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net https://us.i.posthog.com https://us-assets.i.posthog.com https://app.posthog.com https://api.ipify.org; media-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' https://open.spotify.com https://vlibras.gov.br https://*.vlibras.gov.br https://vercel.live https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com; frame-ancestors 'none'; worker-src 'self' blob: https://vlibras.gov.br https://*.vlibras.gov.br; upgrade-insecure-requests"
         }
       ]
     }

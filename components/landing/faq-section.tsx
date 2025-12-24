@@ -1,103 +1,85 @@
 /**
- * FAQSection Component
+ * FAQSection Component (Server Component)
  *
- * Frequently Asked Questions with accordion interaction.
- * Helps users find answers without navigating away.
+ * Frequently Asked Questions with native accordion (details/summary).
+ * Zero client-side JavaScript for maximum performance.
  *
  * Author: Anderson Henrique da Silva
- * Created: 2025-11-18
+ * Updated: 2025-12-24 - Converted to Server Component for better TTFB
  */
 
-'use client'
-
-import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface FAQItemProps {
   question: string
   answer: string
-  isOpen: boolean
-  onToggle: () => void
+  defaultOpen?: boolean
 }
 
-function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
+function FAQItem({ question, answer, defaultOpen = false }: FAQItemProps) {
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800 last:border-b-0">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between py-5 px-6 text-left hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors rounded-lg"
-        aria-expanded={isOpen}
-      >
+    <details
+      className="group border-b border-gray-200 dark:border-gray-800 last:border-b-0"
+      open={defaultOpen}
+    >
+      <summary className="w-full flex items-center justify-between py-5 px-6 text-left hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors rounded-lg cursor-pointer list-none [&::-webkit-details-marker]:hidden">
         <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-8">
           {question}
         </span>
-        <ChevronDown
-          className={cn(
-            'w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform duration-300 flex-shrink-0',
-            isOpen && 'transform rotate-180'
-          )}
-        />
-      </button>
+        <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 group-open:rotate-180" />
+      </summary>
 
-      <div
-        className={cn(
-          'overflow-hidden transition-all duration-300',
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        )}
-      >
-        <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 leading-relaxed">{answer}</div>
+      <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 leading-relaxed animate-in fade-in slide-in-from-top-2 duration-200">
+        {answer}
       </div>
-    </div>
+    </details>
   )
 }
 
+const faqs = [
+  {
+    question: 'É realmente grátis?',
+    answer:
+      'Sim! 100% gratuito e open source. O Cidadão.AI é um projeto acadêmico (TCC) com foco no bem público. Sempre será grátis para qualquer cidadão brasileiro.',
+  },
+  {
+    question: 'Preciso ser desenvolvedor para usar?',
+    answer:
+      'Não! A interface foi projetada para qualquer pessoa. Você conversa com as IAs em português natural, como se estivesse enviando uma mensagem no WhatsApp.',
+  },
+  {
+    question: 'Meus dados pessoais estão seguros?',
+    answer:
+      'Sim! Usamos OAuth (login com Google/GitHub), então não armazenamos senhas. Somos 100% compatíveis com a LGPD. Seus dados de navegação e consultas são privados.',
+  },
+  {
+    question: 'Como vocês detectam irregularidades?',
+    answer:
+      'Usamos 17 agentes de IA especializados que analisam contratos, licitações e gastos públicos. Eles aplicam algoritmos de detecção de anomalias, análise de padrões e cruzamento de dados.',
+  },
+  {
+    question: 'Funciona em qual região do Brasil?',
+    answer:
+      'Todo o Brasil! Estamos conectados ao Portal da Transparência do Governo Federal. No futuro, planejamos integrar portais estaduais e municipais.',
+  },
+  {
+    question: 'Posso exportar os relatórios?',
+    answer:
+      'Sim! Você pode exportar investigações em PDF ou CSV, perfeito para compartilhar com jornalistas, MPs ou redes sociais.',
+  },
+  {
+    question: 'O que são os "Agentes Brasileiros"?',
+    answer:
+      'São 17 inteligências artificiais, cada uma inspirada em um herói brasileiro (Zumbi, Anita Garibaldi, etc.). Cada agente tem uma especialidade: detectar anomalias, analisar padrões, gerar relatórios, etc.',
+  },
+  {
+    question: 'Como posso contribuir com o projeto?',
+    answer:
+      'O código é 100% open source no GitHub! Você pode contribuir com código, reportar bugs, sugerir features ou até mesmo fazer doações para infraestrutura.',
+  },
+]
+
 export function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
-
-  const faqs = [
-    {
-      question: 'É realmente grátis?',
-      answer:
-        'Sim! 100% gratuito e open source. O Cidadão.AI é um projeto acadêmico (TCC) com foco no bem público. Sempre será grátis para qualquer cidadão brasileiro.',
-    },
-    {
-      question: 'Preciso ser desenvolvedor para usar?',
-      answer:
-        'Não! A interface foi projetada para qualquer pessoa. Você conversa com as IAs em português natural, como se estivesse enviando uma mensagem no WhatsApp.',
-    },
-    {
-      question: 'Meus dados pessoais estão seguros?',
-      answer:
-        'Sim! Usamos OAuth (login com Google/GitHub), então não armazenamos senhas. Somos 100% compatíveis com a LGPD. Seus dados de navegação e consultas são privados.',
-    },
-    {
-      question: 'Como vocês detectam irregularidades?',
-      answer:
-        'Usamos 17 agentes de IA especializados que analisam contratos, licitações e gastos públicos. Eles aplicam algoritmos de detecção de anomalias, análise de padrões e cruzamento de dados.',
-    },
-    {
-      question: 'Funciona em qual região do Brasil?',
-      answer:
-        'Todo o Brasil! Estamos conectados ao Portal da Transparência do Governo Federal. No futuro, planejamos integrar portais estaduais e municipais.',
-    },
-    {
-      question: 'Posso exportar os relatórios?',
-      answer:
-        'Sim! Você pode exportar investigações em PDF ou CSV, perfeito para compartilhar com jornalistas, MPs ou redes sociais.',
-    },
-    {
-      question: 'O que são os "Agentes Brasileiros"?',
-      answer:
-        'São 17 inteligências artificiais, cada uma inspirada em um herói brasileiro (Zumbi, Anita Garibaldi, etc.). Cada agente tem uma especialidade: detectar anomalias, analisar padrões, gerar relatórios, etc.',
-    },
-    {
-      question: 'Como posso contribuir com o projeto?',
-      answer:
-        'O código é 100% open source no GitHub! Você pode contribuir com código, reportar bugs, sugerir features ou até mesmo fazer doações para infraestrutura.',
-    },
-  ]
-
   return (
     <div className="w-full">
       {/* Header */}
@@ -115,8 +97,7 @@ export function FAQSection() {
             key={index}
             question={faq.question}
             answer={faq.answer}
-            isOpen={openIndex === index}
-            onToggle={() => setOpenIndex(openIndex === index ? null : index)}
+            defaultOpen={index === 0}
           />
         ))}
       </div>
