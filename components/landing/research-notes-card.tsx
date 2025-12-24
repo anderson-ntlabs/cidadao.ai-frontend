@@ -29,6 +29,7 @@ if (typeof window !== 'undefined') {
 
 interface ResearchNotesCardProps {
   locale?: 'pt' | 'en'
+  autoOpen?: boolean
 }
 
 const translations = {
@@ -58,8 +59,8 @@ const translations = {
 
 const PDF_PATH = '/docs/notas-de-pesquisa.pdf'
 
-export function ResearchNotesCard({ locale = 'pt' }: ResearchNotesCardProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function ResearchNotesCard({ locale = 'pt', autoOpen = false }: ResearchNotesCardProps) {
+  const [isOpen, setIsOpen] = useState(autoOpen)
   const [numPages, setNumPages] = useState<number>(0)
   const [pageNumber, setPageNumber] = useState(1)
   const [scale, setScale] = useState(1.0)

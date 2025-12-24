@@ -80,6 +80,11 @@ export default function ENLayout({ children }: { children: React.ReactNode }): J
         {/* DNS Prefetch for external resources */}
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        {/* Spotify embed (landing page playlist) */}
+        <link rel="dns-prefetch" href="https://open.spotify.com" />
+        {/* YouTube embeds (Agora videos) */}
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
 
         {/* Prefetch assets for future navigation (non-blocking) */}
         <link rel="prefetch" href="/operarios.png" as="image" />

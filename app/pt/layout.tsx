@@ -83,6 +83,11 @@ export default function PTLayout({ children }: { children: React.ReactNode }): J
         <link rel="dns-prefetch" href="https://o4510132364574720.ingest.us.sentry.io" />
         <link rel="dns-prefetch" href="https://vlibras.gov.br" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        {/* Spotify embed (landing page playlist) */}
+        <link rel="dns-prefetch" href="https://open.spotify.com" />
+        {/* YouTube embeds (Agora videos) */}
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
 
         {/* Preload LCP image for landing page - Critical for performance */}
         <link rel="preload" href="/forum-icon.png" as="image" type="image/png" />

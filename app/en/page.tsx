@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { LandingClientWrapper } from '@/components/landing/landing-client-wrapper'
 import { FAQSectionEN } from '@/components/landing/faq-section-en'
-import { ResearchNotesCard } from '@/components/landing/research-notes-card'
+import { ResearchNotesCardLazy } from '@/components/landing/research-notes-card-lazy'
 
 export default function ENPageOptimized(): JSX.Element {
   return (
@@ -287,7 +287,7 @@ export default function ENPageOptimized(): JSX.Element {
                     </h4>
                   </a>
 
-                  <ResearchNotesCard locale="en" />
+                  <ResearchNotesCardLazy locale="en" />
                 </div>
               </div>
             </div>

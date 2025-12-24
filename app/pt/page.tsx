@@ -17,7 +17,7 @@ import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { LandingClientWrapper } from '@/components/landing/landing-client-wrapper'
 import { FAQSection } from '@/components/landing/faq-section'
-import { ResearchNotesCard } from '@/components/landing/research-notes-card'
+import { ResearchNotesCardLazy } from '@/components/landing/research-notes-card-lazy'
 
 // Export metadata for better SEO
 export { metadata } from './metadata'
@@ -290,7 +290,7 @@ export default function PTPageOptimized(): JSX.Element {
                     </h4>
                   </a>
 
-                  <ResearchNotesCard locale="pt" />
+                  <ResearchNotesCardLazy locale="pt" />
                 </div>
               </div>
             </div>
