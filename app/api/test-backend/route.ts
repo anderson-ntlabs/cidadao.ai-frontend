@@ -21,12 +21,8 @@ interface ErrorResponse {
 }
 
 export async function GET(): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
-  const possibleUrls = [
-    'https://cidadao-api-production.up.railway.app',
-    'https://neuralthinker-cidadaoaibackend.hf.space',
-    'https://neural-thinker.cidadao-ai-backend.hf.space',
-    'https://neural-thinker-cidadaoai-backend.hf.space',
-  ]
+  // Production Railway URL only
+  const possibleUrls = ['https://cidadao-api-production.up.railway.app']
 
   const results: TestResult[] = []
 

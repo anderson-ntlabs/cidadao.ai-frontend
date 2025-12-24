@@ -5,11 +5,8 @@ const logger = createLogger('CheckApi')
 
 export async function checkAPIEndpoints() {
   const baseUrls = [
-    // Standard HuggingFace Spaces format
+    // Production Railway URL
     'https://cidadao-api-production.up.railway.app',
-    // Alternative formats
-    'https://neural-thinker-cidadaoai-backend.hf.space',
-    'https://neuralthinker-cidadao-ai-backend.hf.space',
     // Check saved URL from discovery
     localStorage.getItem('backend_url'),
   ].filter(Boolean)

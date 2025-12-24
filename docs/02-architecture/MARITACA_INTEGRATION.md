@@ -56,9 +56,9 @@ All endpoints use the Maritaca sabiazinho-3 model:
 
 ```bash
 # Frontend (.env.local)
-NEXT_PUBLIC_API_URL=https://your-space.hf.space
+NEXT_PUBLIC_API_URL=https://cidadao-api-production.up.railway.app
 
-# Backend (HuggingFace Secrets)
+# Backend (Railway Environment Variables)
 MARITACA_API_KEY=your-maritaca-api-key
 ```
 

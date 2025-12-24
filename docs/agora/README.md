@@ -178,7 +178,6 @@ open http://localhost:3000/pt/agora
 
 - [Cidadão.AI API](https://cidadao-api-production.up.railway.app/)
 - [Documentação API](https://cidadao-api-production.up.railway.app/docs)
-- [HuggingFace Space](https://neural-thinker-cidadao-ai-backend.hf.space/)
 - [LabSoft IFSULDEMINAS](https://integra.ifsuldeminas.edu.br/)
 
 ---
