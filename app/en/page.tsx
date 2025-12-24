@@ -1,155 +1,220 @@
 /**
- * English Landing Page - Modal-based Architecture
+ * Landing Page - English Version (Performance Optimized)
  *
- * Redesigned with modal-based navigation for better space utilization
- * and modern UX. Content cards open floating modals instead of separate pages.
+ * Server Component optimized for performance:
+ * - No client-side JavaScript for initial render
+ * - Static generation for better TTFB
+ * - Optimized images with priority loading
+ * - Fixed dimensions to prevent CLS
+ * - Minimal client components
  *
  * Author: Anderson Henrique da Silva
- * Date: 2025-11-06
+ * Updated: 2025-12-24
  */
 
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { ContentCard, ExternalLinkCard, LandingModal, FAQSectionEN } from '@/components/landing'
+import Link from 'next/link'
+import { ArrowRight, ExternalLink } from 'lucide-react'
+import { LandingClientWrapper } from '@/components/landing/landing-client-wrapper'
+import { FAQSectionEN } from '@/components/landing/faq-section-en'
 import { ResearchNotesCard } from '@/components/landing/research-notes-card'
-import { createClient } from '@/lib/supabase/client'
-import { agents } from '@/data/agents'
 
-// Lazy load heavy components for better performance
-const ProjectTimeline = dynamic(
-  () =>
-    import('@/components/timeline/project-timeline').then((mod) => ({
-      default: mod.ProjectTimeline,
-    })),
-  {
-    loading: () => <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />,
-  }
-)
-
-export default function ENPage(): JSX.Element {
-  const router = useRouter()
-  const supabase = createClient()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // Modal states
-  const [aboutModalOpen, setAboutModalOpen] = useState(false)
-  const [agentsModalOpen, setAgentsModalOpen] = useState(false)
-  const [manifestoModalOpen, setManifestoModalOpen] = useState(false)
-
-  // Check auth status without AuthProvider (performance optimization)
-  // Note: Authenticated users go to /pt/app since system is PT-only
-  useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setIsAuthenticated(!!user)
-      // Don't auto-redirect - let user choose to access system
-    }
-    void checkAuth()
-  }, [supabase, router])
-
-  const handleAccessSystem = (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (isAuthenticated) {
-      router.push('/pt/app') // System is PT-only
-    } else {
-      router.push('/pt/login')
-    }
-  }
-
+export default function ENPageOptimized(): JSX.Element {
   return (
     <div className="relative">
-      {/* Hero Section - Mobile Optimized */}
-      <section className="hero relative min-h-[50vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden">
-        {/* Subtle animated gradient overlay */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 via-transparent to-blue-500/10"></div>
+      {/* HERO SECTION - Static with fixed dimensions to prevent CLS */}
+      <section
+        id="hero"
+        className="hero relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-green-500/10 via-blue-500/5 to-yellow-500/10"
+        style={{ height: '70vh', minHeight: '600px' }}
+      >
+        {/* Background Pattern - CSS only, no JS */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(0,255,0,0.05) 35px, rgba(0,255,0,0.05) 70px)`,
+            }}
+          />
         </div>
 
-        <div className="hero-container max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16 text-center relative z-10">
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent">
-            Cidadão.AI
-          </h1>
-
-          <p className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-gray-200 mb-4 sm:mb-6 max-w-3xl mx-auto px-2">
-            Artificial Intelligence for Transparency and Social Control
-          </p>
-
-          <p className="hidden sm:block text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-3xl mx-auto">
-            Monitor public spending, detect anomalies and track investigations in real time. Our
-            network of Brazilian AIs works 24/7 analyzing data from the Transparency Portal.
-          </p>
-
-          {/* CTA Buttons - Mobile optimized */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center max-w-md sm:max-w-none mx-auto">
-            <Button
-              onClick={handleAccessSystem}
-              variant="primary"
-              size="lg"
-              className="min-h-[44px] bg-gradient-to-r from-green-600 to-blue-600 hover:shadow-xl active:scale-95 transition-all duration-300 touch-manipulation"
+        <div className="hero-container max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10">
+          {/* Logo + Title - Fixed sizes to prevent CLS */}
+          <div className="flex flex-col items-center justify-center gap-6 mb-8">
+            <div className="w-[100px] h-[100px] relative">
+              <Image
+                src="/forum-icon.png"
+                width={100}
+                height={100}
+                alt="Cidadão.AI"
+                className="rounded-2xl shadow-2xl ring-4 ring-white/20"
+                priority
+                quality={85}
+              />
+            </div>
+            <h1
+              className="text-5xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent leading-tight"
+              style={{ backgroundSize: '200% 200%' }}
             >
-              Access the System
-            </Button>
-            <Button
-              onClick={() => setAboutModalOpen(true)}
-              variant="secondary"
-              size="lg"
-              className="min-h-[44px] border-2 border-gray-300 dark:border-gray-600 hover:border-green-600 dark:hover:border-green-400 active:scale-95 touch-manipulation"
-            >
-              About the Project
-            </Button>
+              Cidadão.AI
+            </h1>
           </div>
 
-          <p className="mt-4 sm:mt-6 text-xs text-gray-400 dark:text-gray-500 italic">
-            Note: Full system available in Portuguese only
+          {/* Tagline */}
+          <p className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 dark:text-gray-100 mb-4 max-w-4xl mx-auto">
+            Public Transparency with Artificial Intelligence
           </p>
+
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
+            17 AI agents monitoring public spending 24/7 to protect your rights
+          </p>
+
+          {/* CTA Buttons - Server-rendered links */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch sm:items-center max-w-lg sm:max-w-none mx-auto">
+            <Link
+              href="/pt/login"
+              className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden inline-block text-center"
+            >
+              <span className="relative z-10 flex flex-col items-center">
+                <span className="text-xl">Get Started</span>
+                <span className="text-sm opacity-90 mt-1">100% Free • No credit card</span>
+              </span>
+            </Link>
+
+            <Link
+              href="/en/about"
+              className="group px-10 py-5 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl font-bold text-lg text-gray-700 dark:text-gray-300 hover:border-green-500 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center justify-center gap-3"
+            >
+              <span>Learn More</span>
+            </Link>
+          </div>
+
+          {/* Trust Indicators - Static */}
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+            <span className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> Open Source
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> LGPD Compliant
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> Official Data
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-500">✓</span> Ad-free
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* Content Cards Grid - Mobile Optimized */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-transparent via-gray-50/50 dark:via-gray-900/20 to-transparent">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <ContentCard
-              icon="🎓"
-              title="About the Project"
-              description="Computer Science undergraduate thesis - Open source government transparency platform"
-              onClick={() => setAboutModalOpen(true)}
-              gradient="from-green-500 to-emerald-600"
-            />
-            <ContentCard
-              icon="🇧🇷"
-              title="Our Agents"
-              description="17 specialized Brazilian AIs - Each with a unique cultural identity and role"
-              onClick={() => setAgentsModalOpen(true)}
-              gradient="from-blue-500 to-cyan-600"
-            />
-            <ContentCard
-              icon="📜"
-              title="Manifesto"
-              description="Our Mission - Digital democracy and technological citizenship"
-              onClick={() => setManifestoModalOpen(true)}
-              gradient="from-yellow-500 to-orange-600"
-            />
-            <ContentCard
-              icon="🏛️"
-              title="Ágora"
-              description="Learning platform for AI and public transparency with gamification"
+      {/* MAIN FEATURES - Static content */}
+      <section className="py-20 bg-white dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              How It Works
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              Brazilian AI monitoring the government 24 hours a day
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Static Cards */}
+            <Link
+              href="/en/about"
+              className="block p-6 bg-gradient-to-br from-green-500/10 to-emerald-600/10 rounded-xl border border-green-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-4xl mb-4">🎓</div>
+              <h3 className="text-xl font-bold mb-2">About the Project</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                A Computer Science thesis combining scientific research with real social impact
+              </p>
+            </Link>
+
+            <Link
+              href="/en/agents"
+              className="block p-6 bg-gradient-to-br from-blue-500/10 to-cyan-600/10 rounded-xl border border-blue-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-4xl mb-4">🇧🇷</div>
+              <h3 className="text-xl font-bold mb-2">17 AI Agents</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Artificial intelligences with Brazilian hero identities working together
+              </p>
+            </Link>
+
+            <Link
+              href="/en/manifesto"
+              className="block p-6 bg-gradient-to-br from-yellow-500/10 to-orange-600/10 rounded-xl border border-yellow-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-4xl mb-4">📜</div>
+              <h3 className="text-xl font-bold mb-2">Our Manifesto</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                A vision of transparent and participatory democracy through technology
+              </p>
+            </Link>
+
+            <Link
               href="/pt/agora/login"
-              gradient="from-purple-500 to-indigo-600"
-            />
+              className="block p-6 bg-gradient-to-br from-purple-500/10 to-indigo-600/10 rounded-xl border border-purple-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <div className="text-4xl mb-4">🏛️</div>
+              <h3 className="text-xl font-bold mb-2">Agora</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                AI and public transparency training platform with gamification
+              </p>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* FAQ + Spotify Section - Two Column Layout */}
-      <section className="py-12 sm:py-16 bg-gray-50 dark:bg-gray-900/50">
+      {/* HOW IT WORKS - Static Steps */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">How to Use</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400">
+              Start monitoring in 3 simple steps
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                1
+              </div>
+              <h3 className="text-xl font-bold mb-2">Create Account</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Quick Google login in less than 30 seconds
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                2
+              </div>
+              <h3 className="text-xl font-bold mb-2">Ask Questions</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Ask about spending, contracts, or any public data
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-yellow-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                3
+              </div>
+              <h3 className="text-xl font-bold mb-2">Get Analysis</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                AI analyzes millions of data points and delivers clear answers
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ + SPOTIFY SECTION - Two Column Layout */}
+      <section className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left Column - FAQ */}
@@ -164,341 +229,120 @@ export default function ENPage(): JSX.Element {
                   Project Playlist
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed max-w-lg mx-auto">
-                  The creator of Cidadao.AI made a playlist that captures Brazil. Part of the
-                  development was fueled by lots of coffee and good music!
+                  The creator of Cidadão.AI curated a playlist that represents Brazil. Part of the
+                  development was fueled by lots of coffee and great music!
                 </p>
               </div>
 
-              <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 shadow-xl">
                 <iframe
-                  className="w-full rounded-lg sm:rounded-xl shadow-lg"
+                  className="w-full rounded-xl shadow-lg"
                   src="https://open.spotify.com/embed/playlist/2CnnwkzO3GPYUuPz7TAWva?utm_source=generator&theme=0"
                   width="100%"
                   height="352"
                   frameBorder="0"
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   loading="lazy"
-                  title="Cidadao.AI Transparency Soundtrack"
+                  title="Cidadao.AI Playlist - Brazilian Music"
                 />
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* External Links Section - Mobile Optimized */}
-      <section className="py-8 sm:py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Additional Resources
-          </h2>
-          <p className="text-xs sm:text-sm text-center text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 px-4">
-            For developers, researchers and those interested in technical details
-          </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <ExternalLinkCard
-              icon="🐙"
-              title="GitHub"
-              description="Open source repositories"
-              href="https://github.com/anderson-ufrj/cidadao.ai-backend"
-            />
-            <ExternalLinkCard
-              icon="📚"
-              title="Documentation"
-              description="Complete technical guides"
-              href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
-            />
-            <ExternalLinkCard
-              icon="⚡"
-              title="REST API"
-              description="Interactive documentation"
-              href="https://cidadao-api-production.up.railway.app/docs"
-            />
-            <ResearchNotesCard locale="en" />
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT MODAL */}
-      <LandingModal
-        isOpen={aboutModalOpen}
-        onClose={() => setAboutModalOpen(false)}
-        title="About Cidadão.AI"
-        size="xl"
-      >
-        {/* About content */}
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800">
-            <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-              <strong className="text-green-600 dark:text-green-400">Cidadão.AI</strong> is an
-              undergraduate thesis project in{' '}
-              <strong className="text-blue-600 dark:text-blue-400">Computer Science</strong>,
-              developed with the aim of democratizing access to public data and strengthening
-              government transparency in Brazil.
-            </p>
-          </div>
-
-          <div className="prose dark:prose-invert max-w-none">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              🎯 Main Objectives
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🤖</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Artificial Intelligence
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Multi-agent system specialized in analyzing government data
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🔍</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Anomaly Detection
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Advanced algorithms for identifying suspicious patterns
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">💬</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Natural Interaction
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Chat with AIs in natural language (Portuguese)
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">📊</span>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Interactive Dashboards
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Real-time data visualization and analysis
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              🏗️ Project Timeline
-            </h3>
-            <ProjectTimeline />
-
-            <div className="mt-8 bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border-l-4 border-green-600">
-              <h3 className="text-lg font-bold text-green-900 dark:text-green-100 mb-2">
-                💡 Innovation and Impact
-              </h3>
-              <p className="text-sm text-green-800 dark:text-green-200">
-                This project combines cutting-edge technologies such as Large Language Models
-                (LLMs), multi-agent systems, and real-time data analysis to create an unprecedented
-                tool for social control and government transparency in Brazil.
-              </p>
-            </div>
-          </div>
-        </div>
-      </LandingModal>
-
-      {/* AGENTS MODAL */}
-      <LandingModal
-        isOpen={agentsModalOpen}
-        onClose={() => setAgentsModalOpen(false)}
-        title="Our Brazilian AI Agents"
-        size="xl"
-      >
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
-            <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-              Each agent has a{' '}
-              <strong className="text-blue-600 dark:text-blue-400">
-                unique Brazilian identity
-              </strong>
-              , inspired by historical figures who fought for freedom, justice, and democracy.
-            </p>
-          </div>
-
-          {/* Agents Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agents.map((agent) => (
-              <div
-                key={agent.id}
-                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="flex items-center gap-4 mb-3">
-                  <Image
-                    src={agent.image}
-                    alt={agent.name}
-                    width={64}
-                    height={64}
-                    sizes="64px"
-                    className="rounded-lg object-cover shadow-md"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm">
-                      {agent.name}
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{agent.role.en}</p>
-                  </div>
-                </div>
-
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
-                  {agent.description.en}
-                </p>
-
-                {agent.wikipedia && (
+              {/* Developer Links - Below Spotify */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-center mb-4">For Developers</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <a
-                    href={agent.wikipedia}
+                    href="https://github.com/anderson-ufrj/cidadao.ai-backend"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
                   >
-                    <span>Learn more on Wikipedia</span>
-                    <span>→</span>
+                    <div className="text-2xl mb-2">🐙</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      GitHub <ExternalLink className="w-3 h-3" />
+                    </h4>
                   </a>
-                )}
-              </div>
-            ))}
-          </div>
 
-          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border-l-4 border-blue-600">
-            <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-2">
-              🤝 Multi-Agent Collaboration
-            </h3>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              Agents work together, sharing information and coordinating complex analyses. Each
-              brings its expertise, creating a powerful transparency network.
+                  <a
+                    href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
+                  >
+                    <div className="text-2xl mb-2">📚</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      Docs <ExternalLink className="w-3 h-3" />
+                    </h4>
+                  </a>
+
+                  <a
+                    href="https://cidadao-api-production.up.railway.app/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
+                  >
+                    <div className="text-2xl mb-2">⚡</div>
+                    <h4 className="text-sm font-bold flex items-center justify-center gap-1">
+                      API <ExternalLink className="w-3 h-3" />
+                    </h4>
+                  </a>
+
+                  <ResearchNotesCard locale="en" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-24 bg-gradient-to-r from-green-600 to-blue-600">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">Ready to Start?</h2>
+          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+            Join thousands of citizens using AI to monitor the Brazilian government
+          </p>
+          <Link
+            href="/pt/login"
+            className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-green-600 rounded-xl font-bold text-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
+          >
+            Create Free Account
+            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="mt-6 text-white/70 text-sm">
+            No credit card • Setup in 2 minutes • Cancel anytime
+          </p>
+        </div>
+      </section>
+
+      {/* Client-side features wrapper - Only loads if needed */}
+      <LandingClientWrapper />
+
+      {/* Footer */}
+      <footer className="py-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Cidadão.AI - Public Transparency with AI
             </p>
-          </div>
-        </div>
-      </LandingModal>
-
-      {/* MANIFESTO MODAL */}
-      <LandingModal
-        isOpen={manifestoModalOpen}
-        onClose={() => setManifestoModalOpen(false)}
-        title="Manifesto: Technology for the People"
-        size="xl"
-      >
-        <div className="space-y-6">
-          {/* Tarsila Image */}
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl">
-            <Image
-              src="/antropofagia-tarsila.jpg"
-              alt="Antropofagia by Tarsila do Amaral"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <p className="text-sm font-medium text-white">
-                "Antropofagia" (1929) - Tarsila do Amaral
-              </p>
-            </div>
-          </div>
-
-          <div className="prose dark:prose-invert max-w-none">
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-xl border border-yellow-200 dark:border-yellow-800 mb-6">
-              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                We believe in technology that serves the people, not just the market. Cidadão.AI is
-                our contribution to building a more transparent, participatory, and fair democracy.
-              </p>
-            </div>
-
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              📜 Our Principles
-            </h3>
-
-            <div className="space-y-4">
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-lg border-l-4 border-green-600">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                  <span className="text-xl">💻</span>
-                  Open Source and Free
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  All code is public and free. We believe that transparency tools should be
-                  accessible to everyone, without financial barriers.
-                </p>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-lg border-l-4 border-blue-600">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                  <span className="text-xl">🇧🇷</span>
-                  Brazilian Identity
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Our AI agents have Brazilian identities, honoring historical figures who fought
-                  for freedom and justice. Technology with culture and memory.
-                </p>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-lg border-l-4 border-yellow-600">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                  <span className="text-xl">🤝</span>
-                  Social Control
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  We empower citizens to monitor and question public spending. Democracy requires
-                  active participation, and technology should facilitate this.
-                </p>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-lg border-l-4 border-purple-600">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                  <span className="text-xl">🔒</span>
-                  Privacy and Security
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  We respect user privacy and protect data with modern security standards.
-                  Transparency is about governance, not about exposing people.
-                </p>
-              </div>
-
-              <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-lg border-l-4 border-red-600">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                  <span className="text-xl">🌱</span>
-                  Continuous Education
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  The system should educate, not just inform. We explain concepts, provide context,
-                  and help citizens understand the complexity of public governance.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 bg-gradient-to-r from-green-50 via-yellow-50 to-blue-50 dark:from-green-900/20 dark:via-yellow-900/20 dark:to-blue-900/20 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
-                🚀 Join the Movement
-              </h3>
-              <p className="text-sm text-gray-700 dark:text-gray-300 text-center leading-relaxed">
-                Cidadão.AI is more than a platform — it's a movement for digital democracy and
-                technological citizenship. Use, contribute, share. Together we can build a more
-                transparent Brazil.
-              </p>
+            <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <Link href="/en/about" className="hover:text-green-600 transition-colors">
+                About
+              </Link>
+              <Link href="/en/manifesto" className="hover:text-green-600 transition-colors">
+                Manifesto
+              </Link>
+              <Link
+                href="/pt/agora/login"
+                className="hover:text-green-600 transition-colors flex items-center gap-1"
+              >
+                <span>🏛️</span>
+                <span>Agora</span>
+              </Link>
             </div>
           </div>
         </div>
-      </LandingModal>
+      </footer>
     </div>
   )
 }
