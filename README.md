@@ -1,3 +1,7 @@
+> **⚠️ REPOSITÓRIO ARQUIVADO**: Este projeto foi movido para [NeuralThinkersLab/cidadao.ai](https://github.com/NeuralThinkersLab/cidadao.ai) como parte de um monorepo. Este repositório permanece disponível apenas para referência histórica e citações acadêmicas (TCC/DOI).
+
+---
+
 # Cidadão.AI Frontend
 
 <div align="center">
