@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { MessageSquare, Trash2, ChevronLeft, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { chatSessionService } from '@/lib/services/chat-session.service'
-import type { ChatSession } from '@/types/supabase'
+import { chatService } from '@/lib/api/chat.service'
+import type { ChatSession } from '@/types/chat'
 import { ButtonV2 } from '@/components/ui/button'
 import { SkeletonChatHistory } from '@/components/ui/skeleton-cards'
 import { format } from 'date-fns'
@@ -22,7 +22,7 @@ export function ChatHistorySidebar({
   isOpen,
   onClose,
   onSelectSession,
-  currentSessionId
+  currentSessionId,
 }: ChatHistorySidebarProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [loading, setLoading] = useState(true)
@@ -34,12 +34,12 @@ export function ChatHistorySidebar({
   const loadSessions = async () => {
     setLoading(true)
     try {
-      const userSessions = await chatSessionService.getUserSessions(20)
+      const userSessions = await chatService.getUserSessions(20)
       setSessions(userSessions)
     } catch (error) {
       logger.error(error instanceof Error ? error : new Error('Failed to load chat sessions'), {
         component: 'ChatHistorySidebar',
-        action: 'loadSessions'
+        action: 'loadSessions',
       })
     } finally {
       setLoading(false)
@@ -48,7 +48,7 @@ export function ChatHistorySidebar({
 
   const handleDeleteSession = async (sessionId: string) => {
     if (confirm('Tem certeza que deseja excluir esta conversa?')) {
-      const success = await chatSessionService.deleteSession(sessionId)
+      const success = await chatService.deleteSession(sessionId)
       if (success) {
         await loadSessions()
       }
@@ -56,10 +56,8 @@ export function ChatHistorySidebar({
   }
 
   const formatSessionTitle = (session: ChatSession) => {
-    // Try to get first user message as title
-    const firstUserMessage = session.messages?.find(m => m.role === 'user')
-    if (firstUserMessage?.content) {
-      return firstUserMessage.content.slice(0, 50) + (firstUserMessage.content.length > 50 ? '...' : '')
+    if (session.title) {
+      return session.title.length > 50 ? session.title.slice(0, 50) + '...' : session.title
     }
     return 'Nova conversa'
   }
@@ -67,19 +65,21 @@ export function ChatHistorySidebar({
   return (
     <>
       {/* Overlay */}
-      <div 
+      <div
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          'fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity',
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={onClose}
       />
 
       {/* Sidebar */}
-      <div className={cn(
-        "fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 transform transition-transform",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+          'fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 transform transition-transform',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
@@ -110,19 +110,17 @@ export function ChatHistorySidebar({
             <div className="p-4 space-y-2">
               {sessions.map((session) => (
                 <div
-                  key={session.id}
+                  key={session.session_id}
                   className={cn(
-                    "group p-3 rounded-lg cursor-pointer transition-colors",
-                    "hover:bg-gray-100 dark:hover:bg-gray-800",
-                    currentSessionId === session.session_id && "bg-gray-100 dark:bg-gray-800"
+                    'group p-3 rounded-lg cursor-pointer transition-colors',
+                    'hover:bg-gray-100 dark:hover:bg-gray-800',
+                    currentSessionId === session.session_id && 'bg-gray-100 dark:bg-gray-800'
                   )}
                   onClick={() => onSelectSession(session.session_id)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {formatSessionTitle(session)}
-                      </p>
+                      <p className="font-medium text-sm truncate">{formatSessionTitle(session)}</p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
                         <Calendar className="w-3 h-3" />
                         {format(new Date(session.created_at), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
@@ -138,9 +136,9 @@ export function ChatHistorySidebar({
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </button>
                   </div>
-                  {session.messages && session.messages.length > 0 && (
+                  {session.message_count && session.message_count > 0 && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {session.messages.length} mensagens
+                      {session.message_count} mensagens
                     </p>
                   )}
                 </div>

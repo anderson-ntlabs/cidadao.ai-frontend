@@ -1,8 +1,9 @@
 /**
  * Chat Persistence Hook
  *
- * Manages chat session persistence for Agora and Kids mode.
- * Saves conversations to Supabase for reports and analytics.
+ * Manages chat session IDs for Agora and Kids mode.
+ * Messages are persisted by the backend (Railway PostgreSQL) during
+ * streaming/message processing - no frontend persistence needed.
  *
  * @author Anderson Henrique da Silva
  * @since 2025-12-10
@@ -11,7 +12,6 @@
 'use client'
 
 import { useCallback, useRef } from 'react'
-import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
 
 const logger = createLogger('useChatPersistence')
@@ -30,122 +30,54 @@ interface UseChatPersistenceOptions {
 interface ChatPersistenceResult {
   /** Initialize or get existing session */
   initSession: () => Promise<string>
-  /** Save a user message */
+  /** Save a user message (no-op, backend handles persistence) */
   saveUserMessage: (content: string) => Promise<void>
-  /** Save an assistant message */
+  /** Save an assistant message (no-op, backend handles persistence) */
   saveAssistantMessage: (content: string) => Promise<void>
   /** Get current session ID */
   sessionId: string | null
 }
 
 export function useChatPersistence(options: UseChatPersistenceOptions): ChatPersistenceResult {
-  const { isKidsMode = false, agentId, agentName, childName } = options
+  const { isKidsMode = false, agentId, agentName } = options
   const sessionIdRef = useRef<string | null>(null)
-  const dbSessionIdRef = useRef<string | null>(null)
 
   /**
-   * Initialize a new chat session or return existing one
+   * Initialize a new chat session or return existing one.
+   * The backend creates the DB session on first message via get_or_create_session().
    */
   const initSession = useCallback(async (): Promise<string> => {
-    // Return existing session if already initialized
     if (sessionIdRef.current) {
       return sessionIdRef.current
     }
 
-    // Generate a new session ID
     const newSessionId = crypto.randomUUID()
     sessionIdRef.current = newSessionId
 
-    try {
-      // Create session in database
-      const session = await chatSessionService.createSession({
-        session_id: newSessionId,
-        agent_id: agentId,
-        metadata: {
-          is_kids_mode: isKidsMode,
-          child_name: childName,
-          platform: 'agora',
-          started_at: new Date().toISOString(),
-        },
-      })
-
-      if (session) {
-        dbSessionIdRef.current = session.id
-        logger.info('Chat session created', {
-          sessionId: newSessionId,
-          agentId,
-          isKidsMode,
-        })
-      }
-    } catch (error) {
-      logger.error('Failed to create chat session', error)
-    }
+    logger.info('Chat session initialized', {
+      sessionId: newSessionId,
+      agentId,
+      isKidsMode,
+    })
 
     return newSessionId
-  }, [agentId, isKidsMode, childName])
+  }, [agentId, isKidsMode])
 
   /**
-   * Save a user message to the session
+   * No-op: backend persists messages automatically during streaming.
+   * Kept for API compatibility with existing callers.
    */
-  const saveUserMessage = useCallback(
-    async (content: string): Promise<void> => {
-      if (!sessionIdRef.current) {
-        await initSession()
-      }
-
-      try {
-        await chatSessionService.addMessage(sessionIdRef.current!, {
-          role: 'user',
-          content,
-          agent_id: agentId,
-          agent_name: agentName,
-          metadata: {
-            is_kids_mode: isKidsMode,
-            child_name: childName,
-          },
-        })
-
-        logger.debug('User message saved', {
-          sessionId: sessionIdRef.current,
-          contentLength: content.length,
-        })
-      } catch (error) {
-        logger.error('Failed to save user message', error)
-      }
-    },
-    [agentId, agentName, isKidsMode, childName, initSession]
-  )
+  const saveUserMessage = useCallback(async (_content: string): Promise<void> => {
+    // Backend handles persistence via chat_service.save_message()
+  }, [])
 
   /**
-   * Save an assistant message to the session
+   * No-op: backend persists messages automatically during streaming.
+   * Kept for API compatibility with existing callers.
    */
-  const saveAssistantMessage = useCallback(
-    async (content: string): Promise<void> => {
-      if (!sessionIdRef.current) {
-        await initSession()
-      }
-
-      try {
-        await chatSessionService.addMessage(sessionIdRef.current!, {
-          role: 'assistant',
-          content,
-          agent_id: agentId,
-          agent_name: agentName,
-          metadata: {
-            is_kids_mode: isKidsMode,
-          },
-        })
-
-        logger.debug('Assistant message saved', {
-          sessionId: sessionIdRef.current,
-          contentLength: content.length,
-        })
-      } catch (error) {
-        logger.error('Failed to save assistant message', error)
-      }
-    },
-    [agentId, agentName, isKidsMode, initSession]
-  )
+  const saveAssistantMessage = useCallback(async (_content: string): Promise<void> => {
+    // Backend handles persistence via chat_service.save_message()
+  }, [])
 
   return {
     initSession,

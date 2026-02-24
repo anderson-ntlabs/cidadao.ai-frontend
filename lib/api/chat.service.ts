@@ -6,6 +6,7 @@ const logger = createLogger('ChatService')
 import type {
   ChatRequest,
   ChatResponse,
+  ChatSession,
   QuickAction,
   ChatMessage,
   CursorPaginationResponse,
@@ -25,6 +26,8 @@ const CHAT_ENDPOINTS = {
   MESSAGE: '/api/v1/chat/message',
   STREAM: '/api/v1/chat/stream',
   SUGGESTIONS: '/api/v1/chat/suggestions',
+  SESSIONS: '/api/v1/chat/sessions',
+  SESSION: (sessionId: string) => `/api/v1/chat/sessions/${sessionId}`,
   HISTORY: (sessionId: string) => `/api/v1/chat/history/${sessionId}`,
   HISTORY_PAGINATED: (sessionId: string) => `/api/v1/chat/history/${sessionId}/paginated`,
   CACHE_STATS: '/api/v1/chat/cache/stats',
@@ -138,6 +141,72 @@ export const chatService = {
       logger.error('Failed to load agents from backend', { error })
       // Fallback to mocks on error
       return getMockAgents()
+    }
+  },
+
+  // List user sessions from backend
+  async getUserSessions(limit: number = 20, offset: number = 0): Promise<ChatSession[]> {
+    try {
+      const response = await api.get<{ sessions: any[]; count: number }>(CHAT_ENDPOINTS.SESSIONS, {
+        params: { limit, offset },
+      })
+      if (response.success && response.data?.sessions) {
+        return response.data.sessions.map((s: any) => ({
+          session_id: s.id,
+          user_id: s.user_id,
+          title: s.title,
+          agent_id: s.agent_id,
+          status: s.status,
+          message_count: s.message_count,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          last_message_at: s.last_message_at,
+          last_activity: s.last_activity,
+          metadata: s.context || {},
+        }))
+      }
+      return []
+    } catch (error) {
+      logger.error('Failed to list sessions', { error })
+      return []
+    }
+  },
+
+  // Get a single session from backend
+  async getSession(sessionId: string): Promise<ChatSession | null> {
+    try {
+      const response = await api.get<any>(CHAT_ENDPOINTS.SESSION(sessionId))
+      if (response.success && response.data) {
+        const s = response.data
+        return {
+          session_id: s.id,
+          user_id: s.user_id,
+          title: s.title,
+          agent_id: s.agent_id,
+          status: s.status,
+          message_count: s.message_count,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          last_message_at: s.last_message_at,
+          last_activity: s.last_activity,
+          metadata: s.context || {},
+        }
+      }
+      return null
+    } catch (error) {
+      logger.error('Failed to get session', { error })
+      return null
+    }
+  },
+
+  // Delete a session from backend
+  async deleteSession(sessionId: string): Promise<boolean> {
+    try {
+      const response = await api.delete(CHAT_ENDPOINTS.SESSION(sessionId))
+      return response.success
+    } catch (error) {
+      logger.error('Failed to delete session', { error })
+      return false
     }
   },
 

@@ -1,92 +1,28 @@
 /**
- * Chat Session Service - Manages Supabase chat sessions
+ * Chat Session Service - Manages chat sessions via backend API
  *
- * @author Anderson Henrique da Silva
- * @location Minas Gerais, Brasil
- * @date 2025-10-31
+ * Sessions are persisted in Railway PostgreSQL (backend).
+ * Supabase is only used for OAuth authentication.
  */
 
-import { createClient } from '@/lib/supabase/client'
+import { chatService } from '@/lib/api/chat.service'
 import { createLogger } from '@/lib/logger'
-import type { ChatSession, ChatMessage } from '@/types/supabase'
+import type { ChatSession } from '@/types/chat'
 
 const logger = createLogger('ChatSessionService')
 
 export class ChatSessionService {
-  private supabase = createClient()
-
-  /**
-   * Create a new chat session
-   */
-  async createSession(data: {
-    session_id: string
-    agent_id: string
-    investigation_id?: string
-    metadata?: Record<string, any>
-  }): Promise<ChatSession | null> {
-    try {
-      const {
-        data: { user },
-      } = await this.supabase.auth.getUser()
-
-      if (!user) {
-        logger.warn('No authenticated user, skipping session creation')
-        return null
-      }
-
-      const { data: session, error } = await this.supabase
-        .from('chat_sessions')
-        .insert({
-          session_id: data.session_id,
-          user_id: user.id,
-          agent_id: data.agent_id,
-          investigation_id: data.investigation_id,
-          messages: [],
-          session_metadata: data.metadata || {},
-        })
-        .select()
-        .single()
-
-      if (error) {
-        logger.error('Failed to create session', error)
-        return null
-      }
-
-      logger.info('Session created', { sessionId: data.session_id, agentId: data.agent_id })
-      return session
-    } catch (error) {
-      logger.error('Session creation error', error)
-      return null
-    }
-  }
-
   /**
    * Get a session by session_id
    */
   async getSession(sessionId: string): Promise<ChatSession | null> {
     try {
-      const {
-        data: { user },
-      } = await this.supabase.auth.getUser()
-
-      if (!user) {
-        logger.warn('No authenticated user')
+      const session = await chatService.getSession(sessionId)
+      if (!session) {
+        logger.debug('Session not found', { sessionId })
         return null
       }
-
-      const { data: session, error } = await this.supabase
-        .from('chat_sessions')
-        .select('*')
-        .eq('session_id', sessionId)
-        .eq('user_id', user.id)
-        .single()
-
-      if (error) {
-        logger.error('Failed to get session', error)
-        return null
-      }
-
-      logger.debug('Session retrieved', { sessionId, messageCount: session.messages?.length || 0 })
+      logger.debug('Session retrieved', { sessionId, messageCount: session.message_count || 0 })
       return session
     } catch (error) {
       logger.error('Session retrieval error', error)
@@ -99,68 +35,12 @@ export class ChatSessionService {
    */
   async getUserSessions(limit: number = 20, offset: number = 0): Promise<ChatSession[]> {
     try {
-      const {
-        data: { user },
-      } = await this.supabase.auth.getUser()
-
-      if (!user) {
-        logger.warn('No authenticated user')
-        return []
-      }
-
-      const { data: sessions, error } = await this.supabase
-        .from('chat_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1)
-
-      if (error) {
-        logger.error('Failed to get user sessions', error)
-        return []
-      }
-
-      logger.debug('User sessions retrieved', { count: sessions?.length || 0, limit, offset })
-      return sessions || []
+      const sessions = await chatService.getUserSessions(limit, offset)
+      logger.debug('User sessions retrieved', { count: sessions.length, limit, offset })
+      return sessions
     } catch (error) {
       logger.error('Sessions retrieval error', error)
       return []
-    }
-  }
-
-  /**
-   * Update a session
-   */
-  async updateSession(sessionId: string, updates: Partial<ChatSession>): Promise<boolean> {
-    try {
-      const {
-        data: { user },
-      } = await this.supabase.auth.getUser()
-
-      if (!user) {
-        logger.warn('No authenticated user')
-        return false
-      }
-
-      const { error } = await this.supabase
-        .from('chat_sessions')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('session_id', sessionId)
-        .eq('user_id', user.id)
-
-      if (error) {
-        logger.error('Failed to update session', error)
-        return false
-      }
-
-      logger.debug('Session updated', { sessionId })
-      return true
-    } catch (error) {
-      logger.error('Session update error', error)
-      return false
     }
   }
 
@@ -169,82 +49,13 @@ export class ChatSessionService {
    */
   async deleteSession(sessionId: string): Promise<boolean> {
     try {
-      const {
-        data: { user },
-      } = await this.supabase.auth.getUser()
-
-      if (!user) {
-        logger.warn('No authenticated user')
-        return false
-      }
-
-      const { error } = await this.supabase
-        .from('chat_sessions')
-        .delete()
-        .eq('session_id', sessionId)
-        .eq('user_id', user.id)
-
-      if (error) {
-        logger.error('Failed to delete session', error)
-        return false
-      }
-
-      logger.info('Session deleted', { sessionId })
-      return true
-    } catch (error) {
-      logger.error('Session deletion error', error)
-      return false
-    }
-  }
-
-  /**
-   * Add a message to a session
-   */
-  async addMessage(
-    sessionId: string,
-    message: {
-      role: 'user' | 'assistant' | 'system'
-      content: string
-      agent_id: string
-      agent_name: string
-      metadata?: Record<string, any>
-    }
-  ): Promise<boolean> {
-    try {
-      const session = await this.getSession(sessionId)
-
-      if (!session) {
-        logger.warn('Session not found', { sessionId })
-        return false
-      }
-
-      const newMessage: ChatMessage = {
-        id: `msg_${Date.now()}_${Math.random()}`,
-        role: message.role,
-        content: message.content,
-        timestamp: new Date().toISOString(),
-        agent_id: message.agent_id,
-        agent_name: message.agent_name,
-        metadata: message.metadata,
-      }
-
-      const updatedMessages = [...(session.messages || []), newMessage]
-
-      const success = await this.updateSession(sessionId, {
-        messages: updatedMessages,
-      })
-
+      const success = await chatService.deleteSession(sessionId)
       if (success) {
-        logger.debug('Message added to session', {
-          sessionId,
-          role: message.role,
-          agentId: message.agent_id,
-        })
+        logger.info('Session deleted', { sessionId })
       }
-
       return success
     } catch (error) {
-      logger.error('Message addition error', error)
+      logger.error('Session deletion error', error)
       return false
     }
   }

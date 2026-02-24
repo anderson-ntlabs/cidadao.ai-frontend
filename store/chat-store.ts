@@ -1,27 +1,19 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import type {
-  ChatMessage as ChatChatMessage,
-  ChatSession as ChatChatSession,
+  ChatMessage,
+  ChatSession,
   ChatConnectionStatus,
   AgentInfo,
   QuickAction,
   Investigation,
 } from '@/types/chat'
-import type { ChatSession as SupabaseChatSession } from '@/types/supabase'
 import { chatService, generateSessionId } from '@/lib/api/chat.service'
-// WebSocket infrastructure exists in lib/websocket/ but is not used
-// Backend (Railway) does not support WebSocket connections yet
-import { chatSessionService } from '@/lib/services/chat-session.service'
 import { createLogger } from '@/lib/logger'
 import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
 import type { StreamCallbacks } from '@/lib/chat/types'
 
 const logger = createLogger('ChatStore')
-
-// Use chat types for the store (simpler, no user_id required)
-type ChatMessage = ChatChatMessage
-type ChatSession = ChatChatSession
 
 // Streaming state for UI
 export interface StreamingState {
@@ -133,62 +125,37 @@ export const useChatStore = create<ChatStore>()(
 
         // Initialize chat
         initializeChat: async (sessionId?: string) => {
-          const state = get()
-
-          // If sessionId provided, try to load existing session
+          // If sessionId provided, try to load existing session from backend
           if (sessionId) {
             try {
-              const supabaseSession = await chatSessionService.getSession(sessionId)
-              if (supabaseSession) {
-                // Convert Supabase session to Chat session
-                const messages: ChatMessage[] = (supabaseSession.messages || []).map((msg) => ({
-                  id: msg.id,
-                  session_id: supabaseSession.session_id,
-                  role: msg.role,
-                  content: msg.content,
-                  timestamp: msg.timestamp,
-                  agent_id: msg.agent_id,
-                  agent_name: msg.agent_name,
-                  metadata: msg.metadata,
-                }))
-
-                const chatSession: ChatSession = {
-                  session_id: supabaseSession.session_id,
-                  created_at: supabaseSession.created_at,
-                  last_message_at: supabaseSession.updated_at,
-                  metadata: supabaseSession.session_metadata || {},
-                }
+              const backendSession = await chatService.getSession(sessionId)
+              if (backendSession) {
+                // Load messages from backend
+                const messages = await chatService.getHistory(sessionId)
 
                 // Build index for O(1) lookups
                 const messageIndex: Record<string, number> = {}
                 messages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
 
                 set({
-                  session: chatSession,
+                  session: backendSession,
                   messages,
                   messageIndex,
                 })
 
-                // Load initial data
                 await Promise.all([get().loadAgents(), get().loadSuggestions()])
-
                 set({ connectionStatus: 'disconnected' })
                 return
               }
             } catch (error) {
               logger.error('Failed to load session', { error })
-              // Continue to create new session
             }
           }
 
           // Create new session if no sessionId or session not found
           await get().createNewSession()
 
-          // Load initial data
           await Promise.all([get().loadAgents(), get().loadSuggestions()])
-
-          // Don't connect WebSocket - backend doesn't support it yet
-          // get().connectWebSocket();
           set({ connectionStatus: 'disconnected' })
         },
 
@@ -257,24 +224,7 @@ export const useChatStore = create<ChatStore>()(
 
               get().addMessage(assistantMessage)
 
-              // Save message to Supabase
-              try {
-                await chatSessionService.addMessage(sessionId, {
-                  role: 'user',
-                  content: content,
-                  agent_id: '',
-                  agent_name: '',
-                })
-
-                await chatSessionService.addMessage(sessionId, {
-                  role: 'assistant',
-                  content: assistantMessage.content,
-                  agent_id: response.agent_id || '',
-                  agent_name: response.agent_name || '',
-                })
-              } catch (error) {
-                logger.error('Failed to save message to Supabase', { error })
-              }
+              // Messages are already persisted by the backend during sendMessage
 
               // Update suggested actions
               if (response.suggested_actions) {
@@ -512,25 +462,7 @@ export const useChatStore = create<ChatStore>()(
                 },
               }))
 
-              // Save messages to Supabase
-              const finalState = get()
-              chatSessionService
-                .addMessage(sessionId, {
-                  role: 'user',
-                  content,
-                  agent_id: '',
-                  agent_name: '',
-                })
-                .catch((err) => logger.warn('Failed to save user message', { error: err }))
-
-              chatSessionService
-                .addMessage(sessionId, {
-                  role: 'assistant',
-                  content: finalState.streaming.accumulatedContent,
-                  agent_id: finalState.streaming.currentAgentId || '',
-                  agent_name: finalState.streaming.currentAgentName || '',
-                })
-                .catch((err) => logger.warn('Failed to save assistant message', { error: err }))
+              // Messages are persisted by the backend during streaming
             },
 
             onError: (errorMessage: string) => {
@@ -779,51 +711,26 @@ export const useChatStore = create<ChatStore>()(
             currentInvestigation: null,
           })
 
-          // Create session in Supabase (optional - fails silently if table doesn't exist)
-          try {
-            await chatSessionService.createSession({
-              session_id: sessionId, // Pass frontend-generated session ID
-              agent_id: 'abaporu', // Default to Abaporu
-              metadata: { created_from: 'chat-store' },
-            })
-          } catch (error) {
-            // Silently ignore - chat works without Supabase persistence
-            logger.error('Failed to create session in Supabase', { error })
-          }
+          // Session will be created in backend automatically on first message
+          // via chat_service.get_or_create_session()
         },
 
         loadSession: async (sessionId: string) => {
           set({ isLoading: true })
 
           try {
-            const supabaseSession = await chatSessionService.getSession(sessionId)
+            const backendSession = await chatService.getSession(sessionId)
 
-            if (supabaseSession) {
-              // Convert Supabase session to Chat session
-              const messages: ChatMessage[] = (supabaseSession.messages || []).map((msg) => ({
-                id: msg.id,
-                session_id: supabaseSession.session_id,
-                role: msg.role,
-                content: msg.content,
-                timestamp: msg.timestamp,
-                agent_id: msg.agent_id,
-                agent_name: msg.agent_name,
-                metadata: msg.metadata,
-              }))
+            if (backendSession) {
+              // Load messages from backend
+              const messages = await chatService.getHistory(sessionId)
 
               // Build index for O(1) lookups
               const messageIndex: Record<string, number> = {}
               messages.forEach((msg, idx) => (messageIndex[msg.id] = idx))
 
-              const chatSession: ChatSession = {
-                session_id: supabaseSession.session_id,
-                created_at: supabaseSession.created_at,
-                last_message_at: supabaseSession.updated_at,
-                metadata: supabaseSession.session_metadata || {},
-              }
-
               set({
-                session: chatSession,
+                session: backendSession,
                 messages,
                 messageIndex,
                 currentInvestigation: null,

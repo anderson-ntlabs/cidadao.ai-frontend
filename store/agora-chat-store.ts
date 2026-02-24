@@ -14,7 +14,6 @@ import { PrimaryAdapter } from '@/lib/chat/adapters/primary.adapter'
 import { EDUCATIONAL_AGENT_IDS, getEducationalAgents } from '@/data/agents'
 import type { StreamCallbacks } from '@/lib/chat/types'
 import { logger } from '@/lib/utils/logger'
-import { chatSessionService } from '@/lib/services/chat-session.service'
 
 // Types
 export interface AgoraChatMessage {
@@ -59,47 +58,7 @@ interface AgoraChatStore {
 // Create streaming adapter
 const streamingAdapter = new PrimaryAdapter()
 
-// Track if DB session was created (outside store to avoid re-renders)
-let dbSessionInitialized = false
-
-/**
- * Persist message to database (fire and forget)
- */
-async function persistMessage(
-  sessionId: string,
-  role: 'user' | 'assistant',
-  content: string,
-  agentId: string,
-  agentName: string
-): Promise<void> {
-  try {
-    // Initialize DB session if needed
-    if (!dbSessionInitialized) {
-      await chatSessionService.createSession({
-        session_id: sessionId,
-        agent_id: agentId,
-        metadata: {
-          platform: 'agora',
-          is_kids_mode: false,
-          started_at: new Date().toISOString(),
-        },
-      })
-      dbSessionInitialized = true
-    }
-
-    // Add message to session
-    await chatSessionService.addMessage(sessionId, {
-      role,
-      content,
-      agent_id: agentId,
-      agent_name: agentName,
-      metadata: { platform: 'agora' },
-    })
-  } catch (error) {
-    // Silent fail - don't block chat for persistence errors
-    logger.debug('Failed to persist message', { error })
-  }
-}
+// Messages are persisted by the backend during streaming (chat_service.save_message)
 
 // Initial streaming state
 const initialStreamingState: AgoraStreamingState = {
@@ -172,8 +131,7 @@ export const useAgoraChatStore = create<AgoraChatStore>()(
           const agent = agents.find((a) => a.id === selectedAgent)
           const agentName = agent?.name || 'Mentor'
 
-          // Persist user message to database (async, don't await)
-          persistMessage(sessionId, 'user', content, selectedAgent, agentName)
+          // Backend persists messages during streaming
 
           // Add placeholder for streaming response
           const placeholderMessage: AgoraChatMessage = {
@@ -269,10 +227,7 @@ export const useAgoraChatStore = create<AgoraChatStore>()(
                 },
               })
 
-              // Persist assistant message to database (async, don't await)
-              if (assistantContent) {
-                persistMessage(sessionId, 'assistant', assistantContent, selectedAgent, agentName)
-              }
+              // Backend persists messages during streaming
 
               // Award XP for conversation
               const messageCount = finalState.messages.filter((m) => m.role === 'user').length
@@ -342,9 +297,6 @@ export const useAgoraChatStore = create<AgoraChatStore>()(
 
         // Clear chat
         clearChat: () => {
-          // Reset DB session tracking for new conversation
-          dbSessionInitialized = false
-
           set({
             messages: [],
             sessionId: generateSessionId(),
