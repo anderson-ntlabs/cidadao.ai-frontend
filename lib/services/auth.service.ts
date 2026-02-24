@@ -110,6 +110,15 @@ class AuthService {
         const previousUser = this.currentUser
         this.currentUser = user
 
+        // Sync Supabase access token to localStorage for backend API calls
+        if (session?.access_token) {
+          localStorage.setItem('access_token', session.access_token)
+          logger.debug('Access token synced to localStorage')
+        } else if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        }
+
         // Sync with NavigationSessionService (async to avoid circular dependency)
         if (event === 'SIGNED_IN' && user) {
           getNavigationSessionService().then((navService) => navService.initAuthSession(user.id))
@@ -131,7 +140,7 @@ class AuthService {
         }
       })
 
-      // Check for existing session
+      // Check for existing session and sync token
       const {
         data: { user },
         error,
@@ -144,6 +153,13 @@ class AuthService {
       if (user) {
         this.currentUser = this.convertSupabaseUser(user)
         logger.info('Existing session found', { userId: this.currentUser.id })
+
+        // Sync existing session token to localStorage
+        const { data: sessionData } = await this.supabase.auth.getSession()
+        if (sessionData.session?.access_token) {
+          localStorage.setItem('access_token', sessionData.session.access_token)
+          logger.debug('Existing access token synced to localStorage')
+        }
       }
 
       this.isInitialized = true

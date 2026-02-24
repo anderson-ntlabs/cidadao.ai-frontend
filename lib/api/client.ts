@@ -67,28 +67,26 @@ apiClient.interceptors.response.use(
       if (status === 401 && typeof window !== 'undefined') {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
 
-        // Try to refresh token if not already retrying
+        // Try to refresh Supabase session if not already retrying
         if (!originalRequest._retry) {
           originalRequest._retry = true
 
           try {
-            // Dynamic import to avoid circular dependency
-            const { authService } = await import('./auth.service')
-            await authService.refreshToken()
+            const { createClient } = await import('@/lib/supabase/client')
+            const supabase = createClient()
+            const { data } = await supabase.auth.refreshSession()
 
-            // Retry original request with new token
-            const newToken = localStorage.getItem('access_token')
-            if (newToken) {
+            if (data.session?.access_token) {
+              localStorage.setItem('access_token', data.session.access_token)
+
+              // Retry original request with refreshed token
               originalRequest.headers = originalRequest.headers || {}
-              originalRequest.headers.Authorization = `Bearer ${newToken}`
+              originalRequest.headers.Authorization = `Bearer ${data.session.access_token}`
               return apiClient.request(originalRequest)
             }
           } catch (refreshError) {
-            // Refresh failed, clear auth data
             localStorage.removeItem('access_token')
             localStorage.removeItem('refresh_token')
-            localStorage.removeItem('user')
-            // Redirect to login could be triggered here
           }
         }
       }

@@ -60,12 +60,18 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
       const streamUrl = `${this.baseUrl}/api/v1/chat/stream`
       logger.debug('[PrimaryAdapter] Sending request to:', { url: streamUrl })
 
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
       const response = await fetch(streamUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'text/event-stream',
-        },
+        headers,
         body: JSON.stringify({
           message: request.message,
           session_id: request.sessionId,
@@ -305,11 +311,17 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
     try {
+      const msgToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+      const msgHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (msgToken) {
+        msgHeaders['Authorization'] = `Bearer ${msgToken}`
+      }
+
       const response = await fetch(`${this.baseUrl}/api/v1/chat/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: msgHeaders,
         body: JSON.stringify({
           message: request.message,
           session_id: request.sessionId,

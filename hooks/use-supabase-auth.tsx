@@ -108,6 +108,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user)
           setIsAuthenticated(true)
 
+          // Sync existing session token to localStorage for backend API calls
+          const { data: sessionData } = await supabase.auth.getSession()
+          if (sessionData.session?.access_token) {
+            localStorage.setItem('access_token', sessionData.session.access_token)
+          }
+
           // Clean up URL if it has oauth_complete param
           if (typeof window !== 'undefined' && window.location.search.includes('oauth_complete=')) {
             const url = new URL(window.location.href)
@@ -155,6 +161,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       logger.debug('Auth state changed', { event, hasSession: !!session })
+
+      // Sync access token to localStorage for backend API calls
+      if (session?.access_token) {
+        localStorage.setItem('access_token', session.access_token)
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+      }
 
       if (session?.user) {
         setUser(convertSupabaseUser(session.user))
@@ -278,7 +292,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     setIsAuthenticated(false)
 
-    // Clear any auth-related local storage (legacy cleanup)
+    // Clear any auth-related local storage
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('redirectAfterLogin')
     localStorage.removeItem('supabase.auth.token')
     sessionStorage.clear()
