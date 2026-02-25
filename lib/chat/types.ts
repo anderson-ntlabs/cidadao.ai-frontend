@@ -32,6 +32,7 @@ export interface ChatResponse {
   message?: string
   data?: {
     response: string
+    sessionId?: string
     agentId?: string
     agentName?: string
     confidence?: number
@@ -101,6 +102,7 @@ export interface ContractData {
 export interface StreamEvent {
   type: StreamEventType
   timestamp?: string
+  session_id?: string
   message?: string
   intent?: string
   confidence?: number

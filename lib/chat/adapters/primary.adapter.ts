@@ -52,6 +52,7 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
     const contentChunks: string[] = []
     let agentId: string | undefined
     let agentName: string | undefined
+    let sessionId: string | undefined = request.sessionId
     let suggestedActions: string[] | undefined
     let contracts: ContractData[] = []
     let downloadAvailable = false
@@ -117,7 +118,10 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
 
                 switch (event.type) {
                   case 'start':
-                    logger.debug('Stream started', { timestamp: event.timestamp })
+                    if (event.session_id) {
+                      sessionId = event.session_id
+                    }
+                    logger.debug('Stream started', { timestamp: event.timestamp, sessionId })
                     callbacks.onStart?.()
                     break
 
@@ -251,6 +255,7 @@ export class PrimaryAdapter implements ChatAdapter, StreamingAdapter {
         success: true,
         data: {
           response: accumulatedContent,
+          sessionId,
           agentId,
           agentName,
           suggestions: suggestedActions,
