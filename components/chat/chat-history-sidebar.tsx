@@ -28,8 +28,10 @@ export function ChatHistorySidebar({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadSessions()
-  }, [])
+    if (isOpen) {
+      loadSessions()
+    }
+  }, [isOpen])
 
   const loadSessions = async () => {
     setLoading(true)
