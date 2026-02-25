@@ -55,12 +55,17 @@ export default function PTPageOptimized(): JSX.Element {
                 quality={85}
               />
             </div>
-            <h1
-              className="text-5xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent leading-tight"
-              style={{ backgroundSize: '200% 200%' }}
-            >
-              Cidadão.AI
-            </h1>
+            <div className="flex flex-col items-center gap-3">
+              <h1
+                className="text-5xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-green-600 via-yellow-500 to-blue-600 bg-clip-text text-transparent leading-tight"
+                style={{ backgroundSize: '200% 200%' }}
+              >
+                Cidadão.AI
+              </h1>
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-green-600 to-blue-600 text-white text-sm font-bold shadow-lg animate-pulse">
+                v2.0 — Neural Labs
+              </span>
+            </div>
           </div>
 
           {/* Tagline */}
@@ -70,20 +75,25 @@ export default function PTPageOptimized(): JSX.Element {
 
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
-            17 agentes de IA monitorando gastos públicos 24/7 para proteger seus direitos
+            20 agentes de IA monitorando gastos públicos 24/7 para proteger seus direitos
           </p>
 
           {/* CTA Buttons - Server-rendered links */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch sm:items-center max-w-lg sm:max-w-none mx-auto">
-            <Link
-              href="/pt/login"
+            <a
+              href="https://cidadaoai-production.up.railway.app/login"
               className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden inline-block text-center"
             >
               <span className="relative z-10 flex flex-col items-center">
-                <span className="text-xl">Começar Agora</span>
-                <span className="text-sm opacity-90 mt-1">100% Gratuito • Sem cartão</span>
+                <span className="text-xl flex items-center gap-2">
+                  Acessar Sistema 2.0{' '}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <span className="text-sm opacity-90 mt-1">
+                  100% Gratuito — Powered by Neural Labs
+                </span>
               </span>
-            </Link>
+            </a>
 
             <Link
               href="/pt/about"
@@ -141,7 +151,7 @@ export default function PTPageOptimized(): JSX.Element {
               className="block p-6 bg-gradient-to-br from-blue-500/10 to-cyan-600/10 rounded-xl border border-blue-500/20 hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
               <div className="text-4xl mb-4">🇧🇷</div>
-              <h3 className="text-xl font-bold mb-2">17 Agentes de IA</h3>
+              <h3 className="text-xl font-bold mb-2">20 Agentes de IA</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Inteligências artificiais com identidades de heróis brasileiros trabalhando juntas
               </p>
@@ -279,14 +289,14 @@ export default function PTPageOptimized(): JSX.Element {
                   </a>
 
                   <a
-                    href="https://cidadao-api-production.up.railway.app/docs"
+                    href="https://cidadaoai-api-production.up.railway.app/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
                   >
                     <div className="text-2xl mb-2">⚡</div>
                     <h4 className="text-sm font-bold flex items-center justify-center gap-1">
-                      API <ExternalLink className="w-3 h-3" />
+                      API v2 <ExternalLink className="w-3 h-3" />
                     </h4>
                   </a>
 
@@ -301,20 +311,20 @@ export default function PTPageOptimized(): JSX.Element {
       {/* Final CTA */}
       <section className="py-24 bg-gradient-to-r from-green-600 to-blue-600">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">Pronto para Começar?</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+            Pronto para o Cidadao.AI 2.0?
+          </h2>
           <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Junte-se a milhares de cidadãos usando IA para fiscalizar o governo brasileiro
+            Nova plataforma com 20 agentes de IA, chat inteligente e mapa interativo do Brasil
           </p>
-          <Link
-            href="/pt/login"
+          <a
+            href="https://cidadaoai-production.up.railway.app/login"
             className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-green-600 rounded-xl font-bold text-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
           >
-            Criar Conta Grátis
+            Acessar Sistema 2.0
             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <p className="mt-6 text-white/70 text-sm">
-            Sem cartão de crédito • Setup em 2 minutos • Cancele quando quiser
-          </p>
+          </a>
+          <p className="mt-6 text-white/70 text-sm">100% Gratuito — Powered by Neural Labs</p>
         </div>
       </section>
 
@@ -326,7 +336,7 @@ export default function PTPageOptimized(): JSX.Element {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              © 2025 Cidadão.AI - Transparência Pública com IA
+              © 2026 Cidadão.AI - Transparência Pública com IA — Neural Labs
             </p>
             <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
               <Link href="/pt/about" className="hover:text-green-600 transition-colors">
@@ -335,13 +345,12 @@ export default function PTPageOptimized(): JSX.Element {
               <Link href="/pt/manifesto" className="hover:text-green-600 transition-colors">
                 Manifesto
               </Link>
-              <Link
-                href="/pt/agora/login"
-                className="hover:text-green-600 transition-colors flex items-center gap-1"
+              <a
+                href="https://cidadaoai-production.up.railway.app/login"
+                className="hover:text-green-600 transition-colors font-semibold"
               >
-                <span>🏛️</span>
-                <span>Ágora</span>
-              </Link>
+                Sistema 2.0
+              </a>
             </div>
           </div>
         </div>
