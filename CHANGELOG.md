@@ -8,7 +8,7 @@
 **Data**: 2025-09-17 08:42:08 -03 (Horário de Brasília)
 **Localização**: Minas Gerais, Brasil
 **Categoria**: Documentation / Changelog
-**Última Atualização**: 2025-10-04
+**Última Atualização**: 2026-02-25
 
 ---
 
@@ -16,6 +16,27 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
+
+## [1.1.0] - 2026-02-25
+
+### 🚀 Adicionado
+
+- **Captura de Session ID do Backend** (`primary.adapter.ts`)
+  - PrimaryAdapter captura `session_id` do evento SSE `start` durante streaming
+  - Session ID disponível no `ChatResponse.data.sessionId` para rastreamento de sessões
+
+- **Auth Bridge Supabase → Backend** (`types.ts`)
+  - `session_id` adicionado à interface `StreamEvent`
+  - `sessionId` adicionado à interface `ChatResponse.data`
+  - Permite que o frontend identifique sessões persistidas no backend
+
+### 🔄 Modificado
+
+- **PrimaryAdapter SSE Handling** (`lib/chat/adapters/primary.adapter.ts`)
+  - Evento `start` agora extrai e armazena `session_id` do payload SSE
+  - Token JWT do Supabase enviado automaticamente via localStorage `access_token`
+
+---
 
 ## [Unreleased]
 
