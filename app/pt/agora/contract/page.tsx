@@ -339,7 +339,7 @@ export default function AgoraContractPage() {
       288,
       { align: 'center' }
     )
-    doc.text('contato@cidadao.ai | github.com/anderson-ufrj/cidadao.ai', pageWidth / 2, 293, {
+    doc.text('contato@cidadao.ai | github.com/anderson-ntlabs/cidadao.ai', pageWidth / 2, 293, {
       align: 'center',
     })
 

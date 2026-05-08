@@ -405,7 +405,7 @@ const { investigation, startPolling, stopPolling } = useBackendInvestigation({
 
 **Frontend**:
 
-- Repository: anderson-ufrj/cidadao.ai-frontend
+- Repository: anderson-ntlabs/cidadao.ai-frontend
 - Investigation page: `/pt/app/investigacoes`
 - Hooks: `/hooks/use-backend-investigations.ts`
 - Adapter: `/lib/api/investigation-adapter.ts`

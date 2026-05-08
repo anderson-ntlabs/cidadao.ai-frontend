@@ -12,7 +12,7 @@ import { createLogger } from '@/lib/logger'
 const logger = createLogger('GitHubAPI')
 
 // Repository to verify fork
-const REPO_OWNER = 'anderson-ufrj'
+const REPO_OWNER = 'anderson-ntlabs'
 const REPO_NAME = 'cidadao.ai-frontend'
 
 interface GitHubUser {

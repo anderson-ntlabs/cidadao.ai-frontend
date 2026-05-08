@@ -416,7 +416,7 @@ f3c06ca - test: fix request-validator
 
 - **Vercel:** https://vercel.com/dashboard
 - **Sentry:** https://sentry.io/
-- **GitHub:** https://github.com/anderson-ufrj/cidadao.ai-frontend
+- **GitHub:** https://github.com/anderson-ntlabs/cidadao.ai-frontend
 
 ---
 

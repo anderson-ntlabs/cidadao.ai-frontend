@@ -135,7 +135,7 @@ export default function SystemPage(): JSX.Element {
             <ul className="list-disc pl-6 mt-4 space-y-2">
               <li>
                 <a
-                  href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+                  href="https://github.com/anderson-ntlabs/cidadao.ai-backend"
                   className="text-green-600 hover:underline"
                 >
                   Backend Repository
@@ -143,7 +143,7 @@ export default function SystemPage(): JSX.Element {
               </li>
               <li>
                 <a
-                  href="https://github.com/anderson-ufrj/cidadao.ai-frontend"
+                  href="https://github.com/anderson-ntlabs/cidadao.ai-frontend"
                   className="text-green-600 hover:underline"
                 >
                   Frontend Repository
@@ -151,7 +151,7 @@ export default function SystemPage(): JSX.Element {
               </li>
               <li>
                 <a
-                  href="https://github.com/anderson-ufrj/cidadao.ai-models"
+                  href="https://github.com/anderson-ntlabs/cidadao.ai-models"
                   className="text-green-600 hover:underline"
                 >
                   AI Models Repository

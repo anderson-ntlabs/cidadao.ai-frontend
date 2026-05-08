@@ -399,7 +399,7 @@ Solução:
 
 - Production: https://sentry.io/
 - Vercel: https://vercel.com/dashboard
-- GitHub: https://github.com/anderson-ufrj/cidadao.ai-frontend
+- GitHub: https://github.com/anderson-ntlabs/cidadao.ai-frontend
 
 ---
 

@@ -253,7 +253,7 @@ export function useSessionTimeout(timeoutMinutes = 30, warningMinutes = 5) {
 
 ```typescript
 // lib/agora/github.ts
-const REPO_OWNER = 'anderson-ufrj'
+const REPO_OWNER = 'anderson-ntlabs'
 const REPO_NAME = 'cidadao.ai-frontend'
 
 export async function verifyGitHubFork(username: string): Promise<{

@@ -7,7 +7,7 @@
     ":semanticCommits",
     ":timezone(America/Sao_Paulo)"
   ],
-  "assignees": ["anderson-ufrj"],
+  "assignees": ["anderson-ntlabs"],
   "labels": ["dependencies", "automated"],
   "schedule": ["before 5am on monday and thursday"],
   "prConcurrentLimit": 5,
@@ -88,7 +88,7 @@
   ],
   "vulnerabilityAlerts": {
     "labels": ["security", "vulnerability"],
-    "assignees": ["anderson-ufrj"],
+    "assignees": ["anderson-ntlabs"],
     "schedule": ["at any time"],
     "prPriority": 20
   },

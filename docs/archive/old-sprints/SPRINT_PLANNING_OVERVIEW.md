@@ -641,10 +641,10 @@ Anderson Henrique da Silva
 anderson.ufrj@gmail.com
 
 **Repository:**
-https://github.com/anderson-ufrj/cidadao.ai-frontend
+https://github.com/anderson-ntlabs/cidadao.ai-frontend
 
 **Documentation:**
-https://github.com/anderson-ufrj/cidadao.ai-frontend/tree/main/docs
+https://github.com/anderson-ntlabs/cidadao.ai-frontend/tree/main/docs
 
 ---
 

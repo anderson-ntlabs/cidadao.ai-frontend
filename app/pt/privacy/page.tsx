@@ -203,7 +203,7 @@ export default function PrivacyPage(): JSX.Element {
             Para questões sobre privacidade ou sobre o uso de dados para pesquisa, entre em contato
             através do nosso sistema ou abra uma issue no{' '}
             <a
-              href="https://github.com/anderson-ufrj/cidadao.ai-hub"
+              href="https://github.com/anderson-ntlabs/cidadao.ai-hub"
               className="text-green-600 hover:underline"
             >
               GitHub

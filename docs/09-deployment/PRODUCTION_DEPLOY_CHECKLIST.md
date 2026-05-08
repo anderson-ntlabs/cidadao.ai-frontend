@@ -264,7 +264,7 @@ vercel env add NEXT_PUBLIC_API_URL production
 
 **Projeto:**
 
-- Issues: github.com/anderson-ufrj/cidadao.ai-frontend/issues
+- Issues: github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 - Email: anderson.ufrj@gmail.com
 
 ---

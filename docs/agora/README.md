@@ -145,7 +145,7 @@ Novato (0-100 XP) → Aprendiz (100-500 XP) → Contribuidor (500-2000 XP) → M
 
 ```bash
 # Clone o repositório
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
+git clone https://github.com/anderson-ntlabs/cidadao.ai-frontend.git
 
 # Instale dependências
 npm install

@@ -179,7 +179,7 @@ app/pt/privacy/page.tsx                        ← Política (Seção 8)
 
 ### Repositório
 
-- **GitHub**: https://github.com/anderson-ufrj/cidadao.ai-frontend
+- **GitHub**: https://github.com/anderson-ntlabs/cidadao.ai-frontend
 - **Branch**: `feature/production-ready-improvements`
 - **Commits**: 6 commits profissionais
 
@@ -266,7 +266,7 @@ ORDER BY created_at DESC;
 
 ## 📞 Suporte
 
-**Issues**: https://github.com/anderson-ufrj/cidadao.ai-frontend/issues
+**Issues**: https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 
 **Dúvidas**:
 

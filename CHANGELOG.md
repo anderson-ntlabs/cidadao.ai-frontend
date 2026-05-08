@@ -130,5 +130,5 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - 🚨 **Segurança**: Correções de vulnerabilidades
 - ⚡ **Performance**: Melhorias de performance
 
-[Unreleased]: https://github.com/anderson-ufrj/cidadao.ai-frontend/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/anderson-ufrj/cidadao.ai-frontend/releases/tag/v1.0.0
+[Unreleased]: https://github.com/anderson-ntlabs/cidadao.ai-frontend/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/anderson-ntlabs/cidadao.ai-frontend/releases/tag/v1.0.0

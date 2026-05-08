@@ -323,7 +323,7 @@ Antes de começar a coletar dados:
 - PostHog: https://posthog.com/docs
 - Supabase: https://supabase.com/docs
 
-**Issues**: https://github.com/anderson-ufrj/cidadao.ai-frontend/issues
+**Issues**: https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 
 ---
 

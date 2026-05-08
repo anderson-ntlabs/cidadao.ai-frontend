@@ -394,7 +394,7 @@ WHERE user_hash = 'hash_do_usuario';
 
 - **PostHog Docs**: https://posthog.com/docs
 - **Supabase Docs**: https://supabase.com/docs
-- **Issues**: https://github.com/anderson-ufrj/cidadao.ai-frontend/issues
+- **Issues**: https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 
 ---
 

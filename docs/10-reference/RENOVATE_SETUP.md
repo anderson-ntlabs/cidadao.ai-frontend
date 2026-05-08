@@ -12,7 +12,7 @@ Visite: **https://github.com/apps/renovate**
 
 1. Clique em **"Install"**
 2. Escolha **"Only select repositories"**
-3. Selecione: `anderson-ufrj/cidadao.ai-frontend` (ou nome correto do repo)
+3. Selecione: `anderson-ntlabs/cidadao.ai-frontend` (ou nome correto do repo)
 4. Clique em **"Install"**
 
 ### 2. Aguardar o Onboarding PR

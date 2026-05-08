@@ -382,7 +382,7 @@ Este componente e sua documentação são propriedade intelectual do autor. O us
 
 Contribuições são bem-vindas através de Pull Requests no repositório oficial:
 
-- GitHub: `anderson-ufrj/cidadao.ai-frontend`
+- GitHub: `anderson-ntlabs/cidadao.ai-frontend`
 - Branch: `main`
 
 ### Citação
@@ -396,7 +396,7 @@ Para citar este trabalho em publicações acadêmicas ou técnicas:
   year = {2025},
   month = {10},
   location = {Minas Gerais, Brasil},
-  url = {https://github.com/anderson-ufrj/cidadao.ai-frontend}
+  url = {https://github.com/anderson-ntlabs/cidadao.ai-frontend}
 }
 ```
 

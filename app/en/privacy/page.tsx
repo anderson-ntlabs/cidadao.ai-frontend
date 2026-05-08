@@ -196,7 +196,7 @@ export default function PrivacyPage(): JSX.Element {
             For privacy questions or about the use of data for research, contact us through our
             system or open an issue on{' '}
             <a
-              href="https://github.com/anderson-ufrj/cidadao.ai-hub"
+              href="https://github.com/anderson-ntlabs/cidadao.ai-hub"
               className="text-green-600 hover:underline"
             >
               GitHub

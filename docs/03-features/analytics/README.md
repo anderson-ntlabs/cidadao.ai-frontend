@@ -292,7 +292,7 @@ open http://localhost:3000/pt
 
 ### Issues & Bugs
 
-Abra issue em: https://github.com/anderson-ufrj/cidadao.ai-frontend/issues
+Abra issue em: https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 
 ---
 
@@ -312,5 +312,5 @@ Todos os dados coletados são:
 
 **Implementado por:** Anderson Henrique da Silva
 **Instituição:** Pesquisa em Transparência Pública Digital
-**Contato:** GitHub Issues ou anderson-ufrj
+**Contato:** GitHub Issues ou anderson-ntlabs
 **Data:** 2025-01-24

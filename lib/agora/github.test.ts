@@ -50,7 +50,7 @@ describe('GitHub API', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            parent: { full_name: 'anderson-ufrj/cidadao.ai-frontend' },
+            parent: { full_name: 'anderson-ntlabs/cidadao.ai-frontend' },
           }),
       })
 
@@ -75,7 +75,7 @@ describe('GitHub API', () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            parent: { full_name: 'anderson-ufrj/cidadao.ai-frontend' },
+            parent: { full_name: 'anderson-ntlabs/cidadao.ai-frontend' },
           }),
       })
 
@@ -223,7 +223,7 @@ describe('GitHub API', () => {
     it('should return correct fork URL', () => {
       const url = getForkUrl()
 
-      expect(url).toBe('https://github.com/anderson-ufrj/cidadao.ai-frontend/fork')
+      expect(url).toBe('https://github.com/anderson-ntlabs/cidadao.ai-frontend/fork')
     })
   })
 
@@ -231,7 +231,7 @@ describe('GitHub API', () => {
     it('should return correct repo URL', () => {
       const url = getRepoUrl()
 
-      expect(url).toBe('https://github.com/anderson-ufrj/cidadao.ai-frontend')
+      expect(url).toBe('https://github.com/anderson-ntlabs/cidadao.ai-frontend')
     })
   })
 })

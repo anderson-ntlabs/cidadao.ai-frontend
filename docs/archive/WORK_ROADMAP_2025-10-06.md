@@ -423,12 +423,12 @@ perf: optimize bundle size with dynamic imports
 
 - Vercel: https://vercel.com/dashboard
 - Sentry: https://sentry.io/
-- GitHub: https://github.com/anderson-ufrj/cidadao.ai-frontend
+- GitHub: https://github.com/anderson-ntlabs/cidadao.ai-frontend
 
 ### Suporte
 
 - Email: anderson.ufrj@gmail.com
-- Issues: github.com/anderson-ufrj/cidadao.ai-frontend/issues
+- Issues: github.com/anderson-ntlabs/cidadao.ai-frontend/issues
 
 ---
 

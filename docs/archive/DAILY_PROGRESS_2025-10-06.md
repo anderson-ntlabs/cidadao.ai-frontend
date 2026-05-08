@@ -541,14 +541,14 @@ ROI: 9x em primeiro mês
 
 **Desenvolvedor:** Anderson Henrique da Silva
 **Email:** anderson.ufrj@gmail.com
-**GitHub:** anderson-ufrj/cidadao.ai-frontend
+**GitHub:** anderson-ntlabs/cidadao.ai-frontend
 **Produção:** https://cidadao-ai-frontend.vercel.app
 
 **Dashboards:**
 
 - Vercel: https://vercel.com/dashboard
 - Sentry: https://sentry.io/
-- GitHub: https://github.com/anderson-ufrj/cidadao.ai-frontend
+- GitHub: https://github.com/anderson-ntlabs/cidadao.ai-frontend
 
 ---
 

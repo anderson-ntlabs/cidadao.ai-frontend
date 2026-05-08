@@ -854,8 +854,8 @@ Localização: Minas Gerais, Brasil
 
 **Repositórios:**
 
-- Frontend: github.com/anderson-ufrj/cidadao.ai-frontend
-- Backend: github.com/anderson-ufrj/cidadao.ai-backend
+- Frontend: github.com/anderson-ntlabs/cidadao.ai-frontend
+- Backend: github.com/anderson-ntlabs/cidadao.ai-backend
 
 **Ambiente de Produção:**
 

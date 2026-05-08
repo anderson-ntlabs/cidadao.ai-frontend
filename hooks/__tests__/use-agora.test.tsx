@@ -190,7 +190,7 @@ describe('use-agora utilities', () => {
 
     it('should have owner and repo for each track', () => {
       Object.values(TRACK_REPOS).forEach((repo) => {
-        expect(repo.owner).toBe('anderson-ufrj')
+        expect(repo.owner).toBe('anderson-ntlabs')
         expect(repo.repo).toBeDefined()
         expect(repo.repo.startsWith('cidadao.ai-')).toBe(true)
       })

@@ -1472,7 +1472,7 @@ function announceToScreenReader(message: string) {
 
       {/* Open Source */}
       <a
-        href="https://github.com/anderson-ufrj/cidadao.ai-frontend"
+        href="https://github.com/anderson-ntlabs/cidadao.ai-frontend"
         className="flex items-center gap-2 hover:underline"
       >
         <GithubIcon className="w-5 h-5" />

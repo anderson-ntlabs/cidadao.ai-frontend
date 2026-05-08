@@ -1918,7 +1918,7 @@ interface AgentInfo {
 
 #### Repositórios
 
-- **GitHub:** anderson-ufrj/cidadao.ai-frontend
+- **GitHub:** anderson-ntlabs/cidadao.ai-frontend
 - **Deployment:** Vercel (em configuração)
 - **Backend:** HuggingFace Spaces
 

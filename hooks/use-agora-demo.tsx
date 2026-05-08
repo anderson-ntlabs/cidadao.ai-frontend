@@ -164,10 +164,10 @@ function calculateLevel(xp: number): number {
 
 // GitHub repos by track for fork verification
 export const TRACK_REPOS: Record<string, { owner: string; repo: string }> = {
-  backend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-backend' },
-  frontend: { owner: 'anderson-ufrj', repo: 'cidadao.ai-frontend' },
-  ia: { owner: 'anderson-ufrj', repo: 'cidadao.ai-ml' },
-  devops: { owner: 'anderson-ufrj', repo: 'cidadao.ai-infra' },
+  backend: { owner: 'anderson-ntlabs', repo: 'cidadao.ai-backend' },
+  frontend: { owner: 'anderson-ntlabs', repo: 'cidadao.ai-frontend' },
+  ia: { owner: 'anderson-ntlabs', repo: 'cidadao.ai-ml' },
+  devops: { owner: 'anderson-ntlabs', repo: 'cidadao.ai-infra' },
 }
 
 interface AgoraDemoContextType {

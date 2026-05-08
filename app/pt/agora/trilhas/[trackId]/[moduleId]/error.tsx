@@ -89,7 +89,7 @@ export default function AgoraModuleError({ error, reset }: ErrorProps) {
         <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
           Se o problema persistir,{' '}
           <a
-            href="https://github.com/anderson-ufrj/cidadao.ai-frontend/issues"
+            href="https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 dark:text-green-400 hover:underline"

@@ -106,7 +106,7 @@ export function FAQSection() {
       <div className="text-center mt-6">
         <p className="text-gray-600 dark:text-gray-400 mb-3 text-sm">Ainda tem dúvidas?</p>
         <a
-          href="https://github.com/anderson-ufrj/cidadao.ai-backend/issues"
+          href="https://github.com/anderson-ntlabs/cidadao.ai-backend/issues"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm"

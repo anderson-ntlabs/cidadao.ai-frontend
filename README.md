@@ -24,8 +24,8 @@
   </p>
 
   <p>
-    <img src="https://github.com/anderson-ufrj/cidadao.ai-frontend/workflows/CI%20-%20Build%20%26%20Test/badge.svg" alt="CI Build">
-    <img src="https://github.com/anderson-ufrj/cidadao.ai-frontend/workflows/E2E%20Tests%20(Playwright)/badge.svg" alt="E2E Tests">
+    <img src="https://github.com/anderson-ntlabs/cidadao.ai-frontend/workflows/CI%20-%20Build%20%26%20Test/badge.svg" alt="CI Build">
+    <img src="https://github.com/anderson-ntlabs/cidadao.ai-frontend/workflows/E2E%20Tests%20(Playwright)/badge.svg" alt="E2E Tests">
     <img src="https://img.shields.io/badge/coverage-91%25-success?style=flat-square" alt="Coverage">
     <img src="https://img.shields.io/badge/E2E-36_tests-success?style=flat-square&logo=playwright" alt="E2E Tests">
     <img src="https://img.shields.io/badge/Lighthouse-97.8-success?style=flat-square&logo=lighthouse" alt="Lighthouse">
@@ -143,7 +143,7 @@ Implementamos os pilares do governo aberto:
 1. **Clone o repositório**
 
 ```bash
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
+git clone https://github.com/anderson-ntlabs/cidadao.ai-frontend.git
 cd cidadao.ai-frontend
 ```
 
@@ -418,9 +418,9 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 <div align="center">
   <p>Feito com ❤️ para o Brasil</p>
   <p>
-    <a href="https://github.com/anderson-ufrj/cidadao.ai-frontend">GitHub</a> •
+    <a href="https://github.com/anderson-ntlabs/cidadao.ai-frontend">GitHub</a> •
     <a href="https://cidadao.ai">Website</a> •
-    <a href="https://github.com/anderson-ufrj/cidadao.ai-backend">Backend</a>
+    <a href="https://github.com/anderson-ntlabs/cidadao.ai-backend">Backend</a>
   </p>
   
   <br/>

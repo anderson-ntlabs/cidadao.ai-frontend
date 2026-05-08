@@ -86,7 +86,7 @@ describe('Footer', () => {
     it('renders GitHub link', () => {
       render(<Footer locale="pt" />)
       const link = screen.getByText('💻 GitHub')
-      expect(link).toHaveAttribute('href', 'https://github.com/anderson-ufrj')
+      expect(link).toHaveAttribute('href', 'https://github.com/anderson-ntlabs')
     })
 
     it('renders LinkedIn link', () => {

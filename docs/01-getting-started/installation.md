@@ -33,7 +33,7 @@ Comprehensive installation guide for Cidadão.AI frontend development.
 
 ```bash
 # Clone and setup in one command
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git && \
+git clone https://github.com/anderson-ntlabs/cidadao.ai-frontend.git && \
 cd cidadao.ai-frontend && \
 npm install && \
 cp .env.example .env.local && \
@@ -111,10 +111,10 @@ sudo apt-get install git
 
 ```bash
 # HTTPS (recommended for most users)
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
+git clone https://github.com/anderson-ntlabs/cidadao.ai-frontend.git
 
 # SSH (if you have SSH keys configured)
-git clone git@github.com:anderson-ufrj/cidadao.ai-frontend.git
+git clone git@github.com:anderson-ntlabs/cidadao.ai-frontend.git
 
 # Navigate to project
 cd cidadao.ai-frontend
@@ -400,7 +400,7 @@ npm uninstall -g typescript
 - [Quick Start Guide](./quick-start.md) - Get running fast
 - [Environment Setup](./environment-setup.md) - Configure your environment
 - [Troubleshooting](../05-guides/troubleshooting.md) - Common solutions
-- [GitHub Issues](https://github.com/anderson-ufrj/cidadao.ai-frontend/issues) - Report bugs
+- [GitHub Issues](https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues) - Report bugs
 
 ---
 

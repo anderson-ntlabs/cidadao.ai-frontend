@@ -252,7 +252,7 @@ export default function ENPageOptimized(): JSX.Element {
                 <h3 className="text-xl font-bold text-center mb-4">For Developers</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <a
-                    href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+                    href="https://github.com/anderson-ntlabs/cidadao.ai-backend"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"
@@ -264,7 +264,7 @@ export default function ENPageOptimized(): JSX.Element {
                   </a>
 
                   <a
-                    href="https://anderson-ufrj.github.io/cidadao.ai-technical-docs/docs/intro"
+                    href="https://anderson-ntlabs.github.io/cidadao.ai-technical-docs/docs/intro"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block p-4 bg-gray-100 dark:bg-gray-800 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 text-center"

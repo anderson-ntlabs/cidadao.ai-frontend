@@ -11,7 +11,7 @@ Get the Cidadão.AI frontend running in 5 minutes!
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/anderson-ufrj/cidadao.ai-frontend.git
+git clone https://github.com/anderson-ntlabs/cidadao.ai-frontend.git
 cd cidadao.ai-frontend
 ```
 

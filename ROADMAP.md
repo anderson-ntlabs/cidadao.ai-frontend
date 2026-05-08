@@ -482,7 +482,7 @@ jobs:
 
 ### Contato
 
-- **GitHub**: anderson-ufrj/cidadao.ai-\*
+- **GitHub**: anderson-ntlabs/cidadao.ai-\*
 - **Issues**: Use templates de issue
 - **Discussions**: Para perguntas gerais
 

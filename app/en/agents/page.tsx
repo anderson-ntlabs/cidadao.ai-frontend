@@ -124,7 +124,7 @@ export default function AgentsPage(): JSX.Element {
                 Access API
               </Button>
             </Link>
-            <Link href="https://github.com/anderson-ufrj/cidadao.ai-backend" target="_blank">
+            <Link href="https://github.com/anderson-ntlabs/cidadao.ai-backend" target="_blank">
               <Button variant="secondary">View Source Code</Button>
             </Link>
           </div>

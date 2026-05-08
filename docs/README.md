@@ -2,7 +2,7 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](https://github.com/anderson-ufrj/cidadao.ai-frontend)
+[![Test Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](https://github.com/anderson-ntlabs/cidadao.ai-frontend)
 [![Bundle Size](https://img.shields.io/badge/bundle-254kB-success)](./11-performance/bundle-analysis-2025-11-22.md)
 [![Lighthouse](https://img.shields.io/badge/lighthouse-97.8-success)](./11-performance/bundle-analysis-2025-11-22.md)
 [![License](https://img.shields.io/badge/license-MIT-blue)](../LICENSE)

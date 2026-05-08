@@ -210,7 +210,7 @@ export default function SystemPage(): JSX.Element {
           <p>
             O Cidadão.AI é um projeto open source e acolhe contribuições da comunidade. Visite nosso{' '}
             <a
-              href="https://github.com/anderson-ufrj/cidadao.ai-backend"
+              href="https://github.com/anderson-ntlabs/cidadao.ai-backend"
               className="text-blue-600 hover:underline"
             >
               repositório no GitHub
