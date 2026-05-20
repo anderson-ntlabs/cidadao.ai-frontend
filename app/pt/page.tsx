@@ -81,7 +81,7 @@ export default function PTPageOptimized(): JSX.Element {
           {/* CTA Buttons - Server-rendered links */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-stretch sm:items-center max-w-lg sm:max-w-none mx-auto">
             <a
-              href="https://cidadaoai-production.up.railway.app/login"
+              href="https://cidadao.ntlabs.dev"
               className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden inline-block text-center"
             >
               <span className="relative z-10 flex flex-col items-center">
@@ -318,7 +318,7 @@ export default function PTPageOptimized(): JSX.Element {
             Nova plataforma com 20 agentes de IA, chat inteligente e mapa interativo do Brasil
           </p>
           <a
-            href="https://cidadaoai-production.up.railway.app/login"
+            href="https://cidadao.ntlabs.dev"
             className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-green-600 rounded-xl font-bold text-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
           >
             Acessar Sistema 2.0
@@ -346,7 +346,7 @@ export default function PTPageOptimized(): JSX.Element {
                 Manifesto
               </Link>
               <a
-                href="https://cidadaoai-production.up.railway.app/login"
+                href="https://cidadao.ntlabs.dev"
                 className="hover:text-green-600 transition-colors font-semibold"
               >
                 Sistema 2.0
