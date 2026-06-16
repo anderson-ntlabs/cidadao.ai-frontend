@@ -61,7 +61,7 @@ export function FooterWithSurvey({ locale }: FooterWithSurveyProps) {
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <Link
-                href="https://andersonhenrique.youcanbook.me/"
+                href="https://calendar.app.google/zNAZCYfNtUiAw1GW8"
                 target="_blank"
                 rel="noopener"
                 className="text-base text-green-600 dark:text-green-400 hover:text-green-500 dark:hover:text-green-300"
@@ -69,7 +69,7 @@ export function FooterWithSurvey({ locale }: FooterWithSurveyProps) {
                 {locale === 'pt' ? 'Agendar Reunião' : 'Schedule Meeting'}
               </Link>
               <Link
-                href="https://github.com/anderson-ufrj"
+                href="https://github.com/anderson-ntlabs"
                 target="_blank"
                 rel="noopener"
                 className="text-base text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
