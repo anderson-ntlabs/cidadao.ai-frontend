@@ -17,7 +17,7 @@ export default function MapError({ error, reset }: ErrorProps) {
     logger.error(error, {
       component: 'MapPage',
       digest: error.digest,
-      errorBoundary: true
+      errorBoundary: true,
     })
   }, [error])
 
@@ -40,7 +40,8 @@ export default function MapError({ error, reset }: ErrorProps) {
 
           {/* Description */}
           <p className="text-center text-slate-600 dark:text-slate-400 mb-6">
-            Não foi possível renderizar o mapa de transparência. Você pode tentar a visualização em tabela como alternativa.
+            Não foi possível renderizar o mapa de transparência. Você pode tentar a visualização em
+            tabela como alternativa.
           </p>
 
           {/* Error Details (Development only) */}
@@ -113,7 +114,7 @@ export default function MapError({ error, reset }: ErrorProps) {
         <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
           Erro persiste em múltiplos navegadores?{' '}
           <a
-            href="https://github.com/anderson-ufrj/cidadao.ai-frontend/issues"
+            href="https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues"
             target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 dark:text-green-400 hover:underline"
