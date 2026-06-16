@@ -31,7 +31,7 @@ Este projeto adota um código de conduta para garantir um ambiente acolhedor e i
 # Fork o repositório no GitHub, então:
 git clone https://github.com/SEU_USUARIO/cidadao.ai-frontend.git
 cd cidadao.ai-frontend
-git remote add upstream https://github.com/anderson-ufrj/cidadao.ai-frontend.git
+git remote add upstream https://github.com/anderson-ntlabs/cidadao.ai-frontend.git
 ```
 
 ### 2. Crie uma Branch
@@ -64,24 +64,30 @@ Antes de reportar um bug:
 
 ```markdown
 ## Descrição
+
 Breve descrição do bug
 
 ## Passos para Reproduzir
+
 1. Vá para '...'
 2. Clique em '...'
 3. Role até '...'
 4. Veja o erro
 
 ## Comportamento Esperado
+
 O que deveria acontecer
 
 ## Comportamento Atual
+
 O que está acontecendo
 
 ## Screenshots
+
 Se aplicável, adicione screenshots
 
 ## Ambiente
+
 - OS: [ex: macOS 13.0]
 - Browser: [ex: Chrome 120]
 - Node: [ex: 18.17.0]
@@ -93,15 +99,19 @@ Se aplicável, adicione screenshots
 
 ```markdown
 ## Problema
+
 Descreva o problema que esta feature resolve
 
 ## Solução Proposta
+
 Descreva como você imagina a solução
 
 ## Alternativas
+
 Outras formas de resolver o problema
 
 ## Contexto Adicional
+
 Qualquer contexto relevante
 ```
 
@@ -120,20 +130,24 @@ Qualquer contexto relevante
 
 ```markdown
 ## Descrição
+
 Breve descrição das mudanças
 
 ## Tipo de Mudança
+
 - [ ] Bug fix
 - [ ] Nova feature
 - [ ] Breaking change
 - [ ] Documentação
 
 ## Como Testar
+
 1. Passo 1
 2. Passo 2
 3. Passo 3
 
 ## Checklist
+
 - [ ] Meu código segue os padrões do projeto
 - [ ] Revisei meu próprio código
 - [ ] Comentei partes complexas
@@ -262,6 +276,7 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 ### Por que Testes São Importantes
 
 Testes garantem:
+
 - ✅ Código funciona conforme esperado
 - ✅ Mudanças não quebram funcionalidades existentes
 - ✅ Documentação viva do comportamento do código
@@ -369,7 +384,7 @@ describe('LoginForm Integration', () => {
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith({
         email: 'user@example.com',
-        password: 'password123'
+        password: 'password123',
       })
     })
   })
@@ -381,6 +396,7 @@ describe('LoginForm Integration', () => {
 #### ✅ DO - Faça
 
 1. **Teste comportamento do usuário, não implementação**
+
    ```tsx
    // ✅ BOM - Testa o que o usuário vê
    expect(screen.getByRole('button')).toBeDisabled()
@@ -390,6 +406,7 @@ describe('LoginForm Integration', () => {
    ```
 
 2. **Use queries acessíveis**
+
    ```tsx
    // ✅ BOM - Por role (mais acessível)
    screen.getByRole('button', { name: 'Submit' })
@@ -402,6 +419,7 @@ describe('LoginForm Integration', () => {
    ```
 
 3. **Limpe mocks entre testes**
+
    ```tsx
    import { beforeEach, vi } from 'vitest'
 
@@ -411,6 +429,7 @@ describe('LoginForm Integration', () => {
    ```
 
 4. **Use act() para operações async**
+
    ```tsx
    await act(async () => {
      await result.current.fetchData()
@@ -418,6 +437,7 @@ describe('LoginForm Integration', () => {
    ```
 
 5. **Nomes descritivos**
+
    ```tsx
    // ✅ BOM
    it('should show error message when email is invalid', () => {})
@@ -443,6 +463,7 @@ npm run test:coverage
 ```
 
 **Requisitos**:
+
 - ✅ Todos os testes passando
 - ✅ Coverage não deve diminuir
 - ✅ Novos códigos devem ter testes
@@ -451,6 +472,7 @@ npm run test:coverage
 ### Troubleshooting
 
 #### "act() warning"
+
 ```tsx
 // Wrap async operations in act()
 await act(async () => {
@@ -459,6 +481,7 @@ await act(async () => {
 ```
 
 #### "Unhandled promise rejection"
+
 ```tsx
 // Attach catch handler
 const promise = asyncFunc()
@@ -467,6 +490,7 @@ await expect(promise).rejects.toThrow()
 ```
 
 #### "Cannot read properties of null"
+
 ```tsx
 // Use optional chaining
 expect(result.current?.isLoading).toBe(false)
@@ -502,6 +526,6 @@ Todos os contribuidores serão reconhecidos no README do projeto. Obrigado por a
 ---
 
 <div align="center">
-  <p>Dúvidas? Abra uma <a href="https://github.com/anderson-ufrj/cidadao.ai-frontend/issues">issue</a></p>
+  <p>Dúvidas? Abra uma <a href="https://github.com/anderson-ntlabs/cidadao.ai-frontend/issues">issue</a></p>
   <p>Feito com ❤️ pela comunidade</p>
 </div>

@@ -240,7 +240,6 @@ export function DataFreshnessBadge({ lastUpdated, locale = 'pt', className }: Pr
 
 ```tsx
 import { DataFreshnessBadge } from '@/components/ui/data-freshness-badge'
-
 ;<DataFreshnessBadge lastUpdated={investigation.updatedAt} locale="pt" />
 ```
 
@@ -416,7 +415,7 @@ export function Footer() {
 
           {/* Open Source */}
           <a
-            href="https://github.com/anderson-ufrj/cidadao.ai-frontend"
+            href="https://github.com/anderson-ntlabs/cidadao.ai-frontend"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:underline"
