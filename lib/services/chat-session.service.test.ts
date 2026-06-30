@@ -1,30 +1,20 @@
 /**
  * Chat Session Service Tests
  *
- * Tests for Supabase chat session management
+ * The service is a thin wrapper over the backend chat API (Railway
+ * PostgreSQL); it no longer talks to Supabase directly and only exposes
+ * getSession / getUserSessions / deleteSession. These tests mock chatService
+ * and validate the pass-through + error-handling contract.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Hoist mock to avoid initialization order issues
-const mockSupabaseClient = vi.hoisted(() => ({
-  auth: {
-    getUser: vi.fn(),
+vi.mock('@/lib/api/chat.service', () => ({
+  chatService: {
+    getSession: vi.fn(),
+    getUserSessions: vi.fn(),
+    deleteSession: vi.fn(),
   },
-  from: vi.fn(() => ({
-    insert: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: vi.fn(),
-  })),
-}))
-
-vi.mock('@/lib/supabase/client', () => ({
-  createClient: vi.fn(() => mockSupabaseClient),
 }))
 
 vi.mock('@/lib/logger', () => ({
@@ -37,6 +27,7 @@ vi.mock('@/lib/logger', () => ({
 }))
 
 import { ChatSessionService, chatSessionService } from './chat-session.service'
+import { chatService } from '@/lib/api/chat.service'
 
 describe('ChatSessionService', () => {
   let service: ChatSessionService
@@ -44,368 +35,75 @@ describe('ChatSessionService', () => {
   beforeEach(() => {
     service = new ChatSessionService()
     vi.clearAllMocks()
-
-    // Reset mock chain
-    mockSupabaseClient.from.mockReturnValue({
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      range: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    })
-  })
-
-  describe('createSession', () => {
-    it('should return null when no authenticated user', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
-
-      const result = await service.createSession({
-        session_id: 'test-session',
-        agent_id: 'abaporu',
-      })
-
-      expect(result).toBeNull()
-    })
-
-    it('should create session when user is authenticated', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' }
-      const mockSession = {
-        id: 1,
-        session_id: 'test-session',
-        user_id: 'user-123',
-        agent_id: 'abaporu',
-        messages: [],
-      }
-
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        insert: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({ data: mockSession, error: null }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.createSession({
-        session_id: 'test-session',
-        agent_id: 'abaporu',
-      })
-
-      expect(result).toEqual(mockSession)
-    })
-
-    it('should return null on database error', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' }
-
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        insert: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database error' },
-        }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.createSession({
-        session_id: 'test-session',
-        agent_id: 'abaporu',
-      })
-
-      expect(result).toBeNull()
-    })
-
-    it('should handle exception gracefully', async () => {
-      mockSupabaseClient.auth.getUser.mockRejectedValue(new Error('Network error'))
-
-      const result = await service.createSession({
-        session_id: 'test-session',
-        agent_id: 'abaporu',
-      })
-
-      expect(result).toBeNull()
-    })
   })
 
   describe('getSession', () => {
-    it('should return null when no authenticated user', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
+    it('should return the session from the backend', async () => {
+      const session = { session_id: 'test-session', message_count: 2 } as any
+      vi.mocked(chatService.getSession).mockResolvedValue(session)
 
       const result = await service.getSession('test-session')
 
-      expect(result).toBeNull()
+      expect(result).toEqual(session)
+      expect(chatService.getSession).toHaveBeenCalledWith('test-session')
     })
 
-    it('should return session when found', async () => {
-      const mockUser = { id: 'user-123' }
-      const mockSession = {
-        id: 1,
-        session_id: 'test-session',
-        messages: [{ id: 'msg-1', content: 'Hello' }],
-      }
+    it('should return null when the session is not found', async () => {
+      vi.mocked(chatService.getSession).mockResolvedValue(null)
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({ data: mockSession, error: null }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.getSession('test-session')
-
-      expect(result).toEqual(mockSession)
+      expect(await service.getSession('missing')).toBeNull()
     })
 
-    it('should return null on database error', async () => {
-      const mockUser = { id: 'user-123' }
+    it('should return null when the backend throws', async () => {
+      vi.mocked(chatService.getSession).mockRejectedValue(new Error('network error'))
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Not found' },
-        }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.getSession('test-session')
-
-      expect(result).toBeNull()
+      expect(await service.getSession('test-session')).toBeNull()
     })
   })
 
   describe('getUserSessions', () => {
-    it('should return empty array when no authenticated user', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
+    it('should return the sessions list from the backend', async () => {
+      const sessions = [{ session_id: 'session-1' }, { session_id: 'session-2' }] as any
+      vi.mocked(chatService.getUserSessions).mockResolvedValue(sessions)
 
       const result = await service.getUserSessions()
 
-      expect(result).toEqual([])
+      expect(result).toEqual(sessions)
     })
 
-    it('should return sessions array', async () => {
-      const mockUser = { id: 'user-123' }
-      const mockSessions = [
-        { id: 1, session_id: 'session-1' },
-        { id: 2, session_id: 'session-2' },
-      ]
+    it('should forward pagination arguments', async () => {
+      vi.mocked(chatService.getUserSessions).mockResolvedValue([])
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
+      await service.getUserSessions(10, 20)
 
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        range: vi.fn().mockResolvedValue({ data: mockSessions, error: null }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.getUserSessions()
-
-      expect(result).toEqual(mockSessions)
+      expect(chatService.getUserSessions).toHaveBeenCalledWith(10, 20)
     })
 
-    it('should support pagination', async () => {
-      const mockUser = { id: 'user-123' }
-      const mockSessions = [{ id: 3, session_id: 'session-3' }]
+    it('should return an empty array when the backend throws', async () => {
+      vi.mocked(chatService.getUserSessions).mockRejectedValue(new Error('network error'))
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const rangeMock = vi.fn().mockResolvedValue({ data: mockSessions, error: null })
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        range: rangeMock,
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.getUserSessions(10, 20)
-
-      expect(rangeMock).toHaveBeenCalledWith(20, 29)
-      expect(result).toEqual(mockSessions)
-    })
-
-    it('should return empty array on error', async () => {
-      const mockUser = { id: 'user-123' }
-
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        range: vi.fn().mockResolvedValue({ data: null, error: { message: 'Error' } }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.getUserSessions()
-
-      expect(result).toEqual([])
-    })
-  })
-
-  describe('updateSession', () => {
-    it('should return false when no authenticated user', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
-
-      const result = await service.updateSession('test-session', { agent_id: 'new-agent' })
-
-      expect(result).toBe(false)
-    })
-
-    it('should return true on successful update', async () => {
-      const mockUser = { id: 'user-123' }
-
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      // Need double eq() because the service chains .eq().eq()
-      const mockEq2 = vi.fn().mockResolvedValue({ error: null })
-      const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
-      const mockChain = {
-        update: vi.fn().mockReturnValue({ eq: mockEq1 }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.updateSession('test-session', { agent_id: 'new-agent' })
-
-      expect(result).toBe(true)
-    })
-
-    it('should return false on database error', async () => {
-      const mockUser = { id: 'user-123' }
-
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        update: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ error: { message: 'Update failed' } }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.updateSession('test-session', { agent_id: 'new-agent' })
-
-      expect(result).toBe(false)
+      expect(await service.getUserSessions()).toEqual([])
     })
   })
 
   describe('deleteSession', () => {
-    it('should return false when no authenticated user', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
+    it('should return true when the backend confirms deletion', async () => {
+      vi.mocked(chatService.deleteSession).mockResolvedValue(true)
 
-      const result = await service.deleteSession('test-session')
-
-      expect(result).toBe(false)
+      expect(await service.deleteSession('test-session')).toBe(true)
+      expect(chatService.deleteSession).toHaveBeenCalledWith('test-session')
     })
 
-    it('should return true on successful deletion', async () => {
-      const mockUser = { id: 'user-123' }
+    it('should return false when the backend reports failure', async () => {
+      vi.mocked(chatService.deleteSession).mockResolvedValue(false)
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      // Need double eq() because the service chains .eq().eq()
-      const mockEq2 = vi.fn().mockResolvedValue({ error: null })
-      const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
-      const mockChain = {
-        delete: vi.fn().mockReturnValue({ eq: mockEq1 }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.deleteSession('test-session')
-
-      expect(result).toBe(true)
+      expect(await service.deleteSession('test-session')).toBe(false)
     })
 
-    it('should return false on database error', async () => {
-      const mockUser = { id: 'user-123' }
+    it('should return false when the backend throws', async () => {
+      vi.mocked(chatService.deleteSession).mockRejectedValue(new Error('network error'))
 
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: mockUser },
-        error: null,
-      })
-
-      const mockChain = {
-        delete: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockResolvedValue({ error: { message: 'Delete failed' } }),
-      }
-      mockSupabaseClient.from.mockReturnValue(mockChain)
-
-      const result = await service.deleteSession('test-session')
-
-      expect(result).toBe(false)
-    })
-  })
-
-  describe('addMessage', () => {
-    it('should return false when session not found', async () => {
-      mockSupabaseClient.auth.getUser.mockResolvedValue({
-        data: { user: null },
-        error: null,
-      })
-
-      const result = await service.addMessage('non-existent-session', {
-        role: 'user',
-        content: 'Hello',
-        agent_id: 'abaporu',
-        agent_name: 'Abaporu',
-      })
-
-      expect(result).toBe(false)
+      expect(await service.deleteSession('test-session')).toBe(false)
     })
   })
 

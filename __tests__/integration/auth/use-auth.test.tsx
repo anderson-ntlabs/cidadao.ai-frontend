@@ -65,6 +65,8 @@ vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: {
       getUser: mockGetUser,
+      // Called after a user is found to sync the access token to localStorage
+      getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       signInWithPassword: mockSignInWithPassword,
       signInWithOAuth: mockSignInWithOAuth,
       signOut: mockSignOut,
