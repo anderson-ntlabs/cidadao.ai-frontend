@@ -1,29 +1,26 @@
 /**
  * Tests for useChatPersistence hook
  *
+ * The hook was refactored (2025-12-10): the backend (Railway PostgreSQL)
+ * persists messages during streaming, so the hook no longer talks to any
+ * session service. `initSession` mints a client-side UUID and memoizes it;
+ * `saveUserMessage` / `saveAssistantMessage` are intentional no-ops kept for
+ * API compatibility. These tests validate that current contract.
+ *
  * @author Anderson Henrique da Silva
  * @since 2025-12-14
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useChatPersistence } from '../use-chat-persistence'
-import { chatSessionService } from '@/lib/services/chat-session.service'
 
-// Mock the chat session service
-vi.mock('@/lib/services/chat-session.service', () => ({
-  chatSessionService: {
-    createSession: vi.fn(),
-    addMessage: vi.fn(),
-  },
-}))
-
-// Mock crypto.randomUUID
+// Deterministic UUID so initSession is assertable
 const mockUUID = '12345678-1234-1234-1234-123456789012'
+const randomUUID = vi.fn(() => mockUUID)
 Object.defineProperty(global, 'crypto', {
-  value: {
-    randomUUID: vi.fn(() => mockUUID),
-  },
+  value: { randomUUID },
+  configurable: true,
 })
 
 describe('useChatPersistence', () => {
@@ -37,12 +34,8 @@ describe('useChatPersistence', () => {
     vi.clearAllMocks()
   })
 
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
   describe('initialization', () => {
-    it('should initialize with null session ID', () => {
+    it('should initialize with null session ID and expose the API', () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
       expect(result.current.sessionId).toBe(null)
@@ -53,11 +46,7 @@ describe('useChatPersistence', () => {
 
     it('should accept kids mode option', () => {
       const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-          childName: 'João',
-        })
+        useChatPersistence({ ...defaultOptions, isKidsMode: true, childName: 'João' })
       )
 
       expect(result.current.sessionId).toBe(null)
@@ -65,491 +54,134 @@ describe('useChatPersistence', () => {
   })
 
   describe('initSession', () => {
-    it('should create a new session successfully', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-        agent_id: 'agent-123',
-        metadata: {
-          is_kids_mode: false,
-          platform: 'agora',
-        },
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-
+    it('should mint a client-side UUID (no backend call)', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
-      let sessionId: string = ''
-
+      let sessionId = ''
       await act(async () => {
         sessionId = await result.current.initSession()
       })
 
       expect(sessionId).toBe(mockUUID)
-      // Note: sessionId is stored in a ref and won't trigger re-renders
-      expect(chatSessionService.createSession).toHaveBeenCalledWith({
-        session_id: mockUUID,
-        agent_id: 'agent-123',
-        metadata: {
-          is_kids_mode: false,
-          child_name: undefined,
-          platform: 'agora',
-          started_at: expect.any(String),
-        },
-      })
+      expect(randomUUID).toHaveBeenCalledTimes(1)
     })
 
-    it('should create session with kids mode metadata', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-
+    it('should mint a session in kids mode too', async () => {
       const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-          childName: 'Maria',
-        })
+        useChatPersistence({ ...defaultOptions, isKidsMode: true, childName: 'Maria' })
       )
 
-      await act(async () => {
-        await result.current.initSession()
-      })
-
-      expect(chatSessionService.createSession).toHaveBeenCalledWith({
-        session_id: mockUUID,
-        agent_id: 'agent-123',
-        metadata: {
-          is_kids_mode: true,
-          child_name: 'Maria',
-          platform: 'agora',
-          started_at: expect.any(String),
-        },
-      })
-    })
-
-    it('should return existing session ID if already initialized', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      // First call
-      await act(async () => {
-        await result.current.initSession()
-      })
-
-      // Second call
-      let secondSessionId: string = ''
-      await act(async () => {
-        secondSessionId = await result.current.initSession()
-      })
-
-      expect(secondSessionId).toBe(mockUUID)
-      expect(chatSessionService.createSession).toHaveBeenCalledTimes(1)
-    })
-
-    it('should handle session creation errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(chatSessionService.createSession).mockRejectedValue(new Error('Database error'))
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      let sessionId: string = ''
-
-      await act(async () => {
-        sessionId = await result.current.initSession()
-      })
-
-      // Should still return session ID even if DB save fails
-      expect(sessionId).toBe(mockUUID)
-
-      consoleErrorSpy.mockRestore()
-    })
-
-    it('should handle null session response', async () => {
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(null)
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      let sessionId: string = ''
-
+      let sessionId = ''
       await act(async () => {
         sessionId = await result.current.initSession()
       })
 
       expect(sessionId).toBe(mockUUID)
+    })
+
+    it('should memoize the session id and not regenerate on repeat calls', async () => {
+      const { result } = renderHook(() => useChatPersistence(defaultOptions))
+
+      let first = ''
+      let second = ''
+      await act(async () => {
+        first = await result.current.initSession()
+      })
+      await act(async () => {
+        second = await result.current.initSession()
+      })
+
+      expect(second).toBe(first)
+      expect(randomUUID).toHaveBeenCalledTimes(1)
     })
   })
 
-  describe('saveUserMessage', () => {
-    it('should save user message successfully', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+  describe('saveUserMessage (no-op, backend persists)', () => {
+    it('should resolve without throwing and without persisting', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
       await act(async () => {
         await result.current.initSession()
       })
 
-      await act(async () => {
-        await result.current.saveUserMessage('Hello, how can I help?')
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(mockUUID, {
-        role: 'user',
-        content: 'Hello, how can I help?',
-        agent_id: 'agent-123',
-        agent_name: 'Test Agent',
-        metadata: {
-          is_kids_mode: false,
-          child_name: undefined,
-        },
-      })
+      await expect(
+        result.current.saveUserMessage('Hello, how can I help?')
+      ).resolves.toBeUndefined()
     })
 
-    it('should initialize session if not already initialized', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+    it('should be safe to call before initSession', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
-      // Don't call initSession first
-      await act(async () => {
-        await result.current.saveUserMessage('Test message')
-      })
-
-      expect(chatSessionService.createSession).toHaveBeenCalled()
-      expect(chatSessionService.addMessage).toHaveBeenCalled()
+      await expect(result.current.saveUserMessage('Test message')).resolves.toBeUndefined()
     })
 
-    it('should include kids mode metadata in user message', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
-      const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-          childName: 'Pedro',
-        })
-      )
-
-      await act(async () => {
-        await result.current.initSession()
-        await result.current.saveUserMessage('Kids message')
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(mockUUID, {
-        role: 'user',
-        content: 'Kids message',
-        agent_id: 'agent-123',
-        agent_name: 'Test Agent',
-        metadata: {
-          is_kids_mode: true,
-          child_name: 'Pedro',
-        },
-      })
-    })
-
-    it('should handle save errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockRejectedValue(new Error('Save failed'))
-
+    it('should handle empty and very long content', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
-      await act(async () => {
-        await result.current.initSession()
-      })
-
-      // Should not throw
-      await act(async () => {
-        await result.current.saveUserMessage('Test')
-      })
-
-      consoleErrorSpy.mockRestore()
+      await expect(result.current.saveUserMessage('')).resolves.toBeUndefined()
+      await expect(result.current.saveUserMessage('a'.repeat(10000))).resolves.toBeUndefined()
     })
   })
 
-  describe('saveAssistantMessage', () => {
-    it('should save assistant message successfully', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+  describe('saveAssistantMessage (no-op, backend persists)', () => {
+    it('should resolve without throwing and without persisting', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
       await act(async () => {
         await result.current.initSession()
       })
 
-      await act(async () => {
-        await result.current.saveAssistantMessage('I can help you with that.')
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(mockUUID, {
-        role: 'assistant',
-        content: 'I can help you with that.',
-        agent_id: 'agent-123',
-        agent_name: 'Test Agent',
-        metadata: {
-          is_kids_mode: false,
-        },
-      })
+      await expect(
+        result.current.saveAssistantMessage('I can help you with that.')
+      ).resolves.toBeUndefined()
     })
 
-    it('should initialize session if not already initialized', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+    it('should be safe to call before initSession', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
-      await act(async () => {
-        await result.current.saveAssistantMessage('Assistant response')
-      })
-
-      expect(chatSessionService.createSession).toHaveBeenCalled()
-      expect(chatSessionService.addMessage).toHaveBeenCalled()
+      await expect(
+        result.current.saveAssistantMessage('Assistant response')
+      ).resolves.toBeUndefined()
     })
 
-    it('should include kids mode flag in assistant message', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+    it('should be a no-op in kids mode (with or without child name)', async () => {
       const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-        })
+        useChatPersistence({ ...defaultOptions, isKidsMode: true, childName: 'Ana' })
       )
 
-      await act(async () => {
-        await result.current.saveAssistantMessage('Kids response')
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(mockUUID, {
-        role: 'assistant',
-        content: 'Kids response',
-        agent_id: 'agent-123',
-        agent_name: 'Test Agent',
-        metadata: {
-          is_kids_mode: true,
-        },
-      })
-    })
-
-    it('should not include child_name in assistant messages', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
-      const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-          childName: 'Ana',
-        })
-      )
-
-      await act(async () => {
-        await result.current.saveAssistantMessage('Response')
-      })
-
-      const callArgs = vi.mocked(chatSessionService.addMessage).mock.calls[0][1]
-      expect(callArgs.metadata).not.toHaveProperty('child_name')
-    })
-
-    it('should handle save errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockRejectedValue(new Error('Save failed'))
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      await act(async () => {
-        await result.current.initSession()
-      })
-
-      await act(async () => {
-        await result.current.saveAssistantMessage('Test')
-      })
-
-      consoleErrorSpy.mockRestore()
+      await expect(result.current.saveAssistantMessage('Kids response')).resolves.toBeUndefined()
     })
   })
 
   describe('conversation flow', () => {
-    it('should handle complete conversation flow', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
+    it('should run init + user + assistant turns without error and keep one session', async () => {
       const { result } = renderHook(() => useChatPersistence(defaultOptions))
 
-      // Initialize session
+      let sessionId = ''
       await act(async () => {
-        await result.current.initSession()
-      })
-
-      // User message
-      await act(async () => {
+        sessionId = await result.current.initSession()
         await result.current.saveUserMessage('What is transparency?')
-      })
-
-      // Assistant response
-      await act(async () => {
-        await result.current.saveAssistantMessage(
-          'Transparency is about making government data accessible.'
-        )
-      })
-
-      // Another user message
-      await act(async () => {
+        await result.current.saveAssistantMessage('Government data made accessible.')
         await result.current.saveUserMessage('Tell me more')
       })
 
-      expect(chatSessionService.createSession).toHaveBeenCalledTimes(1)
-      expect(chatSessionService.addMessage).toHaveBeenCalledTimes(3)
+      expect(sessionId).toBe(mockUUID)
+      expect(randomUUID).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('edge cases', () => {
-    it('should handle empty message content', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      await act(async () => {
-        await result.current.saveUserMessage('')
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(mockUUID, {
-        role: 'user',
-        content: '',
-        agent_id: 'agent-123',
-        agent_name: 'Test Agent',
-        metadata: expect.any(Object),
-      })
-    })
-
-    it('should handle very long messages', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue(true)
-
-      const { result } = renderHook(() => useChatPersistence(defaultOptions))
-
-      const longMessage = 'a'.repeat(10000)
-
-      await act(async () => {
-        await result.current.saveUserMessage(longMessage)
-      })
-
-      expect(chatSessionService.addMessage).toHaveBeenCalledWith(
-        mockUUID,
-        expect.objectContaining({
-          content: longMessage,
-        })
-      )
-    })
-
-    it('should handle null child name', async () => {
-      const mockSession = {
-        id: 'db-session-id',
-        session_id: mockUUID,
-      }
-
-      vi.mocked(chatSessionService.createSession).mockResolvedValue(mockSession as any)
-
+    it('should handle null child name without error', async () => {
       const { result } = renderHook(() =>
-        useChatPersistence({
-          ...defaultOptions,
-          isKidsMode: true,
-          childName: null,
-        })
+        useChatPersistence({ ...defaultOptions, isKidsMode: true, childName: null })
       )
 
+      let sessionId = ''
       await act(async () => {
-        await result.current.initSession()
+        sessionId = await result.current.initSession()
       })
 
-      expect(chatSessionService.createSession).toHaveBeenCalledWith({
-        session_id: mockUUID,
-        agent_id: 'agent-123',
-        metadata: {
-          is_kids_mode: true,
-          child_name: null,
-          platform: 'agora',
-          started_at: expect.any(String),
-        },
-      })
+      expect(sessionId).toBe(mockUUID)
     })
   })
 })

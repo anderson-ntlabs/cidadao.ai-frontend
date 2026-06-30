@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { useChatStore } from './chat-store'
 import { chatService } from '@/lib/api/chat.service'
-import { chatSessionService } from '@/lib/services/chat-session.service'
 // WebSocket functions are no longer used - backend doesn't support WebSocket
 import type { ChatMessage, ChatResponse } from '@/types/chat'
 import * as chatServiceModule from '@/lib/api/chat.service'
@@ -13,7 +12,6 @@ vi.spyOn(chatServiceModule, 'generateSessionId').mockImplementation(
 
 // Mock dependencies
 vi.mock('@/lib/api/chat.service')
-vi.mock('@/lib/services/chat-session.service')
 // WebSocket mock removed - no longer used in store
 
 // Mock Supabase client
@@ -91,8 +89,6 @@ describe('ChatStore', () => {
 
       vi.mocked(chatService.getAgents).mockResolvedValue(mockAgents as any)
       vi.mocked(chatService.getSuggestions).mockResolvedValue(mockSuggestions)
-      vi.mocked(chatSessionService.createSession).mockResolvedValue({ id: 'session1' } as any)
-
       await useChatStore.getState().initializeChat()
 
       const state = useChatStore.getState()
@@ -138,8 +134,6 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
-
       await useChatStore.getState().sendMessage(userContent)
 
       const messages = useChatStore.getState().messages
@@ -304,8 +298,6 @@ describe('ChatStore', () => {
 
   describe('Session Actions', () => {
     it('should create new session', async () => {
-      vi.mocked(chatSessionService.createSession).mockResolvedValue({} as any)
-
       await useChatStore.getState().createNewSession()
 
       const state = useChatStore.getState()
@@ -657,7 +649,8 @@ describe('ChatStore', () => {
         ],
       }
 
-      vi.mocked(chatSessionService.getSession).mockResolvedValue(mockSession as any)
+      vi.mocked(chatService.getSession).mockResolvedValue(mockSession as any)
+      vi.mocked(chatService.getHistory).mockResolvedValue(mockSession.messages as any)
       vi.mocked(chatService.getAgents).mockResolvedValue([])
       vi.mocked(chatService.getSuggestions).mockResolvedValue([])
 
@@ -670,7 +663,7 @@ describe('ChatStore', () => {
     })
 
     it('should create new session when provided sessionId not found', async () => {
-      vi.mocked(chatSessionService.getSession).mockResolvedValue(null)
+      vi.mocked(chatService.getSession).mockResolvedValue(null)
       vi.mocked(chatService.getAgents).mockResolvedValue([])
       vi.mocked(chatService.getSuggestions).mockResolvedValue([])
 
@@ -682,7 +675,7 @@ describe('ChatStore', () => {
     })
 
     it('should create new session when loading existing session fails', async () => {
-      vi.mocked(chatSessionService.getSession).mockRejectedValue(new Error('Database error'))
+      vi.mocked(chatService.getSession).mockRejectedValue(new Error('Database error'))
       vi.mocked(chatService.getAgents).mockResolvedValue([])
       vi.mocked(chatService.getSuggestions).mockResolvedValue([])
 
@@ -714,7 +707,8 @@ describe('ChatStore', () => {
         ],
       }
 
-      vi.mocked(chatSessionService.getSession).mockResolvedValue(mockSession as any)
+      vi.mocked(chatService.getSession).mockResolvedValue(mockSession as any)
+      vi.mocked(chatService.getHistory).mockResolvedValue(mockSession.messages as any)
 
       await useChatStore.getState().loadSession('test-session-456')
 
@@ -726,7 +720,7 @@ describe('ChatStore', () => {
     })
 
     it('should handle session not found', async () => {
-      vi.mocked(chatSessionService.getSession).mockResolvedValue(null)
+      vi.mocked(chatService.getSession).mockResolvedValue(null)
 
       await useChatStore.getState().loadSession('non-existent')
 
@@ -736,7 +730,7 @@ describe('ChatStore', () => {
     })
 
     it('should handle error when loading session', async () => {
-      vi.mocked(chatSessionService.getSession).mockRejectedValue(new Error('DB error'))
+      vi.mocked(chatService.getSession).mockRejectedValue(new Error('DB error'))
 
       await useChatStore.getState().loadSession('error-session')
 
@@ -941,8 +935,6 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
-
       await useChatStore.getState().sendMessage('Test')
 
       const messages = useChatStore.getState().messages
@@ -958,8 +950,6 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
-
       await useChatStore.getState().sendMessage('Test')
 
       const messages = useChatStore.getState().messages
@@ -975,8 +965,6 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse as any)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
-
       await useChatStore.getState().sendMessage('Test')
 
       const messages = useChatStore.getState().messages
@@ -1005,8 +993,6 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
-      vi.mocked(chatSessionService.addMessage).mockResolvedValue({} as any)
-
       await useChatStore.getState().sendMessage(content)
 
       const messages = useChatStore.getState().messages
@@ -1014,7 +1000,7 @@ describe('ChatStore', () => {
       expect(userMessages).toHaveLength(1) // No duplicate
     })
 
-    it('should handle Supabase save failure gracefully', async () => {
+    it('should delegate persistence to the backend (no frontend Supabase save)', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const mockResponse: ChatResponse = {
@@ -1024,19 +1010,18 @@ describe('ChatStore', () => {
       }
 
       vi.mocked(chatService.sendMessage).mockResolvedValue(mockResponse)
-      vi.mocked(chatSessionService.addMessage).mockRejectedValue(new Error('DB error'))
-
       await useChatStore.getState().sendMessage('Test')
 
-      // Should still complete successfully
+      // Completes and renders the assistant reply
       const messages = useChatStore.getState().messages
       expect(messages.length).toBeGreaterThan(0)
       expect(useChatStore.getState().error).toBeNull()
 
-      // Should log error
-      expect(consoleSpy).toHaveBeenCalledWith(
+      // Messages are persisted by the backend during sendMessage; the store
+      // must not attempt (or fail) a frontend Supabase save.
+      expect(consoleSpy).not.toHaveBeenCalledWith(
         expect.stringContaining('Failed to save message to Supabase'),
-        expect.objectContaining({ error: expect.any(Error) })
+        expect.anything()
       )
 
       consoleSpy.mockRestore()
