@@ -208,9 +208,9 @@ describe('CostMetricsService', () => {
 
       const report = service.getReport()
 
-      // sabia-4: 1000 tokens * $0.0006/1000 = $0.0006
-      // sabiazinho-4: 1000 tokens * $0.0002/1000 = $0.0002
-      expect(report.estimatedCost).toBeCloseTo(0.0008, 6)
+      // sabia-4: 1000 tokens * R$0.017/1000 = R$0.017
+      // sabiazinho-4: 1000 tokens * R$0.0034/1000 = R$0.0034
+      expect(report.estimatedCost).toBeCloseTo(0.0204, 6)
     })
 
     it('should calculate cost savings from cache', () => {
@@ -232,8 +232,8 @@ describe('CostMetricsService', () => {
 
       // Cost savings is based on average cost per request
       // In this case: 1 cached request * avg cost of sabia-4 request
-      // 250 tokens * $0.0006/1000 = $0.00015
-      expect(report.costSavings).toBeCloseTo(0.00015, 6)
+      // 250 tokens * R$0.017/1000 = R$0.00425
+      expect(report.costSavings).toBeCloseTo(0.00425, 6)
     })
   })
 
@@ -272,7 +272,7 @@ describe('CostMetricsService', () => {
       })
 
       const metrics = service.getRealTimeMetrics()
-      expect(metrics.costLast5Min).toBeCloseTo(0.0006, 6)
+      expect(metrics.costLast5Min).toBeCloseTo(0.017, 6)
     })
 
     it('should calculate cache hit rate', () => {
@@ -306,11 +306,11 @@ describe('CostMetricsService', () => {
       const breakdown = service.getCostBreakdown()
 
       // Each request: 250 tokens (50 req + 200 res)
-      // sabia-4: 2 requests * 250 tokens * $0.0006/1000 = $0.0003
-      // sabiazinho-4: 1 request * 250 tokens * $0.0002/1000 = $0.00005
+      // sabia-4: 2 requests * 250 tokens * R$0.017/1000 = R$0.0085
+      // sabiazinho-4: 1 request * 250 tokens * R$0.0034/1000 = R$0.00085
       expect(breakdown).toEqual({
-        'sabia-4': expect.closeTo(0.0003, 6),
-        'sabiazinho-4': expect.closeTo(0.00005, 6),
+        'sabia-4': expect.closeTo(0.0085, 6),
+        'sabiazinho-4': expect.closeTo(0.00085, 6),
       })
     })
 

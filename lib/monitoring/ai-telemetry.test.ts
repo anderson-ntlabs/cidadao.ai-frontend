@@ -267,7 +267,7 @@ describe('AI Telemetry', () => {
       expect(mockSetContext).toHaveBeenCalledWith(
         'ai_usage',
         expect.objectContaining({
-          estimatedCostUSD: expect.any(String),
+          estimatedCostBRL: expect.any(String),
         })
       )
     })
