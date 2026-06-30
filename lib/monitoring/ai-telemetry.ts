@@ -193,9 +193,10 @@ export function trackTokenUsage(
   const totalTokens = inputTokens + outputTokens
 
   // Estimated costs per 1M tokens (adjust based on actual pricing)
+  // TODO: confirm official Maritaca pricing for sabia-4 / sabiazinho-4 (values carried over from sabia-3/sabiazinho-3)
   const costs: Record<string, { input: number; output: number }> = {
-    'sabia-3': { input: 0.3, output: 0.9 },
-    'sabiazinho-3': { input: 0.15, output: 0.45 },
+    'sabia-4': { input: 0.3, output: 0.9 },
+    'sabiazinho-4': { input: 0.15, output: 0.45 },
   }
 
   const modelCost = costs[model] || { input: 0.5, output: 1.5 }

@@ -216,8 +216,8 @@ describe('MobileAgentSelector', () => {
       )
 
       // Check for model names
-      expect(screen.getByText('Sabiazinho-3')).toBeInTheDocument()
-      expect(screen.getByText(/sabiá-3/i)).toBeInTheDocument()
+      expect(screen.getByText('Sabiazinho-4')).toBeInTheDocument()
+      expect(screen.getByText(/sabiá-4/i)).toBeInTheDocument()
     })
 
     it('calls onMaritacaModelChange when model selected', async () => {
@@ -233,9 +233,9 @@ describe('MobileAgentSelector', () => {
         />
       )
 
-      await user.click(screen.getByText('Sabiazinho-3'))
+      await user.click(screen.getByText('Sabiazinho-4'))
 
-      expect(onMaritacaModelChange).toHaveBeenCalledWith('sabiazinho-3')
+      expect(onMaritacaModelChange).toHaveBeenCalledWith('sabiazinho-4')
     })
   })
 })

@@ -148,7 +148,7 @@ describe('Chat Integration Tests', () => {
             ok: true,
             json: async () => ({
               response: 'Fallback response from Maritaca',
-              metadata: { model: 'sabiazinho-3' },
+              metadata: { model: 'sabiazinho-4' },
             }),
           })
         }

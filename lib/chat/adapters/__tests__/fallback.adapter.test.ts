@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { FallbackAdapter, type MaritacaModel } from '../fallback.adapter'
+import { FallbackAdapter, normalizeMaritacaModel, type MaritacaModel } from '../fallback.adapter'
 import type { ChatRequest } from '../../types'
 
 // Mock logger
@@ -56,21 +56,21 @@ describe('FallbackAdapter', () => {
       expect(response.success).toBe(true)
       expect(response.data?.response).toBe('Maritaca response')
       expect(response.data?.agentId).toBe('maritaca')
-      expect(response.data?.agentName).toBe('Maritaca (sabiazinho-3)')
+      expect(response.data?.agentName).toBe('Maritaca (sabiazinho-4)')
       expect(response.data?.confidence).toBe(0.85)
-      expect(response.data?.metadata?.model).toBe('sabiazinho-3')
+      expect(response.data?.metadata?.model).toBe('sabiazinho-4')
 
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/chat/direct/maritaca'),
         expect.objectContaining({
           method: 'POST',
-          body: expect.stringContaining('sabiazinho-3'),
+          body: expect.stringContaining('sabiazinho-4'),
         })
       )
     })
 
-    it('should send message with sabia-3 model', async () => {
-      const adapter = new FallbackAdapter('sabia-3')
+    it('should send message with sabia-4 model', async () => {
+      const adapter = new FallbackAdapter('sabia-4')
       const request: ChatRequest = {
         message: 'Test message',
       }
@@ -83,11 +83,11 @@ describe('FallbackAdapter', () => {
       const response = await adapter.send(request)
 
       expect(response.success).toBe(true)
-      expect(response.data?.agentName).toBe('Maritaca (sabia-3)')
+      expect(response.data?.agentName).toBe('Maritaca (sabia-4)')
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          body: expect.stringContaining('sabia-3'),
+          body: expect.stringContaining('sabia-4'),
         })
       )
     })
@@ -201,7 +201,7 @@ describe('FallbackAdapter', () => {
       }
 
       const mockMetadata = {
-        model: 'sabiazinho-3',
+        model: 'sabiazinho-4',
         tokens: 150,
         cost: 0.002,
         processingTime: 500,
@@ -219,7 +219,7 @@ describe('FallbackAdapter', () => {
 
       expect(response.success).toBe(true)
       expect(response.data?.metadata).toMatchObject(mockMetadata)
-      expect(response.data?.metadata?.model).toBe('sabiazinho-3')
+      expect(response.data?.metadata?.model).toBe('sabiazinho-4')
     })
   })
 
@@ -240,19 +240,19 @@ describe('FallbackAdapter', () => {
   })
 
   describe('model management', () => {
-    it('should switch to sabia-3 model', () => {
-      adapter.setModel('sabia-3')
-      expect(adapter.getModel()).toBe('sabia-3')
+    it('should switch to sabia-4 model', () => {
+      adapter.setModel('sabia-4')
+      expect(adapter.getModel()).toBe('sabia-4')
     })
 
-    it('should switch to sabiazinho-3 model', () => {
-      adapter.setModel('sabia-3')
-      adapter.setModel('sabiazinho-3')
-      expect(adapter.getModel()).toBe('sabiazinho-3')
+    it('should switch to sabiazinho-4 model', () => {
+      adapter.setModel('sabia-4')
+      adapter.setModel('sabiazinho-4')
+      expect(adapter.getModel()).toBe('sabiazinho-4')
     })
 
     it('should use new model after switching', async () => {
-      adapter.setModel('sabia-3')
+      adapter.setModel('sabia-4')
 
       const request: ChatRequest = {
         message: 'Test message',
@@ -268,13 +268,13 @@ describe('FallbackAdapter', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          body: expect.stringContaining('"model":"sabia-3"'),
+          body: expect.stringContaining('"model":"sabia-4"'),
         })
       )
     })
 
     it('should reflect model in agent name', async () => {
-      adapter.setModel('sabia-3')
+      adapter.setModel('sabia-4')
 
       const request: ChatRequest = {
         message: 'Test message',
@@ -287,17 +287,17 @@ describe('FallbackAdapter', () => {
 
       const response = await adapter.send(request)
 
-      expect(response.data?.agentName).toBe('Maritaca (sabia-3)')
+      expect(response.data?.agentName).toBe('Maritaca (sabia-4)')
     })
 
-    it('should start with sabiazinho-3 by default', () => {
+    it('should start with sabiazinho-4 by default', () => {
       const newAdapter = new FallbackAdapter()
-      expect(newAdapter.getModel()).toBe('sabiazinho-3')
+      expect(newAdapter.getModel()).toBe('sabiazinho-4')
     })
 
     it('should accept initial model in constructor', () => {
-      const newAdapter = new FallbackAdapter('sabia-3')
-      expect(newAdapter.getModel()).toBe('sabia-3')
+      const newAdapter = new FallbackAdapter('sabia-4')
+      expect(newAdapter.getModel()).toBe('sabia-4')
     })
   })
 
@@ -528,6 +528,28 @@ describe('FallbackAdapter', () => {
       const response = await adapter.send(request)
 
       expect(response.data?.confidence).toBe(0.85)
+    })
+  })
+
+  describe('normalizeMaritacaModel', () => {
+    it('should map retired sabia-3 / sabia-3.1 to sabia-4', () => {
+      expect(normalizeMaritacaModel('sabia-3')).toBe('sabia-4')
+      expect(normalizeMaritacaModel('sabia-3.1')).toBe('sabia-4')
+    })
+
+    it('should map retired sabiazinho-3 to sabiazinho-4', () => {
+      expect(normalizeMaritacaModel('sabiazinho-3')).toBe('sabiazinho-4')
+    })
+
+    it('should pass through current models unchanged', () => {
+      expect(normalizeMaritacaModel('sabia-4')).toBe('sabia-4')
+      expect(normalizeMaritacaModel('sabiazinho-4')).toBe('sabiazinho-4')
+    })
+
+    it('should default unknown / null / undefined to sabia-4', () => {
+      expect(normalizeMaritacaModel('unknown-model')).toBe('sabia-4')
+      expect(normalizeMaritacaModel(null)).toBe('sabia-4')
+      expect(normalizeMaritacaModel(undefined)).toBe('sabia-4')
     })
   })
 })

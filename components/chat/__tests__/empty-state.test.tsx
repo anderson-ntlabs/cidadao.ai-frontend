@@ -50,18 +50,18 @@ vi.mock('@/data/agent-config', () => ({
     suggestions: ['Sugestão 1', 'Sugestão 2', 'Sugestão 3'],
   })),
   MARITACA_CONFIG: {
-    'sabia-3': {
-      name: 'Sabiá-3.1',
+    'sabia-4': {
+      name: 'Sabiá-4',
       role: 'Modelo avançado de IA',
       icon: '🦜',
-      greeting: 'Olá! Sou o Sabiá-3.1',
+      greeting: 'Olá! Sou o Sabiá-4',
       color: '#7c3aed',
       accentColor: '#8b5cf6',
       bgGradient: 'from-purple-500 to-violet-600',
       suggestions: ['Maritaca Sugestão 1', 'Maritaca Sugestão 2'],
     },
-    'sabiazinho-3': {
-      name: 'Sabiazinho-3',
+    'sabiazinho-4': {
+      name: 'Sabiazinho-4',
       role: 'Modelo rápido',
       icon: '🐦',
       greeting: 'Oi! Sou o Sabiazinho!',
@@ -126,7 +126,7 @@ describe('ChatEmptyState', () => {
 
   describe('Maritaca Mode', () => {
     it('shows Maritaca info when in maritaca mode', () => {
-      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-3" />)
+      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-4" />)
 
       // Should show maritaca logo
       const image = screen.getByTestId('agent-image')
@@ -134,7 +134,7 @@ describe('ChatEmptyState', () => {
     })
 
     it('shows different model when selected', () => {
-      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabiazinho-3" />)
+      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabiazinho-4" />)
 
       // Should render maritaca avatar
       const image = screen.getByTestId('agent-image')
@@ -142,7 +142,7 @@ describe('ChatEmptyState', () => {
     })
 
     it('uses Maritaca logo as avatar', () => {
-      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-3" />)
+      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-4" />)
 
       const image = screen.getByTestId('agent-image')
       expect(image).toHaveAttribute('src', '/logos/maritaca.png')
@@ -197,7 +197,7 @@ describe('ChatEmptyState', () => {
     })
 
     it('displays Maritaca info in maritaca mode', () => {
-      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-3" />)
+      render(<ChatEmptyState {...defaultProps} chatMode="maritaca" maritacaModel="sabia-4" />)
 
       // Should show maritaca avatar
       const image = screen.getByTestId('agent-image')

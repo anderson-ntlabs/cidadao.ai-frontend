@@ -171,13 +171,13 @@ export default function ChatPage() {
           agent={{
             name:
               chatMode === 'maritaca'
-                ? selectedModel === 'sabia-3'
-                  ? 'Sabiá-3.1'
-                  : 'Sabiazinho-3'
+                ? selectedModel === 'sabia-4'
+                  ? 'Sabiá-4'
+                  : 'Sabiazinho-4'
                 : currentAgent.name,
             avatar:
               chatMode === 'maritaca'
-                ? selectedModel === 'sabia-3'
+                ? selectedModel === 'sabia-4'
                   ? '/sabia3.1.png'
                   : '/sabiazinho.png'
                 : currentAgent.image,
@@ -304,15 +304,15 @@ export default function ChatPage() {
                   const selectedAgent = getAgentByIdOrNull(selectedAgentId)
                   const displayImage =
                     chatMode === 'maritaca'
-                      ? selectedModel === 'sabia-3'
+                      ? selectedModel === 'sabia-4'
                         ? '/sabia3.1.png'
                         : '/sabiazinho.png'
                       : selectedAgent?.image || '/agents/abaporu.webp'
                   const displayName =
                     chatMode === 'maritaca'
-                      ? selectedModel === 'sabia-3'
-                        ? 'Sabia-3.1'
-                        : 'Sabiazinho-3'
+                      ? selectedModel === 'sabia-4'
+                        ? 'Sabiá-4'
+                        : 'Sabiazinho-4'
                       : selectedAgent?.name || 'Cidadão.AI'
                   const displaySubtitle =
                     chatMode === 'maritaca'

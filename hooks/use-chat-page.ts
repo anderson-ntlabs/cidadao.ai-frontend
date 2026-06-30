@@ -95,7 +95,7 @@ export function useChatPage(): UseChatPageReturn {
   const [currentAgentId, setCurrentAgentId] = useState<string>('abaporu')
   const [isInitialized, setIsInitialized] = useState(false)
   const [chatMode, setChatMode] = useState<ChatMode>('cidadao')
-  const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-3')
+  const [selectedModel, setSelectedModel] = useState<MaritacaModel>('sabia-4')
   const [showErrorBanner, setShowErrorBanner] = useState(false)
   const [lastFailedMessage, setLastFailedMessage] = useState<string>('')
   const [sendingProgress, setSendingProgress] = useState(0)

@@ -10,13 +10,32 @@
 import type { ChatAdapter, ChatRequest, ChatResponse } from '../types'
 import { logger } from '@/lib/utils/logger'
 
-export type MaritacaModel = 'sabiazinho-3' | 'sabia-3'
+export type MaritacaModel = 'sabiazinho-4' | 'sabia-4'
+
+/**
+ * Maritaca retired sabia-3 / sabia-3.1 / sabiazinho-3 on 2026-07-15.
+ * Normalize any legacy value (e.g. one persisted in localStorage before the
+ * migration) to a currently-supported model so we never send a dead id.
+ */
+export function normalizeMaritacaModel(value: string | null | undefined): MaritacaModel {
+  switch (value) {
+    case 'sabiazinho-3':
+    case 'sabiazinho-4':
+      return 'sabiazinho-4'
+    case 'sabia-3':
+    case 'sabia-3.1':
+    case 'sabia-4':
+      return 'sabia-4'
+    default:
+      return 'sabia-4'
+  }
+}
 
 export class FallbackAdapter implements ChatAdapter {
   name = 'fallback-maritaca'
   private model: MaritacaModel
 
-  constructor(model: MaritacaModel = 'sabiazinho-3') {
+  constructor(model: MaritacaModel = 'sabiazinho-4') {
     this.model = model
   }
 

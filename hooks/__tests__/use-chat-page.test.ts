@@ -281,13 +281,13 @@ describe('useChatPage', () => {
     it('sets selected model', () => {
       const { result } = renderHook(() => useChatPage())
 
-      expect(result.current.selectedModel).toBe('sabia-3')
+      expect(result.current.selectedModel).toBe('sabia-4')
 
       act(() => {
-        result.current.setSelectedModel('sabia-3-2025-01-10')
+        result.current.setSelectedModel('sabia-4-2025-01-10')
       })
 
-      expect(result.current.selectedModel).toBe('sabia-3-2025-01-10')
+      expect(result.current.selectedModel).toBe('sabia-4-2025-01-10')
     })
   })
 

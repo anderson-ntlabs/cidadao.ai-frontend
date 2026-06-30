@@ -299,8 +299,8 @@ export const AGENT_VISUAL_CONFIG: Record<string, AgentVisualConfig> = {
  * Maritaca AI mode configuration
  */
 export const MARITACA_CONFIG = {
-  'sabia-3': {
-    name: 'Sabiá-3.1',
+  'sabia-4': {
+    name: 'Sabiá-4',
     role: 'Modelo Completo',
     color: '#6366F1',
     accentColor: '#818CF8',
@@ -308,15 +308,15 @@ export const MARITACA_CONFIG = {
     icon: '🦜',
     specialty: 'Modelo avançado para tarefas complexas',
     greeting:
-      'Olá! Sou o Sabiá-3.1, o modelo mais avançado da Maritaca AI. Fui treinado especificamente para entender português brasileiro com todas as suas nuances. Como posso ajudar?',
+      'Olá! Sou o Sabiá-4, o modelo mais avançado da Maritaca AI. Fui treinado especificamente para entender português brasileiro com todas as suas nuances. Como posso ajudar?',
     suggestions: [
       'Conversar sobre qualquer tema',
       'Analisar textos complexos',
       'Ajudar com redação',
     ],
   },
-  'sabiazinho-3': {
-    name: 'Sabiazinho-3',
+  'sabiazinho-4': {
+    name: 'Sabiazinho-4',
     role: 'Modelo Otimizado',
     color: '#10B981',
     accentColor: '#34D399',
@@ -324,7 +324,7 @@ export const MARITACA_CONFIG = {
     icon: '🐦',
     specialty: 'Respostas rápidas e eficientes',
     greeting:
-      'Oi! Sou o Sabiazinho-3, versão otimizada para respostas rápidas. Posso ajudar com tarefas do dia a dia de forma ágil. O que você precisa?',
+      'Oi! Sou o Sabiazinho-4, versão otimizada para respostas rápidas. Posso ajudar com tarefas do dia a dia de forma ágil. O que você precisa?',
     suggestions: ['Tirar dúvidas rápidas', 'Resumir informações', 'Responder perguntas diretas'],
   },
 }

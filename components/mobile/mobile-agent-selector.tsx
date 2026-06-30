@@ -3,7 +3,7 @@
  *
  * Full-screen bottom sheet with tabs for selecting between:
  * - Cidadão.AI mode (17 Brazilian AI agents)
- * - Maritaca.AI mode (Sabiá-3.1 and Sabiazinho-3 models)
+ * - Maritaca.AI mode (Sabiá-4 and Sabiazinho-4 models)
  *
  * Features touch-optimized scrolling and haptic feedback.
  *
@@ -57,8 +57,8 @@ export interface MobileAgentSelectorProps {
 // Maritaca models configuration
 const MARITACA_MODELS = [
   {
-    id: 'sabiazinho-3' as MaritacaModel,
-    name: 'Sabiazinho-3',
+    id: 'sabiazinho-4' as MaritacaModel,
+    name: 'Sabiazinho-4',
     description: 'Modelo otimizado para velocidade e eficiência',
     image: '/sabiazinho.png',
     icon: '🐦',
@@ -68,8 +68,8 @@ const MARITACA_MODELS = [
     iconColor: 'text-yellow-500',
   },
   {
-    id: 'sabia-3' as MaritacaModel,
-    name: 'Sabiá-3.1',
+    id: 'sabia-4' as MaritacaModel,
+    name: 'Sabiá-4',
     description: 'Modelo completo com máxima qualidade',
     image: '/sabia3.1.png',
     icon: '🦜',
@@ -86,7 +86,7 @@ export function MobileAgentSelector({
   selectedAgentId,
   onSelectAgent,
   chatMode = 'cidadao',
-  maritacaModel = 'sabia-3',
+  maritacaModel = 'sabia-4',
   onModeChange,
   onMaritacaModelChange,
   className,
@@ -365,7 +365,7 @@ export function MobileAgentSelector({
                       <div className="flex items-center gap-1 mt-1">
                         <IconComponent className={cn('w-3 h-3', model.iconColor)} />
                         <span className="text-xs text-gray-400">
-                          {model.id === 'sabiazinho-3' ? 'Velocidade: Alta' : 'Qualidade: Máxima'}
+                          {model.id === 'sabiazinho-4' ? 'Velocidade: Alta' : 'Qualidade: Máxima'}
                         </span>
                       </div>
                     </div>

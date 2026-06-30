@@ -120,9 +120,10 @@ export class CostMetricsService {
   private readonly maxMetrics = 10000
 
   // Cost per 1000 tokens (in USD)
+  // TODO: confirm official Maritaca pricing for sabia-4 / sabiazinho-4 (values carried over from sabia-3/sabiazinho-3)
   private readonly modelCosts = {
-    'sabiazinho-3': 0.0002, // $0.20 per million tokens
-    'sabia-3': 0.0006, // $0.60 per million tokens
+    'sabiazinho-4': 0.0002, // $0.20 per million tokens
+    'sabia-4': 0.0006, // $0.60 per million tokens
     mixed: 0.0004, // Average
     fallback: 0, // Local fallback
   }

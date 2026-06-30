@@ -63,13 +63,13 @@ export function ChatEmptyState({
   onSuggestionClick,
   selectedAgentId,
   chatMode = 'cidadao',
-  maritacaModel = 'sabia-3',
+  maritacaModel = 'sabia-4',
 }: ChatEmptyStateProps): JSX.Element {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   // Get the appropriate config based on mode
   const isMaritacaMode = chatMode === 'maritaca'
-  const maritacaConfig = MARITACA_CONFIG[maritacaModel] || MARITACA_CONFIG['sabia-3']
+  const maritacaConfig = MARITACA_CONFIG[maritacaModel] || MARITACA_CONFIG['sabia-4']
 
   // Get agent config (for Cidadão.AI mode)
   const selectedAgent = selectedAgentId ? agents.find((a) => a.id === selectedAgentId) : null

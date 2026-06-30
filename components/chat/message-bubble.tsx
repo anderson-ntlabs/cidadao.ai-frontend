@@ -208,12 +208,12 @@ export const MessageBubble = memo(function MessageBubble({
             <span
               className={cn(
                 'text-xs px-1.5 py-0.5 rounded font-medium',
-                metadata.model === 'sabia-3'
+                metadata.model === 'sabia-4'
                   ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                   : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
               )}
             >
-              {metadata.model === 'sabia-3' ? 'Sabiá-3.1' : 'Sabiazinho-3'}
+              {metadata.model === 'sabia-4' ? 'Sabiá-4' : 'Sabiazinho-4'}
             </span>
           )}
         </div>
