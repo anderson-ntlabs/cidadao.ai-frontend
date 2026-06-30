@@ -118,14 +118,14 @@ describe('Agent Visual Configuration', () => {
   })
 
   describe('MARITACA_CONFIG', () => {
-    it('should have sabia-3 config', () => {
-      expect(MARITACA_CONFIG['sabia-3']).toBeDefined()
-      expect(MARITACA_CONFIG['sabia-3'].name).toBe('Sabiá-3.1')
+    it('should have sabia-4 config', () => {
+      expect(MARITACA_CONFIG['sabia-4']).toBeDefined()
+      expect(MARITACA_CONFIG['sabia-4'].name).toBe('Sabiá-4')
     })
 
-    it('should have sabiazinho-3 config', () => {
-      expect(MARITACA_CONFIG['sabiazinho-3']).toBeDefined()
-      expect(MARITACA_CONFIG['sabiazinho-3'].name).toBe('Sabiazinho-3')
+    it('should have sabiazinho-4 config', () => {
+      expect(MARITACA_CONFIG['sabiazinho-4']).toBeDefined()
+      expect(MARITACA_CONFIG['sabiazinho-4'].name).toBe('Sabiazinho-4')
     })
 
     it('should have required properties for Maritaca configs', () => {

@@ -192,13 +192,14 @@ export function trackTokenUsage(
 ): void {
   const totalTokens = inputTokens + outputTokens
 
-  // Estimated costs per 1M tokens (adjust based on actual pricing)
+  // Official Maritaca pricing in BRL per 1M tokens (https://www.maritaca.ai/en/pricing)
   const costs: Record<string, { input: number; output: number }> = {
-    'sabia-3': { input: 0.3, output: 0.9 },
-    'sabiazinho-3': { input: 0.15, output: 0.45 },
+    'sabia-4': { input: 5.0, output: 20.0 },
+    'sabiazinho-4': { input: 1.0, output: 4.0 },
   }
 
-  const modelCost = costs[model] || { input: 0.5, output: 1.5 }
+  // Unknown models fall back to the most expensive listed model (conservative estimate)
+  const modelCost = costs[model] || { input: 5.0, output: 20.0 }
   const estimatedCost =
     (inputTokens * modelCost.input + outputTokens * modelCost.output) / 1_000_000
 
@@ -208,7 +209,7 @@ export function trackTokenUsage(
     inputTokens,
     outputTokens,
     totalTokens,
-    estimatedCostUSD: estimatedCost.toFixed(6),
+    estimatedCostBRL: estimatedCost.toFixed(6),
   })
 
   // Set measurements

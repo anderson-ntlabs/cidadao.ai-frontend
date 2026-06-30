@@ -9,7 +9,7 @@
 
 import type { ChatAdapter, ChatRequest, ChatResponse, ChatServiceConfig } from './types'
 import { PrimaryAdapter } from './adapters/primary.adapter'
-import { FallbackAdapter } from './adapters/fallback.adapter'
+import { FallbackAdapter, normalizeMaritacaModel } from './adapters/fallback.adapter'
 import { logger } from '@/lib/utils/logger'
 import { chatTelemetry } from '@/lib/telemetry/chat-telemetry'
 
@@ -48,8 +48,10 @@ export class ChatService {
     }
 
     // Check if Maritaca direct mode is requested (from localStorage)
-    const maritacaModel =
+    const storedModel =
       typeof window !== 'undefined' ? localStorage.getItem('maritaca_selected_model') : null
+    // Normalize legacy ids (sabia-3/sabia-3.1/sabiazinho-3) to current models; preserve null
+    const maritacaModel = storedModel ? normalizeMaritacaModel(storedModel) : null
 
     // If Maritaca model is selected, use fallback adapter directly (bypass backend)
     if (maritacaModel && this.fallbackAdapter) {

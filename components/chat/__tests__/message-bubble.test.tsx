@@ -73,11 +73,11 @@ describe('MessageBubble', () => {
           content="Test"
           role="assistant"
           agentName="Abaporu"
-          metadata={{ model: 'sabia-3' }}
+          metadata={{ model: 'sabia-4' }}
         />
       )
-      // Component displays "Sabiá-3.1" for sabia-3 model
-      expect(screen.getByText(/Sabiá-3.1/)).toBeInTheDocument()
+      // Component displays "Sabiá-4" for sabia-4 model
+      expect(screen.getByText(/Sabiá-4/)).toBeInTheDocument()
     })
 
     it('applies correct styles for user messages', () => {

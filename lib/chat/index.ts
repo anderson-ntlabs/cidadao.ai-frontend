@@ -18,7 +18,11 @@ export type {
 
 // Adapters
 export { PrimaryAdapter } from './adapters/primary.adapter'
-export { FallbackAdapter, type MaritacaModel } from './adapters/fallback.adapter'
+export {
+  FallbackAdapter,
+  normalizeMaritacaModel,
+  type MaritacaModel,
+} from './adapters/fallback.adapter'
 
 // Service
 export { ChatService, chatService } from './chat.service'

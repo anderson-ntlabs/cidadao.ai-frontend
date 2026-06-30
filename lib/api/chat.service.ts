@@ -14,7 +14,7 @@ import type {
   SSEEventType,
 } from '@/types/chat'
 import { getMockAgents, getMockSuggestions } from './chat-adapter'
-import { chatService as unifiedChatService } from '@/lib/chat'
+import { chatService as unifiedChatService, normalizeMaritacaModel } from '@/lib/chat'
 import {
   sanitizeSearchQuery,
   isValidInvestigationId,
@@ -66,10 +66,10 @@ export const chatService = {
       })
 
       // Check if Maritaca model is selected in localStorage
-      const maritacaModel =
-        typeof window !== 'undefined'
-          ? (localStorage.getItem('maritaca_selected_model') as any)
-          : null
+      const storedModel =
+        typeof window !== 'undefined' ? localStorage.getItem('maritaca_selected_model') : null
+      // Normalize legacy ids (sabia-3/sabia-3.1/sabiazinho-3) to current models; preserve null
+      const maritacaModel = storedModel ? normalizeMaritacaModel(storedModel) : null
 
       // Map ChatRequest to unified chat request format
       const unifiedRequest = {

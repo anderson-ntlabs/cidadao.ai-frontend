@@ -43,7 +43,7 @@ describe('AI Telemetry', () => {
   describe('startAISpan', () => {
     it('should start a Sentry span with AI operation', () => {
       startAISpan('chat', {
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         agentId: 'zumbi',
       })
@@ -90,7 +90,7 @@ describe('AI Telemetry', () => {
   describe('trackAICall', () => {
     it('should add breadcrumb for successful call', () => {
       trackAICall({
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         operation: 'chat',
         latencyMs: 500,
@@ -100,10 +100,10 @@ describe('AI Telemetry', () => {
 
       expect(mockAddBreadcrumb).toHaveBeenCalledWith({
         category: 'ai',
-        message: 'maritaca/sabia-3 - chat',
+        message: 'maritaca/sabia-4 - chat',
         level: 'info',
         data: expect.objectContaining({
-          model: 'sabia-3',
+          model: 'sabia-4',
           provider: 'maritaca',
           success: true,
         }),
@@ -112,7 +112,7 @@ describe('AI Telemetry', () => {
 
     it('should add breadcrumb with error level for failed call', () => {
       trackAICall({
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         operation: 'chat',
         latencyMs: 1000,
@@ -129,7 +129,7 @@ describe('AI Telemetry', () => {
 
     it('should set latency measurement', () => {
       trackAICall({
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         operation: 'chat',
         latencyMs: 250,
@@ -141,7 +141,7 @@ describe('AI Telemetry', () => {
 
     it('should set token measurements', () => {
       trackAICall({
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         operation: 'chat',
         latencyMs: 300,
@@ -158,7 +158,7 @@ describe('AI Telemetry', () => {
 
     it('should capture error message on failure', () => {
       trackAICall({
-        model: 'sabia-3',
+        model: 'sabia-4',
         provider: 'maritaca',
         operation: 'chat',
         latencyMs: 5000,
@@ -173,7 +173,7 @@ describe('AI Telemetry', () => {
         expect.objectContaining({
           level: 'error',
           tags: expect.objectContaining({
-            'ai.model': 'sabia-3',
+            'ai.model': 'sabia-4',
             'ai.provider': 'maritaca',
           }),
         })
@@ -188,7 +188,7 @@ describe('AI Telemetry', () => {
       const result = await withAITelemetry(
         'chat',
         {
-          model: 'sabia-3',
+          model: 'sabia-4',
           provider: 'maritaca',
           agentId: 'zumbi',
         },
@@ -214,7 +214,7 @@ describe('AI Telemetry', () => {
         withAITelemetry(
           'chat',
           {
-            model: 'sabia-3',
+            model: 'sabia-4',
             provider: 'maritaca',
           },
           mockFn
@@ -247,13 +247,13 @@ describe('AI Telemetry', () => {
 
   describe('trackTokenUsage', () => {
     it('should set context with token usage', () => {
-      trackTokenUsage('maritaca', 'sabia-3', 1000, 500)
+      trackTokenUsage('maritaca', 'sabia-4', 1000, 500)
 
       expect(mockSetContext).toHaveBeenCalledWith(
         'ai_usage',
         expect.objectContaining({
           provider: 'maritaca',
-          model: 'sabia-3',
+          model: 'sabia-4',
           inputTokens: 1000,
           outputTokens: 500,
           totalTokens: 1500,
@@ -261,19 +261,19 @@ describe('AI Telemetry', () => {
       )
     })
 
-    it('should calculate estimated cost for sabia-3', () => {
-      trackTokenUsage('maritaca', 'sabia-3', 1000000, 500000)
+    it('should calculate estimated cost for sabia-4', () => {
+      trackTokenUsage('maritaca', 'sabia-4', 1000000, 500000)
 
       expect(mockSetContext).toHaveBeenCalledWith(
         'ai_usage',
         expect.objectContaining({
-          estimatedCostUSD: expect.any(String),
+          estimatedCostBRL: expect.any(String),
         })
       )
     })
 
     it('should set cost measurement', () => {
-      trackTokenUsage('maritaca', 'sabia-3', 1000, 500)
+      trackTokenUsage('maritaca', 'sabia-4', 1000, 500)
 
       expect(mockSetMeasurement).toHaveBeenCalledWith(
         'ai.cost.estimated',

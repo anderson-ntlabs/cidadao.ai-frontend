@@ -120,10 +120,16 @@ export class CostMetricsService {
   private readonly maxMetrics = 10000
 
   // Cost per 1000 tokens (in USD)
+  // Blended cost per 1000 tokens in BRL. Maritaca bills input/output separately
+  // (official pricing: https://www.maritaca.ai/en/pricing), but this tracker only
+  // stores total tokens, so we blend using the typical 20% input / 80% output split
+  // from avgTokensPerMessage (50 request / 200 response tokens).
+  // sabia-4:       0.2*R$5 + 0.8*R$20 = R$17/M  -> 0.017/1k
+  // sabiazinho-4:  0.2*R$1 + 0.8*R$4  = R$3.4/M -> 0.0034/1k
   private readonly modelCosts = {
-    'sabiazinho-3': 0.0002, // $0.20 per million tokens
-    'sabia-3': 0.0006, // $0.60 per million tokens
-    mixed: 0.0004, // Average
+    'sabiazinho-4': 0.0034, // R$3.40 per million tokens (blended)
+    'sabia-4': 0.017, // R$17.00 per million tokens (blended)
+    mixed: 0.0102, // Average of the two
     fallback: 0, // Local fallback
   }
 
