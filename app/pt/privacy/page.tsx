@@ -219,8 +219,9 @@ export default function PrivacyPage(): JSX.Element {
               <strong>
                 Dados da conta, perfil, preferências, histórico do chat e investigações
               </strong>
-              : mantidos enquanto sua conta estiver ativa e excluídos em até 30 dias após você
-              excluir a conta ou pedir a exclusão.
+              : mantidos enquanto sua conta estiver ativa. Excluir a conta no aplicativo os remove
+              imediatamente; se você pedir por e-mail, excluímos em até 15 dias. Cópias nos backups
+              dos provedores são sobrescritas em até 30 dias.
             </li>
             <li>
               <strong>Registros de consentimento</strong>: mantidos durante a vida da conta e
@@ -235,8 +236,10 @@ export default function PrivacyPage(): JSX.Element {
               listados acima por no máximo 12 meses.
             </li>
             <li>
-              <strong>Certificados de cursos</strong>: após a exclusão da conta, só um código de
-              verificação anônimo é mantido, para que certificados emitidos continuem verificáveis.
+              <strong>Certificados de cursos</strong>: após a exclusão da conta, o registro público
+              do certificado (nome impresso no certificado, horas, datas e código de verificação) é
+              mantido, sem vínculo com a conta excluída, para que certificados emitidos continuem
+              verificáveis.
             </li>
             <li>
               <strong>Dados de pesquisa anonimizados</strong>: podem ser mantidos, pois não
@@ -274,8 +277,8 @@ export default function PrivacyPage(): JSX.Element {
             <li>
               <strong>No aplicativo</strong>: com login, abra Configurações, na seção de
               Privacidade, e use <em>Exportar meus dados</em> (baixa um arquivo JSON com seus dados)
-              ou <em>Excluir minha conta</em>. Essas ações sempre atuam apenas sobre a conta com
-              login.
+              ou <em>Excluir minha conta</em> (imediata e irreversível). Essas ações sempre atuam
+              apenas sobre a conta com login.
             </li>
             <li>
               <strong>Por e-mail</strong>: escreva para{' '}

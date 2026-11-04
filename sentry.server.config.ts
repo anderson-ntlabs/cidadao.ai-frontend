@@ -22,8 +22,8 @@ Sentry.init({
   // Tracing must be enabled for agent monitoring to work
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-  // Enable PII to capture user context
-  sendDefaultPii: true,
+  // Do not send IP addresses, cookies or request bodies (LGPD data minimisation)
+  sendDefaultPii: false,
 
   // Integrations
   integrations: [

@@ -177,10 +177,10 @@ export default function TermsPage(): JSX.Element {
             <p className="text-gray-600 dark:text-gray-400">IFSULDEMINAS - Campus Muzambinho</p>
             <p className="mt-2">
               <a
-                href="mailto:anderson.ufrj@gmail.com"
+                href="mailto:andersonhs27@gmail.com"
                 className="text-green-600 hover:text-green-700 underline"
               >
-                anderson.ufrj@gmail.com
+                andersonhs27@gmail.com
               </a>
             </p>
           </div>

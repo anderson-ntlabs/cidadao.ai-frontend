@@ -210,8 +210,9 @@ export default function PrivacyPage(): JSX.Element {
           <ul className="list-disc pl-6 mt-2">
             <li>
               <strong>Account data, profile, preferences, chat history and investigations</strong>:
-              kept while your account is active and deleted within 30 days after you delete your
-              account or ask us to delete it.
+              kept while your account is active. Deleting your account in the app removes them
+              immediately; if you ask by email, we delete them within 15 days. Copies in our
+              providers&apos; backups are overwritten within 30 days.
             </li>
             <li>
               <strong>Consent records</strong>: kept for the life of the account and deleted
@@ -226,8 +227,10 @@ export default function PrivacyPage(): JSX.Element {
               above for at most 12 months.
             </li>
             <li>
-              <strong>Course certificates</strong>: only an anonymous verification code is kept
-              after account deletion, so that issued certificates remain verifiable.
+              <strong>Course certificates</strong>: after account deletion, the public certificate
+              record (the name printed on the certificate, hours, dates and verification code) is
+              kept, with no link to the deleted account, so that issued certificates remain
+              verifiable.
             </li>
             <li>
               <strong>Anonymised research data</strong>: may be kept, because it no longer
@@ -259,7 +262,8 @@ export default function PrivacyPage(): JSX.Element {
             <li>
               <strong>In the app</strong>: signed in, open Settings, in the Privacy section, and use{' '}
               <em>Export my data</em> (downloads a JSON file with your data) or{' '}
-              <em>Delete my account</em>. These actions only ever act on the signed-in account.
+              <em>Delete my account</em> (immediate and irreversible). These actions only ever act
+              on the signed-in account.
             </li>
             <li>
               <strong>By email</strong>: write to{' '}

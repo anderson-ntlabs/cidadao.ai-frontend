@@ -29,6 +29,8 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Consentimento LGPD antes do cadastro** (`components/privacy/signup-consent.tsx`): o login e o
   cadastro (`/pt/login`, `/pt/agora/login`) só ficam habilitados após o aceite da política
 - **Links legais nas áreas logadas** (`components/legal-links.tsx`) em `/pt/app/*` e `/pt/agora/*`
+- **Função `public.delete_my_account()`** (migration `20261104023520`): exclui todas as linhas do
+  usuário e o próprio `auth.users` numa transação; requer `supabase db push` antes do deploy
 
 ### 🔄 Modificado
 
@@ -38,12 +40,20 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Exportação e exclusão de dados** agora incluem sessões e mensagens do chat, preferências,
   atividades e investigações
 - **Termos de Uso**: links para a Política de IA Responsável; removida a proibição de redistribuir
-  o código, que contradizia a licença MIT
+  o código, que contradizia a licença MIT; contato passa a ser andersonhs27@gmail.com
+- **Exclusão de conta** agora é sempre imediata, via RPC `delete_my_account`; o modo agendado
+  (que gravava a coluna inexistente `scheduled_deletion_at`) foi removido da API e do modal
+- **Sentry (servidor)**: `sendDefaultPii` desativado (minimização de dados, LGPD)
 
 ### 🐛 Corrigido
 
 - Links quebrados para `/pt/termos` e `/pt/privacidade` no login da Ágora e no modal LGPD
 - Seletor de idioma levava `/en/privacy` e `/en/terms` para rotas inexistentes em português
+- **Vazamento no ranking da Ágora**: a policy "Authenticated users can view leaderboard" deixava
+  qualquer usuário logado ler e-mail, matrícula e GitHub de todos os perfis; removida, e a view
+  `agora_leaderboard` passa a expor só nome, avatar e contadores
+- Exclusão de conta reportava sucesso mesmo quando nenhuma linha era apagada (RLS sem policy de
+  DELETE)
 
 ---
 
