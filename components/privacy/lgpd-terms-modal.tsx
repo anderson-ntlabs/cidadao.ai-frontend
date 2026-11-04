@@ -536,14 +536,14 @@ export function LGPDTermsModal({ isOpen, onClose, onAccept, userName }: LGPDTerm
           {/* External links */}
           <div className="flex justify-center gap-4 text-xs">
             <a
-              href="/pt/termos"
+              href="/pt/terms"
               target="_blank"
               className="text-gray-500 hover:text-tarsila-verde flex items-center gap-1"
             >
               Termos completos <ExternalLink className="w-3 h-3" />
             </a>
             <a
-              href="/pt/privacidade"
+              href="/pt/privacy"
               target="_blank"
               className="text-gray-500 hover:text-tarsila-verde flex items-center gap-1"
             >

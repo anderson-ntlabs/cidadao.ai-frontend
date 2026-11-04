@@ -57,8 +57,6 @@ export function LanguageSelector({ className }: { className?: string }) {
       const routeMap: Record<string, string> = {
         '/pt/agents': '/pt/agentes',
         '/pt/about': '/pt/sobre',
-        '/pt/privacy': '/pt/privacidade',
-        '/pt/terms': '/pt/termos',
         '/pt/help': '/pt/ajuda',
       }
 

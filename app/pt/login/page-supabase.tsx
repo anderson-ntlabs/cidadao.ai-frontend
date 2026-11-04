@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAuth } from '@/hooks/use-supabase-auth'
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
+import { SignupConsent } from '@/components/privacy/signup-consent'
 
 // Available background images for random selection
 const BACKGROUND_IMAGES = [
@@ -141,73 +142,75 @@ export default function LoginPage() {
 
         {/* Login Form Card - Glassmorphism effect */}
         <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
-          <Auth
-            supabaseClient={supabase}
-            view={view}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#16a34a',
-                    brandAccent: '#15803d',
-                    inputBackground: '#f9fafb',
-                    inputText: '#111827',
-                    inputBorder: '#e5e7eb',
-                    inputBorderFocus: '#16a34a',
-                    inputBorderHover: '#d1d5db',
+          <SignupConsent>
+            <Auth
+              supabaseClient={supabase}
+              view={view}
+              appearance={{
+                theme: ThemeSupa,
+                variables: {
+                  default: {
+                    colors: {
+                      brand: '#16a34a',
+                      brandAccent: '#15803d',
+                      inputBackground: '#f9fafb',
+                      inputText: '#111827',
+                      inputBorder: '#e5e7eb',
+                      inputBorderFocus: '#16a34a',
+                      inputBorderHover: '#d1d5db',
+                    },
+                    radii: {
+                      borderRadiusButton: '0.5rem',
+                      inputBorderRadius: '0.5rem',
+                    },
                   },
-                  radii: {
-                    borderRadiusButton: '0.5rem',
-                    inputBorderRadius: '0.5rem',
+                },
+                className: {
+                  anchor: 'text-green-600 hover:text-green-700 underline',
+                  button: 'font-semibold',
+                  input: 'placeholder:text-gray-400',
+                  label: 'text-gray-700 font-medium',
+                },
+              }}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: 'Email',
+                    password_label: 'Senha',
+                    button_label: 'Entrar',
+                    loading_button_label: 'Entrando...',
+                    social_provider_text: 'Entrar com {{provider}}',
+                    link_text: 'Já tem uma conta? Entre',
+                    email_input_placeholder: 'seu@email.com',
+                    password_input_placeholder: 'Sua senha',
+                  },
+                  sign_up: {
+                    email_label: 'Email',
+                    password_label: 'Senha',
+                    button_label: 'Criar conta',
+                    loading_button_label: 'Criando conta...',
+                    social_provider_text: 'Criar conta com {{provider}}',
+                    link_text: 'Não tem uma conta? Cadastre-se',
+                    email_input_placeholder: 'seu@email.com',
+                    password_input_placeholder: 'Crie uma senha segura',
+                    confirmation_text: 'Verifique seu email para confirmar',
+                  },
+                  forgotten_password: {
+                    link_text: 'Esqueceu sua senha?',
+                    email_label: 'Email',
+                    button_label: 'Enviar instruções',
+                    loading_button_label: 'Enviando...',
+                    confirmation_text: 'Verifique seu email para redefinir a senha',
+                    email_input_placeholder: 'seu@email.com',
                   },
                 },
-              },
-              className: {
-                anchor: 'text-green-600 hover:text-green-700 underline',
-                button: 'font-semibold',
-                input: 'placeholder:text-gray-400',
-                label: 'text-gray-700 font-medium',
-              },
-            }}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email',
-                  password_label: 'Senha',
-                  button_label: 'Entrar',
-                  loading_button_label: 'Entrando...',
-                  social_provider_text: 'Entrar com {{provider}}',
-                  link_text: 'Já tem uma conta? Entre',
-                  email_input_placeholder: 'seu@email.com',
-                  password_input_placeholder: 'Sua senha',
-                },
-                sign_up: {
-                  email_label: 'Email',
-                  password_label: 'Senha',
-                  button_label: 'Criar conta',
-                  loading_button_label: 'Criando conta...',
-                  social_provider_text: 'Criar conta com {{provider}}',
-                  link_text: 'Não tem uma conta? Cadastre-se',
-                  email_input_placeholder: 'seu@email.com',
-                  password_input_placeholder: 'Crie uma senha segura',
-                  confirmation_text: 'Verifique seu email para confirmar',
-                },
-                forgotten_password: {
-                  link_text: 'Esqueceu sua senha?',
-                  email_label: 'Email',
-                  button_label: 'Enviar instruções',
-                  loading_button_label: 'Enviando...',
-                  confirmation_text: 'Verifique seu email para redefinir a senha',
-                  email_input_placeholder: 'seu@email.com',
-                },
-              },
-            }}
-            providers={['google', 'github']}
-            redirectTo={redirectTo}
-            onlyThirdPartyProviders={false}
-            magicLink={false}
-          />
+              }}
+              providers={['google', 'github']}
+              redirectTo={redirectTo}
+              onlyThirdPartyProviders={false}
+              magicLink={false}
+            />
+          </SignupConsent>
         </div>
 
         {/* Toggle Sign In/Sign Up */}

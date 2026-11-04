@@ -8,7 +8,7 @@
 **Data**: 2025-09-17 08:42:08 -03 (Horário de Brasília)
 **Localização**: Minas Gerais, Brasil
 **Categoria**: Documentation / Changelog
-**Última Atualização**: 2026-02-25
+**Última Atualização**: 2026-11-03
 
 ---
 
@@ -16,6 +16,36 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
+
+## [Unreleased]
+
+### 🚀 Adicionado
+
+- **Política de IA Responsável e de Conteúdo** (`/pt/responsible-ai`, `/en/responsible-ai`)
+  - Uso da IA, limites ("um achado não é uma acusação"), conteúdo proibido, canal de denúncia,
+    remoção e comunicação às autoridades, proteção de crianças (ECA e LGPD art. 14)
+- **Aviso "Um achado não é uma acusação"** (`components/ai/finding-notice.tsx`) junto às respostas
+  dos agentes no chat, às anomalias, ao resumo da investigação e à lista de investigações
+- **Consentimento LGPD antes do cadastro** (`components/privacy/signup-consent.tsx`): o login e o
+  cadastro (`/pt/login`, `/pt/agora/login`) só ficam habilitados após o aceite da política
+- **Links legais nas áreas logadas** (`components/legal-links.tsx`) em `/pt/app/*` e `/pt/agora/*`
+
+### 🔄 Modificado
+
+- **Política de Privacidade** (PT/EN) reescrita: controlador e contato, dados coletados, bases
+  legais, operadores reais (Vercel, Supabase, Railway, provedor de LLM, PostHog, Sentry, Resend,
+  ipify), prazos de retenção, direitos do titular e como exercê-los, crianças e adolescentes
+- **Exportação e exclusão de dados** agora incluem sessões e mensagens do chat, preferências,
+  atividades e investigações
+- **Termos de Uso**: links para a Política de IA Responsável; removida a proibição de redistribuir
+  o código, que contradizia a licença MIT
+
+### 🐛 Corrigido
+
+- Links quebrados para `/pt/termos` e `/pt/privacidade` no login da Ágora e no modal LGPD
+- Seletor de idioma levava `/en/privacy` e `/en/terms` para rotas inexistentes em português
+
+---
 
 ## [1.1.0] - 2026-02-25
 

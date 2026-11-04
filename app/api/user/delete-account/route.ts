@@ -156,7 +156,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         .eq('user_id', userId)
       results.challenge_progress = challengeError ? `Error: ${challengeError.message}` : 'Deleted'
 
-      // 11. Delete Agora profile (last)
+      // 11. Delete chat messages and sessions written to the AI agents
+      const { error: chatMessagesError } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', userId)
+      results.chat_messages = chatMessagesError ? `Error: ${chatMessagesError.message}` : 'Deleted'
+
+      const { error: chatSessionsError } = await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('user_id', userId)
+      results.chat_sessions = chatSessionsError ? `Error: ${chatSessionsError.message}` : 'Deleted'
+
+      // 12. Delete activity log and preferences
+      const { error: activitiesError } = await supabase
+        .from('user_activities')
+        .delete()
+        .eq('user_id', userId)
+      results.user_activities = activitiesError ? `Error: ${activitiesError.message}` : 'Deleted'
+
+      const { error: preferencesError } = await supabase
+        .from('user_preferences')
+        .delete()
+        .eq('user_id', userId)
+      results.user_preferences = preferencesError ? `Error: ${preferencesError.message}` : 'Deleted'
+
+      // 13. Delete Agora profile (last)
       const { error: profileError } = await supabase
         .from('agora_profiles')
         .delete()

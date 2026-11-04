@@ -58,7 +58,16 @@ export default function TermsPage(): JSX.Element {
             <li>Usar o sistema para fins ilegais ou antiéticos</li>
             <li>Tentar acessar áreas restritas ou dados privados</li>
             <li>Sobrecarregar o sistema com requisições excessivas</li>
-            <li>Reproduzir, modificar ou distribuir o código sem autorização</li>
+            <li>
+              Publicar conteúdo proibido pela{' '}
+              <a
+                href="/pt/responsible-ai"
+                className="text-green-600 hover:text-green-700 underline"
+              >
+                Política de IA Responsável
+              </a>
+            </li>
+            <li>Apresentar achados da IA como fatos comprovados ou acusações</li>
             <li>Utilizar dados para assédio, discriminação ou difamação</li>
           </ul>
         </section>
@@ -67,12 +76,18 @@ export default function TermsPage(): JSX.Element {
           <h2 className="text-2xl font-semibold mb-4">4. Dados e Privacidade</h2>
           <p>
             Coletamos apenas dados necessários para o funcionamento do sistema. Suas consultas e
-            investigações são armazenadas de forma segura e não são compartilhadas com terceiros.
+            investigações são armazenadas de forma segura e não são vendidas nem compartilhadas,
+            exceto com os operadores necessários para prestar o serviço (como o provedor do modelo
+            de linguagem que gera as respostas), descritos na Política de Privacidade.
           </p>
           <p className="mt-4">
             Para mais informações, consulte nossa{' '}
             <a href="/pt/privacy" className="text-green-600 hover:text-green-700 underline">
               Política de Privacidade
+            </a>{' '}
+            e nossa{' '}
+            <a href="/pt/responsible-ai" className="text-green-600 hover:text-green-700 underline">
+              Política de IA Responsável e de Conteúdo
             </a>
             .
           </p>

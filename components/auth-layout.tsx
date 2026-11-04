@@ -13,6 +13,7 @@ import { MobileNavV2 } from './mobile-nav'
 import { BottomNavigation } from './mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { createLogger } from '@/lib/logger'
+import { LegalLinks } from './legal-links'
 
 const logger = createLogger('AuthLayout')
 
@@ -198,6 +199,8 @@ export function AuthLayoutV2({
           </div>
         </div>
       </main>
+
+      <LegalLinks locale={locale} className={isMobile ? 'pb-24' : undefined} />
 
       {/* Mobile Bottom Navigation - Only show in authenticated app area */}
       {isMobile ? (

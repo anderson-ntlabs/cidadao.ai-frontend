@@ -13,6 +13,7 @@ import { BottomNavigation } from '@/components/mobile/bottom-navigation'
 import { useMobileDetection } from '@/lib/utils/mobile-detection'
 import { navigationSessionService } from '@/lib/services/navigation-session.service'
 import { GraduationCap, Home, MessageSquare, BookOpen, Trophy, User } from 'lucide-react'
+import { LegalLinks } from '@/components/legal-links'
 
 /**
  * Agora Layout
@@ -309,6 +310,8 @@ function AgoraLayoutContent({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </AuthGuard>
+
+      <LegalLinks locale="pt" className={showBottomNav ? 'pb-24' : undefined} />
 
       {/* Mobile Bottom Navigation - NOT shown on Kids pages */}
       {showBottomNav && <BottomNavigation items={agoraNavItems} />}

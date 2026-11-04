@@ -378,6 +378,7 @@ function ChatContent() {
                         isLatest={isLatest}
                         isLoading={isLoading}
                         isStreaming={isLatest && streaming.isStreaming}
+                        showFindingNotice={false}
                       />
                     </div>
 

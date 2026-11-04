@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast'
 import { VoicePlayer } from '@/components/voice'
 import { getAgentVisualConfig } from '@/data/agent-config'
 import { ContractList } from './contract-card'
+import { FindingNotice } from '@/components/ai/finding-notice'
 import type { ContractData } from '@/lib/chat/types'
 
 // Lazy load ReactMarkdown for better initial performance
@@ -36,6 +37,8 @@ export interface MessageBubbleProps {
   isStreaming?: boolean
   onComplete?: () => void
   metadata?: Record<string, any>
+  /** Show the "a finding is not an accusation" notice under agent answers */
+  showFindingNotice?: boolean
 }
 
 // Typing cursor component
@@ -56,6 +59,7 @@ export const MessageBubble = memo(function MessageBubble({
   isStreaming = false,
   onComplete,
   metadata,
+  showFindingNotice = true,
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [showCursor, setShowCursor] = useState(false)
@@ -307,6 +311,10 @@ export const MessageBubble = memo(function MessageBubble({
           downloadAvailable={metadata.downloadAvailable}
           totalContracts={metadata.totalContracts}
         />
+      )}
+
+      {showFindingNotice && content && !isLoading && !isStreaming && (
+        <FindingNotice locale="pt" className="mt-3" />
       )}
 
       {/* Quick Actions - Desktop: hover, Mobile: always visible toggle */}
