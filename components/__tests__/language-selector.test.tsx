@@ -277,7 +277,7 @@ describe('LanguageSelector', () => {
       expect(mockPush).toHaveBeenCalledWith('/pt/sobre')
     })
 
-    it('maps /en/privacy to /pt/privacidade', async () => {
+    it('keeps /en/privacy as /pt/privacy (same route in both locales)', async () => {
       const user = userEvent.setup()
       mockUsePathname.mockReturnValue('/en/privacy')
 
@@ -285,10 +285,10 @@ describe('LanguageSelector', () => {
 
       await user.click(screen.getByText('Português').closest('button')!)
 
-      expect(mockPush).toHaveBeenCalledWith('/pt/privacidade')
+      expect(mockPush).toHaveBeenCalledWith('/pt/privacy')
     })
 
-    it('maps /en/terms to /pt/termos', async () => {
+    it('keeps /en/terms as /pt/terms (same route in both locales)', async () => {
       const user = userEvent.setup()
       mockUsePathname.mockReturnValue('/en/terms')
 
@@ -296,7 +296,7 @@ describe('LanguageSelector', () => {
 
       await user.click(screen.getByText('Português').closest('button')!)
 
-      expect(mockPush).toHaveBeenCalledWith('/pt/termos')
+      expect(mockPush).toHaveBeenCalledWith('/pt/terms')
     })
 
     it('maps /en/help to /pt/ajuda', async () => {

@@ -195,6 +195,58 @@ export async function GET(): Promise<NextResponse> {
       }
     }
 
+    // 11. Chat sessions and messages written to the AI agents
+    const { data: chatSessions } = await supabase
+      .from('chat_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (chatSessions?.length) {
+      exportData.chatSessions = chatSessions
+    }
+
+    const { data: chatMessages } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+
+    if (chatMessages?.length) {
+      exportData.chatMessages = chatMessages
+    }
+
+    // 12. Preferences, activity log and investigations
+    const { data: preferences } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (preferences) {
+      exportData.preferences = preferences
+    }
+
+    const { data: activities } = await supabase
+      .from('user_activities')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (activities?.length) {
+      exportData.activities = activities
+    }
+
+    const { data: investigations } = await supabase
+      .from('investigations')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (investigations?.length) {
+      exportData.investigations = investigations
+    }
+
     // Create filename
     const dateStr = new Date().toISOString().split('T')[0]
     const filename = `cidadao-ai-dados-${dateStr}.json`

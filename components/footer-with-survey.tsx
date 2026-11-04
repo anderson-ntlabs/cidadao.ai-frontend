@@ -133,6 +133,18 @@ export function FooterWithSurvey({ locale }: FooterWithSurveyProps) {
                 {locale === 'pt' ? 'Política de Privacidade' : 'Privacy Policy'}
               </Link>
               <Link
+                href={`/${locale}/responsible-ai`}
+                className="text-base text-gray-400 hover:text-gray-300"
+              >
+                {locale === 'pt' ? 'IA Responsável' : 'Responsible AI'}
+              </Link>
+              <Link
+                href={`/${locale}/terms`}
+                className="text-base text-gray-400 hover:text-gray-300"
+              >
+                {locale === 'pt' ? 'Termos de Uso' : 'Terms of Use'}
+              </Link>
+              <Link
                 href={`/${locale}/cookies`}
                 className="text-base text-gray-400 hover:text-gray-300"
               >

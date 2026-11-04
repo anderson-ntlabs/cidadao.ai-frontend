@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils'
 import { sanitizeSearchQuery } from '@/lib/security/input-validation'
 import { useBackendInvestigations } from '@/hooks/use-backend-investigations'
 import { mockInvestigations } from '@/data/investigations'
+import { FindingNotice } from '@/components/ai/finding-notice'
 // BreadcrumbsV2 removed - handled by AuthLayout
 
 // Tipos de investigação
@@ -336,6 +337,8 @@ export default function InvestigacoesPage() {
             </GlassCardContent>
           </GlassCard>
         </div>
+
+        <FindingNotice locale="pt" className="-mt-2 mb-6" />
 
         {/* Filters and Search */}
         <GlassCard className="mb-6">

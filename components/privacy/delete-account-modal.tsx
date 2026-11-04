@@ -29,7 +29,6 @@ import {
   AlertTriangle,
   Trash2,
   Shield,
-  Clock,
   Loader2,
   CheckCircle2,
   XCircle,
@@ -60,7 +59,6 @@ type Step =
   | 'processing'
   | 'success'
   | 'error'
-type DeleteMode = 'soft' | 'hard'
 
 interface Achievement {
   id: string
@@ -75,13 +73,11 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
   const supabase = createClient()
 
   const [step, setStep] = useState<Step>('intro')
-  const [mode, setMode] = useState<DeleteMode>('soft')
   const [confirmation, setConfirmation] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [hasExported, setHasExported] = useState(false)
   const [result, setResult] = useState<{
-    scheduledDeletion?: string
     message?: string
   } | null>(null)
 
@@ -104,7 +100,7 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
     {
       id: 'decision',
       title: 'Decisão Consciente',
-      description: 'Escolheu o tipo de exclusão',
+      description: 'Entendeu que a exclusão é imediata',
       icon: <BookOpen className="w-5 h-5" />,
       unlocked: false,
     },
@@ -129,7 +125,6 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
 
   const handleClose = () => {
     setStep('intro')
-    setMode('soft')
     setConfirmation('')
     setError(null)
     setResult(null)
@@ -177,7 +172,6 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mode,
           confirmation: 'DELETAR MINHA CONTA',
         }),
       })
@@ -190,17 +184,14 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
 
       unlockAchievement('farewell')
       setResult({
-        scheduledDeletion: data.scheduledDeletion,
         message: data.message,
       })
       setStep('success')
 
-      if (mode === 'hard') {
-        setTimeout(async () => {
-          await supabase.auth.signOut()
-          router.push('/pt')
-        }, 4000)
-      }
+      setTimeout(async () => {
+        await supabase.auth.signOut()
+        router.push('/pt')
+      }, 4000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
       setStep('error')
@@ -370,7 +361,9 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                     O que será excluído:
                   </h4>
                   <ul className="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+                    <li>• Sua conta de acesso (login)</li>
                     <li>• Perfil e informações pessoais</li>
+                    <li>• Histórico do chat e investigações</li>
                     <li>• XP, badges e progresso</li>
                     <li>• Sessões de estudo e diário</li>
                     <li>• Perfis Kids (se houver)</li>
@@ -382,7 +375,8 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                     <Shield className="w-4 h-4" />O que será preservado:
                   </h4>
                   <p className="text-sm text-green-700 dark:text-green-400">
-                    Certificados emitidos permanecerão verificáveis de forma anônima.
+                    Certificados emitidos continuam verificáveis pelo código de verificação (com o
+                    nome impresso no certificado), sem vínculo com a conta excluída.
                   </p>
                 </div>
               </div>
@@ -484,75 +478,19 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-white">
-                      Escolha o tipo de exclusão
+                      A exclusão é imediata
                     </h3>
                     <p className="text-sm text-gray-500">Passo 3 de 4</p>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  {/* Soft delete option */}
-                  <label
-                    className={cn(
-                      'flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all',
-                      mode === 'soft'
-                        ? 'border-tarsila-verde bg-tarsila-verde/5'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="deleteMode"
-                      value="soft"
-                      checked={mode === 'soft'}
-                      onChange={() => setMode('soft')}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-tarsila-verde" />
-                        <span className="font-semibold">Exclusão Agendada</span>
-                        <span className="text-xs px-2 py-0.5 bg-tarsila-verde/20 text-tarsila-verde rounded-full">
-                          Recomendado
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Seus dados serão excluídos em <strong>30 dias</strong>. Você pode cancelar
-                        fazendo login antes do prazo.
-                      </p>
-                    </div>
-                  </label>
-
-                  {/* Hard delete option */}
-                  <label
-                    className={cn(
-                      'flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all',
-                      mode === 'hard'
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="deleteMode"
-                      value="hard"
-                      checked={mode === 'hard'}
-                      onChange={() => setMode('hard')}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Trash2 className="w-5 h-5 text-red-500" />
-                        <span className="font-semibold text-red-600 dark:text-red-400">
-                          Exclusão Imediata
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Todos os seus dados serão excluídos <strong>instantaneamente</strong>. Esta
-                        ação é irreversível.
-                      </p>
-                    </div>
-                  </label>
+                <div className="flex items-start gap-4 p-4 rounded-xl border-2 border-red-500 bg-red-50 dark:bg-red-900/20">
+                  <Trash2 className="w-5 h-5 text-red-500 mt-1 flex-shrink-0" />
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Ao confirmar, sua conta e todos os seus dados serão excluídos{' '}
+                    <strong>imediatamente</strong>. Esta ação é irreversível: não há período de
+                    espera nem como recuperar a conta depois.
+                  </p>
                 </div>
               </div>
 
@@ -561,14 +499,14 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                   Voltar
                 </Button>
                 <Button
-                  variant={mode === 'hard' ? 'destructive' : 'primary'}
+                  variant="destructive"
                   className="flex-1"
                   onClick={() => {
                     unlockAchievement('decision')
                     setStep('confirm')
                   }}
                 >
-                  Confirmar escolha
+                  Entendi
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -587,8 +525,7 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                     Última etapa
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Para confirmar a {mode === 'hard' ? 'exclusão imediata' : 'exclusão agendada'},
-                    digite:
+                    Para confirmar a exclusão imediata, digite:
                   </p>
                   <code className="inline-block mt-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 rounded-lg font-mono text-red-600 dark:text-red-400 text-lg">
                     {CONFIRMATION_TEXT}
@@ -624,7 +561,7 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                   onClick={handleDelete}
                   disabled={confirmation !== CONFIRMATION_TEXT}
                 >
-                  {mode === 'hard' ? 'Excluir Agora' : 'Agendar Exclusão'}
+                  Excluir Agora
                 </Button>
               </div>
             </>
@@ -634,9 +571,7 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
           {step === 'processing' && (
             <div className="text-center py-12 space-y-4">
               <Loader2 className="w-16 h-16 animate-spin text-red-500 mx-auto" />
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                {mode === 'hard' ? 'Excluindo seus dados...' : 'Agendando exclusão...'}
-              </p>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">Excluindo seus dados...</p>
               <p className="text-sm text-gray-500">Isso pode levar alguns segundos</p>
             </div>
           )}
@@ -649,22 +584,8 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {mode === 'hard' ? 'Conta excluída' : 'Exclusão agendada'}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Conta excluída</h3>
                 <p className="text-gray-600 dark:text-gray-400 mt-2">{result?.message}</p>
-                {result?.scheduledDeletion && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    Data de exclusão:{' '}
-                    <strong>
-                      {new Date(result.scheduledDeletion).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </strong>
-                  </p>
-                )}
               </div>
 
               {/* Final achievements */}
@@ -687,18 +608,9 @@ export function DeleteAccountModal({ isOpen, onClose, userName }: DeleteAccountM
                 </div>
               </div>
 
-              {mode === 'hard' ? (
-                <p className="text-sm text-gray-500">
-                  Você será desconectado em instantes... Obrigado por fazer parte da Ágora! 💚
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-gray-500">
-                    Mudou de ideia? Faça login antes da data e sua conta será reativada.
-                  </p>
-                  <Button onClick={handleClose}>Entendi</Button>
-                </div>
-              )}
+              <p className="text-sm text-gray-500">
+                Você será desconectado em instantes... Obrigado por fazer parte da Ágora! 💚
+              </p>
             </div>
           )}
 

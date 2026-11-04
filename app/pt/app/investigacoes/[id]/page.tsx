@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AnomalyChart } from '@/components/investigations/anomaly-chart'
 import { ShareModal } from '@/components/investigations/share-modal'
+import { FindingNotice } from '@/components/ai/finding-notice'
 
 /**
  * Investigation Detail Page
@@ -405,6 +406,7 @@ export default function InvestigationDetailPage() {
                         <p className="text-gray-600 dark:text-gray-400 text-sm">
                           {anomaly.explanation}
                         </p>
+                        <FindingNotice locale="pt" className="mt-2" />
                       </div>
                     </div>
 
@@ -463,6 +465,7 @@ export default function InvestigationDetailPage() {
               irregularidades. Detalhes completos estarão disponíveis quando a análise for concluída
               pelo backend.
             </p>
+            <FindingNotice locale="pt" className="mt-3" />
           </div>
         )}
 
@@ -476,6 +479,7 @@ export default function InvestigationDetailPage() {
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
               {backendResults.summary}
             </p>
+            <FindingNotice locale="pt" className="mt-3" />
 
             {backendResults.confidence_score !== undefined && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

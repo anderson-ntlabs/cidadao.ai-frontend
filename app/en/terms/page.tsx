@@ -58,7 +58,16 @@ export default function TermsPage(): JSX.Element {
             <li>Use the system for illegal or unethical purposes</li>
             <li>Attempt to access restricted areas or private data</li>
             <li>Overload the system with excessive requests</li>
-            <li>Reproduce, modify, or distribute the code without authorization</li>
+            <li>
+              Publish content prohibited by the{' '}
+              <a
+                href="/en/responsible-ai"
+                className="text-green-600 hover:text-green-700 underline"
+              >
+                Responsible AI Policy
+              </a>
+            </li>
+            <li>Present AI findings as proven facts or accusations</li>
             <li>Use data for harassment, discrimination, or defamation</li>
           </ul>
         </section>
@@ -67,12 +76,18 @@ export default function TermsPage(): JSX.Element {
           <h2 className="text-2xl font-semibold mb-4">4. Data and Privacy</h2>
           <p>
             We only collect data necessary for system operation. Your queries and investigations are
-            stored securely and are not shared with third parties.
+            stored securely and are not sold or shared, except with the processors needed to provide
+            the service (such as the language model provider that generates the answers), described
+            in the Privacy Policy.
           </p>
           <p className="mt-4">
             For more information, see our{' '}
             <a href="/en/privacy" className="text-green-600 hover:text-green-700 underline">
               Privacy Policy
+            </a>{' '}
+            and our{' '}
+            <a href="/en/responsible-ai" className="text-green-600 hover:text-green-700 underline">
+              Responsible AI and Content Policy
             </a>
             .
           </p>
@@ -162,10 +177,10 @@ export default function TermsPage(): JSX.Element {
             <p className="text-gray-600 dark:text-gray-400">IFSULDEMINAS - Muzambinho Campus</p>
             <p className="mt-2">
               <a
-                href="mailto:anderson.ufrj@gmail.com"
+                href="mailto:andersonhs27@gmail.com"
                 className="text-green-600 hover:text-green-700 underline"
               >
-                anderson.ufrj@gmail.com
+                andersonhs27@gmail.com
               </a>
             </p>
           </div>

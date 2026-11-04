@@ -14,6 +14,7 @@ import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import type { GovBrUserData } from '@/components/auth'
 import { cn } from '@/lib/utils'
+import { SignupConsent } from '@/components/privacy/signup-consent'
 import { Github, GraduationCap, Sparkles, Loader2, Shield } from 'lucide-react'
 
 // Lazy load GovBr modal only when needed
@@ -256,78 +257,82 @@ export default function AgoraLoginPage() {
 
         {/* Login Card */}
         <GlassCard className="mb-6">
-          <GlassCardContent className="p-6 space-y-4">
-            {/* Gov.br Login - Featured */}
-            <Button
-              onClick={() => setShowGovBrModal(true)}
-              disabled={isLoggingIn !== null}
-              size="lg"
-              className={cn(
-                'w-full justify-center gap-3 h-14 text-base',
-                'bg-[#1351B4] hover:bg-[#0C4199]',
-                'text-white'
-              )}
-              aria-label="Entrar com Gov.br"
-            >
-              {isLoggingIn === 'govbr' ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <GovBrIcon className="w-5 h-5" />
-              )}
-              Entrar com Gov.br
-            </Button>
+          <GlassCardContent className="p-6">
+            <SignupConsent>
+              <div className="space-y-4">
+                {/* Gov.br Login - Featured */}
+                <Button
+                  onClick={() => setShowGovBrModal(true)}
+                  disabled={isLoggingIn !== null}
+                  size="lg"
+                  className={cn(
+                    'w-full justify-center gap-3 h-14 text-base',
+                    'bg-[#1351B4] hover:bg-[#0C4199]',
+                    'text-white'
+                  )}
+                  aria-label="Entrar com Gov.br"
+                >
+                  {isLoggingIn === 'govbr' ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <GovBrIcon className="w-5 h-5" />
+                  )}
+                  Entrar com Gov.br
+                </Button>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200 dark:border-gray-700" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-2 bg-white/80 dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
+                      ou continue com
+                    </span>
+                  </div>
+                </div>
+
+                {/* Other providers row */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* GitHub Login */}
+                  <Button
+                    onClick={() => void handleLogin('github')}
+                    disabled={isLoggingIn !== null}
+                    size="lg"
+                    className={cn(
+                      'w-full justify-center gap-2 h-12',
+                      'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
+                      'text-white dark:text-gray-900'
+                    )}
+                    aria-label="Entrar com GitHub"
+                  >
+                    {isLoggingIn === 'github' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Github className="w-4 h-4" />
+                    )}
+                    GitHub
+                  </Button>
+
+                  {/* Google Login */}
+                  <Button
+                    onClick={() => void handleLogin('google')}
+                    disabled={isLoggingIn !== null}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full justify-center gap-2 h-12"
+                    aria-label="Entrar com Google"
+                  >
+                    {isLoggingIn === 'google' ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <GoogleIcon className="w-4 h-4" />
+                    )}
+                    Google
+                  </Button>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-white/80 dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
-                  ou continue com
-                </span>
-              </div>
-            </div>
-
-            {/* Other providers row */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* GitHub Login */}
-              <Button
-                onClick={() => void handleLogin('github')}
-                disabled={isLoggingIn !== null}
-                size="lg"
-                className={cn(
-                  'w-full justify-center gap-2 h-12',
-                  'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100',
-                  'text-white dark:text-gray-900'
-                )}
-                aria-label="Entrar com GitHub"
-              >
-                {isLoggingIn === 'github' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Github className="w-4 h-4" />
-                )}
-                GitHub
-              </Button>
-
-              {/* Google Login */}
-              <Button
-                onClick={() => void handleLogin('google')}
-                disabled={isLoggingIn !== null}
-                variant="secondary"
-                size="lg"
-                className="w-full justify-center gap-2 h-12"
-                aria-label="Entrar com Google"
-              >
-                {isLoggingIn === 'google' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <GoogleIcon className="w-4 h-4" />
-                )}
-                Google
-              </Button>
-            </div>
+            </SignupConsent>
           </GlassCardContent>
         </GlassCard>
 
@@ -373,11 +378,11 @@ export default function AgoraLoginPage() {
         <div className="text-center space-y-3">
           <p className="text-xs academy-text-muted">
             Ao entrar, você concorda com nossos{' '}
-            <Link href="/pt/termos" className="text-tarsila-verde hover:underline">
+            <Link href="/pt/terms" className="text-tarsila-verde hover:underline">
               Termos de Uso
             </Link>{' '}
             e{' '}
-            <Link href="/pt/privacidade" className="text-tarsila-verde hover:underline">
+            <Link href="/pt/privacy" className="text-tarsila-verde hover:underline">
               Política de Privacidade
             </Link>
           </p>
